@@ -1,0 +1,3 @@
+requirejs([], () ->
+	console.log "werd"
+)
