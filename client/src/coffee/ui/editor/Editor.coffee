@@ -5,8 +5,26 @@ define(["vendor/backbone",
 		"css!./res/css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, empty) ->
 	editorId = 0
+
+	menuOptions =
+		new: (e) ->
+		open: (e) ->
+		openRecent: (e) ->
+		save: (e) ->
+		saveAs: (e) ->
+		undo: (e) ->
+			@model.undo()
+		redo: (e) ->
+			@model.redo()
+		cut: (e) ->
+		copy: (e) ->
+		paste: (e) ->
+
 	Backbone.View.extend(
 		className: "editor"
+		events:
+			"click .dropdown-menu > li > a": "menuItemSelected"
+
 		initialize: () ->
 			@id = editorId++
 			@perspectives =
@@ -14,6 +32,11 @@ define(["vendor/backbone",
 				transitionEditor: new TransitionEditor({model: @model})
 
 			@activePerspective = "slideEditor"
+
+		menuItemSelected: (e) ->
+			$target = $(e.target)
+			option = $target.attr("data-option")
+			menuOptions[option].call(@, e)
 
 		render: () ->
 			perspectives = _.map(@perspectives, (perspective, key) ->

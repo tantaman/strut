@@ -18,8 +18,6 @@ define(["vendor/backbone",
 
 		select: () ->
 
-		remove: () ->
-
 		render: () ->
 			@$el.html(Templates.SlideSnapshot(@model.attributes))
 			@$el

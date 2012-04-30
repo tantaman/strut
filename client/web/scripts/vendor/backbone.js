@@ -4,6 +4,9 @@
 //     For all details and documentation:
 //     http://backbonejs.org
 define(function() {
+  var obj = {};
+  obj._ = window._;
+  obj.jQuery = window.jQuery;
 (function() {
 
   // Initial Setup
@@ -1253,6 +1256,7 @@ define(function() {
     throw new Error('A "url" property or function must be specified');
   };
 
-}).call(this);
-return Backbone;
+}).call(obj);
+console.log(obj);
+return obj.Backbone;
 });

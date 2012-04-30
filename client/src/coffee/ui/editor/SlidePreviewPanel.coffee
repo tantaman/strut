@@ -6,12 +6,17 @@ define(["vendor/backbone",
 		className: "slidePreviewPanel"
 		initialize: () ->
 			@model.on("add", @slideCreated, @)
+			@model.on("remove", @slideRemoved, @)
 			@snapshots = []
 
 		slideCreated: (slide) ->
 			snapshot = new SlideSnapshot({model: slide})
 			@snapshots.push(snapshot)
 			@$el.append(snapshot.render())
+
+		slideRemoved: (slide, collection, options) ->
+			@snapshots[options.index].remove()
+			@snapshots.splice(options.index, 1)
 
 		render: () ->
 			slides = @model.get("slides")

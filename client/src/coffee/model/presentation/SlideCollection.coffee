@@ -1,4 +1,4 @@
-define(["vendor/Backbone", "./Slide"],
+define(["vendor/backbone", "./Slide"],
 (Backbone, Slide) ->
 	Backbone.Collection.extend(
 		model: Slide
