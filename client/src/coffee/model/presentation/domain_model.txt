@@ -6,6 +6,7 @@ spatialObject {
 slide < spatialObject: {
 	background
 	components
+	active component
 }
 
 component < spatialObject: {
@@ -23,4 +24,5 @@ fontAttributes {
 deck {
 	name
 	slides[]
+	active slide
 }

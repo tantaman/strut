@@ -28,34 +28,40 @@ myDir = Dir.pwd
 # -place Templates.js into the plugin's
 # 	scripts directory.
 task :compileTpls, :pretty do |t, args|
+	FileList[myDir + "/web/scripts/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
+		puts "Processing: #{filename}"
+		compiledTemplates = '''
+		define(["vendor/Handlebars"], function(Handlebars) {
+			return {
+		'''
 
-		FileList["#{myDir}/web/scripts/ui/**/res/templates"].each do |dirname|
-			compiledTemplates = "define(function() {\n"
+		first = true
+		FileList["#{filename}/*.bars"].each do |fname|
+			pipe = IO.popen("handlebars -s #{fname}")
+			result = pipe.readlines
+			pipe.close
 
-			first = true
-			FileList["#{dirname}/*.html"].each do |fname|
-				templateName = File.basename(fname, ".html")
-				component = fname.scan(/ui\/([^\/]+)\/res/).last.first
-				pipe = IO.popen("dust #{fname} #{component}.#{templateName}")
-				result = pipe.readlines
-				pipe.close
-
-				joined = result.join
-				if not pretty
-					joined = joined.gsub(/\\r\\n|\n|\\n/, "");
-				end
-				puts fname
-				
-				compiledTemplates += "\n#{joined}"
+			joined = result.join
+			if not pretty
+				joined = joined.gsub(/\\r\\n|\n|\\n/, "");
 			end
-			puts "#{dirname}/../../Templates.js"
-  			File.open("#{dirname}/../../Templates.js", 'w') {|f|
-  				f.write(compiledTemplates)
-  				f.write("\n});")
-  				f.write("\n");
-  			}
+			templateFileName = File.basename(fname, ".bars");
+
+			if first
+				compiledTemplates += "\n\"#{templateFileName}\": Handlebars.template(#{joined})"
+				first = false
+			else
+				compiledTemplates += ",\n\"#{templateFileName}\": Handlebars.template(#{joined})"
+			end
   		end
+
+  		puts "#{filename}/../../Templates.js"
+  		File.open("#{filename}/../../Templates.js", 'w') {|f|
+  			f.write(compiledTemplates)
+  			f.write("\n}});");
+  		}
+	end
 end
 
 task :compileStylus do
@@ -78,13 +84,68 @@ task :compileCoffee, :watch do |t,args|
 		watch = "--watch"
 	end
 
-	system %{coffee #{watch} --bare --compile --output web/scripts src/coffee/}
+	system %{coffee #{watch} -b --compile --output web/scripts/ src/coffee/}
+end
+
+task :refactor, :source, :destination do |t, args|
+	source = args[:source]
+	destination = args[:destination]
+
+	if !destination
+		puts "usage: rake refactor[source,destination]"
+		exit
+	end
+
+	FileList["./**/*.js"].each do |fname|
+		#puts fname
+		pipe = IO.popen("amdRefactor #{source} < #{fname}")
+		result = pipe.readlines
+		pipe.close
+
+		if result.length > 0
+			# line col_start col_end
+			importLoc = result[0].split(",")
+			line = Integer(importLoc[0]) - 1
+			colStart = Integer(importLoc[1]) - 1
+			colEnd = Integer(importLoc[2])
+
+			lines = File.readlines(fname);
+			theLine = lines[line]
+			theLine = 
+				"#{theLine[0..colStart]}#{destination}#{theLine[colEnd..theLine.length]}"
+
+			lines[line] = theLine
+
+			puts "Refactoring: #{fname}"
+			File.open(fname, 'w') { |f| f << lines }
+			#puts lines
+		end
+	end
+end
+
+task :showDeps, :package do |t, args|
+	myPkg = args[:package]
+
+	if !myPkg
+		puts "usage: rake showDeps[package]"
+		exit
+	end
+
+	FileList["web/scripts/#{myPkg}/**/*.js"].each do |fname|
+		pipe = IO.popen("amdDeps #{myPkg} < #{fname}")
+		result = pipe.readlines
+		pipe.close
+
+		if result.length > 0
+			puts result
+		end
+	end
 end
 
 # TODO: need to specify dependencies
 # and also need to not run if no changes
 task :dist do
-	system %{rsync -r --exclude='.git' --exclude='webgl*' web/ dist/}
+	system %{rsync -r --exclude='.git' --exclude='webgl*' --exclude='ghost*' --exclude='isis*' --exclude='mast*' web/ dist/}
 	myDir = Dir.pwd
 	FileList["web/**/*.js"].each do |filename|
 		destFilename = filename[3..filename.length]
