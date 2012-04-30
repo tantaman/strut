@@ -1,6 +1,7 @@
 define(["common/EventEmitter"],
 (EventEmitter) ->
 # TODO: extend backbone model so we can enable/disable menu items appropriately.
+# TODO: just make a damned JS linked list implementation...  this would be so much less hacky!
 	class UndoHistory
 		constructor: (@size) ->
 			@actions = new Array(@size)
@@ -41,4 +42,9 @@ define(["common/EventEmitter"],
 			else if @undoEnd
 				@actions[@cursor].do()
 				@undoEnd = false
+
+
+		# this'll be way easier / make way more sense
+		class UndoHistory2 extends LinkedList
+
 )
