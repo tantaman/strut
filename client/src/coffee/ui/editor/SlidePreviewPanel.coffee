@@ -5,24 +5,43 @@ define(["vendor/backbone",
 	Backbone.View.extend(
 		className: "slidePreviewPanel"
 		initialize: () ->
-			@model.on("add", @slideCreated, @)
-			@model.on("remove", @slideRemoved, @)
+			slideCollection = @model.get("slides")
+			slideCollection.on("add", @slideCreated, @)
+			slideCollection.on("remove", @slideRemoved, @)
 			@snapshots = []
+			@model.on("change:activeSlide", @activeSlideChanged, @)
 
 		slideCreated: (slide) ->
 			snapshot = new SlideSnapshot({model: slide})
+			snapshot.on("clicked", @slideClicked, @)
+			snapshot.on("removeClicked", @slideRemoveClicked, @)
 			@snapshots.push(snapshot)
 			@$el.append(snapshot.render())
+			console.log(@model.get("slides"))
 
 		slideRemoved: (slide, collection, options) ->
+			console.log("Removing: " + options.index)
 			@snapshots[options.index].remove()
 			@snapshots.splice(options.index, 1)
+
+		slideClicked: (snapshot) ->
+			@model.set("activeSlide", snapshot.model)
+
+		slideRemoveClicked: (snapshot) ->
+			@model.removeSlide(snapshot.model)
+
+		activeSlideChanged: (model, slide) ->
+			if @previousActive?
+				@previousActive.$el.removeClass("active")
+			@previousActive = @snapshots[slide.get("num")]
+			if @previousActive
+				@previousActive.$el.addClass("active")
 
 		render: () ->
 			slides = @model.get("slides")
 			if slides?
 				slides.each((slide) =>
-					snapshot = new SlideSnapshot(slide)
+					snapshot = new SlideSnapshot({model: slide})
 					@snapshots.push(snapshot)
 					@$el.append(snapshot.render())
 				)

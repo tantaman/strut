@@ -1257,6 +1257,6 @@ define(function() {
   };
 
 }).call(obj);
-console.log(obj);
+
 return obj.Backbone;
 });

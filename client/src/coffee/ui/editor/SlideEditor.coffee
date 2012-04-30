@@ -4,15 +4,24 @@ define(["vendor/backbone", "./Templates",
 		"common/EventEmitter",
 		"css!./res/css/SlideEditor"],
 (Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty) ->
+
+	menuBarOptions = 
+		createSlide: () ->
+			@model.newSlide()
+		fontFamily: () ->
+		fontSize: () ->
+		fontStyle: () ->
+		textBox: () ->
+		picture: () ->
+		table: () ->
+		shapes: () ->
+		transitionEditor: () ->
+
+
 	Backbone.View.extend(
 		className: "slideEditor"
 		events:
-			"click .newSlideBtn": "createSlide"
-			"click .fontFamilySelections a": "fontFamilySelected"
-			"click .fontSizeSelections a": "fontSizeSelected"
-			"click .fontStyle a": "fontStyleSelected"
-			"click .newSlideComponent a": "newSlideComponentSelected"
-			"click .transitionEditorBtn": "transitionEditorChosen"
+			"click .menuBarOption": "menuOptionChosen"
 
 		initialize: () ->
 			@name = "Slide Editor"
@@ -21,34 +30,23 @@ define(["vendor/backbone", "./Templates",
 			)
 
 			@bus = new EventEmitter()
-			@slidePreviewPanel = new SlidePreviewPanel({model: @model.get("slides"), bus: @bus})
 			@operatingTable = new OperatingTable({bus: @bus})
+			@slidePreviewPanel = new SlidePreviewPanel({model: @model, bus: @bus})
 
-			@model.on("change:activeSlide", @slideChanged, @)
+			@model.on("change:activeSlide", @activeSlideChanged, @)
 
-		createSlide: () ->
-			@model.newSlide()
+		menuOptionChosen: (e) ->
+			option = $(e.currentTarget).attr("data-option")
+			menuBarOptions[option].call(@, e)
 
-		colorSelected: () ->
-
-		fontFamilySelected: () ->
-
-		fontSizeSelected: () ->
-
-		fontStyleSelected: () ->
-
-		newSlideComponentSelected: () ->
-
-		transitionEditorChosen: () ->
-
-
-		slideChanged: (model, newSlide) ->
+		activeSlideChanged: (model, newSlide) ->
 			if @currentSlide
-				@currentSlide.off(null, null, @)
+				@currentSlide.off("change:activeSlide", @activeSlideChanged, @)
 			@currentSlide = newSlide
-			newSlide.on("change:activeComponent", @componentChanged, @)
+			newSlide.on("change:activeComponent", @activeComponentChanged, @)
+			@operatingTable.setModel(newSlide)
 
-		componentChanged: (model, newComponent) ->
+		activeComponentChanged: (model, newComponent) ->
 			# enable / disable buttons
 
 		render: () ->

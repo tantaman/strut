@@ -12,6 +12,7 @@ define(["vendor/backbone", "./SlideCollection",
 			if not @slide?
 				@slide = new Slide({num: slides.length})
 			slides.add(@slide)
+			@slide
 
 		undo: () ->
 			@deck.get("slides").remove(@slide)
@@ -25,8 +26,14 @@ define(["vendor/backbone", "./SlideCollection",
 
 		newSlide: () ->
 			action = new NewSlideAction(@)
-			action.do()
+			slide = action.do()
 			@undoHistory.push(action)
+			@set("activeSlide", slide)
+			slide
+
+		removeSlide: (slide) ->
+			# TODO: undoableify
+			@get("slides").remove(slide)
 
 		undo: () ->
 			@undoHistory.undo()

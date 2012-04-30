@@ -7,8 +7,8 @@ define(["vendor/backbone",
 		events:
 			"hoverin": "hoverin"
 			"hoverout": "hoverout"
-			"click": "select"
-			"click .remove": "remove"
+			"click": "clicked"
+			"click .removeBtn": "removeClicked"
 
 		initialize: () ->
 
@@ -16,7 +16,12 @@ define(["vendor/backbone",
 
 		hoverout: () ->
 
-		select: () ->
+		clicked: () ->
+			@trigger("clicked", @)
+
+		removeClicked: () ->
+			console.log("REMOVE CLICKED")
+			@trigger("removeClicked", @)
 
 		render: () ->
 			@$el.html(Templates.SlideSnapshot(@model.attributes))

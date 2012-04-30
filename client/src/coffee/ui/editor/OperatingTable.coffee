@@ -3,6 +3,8 @@ define(["vendor/backbone"],
 	Backbone.View.extend(
 		className: "operatingTable"
 		initialize: () ->
+		setModel: () ->
+			
 		render: () ->
 			@$el
 	)

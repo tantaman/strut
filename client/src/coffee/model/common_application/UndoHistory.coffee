@@ -1,19 +1,22 @@
 define(["common/EventEmitter"],
 (EventEmitter) ->
+# TODO: extend backbone model so we can enable/disable menu items appropriately.
 	class UndoHistory
 		constructor: (@size) ->
 			@actions = new Array(@size)
 			@cursor = -1
 			@start = 0
 			@end = 0
+			@cnt = 0
 			_.extend(@, new EventEmitter())
 
 		push: (action) ->
+			++@cnt
 			@undoEnd = false
 			prevCursor = @cursor
 			@cursor = (@cursor + 1) % @size
 			@end = @cursor + 1
-			if prevCursor isnt -1
+			if @cnt >= @size
 				@start = @end % @size
 
 			@actions[@cursor] = action
