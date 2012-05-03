@@ -6,6 +6,6 @@ define(["model/geom/SpatialObject"],
 
 		add: (component) ->
 			@attributes.components.push(component)
-			@trigger("change:components.push", @, component)
+			@trigger("change:components.add", @, component)
 	)
 )

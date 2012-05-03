@@ -2,30 +2,12 @@ define(["vendor/backbone", "./Templates",
 		"./SlidePreviewPanel",
 		"./OperatingTable",
 		"common/EventEmitter",
-		"css!./res/css/SlideEditor"],
-(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty) ->
-
-	menuBarOptions = 
-		createSlide: () ->
-			@model.newSlide()
-		fontFamily: () ->
-		fontSize: () ->
-		fontStyle: () ->
-		textBox: () ->
-			activeSlide = @model.get("activeSlide")
-			if activeSlide
-				
-
-		picture: () ->
-		table: () ->
-		shapes: () ->
-		transitionEditor: () ->
-
+		"css!./res/css/SlideEditor",
+		"./ButtonBarView"],
+(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView) ->
 
 	Backbone.View.extend(
 		className: "slideEditor"
-		events:
-			"click .menuBarOption": "menuOptionChosen"
 
 		initialize: () ->
 			@name = "Slide Editor"
@@ -39,20 +21,8 @@ define(["vendor/backbone", "./Templates",
 
 			@model.on("change:activeSlide", @activeSlideChanged, @)
 
-		menuOptionChosen: (e) ->
-			option = $(e.currentTarget).attr("data-option")
-			menuBarOptions[option].call(@, e)
-
 		activeSlideChanged: (model, newSlide) ->
-			if @currentSlide
-				@currentSlide.off("change:activeSlide", @activeSlideChanged, @)
-			@currentSlide = newSlide
-			if newSlide
-				newSlide.on("change:activeComponent", @activeComponentChanged, @)
 			@operatingTable.setModel(newSlide)
-
-		activeComponentChanged: (model, newComponent) ->
-			# enable / disable buttons
 
 		render: () ->
 			@$el.html(Templates.SlideEditor(@model))
@@ -79,6 +49,11 @@ define(["vendor/backbone", "./Templates",
 			$mainContent.append(@$slidePreviewPanel)
 			$mainContent.append(@$operatingTable)
 			@resized()
+
+			if @_buttonBar?
+				@_buttonBar.dispose()
+
+			@_buttonBar = new ButtonBarView({el: @$el.find(".buttonBar"), deck: @model})
 
 			@$el
 
