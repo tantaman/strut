@@ -17,6 +17,25 @@ define(["vendor/backbone", "./SlideCollection",
 		undo: () ->
 			@deck.get("slides").remove(@slide)
 
+		name: "NewSlideAction"
+
+	RemoveSlideAction = (deck) ->
+		@deck = deck
+		@
+
+	RemoveSlideAction.prototype =
+		do: () ->
+			console.log "DO IT!"
+			slides = @deck.get("slides")
+			@popped = slides.pop()
+			@popped
+
+		undo: () ->
+			@deck.get("slides").add(@popped)
+			@popped = null
+		
+		name: "RemoveSlideAction"
+
 
 	Backbone.Model.extend(
 		initialize: () ->
@@ -32,8 +51,10 @@ define(["vendor/backbone", "./SlideCollection",
 			slide
 
 		removeSlide: (slide) ->
-			# TODO: undoableify
-			@get("slides").remove(slide)
+			action = new RemoveSlideAction(@)
+			slide = action.do()
+			@undoHistory.push(action)
+			slide
 
 		undo: () ->
 			@undoHistory.undo()
