@@ -32,6 +32,23 @@ define(["vendor/backbone",
 				transitionEditor: new TransitionEditor({model: @model})
 
 			@activePerspective = "slideEditor"
+			@model.undoHistory.on("updated", @undoHistoryChanged, @)
+
+		undoHistoryChanged: () ->
+			undoName = @model.undoHistory.undoName()
+			redoName = @model.undoHistory.redoName()
+			if undoName isnt ""
+				$lbl = @$el.find(".undoName")
+				$lbl.text(undoName)
+				$lbl.removeClass("disp-none")
+			else
+				@$el.find(".undoName").addClass("disp-none")
+			if redoName isnt ""
+				$lbl = @$el.find(".redoName")
+				$lbl.text(redoName)
+				$lbl.removeClass("disp-none")
+			else
+				@$el.find(".redoName").addClass("disp-none")
 
 		menuItemSelected: (e) ->
 			$target = $(e.target)
@@ -59,6 +76,7 @@ define(["vendor/backbone",
 					perspective.$el.removeClass("disp-none")
 			)
 
+			@undoHistoryChanged()
 			@$el
 	)
 )

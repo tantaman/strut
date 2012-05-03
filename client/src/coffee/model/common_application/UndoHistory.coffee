@@ -6,20 +6,25 @@ define(["common/EventEmitter",
 				@actions = new LinkedList()
 				@cursor = null
 				@undoCount = 0
+				_.extend(@, new EventEmitter())
 
 			push: (action) ->
 				if (@actions.length - @undoCount) < @size
 					if @undoCount > 0
+						node =
+							prev: null
+							next: null
+							value: action
 						if not @cursor
-							@actions.push(action)
+							@actions.head = node
+							@actions.tail = node
+							@actions.length = 1
 						else
-							node =
-								prev: @cursor
-								next: null
-								value: action
+							node.prev = @cursor
 							@cursor.next.prev = null
 							@cursor.next = node
-							@actions.length = @actions.length - @undoCount
+							@actions.length += 1
+							@actions.length = (@actions.length - @undoCount)
 						@undoCount = 0
 						@cursor = null
 					else
@@ -27,6 +32,32 @@ define(["common/EventEmitter",
 				else
 					@actions.shift()
 					@actions.push(action)
+
+				@emit("updated")
+				@
+
+			undoName: () ->
+				if @undoCount < @actions.length
+					node = @cursor || @actions.tail
+					if node?
+						node.value.name
+					else
+						""
+				else
+					""
+
+			redoName: () ->
+				if @undoCount > 0
+					if not @cursor?
+						node = @actions.head
+					else
+						node = @cursor.next
+					if node?
+						node.value.name
+					else
+						""
+				else
+					""
 
 			undo: () ->
 				if @undoCount < @actions.length
@@ -36,6 +67,8 @@ define(["common/EventEmitter",
 					@cursor.value.undo()
 					@cursor = @cursor.prev
 					++@undoCount
+					@emit("updated")
+				@
 
 			redo: () ->
 				if @undoCount > 0
@@ -46,6 +79,8 @@ define(["common/EventEmitter",
 
 					@cursor.value.do()
 					--@undoCount
+					@emit("updated")
+				@
 
 # TODO: extend backbone model so we can enable/disable menu items appropriately.
 # TODO: just make a damned JS linked list implementation...  this would be so much less hacky!

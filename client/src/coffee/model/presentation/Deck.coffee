@@ -17,41 +17,53 @@ define(["vendor/backbone", "./SlideCollection",
 		undo: () ->
 			@deck.get("slides").remove(@slide)
 
-		name: "NewSlideAction"
+		name: "Create Slide"
 
-	RemoveSlideAction = (deck) ->
+	RemoveSlideAction = (deck, slide) ->
 		@deck = deck
+		@slide = slide
 		@
 
 	RemoveSlideAction.prototype =
 		do: () ->
-			console.log "DO IT!"
 			slides = @deck.get("slides")
-			@popped = slides.pop()
-			@popped
+			slides.remove(@slide)
+			@slide
 
 		undo: () ->
-			@deck.get("slides").add(@popped)
-			@popped = null
-		
-		name: "RemoveSlideAction"
+			@deck.get("slides").add(@slide)
+
+		name: "Remove Slide"
 
 
 	Backbone.Model.extend(
 		initialize: () ->
 			@undoHistory = new UndoHistory(20)
 			@set("slides", new SlideCollection())
+			slides = @get("slides")
+			slides.on("add", @_slideAdded, @)
+			slides.on("remove", @_slideRemoved, @)
 			
-
 		newSlide: () ->
 			action = new NewSlideAction(@)
 			slide = action.do()
 			@undoHistory.push(action)
-			@set("activeSlide", slide)
 			slide
 
+		_slideAdded: (slide, collection) ->
+			@set("activeSlide", slide)
+
+		_slideRemoved: (slide, collection, options) ->
+			if @get("activeSlide") is slide
+				if options.index < collection.length
+					@set("activeSlide", collection.at(options.index))
+				else if options.index > 0
+					@set("activeSlide", collection.at(options.index - 1))
+				else
+					@set("activeSlide", null)
+
 		removeSlide: (slide) ->
-			action = new RemoveSlideAction(@)
+			action = new RemoveSlideAction(@, slide)
 			slide = action.do()
 			@undoHistory.push(action)
 			slide

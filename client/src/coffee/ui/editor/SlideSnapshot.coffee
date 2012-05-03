@@ -20,7 +20,6 @@ define(["vendor/backbone",
 			@trigger("clicked", @)
 
 		removeClicked: () ->
-			console.log("REMOVE CLICKED")
 			@trigger("removeClicked", @)
 
 		render: () ->

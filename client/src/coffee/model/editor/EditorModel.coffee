@@ -1,4 +1,0 @@
-define(["vendor/backbone"],
-(Backbone) ->
-	
-)

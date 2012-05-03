@@ -17,10 +17,11 @@ define(["vendor/backbone",
 			snapshot.on("removeClicked", @slideRemoveClicked, @)
 			@snapshots.push(snapshot)
 			@$el.append(snapshot.render())
-			console.log(@model.get("slides"))
+
+			if slide is @model.get("activeSlide")
+				@activeSlideChanged(@model, slide)
 
 		slideRemoved: (slide, collection, options) ->
-			console.log("Removing: " + options.index)
 			@snapshots[options.index].remove()
 			@snapshots.splice(options.index, 1)
 
@@ -31,10 +32,13 @@ define(["vendor/backbone",
 			@model.removeSlide(snapshot.model)
 
 		activeSlideChanged: (model, slide) ->
-			if @previousActive?
-				@previousActive.$el.removeClass("active")
-			@previousActive = @snapshots[slide.get("num")]
-			if @previousActive
+			if not slide
+				return null
+			newActive = @snapshots[slide.get("num")]
+			if newActive and @previousActive isnt newActive
+				if @previousActive?
+					@previousActive.$el.removeClass("active")
+				@previousActive = newActive
 				@previousActive.$el.addClass("active")
 
 		render: () ->

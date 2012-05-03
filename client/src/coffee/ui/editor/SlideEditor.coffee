@@ -12,6 +12,10 @@ define(["vendor/backbone", "./Templates",
 		fontSize: () ->
 		fontStyle: () ->
 		textBox: () ->
+			activeSlide = @model.get("activeSlide")
+			if activeSlide
+				
+
 		picture: () ->
 		table: () ->
 		shapes: () ->
@@ -43,7 +47,8 @@ define(["vendor/backbone", "./Templates",
 			if @currentSlide
 				@currentSlide.off("change:activeSlide", @activeSlideChanged, @)
 			@currentSlide = newSlide
-			newSlide.on("change:activeComponent", @activeComponentChanged, @)
+			if newSlide
+				newSlide.on("change:activeComponent", @activeComponentChanged, @)
 			@operatingTable.setModel(newSlide)
 
 		activeComponentChanged: (model, newComponent) ->
