@@ -14,6 +14,7 @@ define(["./ComponentView",
 
 		initialize: () ->
 			ComponentView.prototype.initialize.apply(this, arguments)
+			@model.on("change:style", @_styleChanged, @)
 
 		dblclicked: (e) ->
 			@$el.addClass("editable").attr("contenteditable", true)
@@ -26,6 +27,9 @@ define(["./ComponentView",
 			else
 				@model.set("text", text)
 				@allowDragging = true
+
+		_styleChanged: (model, style) ->
+			@$el.css("fontStyle", style)
 
 		render: () ->
 			@$el.html(Templates.Component(@model.attributes))

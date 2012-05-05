@@ -9,7 +9,21 @@ define(["vendor/backbone",
 			@deck.newSlide()
 		fontFamily: () ->
 		fontSize: () ->
-		fontStyle: () ->
+		# Need a font weight callback
+		# and text decoration callback
+		fontStyle: (e) ->
+			value = e.target.dataset.value
+			if not value?
+				$target = $(e.target)
+				value = $target.parent()[0].dataset.value
+			else
+				$target = $(e.target)
+
+			#if not $target.hasClass("disable")
+			#	$target.toggleClass("active")
+
+			@model.fontStyleChanged(value)
+
 		textBox: () ->
 			activeSlide = @deck.get("activeSlide")
 			if activeSlide?

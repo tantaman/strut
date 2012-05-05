@@ -21,6 +21,18 @@ define(["vendor/backbone"],
 			if @activeComponent and @activeComponent.constructor.name is "TextBox"
 				@activeComponent.set("color", hex)
 
+		fontStyleChanged: (style) ->
+			console.log "NEW FONT STYLE: " + style
+			currentStyle = @get("fontStyle")
+			if currentStyle is style
+				style = ""
+				@set("fontStyle", "")
+			else
+				@set("fontStyle", style)
+
+			if @activeComponent and @activeComponent.constructor.name is "TextBox"
+				@activeComponent.set("style", style)
+
 		activeComponentChanged: (component) ->
 			@activeComponent = component
 
