@@ -36,7 +36,7 @@ define(["./ComponentView",
 				fontSize: @model.get("size")
 				fontWeight: @model.get("weight")
 				fontStyle: @model.get("style")
-				color: @model.get("color")
+				color: "#" + @model.get("color")
 				top: @model.get("y")
 				left: @model.get("x")
 			})

@@ -34,13 +34,6 @@ define(["vendor/backbone", "./Templates",
 					$items.tooltip('hide')
 				);
 
-			$colorChooser = @$el.find(".color-chooser");
-			$colorChooser.ColorPicker({
-				onChange: (hsb, hex, rgb) =>
-					$colorChooser.find("div").css("backgroundColor", "#" + hex)
-					@colorSelected(hex)
-			})
-
 			$mainContent = @$el.find(".mainContent")
 			@$slidePreviewPanel = @slidePreviewPanel.render()
 			@$operatingTable = @operatingTable.render()
@@ -53,6 +46,7 @@ define(["vendor/backbone", "./Templates",
 				@_buttonBar.dispose()
 
 			@_buttonBar = new ButtonBarView({el: @$el.find(".buttonBar"), deck: @model})
+			@_buttonBar.render()
 
 			@$el
 

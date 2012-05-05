@@ -18,9 +18,13 @@ define(["vendor/backbone", "./Templates",
 			@render()
 
 		clicked: (e) ->
-			@$el.find(".selected").removeClass("selected")
-			@$el.find(".editable").removeClass("editable").attr("contenteditable", false)
-				.trigger("editComplete")
+			if @model?
+				@model.get("components").forEach((component) ->
+					if component.get("selected")
+						component.set("selected", false)
+				)
+				@$el.find(".editable").removeClass("editable").attr("contenteditable", false)
+					.trigger("editComplete")
 
 		_componentAdded: (model, component) ->
 			view = ComponentViewFactory.createView(component)

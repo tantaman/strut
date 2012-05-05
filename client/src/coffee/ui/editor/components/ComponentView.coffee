@@ -12,9 +12,20 @@ define(["vendor/backbone"],
 		initialize: () ->
 			@_dragging = false
 			@allowDragging = true
+			@model.on("change:selected", @_selectionChanged, @)
+			@model.on("change:color", @_colorChanged, @)
+
+		_selectionChanged: (model, selected) ->
+			if selected
+				@$el.addClass("selected")
+			else
+				@$el.removeClass("selected")
+
+		_colorChanged: (model, color) ->
+			@$el.css("color", "#" + color)
 
 		clicked: (e) ->
-			@$el.addClass("selected")
+			@model.set("selected", true)
 			e.stopPropagation()
 
 		removeClicked: (e) ->
@@ -27,6 +38,10 @@ define(["vendor/backbone"],
 				x: e.pageX
 				y: e.pageY
 			}
+
+		remove: () ->
+			Backbone.View.prototype.remove.call(this)
+			@model.dispose()
 
 		mousemove: (e) ->
 			if @_dragging and @allowDragging

@@ -34,6 +34,7 @@ define(["vendor/backbone",
 			@deck.on("change:activeSlide", @activeSlideChanged, @)
 			@model = new ButtonBarModel()
 
+		# should prob go in ButtonBarModel
 		activeSlideChanged: (mode, newSlide) ->
 			if @currentSlide
 				@currentSlide.off("change:activeSlide", @activeSlideChanged, @)
@@ -41,8 +42,13 @@ define(["vendor/backbone",
 			if newSlide
 				newSlide.on("change:activeComponent", @activeComponentChanged, @)
 
-		activeComponentChanged: (model, newComponent) ->
+		activeComponentChanged: (slide, newComponent) ->
 			# enable / disable buttons
+			@model.activeComponentChanged(newComponent)
+			if newComponent
+				@$el.find(".fontButton").removeClass("disabled")
+			else
+				@$el.find(".fontButton").addClass("disabled")
 
 		buttonBarOptionChosen: (e) ->
 			option = $(e.currentTarget).attr("data-option")
@@ -54,6 +60,12 @@ define(["vendor/backbone",
 			@deck.off("change:activeSlide", @activeSlideChanged, @)
 
 		render: () ->
+			$colorChooser = @$el.find(".color-chooser");
+			$colorChooser.ColorPicker({
+				onChange: (hsb, hex, rgb) =>
+					$colorChooser.find("div").css("backgroundColor", "#" + hex)
+					@model.colorSelected(hex)
+			})
 			@$el
 	)
 )

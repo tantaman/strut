@@ -16,6 +16,14 @@ define(["vendor/backbone"],
 				z: 0
 			}
 
+		colorSelected: (hex) ->
+			@set("fontColor", hex)
+			if @activeComponent and @activeComponent.constructor.name is "TextBox"
+				@activeComponent.set("color", hex)
+
+		activeComponentChanged: (component) ->
+			@activeComponent = component
+
 		constructor: `function ButtonBarModel() {
 			Backbone.Model.prototype.constructor.apply(this, arguments);
 		}`
