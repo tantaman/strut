@@ -19,8 +19,9 @@ define(["vendor/backbone",
 		clicked: () ->
 			@trigger("clicked", @)
 
-		removeClicked: () ->
+		removeClicked: (e) ->
 			@trigger("removeClicked", @)
+			e.stopPropagation()
 
 		render: () ->
 			@$el.html(Templates.SlideSnapshot(@model.attributes))

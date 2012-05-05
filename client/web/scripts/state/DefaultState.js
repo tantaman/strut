@@ -8,7 +8,8 @@ define(["common/MapResolver"], function(MapResolver) {
           fontSize: 72,
           fontFamily: "Calibri",
           fontColor: "grey",
-          fontStyle: "normal"
+          fontStyle: "",
+          fontWeight: ""
         }
       }
     }

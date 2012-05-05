@@ -1,8 +1,11 @@
 define(["vendor/backbone", "./Templates",
-		"./components/ComponentViewFactory"],
-(Backbone, Templates, ComponentViewFactory) ->
+		"./components/ComponentViewFactory",
+		"css!./res/css/OperatingTable.css"],
+(Backbone, Templates, ComponentViewFactory, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"
+		events:
+			"click": "clicked"
 		initialize: () ->
 
 		setModel: (slide) ->
@@ -14,8 +17,12 @@ define(["vendor/backbone", "./Templates",
 			# re-render ourselves
 			@render()
 
+		clicked: (e) ->
+			@$el.find(".selected").removeClass("selected")
+			@$el.find(".editable").removeClass("editable").attr("contenteditable", false)
+				.trigger("editComplete")
+
 		_componentAdded: (model, component) ->
-			console.log("Comp added")
 			view = ComponentViewFactory.createView(component)
 			@$el.append(view.render())
 			

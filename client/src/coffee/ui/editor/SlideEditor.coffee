@@ -15,9 +15,8 @@ define(["vendor/backbone", "./Templates",
 				@resized()
 			)
 
-			@bus = new EventEmitter()
-			@operatingTable = new OperatingTable({bus: @bus})
-			@slidePreviewPanel = new SlidePreviewPanel({model: @model, bus: @bus})
+			@operatingTable = new OperatingTable()
+			@slidePreviewPanel = new SlidePreviewPanel({model: @model})
 
 			@model.on("change:activeSlide", @activeSlideChanged, @)
 
@@ -61,5 +60,6 @@ define(["vendor/backbone", "./Templates",
 			if @$slidePreviewPanel
 				@$slidePreviewPanel.css("height", window.innerHeight - 80)
 				@$operatingTable.css("height", window.innerHeight - 80)
+				@$operatingTable.css("width", window.innerWidth - 150)
 	)
 )

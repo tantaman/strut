@@ -2,6 +2,8 @@ define(["vendor/backbone",
 		"model/editor/ButtonBarModel",
 		"model/presentation/components/ComponentFactory"],
 (Backbone, ButtonBarModel, ComponentFactory) ->
+	# This can be a delegate / mixin that we share with the menu bar
+	# for those options which appear on both bars.
 	buttonBarOptions = 
 		createSlide: () ->
 			@deck.newSlide()
@@ -11,11 +13,16 @@ define(["vendor/backbone",
 		textBox: () ->
 			activeSlide = @deck.get("activeSlide")
 			if activeSlide?
-				activeSlide.add(ComponentFactory.createTextBox(@model))
+				activeSlide.add(
+					ComponentFactory.createTextBox(@model.fontConfig()))
 
 		picture: () ->
+			# present picture insertion dialog
+
 		table: () ->
+			# present table insertion dialog
 		shapes: () ->
+			# shape editor?
 		transitionEditor: () ->
 
 	Backbone.View.extend(

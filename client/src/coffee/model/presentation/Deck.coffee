@@ -50,10 +50,16 @@ define(["vendor/backbone", "./SlideCollection",
 			@undoHistory.push(action)
 			slide
 
+		set: (key, value) ->
+			if key is "activeSlide"
+				console.log "omg"
+			Backbone.Model.prototype.set.apply(this, arguments)
+
 		_slideAdded: (slide, collection) ->
 			@set("activeSlide", slide)
 
 		_slideRemoved: (slide, collection, options) ->
+			console.log "Slide removed"
 			if @get("activeSlide") is slide
 				if options.index < collection.length
 					@set("activeSlide", collection.at(options.index))
@@ -61,6 +67,8 @@ define(["vendor/backbone", "./SlideCollection",
 					@set("activeSlide", collection.at(options.index - 1))
 				else
 					@set("activeSlide", null)
+			console.log @
+			console.log @get("activeSlide")
 
 		removeSlide: (slide) ->
 			action = new RemoveSlideAction(@, slide)

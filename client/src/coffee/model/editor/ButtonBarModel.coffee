@@ -5,8 +5,16 @@ define(["vendor/backbone"],
 			@fetch({keyTrail: ["editor", "slideEditor", "buttonBar"]})
 
 		fontConfig: () ->
-			# marshall up the font configuration...
-			# for our text box...
+			{
+				size: @get("fontSize")
+				family: @get("fontFamily")
+				color: @get("fontColor")
+				style: @get("fontStyle")
+				weight: @get("fontWeight")
+				x: window.innerWidth / 2 - 150 # ugh.. magic h4x
+				y: window.innerHeight / 2 - 80
+				z: 0
+			}
 
 		constructor: `function ButtonBarModel() {
 			Backbone.Model.prototype.constructor.apply(this, arguments);
