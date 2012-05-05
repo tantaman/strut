@@ -1,32 +1,14 @@
 # This rakefile:
 # -compiles coffee scripts
-# -compiles templates as specified in wtf.js
+# -compiles templates
 # -compiles stylus styles
 # -eventually cleans up web to be a dist only thinger
-# html page compiler....
-# so test pages don't have to copy-paste header code...
-
-# TODO: going to want to compile to a dist dir or something...
-# So need generational targets that only generate if there are changes...
-
-# TODO: Update targets to only generate out of date files
-	
 
 require 'rake'
 
 myDir = Dir.pwd
 
-# Template Pre-compile plan:
-# -Descend into plugins/ui/some_plugin/templates
-# 	for every plugin
-# -compile all templates found there
-# -place them into Templates.js as:
-# 	return {
-# 		template1FileName: Handlebars.template(PRE-COMPILED-TEMPLATE),
-# 		template2FileName: ...
-# 	}
-# -place Templates.js into the plugin's
-# 	scripts directory.
+
 task :compileTpls, :pretty do |t, args|
 	FileList[myDir + "/web/scripts/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
