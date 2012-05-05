@@ -3,7 +3,7 @@ define(["vendor/backbone", "./Templates",
 		"./OperatingTable",
 		"common/EventEmitter",
 		"css!./res/css/SlideEditor",
-		"./ButtonBarView"],
+		"./button_bar/ButtonBarView"],
 (Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView) ->
 
 	Backbone.View.extend(

@@ -52,9 +52,14 @@ define(["vendor/backbone", "./SlideCollection",
 
 		set: (key, value) ->
 			if key is "activeSlide"
-				console.log "omg"
+				@_activeSlideChanging(value)
 			Backbone.Model.prototype.set.apply(this, arguments)
 
+		_activeSlideChanging: (newActive) ->
+			lastActive = @get("activeSlide")
+			if lastActive?
+				lastActive.unselectComponents()
+		
 		_slideAdded: (slide, collection) ->
 			@set("activeSlide", slide)
 

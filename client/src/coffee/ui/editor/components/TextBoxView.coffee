@@ -1,10 +1,10 @@
 define(["./ComponentView",
 		"../Templates"],
 (ComponentView, Templates) ->
+	styles = ["family", "size", "weight", "style", "color", "decoration"]
 	ComponentView.extend(
 		className: "component textBox"
 		tagName: "div"
-		styles: ["fontFamily", "fontSize", "fontWeight", "fontStyle", "color"]
 		events: () ->
 			parentEvents = ComponentView.prototype.events.call(this)
 			myEvents = 
@@ -14,7 +14,9 @@ define(["./ComponentView",
 
 		initialize: () ->
 			ComponentView.prototype.initialize.apply(this, arguments)
-			@model.on("change:style", @_styleChanged, @)
+			for style in styles
+				@model.on("change:" + style, @_styleChanged, @)
+			#@model.on("change:style", @_styleChanged, @)
 
 		dblclicked: (e) ->
 			@$el.addClass("editable").attr("contenteditable", true)
@@ -28,8 +30,15 @@ define(["./ComponentView",
 				@model.set("text", text)
 				@allowDragging = true
 
-		_styleChanged: (model, style) ->
-			@$el.css("fontStyle", style)
+		_styleChanged: (model, style, opts) ->
+			for key,value of opts.changes
+				if value
+					if key is "decoration"
+						console.log "DECORATION CHANGE"
+						key = "textDecoration"
+					console.log key
+					console.log style
+					@$el.css("font" + key.substr(0,1).toUpperCase() + key.substr(1), style)
 
 		render: () ->
 			@$el.html(Templates.Component(@model.attributes))

@@ -14,6 +14,7 @@ define(["vendor/backbone"],
 			@allowDragging = true
 			@model.on("change:selected", @_selectionChanged, @)
 			@model.on("change:color", @_colorChanged, @)
+			@model.on("unrender", @_unrender, @)
 
 		_selectionChanged: (model, selected) ->
 			if selected
@@ -39,9 +40,15 @@ define(["vendor/backbone"],
 				y: e.pageY
 			}
 
-		remove: () ->
+		_unrender: () ->
+			console.log "Unrendering"
+			@remove(true)
+		remove: (keepModel) ->
 			Backbone.View.prototype.remove.call(this)
-			@model.dispose()
+			if not keepModel
+				@model.dispose()
+			else
+				@model.off(null, null, @)
 
 		mousemove: (e) ->
 			if @_dragging and @allowDragging

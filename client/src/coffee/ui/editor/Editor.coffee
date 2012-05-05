@@ -23,7 +23,7 @@ define(["vendor/backbone",
 	Backbone.View.extend(
 		className: "editor"
 		events:
-			"click .dropdown-menu > li": "menuItemSelected"
+			"click > .navbar .dropdown-menu > li": "menuItemSelected"
 
 		initialize: () ->
 			@id = editorId++
@@ -51,7 +51,6 @@ define(["vendor/backbone",
 				@$el.find(".redoName").addClass("disp-none")
 
 		menuItemSelected: (e) ->
-			console.log e
 			$target = $(e.currentTarget)
 			option = $target.attr("data-option")
 			menuOptions[option].call(@, e)

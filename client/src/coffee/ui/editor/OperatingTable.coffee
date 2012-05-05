@@ -9,13 +9,14 @@ define(["vendor/backbone", "./Templates",
 		initialize: () ->
 
 		setModel: (slide) ->
+			prevModel = @model
 			if @model?
 				@model.off("change:components.add", @_componentAdded, @)
 			@model = slide
 			if @model?
 				@model.on("change:components.add", @_componentAdded, @)
 			# re-render ourselves
-			@render()
+			@render(prevModel)
 
 		clicked: (e) ->
 			if @model?
@@ -30,8 +31,10 @@ define(["vendor/backbone", "./Templates",
 			view = ComponentViewFactory.createView(component)
 			@$el.append(view.render())
 			
-		render: () ->
-			@$el.html("")
+		render: (prevModel) ->
+			if prevModel?
+				prevModel.trigger("unrender", true)
+			#@$el.html("")
 			#@$el.html(Templates.OperatingTable(@model))
 			if @model?
 				components = @model.get("components")

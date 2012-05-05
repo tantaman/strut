@@ -3,6 +3,12 @@ define(["model/geom/SpatialObject"],
 	SpatialObject.extend(
 		initialize: () ->
 			@set("components", [])
+			@on("unrender", @_unrendered, @)
+
+		_unrendered: () ->
+			@get("components").forEach((component) ->
+				component.trigger("unrender", true)
+			)
 
 		add: (component) ->
 			@attributes.components.push(component)
@@ -16,6 +22,10 @@ define(["model/geom/SpatialObject"],
 				@attributes.components.splice(idx, 1)
 				@trigger("change:components.remove", @, component)
 
+		unselectComponents: () ->
+			if @_lastSelection
+				@_lastSelection.set("selected", false)
+
 		selectionChanged: (model, selected) ->
 			if selected
 				@trigger("change:activeComponent", @, model, selected)
@@ -27,5 +37,6 @@ define(["model/geom/SpatialObject"],
 					@_lastSelection = model
 			else
 				@trigger("change:activeComponent", @, null)
+				@_lastSelection = null
 	)
 )

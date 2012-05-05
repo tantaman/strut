@@ -10,7 +10,7 @@ define(["common/MapResolver"],
 					fontStyle: ""
 					fontWeight: ""
 
-	interface = 
+	iface = 
 		get: (key) ->
 			MapResolver.resolveItem(stateMap, key)
 )
