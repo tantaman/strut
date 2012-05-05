@@ -4,6 +4,7 @@ define(["vendor/backbone",
 (Backbone, ButtonBarModel, ComponentFactory) ->
 	# This can be a delegate / mixin that we share with the menu bar
 	# for those options which appear on both bars.
+	fontSettings = ["size", "family", "weight", "style", "decoration"]
 	buttonBarOptions = 
 		_extractValue: (e) ->
 			value = e.target.dataset.value
@@ -14,26 +15,6 @@ define(["vendor/backbone",
 
 		createSlide: () ->
 			@deck.newSlide()
-		fontFamily: (e) ->
-			console.log(e)
-
-		fontSize: (e) ->
-			console.log e
-			#value = buttonBarOptions._extractValue(e)
-
-			#@model.fontSize(value)
-
-		fontStyle: (e) ->
-			value = buttonBarOptions._extractValue(e)
-			@model.fontStyle(value)
-
-		fontWeight: (e) ->
-			value = buttonBarOptions._extractValue(e)
-			@model.fontWeight(value)
-			
-		fontDecoration: (e) ->
-			value = buttonBarOptions._extractValue(e)
-			@model.fontDecoration(value)
 
 		textBox: () ->
 			activeSlide = @deck.get("activeSlide")
@@ -50,6 +31,18 @@ define(["vendor/backbone",
 			# shape editor?
 		transitionEditor: () ->
 
+	# dynamically generate the font setting handlers
+	fontSettings.forEach((setting) ->
+		longSetting = "font" + setting.substr(0,1).toUpperCase() + setting.substr(1)
+		buttonBarOptions[longSetting] = 
+			(() ->
+				_longSetting = longSetting
+				(e) ->
+					value = buttonBarOptions._extractValue(e)
+					@model[_longSetting](value)
+			)()
+	)
+
 	Backbone.View.extend(
 		events:
 			"click *[data-option]": "buttonBarOptionChosen"
@@ -58,6 +51,14 @@ define(["vendor/backbone",
 			@deck = @options.deck
 			@deck.on("change:activeSlide", @activeSlideChanged, @)
 			@model = new ButtonBarModel()
+			@model.on("change:fontSize", @_fontSizeChanged, @)
+			@model.on("change:fontFamily", @_fontFamilyChanged, @)
+
+		_fontFamilyChanged: (model, value) ->
+			@$el.find(".fontFamilyBtn .text").text(value)
+
+		_fontSizeChanged: (model, value) ->
+			@$el.find(".fontSizeBtn .text").text(value)
 
 		# should prob go in ButtonBarModel
 		activeSlideChanged: (mode, newSlide) ->

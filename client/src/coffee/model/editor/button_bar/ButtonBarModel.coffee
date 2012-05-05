@@ -9,6 +9,9 @@ define(["vendor/backbone"],
 		"decoration"
 	]
 
+	toggleable = (setting) ->
+		fontSettings.indexOf(setting) > 2
+
 	fontMethods = {}
 	# Auto-generate font setters
 	for setting in fontSettings
@@ -21,8 +24,10 @@ define(["vendor/backbone"],
 					if @_activeIsTextbox()
 						console.log("Setting: " + _longSetting + " " + _setting + " " + value)
 						currentValue = @get(_longSetting)
-						if currentValue is value
+						if currentValue is value and toggleable(_setting)
 							value = ""
+						if _setting is "size"
+							value |= 0
 						@set(_longSetting, value)
 						@activeComponent.set(_setting, value))()
 

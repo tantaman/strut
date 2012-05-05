@@ -36,9 +36,11 @@ define(["./ComponentView",
 					if key is "decoration"
 						console.log "DECORATION CHANGE"
 						key = "textDecoration"
+					else
+						key = "font" + key.substr(0,1).toUpperCase() + key.substr(1)
 					console.log key
 					console.log style
-					@$el.css("font" + key.substr(0,1).toUpperCase() + key.substr(1), style)
+					@$el.css(key, style)
 
 		render: () ->
 			@$el.html(Templates.Component(@model.attributes))
