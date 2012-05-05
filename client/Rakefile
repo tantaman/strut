@@ -145,7 +145,7 @@ end
 # TODO: need to specify dependencies
 # and also need to not run if no changes
 task :dist do
-	system %{rsync -r --exclude='.git' --exclude='webgl*' --exclude='ghost*' --exclude='isis*' --exclude='mast*' web/ dist/}
+	system %{rsync -r --exclude='.git' web/ dist/}
 	myDir = Dir.pwd
 	FileList["web/**/*.js"].each do |filename|
 		destFilename = filename[3..filename.length]
