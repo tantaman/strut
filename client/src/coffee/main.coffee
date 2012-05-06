@@ -9,6 +9,16 @@ requirejs.config({
 	}
 })
 
+window.browserPrefix = ""
+if $.browser.mozilla
+	window.browserPrefix = "-moz-"
+else if $.browser.msie
+	window.browserPrefix = "-ms-"
+else if $.browser.opera
+	window.browserPrefix = "-o-"
+else if $.browser.webkit
+	window.browserPrefix = "-webkit-"
+
 requirejs(["vendor/backbone",
 			"state/DefaultState"],
 (Backbone, DefaultState) ->

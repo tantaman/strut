@@ -22,15 +22,20 @@ define(["./ComponentView",
 			#@model.on("change:style", @_styleChanged, @)
 
 		dblclicked: (e) ->
-			@$el.addClass("editable").attr("contenteditable", true)
+			@$el.addClass("editable")
+			@$el.find(".content").selectText().attr("contenteditable", true)
 			@allowDragging = false
+			@editing = true
 
 		editCompleted: () ->
 			text = @$textEl.text()
+			@editing = false
 			if text is ""
 				@remove()
 			else
+				console.log "ALLOWING DRAGGING"
 				@model.set("text", text)
+				@$el.find(".content").attr("contenteditable", false)
 				@allowDragging = true
 
 		_styleChanged: (model, style, opts) ->
@@ -46,7 +51,7 @@ define(["./ComponentView",
 					@$el.css(key, style)
 
 		render: () ->
-			@$el.html(Templates.Component(@model.attributes))
+			ComponentView.prototype.render.call(@)
 			@$textEl = @$el.find(".content")
 			#@$el.text(@model.get("text"))
 			@$el.css({
