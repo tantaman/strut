@@ -48,9 +48,10 @@ define(["vendor/backbone",
 			slides = @model.get("slides")
 			if slides?
 				slides.each((slide) =>
-					snapshot = new SlideSnapshot({model: slide})
-					@snapshots.push(snapshot)
-					@$el.append(snapshot.render())
+					@slideCreated(slide)
+					#snapshot = new SlideSnapshot({model: slide})
+					#@snapshots.push(snapshot)
+					#@$el.append(snapshot.render())
 				)
 			@$el
 

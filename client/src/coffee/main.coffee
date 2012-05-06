@@ -38,4 +38,5 @@ continuation = () ->
 		editor = new Editor({model: deck})
 
 		$("body").append(editor.render())
+		deck.newSlide()
 	)

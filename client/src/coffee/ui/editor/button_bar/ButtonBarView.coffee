@@ -27,11 +27,18 @@ define(["vendor/backbone",
 
 		picture: () ->
 			# present picture insertion dialog
+			activeSlide = @deck.get("activeSlide")
+			if activeSlide?
+				@options.pictureGrabber.show((src) ->
+					console.log "Picture chosen? " + src
+				)
 
 		table: () ->
 			# present table insertion dialog
 		shapes: () ->
 			# shape editor?
+		chart: () ->
+			#
 		transitionEditor: () ->
 
 	# dynamically generate the font setting handlers

@@ -80,6 +80,7 @@ define(["vendor/backbone",
 			)
 
 			@undoHistoryChanged()
+
 			@$el
 	)
 )

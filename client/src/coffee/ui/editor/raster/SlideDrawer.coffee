@@ -33,18 +33,35 @@ define(["common/Throttler"],
 			})
 
 		paint: () ->
-			@g2d.save()
 			@g2d.clearRect(0,0,@size.width,@size.height)
 			components = @model.get("components")
+
 			components.forEach((component) =>
 				type = component.constructor.name
+
+				@g2d.save()
+				###
+				# TODO: figure out correct translation to apply after transforms
+				skewX = component.get("skewX")
+				skewY = component.get("skewY")
+				transform = [1,0,0,1,0,0]
+				if skewX
+					transform[1] = skewX
+				if skewY
+					transform[2] = skewY
+				@g2d.transform.apply(@g2d, transform)
+
+				rotate = component.get("rotate")
+				if rotate
+					@g2d.rotate(rotate)###
+
 				switch type
 					when "TextBox" then @paintTextBox(component)
 					when "Image" then @paintImage(component)
 					when "Table" then @paintTable(component)
 					when "Image" then @paintImage(component)
+				@g2d.restore()
 			)
-			@g2d.restore()
 
 		paintTextBox: (textBox) ->
 			@g2d.fillStyle = "#" + textBox.get("color")

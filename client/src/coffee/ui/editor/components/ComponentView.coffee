@@ -11,9 +11,6 @@ define(["vendor/backbone",
 		className: "component"
 		events: () ->
 			"mousedown": "mousedown"
-			"mousemove": "mousemove"
-			"mouseup": "stopdrag"
-			"mouseout": "stopdrag"
 			"click": "clicked"
 			"click .removeBtn": "removeClicked"
 			"deltadrag span[data-delta='skewX']": "skewX"
@@ -26,6 +23,12 @@ define(["vendor/backbone",
 			@model.on("change:selected", @_selectionChanged, @)
 			@model.on("change:color", @_colorChanged, @)
 			@model.on("unrender", @_unrender, @)
+
+			@_mouseup = @stopdrag.bind(@)
+			@_mousemove = @mousemove.bind(@)
+			$(document).bind("mouseup", @_mouseup)
+			$(document).bind("mousemove", @_mousemove)
+
 			@_deltaDrags = []
 
 		_selectionChanged: (model, selected) ->
@@ -46,11 +49,11 @@ define(["vendor/backbone",
 			@remove()
 
 		skewX: (e, deltas) ->
-			@model.set("skewX", Math.atan2(deltas.dy, deltas.dx))
+			@model.set("skewX", Math.atan2(deltas.dx, 22))
 			@_setUpdatedTransform()
 
 		skewY: (e, deltas) ->
-			@model.set("skewY", Math.atan2(deltas.dy, deltas.dx))
+			@model.set("skewY", Math.atan2(deltas.dy, 22))
 			@_setUpdatedTransform()
 
 		rotate: (e, deltas) ->
@@ -102,6 +105,10 @@ define(["vendor/backbone",
 				@model.dispose()
 			else
 				@model.off(null, null, @)
+
+			$doc = $(document)
+			$doc.unbind("mouseup", @_mouseup)
+			$doc.unbind("mousemove", @_mousemove)
 
 		mousemove: (e) ->
 			if @_dragging and @allowDragging

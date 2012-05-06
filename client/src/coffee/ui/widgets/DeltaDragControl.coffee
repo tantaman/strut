@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(() ->
 	events = ["mousedown", "mousemove", "mouseup"]
 	class DragControl
