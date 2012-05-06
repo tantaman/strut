@@ -1,20 +1,18 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone",
 		"./Templates",
-		"css!./res/css/SlideSnapshot"],
-(Backbone, Templates, empty) ->
+		"css!./res/css/SlideSnapshot",
+		"./raster/SlideDrawer"],
+(Backbone, Templates, empty, SlideDrawer) ->
 	Backbone.View.extend(
 		className: "slideSnapshot"
 		events:
-			"hoverin": "hoverin"
-			"hoverout": "hoverout"
 			"click": "clicked"
 			"click .removeBtn": "removeClicked"
 
 		initialize: () ->
-
-		hoverin: () ->
-
-		hoverout: () ->
 
 		clicked: () ->
 			@trigger("clicked", @)
@@ -23,8 +21,16 @@ define(["vendor/backbone",
 			@trigger("removeClicked", @)
 			e.stopPropagation()
 
+		remove: () ->
+			@slideDrawer.dispose()
+			Backbone.View.prototype.remove.apply(@, arguments)
+
 		render: () ->
+			if @slideDrawer?
+				@slideDrawer.dispose()
 			@$el.html(Templates.SlideSnapshot(@model.attributes))
+			g2d = @$el.find("canvas")[0].getContext("2d")
+			@slideDrawer = new SlideDrawer(@model, g2d)
 			@$el
 	)
 )

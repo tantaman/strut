@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone",
 		"./SlideSnapshot",
 		"css!./res/css/slidePreviewPanel.css"],

@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["./ImageView",
 		"./TableView",
 		"./TextBoxView"],

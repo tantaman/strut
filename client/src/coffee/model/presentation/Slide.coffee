@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["model/geom/SpatialObject"],
 (SpatialObject) ->
 	SpatialObject.extend(
@@ -14,13 +17,19 @@ define(["model/geom/SpatialObject"],
 			@attributes.components.push(component)
 			component.on("dispose", @remove, @)
 			component.on("change:selected", @selectionChanged, @)
+			component.on("change", @componentChanged, @)
+			@trigger("change")
 			@trigger("change:components.add", @, component)
 
 		remove: (component) ->
 			idx = @attributes.components.indexOf(component)
 			if idx != -1
 				@attributes.components.splice(idx, 1)
+				@trigger("change")
 				@trigger("change:components.remove", @, component)
+
+		componentChanged: () ->
+			@trigger("change")
 
 		unselectComponents: () ->
 			if @_lastSelection

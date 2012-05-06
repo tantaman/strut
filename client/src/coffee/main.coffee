@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 requirejs.config({
 	"packages": ["ui/editor", "model/presentation"],
 	paths: {

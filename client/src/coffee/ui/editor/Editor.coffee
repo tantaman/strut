@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone",
 		"./SlideEditor",
 		"./TransitionEditor",
@@ -23,7 +26,7 @@ define(["vendor/backbone",
 	Backbone.View.extend(
 		className: "editor"
 		events:
-			"click > .navbar .dropdown-menu > li": "menuItemSelected"
+			"click .menuBar .dropdown-menu > li": "menuItemSelected"
 
 		initialize: () ->
 			@id = editorId++

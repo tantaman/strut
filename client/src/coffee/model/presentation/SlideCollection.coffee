@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone", "./Slide"],
 (Backbone, Slide) ->
 	Backbone.Collection.extend(

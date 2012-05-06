@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["./ComponentView",
 		"../Templates"],
 (ComponentView, Templates) ->

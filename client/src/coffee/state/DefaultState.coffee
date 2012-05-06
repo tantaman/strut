@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["common/MapResolver"],
 (MapResolver) ->
 	stateMap =

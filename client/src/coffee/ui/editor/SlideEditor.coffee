@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone", "./Templates",
 		"./SlidePreviewPanel",
 		"./OperatingTable",

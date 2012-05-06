@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["./Image",
 		"./Table",
 		"./TextBox"],

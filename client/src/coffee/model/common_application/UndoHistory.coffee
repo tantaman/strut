@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["common/EventEmitter",
 		"common/collections/LinkedList"],
 (EventEmitter, LinkedList) ->

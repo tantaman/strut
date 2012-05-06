@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone", "./SlideCollection",
 		"./Slide",
 		"model/common_application/UndoHistory"],

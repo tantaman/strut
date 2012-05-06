@@ -1,3 +1,6 @@
+###
+@author Matt Crinklaw-Vogt
+###
 define(["vendor/backbone",
 		"model/editor/button_bar/ButtonBarModel",
 		"model/presentation/components/ComponentFactory"],
