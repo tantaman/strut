@@ -23,7 +23,7 @@ define(["./ComponentView",
 
 		dblclicked: (e) ->
 			@$el.addClass("editable")
-			@$el.find(".content").selectText().attr("contenteditable", true)
+			@$el.find(".content").attr("contenteditable", true) #selectText()
 			@allowDragging = false
 			@editing = true
 
