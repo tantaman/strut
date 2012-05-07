@@ -3,7 +3,7 @@
 ###
 define(["vendor/backbone",
 		"./SlideSnapshot",
-		"css!./res/css/slidePreviewPanel.css"],
+		"css!./res/css/SlidePreviewPanel.css"],
 (Backbone, SlideSnapshot) ->
 	Backbone.View.extend(
 		className: "slidePreviewPanel"

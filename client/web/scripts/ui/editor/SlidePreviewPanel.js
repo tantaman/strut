@@ -1,7 +1,7 @@
 /*
 @author Matt Crinklaw-Vogt
 */
-define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/slidePreviewPanel.css"], function(Backbone, SlideSnapshot) {
+define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot) {
   return Backbone.View.extend({
     className: "slidePreviewPanel",
     initialize: function() {
