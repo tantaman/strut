@@ -1,5 +1,5 @@
 {{> ComponentContainer}}
-<span style="font-family: {{family}}; font-size: {{size}};
+<span style="font-family: {{family}}; font-size: {{size}}px;
 			font-weight: {{weight}}; font-style: {{style}}; color: #{{color}};
 			text-decoration: {{decoration}}">
 {{text}}
