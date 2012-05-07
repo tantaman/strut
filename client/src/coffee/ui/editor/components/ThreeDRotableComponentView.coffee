@@ -37,19 +37,19 @@ define(["./ComponentView",
 			rot = @_calcRot(deltas)
 			@model.set("rotateZ", @_initialRotZ + rot - @_rotZOffset)
 			@_setUpdatedTransform()
-			
+
 		rotateXStart: (e, deltas) ->
 			@updateOrigin()
 			@_rotXOffset = @_calcRot(deltas)
-			@_initialRotX = @model.get("rotateX")
+			@_initialRotX = @model.get("rotateX") || 0
 		rotateYStart: (e, deltas) ->
 			@updateOrigin()
 			@_rotYOffset = @_calcRot(deltas)
-			@_initialRotY = @model.get("rotateY")
+			@_initialRotY = @model.get("rotateY") || 0
 		rotateZStart: (e, deltas) ->
 			@updateOrigin()
 			@_rotZOffset = @_calcRot(deltas)
-			@_initialRotZ = @model.get("rotateZ")
+			@_initialRotZ = @model.get("rotateZ") || 0
 
 
 		__getTemplate: () ->

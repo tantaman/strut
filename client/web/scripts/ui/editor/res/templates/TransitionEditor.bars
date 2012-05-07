@@ -1,0 +1,16 @@
+<div class="navbar">
+  <div class="navbar-inner buttonBar">
+    <div class="container">
+    	<ul class="nav pull-right">
+    		<li>
+    			<div class="btn-group">
+                        <a class="btn btn-danger menuBarOption" data-option="slideEditor"><i class="icon-arrow-left"></i>Back</a>
+                        <a class="btn btn-danger menuBarOption" data-option="preview">Preview Show<i class="icon-arrow-right"></i></a>
+                  </div>
+    		</li>
+    	</ul>
+   	</div>
+  </div>
+</div>
+<div class="transitionSlides">
+</div>

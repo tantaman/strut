@@ -40,17 +40,17 @@ define(["./ComponentView", "../Templates"], function(ComponentView) {
     rotateXStart: function(e, deltas) {
       this.updateOrigin();
       this._rotXOffset = this._calcRot(deltas);
-      return this._initialRotX = this.model.get("rotateX");
+      return this._initialRotX = this.model.get("rotateX") || 0;
     },
     rotateYStart: function(e, deltas) {
       this.updateOrigin();
       this._rotYOffset = this._calcRot(deltas);
-      return this._initialRotY = this.model.get("rotateY");
+      return this._initialRotY = this.model.get("rotateY") || 0;
     },
     rotateZStart: function(e, deltas) {
       this.updateOrigin();
       this._rotZOffset = this._calcRot(deltas);
-      return this._initialRotZ = this.model.get("rotateZ");
+      return this._initialRotZ = this.model.get("rotateZ") || 0;
     },
     __getTemplate: function() {
       return Templates.ThreeDRotableComponentView;

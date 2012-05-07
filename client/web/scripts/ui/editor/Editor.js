@@ -28,6 +28,9 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       return this.changePerspective(e, {
         perspective: "slideEditor"
       });
+    },
+    preview: function(e) {
+      return console.log("Preview...");
     }
   };
   return Backbone.View.extend({

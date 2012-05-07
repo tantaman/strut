@@ -4,3 +4,12 @@
 	position: relative;
 	z-index: 500;
 }
+
+.transitionEditor .transitionSlideSnapshot .badge:before {
+	counter-increment: transitionSlideSnapshot;
+	content: counter(transitionSlideSnapshot);
+}
+
+body {
+	counter-reset: transitionSlideSnapshot;
+}

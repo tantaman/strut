@@ -15,6 +15,7 @@ define(["./components/ThreeDRotableComponentView",
 			ThreeDComponentView.prototype.remove.call(@, true)
 			if @slideDrawer?
 				@slideDrawer.dispose()
+			@model.set("selected", false)
 
 		render: () ->
 			ThreeDComponentView.prototype.render.apply(@, arguments)

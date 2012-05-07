@@ -9,7 +9,8 @@ define(["./components/ThreeDRotableComponentView", "./Templates", "./raster/Slid
     },
     remove: function() {
       ThreeDComponentView.prototype.remove.call(this, true);
-      if (this.slideDrawer != null) return this.slideDrawer.dispose();
+      if (this.slideDrawer != null) this.slideDrawer.dispose();
+      return this.model.set("selected", false);
     },
     render: function() {
       var g2d;

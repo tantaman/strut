@@ -26,6 +26,8 @@ define(["vendor/backbone",
 			@changePerspective(e, {perspective: "transitionEditor"})
 		slideEditor: (e) ->
 			@changePerspective(e, {perspective: "slideEditor"})
+		preview: (e) ->
+			console.log "Preview..."
 
 	Backbone.View.extend(
 		className: "editor"

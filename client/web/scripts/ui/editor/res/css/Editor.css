@@ -14,3 +14,12 @@
 .editor .perspectives-container {
 	margin-top: 40px;
 }
+
+.editor .navbar-inner {
+	border-radius: 0px;
+}
+
+.editor .navbar-inner .btn-group {
+	margin-bottom: 5px;
+	margin-right: 4px;
+}
