@@ -2,7 +2,7 @@
 @author Matt Crinklaw-Vogt
 ###
 define(["vendor/backbone",
-		"./Templates"
+		"./Templates",
 		"css!./res/css/PictureGrabber.css",
 		"common/Throttler"],
 (Backbone, Templates, empty, Throttler) ->
