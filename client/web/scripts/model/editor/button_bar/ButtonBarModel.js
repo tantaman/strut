@@ -45,8 +45,8 @@ define(["vendor/backbone"], function(Backbone) {
         style: this.get("fontStyle"),
         weight: this.get("fontWeight"),
         decoration: this.get("fontDecoration"),
-        x: window.innerWidth / 2 - 150,
-        y: window.innerHeight / 2 - 80,
+        x: Math.min(1024, window.innerWidth) / 2 - 150,
+        y: Math.min(768, window.innerHeight) / 2 - 80,
         z: 0
       };
     },
