@@ -1,5 +1,5 @@
 ###
-@author Matt Crinklaw-Vogt
+@author Tantaman
 ###
 define(["vendor/backbone",
 		"model/editor/button_bar/ButtonBarModel",
@@ -30,7 +30,8 @@ define(["vendor/backbone",
 			activeSlide = @deck.get("activeSlide")
 			if activeSlide?
 				@options.pictureGrabber.show((src) ->
-					console.log "Picture chosen? " + src
+					activeSlide.add(
+						ComponentFactory.createImage(src))
 				)
 
 		table: () ->
@@ -38,7 +39,7 @@ define(["vendor/backbone",
 		shapes: () ->
 			# shape editor?
 		chart: () ->
-			#
+			# use d3 for charts
 		transitionEditor: () ->
 
 	# dynamically generate the font setting handlers

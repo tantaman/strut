@@ -9,5 +9,9 @@ define(["model/geom/SpatialObject"],
 		dispose: () ->
 			@trigger("dispose", @)
 			@off()
+
+		constructor: `function Component() {
+			SpatialObject.prototype.constructor.apply(this, arguments);
+		}`
 	)
 )

@@ -1,5 +1,5 @@
 ###
-@author Matt Crinklaw-Vogt
+@author Tantaman
 ###
 define(["./Image",
 		"./Table",
@@ -8,4 +8,6 @@ define(["./Image",
 	ComponentFactory =
 		createTextBox: (configuration) ->
 			new TextBox(configuration)
+		createImage: (src) ->
+			new Image({src: src})
 )

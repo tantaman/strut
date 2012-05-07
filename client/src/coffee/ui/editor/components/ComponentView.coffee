@@ -7,7 +7,7 @@ define(["vendor/backbone",
 		"css!../res/css/ComponentView.css"],
 (Backbone, DeltaDragControl, Templates, empty) ->
 	Backbone.View.extend(
-		transforms: ["skewX", "skewY", "rotate"]
+		transforms: ["skewX", "skewY", "rotate", "scale"]
 		className: "component"
 		events: () ->
 			"mousedown": "mousedown"
@@ -16,6 +16,7 @@ define(["vendor/backbone",
 			"deltadrag span[data-delta='skewX']": "skewX"
 			"deltadrag span[data-delta='skewY']": "skewY"
 			"deltadrag span[data-delta='rotate']": "rotate"
+			"deltadrag span[data-delta='scale']": "scale"
 
 		initialize: () ->
 			@_dragging = false
@@ -49,16 +50,22 @@ define(["vendor/backbone",
 			@remove()
 
 		skewX: (e, deltas) ->
-			@model.set("skewX", Math.atan2(deltas.dx, 22))
+			skew = @model.get("skewX")
+			@model.set("skewX", skew + Math.atan2(deltas.dx, 22))
 			@_setUpdatedTransform()
 
 		skewY: (e, deltas) ->
-			@model.set("skewY", Math.atan2(deltas.dy, 22))
+			skew = @model.get("skewY")
+			@model.set("skewY", skewY + Math.atan2(deltas.dy, 22))
 			@_setUpdatedTransform()
 
 		rotate: (e, deltas) ->
-			@model.set("rotate", Math.atan2(deltas.dy, deltas.dx))
+			rot = @model.get("rotate")
+			@model.set("rotate", rot + Math.atan2(deltas.dy, deltas.dx))
 			@_setUpdatedTransform()
+
+		scale: (e, deltas) ->
+
 
 		_setUpdatedTransform: () ->
 			transformStr = @buildTransformString()

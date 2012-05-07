@@ -1,5 +1,5 @@
 ###
-@author Matt Crinklaw-Vogt
+@author Tantaman
 ###
 define(["./ComponentView",
 		"../Templates"],
@@ -9,14 +9,14 @@ define(["./ComponentView",
 		className: "component textBox"
 		tagName: "div"
 		events: () ->
-			parentEvents = ComponentView.prototype.events.call(this)
+			parentEvents = ComponentView.prototype.events.call(@)
 			myEvents = 
 				"dblclick": "dblclicked"
 				"editComplete": "editCompleted"
 			_.extend(parentEvents, myEvents)
 
 		initialize: () ->
-			ComponentView.prototype.initialize.apply(this, arguments)
+			ComponentView.prototype.initialize.apply(@, arguments)
 			for style in styles
 				@model.on("change:" + style, @_styleChanged, @)
 			#@model.on("change:style", @_styleChanged, @)
