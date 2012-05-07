@@ -9,7 +9,7 @@
     <meta name="description" content="TODO" />
     <meta name="author" content="TODO" />
 
-    <link href="https://raw.github.com/tantaman/Showoff/master/client/web/preview_export/css/main.css" rel="stylesheet" />
+    <link href="http://tantaman.github.com/Showoff/client/web/preview_export/css/main.css" rel="stylesheet" />
     
     <link rel="shortcut icon" href="favicon.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -44,7 +44,7 @@ if ("ontouchstart" in document.documentElement) {
 }
 </script>
 
-<script src="https://raw.github.com/tantaman/Showoff/master/client/web/preview_export/scripts/impress.js"></script>
+<script src="http://tantaman.github.com/Showoff/client/web/preview_export/scripts/impress.js"></script>
 <script>impress().init();</script>
 
 </body>
