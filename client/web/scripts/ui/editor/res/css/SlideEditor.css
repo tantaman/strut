@@ -6,8 +6,8 @@
 	margin-left: 25px;
 }
 
-.slideEditor .btn i {
-	margin-right: 2px;
+.slideEditor .btn-warning {
+	font-size: 12px;
 }
 
 .slideEditor .btn .icon-arrow-right {
@@ -32,4 +32,21 @@
 	height: 100%;
 	width: 100%;
 	margin-left: 150px;
+}
+
+.slideEditor .divider-vertical {
+	height: 51px;
+}
+
+.slideEditor .iconBtns i {
+	display: block;
+	margin: 0 auto;
+}
+
+.slideEditor .pull-right .btn-group {
+	margin-top: 10px;
+}
+
+.slideEditor .normalBtns {
+	margin-top: 10px;
 }

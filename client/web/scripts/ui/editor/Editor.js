@@ -113,7 +113,11 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       $perspectivesContainer = this.$el.find(".perspectives-container");
       _.each(this.perspectives, function(perspective, key) {
         $perspectivesContainer.append(perspective.render());
-        if (key === _this.activePerspective) return perspective.show();
+        if (key === _this.activePerspective) {
+          return perspective.show();
+        } else {
+          return perspective.$el.addClass("disp-none");
+        }
       });
       this.undoHistoryChanged();
       return this.$el;

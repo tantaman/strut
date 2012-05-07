@@ -1,7 +1,7 @@
 <div class="navbar navbar-fixed-top menuBar">
-  <div class="btn-success">
+  <div class="btn-inverse temp">
     <div class="container">
-    	<a class="brand" href="#">Showoff</a>
+    	<a class="brand" href="#" style="font-weight: bold">Showoff</a>
      	<ul class="nav">
      		<li class="dropdown active">
      			<a href="#" class="dropdown-toggle" data-toggle="dropdown">

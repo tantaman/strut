@@ -29,12 +29,12 @@
 }
 
 .slideSnapshot {
-	border: 1px solid #5BB75B;
+	border: 1px solid grey;
 }
 
 .slideSnapshot.active {
 	box-shadow:inset 0 0 10px #000000;
-	border: 1px solid orange;
+	border: 1px solid black;
 }
 
 .slideSnapshot canvas {

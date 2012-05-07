@@ -101,6 +101,8 @@ define(["vendor/backbone",
 				$perspectivesContainer.append(perspective.render())
 				if key is @activePerspective
 					perspective.show()
+				else
+					perspective.$el.addClass("disp-none")
 			)
 
 			@undoHistoryChanged()
