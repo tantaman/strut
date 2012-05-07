@@ -37,3 +37,6 @@ To compile the templates
 * RequireJS http://requirejs.org/
 * JQuery http://jquery.com/
 * Rake http://rubyforge.org/projects/rake/
+* HandlebarsJS http://handlebarsjs.com/
+* DustJS http://akdubya.github.com/dustjs/
+* Class class http://ejohn.org/blog/simple-javascript-inheritance/
