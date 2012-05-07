@@ -1,5 +1,5 @@
 /*
-@author Matt Crinklaw-Vogt
+@author Tantaman
 */
 define(["vendor/backbone"], function(Backbone) {
   var fontMethods, fontSettings, longSetting, setting, toggleable, _i, _len;

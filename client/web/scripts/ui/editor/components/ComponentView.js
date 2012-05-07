@@ -70,13 +70,19 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return this._setUpdatedTransform();
     },
     rotateStart: function(e, deltas) {
-      this._origin = {
+      this.updateOrigin();
+      this._rotOffset = this._calcRot(deltas);
+      this._initialRotate = this.model.get("rotate") || 0;
+      return console.log(this._initialRotate);
+    },
+    updateOrigin: function() {
+      return this._origin = {
         x: this.$el.width() / 2 + this.model.get("x"),
         y: this.$el.height() / 2 + this.model.get("y")
       };
-      this._rotOffset = Math.atan2(deltas.y - this._origin.y, deltas.x - this._origin.x);
-      this._initialRotate = this.model.get("rotate") || 0;
-      return console.log(this._initialRotate);
+    },
+    _calcRot: function(point) {
+      return Math.atan2(point.y - this._origin.y, point.x - this._origin.x);
     },
     scale: function(e, deltas) {
       var contentHeight, contentWidth, newHeight, newWidth, scale;
@@ -127,7 +133,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     render: function() {
       var _this = this;
-      this.$el.html(Templates.Component(this.model.attributes));
+      this.$el.html(this.__getTemplate()(this.model.attributes));
       this.$el.find("span[data-delta]").each(function(idx, elem) {
         var deltaDrag;
         deltaDrag = new DeltaDragControl($(elem), true);
@@ -136,6 +142,9 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this.$content = this.$el.find(".content");
       this._setUpdatedTransform();
       return this.$el;
+    },
+    __getTemplate: function() {
+      return Templates.Component;
     },
     _unrender: function() {
       console.log("Unrendering");
@@ -180,6 +189,9 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     stopdrag: function() {
       this._dragging = false;
       return true;
-    }
+    },
+    constructor: function ComponentView() {
+			Backbone.View.prototype.constructor.apply(this, arguments);
+		}
   });
 });

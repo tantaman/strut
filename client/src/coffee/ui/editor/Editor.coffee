@@ -22,11 +22,16 @@ define(["vendor/backbone",
 		cut: (e) ->
 		copy: (e) ->
 		paste: (e) ->
+		transitionEditor: (e) ->
+			@changePerspective(e, {perspective: "transitionEditor"})
+		slideEditor: (e) ->
+			@changePerspective(e, {perspective: "slideEditor"})
 
 	Backbone.View.extend(
 		className: "editor"
 		events:
 			"click .menuBar .dropdown-menu > li": "menuItemSelected"
+			"changePerspective": "changePerspective"
 
 		initialize: () ->
 			@id = editorId++
@@ -53,6 +58,15 @@ define(["vendor/backbone",
 			else
 				@$el.find(".redoName").addClass("disp-none")
 
+		changePerspective: (e, data) ->
+			@activePerspective = data.perspective
+			_.each(@perspectives, (perspective, key) =>
+				if key is @activePerspective
+					perspective.show()
+				else
+					perspective.hide()
+			)
+
 		menuItemSelected: (e) ->
 			$target = $(e.currentTarget)
 			option = $target.attr("data-option")
@@ -76,7 +90,7 @@ define(["vendor/backbone",
 			_.each(@perspectives, (perspective, key) =>
 				$perspectivesContainer.append(perspective.render())
 				if key is @activePerspective
-					perspective.$el.removeClass("disp-none")
+					perspective.show()
 			)
 
 			@undoHistoryChanged()

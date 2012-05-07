@@ -1,0 +1,6 @@
+<div class="content">
+<canvas></canvas>
+</div>
+<span class="topLabel label" data-delta="rotateX">Rotate X</span>
+<span class="leftLabel label" data-delta="rotateY">Rotate Y</span>
+<span class="rightLabel label" data-delta="rotateZ">Rotate</span>

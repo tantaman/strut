@@ -1,5 +1,5 @@
 /*
-@author Matt Crinklaw-Vogt
+@author Tantaman
 */
 define(["./ImageView", "./TableView", "./TextBoxView"], function(ImageView, TableView, TextBoxView) {
   var ComponentViewFactory;

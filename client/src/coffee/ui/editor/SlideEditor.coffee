@@ -24,6 +24,11 @@ define(["vendor/backbone", "./Templates",
 
 			@model.on("change:activeSlide", @activeSlideChanged, @)
 
+		show: () ->
+			@$el.removeClass("disp-none")
+		hide: () ->
+			@$el.addClass("disp-none")
+
 		activeSlideChanged: (model, newSlide) ->
 			@operatingTable.setModel(newSlide)
 

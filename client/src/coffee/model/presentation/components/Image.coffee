@@ -1,3 +1,6 @@
+###
+@author Tantaman
+###
 define(["./Component"],
 (Component) ->
 	Component.extend(

@@ -2,38 +2,3 @@
 	position: relative;
 }
 
-.operatingTable .component {
-	position: absolute;
-	line-height: normal;
-	padding: 2px;
-	cursor: pointer;
-	margin: 0px;
-}
-
-.operatingTable .component {
-	-moz-user-select: none;
-	-webkit-user-select: none;
-}
-
-.operatingTable .component.selected {
-	border: 1px solid black;
-}
-
-.operatingTable .component.editable {
-	cursor: auto;
-	border: 0px;
-	border: 2px solid red;
-	-moz-user-select: text;
-	-webkit-user-select: text;
-}
-
-.operatingTable .component .close-btn-red-20 {
-	display: none;
-	position: absolute;
-	top: 0px;
-	left: -7px;
-}
-
-.operatingTable .component:hover .close-btn-red-20 {
-	display: inline;
-}

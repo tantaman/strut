@@ -18,12 +18,23 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
     },
     cut: function(e) {},
     copy: function(e) {},
-    paste: function(e) {}
+    paste: function(e) {},
+    transitionEditor: function(e) {
+      return this.changePerspective(e, {
+        perspective: "transitionEditor"
+      });
+    },
+    slideEditor: function(e) {
+      return this.changePerspective(e, {
+        perspective: "slideEditor"
+      });
+    }
   };
   return Backbone.View.extend({
     className: "editor",
     events: {
-      "click .menuBar .dropdown-menu > li": "menuItemSelected"
+      "click .menuBar .dropdown-menu > li": "menuItemSelected",
+      "changePerspective": "changePerspective"
     },
     initialize: function() {
       this.id = editorId++;
@@ -57,6 +68,17 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
         return this.$el.find(".redoName").addClass("disp-none");
       }
     },
+    changePerspective: function(e, data) {
+      var _this = this;
+      this.activePerspective = data.perspective;
+      return _.each(this.perspectives, function(perspective, key) {
+        if (key === _this.activePerspective) {
+          return perspective.show();
+        } else {
+          return perspective.hide();
+        }
+      });
+    },
     menuItemSelected: function(e) {
       var $target, option;
       $target = $(e.currentTarget);
@@ -80,9 +102,7 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       $perspectivesContainer = this.$el.find(".perspectives-container");
       _.each(this.perspectives, function(perspective, key) {
         $perspectivesContainer.append(perspective.render());
-        if (key === _this.activePerspective) {
-          return perspective.$el.removeClass("disp-none");
-        }
+        if (key === _this.activePerspective) return perspective.show();
       });
       this.undoHistoryChanged();
       return this.$el;

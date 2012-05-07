@@ -9,6 +9,8 @@ define(["vendor/backbone",
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY", "rotate", "scale"]
 		className: "component"
+		# TODO: make this junk less verbose
+		# and more common
 		events: () ->
 			"mousedown": "mousedown"
 			"click": "clicked"
@@ -72,12 +74,18 @@ define(["vendor/backbone",
 			@_setUpdatedTransform()
 
 		rotateStart: (e, deltas) ->
+			@updateOrigin()
+			@_rotOffset = @_calcRot(deltas)
+			@_initialRotate = @model.get("rotate") || 0
+			console.log @_initialRotate
+
+		updateOrigin: () ->
 			@_origin = 
 				x: @$el.width() / 2 + @model.get("x")
 				y: @$el.height() / 2 + @model.get("y")
-			@_rotOffset = Math.atan2(deltas.y - @_origin.y, deltas.x - @_origin.x)
-			@_initialRotate = @model.get("rotate") || 0
-			console.log @_initialRotate
+
+		_calcRot: (point) ->
+			Math.atan2(point.y - @_origin.y, point.x - @_origin.x)
 
 		scale: (e, deltas) ->
 			contentWidth = @$content.width()
@@ -122,7 +130,7 @@ define(["vendor/backbone",
 			}
 
 		render: () ->
-			@$el.html(Templates.Component(@model.attributes))
+			@$el.html(@__getTemplate()(@model.attributes))
 			@$el.find("span[data-delta]").each((idx, elem) =>
 				deltaDrag = new DeltaDragControl($(elem), true)
 				@_deltaDrags.push(deltaDrag)
@@ -130,6 +138,9 @@ define(["vendor/backbone",
 			@$content = @$el.find(".content")
 			@_setUpdatedTransform()
 			@$el
+
+		__getTemplate: () ->
+			Templates.Component
 
 		_unrender: () ->
 			console.log "Unrendering"
@@ -169,5 +180,8 @@ define(["vendor/backbone",
 			@_dragging = false
 			true
 
+		constructor: `function ComponentView() {
+			Backbone.View.prototype.constructor.apply(this, arguments);
+		}`
 	)
 )

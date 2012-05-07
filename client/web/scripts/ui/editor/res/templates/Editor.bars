@@ -33,7 +33,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     {{#perspectives}}
-                        <li><a href="#">{{name}}</a><li>
+                        <li data-option="{{perspective}}"><a href="#">{{name}}</a><li>
                     {{/perspectives}}
                 </ul>
             </li>

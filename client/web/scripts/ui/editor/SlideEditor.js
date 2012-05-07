@@ -16,6 +16,12 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
       });
       return this.model.on("change:activeSlide", this.activeSlideChanged, this);
     },
+    show: function() {
+      return this.$el.removeClass("disp-none");
+    },
+    hide: function() {
+      return this.$el.addClass("disp-none");
+    },
     activeSlideChanged: function(model, newSlide) {
       return this.operatingTable.setModel(newSlide);
     },

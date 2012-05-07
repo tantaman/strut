@@ -1,5 +1,5 @@
 ###
-@author Matt Crinklaw-Vogt
+@author Tantaman
 ###
 define(["vendor/backbone"],
 (Backbone) ->

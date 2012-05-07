@@ -1,5 +1,5 @@
 /*
-@author Matt Crinklaw-Vogt
+@author Tantaman
 */
 var continuation;
 

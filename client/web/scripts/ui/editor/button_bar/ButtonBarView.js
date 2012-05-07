@@ -37,7 +37,11 @@ define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/pres
     table: function() {},
     shapes: function() {},
     chart: function() {},
-    transitionEditor: function() {}
+    transitionEditor: function() {
+      return this.$el.trigger("changePerspective", {
+        perspective: "transitionEditor"
+      });
+    }
   };
   fontSettings.forEach(function(setting) {
     var longSetting;

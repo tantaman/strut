@@ -1,5 +1,5 @@
 ###
-@author Matt Crinklaw-Vogt
+@author Tantaman
 ###
 requirejs.config({
 	"packages": ["ui/editor", "model/presentation"],

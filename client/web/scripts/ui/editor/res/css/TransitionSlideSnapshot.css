@@ -1,0 +1,14 @@
+.transitionSlideSnapshot {
+	position: absolute;
+	border: 1px solid black;
+}
+
+.transitionSlideSnapshot .content {
+	width: 150px;
+	height: 100px;
+}
+
+.transitionSlideSnapshot canvas {
+	width: 100%;
+	height: 100%;
+}
