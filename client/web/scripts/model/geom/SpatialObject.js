@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone"], function(Backbone) {
+define(["common/Calcium"], function(Backbone) {
   return Backbone.Model.extend({
     initialize: function() {},
     constructor: function SpatialObject() {

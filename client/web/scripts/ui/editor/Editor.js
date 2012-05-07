@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, empty) {
+define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
@@ -33,6 +33,15 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
     },
     preview: function(e) {
       return this.$el.trigger("preview");
+    },
+    exportJSON: function(e) {
+      return this.rawTextModal.show(null, JSON.stringify(this.model.toJSON(false, true)));
+    },
+    importJSON: function(e) {
+      var _this = this;
+      return this.rawTextModal.show(function(json) {
+        return _this.model["import"](JSON.parse(json));
+      });
     }
   };
   return Backbone.View.extend({
@@ -120,6 +129,8 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
         }
       });
       this.undoHistoryChanged();
+      this.rawTextModal = new RawTextModal();
+      this.$el.append(this.rawTextModal.render());
       return this.$el;
     }
   });

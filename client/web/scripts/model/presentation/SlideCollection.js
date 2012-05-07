@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Slide"], function(Backbone, Slide) {
+define(["common/Calcium", "./Slide"], function(Backbone, Slide) {
   return Backbone.Collection.extend({
     model: Slide,
     initialize: function() {

@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone"]
+define(["common/Calcium"]
 (Backbone) ->
 	Backbone.Model.extend(
 		initialize: () ->

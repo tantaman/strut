@@ -6,6 +6,7 @@
 define(["./Component"], function(Component) {
   return Component.extend({
     initialize: function() {
+      this.set("type", "TextBox");
       if (!(this.get("text") != null)) return this.set("text", "Text");
     },
     constructor: function TextBox() {

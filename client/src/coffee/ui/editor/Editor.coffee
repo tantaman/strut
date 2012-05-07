@@ -5,9 +5,10 @@ define(["vendor/backbone",
 		"./SlideEditor",
 		"./TransitionEditor",
 		"./Templates",
-		"ui/impress_renderer/ImpressRenderer"
+		"ui/impress_renderer/ImpressRenderer",
+		"ui/widgets/RawTextImporter",
 		"css!./res/css/Editor.css"],
-(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, empty) ->
+(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, empty) ->
 	editorId = 0
 
 	menuOptions =
@@ -29,6 +30,13 @@ define(["vendor/backbone",
 			@changePerspective(e, {perspective: "slideEditor"})
 		preview: (e) ->
 			@$el.trigger("preview")
+		exportJSON: (e) ->
+			@rawTextModal.show(null, JSON.stringify(@model.toJSON(false, true)))
+
+		importJSON: (e) ->
+			@rawTextModal.show((json) =>
+				@model.import(JSON.parse(json))
+			)
 
 	Backbone.View.extend(
 		className: "editor"
@@ -106,6 +114,8 @@ define(["vendor/backbone",
 			)
 
 			@undoHistoryChanged()
+			@rawTextModal = new RawTextModal()
+			@$el.append(@rawTextModal.render())
 
 			@$el
 	)
