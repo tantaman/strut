@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>impress.js | presentation tool based on the power of CSS3 transforms and transitions in modern browsers | by Bartek Szopka @bartaz</title>
+    
+    <meta name="description" content="TODO" />
+    <meta name="author" content="TODO" />
+
+    <link href="css/main.css" rel="stylesheet" />
+    
+    <link rel="shortcut icon" href="favicon.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+</head>
+<body class="impress-not-supported">
+<div class="fallback-message">
+    <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+    <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+<div id="impress">
+
+{{#slides.models}}
+{{#attributes}}
+
+<div class="step" data-x="{{x}}" data-y="{{y}}" {{#rotateX}}data-rotate-x="{{rotateX}}"{{/rotateX}}  {{#rotateY}}data-rotate-y="{{rotateY}}"{{/rotateY}} {{#rotateZ}}data-rotate-z="{{rotateZ}}"{{/rotateZ}}>
+
+{{#components}}
+{{#renderComponent .}}{{/renderComponent}}
+{{/components}}
+
+{{/attributes}}
+</div>
+{{/slides.models}}
+
+
+<div class="hint">
+    <p>Use a spacebar or arrow keys to navigate</p>
+</div>
+<script>
+if ("ontouchstart" in document.documentElement) { 
+    document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
+}
+</script>
+
+<script src="scripts/impress.js"></script>
+<script>impress().init();</script>
+
+</body>
+</html>
