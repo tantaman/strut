@@ -4,8 +4,17 @@ Showoff
 #### GUI / Authoring Tool for ImpressJS ####
 
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
+I hope this project can also serve as an example of a browser based rich client as the project matures.
 
-Unlike other ImpressJS authoring tools, this one runs entirely on the client side and has a more modular code base.
+Current features:
+
+ * Slide creation
+ * Text & image insertion
+ * Text and image manipulation (skew, rotate, scale)
+ * Fonts and font styles
+ * Undo/Redo for some operations
+ * Transition configuration
+ * ImpreeJS preview generation
 
 ### Preview ###
 
@@ -28,6 +37,17 @@ To compile the templates
 1. Install Handlebars (npm install handlebars)
 2. cd to the root Showoff directory
 3. run `rake compileTpls`
+
+### Contributing ###
+
+Here is the basic layout of the source:
+
+* Presentation Model: src/coffee/model/presentation
+* Editor UI Layer: src/coffee/ui/editor
+* Model -> ImpressJS Rendering: src/coffee/ui/impress_renderer
+
+templates for UI components are contained in web/scripts/ui/COMPONENT_NAME/res/templates
+in order to package related markup and backing UI (not model) code into modules.
 
 ### Acknowledgements ###
 
