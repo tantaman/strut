@@ -1,0 +1,7 @@
+{{> ComponentContainer}}
+<span style="font-family: {{family}}; font-size: {{size}};
+			font-weight: {{weight}}; font-style: {{style}}; color: #{{color}};
+			text-decoration: {{decoration}}">
+{{text}}
+</span>
+</div>

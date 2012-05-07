@@ -41,6 +41,9 @@ define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/pres
       return this.$el.trigger("changePerspective", {
         perspective: "transitionEditor"
       });
+    },
+    preview: function() {
+      return this.$el.trigger("preview");
     }
   };
   fontSettings.forEach(function(setting) {

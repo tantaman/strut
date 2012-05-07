@@ -5,8 +5,9 @@ define(["vendor/backbone",
 		"./SlideEditor",
 		"./TransitionEditor",
 		"./Templates",
+		"ui/impress_renderer/ImpressRenderer"
 		"css!./res/css/Editor.css"],
-(Backbone, SlideEditor, TransitionEditor, Templates, empty) ->
+(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, empty) ->
 	editorId = 0
 
 	menuOptions =
@@ -27,13 +28,14 @@ define(["vendor/backbone",
 		slideEditor: (e) ->
 			@changePerspective(e, {perspective: "slideEditor"})
 		preview: (e) ->
-			console.log "Preview..."
+			@$el.trigger("preview")
 
 	Backbone.View.extend(
 		className: "editor"
 		events:
 			"click .menuBar .dropdown-menu > li": "menuItemSelected"
 			"changePerspective": "changePerspective"
+			"preview": "renderPreview"
 
 		initialize: () ->
 			@id = editorId++
@@ -59,6 +61,12 @@ define(["vendor/backbone",
 				$lbl.removeClass("disp-none")
 			else
 				@$el.find(".redoName").addClass("disp-none")
+
+		renderPreview: () ->
+			showStr = ImpressRenderer.render(@model.attributes)
+			newWind = window.open("data:text/html;charset=utf-8," + escape(showStr))
+			#frame = newWind.document.getElementById("presentation")
+			#frame.src = "data:text/html;charset=utf-8," + escape(showStr)
 
 		changePerspective: (e, data) ->
 			@activePerspective = data.perspective

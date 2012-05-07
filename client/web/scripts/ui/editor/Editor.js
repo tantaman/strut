@@ -1,7 +1,7 @@
 /*
 @author Matt Crinklaw-Vogt
 */
-define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, empty) {
+define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
@@ -30,14 +30,15 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       });
     },
     preview: function(e) {
-      return console.log("Preview...");
+      return this.$el.trigger("preview");
     }
   };
   return Backbone.View.extend({
     className: "editor",
     events: {
       "click .menuBar .dropdown-menu > li": "menuItemSelected",
-      "changePerspective": "changePerspective"
+      "changePerspective": "changePerspective",
+      "preview": "renderPreview"
     },
     initialize: function() {
       this.id = editorId++;
@@ -70,6 +71,11 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       } else {
         return this.$el.find(".redoName").addClass("disp-none");
       }
+    },
+    renderPreview: function() {
+      var newWind, showStr;
+      showStr = ImpressRenderer.render(this.model.attributes);
+      return newWind = window.open("data:text/html;charset=utf-8," + escape(showStr));
     },
     changePerspective: function(e, data) {
       var _this = this;

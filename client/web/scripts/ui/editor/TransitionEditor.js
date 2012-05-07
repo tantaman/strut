@@ -8,7 +8,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./re
       "click": "clicked",
       "click *[data-option]": "buttonChosen"
     },
-    scale: 1000 / 150,
+    scale: 1024 / 150,
     initialize: function() {
       this.name = "Transition Editor";
       return this._snapshots = [];
@@ -35,7 +35,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./re
             perspective: "slideEditor"
           });
         case "preview":
-          return console.log("Preview...");
+          return this.$el.trigger("preview");
       }
     },
     _disposeOldView: function() {
@@ -50,17 +50,20 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./re
       return this.$el;
     },
     _partialRender: function() {
-      var $container, slides,
+      var $container, cnt, colCnt, slides,
         _this = this;
       $container = this.$el.find(".transitionSlides");
       $container.html("");
       slides = this.model.get("slides");
+      colCnt = 6;
+      cnt = 0;
       return slides.each(function(slide) {
         var snapshot, x;
         x = slide.get("x");
         if (!(x != null)) {
-          slide.set("x", Math.random() * Math.min(window.innerWidth, 1000));
-          slide.set("y", Math.random() * Math.min(window.innerHeight, 700) + 80);
+          slide.set("x", cnt * 160 + 30);
+          slide.set("y", ((cnt / colCnt) | 0) * 160 + 80);
+          ++cnt;
         }
         snapshot = new TransitionSlideSnapshot({
           model: slide

@@ -11,7 +11,7 @@ define(["vendor/backbone",
 		events:
 			"click": "clicked"
 			"click *[data-option]": "buttonChosen"
-		scale: 1000/150 # TODO: set up some glob config...
+		scale: 1024/150 # TODO: set up some glob config...
 		# that has slide sizes and thumbnail sizes and so on
 		initialize: () ->
 			@name = "Transition Editor"
@@ -35,7 +35,7 @@ define(["vendor/backbone",
 			option = $(e.currentTarget).attr("data-option")
 			switch option
 				when "slideEditor" then @$el.trigger("changePerspective", {perspective: "slideEditor"})
-				when "preview" then console.log "Preview..."
+				when "preview" then @$el.trigger("preview")
 
 		_disposeOldView: () ->
 			@_snapshots.forEach((snapshot) ->
@@ -52,12 +52,15 @@ define(["vendor/backbone",
 			$container = @$el.find(".transitionSlides")
 			$container.html("")
 			slides = @model.get("slides")
+			colCnt = 6
+			cnt = 0
 			slides.each((slide) =>
 				x = slide.get("x")
 				if not x?
 					# TODO: construct a better way of doing this
-					slide.set("x", Math.random() * Math.min(window.innerWidth, 1000))
-					slide.set("y", Math.random() * Math.min(window.innerHeight, 700) + 80)
+					slide.set("x", cnt * 160 + 30)
+					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
+					++cnt
 
 				snapshot = new TransitionSlideSnapshot({model: slide})
 				@_snapshots.push(snapshot)

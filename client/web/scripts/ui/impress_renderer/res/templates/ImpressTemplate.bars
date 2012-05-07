@@ -9,7 +9,7 @@
     <meta name="description" content="TODO" />
     <meta name="author" content="TODO" />
 
-    <link href="css/main.css" rel="stylesheet" />
+    <link href="http://localhost:8080/Showoff/client/web/preview_export/css/main.css" rel="stylesheet" />
     
     <link rel="shortcut icon" href="favicon.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -24,12 +24,12 @@
 {{#slides.models}}
 {{#attributes}}
 
-<div class="step" data-x="{{x}}" data-y="{{y}}" {{#rotateX}}data-rotate-x="{{rotateX}}"{{/rotateX}}  {{#rotateY}}data-rotate-y="{{rotateY}}"{{/rotateY}} {{#rotateZ}}data-rotate-z="{{rotateZ}}"{{/rotateZ}}>
-
+<div class="step" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}}>
+<div style="width: 1024px; height: 768px">
 {{#components}}
 {{#renderComponent .}}{{/renderComponent}}
 {{/components}}
-
+</div>
 {{/attributes}}
 </div>
 {{/slides.models}}
@@ -44,7 +44,7 @@ if ("ontouchstart" in document.documentElement) {
 }
 </script>
 
-<script src="scripts/impress.js"></script>
+<script src="http://localhost:8080/Showoff/client/web/preview_export/scripts/impress.js"></script>
 <script>impress().init();</script>
 
 </body>

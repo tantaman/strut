@@ -64,6 +64,7 @@
         <ul class="nav pull-right">
             <li>
                   <div class="btn-group">
+                        <a class="btn btn-danger transitionEditorBtn" data-option="preview"><span>Preview Show</span></a>
                         <a class="btn btn-danger transitionEditorBtn" data-option="transitionEditor"><span>Transition Editor</span><i class="icon-arrow-right"></i></a>
                   </div>
             </li>

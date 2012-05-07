@@ -1,0 +1,3 @@
+{{> ComponentContainer}}
+<img src="{{src}}"></img>
+</div>

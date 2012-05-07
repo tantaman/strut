@@ -37,13 +37,13 @@ define(["model/geom/SpatialObject"],
 
 		selectionChanged: (model, selected) ->
 			if selected
-				@trigger("change:activeComponent", @, model, selected)
 				if @_lastSelection isnt model
 					@attributes.components.forEach((component) ->
 						if component isnt model
 							component.set("selected", false)
 					)
 					@_lastSelection = model
+				@trigger("change:activeComponent", @, model, selected)
 			else
 				@trigger("change:activeComponent", @, null)
 				@_lastSelection = null

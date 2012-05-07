@@ -42,6 +42,8 @@ define(["vendor/backbone",
 			# use d3 for charts
 		transitionEditor: () ->
 			@$el.trigger("changePerspective", {perspective: "transitionEditor"})
+		preview: () ->
+			@$el.trigger("preview")
 
 	# dynamically generate the font setting handlers
 	fontSettings.forEach((setting) ->

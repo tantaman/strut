@@ -37,13 +37,13 @@ define(["model/geom/SpatialObject"], function(SpatialObject) {
     },
     selectionChanged: function(model, selected) {
       if (selected) {
-        this.trigger("change:activeComponent", this, model, selected);
         if (this._lastSelection !== model) {
           this.attributes.components.forEach(function(component) {
             if (component !== model) return component.set("selected", false);
           });
-          return this._lastSelection = model;
+          this._lastSelection = model;
         }
+        return this.trigger("change:activeComponent", this, model, selected);
       } else {
         this.trigger("change:activeComponent", this, null);
         return this._lastSelection = null;
