@@ -32,4 +32,8 @@ To compile the templates
 ### Acknowledgements ###
 
 * ImpreeJS (of course) https://github.com/bartaz/impress.js/
-* Another ImpressJS authoring tool that introduced me to Twitter Bootstrap and heavily influenced Showoff's UI: https://github.com/hsivaramx/Impressionist
+* BackboneJS http://documentcloud.github.com/backbone/
+* CoffeeScript http://coffeescript.org/
+* RequireJS http://requirejs.org/
+* JQuery http://jquery.com/
+* Rake http://rubyforge.org/projects/rake/
