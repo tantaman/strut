@@ -1,7 +1,7 @@
 define(["./Component"],
 (Component) ->
 	Component.extend(
-		constructor: `ImageModel() {
+		constructor: `function ImageModel() {
 			Component.prototype.constructor.apply(this, arguments);
 		}`
 	)

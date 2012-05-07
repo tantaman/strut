@@ -18,8 +18,19 @@
 	left: -35px;
 	top: 40%;
 	cursor: s-resize;
+	transform: rotate(-90deg);
 	-moz-transform: rotate(-90deg);
 	-webkit-transform: rotate(-90deg);
+}
+
+.component .scale {
+	position: absolute;
+	right: -40px;
+	bottom: -40px;
+	cursor: se-resize;
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
 }
 
 .component .rotate {

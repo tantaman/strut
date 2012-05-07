@@ -2,6 +2,7 @@
 @author Tantaman
 ###
 define(["./ComponentView"],
+(ComponentView) ->
 	ComponentView.extend(
 		className: "component imageView"
 		tagName: "div"
@@ -10,6 +11,13 @@ define(["./ComponentView"],
 
 		render: () ->
 			ComponentView.prototype.render.call(@)
-			@$el.find(".content").append("<img src=#{@model.get('src')}></img>");
+			$img = $("<img src=#{@model.get('src')}></img>")
+			$img.bind("dragstart", (e) -> e.preventDefault(); false)
+			@$el.find(".content").append($img);
+			@$el.css({
+				top: @model.get("y")
+				left: @model.get("x")
+			})
+			@$el
 	)
 )

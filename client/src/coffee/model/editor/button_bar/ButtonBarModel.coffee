@@ -52,6 +52,14 @@ define(["vendor/backbone"],
 				z: 0
 			}
 
+		imgConfig: (src) ->
+			{
+				src: src
+				x: window.innerWidth / 2 - 150
+				y: window.innerHeight / 2 - 80
+				z: 0
+			}
+
 		_activeIsTextbox: () ->
 			@activeComponent and @activeComponent.constructor.name is "TextBox"
 

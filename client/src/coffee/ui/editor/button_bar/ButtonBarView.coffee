@@ -29,9 +29,9 @@ define(["vendor/backbone",
 			# present picture insertion dialog
 			activeSlide = @deck.get("activeSlide")
 			if activeSlide?
-				@options.pictureGrabber.show((src) ->
+				@options.pictureGrabber.show((src) =>
 					activeSlide.add(
-						ComponentFactory.createImage(src))
+						ComponentFactory.createImage(@model.imgConfig(src)))
 				)
 
 		table: () ->

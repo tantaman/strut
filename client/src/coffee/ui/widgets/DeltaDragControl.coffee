@@ -22,18 +22,18 @@ define(() ->
 
 		mousedown: (e) ->
 			@dragging = true
+			@_startPos =
+				x: e.pageX
+				y: e.pageY
+			@$el.trigger("deltadragStart", {x: e.pageX, y: e.pageY})
 			if @stopProp
 				e.stopPropagation()
 
 		mousemove: (e) ->
 			if @dragging
-				myPos = @$el.offset()
-				pos =
-					x: e.pageX
-					y: e.pageY
-				dx = pos.x - myPos.left
-				dy = pos.y - myPos.top
-				@$el.trigger("deltadrag", [{dx: dx, dy: dy}])
+				dx = e.pageX - @_startPos.x
+				dy = e.pageY - @_startPos.y
+				@$el.trigger("deltadrag", [{dx: dx, dy: dy, x: e.pageX, y: e.pageY}])
 				if @stopProp
 					e.stopPropagation()
 

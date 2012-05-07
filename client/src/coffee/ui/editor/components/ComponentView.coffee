@@ -17,6 +17,10 @@ define(["vendor/backbone",
 			"deltadrag span[data-delta='skewY']": "skewY"
 			"deltadrag span[data-delta='rotate']": "rotate"
 			"deltadrag span[data-delta='scale']": "scale"
+			"deltadragStart span[data-delta='skewX']": "skewXStart"
+			"deltadragStart span[data-delta='skewY']": "skewYStart"
+			"deltadragStart span[data-delta='rotate']": "rotateStart"
+			"deltadragStart span[data-delta='scale']": "scaleStart"
 
 		initialize: () ->
 			@_dragging = false
@@ -42,7 +46,6 @@ define(["vendor/backbone",
 			@$el.css("color", "#" + color)
 
 		clicked: (e) ->
-			@model.set("selected", true)
 			e.stopPropagation()
 
 		removeClicked: (e) ->
@@ -50,22 +53,45 @@ define(["vendor/backbone",
 			@remove()
 
 		skewX: (e, deltas) ->
-			skew = @model.get("skewX")
-			@model.set("skewX", skew + Math.atan2(deltas.dx, 22))
+			@model.set("skewX", @_initialSkewX + Math.atan2(deltas.dx, 22))
 			@_setUpdatedTransform()
+
+		skewXStart: () ->
+			@_initialSkewX = @model.get("skewX") || 0
 
 		skewY: (e, deltas) ->
-			skew = @model.get("skewY")
-			@model.set("skewY", skewY + Math.atan2(deltas.dy, 22))
+			@model.set("skewY", @_initialSkewY + Math.atan2(deltas.dy, 22))
 			@_setUpdatedTransform()
+
+		skewYStart: () ->
+			@_initialSkewY = @model.get("skewY") || 0
 
 		rotate: (e, deltas) ->
-			rot = @model.get("rotate")
-			@model.set("rotate", rot + Math.atan2(deltas.dy, deltas.dx))
+			rot = Math.atan2(deltas.y - @_origin.y, deltas.x - @_origin.x)
+			@model.set("rotate", @_initialRotate + rot - @_rotOffset)
 			@_setUpdatedTransform()
 
-		scale: (e, deltas) ->
+		rotateStart: (e, deltas) ->
+			@_origin = 
+				x: @$el.width() / 2 + @model.get("x")
+				y: @$el.height() / 2 + @model.get("y")
+			@_rotOffset = Math.atan2(deltas.y - @_origin.y, deltas.x - @_origin.x)
+			@_initialRotate = @model.get("rotate") || 0
+			console.log @_initialRotate
 
+		scale: (e, deltas) ->
+			contentWidth = @$content.width()
+			contentHeight = @$content.height()
+			newWidth = contentWidth + deltas.dx
+			newHeight = contentHeight + deltas.dy
+
+			scale = (newWidth*newHeight) / (contentWidth*contentHeight)
+
+			@model.set("scale", scale * @_initialScale)
+			@_setUpdatedTransform()
+
+		scaleStart: () ->
+			@_initialScale = @model.get("scale") || 1
 
 		_setUpdatedTransform: () ->
 			transformStr = @buildTransformString()
@@ -74,16 +100,21 @@ define(["vendor/backbone",
 			obj[window.browserPrefix + "transform"] = transformStr
 			@$content.css(obj)
 
+			# TODO: just use the transform matrix...
 		buildTransformString: () ->
 			transformStr = ""
 			@transforms.forEach((transformName) =>
 				transformValue = @model.get(transformName)
 				if transformValue
-					transformStr += transformName + "(" + transformValue + "rad) "
+					if transformName is "scale"
+						transformStr += transformName + "(" + transformValue + ") "
+					else
+						transformStr += transformName + "(" + transformValue + "rad) "
 			)
 			transformStr
 
 		mousedown: (e) ->
+			@model.set("selected", true)
 			@_dragging = true
 			@_prevPos = {
 				x: e.pageX
