@@ -29,7 +29,20 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
     }
 
     ImpressRenderer.prototype.render = function(deckAttrs) {
-      console.log(deckAttrs);
+      var cnt, colCnt, slides,
+        _this = this;
+      slides = deckAttrs.slides;
+      colCnt = 6;
+      cnt = 0;
+      slides.each(function(slide) {
+        var x;
+        x = slide.get("x");
+        if (!(x != null)) {
+          slide.set("x", cnt * 160 + 30);
+          slide.set("y", ((cnt / colCnt) | 0) * 160 + 80);
+        }
+        return ++cnt;
+      });
       return Templates.ImpressTemplate(deckAttrs);
     };
 
