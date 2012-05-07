@@ -1,0 +1,44 @@
+.slideEditor .navbar-inner {
+	border-radius: 0px;
+}
+
+.slideEditor .navbar-inner .btn-group {
+	margin-bottom: 5px;
+	margin-right: 4px;
+}
+
+.slideEditor .navbar .caret {
+	margin-left: 2px;
+}
+
+.slideEditor div.newSlide {
+	margin-left: 25px;
+}
+
+.slideEditor .btn i {
+	margin-right: 2px;
+}
+
+.slideEditor .btn .icon-arrow-right {
+	margin-left: 8px;
+	margin-right: -6px;
+}
+
+.slideEditor .mainContent {
+	margin-top: -18px;
+}
+
+.slideEditor .slidePreviewPanel {
+	width: 150px;
+	min-height: 100%;
+	height: 100%;
+	float: left;
+	border-right: 1px solid grey;
+	background: #EEE;
+}
+
+.slideEditor .operatingTable {
+	height: 100%;
+	width: 100%;
+	margin-left: 150px;
+}

@@ -1,0 +1,76 @@
+<div class="navbar">
+  <div class="navbar-inner buttonBar">
+    <div class="container">
+    	<ul class="nav">
+            <li style="width: 120px">
+            	<div class="btn-group newSlide">
+            		<a class="btn btn-warning btn-small menuBarOption" data-option="createSlide" href="#"><i class="icon-plus"></i>New Slide</a>
+            	</div>
+            </li>
+            <li class="divider-vertical">
+            </li>
+            <li>
+            	<div class="btn-group">
+            		<a class="btn btn-inverse dropdown-toggle btn-small disabled fontButton fontFamilyBtn" data-toggle="dropdown" title="Choose the font family"><span class="text">Font</span><span class="caret"></span></a>
+            		<ul class="dropdown-menu menuBarOption" data-option="fontFamily">
+            			<li>
+            				<a href="#" data-value="Calibri">Calibri</a>
+            			</li>
+            		</ul>
+            	</div>
+            </li>
+            <li>
+            	<div class="btn-group">
+            		<a class="btn btn-small btn-inverse dropdown-toggle disabled fontButton fontSizeBtn" data-toggle="dropdown" title="Choose the font size"><span class="text">72</span>
+            			<span class="caret"></span></a>
+            		<ul class="dropdown-menu menuBarOption" data-option="fontSize">
+            			<li>
+                                    <a href="#" data-value="144">144</a>
+                                    <a href="#" data-value="96">96</a>
+                                    <a href="#" data-value="72">72</a>
+            				<a href="#" data-value="64">64</a>
+                                    <a href="#" data-value="48">48</a>
+                                    <a href="#" data-value="36">36</a>
+                                    <a href="#" data-value="24">24</a>
+            			</li>
+            		</ul>
+            	</div>
+            </li>
+            <li>
+                  <div class="color-chooser"><div></div></div>
+            </li>
+            <li class="divider-vertical">
+            </li>
+            <li>
+                  <div class="btn-group menuBarOption">
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="fontWeight" data-value="bold"><strong>B</strong></a>
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="fontStyle" data-value="italic"><em>I</em></a>
+                        <a class="btn btn-small btn-inverse underline disabled fontButton" data-option="fontDecoration" data-value="underline">U</a>
+                  </div>
+            </li>
+            <li class="divider-vertical">
+            </li>
+            <li>
+                  <div class="btn-group">
+                        <a class="btn btn-warning menuBarOption" data-option="textBox"><i class="icon-text-width"></i>Text Box</a>
+                        <a class="btn btn-warning menuBarOption" data-option="picture"><i class="icon-picture"></i>Picture</a>
+                        <a class="btn btn-warning menuBarOption" data-option="table"><i class="icon-th"></i>Table</a>
+                        <a class="btn btn-warning menuBarOption" data-option="shapes"><i class="icon-star"></i>Shapes</a>
+                  </div>
+            </li>
+            <li class="divider-vertical">
+            </li>
+        </ul>
+        <ul class="nav pull-right">
+            <li>
+                  <div class="btn-group">
+                        <a class="btn btn-danger transitionEditorBtn"><span>Transition Editor</span><i class="icon-arrow-right"></i></a>
+                  </div>
+            </li>
+        </ul>
+    </div>
+  </div>
+</div>
+
+<div class="mainContent">
+</div>

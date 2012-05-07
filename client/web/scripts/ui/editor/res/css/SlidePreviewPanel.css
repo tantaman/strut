@@ -1,0 +1,20 @@
+.slidePreviewPanel .slideSnapshot {
+	width: 120px;
+	height: 80px;
+	margin: 0 auto;
+	background: white;
+	margin-top: 20px;
+}
+
+.slidePreviewPanel .slideSnapshot .badge:before {
+	counter-increment: slideSnapshot;
+	content: counter(slideSnapshot);
+}
+
+.slidePreviewPanel {
+	overflow: scroll;
+}
+
+body {
+	counter-reset: slideSnapshot;
+}

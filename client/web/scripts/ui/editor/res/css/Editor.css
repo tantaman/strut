@@ -1,0 +1,16 @@
+.editor .btn-success > .container {
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+.editor .nav .active a:hover {
+	background-color: orange;
+}
+
+.editor .nav li.open {
+	background-color: orange;
+}
+
+.editor .perspectives-container {
+	margin-top: 40px;
+}
