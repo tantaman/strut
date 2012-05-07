@@ -3,9 +3,8 @@
 ###
 define(["vendor/backbone",
 		"./Templates",
-		"css!./res/css/PictureGrabber.css",
 		"common/Throttler"],
-(Backbone, Templates, empty, Throttler) ->
+(Backbone, Templates, Throttler) ->
 	Backbone.View.extend(
 		className: "pictureGrabber modal"
 		events:
