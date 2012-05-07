@@ -9,7 +9,9 @@ Unlike other ImpressJS authoring tools, this one runs entirely on the client sid
 
 ### Preview ###
 
-A github hosted preview is available at:
+A github hosted preview is available at: http://tantaman.github.com/Showoff/client/web/index.html
+
+The preview currently points to the development version of Showoff.
 
 ### Building ###
 
