@@ -60,7 +60,7 @@ define(["vendor/backbone",
 					# TODO: construct a better way of doing this
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
-					++cnt
+				++cnt
 
 				snapshot = new TransitionSlideSnapshot({model: slide})
 				@_snapshots.push(snapshot)

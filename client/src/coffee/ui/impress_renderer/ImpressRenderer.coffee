@@ -38,7 +38,7 @@ define(["vendor/Handlebars",
 				if not x?
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
-					++cnt
+				++cnt
 			Templates.ImpressTemplate(deckAttrs)
 
 	new ImpressRenderer()
