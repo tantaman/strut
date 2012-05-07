@@ -11,10 +11,16 @@
             </li>
             <li>
             	<div class="btn-group normalBtns">
-            		<a class="btn btn-inverse dropdown-toggle btn-small disabled fontButton fontFamilyBtn" data-toggle="dropdown" title="Choose the font family"><span class="text">Font</span><span class="caret"></span></a>
+            		<a class="btn btn-inverse dropdown-toggle btn-small disabled fontButton fontFamilyBtn" data-toggle="dropdown" title="Choose the font family"><span class="text">Lato</span><span class="caret"></span></a>
             		<ul class="dropdown-menu menuBarOption" data-option="fontFamily">
             			<li>
-            				<a href="#" data-value="Calibri">Calibri</a>
+                                    <a href="#" data-value="'Lato', sans-serif">Lato</a>
+                                    <a href="#" data-value="'Ubuntu', sans-serif">Ubuntu</a>
+                                    <a href="#" data-value="'Abril Fatface', cursive">Abril</a>
+                                    <a href="#" data-value="'Hammersmith One', sans-serif">Hammersmith One</a>
+                                    <a href="#" data-value="'Fredoka One', cursive">Fredoka One</a>
+                                    <a href="#" data-value="'Gorditas', cursive">Gorditas</a>
+                                    <a href="#" data-value="'Press Start 2P', cursive">Press Start 2P</a>
             			</li>
             		</ul>
             	</div>

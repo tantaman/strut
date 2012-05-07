@@ -73,6 +73,7 @@ define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/pres
       return this.model.on("change:fontFamily", this._fontFamilyChanged, this);
     },
     _fontFamilyChanged: function(model, value) {
+      value = value.substr(value.indexOf("'") + 1, value.lastIndexOf("'") - 1);
       return this.$el.find(".fontFamilyBtn .text").text(value);
     },
     _fontSizeChanged: function(model, value) {

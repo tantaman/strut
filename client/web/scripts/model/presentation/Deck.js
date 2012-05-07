@@ -69,6 +69,7 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       slides.each(function(slide) {
         return slides.remove(slide);
       });
+      this.set("activeSlide", null);
       rawObj.slides.forEach(function(slide) {
         return slides.add(slide);
       });

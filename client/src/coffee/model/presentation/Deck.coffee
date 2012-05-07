@@ -63,6 +63,7 @@ define(["common/Calcium", "./SlideCollection",
 			slides.each((slide) ->
 				slides.remove(slide)
 			)
+			@set("activeSlide", null)
 
 			rawObj.slides.forEach((slide) ->
 				slides.add(slide)

@@ -69,6 +69,7 @@ define(["vendor/backbone",
 			@model.on("change:fontFamily", @_fontFamilyChanged, @)
 
 		_fontFamilyChanged: (model, value) ->
+			value = value.substr(value.indexOf("'")+1, value.lastIndexOf("'")-1)
 			@$el.find(".fontFamilyBtn .text").text(value)
 
 		_fontSizeChanged: (model, value) ->
