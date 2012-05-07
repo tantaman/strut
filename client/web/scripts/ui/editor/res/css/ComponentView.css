@@ -1,0 +1,30 @@
+.component .label {
+	visibility: hidden;
+}
+
+.component.selected .label {
+	visibility: visible;
+}
+
+.component .skewX {
+	position: absolute;
+	left: 40%;
+	top: -20px;
+	cursor: w-resize;
+}
+
+.component .skewY {
+	position: absolute;
+	left: -35px;
+	top: 40%;
+	cursor: s-resize;
+	-moz-transform: rotate(-90deg);
+	-webkit-transform: rotate(-90deg);
+}
+
+.component .rotate {
+	position: absolute;
+	right: -45px;
+	top: 50%;
+	cursor: n-resize;
+}
