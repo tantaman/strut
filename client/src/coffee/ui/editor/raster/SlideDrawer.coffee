@@ -57,9 +57,8 @@ define(["common/Throttler"],
 
 				switch type
 					when "TextBox" then @paintTextBox(component)
-					when "Image" then @paintImage(component)
+					when "ImageModel" then @paintImage(component)
 					when "Table" then @paintTable(component)
-					when "Image" then @paintImage(component)
 				@g2d.restore()
 			)
 
@@ -68,11 +67,18 @@ define(["common/Throttler"],
 			@g2d.font = textBox.get("size")*@scale + "px " + textBox.get("family")
 			@g2d.fillText(textBox.get("text"), textBox.get("x") * @scale, textBox.get("y") * @scale + textBox.get("size") * @scale)
 
-		paintImage: () ->
+		paintImage: (imageModel) ->
+			image = new Image()
+			# this should be cached...  or should we cache the image objects
+			# ourselves?
+			image.onload = () =>
+				@g2d.drawImage(image, imageModel.get("x") * @scale,
+									  imageModel.get("y") * @scale,
+									  image.naturalWidth * @scale,
+									  image.naturalHeight * @scale)
+			image.src = imageModel.get("src")
 
 		paintTable: () ->
-
-		paintImage: () ->
 
 		dispose: () ->
 			@model.off("change", @repaint, @)

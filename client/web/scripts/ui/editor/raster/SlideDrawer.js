@@ -68,14 +68,11 @@ define(["common/Throttler"], function(Throttler) {
           case "TextBox":
             _this.paintTextBox(component);
             break;
-          case "Image":
+          case "ImageModel":
             _this.paintImage(component);
             break;
           case "Table":
             _this.paintTable(component);
-            break;
-          case "Image":
-            _this.paintImage(component);
         }
         return _this.g2d.restore();
       });
@@ -87,11 +84,17 @@ define(["common/Throttler"], function(Throttler) {
       return this.g2d.fillText(textBox.get("text"), textBox.get("x") * this.scale, textBox.get("y") * this.scale + textBox.get("size") * this.scale);
     };
 
-    SlideDrawer.prototype.paintImage = function() {};
+    SlideDrawer.prototype.paintImage = function(imageModel) {
+      var image,
+        _this = this;
+      image = new Image();
+      image.onload = function() {
+        return _this.g2d.drawImage(image, imageModel.get("x") * _this.scale, imageModel.get("y") * _this.scale, image.naturalWidth * _this.scale, image.naturalHeight * _this.scale);
+      };
+      return image.src = imageModel.get("src");
+    };
 
     SlideDrawer.prototype.paintTable = function() {};
-
-    SlideDrawer.prototype.paintImage = function() {};
 
     SlideDrawer.prototype.dispose = function() {
       return this.model.off("change", this.repaint, this);
