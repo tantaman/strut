@@ -1,4 +1,4 @@
-Showoff
+Strut
 =======
 
 #### GUI / Authoring Tool for ImpressJS ####
