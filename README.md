@@ -18,24 +18,24 @@ Current features:
 
 ### Preview ###
 
-A github hosted preview is available at: http://tantaman.github.com/Showoff/client/web/index.html
+A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
 
-The preview currently points to the development version of Showoff.
+The preview currently points to the development version of Sturt.
 
 ### Building ###
 
-Most of Showoff is written in Coffeescript and uses precompiled templates for HTML rendering.
+Most of Strut is written in Coffeescript and uses precompiled templates for HTML rendering.
 
 To compile the CoffeeScript
 
 1. Install CoffeeScript (npm install coffeescript)
-2. cd to the root Showoff directory
+2. cd to the root Strut directory
 3. run `rake compileCoffee[w]`  (omit [w] to not watch for changes)
 
 To compile the templates
 
 1. Install Handlebars (npm install handlebars)
-2. cd to the root Showoff directory
+2. cd to the root Strut directory
 3. run `rake compileTpls`
 
 ### Contributing ###
