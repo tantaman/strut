@@ -6,6 +6,12 @@ Strut
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
 I hope this project can also serve as an example of a browser based rich client as the project matures.
 
+### Preview ###
+
+A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
+
+The preview currently points to the development version of Sturt.
+
 Current features:
 
  * Slide creation
@@ -15,12 +21,6 @@ Current features:
  * Undo/Redo for some operations
  * Transition configuration
  * ImpreeJS preview generation
-
-### Preview ###
-
-A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
-
-The preview currently points to the development version of Sturt.
 
 ### Building ###
 
@@ -37,6 +37,8 @@ To compile the templates
 1. Install Handlebars (npm install handlebars)
 2. cd to the root Strut directory
 3. run `rake compileTpls`
+
+Navigate to client/web/index.html to view Strut.
 
 ### Contributing ###
 
