@@ -9,7 +9,9 @@ I hope this project can also serve as an example of a browser based rich client 
 ### Prior Art ###
 
 Whats the difference between ```Strut``` and ```Impressionist```?
-From a developer's perspective, everything.  In Strut there is an object for each major component.  The 
+From a developer's perspective, everything.  
+
+In ```Strut``` there is an object for each major component.  The 
 [Slides](https://github.com/tantaman/Strut/blob/master/client/src/coffee/model/presentation/Slide.coffee), 
 [SlidePreviews](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/TransitionSlideSnapshot.coffee), 
 [TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/TransitionEditor.coffee), 
@@ -17,7 +19,9 @@ From a developer's perspective, everything.  In Strut there is an object for eac
 etc. all have their own objects so its easy to
 track down and make changes to a component.  Strut uses [RequireJS](http://requirejs.org/) to keep source files small and
 focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for Strut's data model and serialization as well as for binding events in the 
-view layers.  In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/client/web/scripts/ui/editor/res/templates) is also 
+view layers.  
+
+In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/client/web/scripts/ui/editor/res/templates) is also 
 split up by component and placed in [HandlebarJS](http://handlebarsjs.com/) template files. 
 
 ### Preview ###
