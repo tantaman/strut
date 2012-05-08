@@ -6,6 +6,15 @@ Strut
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
 I hope this project can also serve as an example of a browser based rich client as the project matures.
 
+### Prior Art ###
+
+Whats the difference between ```Strut``` and ```Impressionist```?
+From a developer's perspective, everything.  In Strut there is an object for each major component.  The 
+Slides, SlidePreviews, TransitionEditor, SlideEditor all have their own objects so its easy to
+track down and make changes to a component.  Strut uses RequireJS to keep source files small and
+focused.  BackboneJS is used for Strut's data model and serialization as well as for binding events in the 
+view layers.
+
 ### Preview ###
 
 A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
@@ -53,6 +62,7 @@ in order to package related markup and backing UI (not model) code into modules.
 
 ### Acknowledgements ###
 
+* Impressionist https://github.com/hsivaramx/Impressionist
 * ImpreeJS (of course) https://github.com/bartaz/impress.js/
 * BackboneJS http://documentcloud.github.com/backbone/
 * CoffeeScript http://coffeescript.org/
