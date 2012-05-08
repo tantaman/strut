@@ -47,8 +47,8 @@ define(["vendor/backbone"],
 				style: @get("fontStyle")
 				weight: @get("fontWeight")
 				decoration: @get("fontDecoration")
-				x: window.innerWidth / 2 - 150 # ugh.. magic h4x
-				y: window.innerHeight / 2 - 80
+				x: Math.min(1024, window.innerWidth) / 2 - 150 # ugh.. magic h4x
+				y: Math.min(768, window.innerHeight) / 2 - 80
 				z: 0
 			}
 

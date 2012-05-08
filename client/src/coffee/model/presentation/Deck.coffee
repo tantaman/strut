@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone", "./SlideCollection",
+define(["common/Calcium", "./SlideCollection",
 		"./Slide",
 		"model/common_application/UndoHistory"],
 (Backbone, SlideCollection, Slide, UndoHistory) ->
@@ -58,6 +58,19 @@ define(["vendor/backbone", "./SlideCollection",
 				@_activeSlideChanging(value)
 			Backbone.Model.prototype.set.apply(this, arguments)
 
+		import: (rawObj) ->
+			slides = @get("slides")
+			slides.each((slide) ->
+				slides.remove(slide)
+			)
+			@set("activeSlide", null)
+
+			rawObj.slides.forEach((slide) ->
+				slides.add(slide)
+			)
+
+			console.log "Importing"
+
 		_activeSlideChanging: (newActive) ->
 			lastActive = @get("activeSlide")
 			if lastActive?
@@ -75,8 +88,6 @@ define(["vendor/backbone", "./SlideCollection",
 					@set("activeSlide", collection.at(options.index - 1))
 				else
 					@set("activeSlide", null)
-			console.log @
-			console.log @get("activeSlide")
 
 		removeSlide: (slide) ->
 			action = new RemoveSlideAction(@, slide)

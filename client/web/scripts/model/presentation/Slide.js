@@ -3,10 +3,26 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["model/geom/SpatialObject"], function(SpatialObject) {
+define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(SpatialObject, CompnentFactory) {
   return SpatialObject.extend({
     initialize: function() {
-      this.set("components", []);
+      var components, hydratedComps,
+        _this = this;
+      components = this.get("components");
+      if (!(components != null)) {
+        this.set("components", []);
+      } else {
+        hydratedComps = [];
+        this.set("components", hydratedComps);
+        components.forEach(function(rawComp) {
+          switch (rawComp.type) {
+            case "ImageModel":
+              return hydratedComps.push(CompnentFactory.createImage(rawComp));
+            case "TextBox":
+              return hydratedComps.push(CompnentFactory.createTextBox(rawComp));
+          }
+        });
+      }
       return this.on("unrender", this._unrendered, this);
     },
     _unrendered: function() {
@@ -50,6 +66,9 @@ define(["model/geom/SpatialObject"], function(SpatialObject) {
         this.trigger("change:activeComponent", this, null);
         return this._lastSelection = null;
       }
-    }
+    },
+    constructor: function Slide() {
+			SpatialObject.prototype.constructor.apply(this, arguments);
+		}
   });
 });

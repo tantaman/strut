@@ -1,11 +1,25 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["model/geom/SpatialObject"],
-(SpatialObject) ->
+define(["model/geom/SpatialObject",
+		"./components/ComponentFactory"],
+(SpatialObject, CompnentFactory) ->
 	SpatialObject.extend(
 		initialize: () ->
-			@set("components", [])
+			components = @get("components")
+			if not components?
+				@set("components", [])
+			else
+				hydratedComps = []
+				@set("components", hydratedComps)
+				components.forEach((rawComp) =>
+					switch rawComp.type
+						when "ImageModel"
+							hydratedComps.push(CompnentFactory.createImage(rawComp))
+						when "TextBox"
+							hydratedComps.push(CompnentFactory.createTextBox(rawComp))
+				)
+
 			@on("unrender", @_unrendered, @)
 
 		_unrendered: () ->
@@ -47,5 +61,9 @@ define(["model/geom/SpatialObject"],
 			else
 				@trigger("change:activeComponent", @, null)
 				@_lastSelection = null
+
+		constructor: `function Slide() {
+			SpatialObject.prototype.constructor.apply(this, arguments);
+		}`
 	)
 )

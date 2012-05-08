@@ -5,6 +5,9 @@
 
 define(["./Component"], function(Component) {
   return Component.extend({
+    initialize: function() {
+      return this.set("type", "ImageModel");
+    },
     constructor: function ImageModel() {
 			Component.prototype.constructor.apply(this, arguments);
 		}

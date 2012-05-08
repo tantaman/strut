@@ -8,7 +8,7 @@ define(["common/MapResolver"],
 			slideEditor:
 				buttonBar:
 					fontSize: 72
-					fontFamily: "Calibri"
+					fontFamily: "'Lato', sans-serif"
 					fontColor: "grey"
 					fontStyle: ""
 					fontWeight: ""

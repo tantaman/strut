@@ -38,6 +38,15 @@
                         <li data-option="preview"><a href="#">Preview Show</a></li>
                 </ul>
             </li>
+            <li class="dropdown active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Slideshow<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li data-option="exportJSON"><a href="#">Export to JSON</a></li>
+                    <li data-option="importJSON"><a href="#">Import from JSON</a></li>
+                </ul>
+            </li>
      	</ul>
     </div>
   </div>

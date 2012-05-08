@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone", "./Slide"],
+define(["common/Calcium", "./Slide"],
 (Backbone, Slide) ->
 	Backbone.Collection.extend(
 		model: Slide

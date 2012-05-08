@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideCollection", "./Slide", "model/common_application/UndoHistory"], function(Backbone, SlideCollection, Slide, UndoHistory) {
+define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_application/UndoHistory"], function(Backbone, SlideCollection, Slide, UndoHistory) {
   var NewSlideAction, RemoveSlideAction;
   NewSlideAction = function(deck) {
     this.deck = deck;
@@ -63,6 +63,18 @@ define(["vendor/backbone", "./SlideCollection", "./Slide", "model/common_applica
       if (key === "activeSlide") this._activeSlideChanging(value);
       return Backbone.Model.prototype.set.apply(this, arguments);
     },
+    "import": function(rawObj) {
+      var slides;
+      slides = this.get("slides");
+      slides.each(function(slide) {
+        return slides.remove(slide);
+      });
+      this.set("activeSlide", null);
+      rawObj.slides.forEach(function(slide) {
+        return slides.add(slide);
+      });
+      return console.log("Importing");
+    },
     _activeSlideChanging: function(newActive) {
       var lastActive;
       lastActive = this.get("activeSlide");
@@ -75,15 +87,13 @@ define(["vendor/backbone", "./SlideCollection", "./Slide", "model/common_applica
       console.log("Slide removed");
       if (this.get("activeSlide") === slide) {
         if (options.index < collection.length) {
-          this.set("activeSlide", collection.at(options.index));
+          return this.set("activeSlide", collection.at(options.index));
         } else if (options.index > 0) {
-          this.set("activeSlide", collection.at(options.index - 1));
+          return this.set("activeSlide", collection.at(options.index - 1));
         } else {
-          this.set("activeSlide", null);
+          return this.set("activeSlide", null);
         }
       }
-      console.log(this);
-      return console.log(this.get("activeSlide"));
     },
     removeSlide: function(slide) {
       var action;
