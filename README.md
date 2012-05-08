@@ -17,12 +17,12 @@ In ```Strut``` there is an object for each major component.  The
 [TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/TransitionEditor.coffee), 
 [SlideEditor](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/SlideEditor.coffee),
 etc. all have their own objects so its easy to
-track down and make changes to a component.  Strut uses [RequireJS](http://requirejs.org/) to keep source files small and
-focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for Strut's data model and serialization as well as for binding events in the 
+track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
+focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
 view layers.  
 
 In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/client/web/scripts/ui/editor/res/templates) is also 
-split up by component and placed in [HandlebarJS](http://handlebarsjs.com/) template files. 
+split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
 
 ### Preview ###
 
