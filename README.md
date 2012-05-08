@@ -29,13 +29,13 @@ Most of Strut is written in Coffeescript and uses precompiled templates for HTML
 To compile the CoffeeScript
 
 1. Install CoffeeScript (npm install coffeescript)
-2. cd to the root Strut directory
+2. cd to the Strut/client directory
 3. run `rake compileCoffee[w]`  (omit [w] to not watch for changes)
 
 To compile the templates
 
 1. Install Handlebars (npm install handlebars)
-2. cd to the root Strut directory
+2. cd to the Strut/client directory
 3. run `rake compileTpls`
 
 Navigate to client/web/index.html to view Strut.
