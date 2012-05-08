@@ -28,7 +28,7 @@ split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) tem
 
 A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
 
-The preview currently points to the development version of Sturt.
+The preview currently points to the development version of Strut.
 
 Current features:
 
@@ -38,7 +38,7 @@ Current features:
  * Fonts and font styles
  * Undo/Redo for some operations
  * Transition configuration
- * ImpreeJS preview generation
+ * ImpressJS preview generation
 
 ### Building ###
 
@@ -72,7 +72,7 @@ in order to package related markup and backing UI (not model) code into modules.
 ### Acknowledgements ###
 
 * Impressionist https://github.com/hsivaramx/Impressionist
-* ImpreeJS (of course) https://github.com/bartaz/impress.js/
+* ImpressJS (of course) https://github.com/bartaz/impress.js/
 * BackboneJS http://documentcloud.github.com/backbone/
 * CoffeeScript http://coffeescript.org/
 * RequireJS http://requirejs.org/
