@@ -10,7 +10,7 @@ myDir = Dir.pwd
 
 
 task :compileTpls, :pretty do |t, args|
-	FileList[myDir + "/web/scripts/ui/**/res/templates"].each do |filename|
+	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
 		puts "Processing: #{filename}"
 		compiledTemplates = '''
@@ -38,8 +38,9 @@ task :compileTpls, :pretty do |t, args|
 			end
   		end
 
-  		puts "#{filename}/../../Templates.js"
-  		File.open("#{filename}/../../Templates.js", 'w') {|f|
+  		destination = filename.sub("/src/ui/", "/web/scripts/ui/")
+  		puts "#{destination}/../../Templates.js"
+  		File.open("#{destination}/../../Templates.js", 'w') {|f|
   			f.write(compiledTemplates)
   			f.write("\n}});");
   		}
@@ -66,7 +67,7 @@ task :compileCoffee, :watch do |t,args|
 		watch = "--watch"
 	end
 
-	system %{coffee #{watch} -b --compile --output web/scripts/ src/coffee/}
+	system %{coffee #{watch} -b --compile --output web/scripts/ src/}
 end
 
 task :refactor, :source, :destination do |t, args|

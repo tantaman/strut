@@ -63,7 +63,6 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
       if (this._lastSelection) return this._lastSelection.set("selected", false);
     },
     selectionChanged: function(model, selected) {
-      console.log("SELECTION CHANGED");
       if (selected) {
         if (this._lastSelection !== model) {
           this.attributes.components.forEach(function(component) {

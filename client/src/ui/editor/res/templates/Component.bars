@@ -1,0 +1,6 @@
+<div class="content">{{text}}</div>
+<span class="topLabel label" data-delta="skewX">Skew X</span>
+<span class="leftLabel label" data-delta="skewY">Skew Y</span>
+<span class="rightLabel label" data-delta="rotate">Rotate</span>
+<span class="scale label" data-delta="scale">Scale</span>
+<span class="close-btn-red-20 removeBtn" title="Remove"></span>

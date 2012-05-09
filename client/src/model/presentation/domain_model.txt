@@ -1,0 +1,28 @@
+spatialObject {
+	transformations (skew, rotate, scale)
+	position (x,y,z)
+}
+
+slide < spatialObject: {
+	background
+	components
+	active component
+}
+
+component < spatialObject: {
+	background
+	color
+	font attributes
+}
+
+fontAttributes {
+	weight
+	style
+	size
+}
+
+deck {
+	name
+	slides[]
+	active slide
+}
