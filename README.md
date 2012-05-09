@@ -12,16 +12,16 @@ Whats the difference between ```Strut``` and ```Impressionist```?
 From a developer's perspective, everything.  
 
 In ```Strut``` there is an object for each major component.  The 
-[Slides](https://github.com/tantaman/Strut/blob/master/client/src/coffee/model/presentation/Slide.coffee), 
-[SlidePreviews](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/TransitionSlideSnapshot.coffee), 
-[TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/TransitionEditor.coffee), 
-[SlideEditor](https://github.com/tantaman/Strut/blob/master/client/src/coffee/ui/editor/SlideEditor.coffee),
+[Slides](https://github.com/tantaman/Strut/blob/master/client/src/model/presentation/Slide.coffee), 
+[SlidePreviews](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/TransitionSlideSnapshot.coffee), 
+[TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/TransitionEditor.coffee), 
+[SlideEditor](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/SlideEditor.coffee),
 etc. all have their own objects so its easy to
 track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
 focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
 view layers.  
 
-In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/client/web/scripts/ui/editor/res/templates) is also 
+In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/client/src/ui/editor/res/templates) is also 
 split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
 
 ### Preview ###
@@ -62,11 +62,11 @@ Navigate to client/web/index.html to view Strut.
 
 Here is the basic layout of the source:
 
-* Presentation Model: src/coffee/model/presentation
-* Editor UI Layer: src/coffee/ui/editor
-* Model -> ImpressJS Rendering: src/coffee/ui/impress_renderer
+* Presentation Model: src/model/presentation
+* Editor UI Layer: src/ui/editor
+* Model -> ImpressJS Rendering: src/ui/impress_renderer
 
-templates for UI components are contained in web/scripts/ui/COMPONENT_NAME/res/templates
+templates for UI components are contained in src/ui/COMPONENT_NAME/res/templates
 in order to package related markup and backing UI (not model) code into modules.
 
 ### Acknowledgements ###
