@@ -3,13 +3,17 @@
 	height: 100%;
 	position: relative;
 	z-index: 500;
+	counter-reset: transSlide;
+}
+
+.transitionEditor .transitionSlides {
+	height: 100%;
+	width: 100%;
+	position: relative;
+	z-index: -1;
 }
 
 .transitionEditor .transitionSlideSnapshot .badge:before {
-	counter-increment: transitionSlideSnapshot;
-	content: counter(transitionSlideSnapshot);
-}
-
-body {
-	counter-reset: transitionSlideSnapshot;
+	counter-increment: transSlide;
+	content: counter(transSlide);
 }

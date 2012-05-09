@@ -17,7 +17,6 @@ define(["common/Throttler"],
 			@size = 
 				width: @g2d.canvas.width
 				height: @g2d.canvas.height
-			console.log @size
 			@throttler = new Throttler(600, @)
 			@scale = @size.width / haxTempSlideSize.width
 

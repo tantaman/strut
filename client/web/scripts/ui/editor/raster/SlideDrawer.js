@@ -28,7 +28,6 @@ define(["common/Throttler"], function(Throttler) {
         width: this.g2d.canvas.width,
         height: this.g2d.canvas.height
       };
-      console.log(this.size);
       this.throttler = new Throttler(600, this);
       this.scale = this.size.width / haxTempSlideSize.width;
     }

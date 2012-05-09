@@ -12,12 +12,19 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./re
     },
     scale: 1024 / 150,
     initialize: function() {
+      var _this = this;
       this.name = "Transition Editor";
-      return this._snapshots = [];
+      this._snapshots = [];
+      return $(window).resize(function() {
+        return _this.resized();
+      });
     },
     show: function() {
       this.$el.removeClass("disp-none");
       return this._partialRender();
+    },
+    resized: function() {
+      return this.$el.css("height", window.innerHeight - 80);
     },
     hide: function() {
       this._disposeOldView();
@@ -49,6 +56,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./re
     render: function() {
       this.$el.html(Templates.TransitionEditor());
       this._partialRender();
+      this.resized();
       return this.$el;
     },
     _partialRender: function() {

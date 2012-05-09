@@ -16,10 +16,18 @@ define(["vendor/backbone",
 		initialize: () ->
 			@name = "Transition Editor"
 			@_snapshots = []
+			$(window).resize(() =>
+				@resized()
+			)
 			
 		show: () ->
 			@$el.removeClass("disp-none")
 			@_partialRender()
+
+		resized: () ->
+			# TODO: figure out the flow problems
+			# our content is all absolute so that is one issue.
+			@$el.css("height", window.innerHeight - 80)
 
 		hide: () ->
 			@_disposeOldView()
@@ -46,6 +54,7 @@ define(["vendor/backbone",
 		render: () ->
 			@$el.html(Templates.TransitionEditor())
 			@_partialRender()
+			@resized()
 			@$el
 
 		_partialRender: () ->
