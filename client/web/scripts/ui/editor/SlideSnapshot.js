@@ -20,6 +20,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot", "./rast
     },
     remove: function() {
       this.slideDrawer.dispose();
+      this.off();
       return Backbone.View.prototype.remove.apply(this, arguments);
     },
     render: function() {

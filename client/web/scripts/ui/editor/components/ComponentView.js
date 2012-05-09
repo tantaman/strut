@@ -126,6 +126,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return transformStr;
     },
     mousedown: function(e) {
+      console.log("Setting self to selected");
       this.model.set("selected", true);
       this._dragging = true;
       return this._prevPos = {

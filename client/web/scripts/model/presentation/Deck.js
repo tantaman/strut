@@ -64,15 +64,13 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       return Backbone.Model.prototype.set.apply(this, arguments);
     },
     "import": function(rawObj) {
-      var slides;
+      var activeSlide, slides;
       slides = this.get("slides");
-      slides.each(function(slide) {
-        return slides.remove(slide);
-      });
+      activeSlide = this.get("activeSlide");
+      if (activeSlide != null) activeSlide.unselectComponents();
       this.set("activeSlide", null);
-      rawObj.slides.forEach(function(slide) {
-        return slides.add(slide);
-      });
+      slides.reset(rawObj.slides);
+      this.set("activeSlide", slides.at(0));
       return console.log("Importing");
     },
     _activeSlideChanging: function(newActive) {

@@ -23,7 +23,7 @@ define(["common/Throttler"], function(Throttler) {
     function SlideDrawer(model, g2d) {
       this.model = model;
       this.g2d = g2d;
-      this.model.on("change", this.repaint, this);
+      this.model.on("contentsChanged", this.repaint, this);
       this.size = {
         width: this.g2d.canvas.width,
         height: this.g2d.canvas.height
@@ -103,7 +103,7 @@ define(["common/Throttler"], function(Throttler) {
     SlideDrawer.prototype.paintTable = function() {};
 
     SlideDrawer.prototype.dispose = function() {
-      return this.model.off("change", this.repaint, this);
+      return this.model.off(null, null, this);
     };
 
     return SlideDrawer;

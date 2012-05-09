@@ -15,9 +15,13 @@ define(["model/geom/SpatialObject",
 				components.forEach((rawComp) =>
 					switch rawComp.type
 						when "ImageModel"
-							hydratedComps.push(CompnentFactory.createImage(rawComp))
+							comp = CompnentFactory.createImage(rawComp)
+							hydratedComps.push(comp)
 						when "TextBox"
-							hydratedComps.push(CompnentFactory.createTextBox(rawComp))
+							comp = CompnentFactory.createTextBox(rawComp)
+							hydratedComps.push(comp)
+
+					@_registerWithComponent(comp)
 				)
 
 			@on("unrender", @_unrendered, @)
@@ -27,29 +31,34 @@ define(["model/geom/SpatialObject",
 				component.trigger("unrender", true)
 			)
 
-		add: (component) ->
-			@attributes.components.push(component)
+		_registerWithComponent: (component) ->
 			component.on("dispose", @remove, @)
 			component.on("change:selected", @selectionChanged, @)
 			component.on("change", @componentChanged, @)
-			@trigger("change")
+
+		add: (component) ->
+			@attributes.components.push(component)
+			@_registerWithComponent(component)
+			@trigger("contentsChanged")
 			@trigger("change:components.add", @, component)
 
 		remove: (component) ->
 			idx = @attributes.components.indexOf(component)
 			if idx != -1
 				@attributes.components.splice(idx, 1)
-				@trigger("change")
+				@trigger("contentsChanged")
 				@trigger("change:components.remove", @, component)
+				component.off(null, null, @)
 
 		componentChanged: () ->
-			@trigger("change")
+			@trigger("contentsChanged")
 
 		unselectComponents: () ->
 			if @_lastSelection
 				@_lastSelection.set("selected", false)
 
 		selectionChanged: (model, selected) ->
+			console.log "SELECTION CHANGED"
 			if selected
 				if @_lastSelection isnt model
 					@attributes.components.forEach((component) ->

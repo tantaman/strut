@@ -15,12 +15,17 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
         hydratedComps = [];
         this.set("components", hydratedComps);
         components.forEach(function(rawComp) {
+          var comp;
           switch (rawComp.type) {
             case "ImageModel":
-              return hydratedComps.push(CompnentFactory.createImage(rawComp));
+              comp = CompnentFactory.createImage(rawComp);
+              hydratedComps.push(comp);
+              break;
             case "TextBox":
-              return hydratedComps.push(CompnentFactory.createTextBox(rawComp));
+              comp = CompnentFactory.createTextBox(rawComp);
+              hydratedComps.push(comp);
           }
+          return _this._registerWithComponent(comp);
         });
       }
       return this.on("unrender", this._unrendered, this);
@@ -30,12 +35,15 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
         return component.trigger("unrender", true);
       });
     },
-    add: function(component) {
-      this.attributes.components.push(component);
+    _registerWithComponent: function(component) {
       component.on("dispose", this.remove, this);
       component.on("change:selected", this.selectionChanged, this);
-      component.on("change", this.componentChanged, this);
-      this.trigger("change");
+      return component.on("change", this.componentChanged, this);
+    },
+    add: function(component) {
+      this.attributes.components.push(component);
+      this._registerWithComponent(component);
+      this.trigger("contentsChanged");
       return this.trigger("change:components.add", this, component);
     },
     remove: function(component) {
@@ -43,17 +51,19 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
       idx = this.attributes.components.indexOf(component);
       if (idx !== -1) {
         this.attributes.components.splice(idx, 1);
-        this.trigger("change");
-        return this.trigger("change:components.remove", this, component);
+        this.trigger("contentsChanged");
+        this.trigger("change:components.remove", this, component);
+        return component.off(null, null, this);
       }
     },
     componentChanged: function() {
-      return this.trigger("change");
+      return this.trigger("contentsChanged");
     },
     unselectComponents: function() {
       if (this._lastSelection) return this._lastSelection.set("selected", false);
     },
     selectionChanged: function(model, selected) {
+      console.log("SELECTION CHANGED");
       if (selected) {
         if (this._lastSelection !== model) {
           this.attributes.components.forEach(function(component) {

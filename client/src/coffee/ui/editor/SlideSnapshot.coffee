@@ -23,6 +23,7 @@ define(["vendor/backbone",
 
 		remove: () ->
 			@slideDrawer.dispose()
+			@off()
 			Backbone.View.prototype.remove.apply(@, arguments)
 
 		render: () ->

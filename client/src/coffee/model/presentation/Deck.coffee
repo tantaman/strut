@@ -60,14 +60,13 @@ define(["common/Calcium", "./SlideCollection",
 
 		import: (rawObj) ->
 			slides = @get("slides")
-			slides.each((slide) ->
-				slides.remove(slide)
-			)
+			activeSlide = @get("activeSlide")
+			if activeSlide?
+				activeSlide.unselectComponents()
 			@set("activeSlide", null)
 
-			rawObj.slides.forEach((slide) ->
-				slides.add(slide)
-			)
+			slides.reset(rawObj.slides)
+			@set("activeSlide", slides.at(0))
 
 			console.log "Importing"
 

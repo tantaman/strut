@@ -122,6 +122,7 @@ define(["vendor/backbone",
 			transformStr
 
 		mousedown: (e) ->
+			console.log "Setting self to selected"
 			@model.set("selected", true)
 			@_dragging = true
 			@_prevPos = {

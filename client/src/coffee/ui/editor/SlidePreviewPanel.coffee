@@ -11,6 +11,7 @@ define(["vendor/backbone",
 			slideCollection = @model.get("slides")
 			slideCollection.on("add", @slideCreated, @)
 			slideCollection.on("remove", @slideRemoved, @)
+			slideCollection.on("reset", @slidesReset, @)
 			@snapshots = []
 			@model.on("change:activeSlide", @activeSlideChanged, @)
 
@@ -24,11 +25,21 @@ define(["vendor/backbone",
 			if slide is @model.get("activeSlide")
 				@activeSlideChanged(@model, slide)
 
+		slidesReset: (newSlides) ->
+			@snapshots.forEach((snapshot) ->
+				snapshot.remove()
+			)
+			@snapshots = []
+			newSlides.each((slide) =>
+				@slideCreated(slide)
+			)
+
 		slideRemoved: (slide, collection, options) ->
 			@snapshots[options.index].remove()
 			@snapshots.splice(options.index, 1)
 
 		slideClicked: (snapshot) ->
+			console.log "Changing active slide"
 			@model.set("activeSlide", snapshot.model)
 
 		slideRemoveClicked: (snapshot) ->

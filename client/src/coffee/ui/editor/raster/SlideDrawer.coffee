@@ -13,7 +13,7 @@ define(["common/Throttler"],
 			height: 768
 
 		constructor: (@model, @g2d) ->
-			@model.on("change", @repaint, @)
+			@model.on("contentsChanged", @repaint, @)
 			@size = 
 				width: @g2d.canvas.width
 				height: @g2d.canvas.height
@@ -81,6 +81,6 @@ define(["common/Throttler"],
 		paintTable: () ->
 
 		dispose: () ->
-			@model.off("change", @repaint, @)
+			@model.off(null, null, @)
 
 )

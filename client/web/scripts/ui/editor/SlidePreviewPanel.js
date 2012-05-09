@@ -11,6 +11,7 @@ define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.c
       slideCollection = this.model.get("slides");
       slideCollection.on("add", this.slideCreated, this);
       slideCollection.on("remove", this.slideRemoved, this);
+      slideCollection.on("reset", this.slidesReset, this);
       this.snapshots = [];
       return this.model.on("change:activeSlide", this.activeSlideChanged, this);
     },
@@ -27,11 +28,22 @@ define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.c
         return this.activeSlideChanged(this.model, slide);
       }
     },
+    slidesReset: function(newSlides) {
+      var _this = this;
+      this.snapshots.forEach(function(snapshot) {
+        return snapshot.remove();
+      });
+      this.snapshots = [];
+      return newSlides.each(function(slide) {
+        return _this.slideCreated(slide);
+      });
+    },
     slideRemoved: function(slide, collection, options) {
       this.snapshots[options.index].remove();
       return this.snapshots.splice(options.index, 1);
     },
     slideClicked: function(snapshot) {
+      console.log("Changing active slide");
       return this.model.set("activeSlide", snapshot.model);
     },
     slideRemoveClicked: function(snapshot) {
