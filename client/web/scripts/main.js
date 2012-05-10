@@ -6,7 +6,6 @@
 var continuation;
 
 requirejs.config({
-  "packages": ["ui/editor", "model/presentation"],
   paths: {
     "css": "vendor/amd_plugins/css",
     "text": "vendor/amd_plugins/text"
@@ -43,7 +42,7 @@ requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultS
 });
 
 continuation = function() {
-  return requirejs(["ui/editor", "model/presentation"], function(Editor, presentation) {
+  return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
     var deck, editor;
     window.slideConfig = {
       size: {
@@ -51,7 +50,7 @@ continuation = function() {
         height: 768
       }
     };
-    deck = new presentation.Deck();
+    deck = new Deck();
     editor = new Editor({
       model: deck
     });

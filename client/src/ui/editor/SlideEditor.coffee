@@ -5,7 +5,7 @@ define(["vendor/backbone", "./Templates",
 		"./SlidePreviewPanel",
 		"./OperatingTable",
 		"common/EventEmitter",
-		"css!./res/css/SlideEditor",
+		"css!./res/css/SlideEditor.css",
 		"./button_bar/ButtonBarView",
 		"ui/widgets/PictureGrabber"],
 (Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber) ->

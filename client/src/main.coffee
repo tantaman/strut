@@ -2,7 +2,6 @@
 @author Tantaman
 ###
 requirejs.config({
-	"packages": ["ui/editor", "model/presentation"],
 	paths: {
 		"css": "vendor/amd_plugins/css",
 		"text": "vendor/amd_plugins/text"
@@ -36,9 +35,9 @@ requirejs(["vendor/backbone",
 )
 
 continuation = () ->
-	requirejs(["ui/editor",
-			"model/presentation"],
-	(Editor, presentation) ->
+	requirejs(["ui/editor/Editor",
+			"model/presentation/Deck"],
+	(Editor, Deck) ->
 
 		# slightly better than what we were doing before.
 		# we need to roll the slide config up into the model.
@@ -47,7 +46,7 @@ continuation = () ->
 				width: 1024
 				height: 768
 
-		deck = new presentation.Deck()
+		deck = new Deck()
 		editor = new Editor({model: deck})
 
 		$("body").append(editor.render())
