@@ -38,6 +38,9 @@ define(["vendor/backbone",
 			@snapshots[options.index].remove()
 			@snapshots.splice(options.index, 1)
 
+		# TODO: the slide that is clicked should set itself to selected
+		# The deck should listen to its slides and set the latest
+		# selection to active.
 		slideClicked: (snapshot) ->
 			console.log "Changing active slide"
 			@model.set("activeSlide", snapshot.model)
@@ -45,6 +48,10 @@ define(["vendor/backbone",
 		slideRemoveClicked: (snapshot) ->
 			@model.removeSlide(snapshot.model)
 
+		# TODO:
+		# The slide snapshots should just do this for themselves
+		# and it should be bound to selection state
+		# not just active state.
 		activeSlideChanged: (model, slide) ->
 			if not slide
 				return null
