@@ -15,7 +15,8 @@ define(["./components/ThreeDRotableComponentView", "./Templates", "./raster/Slid
       return this.model.set("selected", false);
     },
     render: function() {
-      var g2d;
+      var g2d,
+        _this = this;
       ThreeDComponentView.prototype.render.apply(this, arguments);
       if (this.slideDrawer != null) this.slideDrawer.dispose();
       g2d = this.$el.find("canvas")[0].getContext("2d");
@@ -24,6 +25,28 @@ define(["./components/ThreeDRotableComponentView", "./Templates", "./raster/Slid
       this.$el.css({
         left: this.model.get("x"),
         top: this.model.get("y")
+      });
+      this.$el.find(".smartspinner[data-name='depth']").spinit({
+        callback: function(val) {
+          return _this.model.set("z", val);
+        },
+        mask: "Depth",
+        height: 22,
+        width: 45,
+        min: -9000,
+        max: 9000,
+        initValue: this.model.get("z")
+      });
+      this.$el.find(".smartspinner[data-name='scale']").spinit({
+        callback: function(val) {
+          return _this.model.set("impScale", val);
+        },
+        mask: "Scale",
+        min: 1,
+        max: 10,
+        height: 22,
+        width: 45,
+        initValue: this.model.get("impScale")
       });
       return this.$el;
     },

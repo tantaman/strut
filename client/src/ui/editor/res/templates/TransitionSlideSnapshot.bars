@@ -1,7 +1,11 @@
 <div class="content">
 <canvas></canvas>
 </div>
-<span class="topLabel label" data-delta="rotateX">Rotate X</span>
-<span class="leftLabel label" data-delta="rotateY">Rotate Y</span>
+<span class="topLabel label" data-delta="rotateY">Rotate Y</span>
+<span class="leftLabel label" data-delta="rotateX">Rotate X</span>
 <span class="rightLabel label" data-delta="rotateZ">Rotate Z</span>
+<div class="spinners">
+<input type="text" class="smartspinner label" data-name="depth"/>
+<input type="text" class="smartspinner label" data-name="scale"/>
+</div>
 <span class="badge badge-inverse"></span>
