@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["./components/ThreeDRotableComponentView", "./Templates", "./raster/SlideDrawer", "css!./res/css/TransitionSlideSnapshot.css"], function(ThreeDComponentView, Templates, SlideDrawer, empty) {
+define(["../components/ThreeDRotableComponentView", "../Templates", "../raster/SlideDrawer", "css!../res/css/TransitionSlideSnapshot.css"], function(ThreeDComponentView, Templates, SlideDrawer, empty) {
   return ThreeDComponentView.extend({
     className: "component transitionSlideSnapshot",
     initialize: function() {
@@ -28,13 +28,14 @@ define(["./components/ThreeDRotableComponentView", "./Templates", "./raster/Slid
       });
       this.$el.find(".smartspinner[data-name='depth']").spinit({
         callback: function(val) {
-          return _this.model.set("z", val);
+          return _this.model.set("z", -val);
         },
         mask: "Depth",
         height: 22,
         width: 45,
         min: -9000,
         max: 9000,
+        stepInc: 125,
         initValue: this.model.get("z")
       });
       this.$el.find(".smartspinner[data-name='scale']").spinit({

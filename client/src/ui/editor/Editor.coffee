@@ -3,7 +3,7 @@
 ###
 define(["vendor/backbone",
 		"./SlideEditor",
-		"./TransitionEditor",
+		"./transition_editor/TransitionEditor",
 		"./Templates",
 		"ui/impress_renderer/ImpressRenderer",
 		"ui/widgets/RawTextImporter",

@@ -3,14 +3,14 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./TransitionSlideSnapshot", "./Templates", "css!./res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, empty) {
+define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, empty) {
   return Backbone.View.extend({
     className: "transitionEditor",
     events: {
       "click": "clicked",
       "click *[data-option]": "buttonChosen"
     },
-    scale: 1024 / 150,
+    scale: window.slideConfig.size.width / 150,
     initialize: function() {
       var _this = this;
       this.name = "Transition Editor";

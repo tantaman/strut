@@ -31,6 +31,12 @@ requirejs(["vendor/backbone",
 		if options.keyTrail?
 			options.success(DefaultState.get(options.keyTrail))
 
+	# slightly better than what we were doing before.
+	# we need to roll the slide config up into the model.
+	window.slideConfig =
+		size:
+			width: 1024
+			height: 768
 	continuation()
 )
 
@@ -38,13 +44,6 @@ continuation = () ->
 	requirejs(["ui/editor/Editor",
 			"model/presentation/Deck"],
 	(Editor, Deck) ->
-
-		# slightly better than what we were doing before.
-		# we need to roll the slide config up into the model.
-		window.slideConfig =
-			size:
-				width: 1024
-				height: 768
 
 		deck = new Deck()
 		editor = new Editor({model: deck})

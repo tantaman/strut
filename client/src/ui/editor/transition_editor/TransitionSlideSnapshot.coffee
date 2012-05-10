@@ -1,10 +1,10 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["./components/ThreeDRotableComponentView",
-		"./Templates",
-		"./raster/SlideDrawer"
-		"css!./res/css/TransitionSlideSnapshot.css"],
+define(["../components/ThreeDRotableComponentView",
+		"../Templates",
+		"../raster/SlideDrawer"
+		"css!../res/css/TransitionSlideSnapshot.css"],
 (ThreeDComponentView, Templates, SlideDrawer, empty) ->
 	ThreeDComponentView.extend(
 		className: "component transitionSlideSnapshot"
@@ -32,12 +32,13 @@ define(["./components/ThreeDRotableComponentView",
 
 			@$el.find(".smartspinner[data-name='depth']").spinit(
 				callback: (val) =>
-					@model.set("z", val)
+					@model.set("z", -val)
 				mask: "Depth"
 				height: 22
 				width: 45
 				min: -9000
 				max: 9000
+				stepInc: 125
 				initValue: @model.get("z")
 			)
 

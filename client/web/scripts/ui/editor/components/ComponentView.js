@@ -74,8 +74,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     rotateStart: function(e, deltas) {
       this.updateOrigin();
       this._rotOffset = this._calcRot(deltas);
-      this._initialRotate = this.model.get("rotate") || 0;
-      return console.log(this._initialRotate);
+      return this._initialRotate = this.model.get("rotate") || 0;
     },
     updateOrigin: function() {
       return this._origin = {

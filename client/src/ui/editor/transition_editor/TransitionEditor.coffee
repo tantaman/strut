@@ -3,15 +3,15 @@
 ###
 define(["vendor/backbone",
 		"./TransitionSlideSnapshot",
-		"./Templates",
-		"css!./res/css/TransitionEditor.css"],
+		"../Templates",
+		"css!../res/css/TransitionEditor.css"],
 (Backbone, TransitionSlideSnapshot, Templates, empty) ->
 	Backbone.View.extend(
 		className: "transitionEditor"
 		events:
 			"click": "clicked"
 			"click *[data-option]": "buttonChosen"
-		scale: 1024/150 # TODO: set up some glob config...
+		scale: window.slideConfig.size.width/150 # TODO: set up some glob config...
 		# that has slide sizes and thumbnail sizes and so on
 		initialize: () ->
 			@name = "Transition Editor"

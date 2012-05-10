@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, empty) {
+define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {

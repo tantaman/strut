@@ -3,7 +3,7 @@
 @author Tantaman
 */
 
-define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/presentation/components/ComponentFactory"], function(Backbone, ButtonBarModel, ComponentFactory) {
+define(["./AbstractButtonBarView", "model/editor/button_bar/ButtonBarModel", "model/presentation/components/ComponentFactory"], function(AbstractButtonBarView, ButtonBarModel, ComponentFactory) {
   var buttonBarOptions, fontSettings;
   fontSettings = ["size", "family", "weight", "style", "decoration"];
   buttonBarOptions = {
@@ -61,11 +61,14 @@ define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/pres
       };
     })();
   });
-  return Backbone.View.extend({
-    events: {
-      "click *[data-option]": "buttonBarOptionChosen"
+  return AbstractButtonBarView.extend({
+    events: function() {
+      return {
+        "click *[data-option]": "optionChosen"
+      };
     },
     initialize: function() {
+      AbstractButtonBarView.prototype.initialize.call(this, buttonBarOptions);
       this.deck = this.options.deck;
       this.deck.on("change:activeSlide", this.activeSlideChanged, this);
       this.model = new ButtonBarModel();
@@ -95,11 +98,6 @@ define(["vendor/backbone", "model/editor/button_bar/ButtonBarModel", "model/pres
       } else {
         return this.$el.find(".fontButton").addClass("disabled");
       }
-    },
-    buttonBarOptionChosen: function(e) {
-      var option;
-      option = $(e.currentTarget).attr("data-option");
-      return buttonBarOptions[option].call(this, e);
     },
     dispose: function() {
       if (this.currentSlide) {

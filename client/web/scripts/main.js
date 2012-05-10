@@ -38,18 +38,18 @@ requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultS
       return options.success(DefaultState.get(options.keyTrail));
     }
   };
+  window.slideConfig = {
+    size: {
+      width: 1024,
+      height: 768
+    }
+  };
   return continuation();
 });
 
 continuation = function() {
   return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
     var deck, editor;
-    window.slideConfig = {
-      size: {
-        width: 1024,
-        height: 768
-      }
-    };
     deck = new Deck();
     editor = new Editor({
       model: deck

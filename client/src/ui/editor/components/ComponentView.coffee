@@ -77,7 +77,6 @@ define(["vendor/backbone",
 			@updateOrigin()
 			@_rotOffset = @_calcRot(deltas)
 			@_initialRotate = @model.get("rotate") || 0
-			console.log @_initialRotate
 
 		updateOrigin: () ->
 			@_origin = 

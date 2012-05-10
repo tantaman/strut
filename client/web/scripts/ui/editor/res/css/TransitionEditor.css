@@ -27,3 +27,13 @@
 	counter-increment: transSlide;
 	content: counter(transSlide);
 }
+
+.transitionEditor .buttonBar input {
+	width: 40px;
+	padding: 0px;
+	margin-top: 10px;
+}
+
+.transitionEditor .buttonBar li {
+	margin-right: 5px;
+}

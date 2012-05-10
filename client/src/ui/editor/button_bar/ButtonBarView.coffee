@@ -1,10 +1,10 @@
 ###
 @author Tantaman
 ###
-define(["vendor/backbone",
+define(["./AbstractButtonBarView",
 		"model/editor/button_bar/ButtonBarModel",
 		"model/presentation/components/ComponentFactory"],
-(Backbone, ButtonBarModel, ComponentFactory) ->
+(AbstractButtonBarView, ButtonBarModel, ComponentFactory) ->
 	# This can be a delegate / mixin that we share with the menu bar
 	# for those options which appear on both bars.
 	fontSettings = ["size", "family", "weight", "style", "decoration"]
@@ -57,11 +57,12 @@ define(["vendor/backbone",
 			)()
 	)
 
-	Backbone.View.extend(
-		events:
-			"click *[data-option]": "buttonBarOptionChosen"
-
+	AbstractButtonBarView.extend(
+		events: () ->
+			"click *[data-option]": "optionChosen"
+			
 		initialize: () ->
+			AbstractButtonBarView.prototype.initialize.call(@, buttonBarOptions)
 			@deck = @options.deck
 			@deck.on("change:activeSlide", @activeSlideChanged, @)
 			@model = new ButtonBarModel()
@@ -90,10 +91,6 @@ define(["vendor/backbone",
 				@$el.find(".fontButton").removeClass("disabled")
 			else
 				@$el.find(".fontButton").addClass("disabled")
-
-		buttonBarOptionChosen: (e) ->
-			option = $(e.currentTarget).attr("data-option")
-			buttonBarOptions[option].call(@, e)
 
 		dispose: () ->
 			if @currentSlide

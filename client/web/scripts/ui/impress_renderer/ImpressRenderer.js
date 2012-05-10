@@ -10,7 +10,7 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
       Handlebars.registerHelper("renderComponent", function(componentModel) {
         var result;
         result = "";
-        switch (componentModel.get("type")) {
+        switch (componentModel.constructor.name) {
           case "ImageModel":
             result = Templates.Image(componentModel.attributes);
             break;

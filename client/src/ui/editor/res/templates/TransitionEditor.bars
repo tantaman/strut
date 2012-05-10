@@ -1,6 +1,17 @@
 <div class="navbar">
   <div class="navbar-inner buttonBar">
     <div class="container">
+      <ul class="nav">
+        <li>
+          <span class="label label-inverse">Rot. X:</span><input type="text"></input>
+        </li>
+        <li>
+          <span class="label label-inverse">Rot. Y:</span><input type="text"></input>
+        </li>
+        <li>
+          <span class="label label-inverse">Rot. Z:</span><input type="text"></input>
+        </li>
+      </ul>
     	<ul class="nav pull-right">
     		<li>
     			<div class="btn-group">

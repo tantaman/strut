@@ -73,7 +73,9 @@ define(["common/Calcium", "./SlideCollection",
 		_activeSlideChanging: (newActive) ->
 			lastActive = @get("activeSlide")
 			if lastActive?
+				#console.log "UNSELECTING LAST ACTIVE"
 				lastActive.unselectComponents()
+				#lastActive.set("selected", false)
 		
 		_slideAdded: (slide, collection) ->
 			@set("activeSlide", slide)
