@@ -19,6 +19,12 @@ else if $.browser.opera
 else if $.browser.webkit
 	window.browserPrefix = "-webkit-"
 
+if not window.localStorage?
+	window.localStorage =
+		setItem: () ->
+		getItem: () ->
+		length: 0
+
 requirejs(["vendor/backbone",
 			"state/DefaultState"],
 (Backbone, DefaultState) ->
@@ -33,6 +39,13 @@ continuation = () ->
 	requirejs(["ui/editor",
 			"model/presentation"],
 	(Editor, presentation) ->
+
+		# slightly better than what we were doing before.
+		# we need to roll the slide config up into the model.
+		window.slideConfig =
+			size:
+				width: 1024
+				height: 768
 
 		deck = new presentation.Deck()
 		editor = new Editor({model: deck})

@@ -3,15 +3,41 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, empty) {
+define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
     "new": function(e) {},
-    open: function(e) {},
+    open: function(e) {
+      var _this = this;
+      return this.openDialog.show(function(fileName) {
+        var data;
+        console.log("Attempting to open " + fileName);
+        data = FileStorage.open(fileName);
+        console.log(data);
+        if (data != null) return _this.model["import"](data);
+      });
+    },
     openRecent: function(e) {},
-    save: function(e) {},
-    saveAs: function(e) {},
+    save: function(e) {
+      var fileName;
+      fileName = this.model.get("fileName");
+      if (!(fileName != null)) {
+        return menuOptions.saveAs.call(this, e);
+      } else {
+        return FileStorage.save(fileName, this.model.toJSON(false, true));
+      }
+    },
+    saveAs: function(e) {
+      var _this = this;
+      return this.saveAsDialog.show(function(fileName) {
+        if ((fileName != null) && fileName !== "") {
+          console.log("Attempting to save " + fileName);
+          _this.model.set("fileName", fileName);
+          return FileStorage.save(fileName, _this.model.toJSON(false, true));
+        }
+      });
+    },
     undo: function(e) {
       return this.model.undo();
     },
@@ -131,6 +157,10 @@ define(["vendor/backbone", "./SlideEditor", "./TransitionEditor", "./Templates",
       this.undoHistoryChanged();
       this.rawTextModal = new RawTextModal();
       this.$el.append(this.rawTextModal.render());
+      this.openDialog = new OpenDialog();
+      this.saveAsDialog = new SaveAsDialog();
+      this.$el.append(this.openDialog.render());
+      this.$el.append(this.saveAsDialog.render());
       return this.$el;
     }
   });

@@ -25,6 +25,14 @@ if ($.browser.mozilla) {
   window.browserPrefix = "-webkit-";
 }
 
+if (!(window.localStorage != null)) {
+  window.localStorage = {
+    setItem: function() {},
+    getItem: function() {},
+    length: 0
+  };
+}
+
 requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
   Backbone.sync = function(method, model, options) {
     if (options.keyTrail != null) {
@@ -37,6 +45,12 @@ requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultS
 continuation = function() {
   return requirejs(["ui/editor", "model/presentation"], function(Editor, presentation) {
     var deck, editor;
+    window.slideConfig = {
+      size: {
+        width: 1024,
+        height: 768
+      }
+    };
     deck = new presentation.Deck();
     editor = new Editor({
       model: deck

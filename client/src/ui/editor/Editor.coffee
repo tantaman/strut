@@ -7,16 +7,39 @@ define(["vendor/backbone",
 		"./Templates",
 		"ui/impress_renderer/ImpressRenderer",
 		"ui/widgets/RawTextImporter",
+		"ui/widgets/OpenDialog",
+		"ui/widgets/SaveAsDialog",
+		"storage/FileStorage",
 		"css!./res/css/Editor.css"],
-(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, empty) ->
+(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
+FileStorage, empty) ->
 	editorId = 0
 
 	menuOptions =
 		new: (e) ->
 		open: (e) ->
+			@openDialog.show((fileName) =>
+				console.log "Attempting to open #{fileName}"
+				data = FileStorage.open(fileName)
+				console.log data
+				if data?
+					@model.import(data)
+			)
 		openRecent: (e) ->
 		save: (e) ->
+			fileName = @model.get("fileName")
+			if not fileName?
+				menuOptions.saveAs.call(@, e)
+			else
+				FileStorage.save(fileName, @model.toJSON(false, true))
+
 		saveAs: (e) ->
+			@saveAsDialog.show((fileName) =>
+				if fileName? and fileName isnt ""
+					console.log "Attempting to save #{fileName}"
+					@model.set("fileName", fileName)
+					FileStorage.save(fileName, @model.toJSON(false, true))
+			)
 		undo: (e) ->
 			@model.undo()
 		redo: (e) ->
@@ -116,6 +139,11 @@ define(["vendor/backbone",
 			@undoHistoryChanged()
 			@rawTextModal = new RawTextModal()
 			@$el.append(@rawTextModal.render())
+
+			@openDialog = new OpenDialog()
+			@saveAsDialog = new SaveAsDialog()
+			@$el.append(@openDialog.render())
+			@$el.append(@saveAsDialog.render())
 
 			@$el
 	)

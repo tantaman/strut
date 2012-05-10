@@ -4,13 +4,6 @@
 define(["common/Throttler"],
 (Throttler) ->
 	class SlideDrawer
-		### TODO: how she we handle slide sizes and scaling?
-		# Fixed slide size?  Slide size = size of editor . . . ?
-		# We'll have to re-visit this when we start testing the impress export.
-		###
-		haxTempSlideSize =
-			width: 1024
-			height: 768
 
 		constructor: (@model, @g2d) ->
 			@model.on("contentsChanged", @repaint, @)
@@ -18,11 +11,11 @@ define(["common/Throttler"],
 				width: @g2d.canvas.width
 				height: @g2d.canvas.height
 			@throttler = new Throttler(600, @)
-			@scale = @size.width / haxTempSlideSize.width
+			@scale = @size.width / slideConfig.size.width
 
 		resized: (newSize) ->
 			@size = newSize
-			@scale = @size.width / haxTempSlideSize.width
+			@scale = @size.width / slideConfig.size.width
 			@repaint()
 
 		repaint: () ->

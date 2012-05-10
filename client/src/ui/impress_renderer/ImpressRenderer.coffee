@@ -15,11 +15,11 @@ define(["vendor/Handlebars",
 
 
 			Handlebars.registerHelper("scaleX", (x) ->
-				x * 1024 / 150 # TODO FIXME
+				x * slideConfig.size.width / 150 # TODO FIXME
 			)
 
 			Handlebars.registerHelper("scaleY", (y) ->
-				y * 1024 / 150 # TODO FIXME
+				y * slideConfig.size.width / 150 # TODO FIXME
 			)
 
 			Handlebars.registerHelper("toDeg", (v) ->

@@ -10,7 +10,7 @@
      			<ul class="dropdown-menu">
      		 		<li data-option="new"><a href="#">New</a></li>
      				<li data-option="open"><a href="#">Open...</a></li>
-     				<li data-option="openRecent"><a href="#">Open Recent...</a></li>
+<!--     				<li data-option="openRecent"><a href="#">Open Recent...</a></li> -->
      				<li data-option="save"><a href="#">Save</a></li>
      				<li data-option="saveAs"><a href="#">Save As...</a></li>
      			</ul>

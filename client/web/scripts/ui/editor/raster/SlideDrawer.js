@@ -6,19 +6,8 @@
 define(["common/Throttler"], function(Throttler) {
   var SlideDrawer;
   return SlideDrawer = (function() {
-    /* TODO: how she we handle slide sizes and scaling?
-    		# Fixed slide size?  Slide size = size of editor . . . ?
-    		# We'll have to re-visit this when we start testing the impress export.
-    */
-
-    var haxTempSlideSize;
 
     SlideDrawer.name = 'SlideDrawer';
-
-    haxTempSlideSize = {
-      width: 1024,
-      height: 768
-    };
 
     function SlideDrawer(model, g2d) {
       this.model = model;
@@ -29,12 +18,12 @@ define(["common/Throttler"], function(Throttler) {
         height: this.g2d.canvas.height
       };
       this.throttler = new Throttler(600, this);
-      this.scale = this.size.width / haxTempSlideSize.width;
+      this.scale = this.size.width / slideConfig.size.width;
     }
 
     SlideDrawer.prototype.resized = function(newSize) {
       this.size = newSize;
-      this.scale = this.size.width / haxTempSlideSize.width;
+      this.scale = this.size.width / slideConfig.size.width;
       return this.repaint();
     };
 

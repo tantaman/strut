@@ -20,10 +20,10 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
         return new Handlebars.SafeString(result);
       });
       Handlebars.registerHelper("scaleX", function(x) {
-        return x * 1024 / 150;
+        return x * slideConfig.size.width / 150;
       });
       Handlebars.registerHelper("scaleY", function(y) {
-        return y * 1024 / 150;
+        return y * slideConfig.size.width / 150;
       });
       Handlebars.registerHelper("toDeg", function(v) {
         return v * 180 / Math.PI;

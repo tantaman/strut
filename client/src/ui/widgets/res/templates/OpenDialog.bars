@@ -1,10 +1,13 @@
 <div class="modal-header">
 	<button class="close" data-dismiss="modal">×</button>
-	<h3>Import/Export Show (from/to JSON)</h3>
+	<h3>Open</h3>
 </div>
 <div class="modal-body">
-	<h4>JSON string</h4>
-	<textarea style="width: 100%; height: 100%" rows="10"></textarea>
+	<ul class="nav nav-list">
+		{{#each fileNames}}
+			<li><a href="#"><span>{{.}}</span><button class="close">x</button></a></li>
+		{{/each}}
+	</ul>
 </div>
 <div class="modal-footer">
 	<a href="#" class="btn btn-inverse ok">OK</a>
