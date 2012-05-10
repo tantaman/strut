@@ -40,7 +40,7 @@ define(["common/Throttler"], function(Throttler) {
       components = this.model.get("components");
       return components.forEach(function(component) {
         var type;
-        type = component.constructor.name;
+        type = component.get("type");
         _this.g2d.save();
         /*
         				# TODO: figure out correct translation to apply after transforms

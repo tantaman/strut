@@ -7,7 +7,7 @@ define(["./ImageView",
 (ImageView, TableView, TextBoxView) ->
 	ComponentViewFactory =
 		createView: (model) ->
-			type = model.constructor.name
+			type = model.get("type")
 			switch type
 				when "TextBox" then new TextBoxView({model: model})
 				when "ImageModel" then new ImageView({model: model})

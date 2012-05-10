@@ -59,7 +59,7 @@ define(["vendor/backbone"], function(Backbone) {
       };
     },
     _activeIsTextbox: function() {
-      return this.activeComponent && this.activeComponent.constructor.name === "TextBox";
+      return this.activeComponent && this.activeComponent.get("type") === "TextBox";
     },
     _pullFontSettings: function() {
       var setting, _j, _len2, _results;

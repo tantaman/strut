@@ -61,7 +61,7 @@ define(["vendor/backbone"],
 			}
 
 		_activeIsTextbox: () ->
-			@activeComponent and @activeComponent.constructor.name is "TextBox"
+			@activeComponent and @activeComponent.get("type") is "TextBox"
 
 		_pullFontSettings: () ->
 			for setting in fontSettings

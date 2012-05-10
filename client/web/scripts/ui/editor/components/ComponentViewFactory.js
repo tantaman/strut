@@ -8,7 +8,7 @@ define(["./ImageView", "./TableView", "./TextBoxView"], function(ImageView, Tabl
   return ComponentViewFactory = {
     createView: function(model) {
       var type;
-      type = model.constructor.name;
+      type = model.get("type");
       switch (type) {
         case "TextBox":
           return new TextBoxView({

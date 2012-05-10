@@ -29,7 +29,7 @@ define(["common/Throttler"],
 			components = @model.get("components")
 
 			components.forEach((component) =>
-				type = component.constructor.name
+				type = component.get("type")
 
 				@g2d.save()
 				###
