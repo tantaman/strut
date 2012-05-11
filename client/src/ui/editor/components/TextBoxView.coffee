@@ -63,5 +63,9 @@ define(["./ComponentView",
 			})
 
 			@$el
+
+		constructor: `function TextBoxView() {
+			ComponentView.prototype.constructor.apply(this, arguments);
+		}`
 	)
 )

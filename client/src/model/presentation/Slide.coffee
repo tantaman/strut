@@ -42,6 +42,14 @@ define(["model/geom/SpatialObject",
 			@trigger("contentsChanged")
 			@trigger("change:components.add", @, component)
 
+		dispose: () ->
+			@set(
+				active: false
+				selected: false
+			)
+			@trigger("dispose", @)
+			@off("dispose")
+
 		remove: (component) ->
 			idx = @attributes.components.indexOf(component)
 			if idx != -1

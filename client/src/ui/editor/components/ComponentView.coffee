@@ -137,6 +137,9 @@ define(["vendor/backbone",
 			)
 			@$content = @$el.find(".content")
 			@_setUpdatedTransform()
+
+			@_selectionChanged(@model, @model.get("selected"))
+
 			@$el
 
 		__getTemplate: () ->
@@ -152,6 +155,7 @@ define(["vendor/backbone",
 				deltaDrag.dispose()
 			if not keepModel
 				@model.dispose()
+				@model.off(null, null, @)
 			else
 				@model.off(null, null, @)
 

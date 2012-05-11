@@ -740,12 +740,13 @@ define(function() {
     reset: function(models, options) {
       models  || (models = []);
       options || (options = {});
+      var oldModels = this.models;
       for (var i = 0, l = this.models.length; i < l; i++) {
         this._removeReference(this.models[i]);
       }
       this._reset();
       this.add(models, _.extend({silent: true}, options));
-      if (!options.silent) this.trigger('reset', this, options);
+      if (!options.silent) this.trigger('reset', this, options, oldModels);
       return this;
     },
 

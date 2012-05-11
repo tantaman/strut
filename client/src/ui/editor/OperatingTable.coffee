@@ -14,7 +14,7 @@ define(["vendor/backbone", "./Templates",
 		setModel: (slide) ->
 			prevModel = @model
 			if @model?
-				@model.off("change:components.add", @_componentAdded, @)
+				@model.off(null, null, @)
 			@model = slide
 			if @model?
 				@model.on("change:components.add", @_componentAdded, @)

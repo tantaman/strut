@@ -46,6 +46,14 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
       this.trigger("contentsChanged");
       return this.trigger("change:components.add", this, component);
     },
+    dispose: function() {
+      this.set({
+        active: false,
+        selected: false
+      });
+      this.trigger("dispose", this);
+      return this.off("dispose");
+    },
     remove: function(component) {
       var idx;
       idx = this.attributes.components.indexOf(component);

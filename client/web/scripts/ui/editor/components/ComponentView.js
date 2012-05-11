@@ -143,6 +143,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       });
       this.$content = this.$el.find(".content");
       this._setUpdatedTransform();
+      this._selectionChanged(this.model, this.model.get("selected"));
       return this.$el;
     },
     __getTemplate: function() {
@@ -162,6 +163,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       }
       if (!keepModel) {
         this.model.dispose();
+        this.model.off(null, null, this);
       } else {
         this.model.off(null, null, this);
       }

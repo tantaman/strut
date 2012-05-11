@@ -13,9 +13,13 @@ define(["vendor/backbone",
 			"click .removeBtn": "removeClicked"
 
 		initialize: () ->
+			@model.on("change:active", @_activated, @)
+			@model.on("dispose", @_modelDisposed, @)
 
 		clicked: () ->
-			@trigger("clicked", @)
+			#@trigger("clicked", @)
+			@model.set("selected", true)
+			@model.set("active", true)
 
 		removeClicked: (e) ->
 			@trigger("removeClicked", @)
@@ -26,6 +30,16 @@ define(["vendor/backbone",
 			@off()
 			Backbone.View.prototype.remove.apply(@, arguments)
 
+		_activated: (model, value) ->
+			if value
+				@$el.addClass("active")
+			else
+				@$el.removeClass("active")
+
+		_modelDisposed: () ->
+			@model.off(null, null, @)
+			@remove()
+
 		render: () ->
 			if @slideDrawer?
 				@slideDrawer.dispose()
@@ -33,6 +47,10 @@ define(["vendor/backbone",
 			g2d = @$el.find("canvas")[0].getContext("2d")
 			@slideDrawer = new SlideDrawer(@model, g2d)
 			@slideDrawer.repaint()
+
+			if @model.get("active")
+				@$el.addClass("active")
+
 			@$el
 	)
 )

@@ -13,9 +13,7 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
     setModel: function(slide) {
       var prevModel;
       prevModel = this.model;
-      if (this.model != null) {
-        this.model.off("change:components.add", this._componentAdded, this);
-      }
+      if (this.model != null) this.model.off(null, null, this);
       this.model = slide;
       if (this.model != null) {
         this.model.on("change:components.add", this._componentAdded, this);

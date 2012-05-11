@@ -10,9 +10,13 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       "click": "clicked",
       "click .removeBtn": "removeClicked"
     },
-    initialize: function() {},
+    initialize: function() {
+      this.model.on("change:active", this._activated, this);
+      return this.model.on("dispose", this._modelDisposed, this);
+    },
     clicked: function() {
-      return this.trigger("clicked", this);
+      this.model.set("selected", true);
+      return this.model.set("active", true);
     },
     removeClicked: function(e) {
       this.trigger("removeClicked", this);
@@ -23,6 +27,17 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       this.off();
       return Backbone.View.prototype.remove.apply(this, arguments);
     },
+    _activated: function(model, value) {
+      if (value) {
+        return this.$el.addClass("active");
+      } else {
+        return this.$el.removeClass("active");
+      }
+    },
+    _modelDisposed: function() {
+      this.model.off(null, null, this);
+      return this.remove();
+    },
     render: function() {
       var g2d;
       if (this.slideDrawer != null) this.slideDrawer.dispose();
@@ -30,6 +45,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       g2d = this.$el.find("canvas")[0].getContext("2d");
       this.slideDrawer = new SlideDrawer(this.model, g2d);
       this.slideDrawer.repaint();
+      if (this.model.get("active")) this.$el.addClass("active");
       return this.$el;
     }
   });

@@ -22,7 +22,8 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       return this.slide;
     },
     undo: function() {
-      return this.deck.get("slides").remove(this.slide);
+      this.deck.get("slides").remove(this.slide);
+      return this.slide;
     },
     name: "Create Slide"
   };
@@ -50,7 +51,9 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       this.set("slides", new SlideCollection());
       slides = this.get("slides");
       slides.on("add", this._slideAdded, this);
-      return slides.on("remove", this._slideRemoved, this);
+      slides.on("remove", this._slideRemoved, this);
+      slides.on("reset", this._slidesReset, this);
+      return this._lastSelected = null;
     },
     newSlide: function() {
       var action, slide;
@@ -76,22 +79,66 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
     _activeSlideChanging: function(newActive) {
       var lastActive;
       lastActive = this.get("activeSlide");
-      if (lastActive != null) return lastActive.unselectComponents();
+      if (newActive === lastActive) return null;
+      if (lastActive != null) {
+        lastActive.unselectComponents();
+        lastActive.set({
+          active: false,
+          selected: false
+        });
+      }
+      if (newActive != null) {
+        return newActive.set({
+          selected: true,
+          active: true
+        });
+      }
     },
     _slideAdded: function(slide, collection) {
-      return this.set("activeSlide", slide);
+      this.set("activeSlide", slide);
+      return this._registerWithSlide(slide);
+    },
+    _slideDisposed: function(slide) {
+      return slide.off(null, null, this);
     },
     _slideRemoved: function(slide, collection, options) {
       console.log("Slide removed");
       if (this.get("activeSlide") === slide) {
         if (options.index < collection.length) {
-          return this.set("activeSlide", collection.at(options.index));
+          this.set("activeSlide", collection.at(options.index));
         } else if (options.index > 0) {
-          return this.set("activeSlide", collection.at(options.index - 1));
+          this.set("activeSlide", collection.at(options.index - 1));
         } else {
-          return this.set("activeSlide", null);
+          this.set("activeSlide", null);
         }
       }
+      return slide.dispose();
+    },
+    _slidesReset: function(newSlides, options, oldSlides) {
+      var _this = this;
+      oldSlides.forEach(function(slide) {
+        return slide.dispose();
+      });
+      return newSlides.forEach(function(slide) {
+        _this._registerWithSlide(slide);
+        if (slide.get("active")) {
+          return slide.trigger("change:active", slide, true);
+        }
+      });
+    },
+    _slideActivated: function(slide, value) {
+      if (value) return this.set("activeSlide", slide);
+    },
+    _slideSelected: function(slide, value) {
+      if ((this._lastSelected != null) && value && this._lastSelected !== slide) {
+        this._lastSelected.set("selected", false);
+      }
+      return this._lastSelected = slide;
+    },
+    _registerWithSlide: function(slide) {
+      slide.on("change:active", this._slideActivated, this);
+      slide.on("change:selected", this._slideSelected, this);
+      return slide.on("dispose", this._slideDisposed, this);
     },
     removeSlide: function(slide) {
       var action;

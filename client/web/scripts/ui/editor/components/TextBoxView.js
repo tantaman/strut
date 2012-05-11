@@ -80,6 +80,9 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
         left: this.model.get("x")
       });
       return this.$el;
-    }
+    },
+    constructor: function TextBoxView() {
+			ComponentView.prototype.constructor.apply(this, arguments);
+		}
   });
 });

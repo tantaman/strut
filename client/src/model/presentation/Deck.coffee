@@ -19,6 +19,7 @@ define(["common/Calcium", "./SlideCollection",
 
 		undo: () ->
 			@deck.get("slides").remove(@slide)
+			@slide
 
 		name: "Create Slide"
 
@@ -46,6 +47,8 @@ define(["common/Calcium", "./SlideCollection",
 			slides = @get("slides")
 			slides.on("add", @_slideAdded, @)
 			slides.on("remove", @_slideRemoved, @)
+			slides.on("reset", @_slidesReset, @)
+			@_lastSelected = null
 			
 		newSlide: () ->
 			action = new NewSlideAction(@)
@@ -72,13 +75,28 @@ define(["common/Calcium", "./SlideCollection",
 
 		_activeSlideChanging: (newActive) ->
 			lastActive = @get("activeSlide")
+			if newActive is lastActive
+				return null
+
 			if lastActive?
-				#console.log "UNSELECTING LAST ACTIVE"
 				lastActive.unselectComponents()
-				#lastActive.set("selected", false)
+				lastActive.set({
+					active: false
+					selected: false
+				})
+
+			if newActive?
+				newActive.set(
+					selected: true
+					active: true
+				)
 		
 		_slideAdded: (slide, collection) ->
 			@set("activeSlide", slide)
+			@_registerWithSlide(slide)
+
+		_slideDisposed: (slide) ->
+			slide.off(null, null, @)
 
 		_slideRemoved: (slide, collection, options) ->
 			console.log "Slide removed"
@@ -89,6 +107,34 @@ define(["common/Calcium", "./SlideCollection",
 					@set("activeSlide", collection.at(options.index - 1))
 				else
 					@set("activeSlide", null)
+			slide.dispose()
+
+		_slidesReset: (newSlides, options, oldSlides) ->
+			oldSlides.forEach((slide) ->
+				slide.dispose()
+			)
+
+			newSlides.forEach((slide) =>
+				@_registerWithSlide(slide)
+				if slide.get("active")
+					slide.trigger("change:active", slide, true)
+			)
+			# dispose of the slides...
+
+		_slideActivated: (slide, value) ->
+			if value
+				@set("activeSlide", slide)
+
+		_slideSelected: (slide, value) ->
+			if @_lastSelected? and value and @_lastSelected isnt slide
+				@_lastSelected.set("selected", false)
+
+			@_lastSelected = slide
+
+		_registerWithSlide: (slide) ->
+			slide.on("change:active", @_slideActivated, @)
+			slide.on("change:selected", @_slideSelected, @)
+			slide.on("dispose", @_slideDisposed, @)
 
 		removeSlide: (slide) ->
 			action = new RemoveSlideAction(@, slide)
