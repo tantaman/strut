@@ -13,8 +13,8 @@ From a developer's perspective, everything.
 
 In ```Strut``` there is an object for each major component.  The 
 [Slides](https://github.com/tantaman/Strut/blob/master/client/src/model/presentation/Slide.coffee), 
-[SlidePreviews](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/TransitionSlideSnapshot.coffee), 
-[TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/TransitionEditor.coffee), 
+[SlidePreviews](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
+[TransitionEditor](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/transition_editor/TransitionEditor.coffee), 
 [SlideEditor](https://github.com/tantaman/Strut/blob/master/client/src/ui/editor/SlideEditor.coffee),
 etc. all have their own objects so its easy to
 track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
