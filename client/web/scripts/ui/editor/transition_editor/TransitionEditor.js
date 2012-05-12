@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, empty) {
+define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, empty) {
   return Backbone.View.extend({
     className: "transitionEditor",
     events: {
@@ -15,11 +15,18 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../
       var _this = this;
       this.name = "Transition Editor";
       this._snapshots = [];
-      return $(window).resize(function() {
+      $(window).resize(function() {
         return _this.resized();
+      });
+      return this.buttonBarView = new ButtonBarView({
+        model: new ButtonBarModel({
+          deck: this.model
+        }),
+        el: this.el
       });
     },
     show: function() {
+      this.hidden = false;
       this.$el.removeClass("disp-none");
       return this._partialRender();
     },
@@ -27,6 +34,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../
       return this.$el.css("height", window.innerHeight - 80);
     },
     hide: function() {
+      this.hidden = true;
       this._disposeOldView();
       return this.$el.addClass("disp-none");
     },
@@ -55,6 +63,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../
     },
     render: function() {
       this.$el.html(Templates.TransitionEditor());
+      this.buttonBarView.render();
       this._partialRender();
       this.resized();
       return this.$el;
@@ -62,6 +71,7 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "css!../
     _partialRender: function() {
       var $container, cnt, colCnt, slides,
         _this = this;
+      this.buttonBarView.partialRender();
       $container = this.$el.find(".transitionSlides");
       $container.html("");
       slides = this.model.get("slides");

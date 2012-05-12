@@ -57,6 +57,7 @@ define(["common/Calcium", "./SlideCollection",
 			slide
 
 		set: (key, value) ->
+			# TODO: shouldn't store activeSlide in our attributes.
 			if key is "activeSlide"
 				@_activeSlideChanging(value)
 			Backbone.Model.prototype.set.apply(this, arguments)
@@ -69,9 +70,7 @@ define(["common/Calcium", "./SlideCollection",
 			@set("activeSlide", null)
 
 			slides.reset(rawObj.slides)
-			@set("activeSlide", slides.at(0))
-
-			console.log "Importing"
+			#@set("activeSlide", slides.at(0))
 
 		_activeSlideChanging: (newActive) ->
 			lastActive = @get("activeSlide")
@@ -118,6 +117,8 @@ define(["common/Calcium", "./SlideCollection",
 				@_registerWithSlide(slide)
 				if slide.get("active")
 					slide.trigger("change:active", slide, true)
+				else if slide.get("selected")
+					slide.set("selected", false)
 			)
 			# dispose of the slides...
 

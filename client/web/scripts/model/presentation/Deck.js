@@ -72,9 +72,7 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       activeSlide = this.get("activeSlide");
       if (activeSlide != null) activeSlide.unselectComponents();
       this.set("activeSlide", null);
-      slides.reset(rawObj.slides);
-      this.set("activeSlide", slides.at(0));
-      return console.log("Importing");
+      return slides.reset(rawObj.slides);
     },
     _activeSlideChanging: function(newActive) {
       var lastActive;
@@ -123,6 +121,8 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
         _this._registerWithSlide(slide);
         if (slide.get("active")) {
           return slide.trigger("change:active", slide, true);
+        } else if (slide.get("selected")) {
+          return slide.set("selected", false);
         }
       });
     },

@@ -1,7 +1,7 @@
 <div class="navbar">
   <div class="navbar-inner buttonBar">
     <div class="container">
-      <ul class="nav">
+      <ul class="nav slideRotations">
         <li>
           <span class="label label-inverse">Rot. X:</span><input type="text"></input>
         </li>

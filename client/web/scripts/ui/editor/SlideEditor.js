@@ -16,16 +16,18 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
       this.slidePreviewPanel = new SlidePreviewPanel({
         model: this.model
       });
-      return this.model.on("change:activeSlide", this.activeSlideChanged, this);
+      return this.model.on("change:activeSlide", this._activeSlideChanged, this);
     },
     show: function() {
+      this.hidden = false;
       return this.$el.removeClass("disp-none");
     },
     hide: function() {
+      this.hidden = true;
       return this.$el.addClass("disp-none");
     },
-    activeSlideChanged: function(model, newSlide) {
-      return this.operatingTable.setModel(newSlide);
+    _activeSlideChanged: function(model, newSlide) {
+      if (!this.hidden) return this.operatingTable.setModel(newSlide);
     },
     render: function() {
       var $items, $mainContent, pictureGrabber;

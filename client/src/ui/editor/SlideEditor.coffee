@@ -22,15 +22,18 @@ define(["vendor/backbone", "./Templates",
 			@operatingTable = new OperatingTable()
 			@slidePreviewPanel = new SlidePreviewPanel({model: @model})
 
-			@model.on("change:activeSlide", @activeSlideChanged, @)
+			@model.on("change:activeSlide", @_activeSlideChanged, @)
 
 		show: () ->
+			@hidden = false
 			@$el.removeClass("disp-none")
 		hide: () ->
+			@hidden = true
 			@$el.addClass("disp-none")
 
-		activeSlideChanged: (model, newSlide) ->
-			@operatingTable.setModel(newSlide)
+		_activeSlideChanged: (model, newSlide) ->
+			if not @hidden
+				@operatingTable.setModel(newSlide)
 
 		render: () ->
 			@$el.html(Templates.SlideEditor(@model))

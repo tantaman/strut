@@ -4,8 +4,10 @@
 define(["vendor/backbone",
 		"./TransitionSlideSnapshot",
 		"../Templates",
+		"./TransitionEditorButtonBarView",
+		"model/editor/transition_editor/TransitionEditorButtonBarModel"
 		"css!../res/css/TransitionEditor.css"],
-(Backbone, TransitionSlideSnapshot, Templates, empty) ->
+(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, empty) ->
 	Backbone.View.extend(
 		className: "transitionEditor"
 		events:
@@ -19,8 +21,14 @@ define(["vendor/backbone",
 			$(window).resize(() =>
 				@resized()
 			)
+
+			@buttonBarView = new ButtonBarView({
+				model: new ButtonBarModel({deck: @model}),
+				el: @el
+			})
 			
 		show: () ->
+			@hidden = false
 			@$el.removeClass("disp-none")
 			@_partialRender()
 
@@ -30,6 +38,7 @@ define(["vendor/backbone",
 			@$el.css("height", window.innerHeight - 80)
 
 		hide: () ->
+			@hidden = true
 			@_disposeOldView()
 			@$el.addClass("disp-none")
 
@@ -53,11 +62,13 @@ define(["vendor/backbone",
 
 		render: () ->
 			@$el.html(Templates.TransitionEditor())
+			@buttonBarView.render()
 			@_partialRender()
 			@resized()
 			@$el
 
 		_partialRender: () ->
+			@buttonBarView.partialRender()
 			$container = @$el.find(".transitionSlides")
 			$container.html("")
 			slides = @model.get("slides")
