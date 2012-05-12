@@ -27,6 +27,10 @@ define(["vendor/backbone", "./Templates",
 		show: () ->
 			@hidden = false
 			@$el.removeClass("disp-none")
+			if @hiddenActiveChange?
+				@operatingTable.setModel(@hiddenActiveChange)
+				@hiddenActiveChange = null
+
 		hide: () ->
 			@hidden = true
 			@$el.addClass("disp-none")
@@ -34,6 +38,8 @@ define(["vendor/backbone", "./Templates",
 		_activeSlideChanged: (model, newSlide) ->
 			if not @hidden
 				@operatingTable.setModel(newSlide)
+			else
+				@hiddenActiveChange = newSlide
 
 		render: () ->
 			@$el.html(Templates.SlideEditor(@model))

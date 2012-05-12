@@ -38,6 +38,8 @@ define(["vendor/backbone",
 
 			@_deltaDrags = []
 
+			@model.on("rerender", @_setUpdatedTransform, @)
+
 		_selectionChanged: (model, selected) ->
 			if selected
 				@$el.addClass("selected")
@@ -121,7 +123,6 @@ define(["vendor/backbone",
 			transformStr
 
 		mousedown: (e) ->
-			console.log "Setting self to selected"
 			@model.set("selected", true)
 			@_dragging = true
 			@_prevPos = {
@@ -146,7 +147,6 @@ define(["vendor/backbone",
 			Templates.Component
 
 		_unrender: () ->
-			console.log "Unrendering"
 			@remove(true)
 
 		remove: (keepModel) ->

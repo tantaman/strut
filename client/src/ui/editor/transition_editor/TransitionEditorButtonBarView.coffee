@@ -1,17 +1,34 @@
-define(["../button_bar/AbstractButtonBarView"],
-(AbstractButtonBarView) ->
+define(["../button_bar/AbstractButtonBarView",
+		"common/Math2"],
+(AbstractButtonBarView, Math2) ->
 	buttonBarOptions =
 		rotateX: (e) ->
+			val = parseFloat(e.target.value)
+			if not isNaN(val)
+				@model.changeSlideRotations(val)
 
 		rotateY: (e) ->
+			val = parseFloat(e.target.value)
+			if not isNaN(val)
+				@model.changeSlideRotations(null, val)
 
 		rotateZ: (e) ->
-			
+			val = parseFloat(e.target.value)
+			if not isNaN(val)
+				@model.changeSlideRotations(null, null, val)
+
+		slideEditor: (e) ->
+			@$el.trigger("changePerspective", {perspective: "slideEditor"})
+
+		preview: (e) ->
+			@$el.trigger("preview")
 
 	AbstractButtonBarView.extend(
 		events: () ->
-			"keypress *[data-option]": "optionChosen"
+			"keyup *[data-option]": "optionChosen"
 			"paste *[data-option]": "optionChosen"
+			"click .btn[data-option]": "optionChosen"
+			"click": "clicked"
 
 		initialize: () ->
 			AbstractButtonBarView.prototype.initialize.call(@, buttonBarOptions)
@@ -19,6 +36,10 @@ define(["../button_bar/AbstractButtonBarView"],
 
 		_slideRotationsChanged: (model, slideRotations) ->
 			@partialRender(slideRotations)
+
+		clicked: (e) ->
+			e.stopPropagation()
+			false
 
 		partialRender: (slideRotations, sceneRotations) ->
 			slideRotations or (slideRotations = @model.slideRotations())
@@ -29,11 +50,13 @@ define(["../button_bar/AbstractButtonBarView"],
 
 		updateRotationControls: ($which, rotations) ->
 			$which.each((idx, elem) ->
-				$(elem).val(rotations[idx])
+				val = rotations[idx]
+				if not val? or isNaN(val)
+					val = 0
+				$(elem).val(Math2.round(val, 2))
 			)
 
 		render: () ->
-			console.log @$el
 			@$slideRotCtrls = @$el.find(".slideRotations input")
 			@partialRender()
 	)

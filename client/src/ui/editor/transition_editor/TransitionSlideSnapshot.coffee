@@ -8,6 +8,11 @@ define(["../components/ThreeDRotableComponentView",
 (ThreeDComponentView, Templates, SlideDrawer, empty) ->
 	ThreeDComponentView.extend(
 		className: "component transitionSlideSnapshot"
+		events: () ->
+			parentEvents = ThreeDComponentView.prototype.events()
+			_.extend(parentEvents,
+				"click": "clicked"
+			)
 		initialize: () ->
 			ThreeDComponentView.prototype.initialize.apply(@, arguments)
 
@@ -16,6 +21,10 @@ define(["../components/ThreeDRotableComponentView",
 			if @slideDrawer?
 				@slideDrawer.dispose()
 			@model.set("selected", false)
+
+		clicked: () ->
+			ThreeDComponentView.prototype.clicked.apply(this, arguments)
+			@model.set("active", true)
 
 		render: () ->
 			ThreeDComponentView.prototype.render.apply(@, arguments)

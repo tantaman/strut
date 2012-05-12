@@ -7,22 +7,15 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
   return Backbone.View.extend({
     className: "transitionEditor",
     events: {
-      "click": "clicked",
-      "click *[data-option]": "buttonChosen"
+      "click": "clicked"
     },
     scale: window.slideConfig.size.width / 150,
     initialize: function() {
       var _this = this;
       this.name = "Transition Editor";
       this._snapshots = [];
-      $(window).resize(function() {
+      return $(window).resize(function() {
         return _this.resized();
-      });
-      return this.buttonBarView = new ButtonBarView({
-        model: new ButtonBarModel({
-          deck: this.model
-        }),
-        el: this.el
       });
     },
     show: function() {
@@ -43,18 +36,6 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
         if (slide.get("selected")) return slide.set("selected", false);
       });
     },
-    buttonChosen: function(e) {
-      var option;
-      option = $(e.currentTarget).attr("data-option");
-      switch (option) {
-        case "slideEditor":
-          return this.$el.trigger("changePerspective", {
-            perspective: "slideEditor"
-          });
-        case "preview":
-          return this.$el.trigger("preview");
-      }
-    },
     _disposeOldView: function() {
       this._snapshots.forEach(function(snapshot) {
         return snapshot.remove();
@@ -63,6 +44,12 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
     },
     render: function() {
       this.$el.html(Templates.TransitionEditor());
+      this.buttonBarView = new ButtonBarView({
+        model: new ButtonBarModel({
+          deck: this.model
+        }),
+        el: this.$el.find(".navbar")
+      });
       this.buttonBarView.render();
       this._partialRender();
       this.resized();

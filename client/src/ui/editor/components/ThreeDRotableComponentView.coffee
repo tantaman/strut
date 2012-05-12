@@ -4,6 +4,7 @@
 define(["./ComponentView",
 		"../Templates"],
 (ComponentView) ->
+	twoPI = Math.PI * 2
 	ComponentView.extend(
 		transforms: ["rotateX", "rotateY", "rotateZ", "scale"]
 		# TODO: make this junk less verbose
@@ -24,13 +25,13 @@ define(["./ComponentView",
 		# We could just dynamically generate all these methods instead of 
 		# writing them by hand...
 		rotateX: (e, deltas) ->
-			rot = @_calcRot(deltas)
-			@model.set("rotateX", @_initialRotX + rot - @_rotXOffset)
+			rot = (deltas.dy * .02) % twoPI
+			@model.set("rotateX", @_initialRotX + rot)
 			@_setUpdatedTransform()
 
 		rotateY: (e, deltas) ->
-			rot = @_calcRot(deltas)
-			@model.set("rotateY", @_initialRotY + rot - @_rotYOffset)
+			rot = (deltas.dx * .02) % twoPI
+			@model.set("rotateY", @_initialRotY + rot)
 			@_setUpdatedTransform()
 
 		rotateZ: (e, deltas) ->

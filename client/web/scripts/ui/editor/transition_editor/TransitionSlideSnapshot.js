@@ -6,6 +6,13 @@
 define(["../components/ThreeDRotableComponentView", "../Templates", "../raster/SlideDrawer", "css!../res/css/TransitionSlideSnapshot.css"], function(ThreeDComponentView, Templates, SlideDrawer, empty) {
   return ThreeDComponentView.extend({
     className: "component transitionSlideSnapshot",
+    events: function() {
+      var parentEvents;
+      parentEvents = ThreeDComponentView.prototype.events();
+      return _.extend(parentEvents, {
+        "click": "clicked"
+      });
+    },
     initialize: function() {
       return ThreeDComponentView.prototype.initialize.apply(this, arguments);
     },
@@ -13,6 +20,10 @@ define(["../components/ThreeDRotableComponentView", "../Templates", "../raster/S
       ThreeDComponentView.prototype.remove.call(this, true);
       if (this.slideDrawer != null) this.slideDrawer.dispose();
       return this.model.set("selected", false);
+    },
+    clicked: function() {
+      ThreeDComponentView.prototype.clicked.apply(this, arguments);
+      return this.model.set("active", true);
     },
     render: function() {
       var g2d,

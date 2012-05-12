@@ -110,6 +110,7 @@
                     setDirection('none');
                 });
                 el.keypress(function(e) {
+                    settings.mask = ''; // !!!
                     if (el.val() == settings.mask) el.val(value);
                     var sText = getSelectedText();
                     if (sText != '') {
@@ -179,6 +180,7 @@
                     return '';
                 }
                 function setValue(a, b) {
+                    settings.mask = ''; // !!!
                     if (a >= settings.min && a <= settings.max) {
                         value = b;
                     } el.val(value);

@@ -9,7 +9,7 @@ define(["vendor/backbone",
 		className: "pictureGrabber modal"
 		events:
 			"click .ok": "okClicked"
-			"keypress input[name='imageUrl']": "urlChanged"
+			"keyup input[name='imageUrl']": "urlChanged"
 			"paste input[name='imageUrl']": "urlChanged"
 
 		initialize: () ->

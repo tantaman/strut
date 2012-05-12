@@ -20,14 +20,22 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
     },
     show: function() {
       this.hidden = false;
-      return this.$el.removeClass("disp-none");
+      this.$el.removeClass("disp-none");
+      if (this.hiddenActiveChange != null) {
+        this.operatingTable.setModel(this.hiddenActiveChange);
+        return this.hiddenActiveChange = null;
+      }
     },
     hide: function() {
       this.hidden = true;
       return this.$el.addClass("disp-none");
     },
     _activeSlideChanged: function(model, newSlide) {
-      if (!this.hidden) return this.operatingTable.setModel(newSlide);
+      if (!this.hidden) {
+        return this.operatingTable.setModel(newSlide);
+      } else {
+        return this.hiddenActiveChange = newSlide;
+      }
     },
     render: function() {
       var $items, $mainContent, pictureGrabber;

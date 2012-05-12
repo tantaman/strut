@@ -12,7 +12,6 @@ define(["vendor/backbone",
 		className: "transitionEditor"
 		events:
 			"click": "clicked"
-			"click *[data-option]": "buttonChosen"
 		scale: window.slideConfig.size.width/150 # TODO: set up some glob config...
 		# that has slide sizes and thumbnail sizes and so on
 		initialize: () ->
@@ -21,11 +20,6 @@ define(["vendor/backbone",
 			$(window).resize(() =>
 				@resized()
 			)
-
-			@buttonBarView = new ButtonBarView({
-				model: new ButtonBarModel({deck: @model}),
-				el: @el
-			})
 			
 		show: () ->
 			@hidden = false
@@ -48,12 +42,6 @@ define(["vendor/backbone",
 					slide.set("selected", false)
 			)
 
-		buttonChosen: (e) ->
-			option = $(e.currentTarget).attr("data-option")
-			switch option
-				when "slideEditor" then @$el.trigger("changePerspective", {perspective: "slideEditor"})
-				when "preview" then @$el.trigger("preview")
-
 		_disposeOldView: () ->
 			@_snapshots.forEach((snapshot) ->
 				snapshot.remove()
@@ -62,6 +50,12 @@ define(["vendor/backbone",
 
 		render: () ->
 			@$el.html(Templates.TransitionEditor())
+
+			@buttonBarView = new ButtonBarView({
+				model: new ButtonBarModel({deck: @model}),
+				el: @$el.find(".navbar")
+			})
+			
 			@buttonBarView.render()
 			@_partialRender()
 			@resized()

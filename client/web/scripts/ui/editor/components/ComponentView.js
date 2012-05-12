@@ -32,7 +32,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this._mousemove = this.mousemove.bind(this);
       $(document).bind("mouseup", this._mouseup);
       $(document).bind("mousemove", this._mousemove);
-      return this._deltaDrags = [];
+      this._deltaDrags = [];
+      return this.model.on("rerender", this._setUpdatedTransform, this);
     },
     _selectionChanged: function(model, selected) {
       if (selected) {
@@ -125,7 +126,6 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return transformStr;
     },
     mousedown: function(e) {
-      console.log("Setting self to selected");
       this.model.set("selected", true);
       this._dragging = true;
       return this._prevPos = {
@@ -150,7 +150,6 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return Templates.Component;
     },
     _unrender: function() {
-      console.log("Unrendering");
       return this.remove(true);
     },
     remove: function(keepModel) {

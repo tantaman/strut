@@ -1,6 +1,7 @@
 define(["vendor/backbone"],
 (Backbone) ->
 	toDeg = 180 / Math.PI
+	silent = {silent: true}
 	Backbone.Model.extend(
 		initialize: () ->
 			deck = @get("deck")
@@ -17,6 +18,7 @@ define(["vendor/backbone"],
 				slide.on("change:rotateX", @_slideRotationChanged, @)
 				slide.on("change:rotateY", @_slideRotationChanged, @)
 				slide.on("change:rotateZ", @_slideRotationChanged, @)
+				@_slideRotationChanged(slide)
 
 		_slideRotationChanged: (slide, value) ->
 			@trigger("change:slideRotations", @,
@@ -31,8 +33,20 @@ define(["vendor/backbone"],
 			else
 				[0,0,0]
 
-		changeSlideRotations: () ->
+		changeSlideRotations: (x,y,z) ->
 			# Silently set the rotations on the active slide
+			slide = @_lastActive
+			if slide?
+				toSet = {}
+				if x?
+					toSet.rotateX = x / toDeg
+				if y?
+					toSet.rotateY = y / toDeg
+				if z?
+					toSet.rotateZ = z / toDeg
+				slide.set(toSet, silent)
+				slide.trigger("rerender")
+
 
 		constructor: `function TransitionEditorButtonBarModel() {
 			Backbone.Model.prototype.constructor.apply(this, arguments);

@@ -4,6 +4,8 @@
 */
 
 define(["./ComponentView", "../Templates"], function(ComponentView) {
+  var twoPI;
+  twoPI = Math.PI * 2;
   return ComponentView.extend({
     transforms: ["rotateX", "rotateY", "rotateZ", "scale"],
     events: function() {
@@ -23,14 +25,14 @@ define(["./ComponentView", "../Templates"], function(ComponentView) {
     },
     rotateX: function(e, deltas) {
       var rot;
-      rot = this._calcRot(deltas);
-      this.model.set("rotateX", this._initialRotX + rot - this._rotXOffset);
+      rot = (deltas.dy * .02) % twoPI;
+      this.model.set("rotateX", this._initialRotX + rot);
       return this._setUpdatedTransform();
     },
     rotateY: function(e, deltas) {
       var rot;
-      rot = this._calcRot(deltas);
-      this.model.set("rotateY", this._initialRotY + rot - this._rotYOffset);
+      rot = (deltas.dx * .02) % twoPI;
+      this.model.set("rotateY", this._initialRotY + rot);
       return this._setUpdatedTransform();
     },
     rotateZ: function(e, deltas) {
