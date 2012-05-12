@@ -3,6 +3,9 @@
 ###
 define(["common/Calcium", "./Slide"],
 (Backbone, Slide) ->
+	slideComparator = (l, r) ->
+		l.get("num") - r.get("num")
+
 	Backbone.Collection.extend(
 		model: Slide
 		initialize: () ->
@@ -13,5 +16,10 @@ define(["common/Calcium", "./Slide"],
 			@models.forEach((model, idx) ->
 				model.set("num", idx)
 			)
+
+		sort: (opts) ->
+			opts or (opts = {})
+			@models.sort(slideComparator)
+			console.log @models
 	)
 )

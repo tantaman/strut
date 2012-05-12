@@ -4,6 +4,10 @@
 */
 
 define(["common/Calcium", "./Slide"], function(Backbone, Slide) {
+  var slideComparator;
+  slideComparator = function(l, r) {
+    return l.get("num") - r.get("num");
+  };
   return Backbone.Collection.extend({
     model: Slide,
     initialize: function() {
@@ -14,6 +18,11 @@ define(["common/Calcium", "./Slide"], function(Backbone, Slide) {
       return this.models.forEach(function(model, idx) {
         return model.set("num", idx);
       });
+    },
+    sort: function(opts) {
+      opts || (opts = {});
+      this.models.sort(slideComparator);
+      return console.log(this.models);
     }
   });
 });

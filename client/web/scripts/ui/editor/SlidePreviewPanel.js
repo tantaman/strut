@@ -6,6 +6,9 @@
 define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot) {
   return Backbone.View.extend({
     className: "slidePreviewPanel",
+    events: {
+      "sortstop": "sortstop"
+    },
     initialize: function() {
       var slideCollection;
       slideCollection = this.model.get("slides");
@@ -42,7 +45,17 @@ define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.c
           return _this._slideCreated(slide);
         });
       }
+      this.$el.sortable();
       return this.$el;
+    },
+    sortstop: function(e, ui) {
+      var _this = this;
+      this.$el.children().each(function(idx, elem) {
+        return $(elem).data("jsView").model.set("num", idx);
+      });
+      return this.model.get("slides").sort({
+        silent: true
+      });
     },
     remove: function() {
       Backbone.View.prototype.remove.apply(this, arguments);

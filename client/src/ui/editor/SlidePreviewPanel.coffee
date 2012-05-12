@@ -7,6 +7,8 @@ define(["vendor/backbone",
 (Backbone, SlideSnapshot) ->
 	Backbone.View.extend(
 		className: "slidePreviewPanel"
+		events:
+			"sortstop": "sortstop"
 		initialize: () ->
 			slideCollection = @model.get("slides")
 			slideCollection.on("add", @_slideCreated, @)
@@ -35,7 +37,15 @@ define(["vendor/backbone",
 				slides.each((slide) =>
 					@_slideCreated(slide)
 				)
+
+			@$el.sortable()
 			@$el
+
+		sortstop: (e, ui) ->
+			@$el.children().each((idx, elem) =>
+				$(elem).data("jsView").model.set("num", idx)
+			)
+			@model.get("slides").sort({silent: true})
 
 		remove: () ->
 			Backbone.View.prototype.remove.apply(this, arguments)

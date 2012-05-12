@@ -28,6 +28,7 @@ define(["vendor/backbone",
 		remove: () ->
 			@slideDrawer.dispose()
 			@off()
+			@$el.data("jsView", null)
 			Backbone.View.prototype.remove.apply(@, arguments)
 
 		_activated: (model, value) ->
@@ -50,6 +51,8 @@ define(["vendor/backbone",
 
 			if @model.get("active")
 				@$el.addClass("active")
+
+			@$el.data("jsView", @)
 
 			@$el
 	)

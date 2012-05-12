@@ -25,6 +25,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
     remove: function() {
       this.slideDrawer.dispose();
       this.off();
+      this.$el.data("jsView", null);
       return Backbone.View.prototype.remove.apply(this, arguments);
     },
     _activated: function(model, value) {
@@ -46,6 +47,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       this.slideDrawer = new SlideDrawer(this.model, g2d);
       this.slideDrawer.repaint();
       if (this.model.get("active")) this.$el.addClass("active");
+      this.$el.data("jsView", this);
       return this.$el;
     }
   });
