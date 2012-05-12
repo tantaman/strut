@@ -11,21 +11,15 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
     },
     scale: window.slideConfig.size.width / 150,
     initialize: function() {
-      var _this = this;
       this.name = "Transition Editor";
-      this._snapshots = [];
-      return $(window).resize(function() {
-        return _this.resized();
-      });
+      return this._snapshots = [];
     },
     show: function() {
       this.hidden = false;
       this.$el.removeClass("disp-none");
       return this._partialRender();
     },
-    resized: function() {
-      return this.$el.css("height", window.innerHeight - 80);
-    },
+    resized: function() {},
     hide: function() {
       this.hidden = true;
       this._disposeOldView();

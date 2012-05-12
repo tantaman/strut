@@ -39,7 +39,7 @@ define(["../components/ThreeDRotableComponentView", "../Templates", "../raster/S
       });
       this.$el.find(".smartspinner[data-name='depth']").spinit({
         callback: function(val) {
-          return _this.model.set("z", -val);
+          return _this.model.set("z", -1 * val);
         },
         mask: "Depth",
         height: 22,

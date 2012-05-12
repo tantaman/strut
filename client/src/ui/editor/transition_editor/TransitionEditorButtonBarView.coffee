@@ -23,6 +23,29 @@ define(["../button_bar/AbstractButtonBarView",
 		preview: (e) ->
 			@$el.trigger("preview")
 
+			# ahh... so now I understand css3 transforms a lot better
+			# and have hit their limitations.
+		lookDownZ: (e) ->
+			#@$el.find(".cameraControls .active").removeClass("active")
+			#@$el.find("[data-option='lookDownZ']").addClass("active")
+
+			#$t = @$el.parents(".transitionEditor").children(".transitionSlides")
+			#$t.css(window.browserPrefix + "transform", "")
+
+		lookDownY: (e) ->
+			#@$el.find(".cameraControls .active").removeClass("active")
+			#@$el.find("[data-option='lookDownY']").addClass("active")
+
+			#$t = @$el.parents(".transitionEditor").children(".transitionSlides")
+			#$t.css(window.browserPrefix + "transform", "rotateX(90deg)")
+
+		lookDownX: (e) ->
+			#@$el.find(".cameraControls .active").removeClass("active")
+			#@$el.find("[data-option='lookDownX']").addClass("active")
+
+			#@$el.parents(".transitionEditor").children(".transitionSlides")
+			#	.css(window.browserPrefix + "transform", "rotateY(90deg)")
+
 	AbstractButtonBarView.extend(
 		events: () ->
 			"keyup *[data-option]": "optionChosen"

@@ -5,3 +5,7 @@
 .underline {
 	text-decoration: underline;
 }
+
+html, body, .editor, .perspectives-container {
+	height: 100%;
+}

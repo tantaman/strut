@@ -25,7 +25,10 @@ define(["../button_bar/AbstractButtonBarView", "common/Math2"], function(Abstrac
     },
     preview: function(e) {
       return this.$el.trigger("preview");
-    }
+    },
+    lookDownZ: function(e) {},
+    lookDownY: function(e) {},
+    lookDownX: function(e) {}
   };
   return AbstractButtonBarView.extend({
     events: function() {

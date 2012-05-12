@@ -6,7 +6,7 @@ define(["vendor/Handlebars",
 			Handlebars.registerHelper("renderComponent", (componentModel) ->
 				result = ""
 
-				switch componentModel.constructor.name
+				switch componentModel.get("type")
 					when "ImageModel" then result = Templates.Image(componentModel.attributes)
 					when "TextBox" then result = Templates.TextBox(componentModel.attributes)
 

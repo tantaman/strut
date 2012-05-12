@@ -17,9 +17,9 @@ define(["vendor/backbone",
 		initialize: () ->
 			@name = "Transition Editor"
 			@_snapshots = []
-			$(window).resize(() =>
-				@resized()
-			)
+#			$(window).resize(() =>
+#				@resized()
+#			)
 			
 		show: () ->
 			@hidden = false
@@ -29,7 +29,7 @@ define(["vendor/backbone",
 		resized: () ->
 			# TODO: figure out the flow problems
 			# our content is all absolute so that is one issue.
-			@$el.css("height", window.innerHeight - 80)
+			#@$el.css("height", window.innerHeight - 80)
 
 		hide: () ->
 			@hidden = true

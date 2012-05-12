@@ -11,6 +11,18 @@
         <li>
           <span class="label label-inverse">Rot. Z:</span><input type="text" data-option="rotateZ"></input>
         </li>
+        <li class="divider-vertical">
+        </li>
+      </ul>
+      <ul class="nav cameraSettings">
+        <li>
+          <div class="btn-group cameraControls">
+            <button class="btn"><i class="icon-camera"></i></button>
+            <a class="btn active" data-option="lookDownZ">Z</a>
+            <a class="btn" data-option="lookDownY">Y</a>
+            <a class="btn" data-option="lookDownX">X</a>
+          </div>
+        </li>
       </ul>
     	<ul class="nav pull-right">
     		<li>
