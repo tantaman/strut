@@ -19,7 +19,23 @@ define(["common/Calcium", "./Slide"],
 
 		sort: (opts) ->
 			opts or (opts = {})
+
+			swapped = {}
+			@models.forEach((model,idx) =>
+				num = model.get("num")
+				if num isnt idx and not swapped[num]
+					swapped[num] = true
+					swapped[idx] = true
+					@_swapTransitionPositions(model, @models[num])
+			)
+
 			@models.sort(slideComparator)
-			console.log @models
+
+		_swapTransitionPositions: (l, r) ->
+			tempPosData = l.getPositionData()
+			silent =
+				silent: true
+			l.set(r.getPositionData(), silent)
+			r.set(tempPosData, silent)
 	)
 )

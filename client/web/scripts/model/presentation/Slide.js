@@ -40,6 +40,17 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
       component.on("change:selected", this.selectionChanged, this);
       return component.on("change", this.componentChanged, this);
     },
+    getPositionData: function() {
+      return {
+        x: this.attributes.x,
+        y: this.attributes.y,
+        z: this.attributes.z,
+        impScale: this.attributes.impScale,
+        rotateX: this.attributes.rotateX,
+        rotateY: this.attributes.rotateY,
+        rotateZ: this.attributes.rotateZ
+      };
+    },
     add: function(component) {
       this.attributes.components.push(component);
       this._registerWithComponent(component);

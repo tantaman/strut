@@ -36,6 +36,17 @@ define(["model/geom/SpatialObject",
 			component.on("change:selected", @selectionChanged, @)
 			component.on("change", @componentChanged, @)
 
+		getPositionData: () ->
+			{
+				x: @attributes.x
+				y: @attributes.y
+				z: @attributes.z
+				impScale: @attributes.impScale
+				rotateX: @attributes.rotateX
+				rotateY: @attributes.rotateY
+				rotateZ: @attributes.rotateZ
+			}
+
 		add: (component) ->
 			@attributes.components.push(component)
 			@_registerWithComponent(component)
