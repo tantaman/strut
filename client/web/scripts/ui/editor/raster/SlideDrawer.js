@@ -73,19 +73,52 @@ define(["common/Throttler"], function(Throttler) {
     };
 
     SlideDrawer.prototype.paintTextBox = function(textBox) {
+      var bbox, txtWidth;
       this.g2d.fillStyle = "#" + textBox.get("color");
       this.g2d.font = textBox.get("size") * this.scale + "px " + textBox.get("family");
-      return this.g2d.fillText(textBox.get("text"), textBox.get("x") * this.scale, textBox.get("y") * this.scale + textBox.get("size") * this.scale);
+      txtWidth = this.g2d.measureText(textBox.get("text")).width * this.scale;
+      bbox = {
+        x: textBox.get("x") * this.scale,
+        y: textBox.get("y") * this.scale,
+        width: txtWidth + txtWidth,
+        height: textBox.get("size") * this.scale
+      };
+      this.applyTransforms(textBox, bbox);
+      return this.g2d.fillText(textBox.get("text"), bbox.x, bbox.y + bbox.height);
     };
 
     SlideDrawer.prototype.paintImage = function(imageModel) {
-      var image,
-        _this = this;
-      image = new Image();
-      image.onload = function() {
-        return _this.g2d.drawImage(image, imageModel.get("x") * _this.scale, imageModel.get("y") * _this.scale, image.naturalWidth * _this.scale, image.naturalHeight * _this.scale);
+      return this._imageLoaded(imageModel.cachedImage, imageModel);
+    };
+
+    SlideDrawer.prototype._imageLoaded = function(image, imageModel) {
+      var bbox;
+      bbox = {
+        x: imageModel.get("x") * this.scale,
+        y: imageModel.get("y") * this.scale,
+        width: image.naturalWidth * this.scale,
+        height: image.naturalHeight * this.scale
       };
-      return image.src = imageModel.get("src");
+      this.applyTransforms(imageModel, bbox);
+      return this.g2d.drawImage(image, bbox.x, bbox.y, bbox.width, bbox.height);
+    };
+
+    SlideDrawer.prototype.applyTransforms = function(component, bbox) {
+      var rotation, scale, skewX, skewY, transform;
+      rotation = component.get("rotate");
+      this.g2d.translate(bbox.width / 2 + bbox.x, bbox.height / 2 + bbox.y);
+      if (rotation != null) this.g2d.rotate(rotation);
+      scale = component.get("scale");
+      if (scale != null) this.g2d.scale(scale, scale);
+      skewX = component.get("skewX");
+      skewY = component.get("skewY");
+      if (skewX || skewY) {
+        transform = [1, 0, 0, 1, 0, 0];
+        if (skewX) transform[2] = skewX;
+        if (skewY) transform[1] = skewY;
+        this.g2d.transform.apply(this.g2d, transform);
+      }
+      return this.g2d.translate(-1 * (bbox.width / 2 + bbox.x), -1 * (bbox.height / 2 + bbox.y));
     };
 
     SlideDrawer.prototype.paintTable = function() {};

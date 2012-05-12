@@ -57,18 +57,56 @@ define(["common/Throttler"],
 		paintTextBox: (textBox) ->
 			@g2d.fillStyle = "#" + textBox.get("color")
 			@g2d.font = textBox.get("size")*@scale + "px " + textBox.get("family")
-			@g2d.fillText(textBox.get("text"), textBox.get("x") * @scale, textBox.get("y") * @scale + textBox.get("size") * @scale)
+
+			txtWidth = @g2d.measureText(textBox.get("text")).width * @scale
+			bbox =
+				x: textBox.get("x") * @scale
+				y: textBox.get("y") * @scale
+				width: txtWidth + txtWidth # Hmm... why the heck do I ahve to do this?
+				height: textBox.get("size") * @scale
+
+			@applyTransforms(textBox, bbox)
+			@g2d.fillText(textBox.get("text"), bbox.x, bbox.y + bbox.height)
 
 		paintImage: (imageModel) ->
-			image = new Image()
-			# this should be cached...  or should we cache the image objects
-			# ourselves?
-			image.onload = () =>
-				@g2d.drawImage(image, imageModel.get("x") * @scale,
-									  imageModel.get("y") * @scale,
-									  image.naturalWidth * @scale,
-									  image.naturalHeight * @scale)
-			image.src = imageModel.get("src")
+			@_imageLoaded(imageModel.cachedImage, imageModel)
+
+		_imageLoaded: (image, imageModel) ->
+			bbox =
+				x: imageModel.get("x") * @scale
+				y: imageModel.get("y") * @scale
+				width: image.naturalWidth * @scale
+				height: image.naturalHeight * @scale
+			
+			@applyTransforms(imageModel, bbox)
+
+			@g2d.drawImage(image, bbox.x,
+								  bbox.y,
+								  bbox.width,
+								  bbox.height)
+
+		applyTransforms: (component, bbox) ->
+			rotation = component.get("rotate")
+			@g2d.translate(bbox.width/2 + bbox.x, bbox.height/2 + bbox.y)
+
+			if rotation?
+				@g2d.rotate(rotation)
+
+			scale = component.get("scale")
+			if scale?
+				@g2d.scale(scale, scale)
+
+			skewX = component.get("skewX")
+			skewY = component.get("skewY")
+			if skewX or skewY
+				transform = [1,0,0,1,0,0]
+				if skewX
+					transform[2] = skewX
+				if skewY
+					transform[1] = skewY
+				@g2d.transform.apply(@g2d, transform)
+			
+			@g2d.translate(-1 * (bbox.width/2 + bbox.x), -1 * (bbox.height/2 + bbox.y))
 
 		paintTable: () ->
 
