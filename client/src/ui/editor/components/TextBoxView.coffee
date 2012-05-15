@@ -60,6 +60,8 @@ define(["./ComponentView",
 				color: "#" + @model.get("color")
 				top: @model.get("y")
 				left: @model.get("x")
+				textDecoration: @model.get("decoration")
+				textAlign: @model.get("align")
 			})
 
 			@$el

@@ -78,7 +78,9 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
         fontStyle: this.model.get("style"),
         color: "#" + this.model.get("color"),
         top: this.model.get("y"),
-        left: this.model.get("x")
+        left: this.model.get("x"),
+        textDecoration: this.model.get("decoration"),
+        textAlign: this.model.get("align")
       });
       return this.$el;
     },
