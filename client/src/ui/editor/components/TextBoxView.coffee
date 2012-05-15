@@ -51,7 +51,7 @@ define(["./ComponentView",
 		render: () ->
 			ComponentView.prototype.render.call(@)
 			@$textEl = @$el.find(".content")
-			#@$el.text(@model.get("text"))
+			@$textEl.html(@model.get("text"))
 			@$el.css({
 				fontFamily: @model.get("family")
 				fontSize: @model.get("size")

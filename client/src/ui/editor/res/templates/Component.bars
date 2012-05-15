@@ -1,4 +1,4 @@
-<div class="content">{{text}}</div>
+<div class="content"></div>
 <span class="topLabel label" data-delta="skewX">Skew X</span>
 <span class="leftLabel label" data-delta="skewY">Skew Y</span>
 <span class="rightLabel label" data-delta="rotate">Rotate</span>
