@@ -58,6 +58,10 @@ define(["vendor/backbone"], function(Backbone) {
         z: 0
       };
     },
+    textAlign: function(value) {
+      this.set("textAlign", value);
+      if (this._activeIsTextbox()) return this.activeComponent.set("align", value);
+    },
     _activeIsTextbox: function() {
       return this.activeComponent && this.activeComponent.get("type") === "TextBox";
     },

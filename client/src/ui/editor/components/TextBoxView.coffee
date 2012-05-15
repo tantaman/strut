@@ -4,7 +4,7 @@
 define(["./ComponentView",
 		"../Templates"],
 (ComponentView, Templates) ->
-	styles = ["family", "size", "weight", "style", "color", "decoration"]
+	styles = ["family", "size", "weight", "style", "color", "decoration", "align"]
 	ComponentView.extend(
 		className: "component textBox"
 		tagName: "div"
@@ -41,9 +41,9 @@ define(["./ComponentView",
 		_styleChanged: (model, style, opts) ->
 			for key,value of opts.changes
 				if value
-					if key is "decoration"
+					if key is "decoration" or key is "align"
 						console.log "DECORATION CHANGE"
-						key = "textDecoration"
+						key = "text" + key.substring(0,1).toUpperCase() + key.substr(1)
 					else if key isnt "color"
 						key = "font" + key.substr(0,1).toUpperCase() + key.substr(1)
 					@$el.css(key, style)

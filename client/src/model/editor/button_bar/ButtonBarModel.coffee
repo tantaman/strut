@@ -60,6 +60,11 @@ define(["vendor/backbone"],
 				z: 0
 			}
 
+		textAlign: (value) ->
+			@set("textAlign", value)
+			if @_activeIsTextbox()
+				@activeComponent.set("align", value)
+
 		_activeIsTextbox: () ->
 			@activeComponent and @activeComponent.get("type") is "TextBox"
 

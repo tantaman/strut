@@ -45,6 +45,9 @@ define(["./AbstractButtonBarView",
 		preview: () ->
 			@$el.trigger("preview")
 
+		textAlign: (e) ->
+			@model.textAlign(e.currentTarget.dataset.value)
+
 	# dynamically generate the font setting handlers
 	fontSettings.forEach((setting) ->
 		longSetting = "font" + setting.substr(0,1).toUpperCase() + setting.substr(1)

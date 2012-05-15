@@ -46,6 +46,9 @@ define(["./AbstractButtonBarView", "model/editor/button_bar/ButtonBarModel", "mo
     },
     preview: function() {
       return this.$el.trigger("preview");
+    },
+    textAlign: function(e) {
+      return this.model.textAlign(e.currentTarget.dataset.value);
     }
   };
   fontSettings.forEach(function(setting) {

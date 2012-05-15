@@ -54,6 +54,14 @@
                         <a class="btn btn-small btn-inverse underline disabled fontButton" data-option="fontDecoration" data-value="underline">U</a>
                   </div>
             </li>
+            <li>
+                  <div class="btn-group menuBarOption normalBtns">
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="left"><i class="icon-align-left icon-white"></i></a>
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="center"><i class="icon-align-center icon-white"></i></a>
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="right"><i class="icon-align-right icon-white"></i></a>
+                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="justify"><i class="icon-align-justify icon-white"></i></a>
+                  </div>
+            </li>
             <li class="divider-vertical">
             </li>
             <li>

@@ -5,7 +5,7 @@
 
 define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
   var styles;
-  styles = ["family", "size", "weight", "style", "color", "decoration"];
+  styles = ["family", "size", "weight", "style", "color", "decoration", "align"];
   return ComponentView.extend({
     className: "component textBox",
     tagName: "div",
@@ -54,9 +54,9 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
       for (key in _ref) {
         value = _ref[key];
         if (value) {
-          if (key === "decoration") {
+          if (key === "decoration" || key === "align") {
             console.log("DECORATION CHANGE");
-            key = "textDecoration";
+            key = "text" + key.substring(0, 1).toUpperCase() + key.substr(1);
           } else if (key !== "color") {
             key = "font" + key.substr(0, 1).toUpperCase() + key.substr(1);
           }
