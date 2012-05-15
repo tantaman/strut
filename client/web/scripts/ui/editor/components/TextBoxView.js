@@ -70,6 +70,7 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
     render: function() {
       ComponentView.prototype.render.call(this);
       this.$textEl = this.$el.find(".content");
+      this.$textEl.html(this.model.get("text"));
       this.$el.css({
         fontFamily: this.model.get("family"),
         fontSize: this.model.get("size"),
