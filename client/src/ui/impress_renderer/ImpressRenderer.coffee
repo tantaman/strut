@@ -3,12 +3,13 @@ define(["vendor/Handlebars",
 (Handlebars, Templates) ->
 	class ImpressRenderer
 		constructor: () ->
-			Handlebars.registerHelper("renderComponent", (componentModel) ->
+			Handlebars.registerHelper("renderComponent", (componentModel) =>
 				result = ""
 
 				switch componentModel.get("type")
 					when "ImageModel" then result = Templates.Image(componentModel.attributes)
-					when "TextBox" then result = Templates.TextBox(componentModel.attributes)
+					when "TextBox" then result = Templates
+						.TextBox(@convertTextBoxData(componentModel.attributes))
 
 				new Handlebars.SafeString(result)
 			)
@@ -40,6 +41,11 @@ define(["vendor/Handlebars",
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
 				++cnt)
 			Templates.ImpressTemplate(deckAttrs)
+
+		convertTextBoxData: (attrs) ->
+			copy = _.extend({}, attrs)
+			copy.text = new Handlebars.SafeString(attrs.text)
+			copy
 
 	new ImpressRenderer()
 )

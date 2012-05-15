@@ -3,13 +3,14 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["common/Throttler"], function(Throttler) {
+define(["common/Throttler", "./TextBoxDrawer", "./ImageModelDrawer"], function(Throttler, TextBoxDrawer, ImageModelDrawer) {
   var SlideDrawer;
   return SlideDrawer = (function() {
 
     SlideDrawer.name = 'SlideDrawer';
 
     function SlideDrawer(model, g2d) {
+      var key, value, _ref;
       this.model = model;
       this.g2d = g2d;
       this.model.on("contentsChanged", this.repaint, this);
@@ -19,11 +20,26 @@ define(["common/Throttler"], function(Throttler) {
       };
       this.throttler = new Throttler(600, this);
       this.scale = this.size.width / slideConfig.size.width;
+      this.drawers = {
+        TextBox: new TextBoxDrawer(this.g2d),
+        ImageModel: new ImageModelDrawer(this.g2d)
+      };
+      _ref = this.drawers;
+      for (key in _ref) {
+        value = _ref[key];
+        value.scale = this.scale;
+      }
     }
 
     SlideDrawer.prototype.resized = function(newSize) {
+      var key, value, _ref;
       this.size = newSize;
       this.scale = this.size.width / slideConfig.size.width;
+      _ref = this.drawers;
+      for (key in _ref) {
+        value = _ref[key];
+        value.scale = this.scale;
+      }
       return this.repaint();
     };
 
@@ -42,86 +58,10 @@ define(["common/Throttler"], function(Throttler) {
         var type;
         type = component.get("type");
         _this.g2d.save();
-        /*
-        				# TODO: figure out correct translation to apply after transforms
-        				skewX = component.get("skewX")
-        				skewY = component.get("skewY")
-        				transform = [1,0,0,1,0,0]
-        				if skewX
-        					transform[1] = skewX
-        				if skewY
-        					transform[2] = skewY
-        				@g2d.transform.apply(@g2d, transform)
-        
-        				rotate = component.get("rotate")
-        				if rotate
-        					@g2d.rotate(rotate)
-        */
-
-        switch (type) {
-          case "TextBox":
-            _this.paintTextBox(component);
-            break;
-          case "ImageModel":
-            _this.paintImage(component);
-            break;
-          case "Table":
-            _this.paintTable(component);
-        }
+        _this.drawers[type].paint(component);
         return _this.g2d.restore();
       });
     };
-
-    SlideDrawer.prototype.paintTextBox = function(textBox) {
-      var bbox, txtWidth;
-      this.g2d.fillStyle = "#" + textBox.get("color");
-      this.g2d.font = textBox.get("size") * this.scale + "px " + textBox.get("family");
-      txtWidth = this.g2d.measureText(textBox.get("text")).width * this.scale;
-      bbox = {
-        x: textBox.get("x") * this.scale,
-        y: textBox.get("y") * this.scale,
-        width: txtWidth + txtWidth,
-        height: textBox.get("size") * this.scale
-      };
-      this.applyTransforms(textBox, bbox);
-      return this.g2d.fillText(textBox.get("text"), bbox.x, bbox.y + bbox.height);
-    };
-
-    SlideDrawer.prototype.paintImage = function(imageModel) {
-      return this._imageLoaded(imageModel.cachedImage, imageModel);
-    };
-
-    SlideDrawer.prototype._imageLoaded = function(image, imageModel) {
-      var bbox;
-      bbox = {
-        x: imageModel.get("x") * this.scale,
-        y: imageModel.get("y") * this.scale,
-        width: image.naturalWidth * this.scale,
-        height: image.naturalHeight * this.scale
-      };
-      this.applyTransforms(imageModel, bbox);
-      return this.g2d.drawImage(image, bbox.x, bbox.y, bbox.width, bbox.height);
-    };
-
-    SlideDrawer.prototype.applyTransforms = function(component, bbox) {
-      var rotation, scale, skewX, skewY, transform;
-      rotation = component.get("rotate");
-      this.g2d.translate(bbox.width / 2 + bbox.x, bbox.height / 2 + bbox.y);
-      if (rotation != null) this.g2d.rotate(rotation);
-      scale = component.get("scale");
-      if (scale != null) this.g2d.scale(scale, scale);
-      skewX = component.get("skewX");
-      skewY = component.get("skewY");
-      if (skewX || skewY) {
-        transform = [1, 0, 0, 1, 0, 0];
-        if (skewX) transform[2] = skewX;
-        if (skewY) transform[1] = skewY;
-        this.g2d.transform.apply(this.g2d, transform);
-      }
-      return this.g2d.translate(-1 * (bbox.width / 2 + bbox.x), -1 * (bbox.height / 2 + bbox.y));
-    };
-
-    SlideDrawer.prototype.paintTable = function() {};
 
     SlideDrawer.prototype.dispose = function() {
       return this.model.off(null, null, this);

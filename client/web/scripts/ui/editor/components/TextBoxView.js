@@ -36,7 +36,7 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
     },
     editCompleted: function() {
       var text;
-      text = this.$textEl.text();
+      text = this.$textEl.html();
       this.editing = false;
       if (text === "") {
         return this.remove();

@@ -28,7 +28,7 @@ define(["./ComponentView",
 			@editing = true
 
 		editCompleted: () ->
-			text = @$textEl.text()
+			text = @$textEl.html()
 			@editing = false
 			if text is ""
 				@remove()
