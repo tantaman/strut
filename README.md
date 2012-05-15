@@ -6,6 +6,9 @@ Strut
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
 I hope this project can also serve as an example of a browser based rich client as the project matures.
 
+Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
+And here is a video of the very first version of Strut: http://www.youtube.com/watch?v=zA5s8wwme44
+
 ### Prior Art ###
 
 Whats the difference between ```Strut``` and ```Impressionist```?
