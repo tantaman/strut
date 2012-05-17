@@ -47,6 +47,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     clicked: function(e) {
       this.$el.trigger("focused");
+      e.stopPropagation();
       return false;
     },
     removeClicked: function(e) {

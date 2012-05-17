@@ -40,6 +40,7 @@ define(["vendor/backbone",
 		slideRemoveClicked: (snapshot) ->
 			@model.removeSlide(snapshot.model)
 
+		# TODO: make a slidepreviewpanelmodel to handle all this stuff
 		cut: () ->
 			slide = @model.get("activeSlide")
 			if slide?
@@ -51,13 +52,18 @@ define(["vendor/backbone",
 		copy: () ->
 			slide = @model.get("activeSlide")
 			if slide?
+				console.log slide
 				@_clipboard.set("item", slide.clone())
 				false
 
 		paste: () ->
 			item = @_clipboard.get("item")
 			if item?
-				@model.addSlide(item.clone())
+				newItem = item.clone()
+				# TODO: h4x hax
+				newItem.set("x", null)
+				newItem.set("y", null)
+				@model.addSlide(newItem)
 
 		render: () ->
 			slides = @model.get("slides")

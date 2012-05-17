@@ -38,6 +38,8 @@ define(["vendor/backbone",
 				@$el.find(".editable").removeClass("editable").attr("contenteditable", false)
 					.trigger("editComplete")
 
+			@_focus()
+
 		# looks like we'll need an OperatingTableModel soon...
 		cut: () ->
 			item = @model.lastSelection
@@ -51,6 +53,7 @@ define(["vendor/backbone",
 			item = @model.lastSelection
 			if (item?)
 				newItem = item.clone()
+				# TODO: h4x hax
 				newItem.set("x", item.get("x") + 25)
 				newItem.set("selected", false)
 				@_clipboard.set("item", newItem)

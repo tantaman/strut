@@ -29,8 +29,9 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
         this.model.get("components").forEach(function(component) {
           if (component.get("selected")) return component.set("selected", false);
         });
-        return this.$el.find(".editable").removeClass("editable").attr("contenteditable", false).trigger("editComplete");
+        this.$el.find(".editable").removeClass("editable").attr("contenteditable", false).trigger("editComplete");
       }
+      return this._focus();
     },
     cut: function() {
       var item;

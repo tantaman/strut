@@ -51,6 +51,7 @@ define(["vendor/backbone",
 
 		clicked: (e) ->
 			@$el.trigger("focused")
+			e.stopPropagation()
 			false
 
 		removeClicked: (e) ->

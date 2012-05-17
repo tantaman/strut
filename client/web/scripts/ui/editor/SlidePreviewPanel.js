@@ -53,14 +53,20 @@ define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactio
       var slide;
       slide = this.model.get("activeSlide");
       if (slide != null) {
+        console.log(slide);
         this._clipboard.set("item", slide.clone());
         return false;
       }
     },
     paste: function() {
-      var item;
+      var item, newItem;
       item = this._clipboard.get("item");
-      if (item != null) return this.model.addSlide(item.clone());
+      if (item != null) {
+        newItem = item.clone();
+        newItem.set("x", null);
+        newItem.set("y", null);
+        return this.model.addSlide(newItem);
+      }
     },
     render: function() {
       var slides,
