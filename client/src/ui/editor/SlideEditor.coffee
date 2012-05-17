@@ -7,8 +7,9 @@ define(["vendor/backbone", "./Templates",
 		"common/EventEmitter",
 		"css!./res/css/SlideEditor.css",
 		"./button_bar/ButtonBarView",
-		"ui/widgets/PictureGrabber"],
-(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber) ->
+		"ui/widgets/PictureGrabber",
+		"vendor/keymaster"],
+(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) ->
 
 	Backbone.View.extend(
 		className: "slideEditor"
@@ -30,6 +31,24 @@ define(["vendor/backbone", "./Templates",
 			if @hiddenActiveChange?
 				@operatingTable.setModel(@hiddenActiveChange)
 				@hiddenActiveChange = null
+
+		cut: () ->
+			component = @[Keymaster.getScope()]
+			if component?
+				component.cut()
+			true
+
+		copy: () ->
+			component = @[Keymaster.getScope()]
+			if component?
+				component.copy()
+			true
+
+		paste: () ->
+			component = @[Keymaster.getScope()]
+			if component?
+				component.paste()
+			true
 
 		hide: () ->
 			@hidden = true

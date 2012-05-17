@@ -143,6 +143,10 @@ define(["common/Calcium", "./SlideCollection",
 			@undoHistory.push(action)
 			slide
 
+		addSlide: (slide) ->
+			# undo func?
+			@get("slides").add(slide)
+
 		undo: () ->
 			@undoHistory.undo()
 

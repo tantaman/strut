@@ -1,15 +1,23 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone", "./Templates",
+define(["vendor/backbone",
+		"./Templates",
 		"./components/ComponentViewFactory",
+		"vendor/keymaster",
+		"ui/interactions/CutCopyPasteTrait",
+		"model/system/Clipboard"
 		"css!./res/css/OperatingTable.css"],
-(Backbone, Templates, ComponentViewFactory, empty) ->
+(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteTrait, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"
 		events:
 			"click": "clicked"
+			"focused": "_focus"
 		initialize: () ->
+			# Set up keymaster events
+			CutCopyPasteTrait.applyTo(@, "operatingTable")
+			@_clipboard = new Clipboard()
 
 		setModel: (slide) ->
 			prevModel = @model
@@ -29,6 +37,38 @@ define(["vendor/backbone", "./Templates",
 				)
 				@$el.find(".editable").removeClass("editable").attr("contenteditable", false)
 					.trigger("editComplete")
+
+		# looks like we'll need an OperatingTableModel soon...
+		cut: () ->
+			item = @model.lastSelection
+			if (item?)
+				@_clipboard.set("item", item)
+				@model.remove(item)
+				item.set("selected", false)
+				false
+
+		copy: () ->
+			item = @model.lastSelection
+			if (item?)
+				newItem = item.clone()
+				newItem.set("x", item.get("x") + 25)
+				newItem.set("selected", false)
+				@_clipboard.set("item", newItem)
+				false
+
+		paste: () ->
+			if @$el.find(".editable").length isnt 0
+				# not in edit mode.  Pretty shitty way to determine that.
+				true
+			else
+				item = @_clipboard.get("item")
+				if item?
+					@model.add(item.clone())
+				false
+
+		_focus: () ->
+			if Keymaster.getScope() isnt "operatingTable"
+				Keymaster.setScope("operatingTable")
 
 		_componentAdded: (model, component) ->
 			view = ComponentViewFactory.createView(component)

@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(SpatialObject, CompnentFactory) {
+define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFactory"], function(Backbone, SpatialObject, CompnentFactory) {
   return SpatialObject.extend({
     initialize: function() {
       var components, hydratedComps,
@@ -16,14 +16,19 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
         this.set("components", hydratedComps);
         components.forEach(function(rawComp) {
           var comp;
-          switch (rawComp.type) {
-            case "ImageModel":
-              comp = CompnentFactory.createImage(rawComp);
-              hydratedComps.push(comp);
-              break;
-            case "TextBox":
-              comp = CompnentFactory.createTextBox(rawComp);
-              hydratedComps.push(comp);
+          if (rawComp instanceof Backbone.Model) {
+            comp = rawComp.clone();
+            hydratedComps.push(comp);
+          } else {
+            switch (rawComp.type) {
+              case "ImageModel":
+                comp = CompnentFactory.createImage(rawComp);
+                hydratedComps.push(comp);
+                break;
+              case "TextBox":
+                comp = CompnentFactory.createTextBox(rawComp);
+                hydratedComps.push(comp);
+            }
           }
           return _this._registerWithComponent(comp);
         });
@@ -72,6 +77,7 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
         this.attributes.components.splice(idx, 1);
         this.trigger("contentsChanged");
         this.trigger("change:components.remove", this, component);
+        component.trigger("unrender");
         return component.off(null, null, this);
       }
     },
@@ -79,20 +85,20 @@ define(["model/geom/SpatialObject", "./components/ComponentFactory"], function(S
       return this.trigger("contentsChanged");
     },
     unselectComponents: function() {
-      if (this._lastSelection) return this._lastSelection.set("selected", false);
+      if (this.lastSelection) return this.lastSelection.set("selected", false);
     },
     selectionChanged: function(model, selected) {
       if (selected) {
-        if (this._lastSelection !== model) {
+        if (this.lastSelection !== model) {
           this.attributes.components.forEach(function(component) {
             if (component !== model) return component.set("selected", false);
           });
-          this._lastSelection = model;
+          this.lastSelection = model;
         }
         return this.trigger("change:activeComponent", this, model, selected);
       } else {
         this.trigger("change:activeComponent", this, null);
-        return this._lastSelection = null;
+        return this.lastSelection = null;
       }
     },
     constructor: function Slide() {

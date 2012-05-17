@@ -3,17 +3,20 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot) {
+define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactions/CutCopyPasteTrait", "model/system/Clipboard", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot, Keymaster, CutCopyPasteTrait, Clipboard, empty) {
   return Backbone.View.extend({
     className: "slidePreviewPanel",
     events: {
-      "sortstop": "sortstop"
+      "sortstop": "sortstop",
+      "click": "clicked"
     },
     initialize: function() {
       var slideCollection;
       slideCollection = this.model.get("slides");
       slideCollection.on("add", this._slideCreated, this);
-      return slideCollection.on("reset", this._slidesReset, this);
+      slideCollection.on("reset", this._slidesReset, this);
+      CutCopyPasteTrait.applyTo(this, "slidePreviewPanel");
+      return this._clipboard = new Clipboard();
     },
     _slideCreated: function(slide) {
       var snapshot;
@@ -36,6 +39,29 @@ define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.c
     slideRemoveClicked: function(snapshot) {
       return this.model.removeSlide(snapshot.model);
     },
+    cut: function() {
+      var slide;
+      slide = this.model.get("activeSlide");
+      if (slide != null) {
+        this._clipboard.set("item", slide);
+        this.model.removeSlide(slide);
+        slide.set("selected", false);
+        return false;
+      }
+    },
+    copy: function() {
+      var slide;
+      slide = this.model.get("activeSlide");
+      if (slide != null) {
+        this._clipboard.set("item", slide.clone());
+        return false;
+      }
+    },
+    paste: function() {
+      var item;
+      item = this._clipboard.get("item");
+      if (item != null) return this.model.addSlide(item.clone());
+    },
     render: function() {
       var slides,
         _this = this;
@@ -56,6 +82,11 @@ define(["vendor/backbone", "./SlideSnapshot", "css!./res/css/SlidePreviewPanel.c
       return this.model.get("slides").sort({
         silent: true
       });
+    },
+    clicked: function() {
+      if (Keymaster.getScope() !== "slidePreviewPanel") {
+        return Keymaster.setScope("slidePreviewPanel");
+      }
     },
     remove: function() {
       Backbone.View.prototype.remove.apply(this, arguments);

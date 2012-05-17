@@ -9,7 +9,7 @@ define(["vendor/backbone",
 		"ui/widgets/RawTextImporter",
 		"ui/widgets/OpenDialog",
 		"ui/widgets/SaveAsDialog",
-		"storage/FileStorage",
+		"storage/FileStorage"
 		"css!./res/css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
 FileStorage, empty) ->
@@ -44,9 +44,23 @@ FileStorage, empty) ->
 			@model.undo()
 		redo: (e) ->
 			@model.redo()
+
 		cut: (e) ->
+			perspective = @perspectives[@activePerspective]
+			if perspective?
+				perspective.cut()
+
 		copy: (e) ->
+			perspective = @perspectives[@activePerspective]
+			if perspective?
+				perspective.copy()
+
 		paste: (e) ->
+			perspective = @perspectives[@activePerspective]
+			if perspective?
+				perspective.paste()
+
+
 		transitionEditor: (e) ->
 			@changePerspective(e, {perspective: "transitionEditor"})
 		slideEditor: (e) ->

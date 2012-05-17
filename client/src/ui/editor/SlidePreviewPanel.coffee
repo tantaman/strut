@@ -3,16 +3,25 @@
 ###
 define(["vendor/backbone",
 		"./SlideSnapshot",
+		"vendor/keymaster",
+		"ui/interactions/CutCopyPasteTrait",
+		"model/system/Clipboard"
 		"css!./res/css/SlidePreviewPanel.css"],
-(Backbone, SlideSnapshot) ->
+(Backbone, SlideSnapshot, Keymaster, CutCopyPasteTrait, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "slidePreviewPanel"
 		events:
 			"sortstop": "sortstop"
+			"click": "clicked"
+
 		initialize: () ->
 			slideCollection = @model.get("slides")
 			slideCollection.on("add", @_slideCreated, @)
 			slideCollection.on("reset", @_slidesReset, @)
+
+			# Set up keymaster events
+			CutCopyPasteTrait.applyTo(@, "slidePreviewPanel")
+			@_clipboard = new Clipboard()
 
 		_slideCreated: (slide) ->
 			snapshot = new SlideSnapshot({model: slide})
@@ -31,6 +40,25 @@ define(["vendor/backbone",
 		slideRemoveClicked: (snapshot) ->
 			@model.removeSlide(snapshot.model)
 
+		cut: () ->
+			slide = @model.get("activeSlide")
+			if slide?
+				@_clipboard.set("item", slide)
+				@model.removeSlide(slide)
+				slide.set("selected", false)
+				false
+
+		copy: () ->
+			slide = @model.get("activeSlide")
+			if slide?
+				@_clipboard.set("item", slide.clone())
+				false
+
+		paste: () ->
+			item = @_clipboard.get("item")
+			if item?
+				@model.addSlide(item.clone())
+
 		render: () ->
 			slides = @model.get("slides")
 			if slides?
@@ -46,6 +74,10 @@ define(["vendor/backbone",
 				$(elem).data("jsView").model.set("num", idx)
 			)
 			@model.get("slides").sort({silent: true})
+
+		clicked: () ->
+			if Keymaster.getScope() isnt "slidePreviewPanel"
+				Keymaster.setScope("slidePreviewPanel")
 
 		remove: () ->
 			Backbone.View.prototype.remove.apply(this, arguments)

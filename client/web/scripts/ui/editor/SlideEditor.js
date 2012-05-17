@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/PictureGrabber"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber) {
+define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/PictureGrabber", "vendor/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) {
   return Backbone.View.extend({
     className: "slideEditor",
     initialize: function() {
@@ -25,6 +25,24 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
         this.operatingTable.setModel(this.hiddenActiveChange);
         return this.hiddenActiveChange = null;
       }
+    },
+    cut: function() {
+      var component;
+      component = this[Keymaster.getScope()];
+      if (component != null) component.cut();
+      return true;
+    },
+    copy: function() {
+      var component;
+      component = this[Keymaster.getScope()];
+      if (component != null) component.copy();
+      return true;
+    },
+    paste: function() {
+      var component;
+      component = this[Keymaster.getScope()];
+      if (component != null) component.paste();
+      return true;
     },
     hide: function() {
       this.hidden = true;

@@ -147,6 +147,9 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       this.undoHistory.push(action);
       return slide;
     },
+    addSlide: function(slide) {
+      return this.get("slides").add(slide);
+    },
     undo: function() {
       return this.undoHistory.undo();
     },

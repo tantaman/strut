@@ -44,9 +44,21 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
     redo: function(e) {
       return this.model.redo();
     },
-    cut: function(e) {},
-    copy: function(e) {},
-    paste: function(e) {},
+    cut: function(e) {
+      var perspective;
+      perspective = this.perspectives[this.activePerspective];
+      if (perspective != null) return perspective.cut();
+    },
+    copy: function(e) {
+      var perspective;
+      perspective = this.perspectives[this.activePerspective];
+      if (perspective != null) return perspective.copy();
+    },
+    paste: function(e) {
+      var perspective;
+      perspective = this.perspectives[this.activePerspective];
+      if (perspective != null) return perspective.paste();
+    },
     transitionEditor: function(e) {
       return this.changePerspective(e, {
         perspective: "transitionEditor"
