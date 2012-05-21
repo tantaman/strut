@@ -5,10 +5,10 @@ define(["vendor/backbone",
 		"./Templates",
 		"./components/ComponentViewFactory",
 		"vendor/keymaster",
-		"ui/interactions/CutCopyPasteTrait",
+		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard"
 		"css!./res/css/OperatingTable.css"],
-(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteTrait, Clipboard, empty) ->
+(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"
 		events:
@@ -16,7 +16,7 @@ define(["vendor/backbone",
 			"focused": "_focus"
 		initialize: () ->
 			# Set up keymaster events
-			CutCopyPasteTrait.applyTo(@, "operatingTable")
+			CutCopyPasteBindings.applyTo(@, "operatingTable")
 			@_clipboard = new Clipboard()
 
 		setModel: (slide) ->

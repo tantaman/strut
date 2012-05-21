@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "vendor/keymaster", "ui/interactions/CutCopyPasteTrait", "model/system/Clipboard", "css!./res/css/OperatingTable.css"], function(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteTrait, Clipboard, empty) {
+define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "vendor/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "css!./res/css/OperatingTable.css"], function(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) {
   return Backbone.View.extend({
     className: "operatingTable",
     events: {
@@ -11,7 +11,7 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
       "focused": "_focus"
     },
     initialize: function() {
-      CutCopyPasteTrait.applyTo(this, "operatingTable");
+      CutCopyPasteBindings.applyTo(this, "operatingTable");
       return this._clipboard = new Clipboard();
     },
     setModel: function(slide) {

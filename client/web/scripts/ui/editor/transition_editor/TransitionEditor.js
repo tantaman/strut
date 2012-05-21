@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, empty) {
+define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "vendor/keymaster", "ui/interactions/CutCopyPasteBindings", "../SlideCopyPaste", "model/system/Clipboard", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) {
   return Backbone.View.extend({
     className: "transitionEditor",
     events: {
@@ -12,11 +12,15 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
     scale: window.slideConfig.size.width / 150,
     initialize: function() {
       this.name = "Transition Editor";
-      return this._snapshots = [];
+      this._snapshots = [];
+      this._clipboard = new Clipboard();
+      _.extend(this, SlideCopyPaste);
+      return CutCopyPasteBindings.applyTo(this, "transitionEditor");
     },
     show: function() {
       this.hidden = false;
       this.$el.removeClass("disp-none");
+      Keymaster.setScope("transitionEditor");
       return this._partialRender();
     },
     resized: function() {},
@@ -46,7 +50,6 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
       });
       this.buttonBarView.render();
       this._partialRender();
-      this.resized();
       return this.$el;
     },
     _partialRender: function() {

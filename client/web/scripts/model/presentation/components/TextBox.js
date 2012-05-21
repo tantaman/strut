@@ -9,6 +9,7 @@ define(["./Component"], function(Component) {
       this.set("type", "TextBox");
       if (!(this.get("text") != null)) return this.set("text", "Text");
     },
+    textWithBreaks: function() {},
     constructor: function TextBox() {
 			Component.prototype.constructor.apply(this, arguments);
 		}

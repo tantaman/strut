@@ -28,6 +28,7 @@ define(["vendor/backbone", "./Templates",
 		show: () ->
 			@hidden = false
 			@$el.removeClass("disp-none")
+			Keymaster.setScope("slidePreviewPanel")
 			if @hiddenActiveChange?
 				@operatingTable.setModel(@hiddenActiveChange)
 				@hiddenActiveChange = null

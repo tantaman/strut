@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactions/CutCopyPasteTrait", "model/system/Clipboard", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot, Keymaster, CutCopyPasteTrait, Clipboard, empty) {
+define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "./SlideCopyPaste", "css!./res/css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot, Keymaster, CutCopyPasteBindings, Clipboard, SlideCopyPaste, empty) {
   return Backbone.View.extend({
     className: "slidePreviewPanel",
     events: {
@@ -15,7 +15,8 @@ define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactio
       slideCollection = this.model.get("slides");
       slideCollection.on("add", this._slideCreated, this);
       slideCollection.on("reset", this._slidesReset, this);
-      CutCopyPasteTrait.applyTo(this, "slidePreviewPanel");
+      _.extend(this, SlideCopyPaste);
+      CutCopyPasteBindings.applyTo(this, "slidePreviewPanel");
       return this._clipboard = new Clipboard();
     },
     _slideCreated: function(slide) {
@@ -38,35 +39,6 @@ define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactio
     },
     slideRemoveClicked: function(snapshot) {
       return this.model.removeSlide(snapshot.model);
-    },
-    cut: function() {
-      var slide;
-      slide = this.model.get("activeSlide");
-      if (slide != null) {
-        this._clipboard.set("item", slide);
-        this.model.removeSlide(slide);
-        slide.set("selected", false);
-        return false;
-      }
-    },
-    copy: function() {
-      var slide;
-      slide = this.model.get("activeSlide");
-      if (slide != null) {
-        console.log(slide);
-        this._clipboard.set("item", slide.clone());
-        return false;
-      }
-    },
-    paste: function() {
-      var item, newItem;
-      item = this._clipboard.get("item");
-      if (item != null) {
-        newItem = item.clone();
-        newItem.set("x", null);
-        newItem.set("y", null);
-        return this.model.addSlide(newItem);
-      }
     },
     render: function() {
       var slides,

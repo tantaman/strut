@@ -21,6 +21,7 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
     show: function() {
       this.hidden = false;
       this.$el.removeClass("disp-none");
+      Keymaster.setScope("slidePreviewPanel");
       if (this.hiddenActiveChange != null) {
         this.operatingTable.setModel(this.hiddenActiveChange);
         return this.hiddenActiveChange = null;

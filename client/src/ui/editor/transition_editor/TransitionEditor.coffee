@@ -5,9 +5,13 @@ define(["vendor/backbone",
 		"./TransitionSlideSnapshot",
 		"../Templates",
 		"./TransitionEditorButtonBarView",
-		"model/editor/transition_editor/TransitionEditorButtonBarModel"
+		"model/editor/transition_editor/TransitionEditorButtonBarModel",
+		"vendor/keymaster",
+		"ui/interactions/CutCopyPasteBindings",
+		"../SlideCopyPaste",
+		"model/system/Clipboard",
 		"css!../res/css/TransitionEditor.css"],
-(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, empty) ->
+(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "transitionEditor"
 		events:
@@ -17,13 +21,14 @@ define(["vendor/backbone",
 		initialize: () ->
 			@name = "Transition Editor"
 			@_snapshots = []
-#			$(window).resize(() =>
-#				@resized()
-#			)
-			
+			@_clipboard = new Clipboard()
+			_.extend(@, SlideCopyPaste)
+			CutCopyPasteBindings.applyTo(@, "transitionEditor")
+
 		show: () ->
 			@hidden = false
 			@$el.removeClass("disp-none")
+			Keymaster.setScope("transitionEditor")
 			@_partialRender()
 
 		resized: () ->
@@ -58,7 +63,6 @@ define(["vendor/backbone",
 			
 			@buttonBarView.render()
 			@_partialRender()
-			@resized()
 			@$el
 
 		_partialRender: () ->

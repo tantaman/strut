@@ -4,10 +4,11 @@
 define(["vendor/backbone",
 		"./SlideSnapshot",
 		"vendor/keymaster",
-		"ui/interactions/CutCopyPasteTrait",
-		"model/system/Clipboard"
+		"ui/interactions/CutCopyPasteBindings",
+		"model/system/Clipboard",
+		"./SlideCopyPaste",
 		"css!./res/css/SlidePreviewPanel.css"],
-(Backbone, SlideSnapshot, Keymaster, CutCopyPasteTrait, Clipboard, empty) ->
+(Backbone, SlideSnapshot, Keymaster, CutCopyPasteBindings, Clipboard, SlideCopyPaste, empty) ->
 	Backbone.View.extend(
 		className: "slidePreviewPanel"
 		events:
@@ -20,7 +21,8 @@ define(["vendor/backbone",
 			slideCollection.on("reset", @_slidesReset, @)
 
 			# Set up keymaster events
-			CutCopyPasteTrait.applyTo(@, "slidePreviewPanel")
+			_.extend(@, SlideCopyPaste)
+			CutCopyPasteBindings.applyTo(@, "slidePreviewPanel")
 			@_clipboard = new Clipboard()
 
 		_slideCreated: (slide) ->
@@ -39,31 +41,6 @@ define(["vendor/backbone",
 
 		slideRemoveClicked: (snapshot) ->
 			@model.removeSlide(snapshot.model)
-
-		# TODO: make a slidepreviewpanelmodel to handle all this stuff
-		cut: () ->
-			slide = @model.get("activeSlide")
-			if slide?
-				@_clipboard.set("item", slide)
-				@model.removeSlide(slide)
-				slide.set("selected", false)
-				false
-
-		copy: () ->
-			slide = @model.get("activeSlide")
-			if slide?
-				console.log slide
-				@_clipboard.set("item", slide.clone())
-				false
-
-		paste: () ->
-			item = @_clipboard.get("item")
-			if item?
-				newItem = item.clone()
-				# TODO: h4x hax
-				newItem.set("x", null)
-				newItem.set("y", null)
-				@model.addSlide(newItem)
 
 		render: () ->
 			slides = @model.get("slides")

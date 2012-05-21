@@ -94,8 +94,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       contentHeight = this.$content.height();
       newWidth = contentWidth + deltas.dx;
       newHeight = contentHeight + deltas.dy;
-      scale = (newWidth * newHeight) / (contentWidth * contentHeight);
-      this.model.set("scale", scale * this._initialScale);
+      scale = (newWidth * newHeight) / (contentWidth * contentHeight) * this._initialScale;
+      this.model.set("scale", scale);
       return this._setUpdatedTransform();
     },
     scaleStart: function() {
@@ -136,7 +136,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       };
     },
     render: function() {
-      var _this = this;
+      var scale,
+        _this = this;
       this.$el.html(this.__getTemplate()(this.model.attributes));
       this.$el.find("span[data-delta]").each(function(idx, elem) {
         var deltaDrag;
@@ -145,8 +146,23 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       });
       this.$content = this.$el.find(".content");
       this._setUpdatedTransform();
+      scale = this.model.get("scale");
       this._selectionChanged(this.model, this.model.get("selected"));
       return this.$el;
+    },
+    _fixScaling: function(scale) {
+      var dh, dw, height, pos, width;
+      pos = this.$el.position();
+      width = this.$el.width() * scale;
+      height = this.$el.height() * scale;
+      dw = width - this.$el.width();
+      dh = height - this.$el.height();
+      return this.$el.css({
+        width: width,
+        height: height,
+        left: pos.left - dw / 2,
+        top: pos.top - dh / 2
+      });
     },
     __getTemplate: function() {
       return Templates.Component;
