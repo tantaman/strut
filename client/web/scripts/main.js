@@ -54,6 +54,12 @@ continuation = function() {
     editor = new Editor({
       model: deck
     });
+    window.zTracker = {
+      z: 0,
+      next: function() {
+        return ++this.z;
+      }
+    };
     $("body").append(editor.render());
     return deck.newSlide();
   });

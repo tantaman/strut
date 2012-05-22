@@ -5,6 +5,7 @@
 
 .editor .menuBar {
 	height: 25px;
+	position: relative;
 }
 
 .editor .menuBar > div {
@@ -30,10 +31,6 @@
 
 .editor .nav li.open {
 	background-color: gray;
-}
-
-.editor .perspectives-container {
-	margin-top: 25px;
 }
 
 .editor .navbar-inner {

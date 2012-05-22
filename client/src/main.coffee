@@ -48,6 +48,11 @@ continuation = () ->
 		deck = new Deck()
 		editor = new Editor({model: deck})
 
+		window.zTracker =
+			z: 0
+			next: () ->
+				++@z
+
 		$("body").append(editor.render())
 		deck.newSlide()
 	)

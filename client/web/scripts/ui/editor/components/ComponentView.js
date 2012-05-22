@@ -129,6 +129,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     mousedown: function(e) {
       this.model.set("selected", true);
+      this.$el.css("zIndex", zTracker.next());
       this._dragging = true;
       return this._prevPos = {
         x: e.pageX,

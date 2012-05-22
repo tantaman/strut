@@ -1,3 +1,7 @@
+.slideEditor {
+	height: 100%;
+}
+
 .slideEditor .navbar .caret {
 	margin-left: 2px;
 }
@@ -17,6 +21,7 @@
 
 .slideEditor .mainContent {
 	margin-top: -18px;
+	height: 100%;
 }
 
 .slideEditor .slidePreviewPanel {
@@ -32,6 +37,8 @@
 	height: 100%;
 	width: 100%;
 	margin-left: 151px;
+	position: absolute;
+	overflow: hidden;
 }
 
 .slideEditor .divider-vertical {

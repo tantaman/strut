@@ -126,6 +126,7 @@ define(["vendor/backbone",
 
 		mousedown: (e) ->
 			@model.set("selected", true)
+			@$el.css("zIndex", zTracker.next())
 			@_dragging = true
 			@_prevPos = {
 				x: e.pageX

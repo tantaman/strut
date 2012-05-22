@@ -16,9 +16,9 @@ define(["vendor/backbone", "./Templates",
 
 		initialize: () ->
 			@name = "Slide Editor"
-			$(window).resize(() =>
-				@resized()
-			)
+			#$(window).resize(() =>
+			#	@resized()
+			#)
 
 			@operatingTable = new OperatingTable()
 			@slidePreviewPanel = new SlidePreviewPanel({model: @model})
@@ -78,7 +78,7 @@ define(["vendor/backbone", "./Templates",
 
 			$mainContent.append(@$slidePreviewPanel)
 			$mainContent.append(@$operatingTable)
-			@resized()
+			#@resized()
 
 			if @_buttonBar?
 				@_buttonBar.dispose()
