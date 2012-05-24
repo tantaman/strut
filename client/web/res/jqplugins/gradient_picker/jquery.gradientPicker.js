@@ -144,13 +144,13 @@
 			this.position = (left / (this.$parentEl.width() - this.outerWidth))*100 | 0;
 			this.cb();
 		},
-
 		stop: function(e, ui) {
 			this.cb();
 			this.configView.show(this.$el.position(), this.color, this.colorChanged);
 		},
 
 		clicked: function(e) {
+			this.configView.show(this.$el.position(), this.color, this.colorChanged);
 			e.stopPropagation();
 			return false;
 		},
@@ -185,6 +185,7 @@
 				this.cb = cb;
 				this.$el.css("visibility", "visible");
 				this.$cpicker.ColorPickerSetColor(color);
+				this.$cpicker.css("background-color", color);
 			}
 			if (this.opts.orientation === "horizontal") {
 				this.$el.css("left", position.left);
