@@ -18,3 +18,10 @@
 	height: 10px;
 	width: 100%;
 }
+
+.gradientPicker-ptConfig {
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	z-index: 1;
+}

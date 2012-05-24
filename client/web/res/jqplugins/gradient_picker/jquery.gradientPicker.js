@@ -2,6 +2,17 @@
 @author Matt Crinklaw-Vogt (tantaman)
 */
 (function( $ ) {
+	if (!$.event.special.destroyed) {
+		$.event.special.destroyed = {
+		    remove: function(o) {
+		    	if (o.handler) {
+		    		o.handler();
+		    	}
+		    }
+		}
+	}
+
+
 	function bind(fn, ctx) {
 		if (typeof fn.bind === "function") {
 			return fn.bind(ctx);
@@ -25,6 +36,7 @@
 
 	function GradientSelection(elem, opts) {
 		this.$el = $(elem);
+		this.$el.css("position", "relative");
 		this.opts = opts;
 
 		this.$preview = $("<div class='gradientPicker-preview'></div>");
@@ -35,15 +47,31 @@
 
 		this.updatePreview = bind(this.updatePreview, this);
 		this.controlPoints = [];
+		this.ctrlPtConfig = new ControlPtConfig(this.$el, opts);
 		for (var i = 0; i < opts.controlPoints.length; ++i) {
-			var ctrlPt = new ControlPoint($ctrlPtContainer, opts.controlPoints[i], opts.orientation, this.updatePreview);
+			var ctrlPt = new ControlPoint($ctrlPtContainer, opts.controlPoints[i], opts.orientation, this.updatePreview, this.ctrlPtConfig);
 			this.controlPoints.push(ctrlPt);
 		}
+
+		this.docClicked = bind(this.docClicked, this);
+		this.destroyed = bind(this.destroyed, this);
+		$(document).bind("click", this.docClicked);
+		this.$el.bind("destroyed", this.destroyed);
+		this.previewClicked = bind(this.previewClicked, this);
 
 		this.updatePreview();
 	}
 
 	GradientSelection.prototype = {
+		docClicked: function() {
+			this.ctrlPtConfig.hide();
+		},
+
+		destroyed: function() {
+			console.log("UNBINDING!");
+			$(document).unbind("click", this.docClicked);
+		},
+
 		updatePreview: function() {
 			// Cycle through control points and generate the correct styles to apply
 			//this.$el.css("background", "black");
@@ -55,6 +83,10 @@
 			}
 
 			this.opts.change(styles);
+		},
+
+		previewClicked: function() {
+
 		},
 
 		_generatePreviewStyles: function() {
@@ -71,10 +103,11 @@
 		}
 	};
 
-	function ControlPoint($parentEl, initialState, orientation, cb) {
+	function ControlPoint($parentEl, initialState, orientation, cb, ctrlPtConfig) {
 		this.$el = $("<div class='gradientPicker-ctrlPt'></div>");
 		$parentEl.append(this.$el);
 		this.$parentEl = $parentEl;
+		this.configView = ctrlPtConfig;
 
 		initialState = initialState.split(" ");
 		this.position = parseInt(initialState[1]);
@@ -93,12 +126,15 @@
 		
 		this.drag = bind(this.drag, this);
 		this.stop = bind(this.stop, this);
+		this.clicked = bind(this.clicked, this);
+		this.colorChanged = bind(this.colorChanged, this);
 		this.$el.draggable({
 			axis: (orientation == "horizontal") ? "x" : "y",
 			drag: this.drag,
 			stop: this.stop,
 			containment: $parentEl
 		});
+		this.$el.click(this.clicked);
 	}
 
 	ControlPoint.prototype = {
@@ -111,15 +147,68 @@
 
 		stop: function(e, ui) {
 			this.cb();
+			this.configView.show(this.$el.position(), this.color, this.colorChanged);
+		},
+
+		clicked: function(e) {
+			e.stopPropagation();
+			return false;
+		},
+
+		colorChanged: function(c) {
+			this.color = c;
+			this.$el.css("background-color", this.color);
+			this.cb();
 		}
 	};
 
-	function ControlPtConfig() {
+	function ControlPtConfig($parent, opts) {
+		//color-chooser
+		this.$el = $('<div class="gradientPicker-ptConfig" style="visibility: hidden"></div>');
+		$parent.append(this.$el);
+		var $cpicker = $('<div class="color-chooser"></div>');
+		this.$el.append($cpicker);
 
+		this.colorChanged = bind(this.colorChanged, this);
+		$cpicker.ColorPicker({
+			onChange: this.colorChanged
+		});
+		this.$cpicker = $cpicker;
+		this.opts = opts;
+		this.visible = false;
 	}
 
 	ControlPtConfig.prototype = {
+		show: function(position, color, cb) {
+			if (!this.visible) {
+				this.visible = true;
+				this.cb = cb;
+				this.$el.css("visibility", "visible");
+				this.$cpicker.ColorPickerSetColor(color);
+			}
+			if (this.opts.orientation === "horizontal") {
+				this.$el.css("left", position.left);
+			} else {
+				this.$el.css("top", position.top);
+			}
+			//else {
+			//	this.visible = false;
+				//this.$el.css("visibility", "hidden");
+			//}
+		},
 
+		hide: function() {
+			if (this.visible) {
+				this.$el.css("visibility", "hidden");
+				this.visible = false;
+			}
+		},
+
+		colorChanged: function(hsb, hex, rgb) {
+			hex = "#" + hex;
+			this.cb(hex);
+			this.$cpicker.css("background-color", hex)
+		}
 	};
 
 	$.fn.gradientPicker = function(opts) {
