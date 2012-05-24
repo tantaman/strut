@@ -1,0 +1,20 @@
+.gradientPicker-preview {
+	width: 100%;
+	height: 100%;
+	/*box-sizing: border-box;
+	-moz-box-sizing: border-box;*/
+}
+
+.gradientPicker-ctrlPt {
+	width: 8px;
+	height: 8px;
+	border: 2px solid gray;
+	position: absolute;
+	display: inline-block;
+}
+
+.gradientPicker-ctrlPts {
+	position: relative;
+	height: 10px;
+	width: 100%;
+}
