@@ -12,7 +12,6 @@
 		}
 	}
 
-
 	function bind(fn, ctx) {
 		if (typeof fn.bind === "function") {
 			return fn.bind(ctx);
@@ -85,8 +84,8 @@
 			this.opts.change(styles);
 		},
 
-		previewClicked: function() {
-
+		previewClicked: function(e) {
+			
 		},
 
 		_generatePreviewStyles: function() {
@@ -168,6 +167,7 @@
 		$parent.append(this.$el);
 		var $cpicker = $('<div class="color-chooser"></div>');
 		this.$el.append($cpicker);
+		this.$el.append("<div class='gradientPicker-close'></div>");
 
 		this.colorChanged = bind(this.colorChanged, this);
 		$cpicker.ColorPicker({
@@ -180,13 +180,11 @@
 
 	ControlPtConfig.prototype = {
 		show: function(position, color, cb) {
-			if (!this.visible) {
-				this.visible = true;
-				this.cb = cb;
-				this.$el.css("visibility", "visible");
-				this.$cpicker.ColorPickerSetColor(color);
-				this.$cpicker.css("background-color", color);
-			}
+			this.visible = true;
+			this.cb = cb;
+			this.$el.css("visibility", "visible");
+			this.$cpicker.ColorPickerSetColor(color);
+			this.$cpicker.css("background-color", color);
 			if (this.opts.orientation === "horizontal") {
 				this.$el.css("left", position.left);
 			} else {
