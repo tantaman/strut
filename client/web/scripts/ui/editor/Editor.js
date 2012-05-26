@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, empty) {
+define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
@@ -80,6 +80,10 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       return this.rawTextModal.show(function(json) {
         return _this.model["import"](JSON.parse(json));
       });
+    },
+    changeBackground: function() {
+      var _this = this;
+      return this.backgroundPickerModal.show(function(controlPoints, styles) {});
     }
   };
   return Backbone.View.extend({
@@ -100,7 +104,8 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
         })
       };
       this.activePerspective = "slideEditor";
-      return this.model.undoHistory.on("updated", this.undoHistoryChanged, this);
+      this.model.undoHistory.on("updated", this.undoHistoryChanged, this);
+      return this.model.on("change:background", this._backgroundChanged, this);
     },
     undoHistoryChanged: function() {
       var $lbl, redoName, undoName;
@@ -136,6 +141,16 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
           return perspective.hide();
         }
       });
+    },
+    _backgroundChanged: function(model, value) {
+      var key, persp, _ref, _results;
+      _ref = this.perspectives;
+      _results = [];
+      for (key in _ref) {
+        persp = _ref[key];
+        _results.push(persp.backgroundChanged(value));
+      }
+      return _results;
     },
     menuItemSelected: function(e) {
       var $target, option;
@@ -173,6 +188,8 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       this.saveAsDialog = new SaveAsDialog();
       this.$el.append(this.openDialog.render());
       this.$el.append(this.saveAsDialog.render());
+      this.backgroundPickerModal = new BackgroundPicker();
+      this.$el.append(this.backgroundPickerModal.render());
       return this.$el;
     }
   });

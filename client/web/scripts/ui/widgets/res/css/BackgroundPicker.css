@@ -1,0 +1,11 @@
+.backgroundPicker .gradientPicker {
+	width: 250px;
+	height: 20px;
+	float: left;
+}
+
+.backgroundPicker .gradientPreview {
+	width: 200px;
+	height: 200px;
+	float: left;
+}

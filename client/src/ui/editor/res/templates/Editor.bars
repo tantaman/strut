@@ -45,6 +45,8 @@
                 <ul class="dropdown-menu">
                     <li data-option="exportJSON"><a href="#">Export to JSON</a></li>
                     <li data-option="importJSON"><a href="#">Import from JSON</a></li>
+                    <li class="divider"></li>
+                    <li data-option="changeBackground"><a href="#">Change Background</a></li>
                 </ul>
             </li>
      	</ul>

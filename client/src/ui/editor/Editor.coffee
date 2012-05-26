@@ -9,10 +9,11 @@ define(["vendor/backbone",
 		"ui/widgets/RawTextImporter",
 		"ui/widgets/OpenDialog",
 		"ui/widgets/SaveAsDialog",
-		"storage/FileStorage"
+		"storage/FileStorage",
+		"ui/widgets/BackgroundPicker",
 		"css!./res/css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
-FileStorage, empty) ->
+FileStorage, BackgroundPicker, empty) ->
 	editorId = 0
 
 	menuOptions =
@@ -75,6 +76,11 @@ FileStorage, empty) ->
 				@model.import(JSON.parse(json))
 			)
 
+		changeBackground: () ->
+			@backgroundPickerModal.show((controlPoints, styles) =>
+				# set the bg on the model
+			)
+
 	Backbone.View.extend(
 		className: "editor"
 		events:
@@ -90,6 +96,7 @@ FileStorage, empty) ->
 
 			@activePerspective = "slideEditor"
 			@model.undoHistory.on("updated", @undoHistoryChanged, @)
+			@model.on("change:background", @_backgroundChanged, @)
 
 		undoHistoryChanged: () ->
 			undoName = @model.undoHistory.undoName()
@@ -121,6 +128,11 @@ FileStorage, empty) ->
 				else
 					perspective.hide()
 			)
+
+		_backgroundChanged: (model, value) ->
+			# tell our perspectives about the bg update...
+			for key,persp of @perspectives
+				persp.backgroundChanged(value)
 
 		menuItemSelected: (e) ->
 			$target = $(e.currentTarget)
@@ -158,6 +170,9 @@ FileStorage, empty) ->
 			@saveAsDialog = new SaveAsDialog()
 			@$el.append(@openDialog.render())
 			@$el.append(@saveAsDialog.render())
+
+			@backgroundPickerModal = new BackgroundPicker()
+			@$el.append(@backgroundPickerModal.render())
 
 			@$el
 	)
