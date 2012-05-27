@@ -34,6 +34,16 @@ define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./Trans
         if (slide.get("selected")) return slide.set("selected", false);
       });
     },
+    backgroundChanged: function(newBG) {
+      var style, _i, _len, _ref, _results;
+      _ref = newBG.styles;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        style = _ref[_i];
+        _results.push(this.$el.css("background-image", style));
+      }
+      return _results;
+    },
     _disposeOldView: function() {
       this._snapshots.forEach(function(snapshot) {
         return snapshot.remove();

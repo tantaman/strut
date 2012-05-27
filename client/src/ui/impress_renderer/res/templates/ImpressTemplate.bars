@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link href='http://fonts.googleapis.com/css?family=Lato:400,700,700italic|Ubuntu:400,700|Abril+Fatface|Hammersmith+One|Fredoka+One|Gorditas|Press+Start+2P' rel='stylesheet' type='text/css'>
 </head>
-<body class="impress-not-supported">
+<body class="impress-not-supported" style="{{#extractBG background.styles}}{{/extractBG}}">
 <div class="fallback-message">
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>

@@ -323,6 +323,8 @@
 				var gradSel = new GradientSelection($this, opts);
 				$this.data("gradientPicker-sel", gradSel);
 			});
+
+			return this;
 		},
 
 		update: function(opts) {
@@ -341,11 +343,11 @@
 				var $this = $(this);
 				var gradSel = $this.data("gradientPicker-sel");
 				if (gradSel != null) {
-					states.push(gredSel.currentState());
+					states.push(gradSel.currentState());
 				}
 			});
 
-			if (states.length > 0) {
+			if (states.length > 1) {
 				return states;
 			} else {
 				return states[0];
@@ -355,10 +357,10 @@
 
 	$.fn.gradientPicker = function(method, opts) {
 		if (typeof method === "string" && method !== "init") {
-			methods[method].call(this, opts);
+			return methods[method].call(this, opts);
 		} else {
 			opts = method;
-			methods.init.call(this, opts);
+			return methods.init.call(this, opts);
 		}
 	};
 })( jQuery );

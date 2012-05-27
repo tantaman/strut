@@ -47,6 +47,10 @@ define(["vendor/backbone",
 					slide.set("selected", false)
 			)
 
+		backgroundChanged: (newBG) ->
+			for style in newBG.styles
+				@$el.css("background-image", style)
+
 		_disposeOldView: () ->
 			@_snapshots.forEach((snapshot) ->
 				snapshot.remove()

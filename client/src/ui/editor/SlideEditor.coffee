@@ -51,6 +51,10 @@ define(["vendor/backbone", "./Templates",
 				component.paste()
 			true
 
+		backgroundChanged: (newBG) ->
+			for style in newBG.styles
+				@$operatingTable.css("background-image", style)
+
 		hide: () ->
 			@hidden = true
 			@$el.addClass("disp-none")

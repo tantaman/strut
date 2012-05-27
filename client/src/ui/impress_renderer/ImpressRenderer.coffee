@@ -27,6 +27,23 @@ define(["vendor/Handlebars",
 				v * 180 / Math.PI
 			)
 
+			Handlebars.registerHelper("extractBG", (styles) ->
+				result = ""
+				style = styles[0]
+				browsers = [
+					"-moz-",
+					"-webkit-",
+					"-o-",
+					"-ms-",
+					""
+				]
+
+				for prefix in browsers
+					result += "background-image: " + prefix + style + "; "
+
+				result
+			)
+
 			Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer)
 
 		render: (deckAttrs) ->

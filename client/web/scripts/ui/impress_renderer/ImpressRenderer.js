@@ -29,6 +29,17 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
       Handlebars.registerHelper("toDeg", function(v) {
         return v * 180 / Math.PI;
       });
+      Handlebars.registerHelper("extractBG", function(styles) {
+        var browsers, prefix, result, style, _i, _len;
+        result = "";
+        style = styles[0];
+        browsers = ["-moz-", "-webkit-", "-o-", "-ms-", ""];
+        for (_i = 0, _len = browsers.length; _i < _len; _i++) {
+          prefix = browsers[_i];
+          result += "background-image: " + prefix + style + "; ";
+        }
+        return result;
+      });
       Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer);
     }
 

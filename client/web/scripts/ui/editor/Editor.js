@@ -83,7 +83,9 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
     },
     changeBackground: function() {
       var _this = this;
-      return this.backgroundPickerModal.show(function(controlPoints, styles) {});
+      return this.backgroundPickerModal.show(function(bgState) {
+        return _this.model.set("background", bgState);
+      });
     }
   };
   return Backbone.View.extend({
@@ -188,7 +190,12 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       this.saveAsDialog = new SaveAsDialog();
       this.$el.append(this.openDialog.render());
       this.$el.append(this.saveAsDialog.render());
-      this.backgroundPickerModal = new BackgroundPicker();
+      this.backgroundPickerModal = new BackgroundPicker({
+        bgOpts: {
+          type: "radial",
+          controlPoints: ["#F0F0F0 0%", "#BEBEBE 100%"]
+        }
+      });
       this.$el.append(this.backgroundPickerModal.render());
       return this.$el;
     }

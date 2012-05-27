@@ -77,8 +77,8 @@ FileStorage, BackgroundPicker, empty) ->
 			)
 
 		changeBackground: () ->
-			@backgroundPickerModal.show((controlPoints, styles) =>
-				# set the bg on the model
+			@backgroundPickerModal.show((bgState) =>
+				@model.set("background", bgState)
 			)
 
 	Backbone.View.extend(
@@ -171,7 +171,12 @@ FileStorage, BackgroundPicker, empty) ->
 			@$el.append(@openDialog.render())
 			@$el.append(@saveAsDialog.render())
 
-			@backgroundPickerModal = new BackgroundPicker()
+			# TEMP
+			@backgroundPickerModal = new BackgroundPicker(
+					bgOpts:
+						type: "radial"
+						controlPoints: ["#F0F0F0 0%", "#BEBEBE 100%"]
+				)
 			@$el.append(@backgroundPickerModal.render())
 
 			@$el

@@ -6,7 +6,7 @@
 	background: url(../images/colorpicker_background.png);
 	font-family: Arial, Helvetica, sans-serif;
 	display: none;
-	z-index:500;
+	z-index: 1051;
 }
 
 .color-chooser {
