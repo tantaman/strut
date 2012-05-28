@@ -48,8 +48,8 @@ define(["vendor/backbone",
 			)
 
 		backgroundChanged: (newBG) ->
-			for style in newBG.styles
-				@$el.css("background-image", style)
+			#for style in newBG.styles
+			#	@$el.css("background-image", style)
 
 		_disposeOldView: () ->
 			@_snapshots.forEach((snapshot) ->
