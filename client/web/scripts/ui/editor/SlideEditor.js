@@ -108,7 +108,7 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
           height: window.slideConfig.size.height
         });
         this.$operatingTable.css(window.browserPrefix + "transform-origin", "0 0");
-        return this.$operatingTable.css(window.browserPrefix + "transform", "scale(" + scalex + ", " + scaley + ")");
+        return this.$operatingTable.css(window.browserPrefix + "transform", "scale(" + scalex + ", " + scalex + ")");
       }
     }
   });

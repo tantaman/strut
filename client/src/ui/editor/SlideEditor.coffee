@@ -107,7 +107,7 @@ define(["vendor/backbone", "./Templates",
 
 				@$operatingTable.css(window.browserPrefix + "transform-origin", "0 0")
 				@$operatingTable.css(window.browserPrefix + "transform",
-					"scale(" + scalex + ", " + scaley + ")")
+					"scale(" + scalex + ", " + scalex + ")")
 
 				#@$operatingTable.css("height", window.innerHeight - 80)
 				#@$operatingTable.css("width", window.innerWidth - 150)
