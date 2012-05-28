@@ -7,7 +7,11 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
   return Backbone.View.extend({
     className: "slideEditor",
     initialize: function() {
+      var _this = this;
       this.name = "Slide Editor";
+      $(window).resize(function() {
+        return _this.resized();
+      });
       this.operatingTable = new OperatingTable();
       this.slidePreviewPanel = new SlidePreviewPanel({
         model: this.model
@@ -81,6 +85,7 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
       this.$operatingTable = this.operatingTable.render();
       $mainContent.append(this.$slidePreviewPanel);
       $mainContent.append(this.$operatingTable);
+      this.resized();
       if (this._buttonBar != null) this._buttonBar.dispose();
       pictureGrabber = new PictureGrabber();
       this.$el.append(pictureGrabber.render());
@@ -93,10 +98,17 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
       return this.$el;
     },
     resized: function() {
-      if (this.$slidePreviewPanel) {
+      var scalex, scaley;
+      if (this.$operatingTable) {
         this.$slidePreviewPanel.css("height", window.innerHeight - 80);
-        this.$operatingTable.css("height", window.innerHeight - 80);
-        return this.$operatingTable.css("width", window.innerWidth - 150);
+        scalex = (window.innerWidth - 168) / window.slideConfig.size.width;
+        scaley = (window.innerHeight - 80) / window.slideConfig.size.height;
+        this.$operatingTable.css({
+          width: window.slideConfig.size.width,
+          height: window.slideConfig.size.height
+        });
+        this.$operatingTable.css(window.browserPrefix + "transform-origin", "0 0");
+        return this.$operatingTable.css(window.browserPrefix + "transform", "scale(" + scalex + ", " + scaley + ")");
       }
     }
   });
