@@ -98,17 +98,11 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
       return this.$el;
     },
     resized: function() {
-      var scalex, scaley;
       if (this.$operatingTable) {
         this.$slidePreviewPanel.css("height", window.innerHeight - 80);
-        scalex = (window.innerWidth - 168) / window.slideConfig.size.width;
-        scaley = (window.innerHeight - 80) / window.slideConfig.size.height;
-        this.$operatingTable.css({
-          width: window.slideConfig.size.width,
-          height: window.slideConfig.size.height
+        return this.$operatingTable.css({
+          height: window.innerHeight - 80
         });
-        this.$operatingTable.css(window.browserPrefix + "transform-origin", "0 0");
-        return this.$operatingTable.css(window.browserPrefix + "transform", "scale(" + scalex + ", " + scalex + ")");
       }
     }
   });

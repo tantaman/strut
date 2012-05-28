@@ -97,17 +97,18 @@ define(["vendor/backbone", "./Templates",
 		resized: () ->
 			if @$operatingTable
 				@$slidePreviewPanel.css("height", window.innerHeight-80)
-				scalex = (window.innerWidth-168) / window.slideConfig.size.width
-				scaley = (window.innerHeight-80) / window.slideConfig.size.height
+				#scalex = (window.innerWidth-168) / window.slideConfig.size.width
+				#scaley = (window.innerHeight-80) / window.slideConfig.size.height
 				
 				@$operatingTable.css(
-					width: window.slideConfig.size.width
-					height: window.slideConfig.size.height
+					height: window.innerHeight - 80
 				)
+				#window.slideConfig.size.height
+				 #window.slideConfig.size.width
 
-				@$operatingTable.css(window.browserPrefix + "transform-origin", "0 0")
-				@$operatingTable.css(window.browserPrefix + "transform",
-					"scale(" + scalex + ", " + scalex + ")")
+				#@$operatingTable.css(window.browserPrefix + "transform-origin", "0 0")
+				#@$operatingTable.css(window.browserPrefix + "transform",
+				#	"scale(" + scalex + ", " + scalex + ")")
 
 				#@$operatingTable.css("height", window.innerHeight - 80)
 				#@$operatingTable.css("width", window.innerWidth - 150)
