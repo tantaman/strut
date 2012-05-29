@@ -38,9 +38,9 @@ task :compileTpls, :pretty do |t, args|
 			end
   		end
 
-  		destination = filename.sub("/src/ui/", "/web/scripts/ui/")
-  		puts "#{destination}/../../Templates.js"
-  		File.open("#{destination}/../../Templates.js", 'w') {|f|
+  		destination = filename.sub("/src/ui/", "/web/scripts/ui/").sub("/res/templates", "")
+  		puts "#{destination}/Templates.js"
+  		File.open("#{destination}/Templates.js", 'w') {|f|
   			f.write(compiledTemplates)
   			f.write("\n}});");
   		}
