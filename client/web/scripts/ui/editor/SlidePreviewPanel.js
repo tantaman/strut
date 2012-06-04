@@ -22,7 +22,8 @@ define(["vendor/backbone", "./SlideSnapshot", "vendor/keymaster", "ui/interactio
     _slideCreated: function(slide) {
       var snapshot;
       snapshot = new SlideSnapshot({
-        model: slide
+        model: slide,
+        deck: this.model
       });
       snapshot.on("removeClicked", this.slideRemoveClicked, this);
       return this.$el.append(snapshot.render());

@@ -26,7 +26,7 @@ define(["vendor/backbone",
 			@_clipboard = new Clipboard()
 
 		_slideCreated: (slide) ->
-			snapshot = new SlideSnapshot({model: slide})
+			snapshot = new SlideSnapshot({model: slide, deck: @model})
 			snapshot.on("removeClicked", @slideRemoveClicked, @)
 			@$el.append(snapshot.render())
 

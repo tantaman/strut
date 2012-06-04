@@ -146,6 +146,7 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
     },
     _backgroundChanged: function(model, value) {
       var key, persp, _ref, _results;
+      console.log("WTF");
       _ref = this.perspectives;
       _results = [];
       for (key in _ref) {

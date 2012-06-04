@@ -68,6 +68,7 @@ define(["common/Calcium", "./SlideCollection",
 			if activeSlide?
 				activeSlide.unselectComponents()
 			@set("activeSlide", null)
+			@set("background", rawObj.background)
 
 			slides.reset(rawObj.slides)
 			#@set("activeSlide", slides.at(0))

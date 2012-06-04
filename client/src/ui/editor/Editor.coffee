@@ -130,6 +130,7 @@ FileStorage, BackgroundPicker, empty) ->
 			)
 
 		_backgroundChanged: (model, value) ->
+			console.log("WTF")
 			# tell our perspectives about the bg update...
 			for key,persp of @perspectives
 				persp.backgroundChanged(value)

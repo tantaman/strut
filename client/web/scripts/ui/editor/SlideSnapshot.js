@@ -12,7 +12,8 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
     },
     initialize: function() {
       this.model.on("change:active", this._activated, this);
-      return this.model.on("dispose", this._modelDisposed, this);
+      this.model.on("dispose", this._modelDisposed, this);
+      return this.options.deck.on("change:background", this._updateBG, this);
     },
     clicked: function() {
       this.model.set("selected", true);
@@ -26,6 +27,8 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       this.slideDrawer.dispose();
       this.off();
       this.$el.data("jsView", null);
+      this.model.off(null, null, this);
+      this.options.deck.off(null, null, this);
       return Backbone.View.prototype.remove.apply(this, arguments);
     },
     _activated: function(model, value) {
@@ -39,6 +42,15 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       this.model.off(null, null, this);
       return this.remove();
     },
+    _updateBG: function() {
+      var bg;
+      bg = this.options.deck.get("background");
+      console.log("BG UPDATED");
+      if (bg != null) {
+        this.$el.css("background-image", bg.styles[0]);
+        return this.$el.css("background-image", bg.styles[1]);
+      }
+    },
     render: function() {
       var g2d;
       if (this.slideDrawer != null) this.slideDrawer.dispose();
@@ -48,6 +60,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/SlideSnapshot.css", "./
       this.slideDrawer.repaint();
       if (this.model.get("active")) this.$el.addClass("active");
       this.$el.data("jsView", this);
+      this._updateBG();
       return this.$el;
     }
   });
