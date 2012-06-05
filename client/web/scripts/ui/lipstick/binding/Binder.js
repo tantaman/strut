@@ -13,11 +13,20 @@ define([], function() {
 
     Bindings.name = 'Bindings';
 
+    /*
+    		#	opts {
+    		#		model: backbone model,
+    		#		el: element
+    		#		mapping: binding mapping
+    		# 	}
+    */
+
+
     function Bindings(opts) {
       var _this = this;
       this.model = opts.model;
       this.$el = opts.el instanceof $ ? opts.el : $(opts.el);
-      $el.bind("destroyed", function() {
+      this.$el.bind("destroyed", function() {
         return _this.dispose();
       });
       this._bind(opts.mapping);
@@ -40,7 +49,53 @@ define([], function() {
       return _results;
     };
 
-    Bindings.prototype._applyBinding = function($target, binding) {};
+    Bindings.prototype._applyBinding = function($target, binding) {
+      var field;
+      field = binding.field;
+      if (typeof this.model[field] === "function") {
+        return this._bindToComputedProperty($target, binding);
+      } else {
+        console.log("Binding: " + field);
+        return this.model.on("change:" + field, function(model, value) {
+          return $target[binding.fn](value);
+        });
+      }
+    };
+
+    Bindings.prototype._bindToComputedProperty = function($target, binding) {
+      var dependencies, field, fn, oldGet, value, _results,
+        _this = this;
+      dependencies = {};
+      oldGet = this._replaceGet(dependencies);
+      this.model[binding.field]();
+      this._restoreGet(oldGet);
+      fn = function(model, value) {
+        return $target[binding.fn](_this.model[binding.field]());
+      };
+      _results = [];
+      for (field in dependencies) {
+        value = dependencies[field];
+        _results.push(this.model.on("change:" + field, fn));
+      }
+      return _results;
+    };
+
+    Bindings.prototype._replaceGet = function(dependencies) {
+      var oldGet,
+        _this = this;
+      oldGet = this.model.get;
+      this.model.get = function(key) {
+        var result;
+        result = oldGet.apply(_this.model, arguments);
+        dependencies[key] = true;
+        return result;
+      };
+      return oldGet;
+    };
+
+    Bindings.prototype._restoreGet = function(oldGet) {
+      return this.model.get = oldGet;
+    };
 
     return Bindings;
 
@@ -51,13 +106,17 @@ define([], function() {
 	"attribute selector": "fieldName"  (where attribute is some jquery func: text, val, css, addClass, removeClass, etc.)
 	well what if we want one func on true and another on false.. that is a common use case...
 
-	alternative:
+	#alternative:
+
 		"selector": 
 			fn: "jQuery fn to apply"  (what about ender and so on?)
-			field: "model field name"
+			field: "name of model field to observe"
 			# optional funcs to apply with certain values
 			fn_false:
 			fn_missing:
+			events: [list of events to bind from view back to model]???
+
+		What about middleware?  Allow that to be passed in through the mapping variable?
 
 	How should / could we handle computed properties?
 	How do we know what properties a func will depend on?
