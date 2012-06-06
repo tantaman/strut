@@ -12,10 +12,10 @@ function(Backbone, Binder, BindingView) {
 			}
 		});
 
-		// ====== Short Hander binding method ======== //
-		var shortHand = new ModelClass({snow: "white"})
+		// ====== Short Hande binding method ======== //
+		var model = new ModelClass({snow: "white"});
 		new Binder({
-			model: shortHand,
+			model: model,
 			el: $("#shortHand"),
 			mapping: {
 				"text span": "weed",
@@ -23,8 +23,8 @@ function(Backbone, Binder, BindingView) {
 				"text div": "computed"
 			}
 		});
-		shortHand.set("weed", "short");
-		shortHand.set("snow", "hand");
+		model.set("weed", "short");
+		model.set("snow", "hand");
 
 
 		// ======== Extend BindingView using short hand ========= //
@@ -45,11 +45,37 @@ function(Backbone, Binder, BindingView) {
 		bindingViewModel.set("weed", "whacker");
 
 
+		// ====== Short Hand with middleware ======= //
+		model = new ModelClass({snow: "green"});
+		new Binder({
+			model: model,
+			el: $("#withMW"),
+			mapping: {
+				"text span": "weed",
+				"html div": "computed"
+			},
+			
+			middleware: {
+				toView: {
+					"span": function(val) {
+						return val.toUpperCase();
+					},
+
+					"div": function(val) {
+						return "<b style='color: green'>" + val + "</b>";
+					}
+				}
+			}
+		});
+
+		model.set("weed", "middelwarez");
+
+
 
 		// ======= LongHand binding method ========== //
-		var longHand = new ModelClass({snow: "white"})
+		model = new ModelClass({snow: "white"})
 		new Binder({
-			model: longHand,
+			model: model,
 			el: $("#longHand"),
 			mapping: {
 				"span": {
@@ -64,7 +90,7 @@ function(Backbone, Binder, BindingView) {
 			}
 		});
 
-		longHand.set("weed", "long");
-		longHand.set("snow", "hand");
+		model.set("weed", "long");
+		model.set("snow", "hand");
 	});
 });

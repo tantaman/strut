@@ -6,17 +6,25 @@ define([],
 	    		if o.handler
 	    			o.handler()
 
+	middlewareDefaults = 
+		toView: {}
+		toModel: {}
+
 	class Bindings
 		###
 		#	opts {
 		#		model: backbone model,
 		#		el: element
 		#		mapping: binding mapping
+		#		middleware: middleware funcs
+		#			toView: "selector": func
 		# 	}
 		###
 		constructor: (opts) ->
 			@model = opts.model
 			@$el = if opts.el instanceof $ then opts.el else $(opts.el)
+			@middleware = opts.middleware or {}
+			_.defaults(@middleware, middlewareDefaults)
 
 			# When $el is removed from the dom, unapply
 			# our data bindings
@@ -36,20 +44,22 @@ define([],
 			for selector, binding of mapping
 				if typeof binding is "object"
 					$target = @$el.find(selector)
-					@_applyBinding($target, binding)
+					@_applyBinding($target, binding, {toView: @middleware.toView[selector]})
 				else
 					idx = selector.indexOf(" ")
-					$target = @$el.find(selector.substring(idx))
+					actualSelector = $.trim(selector.substring(idx))
+					$target = @$el.find(actualSelector)
 					bindingObj = 
 						fn: selector.substring(0, idx)
 						field: binding
-					@_applyBinding($target, bindingObj)
 
-		_applyBinding: ($target, binding) ->
+					@_applyBinding($target, bindingObj, {toView: @middleware.toView[actualSelector]})
+
+		_applyBinding: ($target, binding, middleware) ->
 			field = binding.field
 			# TODO: special case collections....
 			if typeof @model[field] is "function"
-				@_bindToComputedProperty($target, binding)
+				@_bindToComputedProperty($target, binding, middleware)
 			else
 				# TODO: we need to special case backbone collections
 				# TODO: what if someone wants to bind to arbitrary events and not fields?
@@ -58,17 +68,22 @@ define([],
 				# when the view element is an input element?
 				console.log "Binding: " + field
 				@model.on("change:" + field, (model, value) ->
+					if middleware.toView?
+						value = middleware.toView(value)
 					$target[binding.fn](value)
 				)
 
-		_bindToComputedProperty: ($target, binding) ->
+		_bindToComputedProperty: ($target, binding, middleware) ->
 			dependencies = {}
 			oldGet = @_replaceGet(dependencies)
 			@model[binding.field]()
 			@_restoreGet(oldGet)
 
 			fn = (model, value) =>
-					$target[binding.fn](@model[binding.field]())
+				value = @model[binding.field]()
+				if middleware.toView?
+					value = middleware.toView(value)
+				$target[binding.fn](value)
 
 			for field,value of dependencies
 				@model.on("change:" + field, fn)
