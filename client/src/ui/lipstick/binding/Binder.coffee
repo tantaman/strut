@@ -34,8 +34,16 @@ define([],
 
 		_bind: (mapping) ->
 			for selector, binding of mapping
-				$target = @$el.find(selector)
-				@_applyBinding($target, binding)
+				if typeof binding is "object"
+					$target = @$el.find(selector)
+					@_applyBinding($target, binding)
+				else
+					idx = selector.indexOf(" ")
+					$target = @$el.find(selector.substring(idx))
+					bindingObj = 
+						fn: selector.substring(0, idx)
+						field: binding
+					@_applyBinding($target, bindingObj)
 
 		_applyBinding: ($target, binding) ->
 			field = binding.field

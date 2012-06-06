@@ -3,9 +3,31 @@
 	<script type="text/javascript" src="../web/scripts/vendor/jquery-1.7-matt.js"></script>
 	<script type="text/javascript" src="../web/scripts/vendor/underscore.js"></script>
 	<script type="text/javascript" data-main="scripts/SimpleBinding" src="../web/scripts/require.js"></script>
+
+	<style>
+		#longHand {
+			background: orange;
+			margin: 20px;
+		}
+
+		#shortHand {
+			background: green;
+			margin: 20px;
+		}
+
+		.shorthand {
+			border: 2px solid black;
+		}
+	</style>
 </head>
 <body>
-	<div id="testEl">
+	<div id="longHand">
+		<span></span>
+		<div>
+		</div>
+	</div>
+
+	<div id="shortHand">
 		<span></span>
 		<div>
 		</div>

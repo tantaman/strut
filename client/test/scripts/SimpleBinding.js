@@ -12,11 +12,27 @@ function(Backbone, Binder) {
 			}
 		});
 
-		var model = new ModelClass({snow: "white"})
 
+		var shortHand = new ModelClass({snow: "white"})
 		new Binder({
-			model: model,
-			el: $("#testEl"),
+			model: shortHand,
+			el: $("#shortHand"),
+			mapping: {
+				"text span": "weed",
+				"addClass div": "computed",
+				"text div": "computed"
+			}
+		});
+		shortHand.set("weed", "short");
+		shortHand.set("snow", "hand");
+
+
+
+
+		var longHand = new ModelClass({snow: "white"})
+		new Binder({
+			model: longHand,
+			el: $("#longHand"),
 			mapping: {
 				"span": {
 					fn: "text",
@@ -30,7 +46,23 @@ function(Backbone, Binder) {
 			}
 		});
 
-		model.set("weed", "whacker");
-		model.set("snow", "brown");
+		longHand.set("weed", "long");
+		longHand.set("snow", "hand");
+
+		/*
+		var BindingView = BindingView.extend({
+			mapping: {
+				"text span": "weed",
+				"addClass div": "computed",
+				"text div": "computed"
+			}
+		});
+
+		new BindingView({
+			el: $("#bindingView"),
+			model: new ModelClass({snow: "white"})
+		});
+		*/
+
 	});
 });

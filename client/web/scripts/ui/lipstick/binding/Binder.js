@@ -39,12 +39,22 @@ define([], function() {
     Bindings.prototype.on = function() {};
 
     Bindings.prototype._bind = function(mapping) {
-      var $target, binding, selector, _results;
+      var $target, binding, bindingObj, idx, selector, _results;
       _results = [];
       for (selector in mapping) {
         binding = mapping[selector];
-        $target = this.$el.find(selector);
-        _results.push(this._applyBinding($target, binding));
+        if (typeof binding === "object") {
+          $target = this.$el.find(selector);
+          _results.push(this._applyBinding($target, binding));
+        } else {
+          idx = selector.indexOf(" ");
+          $target = this.$el.find(selector.substring(idx));
+          bindingObj = {
+            fn: selector.substring(0, idx),
+            field: binding
+          };
+          _results.push(this._applyBinding($target, bindingObj));
+        }
       }
       return _results;
     };
