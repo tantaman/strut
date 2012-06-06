@@ -10,7 +10,7 @@ define([],
 		toView: {}
 		toModel: {}
 
-	class Bindings
+	Binder = class Binder
 		###
 		#	opts {
 		#		model: backbone model,
@@ -100,31 +100,34 @@ define([],
 		_restoreGet: (oldGet) ->
 			@model.get = oldGet
 
+
+
+	callView = ($target, fn, value) ->
+		fnType = typeof fn
+		if Array.isArray(fn)
+			fnType = "array"
+		switch fnType
+			when "string"
+				$target[fn](value)
+			when "object"
+				for key,fnData of fn
+					comp = comparers[key]
+					if (comp(value))
+						$target[fnData[0]].apply($target, fnData.slice(1, fnData.length))
+			else
+				for fnName in fn
+					$target[fnName](value)
+
+	comparers = 
+		true: (val) -> val is true
+		false: (val) -> val is false
+		truthy: (val) -> val == true
+		falsy: (val) -> val == false
+		exists: (val) -> val?
+		missing: (val) -> not val?
+
+	Binder
 )
-
-callView = ($target, fn, value) ->
-	fnType = typeof fn
-	if Array.isArray(fn)
-		fnType = "array"
-	switch fnType
-		when "string"
-			$target[fn](value)
-		when "object"
-			for key,fnData of fn
-				comp = comparers[key]
-				if (comp(value))
-					$target[fnData[0]].apply($target, fnData.slice(1, fnData.length))
-		else
-			for fnName in fn
-				$target[fnName](value)
-
-comparers = 
-	true: (val) -> val is true
-	false: (val) -> val is false
-	truthy: (val) -> val == true
-	falsy: (val) -> val == false
-	exists: (val) -> val?
-	missing: (val) -> not val?
 
 # Requirements:
 # Should be able to use existing tempaltes as much as possible.  Writing new templates is annoying
