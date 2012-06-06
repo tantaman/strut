@@ -70,7 +70,7 @@ define([],
 				@model.on("change:" + field, (model, value) ->
 					if middleware.toView?
 						value = middleware.toView(value)
-					$target[binding.fn](value)
+					callView($target, binding.fn, value)
 				)
 
 		_bindToComputedProperty: ($target, binding, middleware) ->
@@ -83,7 +83,7 @@ define([],
 				value = @model[binding.field]()
 				if middleware.toView?
 					value = middleware.toView(value)
-				$target[binding.fn](value)
+				callView($target, binding.fn, value)
 
 			for field,value of dependencies
 				@model.on("change:" + field, fn)
@@ -101,6 +101,30 @@ define([],
 			@model.get = oldGet
 
 )
+
+callView = ($target, fn, value) ->
+	fnType = typeof fn
+	if Array.isArray(fn)
+		fnType = "array"
+	switch fnType
+		when "string"
+			$target[fn](value)
+		when "object"
+			for key,fnData of fn
+				comp = comparers[key]
+				if (comp(value))
+					$target[fnData[0]].apply($target, fnData.slice(1, fnData.length))
+		else
+			for fnName in fn
+				$target[fnName](value)
+
+comparers = 
+	true: (val) -> val is true
+	false: (val) -> val is false
+	truthy: (val) -> val == true
+	falsy: (val) -> val == false
+	exists: (val) -> val?
+	missing: (val) -> not val?
 
 # Requirements:
 # Should be able to use existing tempaltes as much as possible.  Writing new templates is annoying

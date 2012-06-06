@@ -54,7 +54,7 @@ function(Backbone, Binder, BindingView) {
 				"text span": "weed",
 				"html div": "computed"
 			},
-			
+
 			middleware: {
 				toView: {
 					"span": function(val) {
@@ -70,6 +70,7 @@ function(Backbone, Binder, BindingView) {
 
 		model.set("weed", "middelwarez");
 
+		window.mwModel = model;
 
 
 		// ======= LongHand binding method ========== //
@@ -84,13 +85,24 @@ function(Backbone, Binder, BindingView) {
 				},
 
 				"div": {
-					fn: "text",
+					fn: ["text", "addClass"],
 					field: "computed"
+				},
+
+				"h1": {
+					fn: {
+						false: ["removeClass", "active"],
+						true: ["addClass", "active"]
+					},
+					field: "thinger"
 				}
 			}
 		});
 
 		model.set("weed", "long");
 		model.set("snow", "hand");
+		model.set("thinger", true);
+
+		window.longHandModel = model;
 	});
 });
