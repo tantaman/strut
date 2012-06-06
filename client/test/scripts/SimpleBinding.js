@@ -3,8 +3,8 @@ requirejs.config({
 });
 
 // Basic sanity checks for prototyping until the real unit tests & dev start
-requirejs(["vendor/backbone", "ui/lipstick/binding/Binder"],
-function(Backbone, Binder) {
+requirejs(["vendor/backbone", "ui/lipstick/binding/Binder", "ui/lipstick/binding/BindingView"],
+function(Backbone, Binder, BindingView) {
 	$(function() {
 		var ModelClass = Backbone.Model.extend({
 			computed: function() {
@@ -12,7 +12,7 @@ function(Backbone, Binder) {
 			}
 		});
 
-
+		// ====== Short Hander binding method ======== //
 		var shortHand = new ModelClass({snow: "white"})
 		new Binder({
 			model: shortHand,
@@ -27,8 +27,26 @@ function(Backbone, Binder) {
 		shortHand.set("snow", "hand");
 
 
+		// ======== Extend BindingView using short hand ========= //
+		var bv = BindingView.extend({
+			mapping: {
+				"text span": "weed",
+				"addClass div": "computed",
+				"text div": "computed"
+			}
+		});
+
+		bindingViewModel = new ModelClass({snow: "white"});
+		new bv({
+			el: $("#bindingView"),
+			model: bindingViewModel
+		});
+
+		bindingViewModel.set("weed", "whacker");
 
 
+
+		// ======= LongHand binding method ========== //
 		var longHand = new ModelClass({snow: "white"})
 		new Binder({
 			model: longHand,
@@ -48,21 +66,5 @@ function(Backbone, Binder) {
 
 		longHand.set("weed", "long");
 		longHand.set("snow", "hand");
-
-		/*
-		var BindingView = BindingView.extend({
-			mapping: {
-				"text span": "weed",
-				"addClass div": "computed",
-				"text div": "computed"
-			}
-		});
-
-		new BindingView({
-			el: $("#bindingView"),
-			model: new ModelClass({snow: "white"})
-		});
-		*/
-
 	});
 });
