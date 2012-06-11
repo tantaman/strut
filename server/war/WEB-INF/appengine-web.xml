@@ -1,0 +1,8 @@
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <!-- Replace this with your application id from http://appengine.google.com -->
+  <application>strutserver</application>
+
+  <version>v0-1</version>
+  <threadsafe>true</threadsafe>
+
+</appengine-web-app>
