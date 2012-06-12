@@ -1,8 +1,10 @@
 /pom.xml
 *jar
+*.class
 /lib
 /classes
 /native
 /.lein-failures
 /checkouts
 /.lein-deps-sum
+temp.txt
