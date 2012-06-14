@@ -34,9 +34,8 @@
   [resource-urls]
   (let [fetch-service (URLFetchServiceFactory/getURLFetchService)]
     (map #(.get %1) 
-      (doall (map #(.fetchAsync fetch-service %1)
-                (map #(java.net.URL. %1) resource-urls))
-      ))
+      (doall (map #(.fetchAsync fetch-service %1) resource-urls)
+    ))
   )
 )
 
@@ -57,19 +56,21 @@
 )
 
 (defn replace-urls [processed-urls]
-  nil
+  ; todo: replace the urls in the document
+  (vals processed-urls)
 )
 
 (defn preprocess-urls [resource-urls]
-  (distinct (flatten (map seq resource-urls)))
+  (let [processed (distinct (flatten (map seq resource-urls)))]
+    (zipmap processed (map #(java.net.URL. %1) processed))
+  )
 )
 
-(defroutes example
-  (GET "/" [] "I'm a babb")
-  (GET "/debug/zip" []
-    (let [zip-file (-> "<img src='http://google.com'></img><link href='http://yahoo.com'></link><script src='http://cnn.com'></script>"
+(defn build-zip-response [markup]
+  (let [zip-file (-> markup
         extract-resource-urls
         preprocess-urls
+        replace-urls
         fetch-resources
         create-zip
       )]
@@ -81,16 +82,16 @@
       (response/header "Content-Transfer-Encoding" "binary")
       (response/header "Content-Description" "File Transfer")
     ))
+)
+
+(defroutes example
+  (GET "/" [] "I'm a babb")
+  (GET "/debug/zip" []
+    (build-zip-response "<img src='http://google.com'></img><link href='http://yahoo.com'></link><script src='http://cnn.com'></script>")
   )
-  (GET "/zip/:markup" [markup] 
-    (let [processed-urls (preprocess-urls (extract-resource-urls markup))] 
-    (do 
-      (fetch-resources processed-urls)
-      (replace-urls processed-urls)
-      "Success!"
-    )
-  ))
-  (GET "/debug/:markup" [markup] markup)
+  (GET "/zip/:markup" [markup]
+    (build-zip-response markup)
+  )
   (route/not-found "Page not found")
 )
 
