@@ -107,8 +107,11 @@
   (GET "/debug/zip" []
     (build-zip-response "<img src='http://clojuredocs.org/images/cd_logo.png'></img><link href='http://html5boilerplate.com/css/style.css?v3launch'></link><script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>")
   )
-  (GET "/zip/:markup" [markup]
-    (build-zip-response markup)
+  (GET ["/zip/:markup", :markup #".+"] [markup]
+    (do
+      (println markup)
+      (build-zip-response markup)
+    )
   )
   (route/not-found "Page not found")
 )
