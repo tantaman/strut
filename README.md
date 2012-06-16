@@ -41,7 +41,7 @@ Most of Strut is written in Coffeescript and uses precompiled templates for HTML
 
 To compile the CoffeeScript
 
-1. Install CoffeeScript (npm install coffeescript)
+1. Install CoffeeScript (npm install coffee-script)
 2. cd to the Strut/client directory
 3. run `rake compileCoffee[w]`  (omit [w] to not watch for changes)
 
