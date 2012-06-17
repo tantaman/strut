@@ -47,7 +47,7 @@ To compile the CoffeeScript
 
 To compile the templates
 
-1. Install Handlebars (npm install handlebars)
+1. Install Handlebars (sudo npm install -g handlebars)
 2. cd to the Strut/client directory
 3. run `rake compileTpls`
 
