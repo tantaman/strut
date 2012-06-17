@@ -2,7 +2,7 @@
 @author Matt Crinklaw-Vogt
 ###
 define(["common/Throttler",
-		"./TextBoxDrawer",
+		"./TextboxDrawer",
 		"./ImageModelDrawer"],
 (Throttler, TextBoxDrawer, ImageModelDrawer) ->
 	class SlideDrawer

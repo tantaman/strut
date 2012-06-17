@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["common/Throttler", "./TextBoxDrawer", "./ImageModelDrawer"], function(Throttler, TextBoxDrawer, ImageModelDrawer) {
+define(["common/Throttler", "./TextboxDrawer", "./ImageModelDrawer"], function(Throttler, TextBoxDrawer, ImageModelDrawer) {
   var SlideDrawer;
   return SlideDrawer = (function() {
 
