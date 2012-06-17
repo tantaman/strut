@@ -24,7 +24,6 @@
 
 {{#slides.models}}
 {{#attributes}}
-
 <div class="step" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}} {{#if z}}data-z="{{z}}"{{/if}} {{#if impScale}}data-scale="{{impScale}}"{{/if}}>
 <div style="width: 1024px; height: 768px">
 {{#components}}
@@ -35,7 +34,7 @@
 </div>
 {{/slides.models}}
 
-
+</div>
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
