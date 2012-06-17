@@ -51,7 +51,10 @@ To compile the templates
 2. cd to the Strut/client directory
 3. run `rake compileTpls`
 
-Navigate to client/web/index.html to view Strut.
+### Running ###
+
+Strut can run enteirely from your local filesystem.  
+Just point your browser to `file:///path/to/strut/client/web/index.html` to view Strut.
 
 ### Contributing ###
 
