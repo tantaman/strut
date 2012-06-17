@@ -80,10 +80,8 @@
         </ul>
         <ul class="nav pull-right">
             <li>
-                  <div class="btn-group">
-                        <a class="btn btn-danger transitionEditorBtn" data-option="preview"><span>Preview Show</span></a>
-                        <a class="btn btn-danger transitionEditorBtn" data-option="transitionEditor"><span>Transition Editor</span><i class="icon-arrow-right"></i></a>
-                  </div>
+                  <a class="btn transitionEditorBtn" data-option="transitionEditor"><i class="icon-th-large"></i> <span>Transitions</span></a>
+                  <a class="btn btn-success transitionEditorBtn" data-option="preview"><i class="icon-play"></i> <span>Present</span></a>
             </li>
         </ul>
     </div>

@@ -26,10 +26,8 @@
       </ul>
     	<ul class="nav pull-right">
     		<li>
-    			<div class="btn-group">
-                        <a class="btn btn-danger menuBarOption" data-option="slideEditor"><i class="icon-arrow-left"></i>Back</a>
-                        <a class="btn btn-danger menuBarOption" data-option="preview">Preview Show<i class="icon-arrow-right"></i></a>
-                  </div>
+    			<a class="btn menuBarOption" data-option="slideEditor"><i class="icon-th-large"></i> <span>Slides</span></a>
+       			<a class="btn btn-success menuBarOption" data-option="preview"><i class="icon-play"></i> <span>Present</span></a>
     		</li>
     	</ul>
    	</div>
