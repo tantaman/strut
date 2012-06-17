@@ -44,6 +44,7 @@ FutureClient.prototype = {
     	if (event.origin == location.protocol +'//'+ location.host) {
     		if (this._popup)
     			this._popup.close()
+    		localStorage.setItem("remoteStorageToken", event.data);
       		this._cb(null, this._createClient(event.data));
     	}
   	},
@@ -64,7 +65,7 @@ FutureClient.prototype = {
 		}
 
 		this._storageInfo = storageInfo;
-		var token = remoteStorage.receiveToken();
+		var token = remoteStorage.receiveToken() || localStorage.getItem("remoteStorageToken");
 		if (token) {
 			this._cb(null, this._createClient(token));
 		} else {
