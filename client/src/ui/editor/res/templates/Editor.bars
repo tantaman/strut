@@ -29,17 +29,6 @@
             </li>
             <li class="dropdown active">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    View<b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                    {{#perspectives}}
-                        <li data-option="{{perspective}}"><a href="#">{{name}}</a></li>
-                    {{/perspectives}}
-                        <li data-option="preview"><a href="#">Preview Show</a></li>
-                </ul>
-            </li>
-            <li class="dropdown active">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                     Slideshow<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
