@@ -5,7 +5,7 @@
 
 define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, empty) {
   return Backbone.View.extend({
-    transforms: ["skewX", "skewY", "rotate", "scale"],
+    transforms: ["skewX", "skewY", "rotate"],
     className: "component",
     events: function() {
       return {
@@ -99,16 +99,32 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return this._setUpdatedTransform();
     },
     scaleStart: function() {
-      return this._initialScale = this.model.get("scale") || 1;
+      this._initialScale = this.model.get("scale") || 1;
+      if (!(this.origSize != null)) {
+        return this.origSize = {
+          width: this.$el.width(),
+          height: this.$el.height()
+        };
+      }
     },
     _setUpdatedTransform: function() {
-      var obj, transformStr;
+      var newHeight, newWidth, obj, scale, transformStr;
       transformStr = this.buildTransformString();
       obj = {
         transform: transformStr
       };
       obj[window.browserPrefix + "transform"] = transformStr;
-      return this.$content.css(obj);
+      this.$content.css(obj);
+      if (this.origSize != null) {
+        scale = this.model.get("scale");
+        newWidth = this.origSize.width * scale;
+        newHeight = this.origSize.height * scale;
+        this.$el.css({
+          width: newWidth,
+          height: newHeight
+        });
+      }
+      return this.$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")");
     },
     buildTransformString: function() {
       var transformStr,
@@ -146,6 +162,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
         return _this._deltaDrags.push(deltaDrag);
       });
       this.$content = this.$el.find(".content");
+      this.$contentScale = this.$el.find(".content-scale");
       this._setUpdatedTransform();
       scale = this.model.get("scale");
       this._selectionChanged(this.model, this.model.get("selected"));

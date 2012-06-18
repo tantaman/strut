@@ -7,7 +7,7 @@ define(["vendor/backbone",
 		"css!../res/css/ComponentView.css"],
 (Backbone, DeltaDragControl, Templates, empty) ->
 	Backbone.View.extend(
-		transforms: ["skewX", "skewY", "rotate", "scale"]
+		transforms: ["skewX", "skewY", "rotate"]
 		className: "component"
 		# TODO: make this junk less verbose
 		# and more common
@@ -103,6 +103,10 @@ define(["vendor/backbone",
 
 		scaleStart: () ->
 			@_initialScale = @model.get("scale") || 1
+			if not @origSize?
+				@origSize = 
+					width: @$el.width()
+					height: @$el.height()
 
 		_setUpdatedTransform: () ->
 			transformStr = @buildTransformString()
@@ -110,6 +114,18 @@ define(["vendor/backbone",
 				transform: transformStr
 			obj[window.browserPrefix + "transform"] = transformStr
 			@$content.css(obj)
+
+			# TODO: add scale to root obj and invert scale on labels?
+			if @origSize?
+				scale = @model.get("scale")
+				newWidth = @origSize.width * scale
+				newHeight = @origSize.height * scale
+				@$el.css(
+					width: newWidth
+					height: newHeight)
+
+			@$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")") 
+
 
 			# TODO: just use the transform matrix...
 		buildTransformString: () ->
@@ -140,6 +156,7 @@ define(["vendor/backbone",
 				@_deltaDrags.push(deltaDrag)
 			)
 			@$content = @$el.find(".content")
+			@$contentScale = @$el.find(".content-scale")
 			@_setUpdatedTransform()
 			scale = @model.get("scale")
 

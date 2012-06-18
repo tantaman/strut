@@ -1,4 +1,6 @@
+<div class="content-scale">
 <div class="content"></div>
+</div>
 <span class="topLabel label" data-delta="skewX">Skew X</span>
 <span class="leftLabel label" data-delta="skewY">Skew Y</span>
 <span class="rightLabel label" data-delta="rotate">Rotate</span>

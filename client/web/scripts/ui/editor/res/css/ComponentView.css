@@ -2,6 +2,12 @@
 	visibility: hidden;
 }
 
+.component .content-scale {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+}
+
 .component.selected .label {
 	visibility: visible;
 }
