@@ -44,7 +44,7 @@
 	height: 51px;
 }
 
-.slideEditor .nav li { /* TODO: fixme */
+.slideEditor .nav > li { /* TODO: fixme */
 	height: 52px;
 }
 
