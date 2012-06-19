@@ -102,7 +102,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     scaleStart: function() {
       this._initialScale = this.model.get("scale") || 1;
-      if (!(this.origSize != null)) {
+      if (!(this.origSize != null) || this.origSize.width === 0 || this.origSize.height === 0) {
         return this.origSize = {
           width: this.$el.width(),
           height: this.$el.height()
@@ -167,10 +167,6 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this.$contentScale = this.$el.find(".content-scale");
       this._selectionChanged(this.model, this.model.get("selected"));
       setTimeout(function() {
-        _this.origSize = {
-          width: _this.$el.width(),
-          height: _this.$el.height()
-        };
         return _this._setUpdatedTransform();
       }, 0);
       return this.$el;

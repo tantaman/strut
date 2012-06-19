@@ -104,7 +104,7 @@ define(["vendor/backbone",
 
 		scaleStart: () ->
 			@_initialScale = @model.get("scale") || 1
-			if not @origSize?
+			if not @origSize? or @origSize.width is 0 or @origSize.height is 0
 				@origSize = 
 					width: @$el.width()
 					height: @$el.height()
@@ -165,9 +165,6 @@ define(["vendor/backbone",
 			@_selectionChanged(@model, @model.get("selected"))
 
 			setTimeout(() =>
-				@origSize = 
-					width: @$el.width()
-					height: @$el.height()
 				@_setUpdatedTransform()
 			, 0)
 
