@@ -27,10 +27,10 @@
     	<ul class="nav pull-right">
     		<li>
     			<div class="btn-group iconBtns" style="display: inline-block">
-                        <a class="btn menuBarOption" data-option="slideEditor"><i class="icon-th-large"></i><span>Slides</span></a>
+                        <a class="btn menuBarOption" data-option="slideEditor"><i class="icon-th-list"></i><span>Slides</span></a>
           </div>
           <div class="btn-group iconBtns" style="display: inline-block">
-                        <a class="btn btn-success menuBarOption" data-option="preview"><i class="icon-play"></i><span>Present</span></a>
+                        <a class="btn btn-success menuBarOption" data-option="preview"><i class="icon-play icon-white"></i><span>Present</span></a>
           </div>
     		</li>
     	</ul>

@@ -48,6 +48,10 @@
 	height: 52px;
 }
 
+.transitionEditor .nav > li { /* TODO: fixme */
+	height: 52px;
+}
+
 .iconBtns i {
 	display: block;
 	margin: 0 auto;

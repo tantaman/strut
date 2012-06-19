@@ -84,7 +84,7 @@
                         <a class="btn transitionEditorBtn" data-option="transitionEditor"><i class="icon-th-large"></i><span>Transitions</span></a>
                   </div>
                   <div class="btn-group iconBtns" style="display: inline-block">
-                        <a class="btn btn-success transitionEditorBtn" data-option="preview"><i class="icon-play"></i><span>Present</span></a>
+                        <a class="btn btn-success transitionEditorBtn" data-option="preview"><i class="icon-play icon-white"></i><span>Present</span></a>
                   </div>
             </li>
         </ul>
