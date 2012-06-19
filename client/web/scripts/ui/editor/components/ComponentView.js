@@ -5,7 +5,7 @@
 
 define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, empty) {
   return Backbone.View.extend({
-    transforms: ["skewX", "skewY", "rotate"],
+    transforms: ["skewX", "skewY"],
     className: "component",
     events: function() {
       return {
@@ -124,7 +124,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
           height: newHeight
         });
       }
-      return this.$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")");
+      this.$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")");
+      return this.$el.css(window.browserPrefix + "transform", "rotate(" + this.model.get("rotate") + "rad)");
     },
     buildTransformString: function() {
       var transformStr,

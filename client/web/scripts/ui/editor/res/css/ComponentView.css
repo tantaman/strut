@@ -8,6 +8,12 @@
 	-moz-transform-origin: 0 0;
 }
 
+.component .content {
+	-webkit-transform-origin: 50% 50%;
+	-moz-transform-origin: 50% 50%;
+	transform-origin: 50% 50%;
+}
+
 .component.selected .label {
 	visibility: visible;
 }

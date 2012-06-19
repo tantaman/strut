@@ -7,7 +7,7 @@ define(["vendor/backbone",
 		"css!../res/css/ComponentView.css"],
 (Backbone, DeltaDragControl, Templates, empty) ->
 	Backbone.View.extend(
-		transforms: ["skewX", "skewY", "rotate"]
+		transforms: ["skewX", "skewY"]
 		className: "component"
 		# TODO: make this junk less verbose
 		# and more common
@@ -125,6 +125,7 @@ define(["vendor/backbone",
 					height: newHeight)
 
 			@$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")") 
+			@$el.css(window.browserPrefix + "transform", "rotate(" + @model.get("rotate") + "rad)")
 
 
 			# TODO: just use the transform matrix...
