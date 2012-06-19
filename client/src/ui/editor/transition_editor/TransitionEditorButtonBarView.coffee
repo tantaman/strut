@@ -17,6 +17,11 @@ define(["../button_bar/AbstractButtonBarView",
 			if not isNaN(val)
 				@model.changeSlideRotations(null, null, val)
 
+		interval: (e) ->
+			val = parseInt(e.target.value)
+			if not isNaN(val)
+				@model.setInterval(val)
+
 		slideEditor: (e) ->
 			@$el.trigger("changePerspective", {perspective: "slideEditor"})
 

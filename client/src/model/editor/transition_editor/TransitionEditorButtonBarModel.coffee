@@ -33,6 +33,10 @@ define(["vendor/backbone"],
 			else
 				[0,0,0]
 
+		setInterval: (i) ->
+			i = i * 1000
+			@get("deck").set("interval", i)
+
 		changeSlideRotations: (x,y,z) ->
 			# Silently set the rotations on the active slide
 			slide = @_lastActive

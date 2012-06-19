@@ -18,6 +18,11 @@ define(["../button_bar/AbstractButtonBarView", "common/Math2"], function(Abstrac
       val = parseFloat(e.target.value);
       if (!isNaN(val)) return this.model.changeSlideRotations(null, null, val);
     },
+    interval: function(e) {
+      var val;
+      val = parseInt(e.target.value);
+      if (!isNaN(val)) return this.model.setInterval(val);
+    },
     slideEditor: function(e) {
       return this.$el.trigger("changePerspective", {
         perspective: "slideEditor"

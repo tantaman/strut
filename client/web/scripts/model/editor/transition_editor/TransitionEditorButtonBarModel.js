@@ -36,6 +36,10 @@ define(["vendor/backbone"], function(Backbone) {
         return [0, 0, 0];
       }
     },
+    setInterval: function(i) {
+      i = i * 1000;
+      return this.get("deck").set("interval", i);
+    },
     changeSlideRotations: function(x, y, z) {
       var slide, toSet;
       slide = this._lastActive;
