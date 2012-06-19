@@ -1,3 +1,7 @@
+**6/19/12 - Several bugs were introduced in the last few commits regarding scaling and positioning of items.
+I'll have these fixed tonight**
+
+
 Strut
 =======
 
