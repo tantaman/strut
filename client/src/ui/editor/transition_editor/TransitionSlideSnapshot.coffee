@@ -41,7 +41,7 @@ define(["../components/ThreeDRotableComponentView",
 
 			@$el.find(".smartspinner[data-name='depth']").spinit(
 				callback: (val) =>
-					@model.set("z", -1*val) # can't do -val, uglify screws it up
+					@model.set("z", val) # can't do -val, uglify screws it up
 				mask: "Depth"
 				height: 22
 				width: 45

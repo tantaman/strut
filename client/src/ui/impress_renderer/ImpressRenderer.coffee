@@ -27,6 +27,10 @@ define(["vendor/Handlebars",
 				v * 180 / Math.PI
 			)
 
+			Handlebars.registerHelper("negate", (v) ->
+				-1 * v
+			)
+
 			Handlebars.registerHelper("extractBG", (styles) ->
 				if styles? and styles.length > 0
 					result = ""

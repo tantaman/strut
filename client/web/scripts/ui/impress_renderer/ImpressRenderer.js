@@ -29,6 +29,9 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
       Handlebars.registerHelper("toDeg", function(v) {
         return v * 180 / Math.PI;
       });
+      Handlebars.registerHelper("negate", function(v) {
+        return -1 * v;
+      });
       Handlebars.registerHelper("extractBG", function(styles) {
         var browsers, prefix, result, style, _i, _len;
         if ((styles != null) && styles.length > 0) {

@@ -1,4 +1,4 @@
-<div style="position: absolute; top: {{y}}px; left: {{x}}px;
+<div class="componentContainer" style="top: {{y}}px; left: {{x}}px;
 -webkit-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}} {{#if scale}}scale({{scale}}){{/if}};
 -moz-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}} {{#if scale}}scale({{scale}}){{/if}};
 transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}} {{#if scale}}scale({{scale}}){{/if}}">
