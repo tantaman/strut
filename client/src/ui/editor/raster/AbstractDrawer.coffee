@@ -2,14 +2,17 @@ define(() ->
 	class AbstractDrawer
 		applyTransforms: (component, bbox) ->
 			rotation = component.get("rotate")
-			@g2d.translate(bbox.width/2 + bbox.x, bbox.height/2 + bbox.y)
+			scale = component.get("scale")
+
+			@g2d.translate(bbox.x, bbox.y)
+
+			if scale?
+				@g2d.scale(scale, scale)
+
+			@g2d.translate(bbox.width/2, bbox.height/2)
 
 			if rotation?
 				@g2d.rotate(rotation)
-
-			scale = component.get("scale")
-			if scale?
-				@g2d.scale(scale, scale)
 
 			skewX = component.get("skewX")
 			skewY = component.get("skewY")
