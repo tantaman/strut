@@ -98,8 +98,9 @@ define(["vendor/backbone",
 
 			scale = (newWidth*newHeight) / (contentWidth*contentHeight) * @_initialScale
 
-			@model.set("scale", scale)
-			@_setUpdatedTransform()
+			if newWidth * newHeight > 10
+				@model.set("scale", scale)
+				@_setUpdatedTransform()
 
 		scaleStart: () ->
 			@_initialScale = @model.get("scale") || 1
@@ -116,8 +117,8 @@ define(["vendor/backbone",
 			@$content.css(obj)
 
 			# TODO: add scale to root obj and invert scale on labels?
+			scale = @model.get("scale")
 			if @origSize?
-				scale = @model.get("scale")
 				newWidth = @origSize.width * scale
 				newHeight = @origSize.height * scale
 				@$el.css(
@@ -156,12 +157,19 @@ define(["vendor/backbone",
 				deltaDrag = new DeltaDragControl($(elem), true)
 				@_deltaDrags.push(deltaDrag)
 			)
+
 			@$content = @$el.find(".content")
 			@$contentScale = @$el.find(".content-scale")
-			@_setUpdatedTransform()
-			scale = @model.get("scale")
+			#@_setUpdatedTransform()
 
 			@_selectionChanged(@model, @model.get("selected"))
+
+			setTimeout(() =>
+				@origSize = 
+					width: @$el.width()
+					height: @$el.height()
+				@_setUpdatedTransform()
+			, 0)
 
 			@$el
 

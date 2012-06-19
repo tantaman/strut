@@ -95,8 +95,10 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       newWidth = contentWidth + deltas.dx;
       newHeight = contentHeight + deltas.dy;
       scale = (newWidth * newHeight) / (contentWidth * contentHeight) * this._initialScale;
-      this.model.set("scale", scale);
-      return this._setUpdatedTransform();
+      if (newWidth * newHeight > 10) {
+        this.model.set("scale", scale);
+        return this._setUpdatedTransform();
+      }
     },
     scaleStart: function() {
       this._initialScale = this.model.get("scale") || 1;
@@ -115,8 +117,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       };
       obj[window.browserPrefix + "transform"] = transformStr;
       this.$content.css(obj);
+      scale = this.model.get("scale");
       if (this.origSize != null) {
-        scale = this.model.get("scale");
         newWidth = this.origSize.width * scale;
         newHeight = this.origSize.height * scale;
         this.$el.css({
@@ -154,8 +156,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       };
     },
     render: function() {
-      var scale,
-        _this = this;
+      var _this = this;
       this.$el.html(this.__getTemplate()(this.model.attributes));
       this.$el.find("span[data-delta]").each(function(idx, elem) {
         var deltaDrag;
@@ -164,9 +165,14 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       });
       this.$content = this.$el.find(".content");
       this.$contentScale = this.$el.find(".content-scale");
-      this._setUpdatedTransform();
-      scale = this.model.get("scale");
       this._selectionChanged(this.model, this.model.get("selected"));
+      setTimeout(function() {
+        _this.origSize = {
+          width: _this.$el.width(),
+          height: _this.$el.height()
+        };
+        return _this._setUpdatedTransform();
+      }, 0);
       return this.$el;
     },
     _fixScaling: function(scale) {

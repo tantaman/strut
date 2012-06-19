@@ -3,13 +3,13 @@
 	<h3>Save as...</h3>
 </div>
 <div class="modal-body">
-	<ul class="nav nav-tabs">
+	<!-- <ul class="nav nav-tabs">
   		<li class="active"><a href="#saveLocalTab">Local</a></li>
   		<li><a href="#saveRemoteTab">Remote</a></li>
-	</ul>
+	</ul> -->
 
-	<div class="tab-content">
-  		<div class="tab-pane active" id="saveLocalTab">
+	<!-- <div class="tab-content">
+  		<div class="tab-pane active" id="saveLocalTab"> -->
 		  	<h4>Name</h4>
 			<input type="text"></input>
 			<ul class="nav nav-list">
@@ -17,7 +17,7 @@
 					<li><a href="#"><span>{{.}}</span><button class="close">x</button></a></li>
 				{{/each}}
 			</ul>
-  		</div>
+  		<!-- </div>
   		<div class="tab-pane" id="saveRemoteTab">
   			<h4>Name</h4>
 			<input type="text"></input>
@@ -27,7 +27,7 @@
 				{{/each}}
 			</ul>
   		</div>
-	</div>
+	</div> -->
 </div>
 <div class="modal-footer">
 	<a href="#" class="btn btn-inverse ok">OK</a>
