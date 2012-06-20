@@ -149,6 +149,9 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     mousedown: function(e) {
       this.model.set("selected", true);
       this.$el.css("zIndex", zTracker.next());
+      this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
+      this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
+      console.log(this.dragScale);
       this._dragging = true;
       return this._prevPos = {
         x: e.pageX,
@@ -216,8 +219,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
         y = this.model.get("y");
         dx = e.pageX - this._prevPos.x;
         dy = e.pageY - this._prevPos.y;
-        newX = x + dx;
-        newY = y + dy;
+        newX = x + dx / this.dragScale;
+        newY = y + dy / this.dragScale;
         this.model.set("x", newX);
         this.model.set("y", newY);
         this.$el.css({

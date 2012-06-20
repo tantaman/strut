@@ -145,6 +145,9 @@ define(["vendor/backbone",
 		mousedown: (e) ->
 			@model.set("selected", true)
 			@$el.css("zIndex", zTracker.next())
+			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
+			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
+			console.log @dragScale
 			@_dragging = true
 			@_prevPos = {
 				x: e.pageX
@@ -209,8 +212,9 @@ define(["vendor/backbone",
 				y = @model.get("y")
 				dx = e.pageX - @_prevPos.x
 				dy = e.pageY - @_prevPos.y
-				newX = x + dx
-				newY = y + dy
+				newX = x + dx / @dragScale
+				newY = y + dy / @dragScale
+
 				@model.set("x", newX)
 				@model.set("y", newY)
 				@$el.css({

@@ -1,7 +1,7 @@
 <div class="navbar navbar-fixed-top menuBar">
   <div class="btn-inverse temp">
     <div class="container">
-    	<a class="brand" href="#">Strut 0.1</a>
+    	<a class="brand" href="#">Strut 0.2</a>
      	<ul class="nav">
      		<li class="dropdown active">
      			<a href="#" class="dropdown-toggle" data-toggle="dropdown">

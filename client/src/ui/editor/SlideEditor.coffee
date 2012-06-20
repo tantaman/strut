@@ -102,7 +102,9 @@ define(["vendor/backbone", "./Templates",
 				
 				@$operatingTable.css(
 					height: window.innerHeight - 80
+					width: window.innerWidth - 150
 				)
+				@operatingTable.resized()
 				#window.slideConfig.size.height
 				 #window.slideConfig.size.width
 

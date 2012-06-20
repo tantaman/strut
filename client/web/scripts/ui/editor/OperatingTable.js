@@ -24,6 +24,23 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
       }
       return this.render(prevModel);
     },
+    resized: function() {
+      var newHeight, scale, slideSize, tableSize, xScale, yScale;
+      slideSize = window.slideConfig.size;
+      tableSize = {
+        width: this.$el.width(),
+        height: this.$el.height()
+      };
+      xScale = tableSize.width / slideSize.width;
+      yScale = (tableSize.height - 20) / slideSize.height;
+      newHeight = slideSize.height * xScale;
+      if (newHeight > tableSize.height) {
+        scale = yScale;
+      } else {
+        scale = xScale;
+      }
+      return this.$slideContainer.css(window.browserPrefix + "transform", "scale(" + scale + ")");
+    },
     clicked: function(e) {
       if (this.model != null) {
         this.model.get("components").forEach(function(component) {
@@ -72,18 +89,25 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
     _componentAdded: function(model, component) {
       var view;
       view = ComponentViewFactory.createView(component);
-      return this.$el.append(view.render());
+      return this.$slideContainer.append(view.render());
     },
     render: function(prevModel) {
       var components,
         _this = this;
       if (prevModel != null) prevModel.trigger("unrender", true);
+      this.$el.html("<div class='slideContainer'></div>");
+      this.$slideContainer = this.$el.find(".slideContainer");
+      this.$slideContainer.css({
+        width: window.slideConfig.size.width,
+        height: window.slideConfig.size.height
+      });
+      this.resized();
       if (this.model != null) {
         components = this.model.get("components");
         components.forEach(function(component) {
           var view;
           view = ComponentViewFactory.createView(component);
-          return _this.$el.append(view.render());
+          return _this.$slideContainer.append(view.render());
         });
       }
       return this.$el;

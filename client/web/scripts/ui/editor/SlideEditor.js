@@ -100,9 +100,11 @@ define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTab
     resized: function() {
       if (this.$operatingTable) {
         this.$slidePreviewPanel.css("height", window.innerHeight - 80);
-        return this.$operatingTable.css({
-          height: window.innerHeight - 80
+        this.$operatingTable.css({
+          height: window.innerHeight - 80,
+          width: window.innerWidth - 150
         });
+        return this.operatingTable.resized();
       }
     }
   });

@@ -29,6 +29,22 @@ define(["vendor/backbone",
 			# re-render ourselves
 			@render(prevModel)
 
+		resized: () ->
+			slideSize = window.slideConfig.size
+			tableSize = width: @$el.width(), height: @$el.height()
+
+			xScale = (tableSize.width) / slideSize.width
+			yScale = (tableSize.height - 20) / slideSize.height
+
+			newHeight = slideSize.height * xScale
+			if newHeight > tableSize.height
+				scale = yScale
+			else
+				scale = xScale
+
+			@$slideContainer.css(window.browserPrefix + "transform", "scale(" + scale + ")")
+
+
 		clicked: (e) ->
 			if @model?
 				@model.get("components").forEach((component) ->
@@ -75,18 +91,22 @@ define(["vendor/backbone",
 
 		_componentAdded: (model, component) ->
 			view = ComponentViewFactory.createView(component)
-			@$el.append(view.render())
+			@$slideContainer.append(view.render())
 			
 		render: (prevModel) ->
 			if prevModel?
 				prevModel.trigger("unrender", true)
-			#@$el.html("")
-			#@$el.html(Templates.OperatingTable(@model))
+			
+			@$el.html("<div class='slideContainer'></div>")
+			@$slideContainer = @$el.find(".slideContainer")
+			@$slideContainer.css(width: window.slideConfig.size.width, height: window.slideConfig.size.height)
+			@resized()
+
 			if @model?
 				components = @model.get("components")
 				components.forEach((component) =>
 					view = ComponentViewFactory.createView(component)
-					@$el.append(view.render())
+					@$slideContainer.append(view.render())
 				)
 			@$el
 	)
