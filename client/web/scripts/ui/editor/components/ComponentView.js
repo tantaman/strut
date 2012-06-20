@@ -70,7 +70,7 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     rotate: function(e, deltas) {
       var rot;
-      rot = Math.atan2(deltas.y - this._origin.y, deltas.x - this._origin.x);
+      rot = this._calcRot(deltas);
       this.model.set("rotate", this._initialRotate + rot - this._rotOffset);
       return this._setUpdatedTransform();
     },

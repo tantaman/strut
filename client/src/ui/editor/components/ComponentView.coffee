@@ -73,7 +73,8 @@ define(["vendor/backbone",
 			@_initialSkewY = @model.get("skewY") || 0
 
 		rotate: (e, deltas) ->
-			rot = Math.atan2(deltas.y - @_origin.y, deltas.x - @_origin.x)
+			rot = @_calcRot(deltas) 
+				#((Math.pow(deltas.x, 2) + Math.pow(deltas.y, 2)) / Math.pow(1000, 2)) * (Math.PI*2)
 			@model.set("rotate", @_initialRotate + rot - @_rotOffset)
 			@_setUpdatedTransform()
 
