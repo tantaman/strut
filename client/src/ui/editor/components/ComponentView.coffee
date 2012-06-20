@@ -84,9 +84,10 @@ define(["vendor/backbone",
 			@_initialRotate = @model.get("rotate") || 0
 
 		updateOrigin: () ->
+			offset = @$el.offset()
 			@_origin = 
-				x: @$el.width() / 2 + @model.get("x")
-				y: @$el.height() / 2 + @model.get("y")
+				x: @$el.width() / 2 + offset.left
+				y: @$el.height() / 2 + offset.top
 
 		_calcRot: (point) ->
 			Math.atan2(point.y - @_origin.y, point.x - @_origin.x)

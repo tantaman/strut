@@ -80,9 +80,11 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       return this._initialRotate = this.model.get("rotate") || 0;
     },
     updateOrigin: function() {
+      var offset;
+      offset = this.$el.offset();
       return this._origin = {
-        x: this.$el.width() / 2 + this.model.get("x"),
-        y: this.$el.height() / 2 + this.model.get("y")
+        x: this.$el.width() / 2 + offset.left,
+        y: this.$el.height() / 2 + offset.top
       };
     },
     _calcRot: function(point) {
