@@ -28,8 +28,9 @@
 	width: 150px;
 	height: 100%;
 	float: left;
-	border-right: 1px solid gray;
-	background: #EEE;
+	border-right: 1px solid #333;
+	background: #222;
+	overflow:auto;
 }
 
 .slideEditor .operatingTable {
@@ -62,6 +63,12 @@
 }
 
 .slideEditor .slideContainer {
+	/*TODO: this would be replaced by the user's desired BG*/
+	background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+	background: radial-gradient(#F0F0F0, #BEBEBE);
 	border: 1px solid rgba(0, 0, 0, 0.2);
 	transform-origin: 0 0;
 	-webkit-transform-origin: 0 0;

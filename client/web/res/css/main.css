@@ -6,6 +6,7 @@
 	text-decoration: underline;
 }
 
-html, body, .editor, .perspectives-container {
-	/*height: 100%;*/
+html, body, .editor {
+	height: 100%;
+	background: #222;
 }
