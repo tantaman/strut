@@ -34,7 +34,7 @@
 
 .slideSnapshot.active {
 	box-shadow:inset 0 0 10px #000000;
-	border: 1px solid black;
+	border: 1px solid #5BB75B;
 }
 
 .slideSnapshot canvas {
