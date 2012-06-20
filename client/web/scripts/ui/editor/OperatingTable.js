@@ -97,6 +97,16 @@ define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "
       view = ComponentViewFactory.createView(component);
       return this.$slideContainer.append(view.render());
     },
+    backgroundChanged: function(newBG) {
+      var style, _i, _len, _ref, _results;
+      _ref = newBG.styles;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        style = _ref[_i];
+        _results.push(this.$slideContainer.css("background-image", style));
+      }
+      return _results;
+    },
     render: function(prevModel) {
       var components,
         _this = this;

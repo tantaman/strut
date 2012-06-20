@@ -92,6 +92,10 @@ define(["vendor/backbone",
 		_componentAdded: (model, component) ->
 			view = ComponentViewFactory.createView(component)
 			@$slideContainer.append(view.render())
+
+		backgroundChanged: (newBG) ->
+			for style in newBG.styles
+				@$slideContainer.css("background-image", style)
 			
 		render: (prevModel) ->
 			if prevModel?

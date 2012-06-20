@@ -52,8 +52,7 @@ define(["vendor/backbone", "./Templates",
 			true
 
 		backgroundChanged: (newBG) ->
-			for style in newBG.styles
-				@$operatingTable.css("background-image", style)
+			@operatingTable.backgroundChanged(newBG)
 
 		hide: () ->
 			@hidden = true
