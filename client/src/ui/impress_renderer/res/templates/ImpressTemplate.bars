@@ -17,7 +17,7 @@
         transform-origin: 0 0;
     }
     </style>
-    <link href="http://tantaman.github.com/Showoff/client/web/preview_export/css/main.css" rel="stylesheet" />
+    <link href="http://tantaman.github.com/Strut/client/web/preview_export/css/main.css" rel="stylesheet" />
     
     <link rel="shortcut icon" href="favicon.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />

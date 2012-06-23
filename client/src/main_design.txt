@@ -1,8 +1,0 @@
-	create a new editor view and pass in the current user
-		-editor has two perspectives:
-			1. slide creator
-			2. presentation layout
-		-editor gets current deck based on the user
-		-editor constructs both perspectives and provides them w/ the current deck
-
-	Switching decks...
