@@ -60,7 +60,7 @@ define(["../button_bar/AbstractButtonBarView",
 
 		initialize: () ->
 			AbstractButtonBarView.prototype.initialize.call(@, buttonBarOptions)
-			@model.on("change:slideRotations", @_slideRotationsChanged, @)
+			#@model.on("change:slideRotations", @_slideRotationsChanged, @)
 
 		_slideRotationsChanged: (model, slideRotations) ->
 			@partialRender(slideRotations)

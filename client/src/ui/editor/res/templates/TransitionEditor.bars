@@ -1,27 +1,14 @@
 <div class="navbar">
   <div class="navbar-inner buttonBar">
     <div class="container">
-      <ul class="nav slideRotations">
-        <li>
-          <span class="label label-inverse">Rot. X:</span><input type="text" data-option="rotateX"></input>
-        </li>
-        <li>
-          <span class="label label-inverse">Rot. Y:</span><input type="text" data-option="rotateY"></input>
-        </li>
-        <li>
-          <span class="label label-inverse">Rot. Z:</span><input type="text" data-option="rotateZ"></input>
-        </li>
-        <li class="divider-vertical">
-        </li>
-      </ul>
       <ul class="nav cameraSettings">
         <li>
-          <div class="btn-group cameraControls">
+         <!-- <div class="btn-group cameraControls">
             <button class="btn"><i class="icon-camera"></i></button>
             <a class="btn active" data-option="lookDownZ">Z</a>
             <a class="btn" data-option="lookDownY">Y</a>
             <a class="btn" data-option="lookDownX">X</a>
-          </div>
+          </div> -->
         </li>
         <li class="divider-vertical">
         </li>

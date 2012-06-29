@@ -14,11 +14,11 @@ define(["vendor/backbone"],
 				@_lastActive.off(null, null, @)
 
 			@_lastActive = slide
-			if slide?
-				slide.on("change:rotateX", @_slideRotationChanged, @)
-				slide.on("change:rotateY", @_slideRotationChanged, @)
-				slide.on("change:rotateZ", @_slideRotationChanged, @)
-				@_slideRotationChanged(slide)
+			#if slide?
+			#	slide.on("change:rotateX", @_slideRotationChanged, @)
+			#	slide.on("change:rotateY", @_slideRotationChanged, @)
+			#	slide.on("change:rotateZ", @_slideRotationChanged, @)
+			#	@_slideRotationChanged(slide)
 
 		_slideRotationChanged: (slide, value) ->
 			@trigger("change:slideRotations", @,
