@@ -30,3 +30,24 @@
 	color: #848484;
 	margin-left: 10px;
 }
+
+.component.transitionSlideSnapshot .positioningCtrls {
+	bottom: -30px;
+}
+
+.component.transitionSlideSnapshot .topLabel {
+	left: 30px;
+	top: -25px;
+}
+
+.component.transitionSlideSnapshot .leftLabel {
+	left: -60px;
+}
+
+.component.transitionSlideSnapshot .rightLabel {
+	transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	right: -60px;
+	top: 40%;
+}

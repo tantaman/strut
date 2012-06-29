@@ -2,6 +2,10 @@
 	visibility: hidden;
 }
 
+.component input {
+	visibility: hidden;
+}
+
 .component .content-scale {
 	transform-origin: 0 0;
 	-webkit-transform-origin: 0 0;
@@ -15,6 +19,10 @@
 }
 
 .component.selected .label {
+	visibility: visible;
+}
+
+.component.selected input {
 	visibility: visible;
 }
 
@@ -50,6 +58,18 @@
 	right: -45px;
 	top: 50%;
 	cursor: n-resize;
+}
+
+.component .positioningCtrls {
+	position: absolute;
+	width: 300px;
+	bottom: -55px;
+}
+
+.component input {
+	width: 25px;
+	height: 12px;
+	line-height: 12px;
 }
 
 .component {

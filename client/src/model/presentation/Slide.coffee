@@ -5,6 +5,13 @@ define(["vendor/backbone",
 		"model/geom/SpatialObject",
 		"./components/ComponentFactory"],
 (Backbone, SpatialObject, CompnentFactory) ->
+	defaults =
+		z: 0
+		impScale: 1
+		rotateX: 0
+		rotateY: 0
+		rotateZ: 0
+
 	SpatialObject.extend(
 		initialize: () ->
 			components = @get("components")
@@ -28,6 +35,8 @@ define(["vendor/backbone",
 
 					@_registerWithComponent(comp)
 				)
+
+			_.defaults(@attributes, defaults)
 
 			@on("unrender", @_unrendered, @)
 

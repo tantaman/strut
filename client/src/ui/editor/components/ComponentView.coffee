@@ -5,6 +5,8 @@ define(["vendor/backbone",
 		"ui/widgets/DeltaDragControl",
 		"../Templates"
 		"css!../res/css/ComponentView.css"],
+# TODO:
+# Start pushing more of this functionality down into a model
 (Backbone, DeltaDragControl, Templates, empty) ->
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY"]
@@ -15,6 +17,8 @@ define(["vendor/backbone",
 			"mousedown": "mousedown"
 			"click": "clicked"
 			"click .removeBtn": "removeClicked"
+			"change input[data-option='x']": "manualMoveX"
+			"change input[data-option='y']": "manualMoveY"
 			"deltadrag span[data-delta='skewX']": "skewX"
 			"deltadrag span[data-delta='skewY']": "skewY"
 			"deltadrag span[data-delta='rotate']": "rotate"
@@ -39,6 +43,8 @@ define(["vendor/backbone",
 			@_deltaDrags = []
 
 			@model.on("rerender", @_setUpdatedTransform, @)
+			@model.on("change:x", @_xChanged, @)
+			@model.on("change:y", @_yChanged, @)
 
 		_selectionChanged: (model, selected) ->
 			if selected
@@ -48,6 +54,14 @@ define(["vendor/backbone",
 
 		_colorChanged: (model, color) ->
 			@$el.css("color", "#" + color)
+
+		_xChanged: (model, value) ->
+			@$el.css("left", value)
+			@$xInput.val(value)
+
+		_yChanged: (model, value) ->
+			@$el.css("top", value)
+			@$yInput.val(value)
 
 		clicked: (e) ->
 			@$el.trigger("focused")
@@ -71,6 +85,12 @@ define(["vendor/backbone",
 
 		skewYStart: () ->
 			@_initialSkewY = @model.get("skewY") || 0
+
+		manualMoveX: (e) ->
+			@model.setInt("x", e.target.value)
+
+		manualMoveY: (e) ->
+			@model.setInt("y", e.target.value)
 
 		rotate: (e, deltas) ->
 			rot = @_calcRot(deltas) 
@@ -149,7 +169,6 @@ define(["vendor/backbone",
 			@$el.css("zIndex", zTracker.next())
 			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
 			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
-			console.log @dragScale
 			@_dragging = true
 			@_prevPos = {
 				x: e.pageX
@@ -168,6 +187,9 @@ define(["vendor/backbone",
 			#@_setUpdatedTransform()
 
 			@_selectionChanged(@model, @model.get("selected"))
+
+			@$xInput = @$el.find("[data-option='x']")
+			@$yInput = @$el.find("[data-option='y']")
 
 			setTimeout(() =>
 				@_setUpdatedTransform()
@@ -217,12 +239,8 @@ define(["vendor/backbone",
 				newX = x + dx / @dragScale
 				newY = y + dy / @dragScale
 
-				@model.set("x", newX)
-				@model.set("y", newY)
-				@$el.css({
-					left: newX
-					top: newY
-				})
+				@model.setInt("x", newX)
+				@model.setInt("y", newY)
 				@_prevPos.x = e.pageX
 				@_prevPos.y = e.pageY
 

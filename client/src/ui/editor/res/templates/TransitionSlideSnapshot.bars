@@ -1,11 +1,22 @@
 <div class="content">
 <canvas></canvas>
 </div>
-<span class="topLabel label" data-delta="rotateY">Rotate Y</span>
-<span class="leftLabel label" data-delta="rotateX">Rotate X</span>
-<span class="rightLabel label" data-delta="rotateZ">Rotate Z</span>
-<div class="spinners">
-<input type="text" class="smartspinner label" data-name="depth"/>
-<input type="text" class="smartspinner label" data-name="scale"/>
+<div class="topLabel form-inline">
+	<span class="label" data-delta="rotateY">Rot. Y</span>
+	<input type="text" data-option="rotateY" value="{{rotateY}}"></input>
+</div>
+<div class="leftLabel form-inline">
+	<span class="label" data-delta="rotateX">Rot. X</span>
+	<input type="text" data-option="rotateX" value="{{rotateX}}"></input>
+</div>
+<div class="rightLabel form-inline">
+	<span class="label" data-delta="rotateZ">Rot. Z</span>
+	<input type="text" data-option="rotateZ" value="{{rotateZ}}"></input>
+</div>
+<div class="positioningCtrls form-inline">
+	<span class="label">z</span>
+	<input class="position" type="text" data-option="z" value="{{z}}"/>
+	<span class="label">scale</span>
+	<input class="position" type="text" data-option="scale" value="{{impScale}}"/>
 </div>
 <span class="badge badge-inverse"></span>
