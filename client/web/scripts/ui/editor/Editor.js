@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, empty) {
+define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "model/common_application/AutoSaver", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, AutoSaver, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
@@ -14,7 +14,6 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
         var data;
         console.log("Attempting to open " + fileName);
         data = FileStorage.open(fileName);
-        console.log(data);
         if (data != null) {
           return _this.model["import"](data);
         }
@@ -115,7 +114,9 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       };
       this.activePerspective = "slideEditor";
       this.model.undoHistory.on("updated", this.undoHistoryChanged, this);
-      return this.model.on("change:background", this._backgroundChanged, this);
+      this.model.on("change:background", this._backgroundChanged, this);
+      this.autoSaver = new AutoSaver(this.model);
+      return this.autoSaver.start();
     },
     undoHistoryChanged: function() {
       var $lbl, redoName, undoName;
@@ -169,8 +170,14 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       option = $target.attr("data-option");
       return menuOptions[option].call(this, e);
     },
+    stopAutoSaving: function() {
+      return this.autoSaver.stop();
+    },
+    startAutoSaving: function() {
+      return this.autoSaver.start();
+    },
     render: function() {
-      var $perspectivesContainer, perspectives,
+      var $perspectivesContainer, hideCB, perspectives, showCB,
         _this = this;
       perspectives = _.map(this.perspectives, function(perspective, key) {
         return {
@@ -197,6 +204,16 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       this.$el.append(this.rawTextModal.render());
       this.openDialog = new OpenDialog();
       this.saveAsDialog = new SaveAsDialog();
+      showCB = function() {
+        return _this.stopAutoSaving();
+      };
+      this.openDialog.$el.on('show', showCB);
+      this.saveAsDialog.$el.on('show', showCB);
+      hideCB = function() {
+        return _this.startAutoSaving();
+      };
+      this.openDialog.$el.on('hide', hideCB);
+      this.saveAsDialog.$el.on('hide', hideCB);
       this.$el.append(this.openDialog.render());
       this.$el.append(this.saveAsDialog.render());
       this.backgroundPickerModal = new BackgroundPicker({

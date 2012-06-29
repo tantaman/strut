@@ -2,6 +2,7 @@ define([],
 () ->
 	class FileStorage
 		constructor: () ->
+			# this should be configurable!
 			@storageImpl = localStorage
 
 		fileNames: () ->
@@ -22,5 +23,6 @@ define([],
 		open: (fileName) ->
 			JSON.parse(@storageImpl.getItem(fileName))
 
+	# FileStorage should not be a singleton...
 	new FileStorage()
 )

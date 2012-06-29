@@ -18,7 +18,6 @@ function(Backbone) {
 					if (isModelish(obj)) {
 						result[attr] = obj.toJSON(dontRecurse, inspectArrays);
 					} else if (inspectArrays && obj instanceof Array) {
-						console.log("INSPECTING ARRAY");
 						var resArr = [];
 						result[attr] = resArr;
 						obj.forEach(function(elem, idx) {

@@ -11,9 +11,10 @@ define(["vendor/backbone",
 		"ui/widgets/SaveAsDialog",
 		"storage/FileStorage",
 		"ui/widgets/BackgroundPicker",
+		"model/common_application/AutoSaver"
 		"css!./res/css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
-FileStorage, BackgroundPicker, empty) ->
+FileStorage, BackgroundPicker, AutoSaver, empty) ->
 	editorId = 0
 
 	menuOptions =
@@ -22,7 +23,6 @@ FileStorage, BackgroundPicker, empty) ->
 			@openDialog.show((fileName) =>
 				console.log "Attempting to open #{fileName}"
 				data = FileStorage.open(fileName)
-				console.log data
 				if data?
 					@model.import(data)
 			)
@@ -98,6 +98,9 @@ FileStorage, BackgroundPicker, empty) ->
 			@model.undoHistory.on("updated", @undoHistoryChanged, @)
 			@model.on("change:background", @_backgroundChanged, @)
 
+			@autoSaver = new AutoSaver(@model)
+			@autoSaver.start()
+
 		undoHistoryChanged: () ->
 			undoName = @model.undoHistory.undoName()
 			redoName = @model.undoHistory.redoName()
@@ -140,6 +143,12 @@ FileStorage, BackgroundPicker, empty) ->
 			option = $target.attr("data-option")
 			menuOptions[option].call(@, e)
 
+		stopAutoSaving: ->
+			@autoSaver.stop()
+
+		startAutoSaving: ->
+			@autoSaver.start()
+
 		render: () ->
 			perspectives = _.map(@perspectives, (perspective, key) ->
 				{
@@ -169,6 +178,15 @@ FileStorage, BackgroundPicker, empty) ->
 
 			@openDialog = new OpenDialog()
 			@saveAsDialog = new SaveAsDialog()
+
+			showCB = => @stopAutoSaving()
+			@openDialog.$el.on('show', showCB)
+			@saveAsDialog.$el.on('show', showCB)
+
+			hideCB = => @startAutoSaving()
+			@openDialog.$el.on('hide', hideCB)
+			@saveAsDialog.$el.on('hide', hideCB)
+
 			@$el.append(@openDialog.render())
 			@$el.append(@saveAsDialog.render())
 
