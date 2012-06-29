@@ -47,17 +47,11 @@ define(["vendor/backbone"],
 				style: @get("fontStyle")
 				weight: @get("fontWeight")
 				decoration: @get("fontDecoration")
-				x: Math.min(1024, window.innerWidth) / 2 - 150 # ugh.. magic h4x
-				y: Math.min(768, window.innerHeight) / 2 - 80
-				z: 0
 			}
 
 		imgConfig: (src) ->
 			{
 				src: src
-				x: window.innerWidth / 2 - 150
-				y: window.innerHeight / 2 - 80
-				z: 0
 			}
 
 		textAlign: (value) ->

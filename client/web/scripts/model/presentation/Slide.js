@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFactory"], function(Backbone, SpatialObject, CompnentFactory) {
+define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, CompnentFactory, Math2) {
   var defaults;
   defaults = {
     z: 0,
@@ -66,10 +66,32 @@ define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFa
       };
     },
     add: function(component) {
+      this._placeComponent(component);
       this.attributes.components.push(component);
       this._registerWithComponent(component);
       this.trigger("contentsChanged");
       return this.trigger("change:components.add", this, component);
+    },
+    /**
+    		* A pretty naive implementation but it should do the job just fine.
+    		* Places a new component in a location that doesn't currently contain a component
+    		* @method _placeComponent
+    		* @param {Component} component The component to be placed
+    		*
+    */
+
+    _placeComponent: function(component) {
+      return this.attributes.components.forEach(function(existingComponent) {
+        var existingX, existingY;
+        existingX = existingComponent.get("x");
+        existingY = existingComponent.get("y");
+        if (Math2.compare(existingX, component.get("x"), 5) && Math2.compare(existingY, component.get("y"), 5)) {
+          return component.set({
+            x: existingX + 20,
+            y: existingY + 20
+          });
+        }
+      });
     },
     dispose: function() {
       this.set({
@@ -90,7 +112,7 @@ define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFa
         return component.off(null, null, this);
       }
     },
-    componentChanged: function() {
+    componentChanged: function(model, value) {
       return this.trigger("contentsChanged");
     },
     unselectComponents: function() {

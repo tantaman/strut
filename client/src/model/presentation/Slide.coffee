@@ -3,8 +3,9 @@
 ###
 define(["vendor/backbone",
 		"model/geom/SpatialObject",
-		"./components/ComponentFactory"],
-(Backbone, SpatialObject, CompnentFactory) ->
+		"./components/ComponentFactory",
+		"common/Math2"],
+(Backbone, SpatialObject, CompnentFactory, Math2) ->
 	defaults =
 		z: 0
 		impScale: 1
@@ -62,10 +63,33 @@ define(["vendor/backbone",
 			}
 
 		add: (component) ->
+			# Component will need to know if it is new or the result of an undo
+			# undo is currently broken as hell anyways though
+			@_placeComponent(component)
 			@attributes.components.push(component)
 			@_registerWithComponent(component)
 			@trigger("contentsChanged")
 			@trigger("change:components.add", @, component)
+
+		###*
+		* A pretty naive implementation but it should do the job just fine.
+		* Places a new component in a location that doesn't currently contain a component
+		* @method _placeComponent
+		* @param {Component} component The component to be placed
+		*###
+		_placeComponent: (component) ->
+			@attributes.components.forEach((existingComponent) ->
+				existingX = existingComponent.get("x")
+				existingY = existingComponent.get("y")
+
+				if Math2.compare(existingX, component.get("x"), 5) and \
+				Math2.compare(existingY, component.get("y"), 5)
+
+					component.set(
+						x: existingX + 20
+						y: existingY + 20
+					)
+			)
 
 		dispose: () ->
 			@set(
@@ -84,7 +108,7 @@ define(["vendor/backbone",
 				component.trigger("unrender")
 				component.off(null, null, @)
 
-		componentChanged: () ->
+		componentChanged: (model, value) ->
 			@trigger("contentsChanged")
 
 		unselectComponents: () ->

@@ -5,6 +5,7 @@ define(["./Component"],
 (Component) ->
 	Component.extend(
 		initialize: () ->
+			Component.prototype.initialize.apply(this, arguments)
 			@set("type", "ImageModel")
 			@on("change:src", @_updateCache, @)
 			@cachedImage = new Image()

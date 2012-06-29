@@ -242,8 +242,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
         dy = e.pageY - this._prevPos.y;
         newX = x + dx / this.dragScale;
         newY = y + dy / this.dragScale;
-        this.model.setInt("x", newX);
-        this.model.setInt("y", newY);
+        this.model.set("x", newX);
+        this.model.set("y", newY);
         this._prevPos.x = e.pageX;
         return this._prevPos.y = e.pageY;
       }

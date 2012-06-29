@@ -9,4 +9,7 @@ define(
 
 	toRads: (deg) ->
 		deg * Math.PI / 180
+
+	compare: (v1, v2, thresh) ->
+		Math.abs(v1 - v2) < thresh
 )

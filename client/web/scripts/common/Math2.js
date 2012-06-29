@@ -12,5 +12,8 @@ define({
   },
   toRads: function(deg) {
     return deg * Math.PI / 180;
+  },
+  compare: function(v1, v2, thresh) {
+    return Math.abs(v1 - v2) < thresh;
   }
 });
