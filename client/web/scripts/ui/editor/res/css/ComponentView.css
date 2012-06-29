@@ -62,7 +62,8 @@
 
 .component .positioningCtrls {
 	position: absolute;
-	bottom: -55px;
+	bottom: -35px;
+	font-size: 18px;
 }
 
 .component input {
