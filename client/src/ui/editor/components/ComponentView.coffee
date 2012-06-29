@@ -239,8 +239,8 @@ define(["vendor/backbone",
 				newX = x + dx / @dragScale
 				newY = y + dy / @dragScale
 
-				@model.setInt("x", newX)
-				@model.setInt("y", newY)
+				@model.set("x", newX)
+				@model.set("y", newY)
 				@_prevPos.x = e.pageX
 				@_prevPos.y = e.pageY
 
