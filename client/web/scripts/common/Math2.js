@@ -6,5 +6,11 @@ define({
     (dec != null) || (dec = 0);
     factor = Math.pow(10, dec);
     return Math.round(num * factor) / factor;
+  },
+  toDeg: function(rads) {
+    return rads * 180 / Math.PI;
+  },
+  toRads: function(deg) {
+    return deg * Math.PI / 180;
   }
 });

@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["./ComponentView", "../Templates"], function(ComponentView) {
+define(["./ComponentView", "../Templates", "common/Math2"], function(ComponentView, Templates, Math2) {
   var twoPI;
   twoPI = Math.PI * 2;
   return ComponentView.extend({
@@ -17,29 +17,49 @@ define(["./ComponentView", "../Templates"], function(ComponentView) {
         "deltadrag span[data-delta='rotateZ']": "rotateZ",
         "deltadragStart span[data-delta='rotateX']": "rotateXStart",
         "deltadragStart span[data-delta='rotateY']": "rotateYStart",
-        "deltadragStart span[data-delta='rotateZ']": "rotateZStart"
+        "deltadragStart span[data-delta='rotateZ']": "rotateZStart",
+        "change input[data-option='z']": "manualMoveZ",
+        "change input[data-option='scale']": "manualMoveScale",
+        "change input[data-option='rotateX']": "manualRotX",
+        "change input[data-option='rotateY']": "manualRotY",
+        "change input[data-option='rotateZ']": "manualRotZ"
       };
     },
     initialize: function() {
-      return ComponentView.prototype.initialize.apply(this, arguments);
+      ComponentView.prototype.initialize.apply(this, arguments);
+      this.model.on("change:rotateX", this._rotXChanged, this);
+      this.model.on("change:rotateY", this._rotYChanged, this);
+      return this.model.on("change:rotateZ", this._rotZChanged, this);
     },
     rotateX: function(e, deltas) {
       var rot;
       rot = (deltas.dy * .02) % twoPI;
-      this.model.set("rotateX", this._initialRotX + rot);
-      return this._setUpdatedTransform();
+      return this.model.set("rotateX", this._initialRotX + rot);
     },
     rotateY: function(e, deltas) {
       var rot;
       rot = (deltas.dx * .02) % twoPI;
-      this.model.set("rotateY", this._initialRotY + rot);
-      return this._setUpdatedTransform();
+      return this.model.set("rotateY", this._initialRotY + rot);
     },
     rotateZ: function(e, deltas) {
       var rot;
       rot = this._calcRot(deltas);
-      this.model.set("rotateZ", this._initialRotZ + rot - this._rotZOffset);
-      return this._setUpdatedTransform();
+      return this.model.set("rotateZ", this._initialRotZ + rot - this._rotZOffset);
+    },
+    manualMoveScale: function(e) {
+      return this.model.setFloat("impScale", e.target.value);
+    },
+    manualMoveZ: function(e) {
+      return this.model.setInt("z", e.target.value);
+    },
+    manualRotX: function(e) {
+      return this.model.setFloat("rotateX", Math2.toRads(e.target.value));
+    },
+    manualRotY: function(e) {
+      return this.model.setFloat("rotateY", Math2.toRads(e.target.value));
+    },
+    manualRotZ: function(e) {
+      return this.model.setFloat("rotateZ", Math2.toRads(e.target.value));
     },
     rotateXStart: function(e, deltas) {
       this.updateOrigin();
@@ -55,6 +75,24 @@ define(["./ComponentView", "../Templates"], function(ComponentView) {
       this.updateOrigin();
       this._rotZOffset = this._calcRot(deltas);
       return this._initialRotZ = this.model.get("rotateZ") || 0;
+    },
+    render: function() {
+      ComponentView.prototype.render.apply(this, arguments);
+      this.$rotXInput = this.$el.find("[data-option='rotateX']");
+      this.$rotYInput = this.$el.find("[data-option='rotateY']");
+      return this.$rotZInput = this.$el.find("[data-option='rotateZ']");
+    },
+    _rotXChanged: function(model, value) {
+      this.$rotXInput.val(Math2.toDeg(value));
+      return this._setUpdatedTransform();
+    },
+    _rotYChanged: function(model, value) {
+      this.$rotYInput.val(Math2.toDeg(value));
+      return this._setUpdatedTransform();
+    },
+    _rotZChanged: function(model, value) {
+      this.$rotZInput.val(Math2.toDeg(value));
+      return this._setUpdatedTransform();
     },
     __getTemplate: function() {
       return Templates.ThreeDRotableComponentView;

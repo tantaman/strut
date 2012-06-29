@@ -18,13 +18,7 @@ define(["vendor/backbone"], function(Backbone) {
       if (this._lastActive != null) {
         this._lastActive.off(null, null, this);
       }
-      this._lastActive = slide;
-      if (slide != null) {
-        slide.on("change:rotateX", this._slideRotationChanged, this);
-        slide.on("change:rotateY", this._slideRotationChanged, this);
-        slide.on("change:rotateZ", this._slideRotationChanged, this);
-        return this._slideRotationChanged(slide);
-      }
+      return this._lastActive = slide;
     },
     _slideRotationChanged: function(slide, value) {
       return this.trigger("change:slideRotations", this, this.slideRotations());

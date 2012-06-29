@@ -12,6 +12,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
         "mousedown": "mousedown",
         "click": "clicked",
         "click .removeBtn": "removeClicked",
+        "change input[data-option='x']": "manualMoveX",
+        "change input[data-option='y']": "manualMoveY",
         "deltadrag span[data-delta='skewX']": "skewX",
         "deltadrag span[data-delta='skewY']": "skewY",
         "deltadrag span[data-delta='rotate']": "rotate",
@@ -33,7 +35,9 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       $(document).bind("mouseup", this._mouseup);
       $(document).bind("mousemove", this._mousemove);
       this._deltaDrags = [];
-      return this.model.on("rerender", this._setUpdatedTransform, this);
+      this.model.on("rerender", this._setUpdatedTransform, this);
+      this.model.on("change:x", this._xChanged, this);
+      return this.model.on("change:y", this._yChanged, this);
     },
     _selectionChanged: function(model, selected) {
       if (selected) {
@@ -44,6 +48,14 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     _colorChanged: function(model, color) {
       return this.$el.css("color", "#" + color);
+    },
+    _xChanged: function(model, value) {
+      this.$el.css("left", value);
+      return this.$xInput.val(value);
+    },
+    _yChanged: function(model, value) {
+      this.$el.css("top", value);
+      return this.$yInput.val(value);
     },
     clicked: function(e) {
       this.$el.trigger("focused");
@@ -67,6 +79,12 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
     },
     skewYStart: function() {
       return this._initialSkewY = this.model.get("skewY") || 0;
+    },
+    manualMoveX: function(e) {
+      return this.model.setInt("x", e.target.value);
+    },
+    manualMoveY: function(e) {
+      return this.model.setInt("y", e.target.value);
     },
     rotate: function(e, deltas) {
       var rot;
@@ -153,7 +171,6 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this.$el.css("zIndex", zTracker.next());
       this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
       this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
-      console.log(this.dragScale);
       this._dragging = true;
       return this._prevPos = {
         x: e.pageX,
@@ -171,6 +188,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this.$content = this.$el.find(".content");
       this.$contentScale = this.$el.find(".content-scale");
       this._selectionChanged(this.model, this.model.get("selected"));
+      this.$xInput = this.$el.find("[data-option='x']");
+      this.$yInput = this.$el.find("[data-option='y']");
       setTimeout(function() {
         return _this._setUpdatedTransform();
       }, 0);
@@ -223,12 +242,8 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
         dy = e.pageY - this._prevPos.y;
         newX = x + dx / this.dragScale;
         newY = y + dy / this.dragScale;
-        this.model.set("x", newX);
-        this.model.set("y", newY);
-        this.$el.css({
-          left: newX,
-          top: newY
-        });
+        this.model.setInt("x", newX);
+        this.model.setInt("y", newY);
         this._prevPos.x = e.pageX;
         return this._prevPos.y = e.pageY;
       }

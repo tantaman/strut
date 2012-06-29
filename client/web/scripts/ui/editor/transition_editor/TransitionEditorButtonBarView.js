@@ -53,8 +53,7 @@ define(["../button_bar/AbstractButtonBarView", "common/Math2"], function(Abstrac
       };
     },
     initialize: function() {
-      AbstractButtonBarView.prototype.initialize.call(this, buttonBarOptions);
-      return this.model.on("change:slideRotations", this._slideRotationsChanged, this);
+      return AbstractButtonBarView.prototype.initialize.call(this, buttonBarOptions);
     },
     _slideRotationsChanged: function(model, slideRotations) {
       return this.partialRender(slideRotations);

@@ -4,6 +4,14 @@
 */
 
 define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFactory"], function(Backbone, SpatialObject, CompnentFactory) {
+  var defaults;
+  defaults = {
+    z: 0,
+    impScale: 1,
+    rotateX: 0,
+    rotateY: 0,
+    rotateZ: 0
+  };
   return SpatialObject.extend({
     initialize: function() {
       var components, hydratedComps,
@@ -33,6 +41,7 @@ define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFa
           return _this._registerWithComponent(comp);
         });
       }
+      _.defaults(this.attributes, defaults);
       return this.on("unrender", this._unrendered, this);
     },
     _unrendered: function() {
