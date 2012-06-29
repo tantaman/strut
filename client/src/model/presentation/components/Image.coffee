@@ -9,7 +9,7 @@ define(["./Component"],
 			@set("type", "ImageModel")
 
 			# We could do an HTTP request and get the content type
-			# that'd be more full proof.
+			# that'd be more fool proof.
 			src = @get("src")
 			idx = src.lastIndexOf(".")
 			if idx isnt -1 and idx+1 < src.length
