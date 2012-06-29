@@ -8,7 +8,7 @@
 <span class="close-btn-red-20 removeBtn" title="Remove"></span>
 <div class="positioningCtrls form-inline">
 	<span class="label">x</span>
-	<input class="position" type="text" data-option="x"/>
+	<input class="position" type="text" data-option="x" value="{{x}}"/>
 	<span class="label">y</span>
-	<input class="position" type="text" data-option="y"/>
+	<input class="position" type="text" data-option="y" value="{{y}}"/>
  </div>
