@@ -29,7 +29,7 @@ define(["./ComponentView"], function(ComponentView) {
       }
     },
     render: function() {
-      var $img, naturalHeight, naturalWidth;
+      var $img, naturalHeight, naturalWidth, scale;
       ComponentView.prototype.render.call(this);
       $img = $("<img src=" + (this.model.get('src')) + "></img>");
       if (this.model.get("imageType") === "SVG") {
@@ -39,14 +39,22 @@ define(["./ComponentView"], function(ComponentView) {
         });
         naturalWidth = $img[0].naturalWidth;
         naturalHeight = $img[0].naturalHeight;
-        this.$el.css({
-          width: naturalWidth,
-          height: naturalHeight
-        });
-        this.model.set("scale", {
-          width: naturalWidth,
-          height: naturalHeight
-        });
+        scale = this.model.get("scale");
+        if (scale) {
+          this.$el.css({
+            width: scale.width,
+            height: scale.height
+          });
+        } else {
+          this.$el.css({
+            width: naturalWidth,
+            height: naturalHeight
+          });
+          this.model.set("scale", {
+            width: naturalWidth,
+            height: naturalHeight
+          });
+        }
       }
       $img.bind("dragstart", function(e) {
         e.preventDefault();

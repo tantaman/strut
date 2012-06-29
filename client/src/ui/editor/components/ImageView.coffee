@@ -33,11 +33,19 @@ define(["./ComponentView"],
 				)
 				naturalWidth = $img[0].naturalWidth
 				naturalHeight = $img[0].naturalHeight
-				@$el.css(
-					width: naturalWidth
-					height: naturalHeight
-				)
-				@model.set("scale", {width: naturalWidth, height: naturalHeight})
+
+				scale = @model.get("scale")
+				if scale
+					@$el.css(
+						width: scale.width
+						height: scale.height
+					)
+				else
+					@$el.css(
+						width: naturalWidth
+						height: naturalHeight
+					)
+					@model.set("scale", {width: naturalWidth, height: naturalHeight})
 
 			$img.bind("dragstart", (e) -> e.preventDefault(); false)
 			@$el.find(".content").append($img);

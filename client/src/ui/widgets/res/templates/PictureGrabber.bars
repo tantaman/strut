@@ -3,7 +3,7 @@
 	<h3>Insert Picture</h3>
 </div>
 <div class="modal-body">
-	<div class="alert alert-error fade disp-none">
+	<div class="alert alert-error disp-none">
   		<button class="close" data-dismiss="alert">×</button>
   		The image URL you entered appears to be incorrect
 	</div>
