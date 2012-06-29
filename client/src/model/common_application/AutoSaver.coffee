@@ -19,14 +19,15 @@ define(["storage/FileStorage"],
 				@handle = null
 
 		_save: ->
-			console.log "SAVING"
 			fileName = @deck.get("fileName")
 			if not fileName?
-				if @lastAutoSave?
-					FileStorage.remove(@lastAutoSave)
-				date = new Date()
-				fileName = 
-					"AUTOSAVE-#{date.getDate()}/#{date.getMonth()+1} #{date.getHours()}:#{date.getMinutes()}:#{date.getSeconds()}"
-				@lastAutoSave = fileName
+				return
+				#if @lastAutoSave?
+				#	FileStorage.remove(@lastAutoSave)
+				#date = new Date()
+				#fileName = 
+				#	"AUTOSAVE-#{date.getDate()}/#{date.getMonth()+1} #{date.getHours()}:#{date.getMinutes()}:#{date.getSeconds()}"
+				#@lastAutoSave = fileName
+			console.log "SAVED"
 			FileStorage.save(fileName, @deck.toJSON(false, true))
 )

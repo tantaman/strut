@@ -31,17 +31,12 @@ define(["storage/FileStorage"], function(FileStorage) {
     };
 
     AutoSaver.prototype._save = function() {
-      var date, fileName;
-      console.log("SAVING");
+      var fileName;
       fileName = this.deck.get("fileName");
       if (!(fileName != null)) {
-        if (this.lastAutoSave != null) {
-          FileStorage.remove(this.lastAutoSave);
-        }
-        date = new Date();
-        fileName = "AUTOSAVE-" + (date.getDate()) + "/" + (date.getMonth() + 1) + " " + (date.getHours()) + ":" + (date.getMinutes()) + ":" + (date.getSeconds());
-        this.lastAutoSave = fileName;
+        return;
       }
+      console.log("SAVED");
       return FileStorage.save(fileName, this.deck.toJSON(false, true));
     };
 
