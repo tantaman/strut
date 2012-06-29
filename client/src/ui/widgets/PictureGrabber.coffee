@@ -20,8 +20,9 @@ define(["vendor/backbone",
 			@$el.modal('show')
 
 		okClicked: () ->
-			@cb(@src)
-			@$el.modal('hide')
+			if !@$el.find(".ok").hasClass("disabled")
+				@cb(@src)
+				@$el.modal('hide')
 
 		urlChanged: () ->
 			@throttler.submit(@loadImage, {rejectionPolicy: "runLast"})
@@ -30,11 +31,21 @@ define(["vendor/backbone",
 			@img.src = @$input.val()
 			@src = @img.src
 
+		_imgLoadError: ->
+			@$el.find(".ok").addClass("disabled")
+			@$el.find(".alert").removeClass("disp-none")
+
+		_imgLoaded: ->
+			@$el.find(".ok").removeClass("disabled")
+			@$el.find(".alert").addClass("disp-none")
+
 		render: () ->
 			@$el.html(Templates.PictureGrabber())
 			@$el.modal()
 			@$el.modal("hide")
 			@img = @$el.find("img")[0]
+			@img.onerror = => @_imgLoadError()
+			@img.onload = => @_imgLoaded()
 			@$input = @$el.find("input[name='imageUrl']")
 			@$el
 

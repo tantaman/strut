@@ -19,8 +19,10 @@ define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone
       return this.$el.modal('show');
     },
     okClicked: function() {
-      this.cb(this.src);
-      return this.$el.modal('hide');
+      if (!this.$el.find(".ok").hasClass("disabled")) {
+        this.cb(this.src);
+        return this.$el.modal('hide');
+      }
     },
     urlChanged: function() {
       return this.throttler.submit(this.loadImage, {
@@ -31,11 +33,26 @@ define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone
       this.img.src = this.$input.val();
       return this.src = this.img.src;
     },
+    _imgLoadError: function() {
+      this.$el.find(".ok").addClass("disabled");
+      return this.$el.find(".alert").removeClass("disp-none");
+    },
+    _imgLoaded: function() {
+      this.$el.find(".ok").removeClass("disabled");
+      return this.$el.find(".alert").addClass("disp-none");
+    },
     render: function() {
+      var _this = this;
       this.$el.html(Templates.PictureGrabber());
       this.$el.modal();
       this.$el.modal("hide");
       this.img = this.$el.find("img")[0];
+      this.img.onerror = function() {
+        return _this._imgLoadError();
+      };
+      this.img.onload = function() {
+        return _this._imgLoaded();
+      };
       this.$input = this.$el.find("input[name='imageUrl']");
       return this.$el;
     },
