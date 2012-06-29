@@ -192,6 +192,12 @@ define(["vendor/backbone",
 			@$yInput = @$el.find("[data-option='y']")
 
 			setTimeout(() =>
+				size = 
+					width: @$el.width()
+					height: @$el.height()
+
+				if size.width > 0 and size.height > 0
+					@origSize = size
 				@_setUpdatedTransform()
 			, 0)
 

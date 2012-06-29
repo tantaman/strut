@@ -191,6 +191,14 @@ define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!.
       this.$xInput = this.$el.find("[data-option='x']");
       this.$yInput = this.$el.find("[data-option='y']");
       setTimeout(function() {
+        var size;
+        size = {
+          width: _this.$el.width(),
+          height: _this.$el.height()
+        };
+        if (size.width > 0 && size.height > 0) {
+          _this.origSize = size;
+        }
         return _this._setUpdatedTransform();
       }, 0);
       return this.$el;
