@@ -1,0 +1,2 @@
+<div class="componentContainer" style="top: {{y}}px; left: {{x}}px; width: {{scale.width}}px; height: {{scale.height}}px;">
+{{> TransformContainer}}

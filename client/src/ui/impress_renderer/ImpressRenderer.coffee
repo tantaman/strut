@@ -7,7 +7,12 @@ define(["vendor/Handlebars",
 				result = ""
 
 				switch componentModel.get("type")
-					when "ImageModel" then result = Templates.Image(componentModel.attributes)
+					when "ImageModel"
+						if componentModel.get("imageType") is "SVG"
+							console.log "SVG!!!"
+							result = Templates.SVGImage(componentModel.attributes)
+						else
+							result = Templates.Image(componentModel.attributes)
 					when "TextBox" then result = Templates
 						.TextBox(@convertTextBoxData(componentModel.attributes))
 
@@ -52,6 +57,8 @@ define(["vendor/Handlebars",
 			)
 
 			Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer)
+			Handlebars.registerPartial("TransformContainer", Templates.TransformContainer)
+			Handlebars.registerPartial("SVGContainer", Templates.SVGContainer)
 
 		render: (deckAttrs) ->
 			slides = deckAttrs.slides

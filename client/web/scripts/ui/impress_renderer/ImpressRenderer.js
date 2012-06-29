@@ -11,7 +11,12 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
         result = "";
         switch (componentModel.get("type")) {
           case "ImageModel":
-            result = Templates.Image(componentModel.attributes);
+            if (componentModel.get("imageType") === "SVG") {
+              console.log("SVG!!!");
+              result = Templates.SVGImage(componentModel.attributes);
+            } else {
+              result = Templates.Image(componentModel.attributes);
+            }
             break;
           case "TextBox":
             result = Templates.TextBox(_this.convertTextBoxData(componentModel.attributes));
@@ -46,6 +51,8 @@ define(["vendor/Handlebars", "./Templates"], function(Handlebars, Templates) {
         }
       });
       Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer);
+      Handlebars.registerPartial("TransformContainer", Templates.TransformContainer);
+      Handlebars.registerPartial("SVGContainer", Templates.SVGContainer);
     }
 
     ImpressRenderer.prototype.render = function(deckAttrs) {

@@ -2,4 +2,4 @@
 -webkit-transform: {{#if scale}}scale({{scale}}){{/if}};
 -moz-transform: {{#if scale}}scale({{scale}}){{/if}};
 transform: {{#if scale}}scale({{scale}}){{/if}}">
-<div class="transformContainer" style="-webkit-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}; -moz-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}; transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}">
+{{> TransformContainer}}
