@@ -39,29 +39,6 @@ define(["../components/ThreeDRotableComponentView",
 				top: @model.get("y")
 			})
 
-			@$el.find(".smartspinner[data-name='depth']").spinit(
-				callback: (val) =>
-					@model.set("z", val) # can't do -val, uglify screws it up
-				mask: "Depth"
-				height: 22
-				width: 45
-				min: -9000
-				max: 9000
-				stepInc: 125
-				initValue: @model.get("z")
-			)
-
-			@$el.find(".smartspinner[data-name='scale']").spinit(
-				callback: (val) =>
-					@model.set("impScale", val)
-				mask: "Scale"
-				min: 1
-				max: 10
-				height: 22
-				width: 45
-				initValue: @model.get("impScale")
-			)
-
 			@$el
 
 		__getTemplate: () ->
