@@ -138,9 +138,9 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       }
     },
     renderPreview: function() {
-      var newWind, showStr;
+      var showStr;
       showStr = ImpressRenderer.render(this.model.attributes);
-      return newWind = window.open("data:text/html;charset=utf-8," + escape(showStr));
+      return window.previewWind = window.open("index.html?preview=" + showStr);
     },
     changePerspective: function(e, data) {
       var _this = this;
@@ -155,7 +155,6 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
     },
     _backgroundChanged: function(model, value) {
       var key, persp, _ref, _results;
-      console.log("WTF");
       _ref = this.perspectives;
       _results = [];
       for (key in _ref) {

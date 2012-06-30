@@ -1,33 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
- <meta charset="utf-8" />
-    <meta name="viewport" content="width=1024" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>Deck Title</title>
-    
-    <meta name="description" content="TODO" />
-    <meta name="author" content="TODO" />
-
-    <style>
-    .componentContainer {
-        position: absolute;
-        -webkit-transform-origin: 0 0;
-        -moz-transform-origin: 0 0;
-        transform-origin: 0 0;
-    }
-    </style>
-    <link href="http://tantaman.github.com/Strut/client/web/preview_export/css/main.css" rel="stylesheet" />
-    
-    <link rel="shortcut icon" href="favicon.png" />
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700,700italic|Ubuntu:400,700|Abril+Fatface|Hammersmith+One|Fredoka+One|Gorditas|Press+Start+2P' rel='stylesheet' type='text/css'>
-</head>
-<body class="impress-not-supported" style="{{#extractBG background.styles}}{{/extractBG}}">
 <div class="fallback-message">
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
 </div>
+<div class="bg" style="{{#extractBG background.styles}}{{/extractBG}}">
 <div id="impress">
 
 {{#slides.models}}
@@ -52,8 +27,6 @@ if ("ontouchstart" in document.documentElement) {
 }
 </script>
 
-<script src="http://tantaman.github.com/Strut/client/web/preview_export/scripts/impress.js"></script>
-<script>impress().init();</script>
 {{#interval}}
 <script>
 var interval = {{.}};
@@ -64,5 +37,4 @@ if (interval >= 1000) {
 }
 </script>
 {{/interval}}
-</body>
-</html>
+</div>

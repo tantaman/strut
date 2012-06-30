@@ -3,8 +3,6 @@
 @author Tantaman
 */
 
-var continuation;
-
 requirejs.config({
   paths: {
     "css": "vendor/amd_plugins/css",
@@ -32,35 +30,57 @@ if (!(window.localStorage != null)) {
   };
 }
 
-requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
-  Backbone.sync = function(method, model, options) {
-    if (options.keyTrail != null) {
-      return options.success(DefaultState.get(options.keyTrail));
-    }
-  };
-  window.slideConfig = {
-    size: {
-      width: 1024,
-      height: 768
-    }
-  };
-  return continuation();
-});
-
-continuation = function() {
-  return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
-    var deck, editor;
-    deck = new Deck();
-    editor = new Editor({
-      model: deck
+$(function() {
+  var continuation;
+  if (window.location.href.indexOf("preview=") !== -1 || $("body > .bg").length > 0) {
+    return requirejs(["ui/preview_export/Templates", "ui/preview_export/impress"], function(Templates, startImpress) {
+      var $head;
+      $head = $("head");
+      $head.append(Templates.Head());
+      $("body").addClass("impress-not-supported");
+      return $(function() {
+        var alreadyLoaded, idx, presentation;
+        alreadyLoaded = $("body > .bg").length > 0;
+        if (!alreadyLoaded) {
+          idx = window.location.href.indexOf("=");
+          presentation = window.location.href.substring(idx + 1);
+          $("body").html(unescape(presentation));
+          startImpress(document, window);
+          return impress().init();
+        }
+      });
     });
-    window.zTracker = {
-      z: 0,
-      next: function() {
-        return ++this.z;
-      }
+  } else {
+    requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+      Backbone.sync = function(method, model, options) {
+        if (options.keyTrail != null) {
+          return options.success(DefaultState.get(options.keyTrail));
+        }
+      };
+      window.slideConfig = {
+        size: {
+          width: 1024,
+          height: 768
+        }
+      };
+      return continuation();
+    });
+    return continuation = function() {
+      return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
+        var deck, editor;
+        deck = new Deck();
+        editor = new Editor({
+          model: deck
+        });
+        window.zTracker = {
+          z: 0,
+          next: function() {
+            return ++this.z;
+          }
+        };
+        $("body").append(editor.render());
+        return deck.newSlide();
+      });
     };
-    $("body").append(editor.render());
-    return deck.newSlide();
-  });
-};
+  }
+});

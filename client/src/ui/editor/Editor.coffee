@@ -119,7 +119,11 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 
 		renderPreview: () ->
 			showStr = ImpressRenderer.render(@model.attributes)
-			newWind = window.open("data:text/html;charset=utf-8," + escape(showStr))
+			#newWind = window.open("data:text/html;charset=utf-8," + escape(showStr))
+
+			window.previewWind = window.open("index.html?preview=" + showStr);
+			#window.location = "index.html?preview=" + showStr;
+
 			#frame = newWind.document.getElementById("presentation")
 			#frame.src = "data:text/html;charset=utf-8," + escape(showStr)
 
@@ -133,7 +137,6 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 			)
 
 		_backgroundChanged: (model, value) ->
-			console.log("WTF")
 			# tell our perspectives about the bg update...
 			for key,persp of @perspectives
 				persp.backgroundChanged(value)
