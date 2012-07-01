@@ -6,7 +6,7 @@ if (window.location.href.indexOf("preview=") != -1) {
 			end = window.location.href.length;
 
 		var presentation = window.location.href.substring(idx+1, end);
-		$("body").html(unescape(presentation));
+		$("body").html(decodeURIComponent(presentation));
 	});
 }
 

@@ -140,7 +140,7 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
     renderPreview: function() {
       var showStr;
       showStr = ImpressRenderer.render(this.model.attributes);
-      return window.previewWind = window.open("preview_export/index.html?preview=" + escape(showStr));
+      return window.previewWind = window.open("preview_export/index.html?preview=" + encodeURIComponent(showStr));
     },
     changePerspective: function(e, data) {
       var _this = this;
