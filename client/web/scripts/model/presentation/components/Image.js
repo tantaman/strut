@@ -28,6 +28,7 @@ define(["./Component"], function(Component) {
       this.cachedImage.src = this.get("src");
       return console.log(this.get("src"));
     },
+    toBase64: function() {},
     constructor: function ImageModel() {
 			Component.prototype.constructor.apply(this, arguments);
 		}

@@ -22,16 +22,12 @@ define(["./ComponentView"],
 			if @model.get("imageType") is "SVG"
 				@scale = svgScale
 
-		render: () ->
-			ComponentView.prototype.render.call(@)
-			$img = $("<img src=#{@model.get('src')}></img>")
-			
+		_finishRender: ($img) ->
 			if @model.get("imageType") is "SVG"
 				$img.css(
 					width: "100%"
 					height: "100%"
 				)
-				# TODO: don't we need to wait for the onload callback before we grab these values..??
 				naturalWidth = $img[0].naturalWidth
 				naturalHeight = $img[0].naturalHeight
 
@@ -42,11 +38,13 @@ define(["./ComponentView"],
 						height: scale.height
 					)
 				else
+					width = Math.max(naturalWidth, 50);
+					height = Math.max(naturalHeight, 50);
 					@$el.css(
-						width: Math.max(naturalWidth, 50)
-						height: Math.max(naturalHeight, 50)
+						width: width
+						height: height
 					)
-					@model.set("scale", {width: naturalWidth, height: naturalHeight})
+					@model.set("scale", {width: width, height: height})
 
 			$img.bind("dragstart", (e) -> e.preventDefault(); false)
 			@$el.find(".content").append($img);
@@ -54,6 +52,13 @@ define(["./ComponentView"],
 				top: @model.get("y")
 				left: @model.get("x")
 			})
+
+		render: () ->
+			ComponentView.prototype.render.call(@)
+			$img = $("<img src=#{@model.get('src')}></img>")
+			$img.load(=> @_finishRender($img))
+			$img.error(=> @remove())
+			
 			@$el
 	)
 )

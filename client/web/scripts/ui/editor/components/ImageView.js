@@ -28,10 +28,8 @@ define(["./ComponentView"], function(ComponentView) {
         return this.scale = svgScale;
       }
     },
-    render: function() {
-      var $img, naturalHeight, naturalWidth, scale;
-      ComponentView.prototype.render.call(this);
-      $img = $("<img src=" + (this.model.get('src')) + "></img>");
+    _finishRender: function($img) {
+      var height, naturalHeight, naturalWidth, scale, width;
       if (this.model.get("imageType") === "SVG") {
         $img.css({
           width: "100%",
@@ -46,13 +44,15 @@ define(["./ComponentView"], function(ComponentView) {
             height: scale.height
           });
         } else {
+          width = Math.max(naturalWidth, 50);
+          height = Math.max(naturalHeight, 50);
           this.$el.css({
-            width: Math.max(naturalWidth, 50),
-            height: Math.max(naturalHeight, 50)
+            width: width,
+            height: height
           });
           this.model.set("scale", {
-            width: naturalWidth,
-            height: naturalHeight
+            width: width,
+            height: height
           });
         }
       }
@@ -61,9 +61,21 @@ define(["./ComponentView"], function(ComponentView) {
         return false;
       });
       this.$el.find(".content").append($img);
-      this.$el.css({
+      return this.$el.css({
         top: this.model.get("y"),
         left: this.model.get("x")
+      });
+    },
+    render: function() {
+      var $img,
+        _this = this;
+      ComponentView.prototype.render.call(this);
+      $img = $("<img src=" + (this.model.get('src')) + "></img>");
+      $img.load(function() {
+        return _this._finishRender($img);
+      });
+      $img.error(function() {
+        return _this.remove();
       });
       return this.$el;
     }
