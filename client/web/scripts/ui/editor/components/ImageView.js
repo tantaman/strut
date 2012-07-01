@@ -47,8 +47,8 @@ define(["./ComponentView"], function(ComponentView) {
           });
         } else {
           this.$el.css({
-            width: naturalWidth,
-            height: naturalHeight
+            width: Math.max(naturalWidth, 50),
+            height: Math.max(naturalHeight, 50)
           });
           this.model.set("scale", {
             width: naturalWidth,

@@ -31,6 +31,7 @@ define(["./ComponentView"],
 					width: "100%"
 					height: "100%"
 				)
+				# TODO: don't we need to wait for the onload callback before we grab these values..??
 				naturalWidth = $img[0].naturalWidth
 				naturalHeight = $img[0].naturalHeight
 
@@ -42,8 +43,8 @@ define(["./ComponentView"],
 					)
 				else
 					@$el.css(
-						width: naturalWidth
-						height: naturalHeight
+						width: Math.max(naturalWidth, 50)
+						height: Math.max(naturalHeight, 50)
 					)
 					@model.set("scale", {width: naturalWidth, height: naturalHeight})
 
