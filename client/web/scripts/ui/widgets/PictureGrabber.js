@@ -24,10 +24,15 @@ define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone
         return this.$el.modal('hide');
       }
     },
-    urlChanged: function() {
-      return this.throttler.submit(this.loadImage, {
-        rejectionPolicy: "runLast"
-      });
+    urlChanged: function(e) {
+      if (e.which === 13) {
+        this.src = this.$input.val();
+        return this.okClicked();
+      } else {
+        return this.throttler.submit(this.loadImage, {
+          rejectionPolicy: "runLast"
+        });
+      }
     },
     loadImage: function() {
       this.img.src = this.$input.val();

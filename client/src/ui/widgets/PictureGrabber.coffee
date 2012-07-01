@@ -24,8 +24,12 @@ define(["vendor/backbone",
 				@cb(@src)
 				@$el.modal('hide')
 
-		urlChanged: () ->
-			@throttler.submit(@loadImage, {rejectionPolicy: "runLast"})
+		urlChanged: (e) ->
+			if e.which is 13
+				@src = @$input.val()
+				@okClicked()
+			else
+				@throttler.submit(@loadImage, {rejectionPolicy: "runLast"})
 
 		loadImage: () ->
 			@img.src = @$input.val()
