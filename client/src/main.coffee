@@ -36,8 +36,8 @@ requirejs(["vendor/backbone",
 		# we need to roll the slide config up into the model.
 	window.slideConfig =
 		size:
-			width: 1024
-			height: 768
+			width: 960
+			height: 720
 	continuation()
 )
 

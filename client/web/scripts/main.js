@@ -40,8 +40,8 @@ requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultS
   };
   window.slideConfig = {
     size: {
-      width: 1024,
-      height: 768
+      width: 960,
+      height: 720
     }
   };
   return continuation();
