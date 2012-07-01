@@ -1,5 +1,6 @@
 define([],
 () ->
+	prefix = "Strut_"
 	class FileStorage
 		constructor: () ->
 			# this should be configurable!
@@ -10,18 +11,20 @@ define([],
 			idx = 0
 			fileNames = []
 			while idx < numFiles
-				fileNames.push(localStorage.key(idx))
+				fileName = localStorage.key(idx)
+				if (fileName.indexOf(prefix) != -1)
+					fileNames.push(fileName.replace(prefix, ""))
 				++idx
 			fileNames
 
 		remove: (fileName) ->
-			@storageImpl.removeItem(fileName)
+			@storageImpl.removeItem(prefix + fileName)
 
 		save: (fileName, contents) ->
-			@storageImpl.setItem(fileName, JSON.stringify(contents))
+			@storageImpl.setItem(prefix + fileName, JSON.stringify(contents))
 
 		open: (fileName) ->
-			JSON.parse(@storageImpl.getItem(fileName))
+			JSON.parse(@storageImpl.getItem(prefix + fileName))
 
 	# FileStorage should not be a singleton...
 	new FileStorage()
