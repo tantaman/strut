@@ -18,15 +18,13 @@ define(["./Component"], function(Component) {
           extension = extension.substring(0, idx);
         }
       }
-      console.log(extension);
       this.set("imageType", extension.toUpperCase());
       this.on("change:src", this._updateCache, this);
       this.cachedImage = new Image();
       return this._updateCache();
     },
     _updateCache: function() {
-      this.cachedImage.src = this.get("src");
-      return console.log(this.get("src"));
+      return this.cachedImage.src = this.get("src");
     },
     toBase64: function() {},
     constructor: function ImageModel() {

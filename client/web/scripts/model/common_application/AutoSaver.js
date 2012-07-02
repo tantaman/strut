@@ -36,7 +36,6 @@ define(["storage/FileStorage"], function(FileStorage) {
       if (!(fileName != null)) {
         return;
       }
-      console.log("SAVED");
       return FileStorage.save(fileName, this.deck.toJSON(false, true));
     };
 

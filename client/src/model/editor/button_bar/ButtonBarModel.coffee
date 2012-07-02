@@ -67,15 +67,25 @@ define(["vendor/backbone"],
 				@set("font" + setting.substr(0,1).toUpperCase() + setting.substr(1),
 					@activeComponent.get(setting))
 
+		_bindActiveText: () ->
+			@activeComponent.on("change:size", @_activeFontSizeChanged, @)
+
+		_activeFontSizeChanged: (model, value) ->
+			@set("fontSize", value)
+
 		colorSelected: (hex) ->
 			@set("fontColor", hex)
 			if @_activeIsTextbox()
 				@activeComponent.set("color", hex)
 
 		activeComponentChanged: (component) ->
+			if (@activeComponent?)
+				@activeComponent.off(null, null, @)
+
 			@activeComponent = component
 			if @_activeIsTextbox()
 				@_pullFontSettings()
+				@_bindActiveText()
 
 		constructor: `function ButtonBarModel() {
 			Backbone.Model.prototype.constructor.apply(this, arguments);

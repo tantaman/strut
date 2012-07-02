@@ -28,6 +28,5 @@ define(["storage/FileStorage"],
 				#fileName = 
 				#	"AUTOSAVE-#{date.getDate()}/#{date.getMonth()+1} #{date.getHours()}:#{date.getMinutes()}:#{date.getSeconds()}"
 				#@lastAutoSave = fileName
-			console.log "SAVED"
 			FileStorage.save(fileName, @deck.toJSON(false, true))
 )

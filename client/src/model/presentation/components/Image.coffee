@@ -18,8 +18,6 @@ define(["./Component"],
 				if idx isnt -1
 					extension = extension.substring(0, idx)
 
-			console.log extension
-
 			@set("imageType",  extension.toUpperCase())
 			@on("change:src", @_updateCache, @)
 			@cachedImage = new Image()
@@ -27,7 +25,6 @@ define(["./Component"],
 
 		_updateCache: () ->
 			@cachedImage.src = @get("src")
-			console.log @get("src")
 
 		toBase64: () ->
 			

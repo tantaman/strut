@@ -74,6 +74,12 @@ define(["vendor/backbone"], function(Backbone) {
       }
       return _results;
     },
+    _bindActiveText: function() {
+      return this.activeComponent.on("change:size", this._activeFontSizeChanged, this);
+    },
+    _activeFontSizeChanged: function(model, value) {
+      return this.set("fontSize", value);
+    },
     colorSelected: function(hex) {
       this.set("fontColor", hex);
       if (this._activeIsTextbox()) {
@@ -81,9 +87,13 @@ define(["vendor/backbone"], function(Backbone) {
       }
     },
     activeComponentChanged: function(component) {
+      if ((this.activeComponent != null)) {
+        this.activeComponent.off(null, null, this);
+      }
       this.activeComponent = component;
       if (this._activeIsTextbox()) {
-        return this._pullFontSettings();
+        this._pullFontSettings();
+        return this._bindActiveText();
       }
     },
     constructor: function ButtonBarModel() {
