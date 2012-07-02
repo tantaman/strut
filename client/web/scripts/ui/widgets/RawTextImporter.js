@@ -7,7 +7,8 @@ define(["vendor/backbone", "./Templates"], function(Backbone, Templates) {
   return Backbone.View.extend({
     className: "rawTextImporter modal",
     events: {
-      "click .ok": "okClicked"
+      "click .ok": "okClicked",
+      "hidden": "hidden"
     },
     initialize: function() {},
     show: function(cb, val) {
@@ -22,6 +23,11 @@ define(["vendor/backbone", "./Templates"], function(Backbone, Templates) {
         this.cb(this.$txtArea.val());
       }
       return this.$el.modal("hide");
+    },
+    hidden: function() {
+      if (this.$txtArea != null) {
+        return this.$txtArea.val("");
+      }
     },
     render: function() {
       this.$el.html(Templates.RawTextImporter());

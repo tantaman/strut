@@ -9,7 +9,8 @@ define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone
     events: {
       "click .ok": "okClicked",
       "keyup input[name='imageUrl']": "urlChanged",
-      "paste input[name='imageUrl']": "urlChanged"
+      "paste input[name='imageUrl']": "urlChanged",
+      "hidden": "hidden"
     },
     initialize: function() {
       return this.throttler = new Throttler(200, this);
@@ -22,6 +23,11 @@ define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone
       if (!this.$el.find(".ok").hasClass("disabled")) {
         this.cb(this.src);
         return this.$el.modal('hide');
+      }
+    },
+    hidden: function() {
+      if (this.$input != null) {
+        return this.$input.val("");
       }
     },
     urlChanged: function(e) {

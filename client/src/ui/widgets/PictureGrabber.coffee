@@ -11,6 +11,7 @@ define(["vendor/backbone",
 			"click .ok": "okClicked"
 			"keyup input[name='imageUrl']": "urlChanged"
 			"paste input[name='imageUrl']": "urlChanged"
+			"hidden": "hidden"
 
 		initialize: () ->
 			@throttler = new Throttler(200, @)
@@ -23,6 +24,10 @@ define(["vendor/backbone",
 			if !@$el.find(".ok").hasClass("disabled")
 				@cb(@src)
 				@$el.modal('hide')
+
+		hidden: () ->
+			if @$input?
+				@$input.val("")
 
 		urlChanged: (e) ->
 			if e.which is 13

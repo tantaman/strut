@@ -8,6 +8,7 @@ define(["vendor/backbone",
 		className: "rawTextImporter modal"
 		events:
 			"click .ok": "okClicked"
+			"hidden": "hidden"
 
 		initialize: () ->
 
@@ -22,6 +23,10 @@ define(["vendor/backbone",
 			if @cb?
 				@cb(@$txtArea.val())
 			@$el.modal("hide")
+
+		hidden: () ->
+			if @$txtArea?
+				@$txtArea.val("")
 
 		render: () ->
 			@$el.html(Templates.RawTextImporter())
