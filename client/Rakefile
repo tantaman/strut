@@ -77,6 +77,10 @@ task :compileCoffee, :watch do |t,args|
 	system %{coffee #{watch} -b --compile --output web/scripts/ src/}
 end
 
+task :docs do
+	system %{yuidoc web/scripts -o docs}
+end
+
 task :refactor, :source, :destination do |t, args|
 	source = args[:source]
 	destination = args[:destination]

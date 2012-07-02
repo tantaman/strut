@@ -1,0 +1,1302 @@
+{
+    "project": {},
+    "files": {
+        "web\\scripts\\common\\EventEmitter.js": {
+            "name": "web\\scripts\\common\\EventEmitter.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\common\\MapResolver.js": {
+            "name": "web\\scripts\\common\\MapResolver.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\common\\Queue.js": {
+            "name": "web\\scripts\\common\\Queue.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\common\\Throttler.js": {
+            "name": "web\\scripts\\common\\Throttler.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\model\\common_application\\AutoSaver.js": {
+            "name": "web\\scripts\\model\\common_application\\AutoSaver.js",
+            "modules": {
+                "model.common_application": 1
+            },
+            "classes": {
+                "model.common_application.AutoSave": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\model\\common_application\\UndoHistory.js": {
+            "name": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "modules": {},
+            "classes": {
+                "model.common_application.UndoHistory": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js": {
+            "name": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "modules": {
+                "model.editor": 1
+            },
+            "classes": {
+                "model.editor.button_bar.ButtonBarModel": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\model\\presentation\\Slide.js": {
+            "name": "web\\scripts\\model\\presentation\\Slide.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\vendor\\amd\\jszip.js": {
+            "name": "web\\scripts\\vendor\\amd\\jszip.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\vendor\\amd_plugins\\text.js": {
+            "name": "web\\scripts\\vendor\\amd_plugins\\text.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\vendor\\A-jquery-1.7-matt.js": {
+            "name": "web\\scripts\\vendor\\A-jquery-1.7-matt.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\require.js": {
+            "name": "web\\scripts\\require.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {
+        "model.common_application": {
+            "name": "model.common_application",
+            "submodules": {},
+            "classes": {
+                "model.common_application.AutoSave": 1,
+                "model.common_application.UndoHistory": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 9,
+            "author": "Matt Crinklaw-Vogt"
+        },
+        "model.editor": {
+            "name": "model.editor",
+            "submodules": {},
+            "classes": {
+                "model.editor.button_bar.ButtonBarModel": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 39,
+            "author": "Matt Crinklaw-Vogt / Tantaman"
+        }
+    },
+    "classes": {
+        "model.common_application.AutoSave": {
+            "name": "model.common_application.AutoSave",
+            "shortname": "model.common_application.AutoSave",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "model.common_application",
+            "namespace": "",
+            "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
+            "line": 13,
+            "description": "Auto saves a given model on a specified interval.\nThe model is expected to have a fileName attribute.\nThe model is saved by calling its toJSON method",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "model",
+                    "description": "The model to be saved",
+                    "type": "Object"
+                },
+                {
+                    "name": "options",
+                    "description": "Options specifying how the model should be saved",
+                    "type": "Object",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "interval",
+                            "description": "Inteval, in seconds, that the model should be saved.",
+                            "type": "Integer",
+                            "optional": true
+                        }
+                    ]
+                }
+            ]
+        },
+        "model.common_application.UndoHistory": {
+            "name": "model.common_application.UndoHistory",
+            "shortname": "model.common_application.UndoHistory",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "model.common_application",
+            "namespace": "",
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 9,
+            "description": "Maintains a list of commands in an undo history.\nDrops commands when they should no longer be reachable\nvia standard undo/redo semantics.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "size",
+                    "description": "Number of commands/actions to remember",
+                    "type": "Integer"
+                }
+            ]
+        },
+        "model.editor.button_bar.ButtonBarModel": {
+            "name": "model.editor.button_bar.ButtonBarModel",
+            "shortname": "model.editor.button_bar.ButtonBarModel",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "model.editor",
+            "namespace": "",
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 39,
+            "description": "Maintains the state of the button bar and notifies interested\nparties of changes.  The ButtonBarModel also listens to the\ncurrently selected component in the slide editor and passes\nalong the relevant changes that occur to that component.",
+            "is_constructor": 1
+        }
+    },
+    "classitems": [
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 1,
+            "description": "The eventEmitter pattern from nodeJS ported to the browser.",
+            "author": "Matt Crinklaw",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 63,
+            "description": "Publish an event on the given topic",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 75,
+            "description": "Publish an event on the given topic on the next iteration \nthrough the event loop",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 84,
+            "description": "Register a callback for the given topic.\nOptionally, a context may be provided.  The provided\ncontext will be used for the this argument to callback.",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 117,
+            "description": "Register a callback that will be removed after\nits first notification",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\EventEmitter.js",
+            "line": 131,
+            "description": "remove a listener.  If the listener was registerd\nwith a context, a context must be provided for its removal.",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\MapResolver.js",
+            "line": 1,
+            "fileoverview": "Utilties to resolve key strings to values\nin a map.",
+            "author": "Matt Crinklaw",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\MapResolver.js",
+            "line": 7,
+            "params": [
+                {
+                    "name": "map",
+                    "description": "The map on which to resolve",
+                    "type": "Object array"
+                },
+                {
+                    "name": "key",
+                    "description": "The key used to retrieve from\n the map.  If the key is an array, each element in the\n array is used to descend deeper into the map.",
+                    "type": "String number array"
+                }
+            ],
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\Queue.js",
+            "line": 1,
+            "description": "A basic queue abstraction.",
+            "author": "Matt Crinklaw",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\Throttler.js",
+            "line": 1,
+            "description": "Throttles an event back to occur at most 1 time in delay ms.",
+            "author": "Matt Crinklaw",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\Throttler.js",
+            "line": 8,
+            "params": [
+                {
+                    "name": "integer",
+                    "description": "delay - minimum interval between execution of\nsubmitted tasks.  Throttler.submit takes various \nparameters that control what is done with the submitted tasks.\nSubmitted tasks can be queued or dropped."
+                }
+            ],
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\common\\Throttler.js",
+            "line": 22,
+            "description": "Runs the cb after delay if nothing is currently executing.\n\nadds the callback to a queue of infinite length\nif options.rejectionPolicy == queue.\n\nadds the callback to a queue of length 1 if\noptions.rejectionPolicy == runLast.  If the queue is filled,\nit replaces the element already in the queue.",
+            "class": "model.common_application.AutoSave"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
+            "line": 34,
+            "description": "Starts the auto save task if not already started",
+            "itemtype": "method",
+            "name": "start",
+            "class": "model.common_application.AutoSave",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
+            "line": 50,
+            "description": "Stops the auto save task if it is currently running",
+            "itemtype": "method",
+            "name": "stop",
+            "class": "model.common_application.AutoSave",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 30,
+            "description": "Adds a new command to the undo history.\nThis re-sets the re-do history",
+            "itemtype": "method",
+            "name": "push",
+            "params": [
+                {
+                    "name": "command",
+                    "description": "Command to be added to the history",
+                    "type": "Command"
+                }
+            ],
+            "class": "model.common_application.UndoHistory",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 72,
+            "description": "This is useful for telling the user what command would be undone\nif they pressed undo.",
+            "itemtype": "method",
+            "name": "undoName",
+            "return": {
+                "description": "name of the next command to be undone",
+                "type": "String"
+            },
+            "class": "model.common_application.UndoHistory",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 95,
+            "description": "This is useful for telling the user what command would be\nredone if they pressed redo",
+            "itemtype": "method",
+            "name": "redoName",
+            "return": {
+                "description": "name of the next command to be redone",
+                "type": "String"
+            },
+            "class": "model.common_application.UndoHistory",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 122,
+            "description": "Undoes a command",
+            "itemtype": "method",
+            "name": "undo",
+            "return": {
+                "description": "this",
+                "type": "model.common_application.UndoHistory"
+            },
+            "class": "model.common_application.UndoHistory",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
+            "line": 143,
+            "description": "Redoes a command",
+            "itemtype": "method",
+            "name": "redo",
+            "return": {
+                "description": "this",
+                "type": "model.common_application.UndoHistory"
+            },
+            "class": "model.common_application.UndoHistory",
+            "module": "model.common_application"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 56,
+            "description": "Creates an object containing the currently\nselected font settings",
+            "itemtype": "method",
+            "name": "fontConfig",
+            "return": {
+                "description": "currently selected font settings",
+                "type": "Object"
+            },
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 74,
+            "description": "Why does this method even exist?",
+            "itemtype": "method",
+            "name": "imgConfig",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 85,
+            "description": "Sets the text alignment",
+            "itemtype": "method",
+            "name": "textAlign",
+            "params": [
+                {
+                    "name": "value",
+                    "description": "css text-align property value",
+                    "type": "String"
+                }
+            ],
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 116,
+            "description": "Sets the font color (and eventually shape color?)",
+            "itemtype": "method",
+            "name": "colorSelected",
+            "params": [
+                {
+                    "name": "hex",
+                    "description": "CSS hex string",
+                    "type": "String"
+                }
+            ],
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 129,
+            "description": "Sets what the ButtonBar knows as the active component",
+            "itemtype": "method",
+            "name": "activeComponentChanged",
+            "params": [
+                {
+                    "name": "component",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 146,
+            "description": "The following are auto-generated methods for\nsetting the various font peroprties AND updating\nthe active component with that setting.",
+            "itemtype": "method",
+            "name": "fontSize",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 154,
+            "itemtype": "method",
+            "name": "fontFamily",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 159,
+            "itemtype": "method",
+            "name": "fontColor",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 164,
+            "itemtype": "method",
+            "name": "fontStyle",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 169,
+            "itemtype": "method",
+            "name": "fontWeight",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
+            "line": 174,
+            "itemtype": "method",
+            "name": "fontDecoration",
+            "class": "model.editor.button_bar.ButtonBarModel",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\model\\presentation\\Slide.js",
+            "line": 75,
+            "description": "A pretty naive implementation but it should do the job just fine.\nPlaces a new component in a location that doesn't currently contain a component",
+            "itemtype": "method",
+            "name": "_placeComponent",
+            "params": [
+                {
+                    "name": "component",
+                    "description": "The component to be placed",
+                    "type": "Component"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 1,
+            "description": "JSZip - A Javascript class for generating Zip files\n<http://stuartk.com/jszip>\n(c) 2009 Stuart Knightley <stuart [at] stuartk.com>\nLicenced under the GPLv3 and the MIT licences\nUsage:\n   zip = new JSZip();\n   zip.file(\"hello.txt\", \"Hello, World!\").add(\"tempfile\", \"nothing\");\n   zip.folder(\"images\").file(\"smile.gif\", base64Data, {base64: true});\n   zip.file(\"Xmas.txt\", \"Ho ho ho !\", {date : new Date(\"December 25, 2007 00:00:01\")});\n   zip.remove(\"tempfile\");\n   base64zip = zip.generate();",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 20,
+            "description": "Representation a of zip file in js",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "data",
+                    "description": "the data to load, if any (optional).",
+                    "type": "String="
+                },
+                {
+                    "name": "options",
+                    "description": "the options for creating this objects (optional).",
+                    "type": "Object="
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 61,
+            "description": "A simple object representing a file in the zip file.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the name of the file",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "the data",
+                    "type": "String"
+                },
+                {
+                    "name": "options",
+                    "description": "the options of the file",
+                    "type": "Object"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 76,
+            "description": "Return the content as UTF8 string.",
+            "return": {
+                "description": "the UTF8 string.",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 84,
+            "description": "Returns the binary content.",
+            "return": {
+                "description": "the content as binary.",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 94,
+            "description": "Transform an integer into a string in hexadecimal.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "dec",
+                    "description": "the number to convert.",
+                    "type": "Number"
+                },
+                {
+                    "name": "bytes",
+                    "description": "the number of bytes to generate.",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "the result.",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 112,
+            "description": "Merge the objects passed as parameters into a new one.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "var_args",
+                    "description": "All objects to merge.",
+                    "type": "...Object"
+                }
+            ],
+            "return": {
+                "description": "a new object with the data of the others.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 134,
+            "description": "Transforms the (incomplete) options from the user into the complete\nset of options to create a file.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "o",
+                    "description": "the options from the user.",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "the complete set of options.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 151,
+            "description": "Add a file in the current folder.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the name of the file",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "the data of the file",
+                    "type": "String"
+                },
+                {
+                    "name": "o",
+                    "description": "the options of the file",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "the new file.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 171,
+            "description": "Find the parent folder of the path.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "path",
+                    "description": "the path to use",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "the parent folder, or \"\"",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 187,
+            "description": "Add a (sub) folder in the current folder.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the folder's name",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "the new folder.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 210,
+            "description": "Generate the data found in the local header of a zip file.\nDo not create it now, as some parts are re-used later.",
+            "access": "private",
+            "tagname": "",
+            "params": [
+                {
+                    "name": "file",
+                    "description": "the file to use.",
+                    "type": "Object"
+                },
+                {
+                    "name": "utfEncodedFileName",
+                    "description": "the file name, utf8 encoded.",
+                    "type": "String"
+                },
+                {
+                    "name": "compressionType",
+                    "description": "the compression to use.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "an object containing header and compressedData.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 285,
+            "description": "Read an existing zip and merge the data in the current JSZip object.\nThe implementation is in jszip-load.js, don't forget to include it.",
+            "params": [
+                {
+                    "name": "stream",
+                    "description": "The stream to load",
+                    "type": "String"
+                },
+                {
+                    "name": "options",
+                    "description": "Options for loading the stream.\n options.base64 : is the stream in base64 ? default : false",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "the current JSZip object",
+                "type": "JSZip"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 298,
+            "description": "Filter nested files/folders with the specified function.",
+            "params": [
+                {
+                    "name": "search",
+                    "description": "the predicate to use :\nfunction (relativePath, file) {...}\nIt takes 2 arguments : the relative path and the file.",
+                    "type": "Function"
+                }
+            ],
+            "return": {
+                "description": "An array of matching elements.",
+                "type": "Array"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 323,
+            "description": "Add a file to the zip file, or search a file.",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "The name of the file to add (if data is defined),\nthe name of the file to find (if no data) or a regex to match files.",
+                    "type": "String|RegExp"
+                },
+                {
+                    "name": "data",
+                    "description": "The file data, either raw or base64 encoded",
+                    "type": "String"
+                },
+                {
+                    "name": "o",
+                    "description": "File options",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "this JSZip object (when adding a file),\na file (when searching by string) or an array of files (when searching by regex).",
+                "type": "JSZip|Object|Array"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 358,
+            "description": "Add a directory to the zip file, or search.",
+            "params": [
+                {
+                    "name": "arg",
+                    "description": "The name of the directory to add, or a regex to search folders.",
+                    "type": "String|RegExp"
+                }
+            ],
+            "return": {
+                "description": "an object with the new directory as the root, or an array containing matching folders.",
+                "type": "JSZip"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 387,
+            "description": "Delete a file, or a directory and all sub-files, from the zip",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the name of the file to delete",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "this JSZip object",
+                "type": "JSZip"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 426,
+            "description": "Generate the complete zip file",
+            "params": [
+                {
+                    "name": "options",
+                    "description": "the options to generate the zip file :\n- base64, true to generate base64.\n- compression, \"STORE\" by default.",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "the zip file",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 511,
+            "description": "Javascript crc32\n  http://www.webtoolkit.info/",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 554,
+            "description": "http://www.webtoolkit.info/javascript-utf8.html",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 583,
+            "description": "http://www.webtoolkit.info/javascript-utf8.html",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\jszip.js",
+            "line": 644,
+            "description": "Base64 encode / decode\n  http://www.webtoolkit.info/\nHacked so that it doesn't utf8 en/decode everything",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
+            "line": 1,
+            "license": "RequireJS text 1.0.2 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/requirejs for details",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
+            "line": 142,
+            "description": "Parses a resource name into its component parts. Resource names\nlook like: module/name.ext!strip, where the !strip part is\noptional.",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the resource name",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "with properties \"moduleName\", \"ext\" and \"strip\"\nwhere strip is a boolean.",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
+            "line": 172,
+            "description": "Is an URL on another domain. Only works for browser use, returns\nfalse in non-browser environments. Only used to know if an\noptimized .js version of a text resource should be loaded\ninstead.",
+            "params": [
+                {
+                    "name": "url",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Boolean"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\vendor\\A-jquery-1.7-matt.js",
+            "line": 4192,
+            "description": "Utility function for retreiving the text value of an array of DOM nodes",
+            "params": [
+                {
+                    "name": "elem",
+                    "description": "",
+                    "type": "Array|Element"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1,
+            "license": "RequireJS 2.0.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/requirejs for details",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 48,
+            "description": "Helper function for iterating over an array. If the func returns\na true value, it will break out of the loop.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 63,
+            "description": "Helper function for iterating over an array backwards. If the func\nreturns a true value, it will break out of the loop.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 82,
+            "description": "Cycles over properties in an object and calls a function for each\nproperty value. If the function returns a truthy value, then the\niteration is stopped.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 98,
+            "description": "Simple function to mix in properties from source into target,\nbut only if target does not already have a property of the same name.\nThis is not robust in IE for transferring methods that match\nObject.prototype names, but the uses of mixin here seem unlikely to\ntrigger a problem related to that.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 183,
+            "description": "Constructs an error with a pointer to an URL with more information.",
+            "params": [
+                {
+                    "name": "id",
+                    "description": "the error ID that maps to an ID on a web page.",
+                    "type": "String"
+                },
+                {
+                    "name": "message",
+                    "description": "human readable error.",
+                    "type": "String"
+                },
+                {
+                    "name": "err",
+                    "description": "the original error, if there is one.",
+                    "type": "Error",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Error"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 246,
+            "description": "Trims the . and .. from an array of path segments.\nIt will keep a leading path segment if a .. will become\nthe first path segment, to help with module name lookups,\nwhich act like paths, but can be remapped. But the end result,\nall paths that use this function should look normalized.\nNOTE: this method MODIFIES the input array.",
+            "params": [
+                {
+                    "name": "ary",
+                    "description": "the array of path segments.",
+                    "type": "Array"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 279,
+            "description": "Given a relative module name, like ./something, normalize it to\na real name that can be mapped to a path.",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the relative name",
+                    "type": "String"
+                },
+                {
+                    "name": "baseName",
+                    "description": "a real name that the name arg is relative\nto.",
+                    "type": "String"
+                },
+                {
+                    "name": "applyMap",
+                    "description": "apply the map config to the value. Should\nonly be done if this normalization is for a dependency ID.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "normalized name",
+                "type": "String"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 398,
+            "description": "Creates a module mapping that includes plugin prefix, module\nname, and path. If parentModuleMap is provided it will\nalso normalize the name via require.normalize()",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "the module name",
+                    "type": "String"
+                },
+                {
+                    "name": "parentModuleMap",
+                    "description": "parent module map\nfor the module name, used to resolve relative names.",
+                    "type": "String",
+                    "optional": true
+                },
+                {
+                    "name": "isNormalized:",
+                    "description": "is the ID already normalized.\nThis is true if this call is done for a define() module ID.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "applyMap:",
+                    "description": "apply the map config to the ID.\nShould only be true if this map is for a dependency.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 538,
+            "description": "Internal method to transfer globalQueue items to this context's\ndefQueue.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 554,
+            "description": "Helper function that creates a require function object to give to\nmodules that ask for it as a dependency. It needs to be specific\nper module because of the implication of path mappings that may\nneed to be relative to the module name.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 938,
+            "description": "Checks is the module is ready to define itself, and if so,\ndefine it. If the silent argument is true, then it will just\ndefine, but not notify listeners, and not ask for a context-wide\ncheck of all loaded modules. That is useful for cycle breaking.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1261,
+            "description": "Given an event from a script node, get the requirejs info from it,\nand then removes the event listeners on the node.",
+            "params": [
+                {
+                    "name": "evt",
+                    "description": "",
+                    "type": "Event"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Object"
+            },
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1294,
+            "description": "Set a configuration for the context.",
+            "params": [
+                {
+                    "name": "cfg",
+                    "description": "config object to integrate.",
+                    "type": "Object"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1502,
+            "description": "Called to enable a module if it is still in the registry\nawaiting enablement. parent module is passed in for context,\nused by the optimizer.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1514,
+            "description": "Internal method used by environment adapters to complete a load event.\nA load event could be a script load or just a load pass from a synchronous\nload call.",
+            "params": [
+                {
+                    "name": "moduleName",
+                    "description": "the name of the module to potentially complete.",
+                    "type": "String"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1572,
+            "description": "Converts a module name + .extension into an URL path.\n*Requires* the use of a module name. It does not support using\nplain URLs like nameToUrl.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1589,
+            "description": "Converts a module name to a file path. Supports cases where\nmoduleName may actually be just an URL.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1659,
+            "description": "Executes a module callack function. Broken out as a separate function\nsolely to allow the build system to sequence the files in the built\nlayer in the right sequence.",
+            "access": "private",
+            "tagname": "",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1670,
+            "description": "callback for script loads, used to check status of loading.",
+            "params": [
+                {
+                    "name": "evt",
+                    "description": "the event from the browser for the script\nthat was loaded.",
+                    "type": "Event"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1692,
+            "description": "Callback for script errors.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1704,
+            "description": "Main entry point.\n\nIf the only argument to require is a string, then the module that\nis represented by that string is fetched for the appropriate context.\n\nIf the first argument is an array, then it will be treated as an array\nof dependency string names to fetch. An optional function callback can\nbe specified to execute when all of those dependencies are available.\n\nMake a local req variable to help Caja compliance (it assumes things\non a require that are not standardized), and to give a short\nname for minification/local scope use.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1754,
+            "description": "Support require.config() to make it easier to cooperate with other\nAMD loaders on globally agreed names.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1762,
+            "description": "Export require as a global, but only if it does not already exist.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1797,
+            "description": "Any errors that require explicitly generates will be passed to this\nfunction. Intercept/override it if you want custom error handling.",
+            "params": [
+                {
+                    "name": "err",
+                    "description": "the error object.",
+                    "type": "Error"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1806,
+            "description": "Does the request to load a module for the browser case.\nMake this a separate function to allow other environments\nto override it.",
+            "params": [
+                {
+                    "name": "context",
+                    "description": "the require context to find state.",
+                    "type": "Object"
+                },
+                {
+                    "name": "moduleName",
+                    "description": "the name of the module.",
+                    "type": "String"
+                },
+                {
+                    "name": "url",
+                    "description": "the URL to the module.",
+                    "type": "Object"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 1951,
+            "description": "The function that handles definitions of modules. Differs from\nrequire() in that a string for the module should be the first argument,\nand the function to execute after dependencies are loaded should\nreturn a value to define the module corresponding to the first argument's\nname.",
+            "class": "",
+            "module": "model.editor"
+        },
+        {
+            "file": "web\\scripts\\require.js",
+            "line": 2024,
+            "description": "Executes the text. Normally just uses eval, but can be modified\nto use a better, environment-specific call. Only used for transpiling\nloader plugins, not for plain JS modules.",
+            "params": [
+                {
+                    "name": "text",
+                    "description": "the text to execute/evaluate.",
+                    "type": "String"
+                }
+            ],
+            "class": "",
+            "module": "model.editor"
+        }
+    ]
+}

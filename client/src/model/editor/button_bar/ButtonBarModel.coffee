@@ -1,6 +1,7 @@
-###
-@author Tantaman
-###
+###*
+* @module model.editor
+* @author Matt Crinklaw-Vogt / Tantaman
+*###
 define(["vendor/amd/backbone"],
 (Backbone) ->
 	fontSettings = [
@@ -34,11 +35,25 @@ define(["vendor/amd/backbone"],
 						@set(_longSetting, value)
 						@activeComponent.set(_setting, value))()
 
+	###*
+	* Maintains the state of the button bar and notifies interested
+	* parties of changes.  The ButtonBarModel also listens to the
+	* currently selected component in the slide editor and passes
+	* along the relevant changes that occur to that component.
+	* @class model.editor.button_bar.ButtonBarModel
+	* @constructor
+	*###
 	Backbone.Model.extend(
 		initialize: () ->
 			@fetch({keyTrail: ["editor", "slideEditor", "buttonBar"]})
 			_.extend(@, fontMethods)
 
+		###*
+		* Creates an object containing the currently
+		* selected font settings
+		* @method fontConfig
+		* @returns {Object} currently selected font settings
+		*###
 		fontConfig: () ->
 			{
 				size: @get("fontSize")
@@ -49,11 +64,20 @@ define(["vendor/amd/backbone"],
 				decoration: @get("fontDecoration")
 			}
 
+		###*
+		* Why does this method even exist?
+		* @method imgConfig
+		*###
 		imgConfig: (src) ->
 			{
 				src: src
 			}
 
+		###*
+		* Sets the text alignment
+		* @method textAlign
+		* @param {String} value css text-align property value
+		*###
 		textAlign: (value) ->
 			@set("textAlign", value)
 			if @_activeIsTextbox()
@@ -73,11 +97,21 @@ define(["vendor/amd/backbone"],
 		_activeFontSizeChanged: (model, value) ->
 			@set("fontSize", value)
 
+		###*
+		* Sets the font color (and eventually shape color?)
+		* @method colorSelected
+		* @param {String} hex CSS hex string
+		*###
 		colorSelected: (hex) ->
 			@set("fontColor", hex)
 			if @_activeIsTextbox()
 				@activeComponent.set("color", hex)
 
+		###*
+		* Sets what the ButtonBar knows as the active component
+		* @method activeComponentChanged
+		* @param {Object} component
+		*###
 		activeComponentChanged: (component) ->
 			if (@activeComponent?)
 				@activeComponent.off(null, null, @)
@@ -86,6 +120,28 @@ define(["vendor/amd/backbone"],
 			if @_activeIsTextbox()
 				@_pullFontSettings()
 				@_bindActiveText()
+
+		###*
+		* The following are auto-generated methods for
+		* setting the various font peroprties AND updating
+		* the active component with that setting.
+		* @method fontSize
+		*###
+		###*
+		* @method fontFamily
+		*###
+		###*
+		* @method fontColor
+		*###
+		###*
+		* @method fontStyle
+		*###
+		###*
+		* @method fontWeight
+		*###
+		###*
+		* @method fontDecoration
+		*###
 
 		constructor: `function ButtonBarModel() {
 			Backbone.Model.prototype.constructor.apply(this, arguments);
