@@ -61,7 +61,11 @@ task :buildVendor do
 		system %{uglifyjs #{fname} > web/scripts/vendor/temp/#{File.basename(fname, ".js")}.min.js}
 	end
 
-	system %{#{cmdPrefix}cat web/scripts/vendor/temp/* >> web/scripts/vendor/vendor-built.js}
+	if cmdPrefix != ""
+		system %{type web\\scripts\\vendor\\temp\\* >> web\\scripts\\vendor\\vendor-built.js}
+	else
+		system %{cat web/scripts/vendor/temp/* >> web/scripts/vendor/vendor-built.js}
+	end
 end
 
 task :compileCoffee, :watch do |t,args|
