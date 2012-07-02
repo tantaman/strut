@@ -67,5 +67,12 @@ if (interval >= 1000) {
 </script>
 {{/interval}}
 </div>
+<script type="text/javascript" src="preview_export/scripts/impress.js">
+</script>
+<script>
+if (!window.impressStarted) {
+    startImpress(document, window);
+    impress().init();   
+}
+</script>
 </body>
-</html>

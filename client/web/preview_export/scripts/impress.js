@@ -20,6 +20,9 @@
          noarg:true, noempty:true, undef:true, strict:true, browser:true */
 
 function startImpress(document, window) {
+if (window.impressStarted)
+    return;
+window.impressStarted = true;
 // You are one of those who like to know how thing work inside?
 // Let me show you the cogs that make impress.js run...
 (function ( document, window ) {
@@ -219,7 +222,7 @@ function startImpress(document, window) {
     // for a presentation based on the element with given id ('impress'
     // by default).
     var impress = window.impress = function ( rootId ) {
-        
+        var previousInit = body.classList.contains("impress-enabled");
         // If impress.js is not supported by the browser return a dummy API
         // it may not be a perfect solution but we return early and avoid
         // running code that may use features not implemented in the browser.
@@ -259,7 +262,11 @@ function startImpress(document, window) {
         
         // root presentation elements
         var root = byId( rootId );
-        var canvas = document.createElement("div");
+        if (previousInit) {
+            var canvas = root.children[0];
+        } else {
+            var canvas = document.createElement("div");
+        }
         
         var initialized = false;
         
@@ -356,10 +363,12 @@ function startImpress(document, window) {
             windowScale = computeWindowScale( config );
             
             // wrap steps with "canvas" element
-            arrayify( root.childNodes ).forEach(function ( el ) {
-                canvas.appendChild( el );
-            });
-            root.appendChild(canvas);
+            if (!previousInit) {
+                arrayify( root.childNodes ).forEach(function ( el ) {
+                    canvas.appendChild( el );
+                });
+                root.appendChild(canvas);
+            }
             
             // set initial styles
             document.documentElement.style.height = "100%";

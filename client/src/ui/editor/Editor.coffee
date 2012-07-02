@@ -130,8 +130,9 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 						setTimeout(cb, 200)
 					else
 						sourceWind.previewWind.document.getElementsByTagName("html")[0].innerHTML = showStr;
-						sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
-						sourceWind.previewWind.impress().init();
+						if not sourceWind.previewWind.impressStarted
+							sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
+							sourceWind.previewWind.impress().init();
 			
 			$(window.previewWind.document).ready(cb)
 			#window.location = "index.html?preview=" + showStr;

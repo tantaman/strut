@@ -147,8 +147,10 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
           return setTimeout(cb, 200);
         } else {
           sourceWind.previewWind.document.getElementsByTagName("html")[0].innerHTML = showStr;
-          sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
-          return sourceWind.previewWind.impress().init();
+          if (!sourceWind.previewWind.impressStarted) {
+            sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
+            return sourceWind.previewWind.impress().init();
+          }
         }
       };
       return $(window.previewWind.document).ready(cb);
