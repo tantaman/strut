@@ -8,6 +8,10 @@ require 'rake'
 
 myDir = Dir.pwd
 
+cmdPprefix = ""
+if ENV['OS']['Windows'] != nil
+	cmdPrefix = "powershell "
+end
 
 task :compileTpls, :pretty do |t, args|
 	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
@@ -50,15 +54,13 @@ end
 task :compileStylus do
 end
 
-task :compileDocs do
-	FileList["./**/*.js"].each do |filename|
-		puts filename
-		pipe = IO.popen("docco #{filename}")
-		result = pipe.readlines
-		pipe.close
-
-		puts result
+task :buildVendor do
+	system "#{cmdPrefix}rm web/scripts/vendor/vendor-built.js"
+	FileList["web/scripts/vendor/*.js"].each do |fname|
+		system %{uglifyjs #{fname} > web/scripts/vendor/temp/#{File.basename(fname, ".js")}.min.js}
 	end
+
+	system %{#{cmdPrefix}cat web/scripts/vendor/temp/* >> web/scripts/vendor/vendor-built.js}
 end
 
 task :compileCoffee, :watch do |t,args|
@@ -122,17 +124,5 @@ task :showDeps, :package do |t, args|
 		if result.length > 0
 			puts result
 		end
-	end
-end
-
-# TODO: need to specify dependencies
-# and also need to not run if no changes
-task :dist do
-	system %{rsync -r --exclude='.git' web/ dist/}
-	myDir = Dir.pwd
-	FileList["web/**/*.js"].each do |filename|
-		destFilename = filename[3..filename.length]
-		system %{java -jar /Users/mattcrinklaw/opt/closure-compiler/compiler.jar --js=#{myDir}/#{filename} --js_output_file=#{myDir}/dist/#{destFilename}}
-		puts "#{myDir}/dist/#{destFilename}"
 	end
 end
