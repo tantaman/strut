@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vot
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./Templates",
 		"./OpenDialog"],
 (Backbone, Templates, OpenDialog) ->

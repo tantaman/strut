@@ -1,4 +1,4 @@
-define(["vendor/keymaster"],
+define(["vendor/amd/keymaster"],
 (Keymaster) ->
 	funcs = ["cut", "copy", "paste"]
 

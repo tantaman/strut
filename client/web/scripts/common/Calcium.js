@@ -1,4 +1,4 @@
-define(["vendor/backbone"],
+define(["vendor/amd/backbone"],
 function(Backbone) {
 	function isModelish(obj) {
 		return obj instanceof Backbone.Model ||

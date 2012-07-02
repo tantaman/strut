@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, CompnentFactory, Math2) {
+define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, CompnentFactory, Math2) {
   var defaults;
   defaults = {
     z: 0,

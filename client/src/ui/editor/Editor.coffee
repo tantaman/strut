@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./SlideEditor",
 		"./transition_editor/TransitionEditor",
 		"./Templates",

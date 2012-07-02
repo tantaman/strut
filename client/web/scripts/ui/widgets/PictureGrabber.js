@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Templates", "common/Throttler"], function(Backbone, Templates, Throttler) {
+define(["vendor/amd/backbone", "./Templates", "common/Throttler"], function(Backbone, Templates, Throttler) {
   return Backbone.View.extend({
     className: "pictureGrabber modal",
     events: {

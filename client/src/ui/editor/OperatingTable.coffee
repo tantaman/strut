@@ -1,10 +1,10 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./Templates",
 		"./components/ComponentViewFactory",
-		"vendor/keymaster",
+		"vendor/amd/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard"
 		"css!./res/css/OperatingTable.css"],

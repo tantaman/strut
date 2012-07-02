@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Templates", "./components/ComponentViewFactory", "vendor/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "css!./res/css/OperatingTable.css"], function(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) {
+define(["vendor/amd/backbone", "./Templates", "./components/ComponentViewFactory", "vendor/amd/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "css!./res/css/OperatingTable.css"], function(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) {
   return Backbone.View.extend({
     className: "operatingTable",
     events: {

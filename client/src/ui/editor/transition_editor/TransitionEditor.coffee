@@ -1,12 +1,12 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./TransitionSlideSnapshot",
 		"../Templates",
 		"./TransitionEditorButtonBarView",
 		"model/editor/transition_editor/TransitionEditorButtonBarModel",
-		"vendor/keymaster",
+		"vendor/amd/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"../SlideCopyPaste",
 		"model/system/Clipboard",

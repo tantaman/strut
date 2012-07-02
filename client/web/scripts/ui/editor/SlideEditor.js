@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/PictureGrabber", "vendor/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) {
+define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/PictureGrabber", "vendor/amd/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) {
   return Backbone.View.extend({
     className: "slideEditor",
     initialize: function() {

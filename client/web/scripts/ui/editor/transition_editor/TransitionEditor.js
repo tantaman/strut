@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "vendor/keymaster", "ui/interactions/CutCopyPasteBindings", "../SlideCopyPaste", "model/system/Clipboard", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) {
+define(["vendor/amd/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "vendor/amd/keymaster", "ui/interactions/CutCopyPasteBindings", "../SlideCopyPaste", "model/system/Clipboard", "css!../res/css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) {
   return Backbone.View.extend({
     className: "transitionEditor",
     events: {

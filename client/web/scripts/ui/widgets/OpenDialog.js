@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vot
 */
 
-define(["vendor/backbone", "./Templates", "storage/FileStorage", "css!./res/css/OpenDialog.css"], function(Backbone, Templates, FileStorage, empty) {
+define(["vendor/amd/backbone", "./Templates", "storage/FileStorage", "css!./res/css/OpenDialog.css"], function(Backbone, Templates, FileStorage, empty) {
   return Backbone.View.extend({
     className: "openDialog modal",
     events: function() {

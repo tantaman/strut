@@ -1,7 +1,7 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"ui/widgets/DeltaDragControl",
 		"../Templates"
 		"css!../res/css/ComponentView.css"],

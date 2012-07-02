@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vot
 */
 
-define(["vendor/backbone", "./Templates"], function(Backbone, Templates) {
+define(["vendor/amd/backbone", "./Templates"], function(Backbone, Templates) {
   return Backbone.View.extend({
     className: "rawTextImporter modal",
     events: {

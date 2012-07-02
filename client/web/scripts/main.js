@@ -35,7 +35,7 @@ if (!(window.localStorage != null)) {
 if (window.location.href.indexOf("preview=true") !== -1) {
 
 } else {
-  requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+  requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
     Backbone.sync = function(method, model, options) {
       if (options.keyTrail != null) {
         return options.success(DefaultState.get(options.keyTrail));

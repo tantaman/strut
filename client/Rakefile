@@ -18,7 +18,7 @@ task :compileTpls, :pretty do |t, args|
 		pretty = args[:pretty]
 		puts "Processing: #{filename}"
 		compiledTemplates = '''
-		define(["vendor/Handlebars"], function(Handlebars) {
+		define(["vendor/amd/Handlebars"], function(Handlebars) {
 			return {
 		'''
 
@@ -56,6 +56,7 @@ end
 
 task :buildVendor do
 	system "#{cmdPrefix}rm web/scripts/vendor/vendor-built.js"
+	system "#{cmdPrefix}rm web/scripts/vendor/temp/*"
 	FileList["web/scripts/vendor/*.js"].each do |fname|
 		system %{uglifyjs #{fname} > web/scripts/vendor/temp/#{File.basename(fname, ".js")}.min.js}
 	end

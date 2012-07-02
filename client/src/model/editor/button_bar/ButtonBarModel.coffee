@@ -1,7 +1,7 @@
 ###
 @author Tantaman
 ###
-define(["vendor/backbone"],
+define(["vendor/amd/backbone"],
 (Backbone) ->
 	fontSettings = [
 		"size",

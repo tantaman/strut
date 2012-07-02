@@ -1,4 +1,4 @@
-define(["vendor/backbone"],
+define(["vendor/amd/backbone"],
 (Backbone) ->
 	Backbone.View.extend(
 		initialize: (callbacks) ->

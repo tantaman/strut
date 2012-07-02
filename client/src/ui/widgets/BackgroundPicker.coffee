@@ -1,4 +1,4 @@
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./Templates",
 		"css!./res/css/BackgroundPicker.css"]
 (Backbone, Templates, empty) ->

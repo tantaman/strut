@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, empty) {
+define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, empty) {
   return Backbone.View.extend({
     transforms: ["skewX", "skewY"],
     className: "component",

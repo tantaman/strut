@@ -1,9 +1,9 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/backbone",
+define(["vendor/amd/backbone",
 		"./SlideSnapshot",
-		"vendor/keymaster",
+		"vendor/amd/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard",
 		"./SlideCopyPaste",

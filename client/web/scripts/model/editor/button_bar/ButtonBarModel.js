@@ -3,7 +3,7 @@
 @author Tantaman
 */
 
-define(["vendor/backbone"], function(Backbone) {
+define(["vendor/amd/backbone"], function(Backbone) {
   var fontMethods, fontSettings, longSetting, setting, toggleable, _i, _len;
   fontSettings = ["size", "family", "color", "style", "weight", "decoration"];
   toggleable = function(setting) {

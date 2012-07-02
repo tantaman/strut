@@ -27,7 +27,7 @@ if not window.localStorage?
 if window.location.href.indexOf("preview=true") isnt -1
 	# do nothing...
 else
-	requirejs(["vendor/backbone",
+	requirejs(["vendor/amd/backbone",
 			"state/DefaultState"],
 	(Backbone, DefaultState) ->
 		Backbone.sync = (method, model, options) ->

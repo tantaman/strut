@@ -1,4 +1,4 @@
-define(["vendor/Handlebars",
+define(["vendor/amd/Handlebars",
 		"./Templates"],
 (Handlebars, Templates) ->
 	class ImpressRenderer
