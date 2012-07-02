@@ -138,9 +138,20 @@ define(["vendor/backbone", "./SlideEditor", "./transition_editor/TransitionEdito
       }
     },
     renderPreview: function() {
-      var showStr;
+      var cb, showStr, sourceWind;
       showStr = ImpressRenderer.render(this.model.attributes);
-      return window.previewWind = window.open("index.html?preview=" + encodeURIComponent(showStr));
+      window.previewWind = window.open("index.html?preview=true");
+      sourceWind = window;
+      cb = function() {
+        if (!(sourceWind.previewWind.startImpress != null)) {
+          return setTimeout(cb, 200);
+        } else {
+          sourceWind.previewWind.document.getElementsByTagName("html")[0].innerHTML = showStr;
+          sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
+          return sourceWind.previewWind.impress().init();
+        }
+      };
+      return $(window.previewWind.document).ready(cb);
     },
     changePerspective: function(e, data) {
       var _this = this;

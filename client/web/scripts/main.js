@@ -32,35 +32,38 @@ if (!(window.localStorage != null)) {
   };
 }
 
-requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
-  Backbone.sync = function(method, model, options) {
-    if (options.keyTrail != null) {
-      return options.success(DefaultState.get(options.keyTrail));
-    }
-  };
-  window.slideConfig = {
-    size: {
-      width: 960,
-      height: 720
-    }
-  };
-  return continuation();
-});
+if (window.location.href.indexOf("preview=true") !== -1) {
 
-continuation = function() {
-  return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
-    var deck, editor;
-    deck = new Deck();
-    editor = new Editor({
-      model: deck
-    });
-    window.zTracker = {
-      z: 0,
-      next: function() {
-        return ++this.z;
+} else {
+  requirejs(["vendor/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+    Backbone.sync = function(method, model, options) {
+      if (options.keyTrail != null) {
+        return options.success(DefaultState.get(options.keyTrail));
       }
     };
-    $("body").append(editor.render());
-    return deck.newSlide();
+    window.slideConfig = {
+      size: {
+        width: 1024,
+        height: 768
+      }
+    };
+    return continuation();
   });
-};
+  continuation = function() {
+    return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
+      var deck, editor;
+      deck = new Deck();
+      editor = new Editor({
+        model: deck
+      });
+      window.zTracker = {
+        z: 0,
+        next: function() {
+          return ++this.z;
+        }
+      };
+      $("body").append(editor.render());
+      return deck.newSlide();
+    });
+  };
+}

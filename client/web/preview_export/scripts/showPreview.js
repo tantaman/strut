@@ -1,4 +1,4 @@
-if (window.location.href.indexOf("preview=") != -1) {
+/*if (window.location.href.indexOf("preview=") != -1) {
 	$(function() {
 		var idx = window.location.href.indexOf("=");
 		var end = window.location.href.indexOf("&");
@@ -8,9 +8,10 @@ if (window.location.href.indexOf("preview=") != -1) {
 		var presentation = window.location.href.substring(idx+1, end);
 		$("body").html(decodeURIComponent(presentation));
 	});
-}
+}*/
 
 $(function() {
+	console.log("STARTING IMPRESS!");
 	startImpress(document, window);
 	impress().init();
 });
