@@ -19,14 +19,20 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
       return _.extend(parentEvents, myEvents);
     },
     initialize: function() {
-      var style, _i, _len, _results;
+      var style, _i, _len;
       ComponentView.prototype.initialize.apply(this, arguments);
-      _results = [];
       for (_i = 0, _len = styles.length; _i < _len; _i++) {
         style = styles[_i];
-        _results.push(this.model.on("change:" + style, this._styleChanged, this));
+        this.model.on("change:" + style, this._styleChanged, this);
       }
-      return _results;
+      return this._lastDx = 0;
+    },
+    scale: function(e, deltas) {
+      var currSize, sign;
+      currSize = this.model.get("size");
+      sign = deltas.dx - this._lastDx > 0 ? 1 : -1;
+      this.model.set("size", currSize + sign * Math.sqrt(Math.abs(deltas.dx - this._lastDx)));
+      return this._lastDx = deltas.dx;
     },
     dblclicked: function(e) {
       this.$el.addClass("editable");

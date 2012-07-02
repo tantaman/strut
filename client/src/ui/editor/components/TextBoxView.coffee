@@ -19,7 +19,15 @@ define(["./ComponentView",
 			ComponentView.prototype.initialize.apply(@, arguments)
 			for style in styles
 				@model.on("change:" + style, @_styleChanged, @)
+			@_lastDx = 0
 			#@model.on("change:style", @_styleChanged, @)
+
+		scale: (e, deltas) ->
+			currSize = @model.get("size")
+
+			sign = if deltas.dx - @_lastDx > 0 then 1 else -1
+			@model.set("size", currSize + sign*Math.sqrt(Math.abs(deltas.dx - @_lastDx)))
+			@_lastDx = deltas.dx
 
 		dblclicked: (e) ->
 			@$el.addClass("editable")

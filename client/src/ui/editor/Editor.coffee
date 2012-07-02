@@ -121,7 +121,7 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 			showStr = ImpressRenderer.render(@model.attributes)
 			#newWind = window.open("data:text/html;charset=utf-8," + escape(showStr))
 
-			window.previewWind = window.open("preview_export/index.html?preview=" + encodeURIComponent(showStr));
+			window.previewWind = window.open("index.html?preview=" + encodeURIComponent(showStr));
 			#window.location = "index.html?preview=" + showStr;
 
 			#frame = newWind.document.getElementById("presentation")

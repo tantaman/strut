@@ -81,3 +81,5 @@ in order to package related markup and backing UI (not model) code into modules.
 * HandlebarsJS http://handlebarsjs.com/
 * DustJS http://akdubya.github.com/dustjs/
 * Class class http://ejohn.org/blog/simple-javascript-inheritance/
+
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=matt.crinklaw&url=https://github.com/tantaman/Strut&title=Strut&language=&tags=github&category=software)
