@@ -38,6 +38,16 @@ if (!(window.localStorage != null)) {
   };
 }
 
+if (!(Function.bind != null) || (Function.prototype.bind != null)) {
+  Function.prototype.bind = function(ctx) {
+    var fn;
+    fn = this;
+    return function() {
+      return fn.apply(ctx, arguments);
+    };
+  };
+}
+
 if (window.location.href.indexOf("preview=true") !== -1) {
 
 } else {

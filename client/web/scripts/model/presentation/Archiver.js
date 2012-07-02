@@ -8,13 +8,25 @@ define(["vendor/amd/jszip"], function(JSZip) {
   };
   return Archiver = {
     createArchive: function(presentation, options) {
-      var archive, presentationCopy;
+      var archive, presentationCopy, showStr,
+        _this = this;
       options || (options = {});
       _.defaults(options, defaults);
       archive = new JSZip();
       presentationCopy = new Deck();
-      return presentationCopy["import"](presentation.toJSON(false, true));
-    }
+      presentationCopy["import"](presentation.toJSON(false, true));
+      presentationCopy.get("slides").each(function(slide) {
+        return _this.processComponents(slide.get("components"), archive, options);
+      });
+      return showStr = "<!doctype html><html>" + ImpressRenderer.render(this.model.attributes) + "</html>";
+    },
+    processComponents: function(components, archive, options) {
+      var _this = this;
+      return components.forEach(function(component) {
+        return _this.processComponent(component, archive, options);
+      });
+    },
+    processComponent: function(component, archive, options) {}
   };
   /*
   		var zip = new JSZip();

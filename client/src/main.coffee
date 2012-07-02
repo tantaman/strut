@@ -27,6 +27,12 @@ if not window.localStorage?
 		getItem: () ->
 		length: 0
 
+if not Function.bind? or Function.prototype.bind?
+	Function.prototype.bind = (ctx) ->
+		fn = this
+		() ->
+			fn.apply(ctx, arguments)
+
 if window.location.href.indexOf("preview=true") isnt -1
 	# do nothing...
 else

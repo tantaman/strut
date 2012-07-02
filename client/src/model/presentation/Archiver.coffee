@@ -11,13 +11,18 @@ define(["vendor/amd/jszip"],
 
 			archive = new JSZip()
 			presentationCopy = new Deck()
-			
+
 			# hmm.. we should update the impress renderer
 			# to just function on the raw object
 			# so we don't have to re-import
 			presentationCopy.import(presentation.toJSON(false, true))
 
-			
+			presentationCopy.get("slides").each((slide) =>
+				@processComponents(slide.get("components"), archive, options)
+			)
+
+			showStr = "<!doctype html><html>" \
+			+ ImpressRenderer.render(@model.attributes) + "</html>"
 
 			# Clone presentation
 			# 	via toJSON, new Deck(), deck.import(json)
@@ -32,6 +37,14 @@ define(["vendor/amd/jszip"],
 			# put js in zip
 			# put fonts in zip
 			# return "download ready" link
+
+		processComponents: (components, archive, options) ->
+			components.forEach((component) =>
+				@processComponent(component, archive, options)
+			)
+
+		processComponent: (component, archive, options) ->
+
 
 	###
 		var zip = new JSZip();
