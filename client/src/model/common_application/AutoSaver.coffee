@@ -6,6 +6,7 @@ define(["storage/FileStorage"],
 (FileStorage) ->
 	defaults =
 		interval: 10
+		onUnload: true
 
 	###*
 	* Auto saves a given model on a specified interval.
@@ -21,6 +22,11 @@ define(["storage/FileStorage"],
 		constructor: (@model, @options) ->
 			@options or (@options = {})
 			_.defaults(@options, defaults)
+
+			if @options.onUnload
+				$(window).unload(() =>
+					@_save()
+				)
 
 		###*
 		* Starts the auto save task if not already started
