@@ -1,5 +1,3 @@
-**Firefox support is currently busted... 6/19/12**
-
 Strut
 =======
 
