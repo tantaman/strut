@@ -151,8 +151,9 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 
 		_backgroundChanged: (model, value) ->
 			# tell our perspectives about the bg update...
-			for key,persp of @perspectives
-				persp.backgroundChanged(value)
+			if value?
+				for key,persp of @perspectives
+					persp.backgroundChanged(value)
 
 		menuItemSelected: (e) ->
 			$target = $(e.currentTarget)

@@ -51,20 +51,6 @@ if (!(Function.bind != null) || (Function.prototype.bind != null)) {
 if (window.location.href.indexOf("preview=true") !== -1) {
 
 } else {
-  requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
-    Backbone.sync = function(method, model, options) {
-      if (options.keyTrail != null) {
-        return options.success(DefaultState.get(options.keyTrail));
-      }
-    };
-    window.slideConfig = {
-      size: {
-        width: 1024,
-        height: 768
-      }
-    };
-    return continuation();
-  });
   continuation = function() {
     return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
       var deck, editor;
@@ -82,4 +68,18 @@ if (window.location.href.indexOf("preview=true") !== -1) {
       return deck.newSlide();
     });
   };
+  requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+    Backbone.sync = function(method, model, options) {
+      if (options.keyTrail != null) {
+        return options.success(DefaultState.get(options.keyTrail));
+      }
+    };
+    window.slideConfig = {
+      size: {
+        width: 1024,
+        height: 768
+      }
+    };
+    return continuation();
+  });
 }

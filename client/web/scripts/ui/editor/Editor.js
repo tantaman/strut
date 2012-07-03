@@ -168,13 +168,15 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
     },
     _backgroundChanged: function(model, value) {
       var key, persp, _ref, _results;
-      _ref = this.perspectives;
-      _results = [];
-      for (key in _ref) {
-        persp = _ref[key];
-        _results.push(persp.backgroundChanged(value));
+      if (value != null) {
+        _ref = this.perspectives;
+        _results = [];
+        for (key in _ref) {
+          persp = _ref[key];
+          _results.push(persp.backgroundChanged(value));
+        }
+        return _results;
       }
-      return _results;
     },
     menuItemSelected: function(e) {
       var $target, option;
