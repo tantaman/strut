@@ -14,4 +14,18 @@ define(->
 					path = path.substring(0, idx)
 
 			path
+
+		# TODO: make a generic type that returns the mime type
+		imageType: (uri) ->
+			if (uri.indexOf("data:") is 0)
+				idx = uri.indexOf(";")
+				uri.substring(11, idx).toUpperCase()
+			else
+				idx = uri.lastIndexOf(".")
+				if idx isnt -1 and idx+1 < uri.length
+					extension = uri.substring(idx+1, uri.length)
+					idx = extension.lastIndexOf("?")
+					if idx isnt -1
+						extension = extension.substring(0, idx)
+					extension.toUpperCase()
 )

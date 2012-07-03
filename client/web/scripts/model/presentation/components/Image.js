@@ -3,22 +3,14 @@
 @author Tantaman
 */
 
-define(["./Component"], function(Component) {
+define(["./Component", "common/FileUtils"], function(Component, FileUtils) {
   return Component.extend({
     initialize: function() {
-      var extension, idx, src;
+      var src;
       Component.prototype.initialize.apply(this, arguments);
       this.set("type", "ImageModel");
       src = this.get("src");
-      idx = src.lastIndexOf(".");
-      if (idx !== -1 && idx + 1 < src.length) {
-        extension = src.substring(idx + 1, src.length);
-        idx = extension.lastIndexOf("?");
-        if (idx !== -1) {
-          extension = extension.substring(0, idx);
-        }
-      }
-      this.set("imageType", extension.toUpperCase());
+      this.set("imageType", FileUtils.imageType(src));
       this.on("change:src", this._updateCache, this);
       this.cachedImage = new Image();
       return this._updateCache();

@@ -1,8 +1,8 @@
 ###
 @author Tantaman
 ###
-define(["./Component"],
-(Component) ->
+define(["./Component", "common/FileUtils"],
+(Component, FileUtils) ->
 	Component.extend(
 		initialize: () ->
 			Component.prototype.initialize.apply(this, arguments)
@@ -11,14 +11,7 @@ define(["./Component"],
 			# We could do an HTTP request and get the content type
 			# that'd be more foolproof.
 			src = @get("src")
-			idx = src.lastIndexOf(".")
-			if idx isnt -1 and idx+1 < src.length
-				extension = src.substring(idx+1, src.length)
-				idx = extension.lastIndexOf("?")
-				if idx isnt -1
-					extension = extension.substring(0, idx)
-
-			@set("imageType",  extension.toUpperCase())
+			@set("imageType",  FileUtils.imageType(src))
 			@on("change:src", @_updateCache, @)
 			@cachedImage = new Image()
 			@_updateCache()

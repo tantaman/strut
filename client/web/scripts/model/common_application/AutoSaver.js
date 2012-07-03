@@ -8,7 +8,8 @@
 define(["storage/FileStorage"], function(FileStorage) {
   var AutoSaver, defaults;
   defaults = {
-    interval: 10
+    interval: 10,
+    onUnload: true
   };
   /**
   	* Auto saves a given model on a specified interval.
@@ -25,10 +26,16 @@ define(["storage/FileStorage"], function(FileStorage) {
   return AutoSaver = (function() {
 
     function AutoSaver(model, options) {
+      var _this = this;
       this.model = model;
       this.options = options;
       this.options || (this.options = {});
       _.defaults(this.options, defaults);
+      if (this.options.onUnload) {
+        $(window).unload(function() {
+          return _this._save();
+        });
+      }
     }
 
     /**
