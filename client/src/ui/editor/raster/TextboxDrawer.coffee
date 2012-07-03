@@ -1,6 +1,7 @@
 define(["./AbstractDrawer"],
 (AbstractDrawer) ->
-	reg = /<[^>]+>|<\/[^>]+>/
+	newlineReg = /<[^>]+>|<\/[^>]+>/
+	spaceReg = /&nbsp;/g
 	class TextBoxDrawer extends AbstractDrawer
 		constructor: (@g2d) ->
 
@@ -9,7 +10,8 @@ define(["./AbstractDrawer"],
 			lineHeight = textBox.get("size")*@scale.y
 			@g2d.font = lineHeight + "px " + textBox.get("family")
 
-			lines = @_extractLines(textBox.get("text"))
+			text = @_convertSpaces(textBox.get("text"))
+			lines = @_extractLines(text)
 			txtWidth = @_findWidestWidth(lines) * @scale.x
 
 			bbox =
@@ -29,7 +31,10 @@ define(["./AbstractDrawer"],
 
 		_extractLines: (text) ->
 			# hmm..  We'll get some incorrect behavior on Chrome.
-			text.split(reg)
+			text.split(newlineReg)
+
+		_convertSpaces: (text) ->
+			text.replace(spaceReg, " ")
 
 		_findWidestWidth: (lines) ->
 			widestWidth = 0

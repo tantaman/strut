@@ -3,8 +3,9 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 define(["./AbstractDrawer"], function(AbstractDrawer) {
-  var TextBoxDrawer, reg;
-  reg = /<[^>]+>|<\/[^>]+>/;
+  var TextBoxDrawer, newlineReg, spaceReg;
+  newlineReg = /<[^>]+>|<\/[^>]+>/;
+  spaceReg = /&nbsp;/g;
   return TextBoxDrawer = (function(_super) {
 
     __extends(TextBoxDrawer, _super);
@@ -14,12 +15,13 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
     }
 
     TextBoxDrawer.prototype.paint = function(textBox) {
-      var bbox, cnt, lineHeight, lines, txtWidth,
+      var bbox, cnt, lineHeight, lines, text, txtWidth,
         _this = this;
       this.g2d.fillStyle = "#" + textBox.get("color");
       lineHeight = textBox.get("size") * this.scale.y;
       this.g2d.font = lineHeight + "px " + textBox.get("family");
-      lines = this._extractLines(textBox.get("text"));
+      text = this._convertSpaces(textBox.get("text"));
+      lines = this._extractLines(text);
       txtWidth = this._findWidestWidth(lines) * this.scale.x;
       bbox = {
         x: textBox.get("x") * this.scale.x,
@@ -38,7 +40,11 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
     };
 
     TextBoxDrawer.prototype._extractLines = function(text) {
-      return text.split(reg);
+      return text.split(newlineReg);
+    };
+
+    TextBoxDrawer.prototype._convertSpaces = function(text) {
+      return text.replace(spaceReg, " ");
     };
 
     TextBoxDrawer.prototype._findWidestWidth = function(lines) {
