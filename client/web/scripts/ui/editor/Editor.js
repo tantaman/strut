@@ -12,6 +12,8 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
       num = localStorage.getItem("StrutNewNum");
       if (!(num != null)) {
         num = 2;
+      } else {
+        num = parseInt(num);
       }
       localStorage.setItem("StrutNewNum", num + 1);
       this.model["import"]({

@@ -55,13 +55,6 @@ if (window.location.href.indexOf("preview=true") !== -1) {
     return requirejs(["ui/editor/Editor", "model/presentation/Deck", "storage/FileStorage"], function(Editor, Deck, FileStorage) {
       var deck, editor, lastPres, pres;
       deck = new Deck();
-      lastPres = localStorage.getItem("StrutLastPres");
-      if (lastPres != null) {
-        pres = FileStorage.open(lastPres);
-        if (pres != null) {
-          deck["import"](pres);
-        }
-      }
       editor = new Editor({
         model: deck
       });
@@ -72,6 +65,13 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         }
       };
       $("body").append(editor.render());
+      lastPres = localStorage.getItem("StrutLastPres");
+      if (lastPres != null) {
+        pres = FileStorage.open(lastPres);
+        if (pres != null) {
+          deck["import"](pres);
+        }
+      }
       if (!(lastPres != null)) {
         return deck.newSlide();
       }

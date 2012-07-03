@@ -42,12 +42,6 @@ else
 				"storage/FileStorage"],
 		(Editor, Deck, FileStorage) ->
 			deck = new Deck()
-			lastPres = localStorage.getItem("StrutLastPres")
-			if lastPres?
-				pres = FileStorage.open(lastPres)
-				if pres?
-					deck.import(pres)
-
 			editor = new Editor({model: deck})
 
 			window.zTracker =
@@ -56,6 +50,12 @@ else
 					++@z
 
 			$("body").append(editor.render())
+
+			lastPres = localStorage.getItem("StrutLastPres")
+			if lastPres?
+				pres = FileStorage.open(lastPres)
+				if pres?
+					deck.import(pres)
 			
 			if not lastPres?
 				deck.newSlide()

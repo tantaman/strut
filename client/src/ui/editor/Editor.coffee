@@ -23,6 +23,8 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			num = localStorage.getItem("StrutNewNum")
 			if not num?
 				num = 2
+			else
+				num = parseInt(num)
 
 			localStorage.setItem("StrutNewNum", num+1)
 			
