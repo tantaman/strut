@@ -17,7 +17,10 @@ define(["common/Throttler", "./TextboxDrawer", "./ImageModelDrawer"], function(T
         height: this.g2d.canvas.height
       };
       this.throttler = new Throttler(600, this);
-      this.scale = this.size.width / slideConfig.size.width;
+      this.scale = {
+        x: this.size.width / slideConfig.size.width,
+        y: this.size.height / slideConfig.size.height
+      };
       this.drawers = {
         TextBox: new TextBoxDrawer(this.g2d),
         ImageModel: new ImageModelDrawer(this.g2d)

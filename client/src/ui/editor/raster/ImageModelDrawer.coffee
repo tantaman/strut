@@ -8,10 +8,10 @@ define(["./AbstractDrawer"],
 
 		_imageLoaded: (image, imageModel) ->
 			bbox =
-				x: imageModel.get("x") * @scale
-				y: imageModel.get("y") * @scale
-				width: image.naturalWidth * @scale
-				height: image.naturalHeight * @scale
+				x: imageModel.get("x") * @scale.x
+				y: imageModel.get("y") * @scale.y
+				width: image.naturalWidth * @scale.x
+				height: image.naturalHeight * @scale.y
 			
 			@applyTransforms(imageModel, bbox)
 

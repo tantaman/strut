@@ -6,17 +6,17 @@ define(["./AbstractDrawer"],
 
 		paint: (textBox) ->
 			@g2d.fillStyle = "#" + textBox.get("color")
-			lineHeight = textBox.get("size")*@scale
+			lineHeight = textBox.get("size")*@scale.y
 			@g2d.font = lineHeight + "px " + textBox.get("family")
 
 			lines = @_extractLines(textBox.get("text"))
-			txtWidth = @_findWidestWidth(lines) * @scale
+			txtWidth = @_findWidestWidth(lines) * @scale.x
 
 			bbox =
-				x: textBox.get("x") * @scale
-				y: textBox.get("y") * @scale
+				x: textBox.get("x") * @scale.x
+				y: textBox.get("y") * @scale.y
 				width: txtWidth + txtWidth # Hmm... why the heck do I ahve to do this?
-				height: textBox.get("size") * @scale
+				height: textBox.get("size") * @scale.y
 
 			@applyTransforms(textBox, bbox)
 

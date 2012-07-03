@@ -17,15 +17,15 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
       var bbox, cnt, lineHeight, lines, txtWidth,
         _this = this;
       this.g2d.fillStyle = "#" + textBox.get("color");
-      lineHeight = textBox.get("size") * this.scale;
+      lineHeight = textBox.get("size") * this.scale.y;
       this.g2d.font = lineHeight + "px " + textBox.get("family");
       lines = this._extractLines(textBox.get("text"));
-      txtWidth = this._findWidestWidth(lines) * this.scale;
+      txtWidth = this._findWidestWidth(lines) * this.scale.x;
       bbox = {
-        x: textBox.get("x") * this.scale,
-        y: textBox.get("y") * this.scale,
+        x: textBox.get("x") * this.scale.x,
+        y: textBox.get("y") * this.scale.y,
         width: txtWidth + txtWidth,
-        height: textBox.get("size") * this.scale
+        height: textBox.get("size") * this.scale.y
       };
       this.applyTransforms(textBox, bbox);
       cnt = 0;

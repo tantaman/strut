@@ -12,7 +12,9 @@ define(["common/Throttler",
 				width: @g2d.canvas.width
 				height: @g2d.canvas.height
 			@throttler = new Throttler(600, @)
-			@scale = @size.width / slideConfig.size.width
+			@scale = 
+				x: @size.width / slideConfig.size.width
+				y: @size.height / slideConfig.size.height
 
 			@drawers =
 				TextBox: new TextBoxDrawer(@g2d)
