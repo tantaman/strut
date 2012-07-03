@@ -24,7 +24,14 @@ define([],
 			@storageImpl.setItem(prefix + fileName, JSON.stringify(contents))
 
 		open: (fileName) ->
-			JSON.parse(@storageImpl.getItem(prefix + fileName))
+			item = @storageImpl.getItem(prefix + fileName)
+			if item?
+				try
+					JSON.parse(item)
+				catch e
+					return null
+			else
+				null
 
 	# FileStorage should not be a singleton...
 	new FileStorage()

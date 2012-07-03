@@ -52,14 +52,17 @@ define(["vendor/amd/backbone", "./Templates", "css!./res/css/SlideSnapshot.css",
       }
     },
     render: function() {
-      var g2d;
+      var g2d,
+        _this = this;
       if (this.slideDrawer != null) {
         this.slideDrawer.dispose();
       }
       this.$el.html(Templates.SlideSnapshot(this.model.attributes));
       g2d = this.$el.find("canvas")[0].getContext("2d");
       this.slideDrawer = new SlideDrawer(this.model, g2d);
-      this.slideDrawer.repaint();
+      setTimeout(function() {
+        return _this.slideDrawer.repaint();
+      }, 0);
       if (this.model.get("active")) {
         this.$el.addClass("active");
       }

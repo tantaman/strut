@@ -52,9 +52,16 @@ if (window.location.href.indexOf("preview=true") !== -1) {
 
 } else {
   continuation = function() {
-    return requirejs(["ui/editor/Editor", "model/presentation/Deck"], function(Editor, Deck) {
-      var deck, editor;
+    return requirejs(["ui/editor/Editor", "model/presentation/Deck", "storage/FileStorage"], function(Editor, Deck, FileStorage) {
+      var deck, editor, lastPres, pres;
       deck = new Deck();
+      lastPres = localStorage.getItem("StrutLastPres");
+      if (lastPres != null) {
+        pres = FileStorage.open(lastPres);
+        if (pres != null) {
+          deck["import"](pres);
+        }
+      }
       editor = new Editor({
         model: deck
       });
@@ -65,7 +72,9 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         }
       };
       $("body").append(editor.render());
-      return deck.newSlide();
+      if (!(lastPres != null)) {
+        return deck.newSlide();
+      }
     });
   };
   requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {

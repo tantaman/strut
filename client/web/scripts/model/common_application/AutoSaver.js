@@ -65,7 +65,12 @@ define(["storage/FileStorage"], function(FileStorage) {
       var fileName;
       fileName = this.model.get("fileName");
       if (!(fileName != null)) {
-        return;
+        fileName = "presentation-1";
+        this.model.set("fileName", fileName);
+      }
+      if (fileName !== this._lastName) {
+        this._lastName = fileName;
+        localStorage.setItem("StrutLastPres", fileName);
       }
       return FileStorage.save(fileName, this.model.toJSON(false, true));
     };

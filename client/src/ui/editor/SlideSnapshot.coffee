@@ -57,7 +57,9 @@ define(["vendor/amd/backbone",
 			@$el.html(Templates.SlideSnapshot(@model.attributes))
 			g2d = @$el.find("canvas")[0].getContext("2d")
 			@slideDrawer = new SlideDrawer(@model, g2d)
-			@slideDrawer.repaint()
+			setTimeout(=>
+				@slideDrawer.repaint()
+			, 0)
 
 			if @model.get("active")
 				@$el.addClass("active")

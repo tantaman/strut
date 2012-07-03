@@ -44,12 +44,17 @@ define(["storage/FileStorage"],
 		_save: ->
 			fileName = @model.get("fileName")
 			if not fileName?
-				return
+				fileName = "presentation-1"
+				@model.set("fileName", fileName)
 				#if @lastAutoSave?
 				#	FileStorage.remove(@lastAutoSave)
 				#date = new Date()
 				#fileName = 
 				#	"AUTOSAVE-#{date.getDate()}/#{date.getMonth()+1} #{date.getHours()}:#{date.getMinutes()}:#{date.getSeconds()}"
 				#@lastAutoSave = fileName
+			if fileName isnt @_lastName
+				@_lastName = fileName
+				localStorage.setItem("StrutLastPres", fileName)
+
 			FileStorage.save(fileName, @model.toJSON(false, true))
 )

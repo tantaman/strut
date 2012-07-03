@@ -3,11 +3,23 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "model/common_application/AutoSaver", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, AutoSaver, empty) {
+define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/RawTextImporter", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "model/common_application/AutoSaver", "model/presentation/Archiver", "css!./res/css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) {
   var editorId, menuOptions;
   editorId = 0;
   menuOptions = {
-    "new": function(e) {},
+    "new": function(e) {
+      var num;
+      num = localStorage.getItem("StrutNewNum");
+      if (!(num != null)) {
+        num = 2;
+      }
+      localStorage.setItem("StrutNewNum", num + 1);
+      this.model["import"]({
+        fileName: "presentation-" + num,
+        slides: []
+      });
+      return this.model.newSlide();
+    },
     open: function(e) {
       var _this = this;
       return this.openDialog.show(function(fileName) {
@@ -15,7 +27,8 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
         console.log("Attempting to open " + fileName);
         data = FileStorage.open(fileName);
         if (data != null) {
-          return _this.model["import"](data);
+          _this.model["import"](data);
+          return localStorage.setItem("StrutLastPres", fileName);
         }
       });
     },
@@ -93,6 +106,12 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
       return this.backgroundPickerModal.show(function(bgState) {
         return _this.model.set("background", bgState);
       });
+    },
+    exportZIP: function(e) {
+      var archive, archiver;
+      archiver = new Archiver(this.model);
+      archive = archiver.create();
+      return window.location.href = "data:application/zip;base64," + archive;
     }
   };
   return Backbone.View.extend({

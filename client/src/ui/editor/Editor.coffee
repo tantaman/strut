@@ -11,20 +11,33 @@ define(["vendor/amd/backbone",
 		"ui/widgets/SaveAsDialog",
 		"storage/FileStorage",
 		"ui/widgets/BackgroundPicker",
-		"model/common_application/AutoSaver"
+		"model/common_application/AutoSaver",
+		"model/presentation/Archiver",
 		"css!./res/css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
-FileStorage, BackgroundPicker, AutoSaver, empty) ->
+FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 	editorId = 0
 
 	menuOptions =
 		new: (e) ->
+			num = localStorage.getItem("StrutNewNum")
+			if not num?
+				num = 2
+
+			localStorage.setItem("StrutNewNum", num+1)
+			
+			@model.import(
+				fileName: "presentation-" + num
+				slides: []
+			)
+			@model.newSlide()
 		open: (e) ->
 			@openDialog.show((fileName) =>
 				console.log "Attempting to open #{fileName}"
 				data = FileStorage.open(fileName)
 				if data?
 					@model.import(data)
+					localStorage.setItem("StrutLastPres", fileName)
 			)
 		openRecent: (e) ->
 		save: (e) ->
@@ -80,6 +93,11 @@ FileStorage, BackgroundPicker, AutoSaver, empty) ->
 			@backgroundPickerModal.show((bgState) =>
 				@model.set("background", bgState)
 			)
+
+		exportZIP: (e) ->
+			archiver = new Archiver(@model)
+			archive = archiver.create()
+			window.location.href="data:application/zip;base64,"+archive;
 
 	Backbone.View.extend(
 		className: "editor"
