@@ -40,6 +40,7 @@
 .editor .navbar-inner .btn-group {
 	margin-bottom: 5px;
 	margin-right: 4px;
+	padding: 0;
 }
 
 .navbar {
@@ -49,4 +50,8 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.navbar .btn, .navbar .btn-group {
+	margin-top: 5px;
 }
