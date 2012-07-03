@@ -27,7 +27,7 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
     initialize: function() {
       this._dragging = false;
       this.allowDragging = true;
-      this.model.on("change:selected", this._selectionChanged, this);
+      this.model.on("change:selected", this.__selectionChanged, this);
       this.model.on("change:color", this._colorChanged, this);
       this.model.on("unrender", this._unrender, this);
       this._mouseup = this.stopdrag.bind(this);
@@ -39,7 +39,7 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       this.model.on("change:x", this._xChanged, this);
       return this.model.on("change:y", this._yChanged, this);
     },
-    _selectionChanged: function(model, selected) {
+    __selectionChanged: function(model, selected) {
       if (selected) {
         return this.$el.addClass("selected");
       } else {
@@ -187,7 +187,7 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       });
       this.$content = this.$el.find(".content");
       this.$contentScale = this.$el.find(".content-scale");
-      this._selectionChanged(this.model, this.model.get("selected"));
+      this.__selectionChanged(this.model, this.model.get("selected"));
       this.$xInput = this.$el.find("[data-option='x']");
       this.$yInput = this.$el.find("[data-option='y']");
       setTimeout(function() {

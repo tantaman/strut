@@ -25,7 +25,8 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
         style = styles[_i];
         this.model.on("change:" + style, this._styleChanged, this);
       }
-      return this._lastDx = 0;
+      this._lastDx = 0;
+      return this.model.on("edit", this.edit, this);
     },
     scale: function(e, deltas) {
       var currSize, sign;
@@ -49,8 +50,20 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
       } else {
         this.model.set("text", text);
         this.$el.find(".content").attr("contenteditable", false);
+        this.$el.removeClass("editable");
         return this.allowDragging = true;
       }
+    },
+    __selectionChanged: function(model, selected) {
+      ComponentView.prototype.__selectionChanged.apply(this, arguments);
+      if (!selected && this.editing) {
+        return this.editCompleted();
+      }
+    },
+    edit: function() {
+      this.model.set("selected", true);
+      this.dblclicked();
+      return this.$el.find(".content").selectText();
     },
     _styleChanged: function(model, style, opts) {
       var key, value, _ref, _results;

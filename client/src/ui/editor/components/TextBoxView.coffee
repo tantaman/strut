@@ -20,6 +20,7 @@ define(["./ComponentView",
 			for style in styles
 				@model.on("change:" + style, @_styleChanged, @)
 			@_lastDx = 0
+			@model.on("edit", @edit, @)
 			#@model.on("change:style", @_styleChanged, @)
 
 		scale: (e, deltas) ->
@@ -43,7 +44,18 @@ define(["./ComponentView",
 			else
 				@model.set("text", text)
 				@$el.find(".content").attr("contenteditable", false)
+				@$el.removeClass("editable")
 				@allowDragging = true
+
+		__selectionChanged: (model, selected) ->
+			ComponentView.prototype.__selectionChanged.apply(@, arguments)
+			if not selected and @editing
+				@editCompleted()
+
+		edit: () ->
+			@model.set("selected", true)
+			@dblclicked()
+			@$el.find(".content").selectText()
 
 		_styleChanged: (model, style, opts) ->
 			for key,value of opts.changes

@@ -31,7 +31,7 @@ define(["vendor/amd/backbone",
 		initialize: () ->
 			@_dragging = false
 			@allowDragging = true
-			@model.on("change:selected", @_selectionChanged, @)
+			@model.on("change:selected", @__selectionChanged, @)
 			@model.on("change:color", @_colorChanged, @)
 			@model.on("unrender", @_unrender, @)
 
@@ -46,7 +46,7 @@ define(["vendor/amd/backbone",
 			@model.on("change:x", @_xChanged, @)
 			@model.on("change:y", @_yChanged, @)
 
-		_selectionChanged: (model, selected) ->
+		__selectionChanged: (model, selected) ->
 			if selected
 				@$el.addClass("selected")
 			else
@@ -186,7 +186,7 @@ define(["vendor/amd/backbone",
 			@$contentScale = @$el.find(".content-scale")
 			#@_setUpdatedTransform()
 
-			@_selectionChanged(@model, @model.get("selected"))
+			@__selectionChanged(@model, @model.get("selected"))
 
 			@$xInput = @$el.find("[data-option='x']")
 			@$yInput = @$el.find("[data-option='y']")

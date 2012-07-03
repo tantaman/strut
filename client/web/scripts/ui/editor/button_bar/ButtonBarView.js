@@ -20,10 +20,12 @@ define(["./AbstractButtonBarView", "model/editor/button_bar/ButtonBarModel", "mo
       return this.deck.newSlide();
     },
     textBox: function() {
-      var activeSlide;
+      var activeSlide, textBox;
       activeSlide = this.deck.get("activeSlide");
       if (activeSlide != null) {
-        return activeSlide.add(ComponentFactory.createTextBox(this.model.fontConfig()));
+        textBox = ComponentFactory.createTextBox(this.model.fontConfig());
+        activeSlide.add(textBox);
+        return textBox.trigger("edit");
       }
     },
     picture: function() {

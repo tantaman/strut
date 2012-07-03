@@ -22,8 +22,9 @@ define(["./AbstractButtonBarView",
 		textBox: () ->
 			activeSlide = @deck.get("activeSlide")
 			if activeSlide?
-				activeSlide.add(
-					ComponentFactory.createTextBox(@model.fontConfig()))
+				textBox = ComponentFactory.createTextBox(@model.fontConfig())
+				activeSlide.add(textBox)
+				textBox.trigger("edit")
 
 		picture: () ->
 			# present picture insertion dialog
