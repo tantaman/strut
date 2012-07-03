@@ -74,7 +74,6 @@
 	-webkit-transform-origin: 0 0;
 	-moz-transform-origin: 0 0;
 	margin: 10px auto;
-	overflow: hidden;
 	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
