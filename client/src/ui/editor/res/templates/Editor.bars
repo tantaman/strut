@@ -37,7 +37,7 @@
                     <li class="divider"></li>
                     <li data-option="changeBackground"><a href="#">Change Background</a></li>
                     <li class="divider"></li>
-                    <li data-option="exportZIP"><a href="#">Zip Presentation</a></li>
+                   <!-- <li data-option="exportZIP"><a href="#">Zip Presentation</a></li> -->
                 </ul>
             </li>
      	</ul>
