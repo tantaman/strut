@@ -68,7 +68,7 @@ define(["vendor/amd/backbone"],
 		* Why does this method even exist?
 		* @method imgConfig
 		*###
-		imgConfig: (src) ->
+		itemConfig: (src) ->
 			{
 				src: src
 			}

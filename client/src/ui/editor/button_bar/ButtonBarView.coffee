@@ -32,7 +32,23 @@ define(["./AbstractButtonBarView",
 			if activeSlide?
 				@options.pictureGrabber.show((src) =>
 					activeSlide.add(
-						ComponentFactory.createImage(@model.imgConfig(src)))
+						ComponentFactory.createImage(@model.itemConfig(src)))
+				)
+
+		iframe: () ->
+			activeSlide = @deck.get("activeSlide")
+			if activeSlide?
+				@options.siteGrabber.show((src) =>
+					webFrame = ComponentFactory.createWebFrame(@model.itemConfig(src))
+					activeSlide.add(webFrame)
+				)
+
+		video: () ->
+			activeSlide = @deck.get("activeSlide")
+			if activeSlide?
+				@options.videoGrabber.show((src) =>
+					video = ComponentFactory.createVideo(@model.itemConfig(src))
+					activeSlide.add(video)
 				)
 
 		table: () ->

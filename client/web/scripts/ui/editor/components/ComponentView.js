@@ -37,7 +37,11 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       this._deltaDrags = [];
       this.model.on("rerender", this._setUpdatedTransform, this);
       this.model.on("change:x", this._xChanged, this);
-      return this.model.on("change:y", this._yChanged, this);
+      this.model.on("change:y", this._yChanged, this);
+      return this._lastDeltas = {
+        dx: 0,
+        dy: 0
+      };
     },
     __selectionChanged: function(model, selected) {
       if (selected) {
@@ -108,26 +112,29 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
     _calcRot: function(point) {
       return Math.atan2(point.y - this._origin.y, point.x - this._origin.x);
     },
-    scale: function(e, deltas) {
-      var contentHeight, contentWidth, newHeight, newWidth, scale;
-      contentWidth = this.$content.width();
-      contentHeight = this.$content.height();
-      newWidth = contentWidth + deltas.dx;
-      newHeight = contentHeight + deltas.dy;
-      scale = (newWidth * newHeight) / (contentWidth * contentHeight) * this._initialScale;
-      if (newWidth * newHeight > 10) {
-        this.model.set("scale", scale);
-        return this._setUpdatedTransform();
-      }
-    },
     scaleStart: function() {
-      this._initialScale = this.model.get("scale") || 1;
-      if (!(this.origSize != null) || this.origSize.width === 0 || this.origSize.height === 0) {
+      this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
+      this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
+      if (!(this.origSize != null)) {
         return this.origSize = {
           width: this.$el.width(),
           height: this.$el.height()
         };
       }
+    },
+    scale: function(e, deltas) {
+      var newHeight, newWidth, offset, scale;
+      offset = this.$el.offset();
+      newWidth = (deltas.x - offset.left) / this.dragScale;
+      newHeight = (deltas.y - offset.top) / this.dragScale;
+      scale = {
+        x: newWidth / this.origSize.width,
+        y: newHeight / this.origSize.height,
+        width: newWidth,
+        height: newHeight
+      };
+      this.model.set("scale", scale);
+      return this._setUpdatedTransform();
     },
     _setUpdatedTransform: function() {
       var newHeight, newWidth, obj, scale, transformStr;
@@ -139,14 +146,16 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       this.$content.css(obj);
       scale = this.model.get("scale");
       if (this.origSize != null) {
-        newWidth = this.origSize.width * scale;
-        newHeight = this.origSize.height * scale;
+        newWidth = scale.width || this.origSize.width;
+        newHeight = scale.height || this.origSize.height;
         this.$el.css({
           width: newWidth,
           height: newHeight
         });
       }
-      this.$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")");
+      if (scale != null) {
+        this.$contentScale.css(window.browserPrefix + "transform", "scale(" + scale.x + "," + scale.y + ")");
+      }
       return this.$el.css(window.browserPrefix + "transform", "rotate(" + this.model.get("rotate") + "rad)");
     },
     buildTransformString: function() {
@@ -157,11 +166,7 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
         var transformValue;
         transformValue = _this.model.get(transformName);
         if (transformValue) {
-          if (transformName === "scale") {
-            return transformStr += transformName + "(" + transformValue + ") ";
-          } else {
-            return transformStr += transformName + "(" + transformValue + "rad) ";
-          }
+          return transformStr += transformName + "(" + transformValue + "rad) ";
         }
       });
       return transformStr;
@@ -178,7 +183,8 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       };
     },
     render: function() {
-      var _this = this;
+      var size,
+        _this = this;
       this.$el.html(this.__getTemplate()(this.model.attributes));
       this.$el.find("span[data-delta]").each(function(idx, elem) {
         var deltaDrag;
@@ -190,17 +196,18 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       this.__selectionChanged(this.model, this.model.get("selected"));
       this.$xInput = this.$el.find("[data-option='x']");
       this.$yInput = this.$el.find("[data-option='y']");
-      setTimeout(function() {
-        var size;
-        size = {
-          width: _this.$el.width(),
-          height: _this.$el.height()
-        };
-        if (size.width > 0 && size.height > 0) {
-          _this.origSize = size;
-        }
-        return _this._setUpdatedTransform();
-      }, 0);
+      this.$el.css({
+        top: this.model.get("y"),
+        left: this.model.get("x")
+      });
+      size = {
+        width: this.$el.width(),
+        height: this.$el.height()
+      };
+      if (size.width > 0 && size.height > 0) {
+        this.origSize = size;
+      }
+      this._setUpdatedTransform();
       return this.$el;
     },
     _fixScaling: function(scale) {

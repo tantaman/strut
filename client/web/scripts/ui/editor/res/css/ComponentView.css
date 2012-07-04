@@ -19,6 +19,14 @@
 	white-space: nowrap;
 }
 
+.component .content-scale:not(.svg) {
+	display: inline-block;
+}
+
+.component .content:not(.svg) {
+	display: inline-block;
+}
+
 .component.selected .label {
 	visibility: visible;
 }
@@ -76,7 +84,7 @@
 .component {
 	position: absolute;
 	line-height: normal;
-	padding: 2px;
+	/*padding: 2px;*/
 	cursor: pointer;
 	margin: 0px;
 }

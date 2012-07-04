@@ -77,7 +77,7 @@ define(["vendor/amd/backbone"], function(Backbone) {
     		*
     */
 
-    imgConfig: function(src) {
+    itemConfig: function(src) {
       return {
         src: src
       };

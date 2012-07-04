@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, CompnentFactory, Math2) {
+define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, ComponentFactory, Math2) {
   var defaults;
   defaults = {
     z: 0,
@@ -28,15 +28,8 @@ define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/Compone
             comp = rawComp.clone();
             hydratedComps.push(comp);
           } else {
-            switch (rawComp.type) {
-              case "ImageModel":
-                comp = CompnentFactory.createImage(rawComp);
-                hydratedComps.push(comp);
-                break;
-              case "TextBox":
-                comp = CompnentFactory.createTextBox(rawComp);
-                hydratedComps.push(comp);
-            }
+            comp = ComponentFactory.create(rawComp);
+            hydratedComps.push(comp);
           }
           return _this._registerWithComponent(comp);
         });

@@ -1,5 +1,5 @@
 <div class="componentContainer" style="top: {{y}}px; left: {{x}}px;
--webkit-transform: {{#if scale}}scale({{scale}}){{/if}};
+-webkit-transform: {{#if scale}}scale({{scale.x}}, {{scale.y}}){{/if}};
 -moz-transform: {{#if scale}}scale({{scale}}){{/if}};
 transform: {{#if scale}}scale({{scale}}){{/if}}">
 {{> TransformContainer}}

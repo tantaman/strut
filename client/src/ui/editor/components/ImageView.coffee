@@ -23,13 +23,13 @@ define(["./ComponentView"],
 				@scale = svgScale
 
 		_finishRender: ($img) ->
+			naturalWidth = $img[0].naturalWidth
+			naturalHeight = $img[0].naturalHeight
 			if @model.get("imageType") is "SVG"
 				$img.css(
 					width: "100%"
 					height: "100%"
 				)
-				naturalWidth = $img[0].naturalWidth
-				naturalHeight = $img[0].naturalHeight
 
 				scale = @model.get("scale")
 				if scale
@@ -45,13 +45,20 @@ define(["./ComponentView"],
 						height: height
 					)
 					@model.set("scale", {width: width, height: height})
+			else
+				@origSize = 
+					width: naturalWidth
+					height: naturalHeight
+				$img[0].width = naturalWidth
+				$img[0].height = naturalHeight
+				@_setUpdatedTransform()
 
 			$img.bind("dragstart", (e) -> e.preventDefault(); false)
-			@$el.find(".content").append($img);
-			@$el.css({
-				top: @model.get("y")
-				left: @model.get("x")
-			})
+			@$content.append($img);
+
+			if @model.get("imageType") is "SVG"
+				$img.parent().addClass("svg")
+				$img.parent().parent().addClass("svg")
 
 		render: () ->
 			ComponentView.prototype.render.call(@)

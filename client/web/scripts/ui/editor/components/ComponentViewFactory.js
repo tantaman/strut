@@ -3,7 +3,7 @@
 @author Tantaman
 */
 
-define(["./ImageView", "./TableView", "./TextBoxView"], function(ImageView, TableView, TextBoxView) {
+define(["./ImageView", "./TableView", "./TextBoxView", "./WebFrameView", "./VideoView"], function(ImageView, TableView, TextBoxView, WebFrameView, VideoView) {
   var ComponentViewFactory;
   return ComponentViewFactory = {
     createView: function(model) {
@@ -20,6 +20,14 @@ define(["./ImageView", "./TableView", "./TextBoxView"], function(ImageView, Tabl
           });
         case "Table":
           return new TableView({
+            model: model
+          });
+        case "WebFrame":
+          return new WebFrameView({
+            model: model
+          });
+        case "Video":
+          return new VideoView({
             model: model
           });
       }

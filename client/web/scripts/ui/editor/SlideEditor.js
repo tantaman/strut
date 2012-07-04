@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/PictureGrabber", "vendor/amd/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) {
+define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./res/css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/ItemGrabber", "vendor/amd/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) {
   return Backbone.View.extend({
     className: "slideEditor",
     initialize: function() {
@@ -66,7 +66,7 @@ define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./Operatin
       }
     },
     render: function() {
-      var $items, $mainContent, pictureGrabber;
+      var $items, $mainContent, pictureGrabber, siteGrabber, videoGrabber;
       this.$el.html(Templates.SlideEditor(this.model));
       this.$el.find(".dropdown-toggle").dropdown();
       $items = this.$el.find("a[title]");
@@ -88,12 +88,27 @@ define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./Operatin
       if (this._buttonBar != null) {
         this._buttonBar.dispose();
       }
-      pictureGrabber = new PictureGrabber();
+      pictureGrabber = new ItemGrabber({
+        tag: "img",
+        title: "Insert Image"
+      });
+      siteGrabber = new ItemGrabber({
+        tag: "iframe",
+        title: "Insert Website"
+      });
+      videoGrabber = new ItemGrabber({
+        tag: "video",
+        title: "Insert Video"
+      });
       this.$el.append(pictureGrabber.render());
+      this.$el.append(siteGrabber.render());
+      this.$el.append(videoGrabber.render());
       this._buttonBar = new ButtonBarView({
         el: this.$el.find(".buttonBar"),
         deck: this.model,
-        pictureGrabber: pictureGrabber
+        pictureGrabber: pictureGrabber,
+        siteGrabber: siteGrabber,
+        videoGrabber: videoGrabber
       });
       this._buttonBar.render();
       return this.$el;

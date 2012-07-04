@@ -43,14 +43,11 @@ define(["common/Throttler",
 			components.forEach((component) =>
 				type = component.get("type")
 
-				@g2d.save()
-
-				@drawers[type].paint(component)
-				#switch type
-				#	when "TextBox" then @paintTextBox(component)
-				#	when "ImageModel" then @paintImage(component)
-				#	when "Table" then @paintTable(component)
-				@g2d.restore()
+				drawer = @drawers[type]
+				if drawer?
+					@g2d.save()
+					drawer.paint(component)
+					@g2d.restore()
 			)
 
 		dispose: () ->

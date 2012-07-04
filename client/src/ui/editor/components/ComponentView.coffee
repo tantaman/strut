@@ -46,6 +46,10 @@ define(["vendor/amd/backbone",
 			@model.on("change:x", @_xChanged, @)
 			@model.on("change:y", @_yChanged, @)
 
+			@_lastDeltas = 
+				dx: 0
+				dy: 0
+
 		__selectionChanged: (model, selected) ->
 			if selected
 				@$el.addClass("selected")
@@ -112,24 +116,29 @@ define(["vendor/amd/backbone",
 		_calcRot: (point) ->
 			Math.atan2(point.y - @_origin.y, point.x - @_origin.x)
 
-		scale: (e, deltas) ->
-			contentWidth = @$content.width()
-			contentHeight = @$content.height()
-			newWidth = contentWidth + deltas.dx
-			newHeight = contentHeight + deltas.dy
-
-			scale = (newWidth*newHeight) / (contentWidth*contentHeight) * @_initialScale
-
-			if newWidth * newHeight > 10
-				@model.set("scale", scale)
-				@_setUpdatedTransform()
-
 		scaleStart: () ->
-			@_initialScale = @model.get("scale") || 1
-			if not @origSize? or @origSize.width is 0 or @origSize.height is 0
-				@origSize = 
+			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
+			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
+			# TEMPORARY! until the video element is updated
+			if not @origSize?
+				@origSize =
 					width: @$el.width()
 					height: @$el.height()
+
+		scale: (e, deltas) ->
+			offset = @$el.offset()
+			
+			newWidth = (deltas.x - offset.left) / @dragScale
+			newHeight = (deltas.y - offset.top) / @dragScale
+
+			scale =
+				x: newWidth / @origSize.width
+				y: newHeight / @origSize.height
+				width: newWidth
+				height: newHeight
+
+			@model.set("scale", scale)
+			@_setUpdatedTransform()		
 
 		_setUpdatedTransform: () ->
 			transformStr = @buildTransformString()
@@ -141,26 +150,25 @@ define(["vendor/amd/backbone",
 			# TODO: add scale to root obj and invert scale on labels?
 			scale = @model.get("scale")
 			if @origSize?
-				newWidth = @origSize.width * scale
-				newHeight = @origSize.height * scale
+				newWidth = scale.width or @origSize.width
+				newHeight = scale.height or @origSize.height
 				@$el.css(
 					width: newWidth
 					height: newHeight)
 
-			@$contentScale.css(window.browserPrefix + "transform", "scale(" + scale + ")") 
+			if scale?
+				@$contentScale.css(window.browserPrefix + "transform", "scale(" + scale.x + "," + scale.y + ")") 
 			@$el.css(window.browserPrefix + "transform", "rotate(" + @model.get("rotate") + "rad)")
 
-
-			# TODO: just use the transform matrix...
 		buildTransformString: () ->
 			transformStr = ""
 			@transforms.forEach((transformName) =>
 				transformValue = @model.get(transformName)
 				if transformValue
-					if transformName is "scale"
-						transformStr += transformName + "(" + transformValue + ") "
-					else
-						transformStr += transformName + "(" + transformValue + "rad) "
+					#if transformName is "scale"
+						#transformStr += transformName + "(" + transformValue + ") "
+					#else
+					transformStr += transformName + "(" + transformValue + "rad) "
 			)
 			transformStr
 
@@ -191,15 +199,18 @@ define(["vendor/amd/backbone",
 			@$xInput = @$el.find("[data-option='x']")
 			@$yInput = @$el.find("[data-option='y']")
 
-			setTimeout(() =>
-				size = 
-					width: @$el.width()
-					height: @$el.height()
+			@$el.css({
+				top: @model.get("y")
+				left: @model.get("x")
+			})
 
-				if size.width > 0 and size.height > 0
-					@origSize = size
-				@_setUpdatedTransform()
-			, 0)
+			size = 
+				width: @$el.width()
+				height: @$el.height()
+
+			if size.width > 0 and size.height > 0
+				@origSize = size
+			@_setUpdatedTransform()
 
 			@$el
 

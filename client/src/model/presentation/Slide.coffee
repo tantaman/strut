@@ -5,7 +5,7 @@ define(["vendor/amd/backbone",
 		"model/geom/SpatialObject",
 		"./components/ComponentFactory",
 		"common/Math2"],
-(Backbone, SpatialObject, CompnentFactory, Math2) ->
+(Backbone, SpatialObject, ComponentFactory, Math2) ->
 	defaults =
 		z: 0
 		impScale: 1
@@ -26,13 +26,8 @@ define(["vendor/amd/backbone",
 						comp = rawComp.clone()
 						hydratedComps.push(comp)
 					else
-						switch rawComp.type
-							when "ImageModel"
-								comp = CompnentFactory.createImage(rawComp)
-								hydratedComps.push(comp)
-							when "TextBox"
-								comp = CompnentFactory.createTextBox(rawComp)
-								hydratedComps.push(comp)
+						comp = ComponentFactory.create(rawComp)
+						hydratedComps.push(comp)
 
 					@_registerWithComponent(comp)
 				)

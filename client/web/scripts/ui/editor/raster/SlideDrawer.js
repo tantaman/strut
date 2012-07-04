@@ -56,11 +56,14 @@ define(["common/Throttler", "./TextboxDrawer", "./ImageModelDrawer"], function(T
       this.g2d.clearRect(0, 0, this.size.width, this.size.height);
       components = this.model.get("components");
       return components.forEach(function(component) {
-        var type;
+        var drawer, type;
         type = component.get("type");
-        _this.g2d.save();
-        _this.drawers[type].paint(component);
-        return _this.g2d.restore();
+        drawer = _this.drawers[type];
+        if (drawer != null) {
+          _this.g2d.save();
+          drawer.paint(component);
+          return _this.g2d.restore();
+        }
       });
     };
 

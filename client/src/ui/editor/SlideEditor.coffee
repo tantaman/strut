@@ -7,9 +7,9 @@ define(["vendor/amd/backbone", "./Templates",
 		"common/EventEmitter",
 		"css!./res/css/SlideEditor.css",
 		"./button_bar/ButtonBarView",
-		"ui/widgets/PictureGrabber",
+		"ui/widgets/ItemGrabber",
 		"vendor/amd/keymaster"],
-(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, PictureGrabber, Keymaster) ->
+(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) ->
 
 	Backbone.View.extend(
 		className: "slideEditor"
@@ -86,9 +86,19 @@ define(["vendor/amd/backbone", "./Templates",
 			if @_buttonBar?
 				@_buttonBar.dispose()
 
-			pictureGrabber = new PictureGrabber()
+			pictureGrabber = new ItemGrabber(tag: "img", title: "Insert Image")
+			siteGrabber = new ItemGrabber(tag: "iframe", title: "Insert Website")
+			videoGrabber = new ItemGrabber(tag: "video", title: "Insert Video")
 			@$el.append(pictureGrabber.render())
-			@_buttonBar = new ButtonBarView({el: @$el.find(".buttonBar"), deck: @model, pictureGrabber: pictureGrabber})
+			@$el.append(siteGrabber.render())
+			@$el.append(videoGrabber.render())
+			@_buttonBar = new ButtonBarView(
+				el: @$el.find(".buttonBar")
+				deck: @model
+				pictureGrabber: pictureGrabber
+				siteGrabber: siteGrabber
+				videoGrabber: videoGrabber
+			)
 			@_buttonBar.render()
 
 			@$el

@@ -6,11 +6,11 @@ define(["vendor/amd/backbone",
 		"common/Throttler"],
 (Backbone, Templates, Throttler) ->
 	Backbone.View.extend(
-		className: "pictureGrabber modal"
+		className: "itemGrabber modal"
 		events:
 			"click .ok": "okClicked"
-			"keyup input[name='imageUrl']": "urlChanged"
-			"paste input[name='imageUrl']": "urlChanged"
+			"keyup input[name='itemUrl']": "urlChanged"
+			"paste input[name='itemUrl']": "urlChanged"
 			"hidden": "hidden"
 
 		initialize: () ->
@@ -34,31 +34,31 @@ define(["vendor/amd/backbone",
 				@src = @$input.val()
 				@okClicked()
 			else
-				@throttler.submit(@loadImage, {rejectionPolicy: "runLast"})
+				@throttler.submit(@loadItem, {rejectionPolicy: "runLast"})
 
-		loadImage: () ->
-			@img.src = @$input.val()
-			@src = @img.src
+		loadItem: () ->
+			@item.src = @$input.val()
+			@src = @item.src
 
-		_imgLoadError: ->
+		_itemLoadError: ->
 			@$el.find(".ok").addClass("disabled")
 			@$el.find(".alert").removeClass("disp-none")
 
-		_imgLoaded: ->
+		_itemLoaded: ->
 			@$el.find(".ok").removeClass("disabled")
 			@$el.find(".alert").addClass("disp-none")
 
 		render: () ->
-			@$el.html(Templates.PictureGrabber())
+			@$el.html(Templates.ItemGrabber(@options))
 			@$el.modal()
 			@$el.modal("hide")
-			@img = @$el.find("img")[0]
-			@img.onerror = => @_imgLoadError()
-			@img.onload = => @_imgLoaded()
-			@$input = @$el.find("input[name='imageUrl']")
+			@item = @$el.find(@options.tag)[0]
+			@item.onerror = => @_itemLoadError()
+			@item.onload = => @_itemLoaded()
+			@$input = @$el.find("input[name='itemUrl']")
 			@$el
 
-		constructor: `function PictureGrabber() {
+		constructor: `function ItemGrabber() {
 			Backbone.View.prototype.constructor.apply(this, arguments);
 		}`
 	)

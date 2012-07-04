@@ -34,7 +34,31 @@ define(["./AbstractButtonBarView", "model/editor/button_bar/ButtonBarModel", "mo
       activeSlide = this.deck.get("activeSlide");
       if (activeSlide != null) {
         return this.options.pictureGrabber.show(function(src) {
-          return activeSlide.add(ComponentFactory.createImage(_this.model.imgConfig(src)));
+          return activeSlide.add(ComponentFactory.createImage(_this.model.itemConfig(src)));
+        });
+      }
+    },
+    iframe: function() {
+      var activeSlide,
+        _this = this;
+      activeSlide = this.deck.get("activeSlide");
+      if (activeSlide != null) {
+        return this.options.siteGrabber.show(function(src) {
+          var webFrame;
+          webFrame = ComponentFactory.createWebFrame(_this.model.itemConfig(src));
+          return activeSlide.add(webFrame);
+        });
+      }
+    },
+    video: function() {
+      var activeSlide,
+        _this = this;
+      activeSlide = this.deck.get("activeSlide");
+      if (activeSlide != null) {
+        return this.options.videoGrabber.show(function(src) {
+          var video;
+          video = ComponentFactory.createVideo(_this.model.itemConfig(src));
+          return activeSlide.add(video);
         });
       }
     },
