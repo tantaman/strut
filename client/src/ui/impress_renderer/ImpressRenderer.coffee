@@ -9,12 +9,13 @@ define(["vendor/amd/Handlebars",
 				switch componentModel.get("type")
 					when "ImageModel"
 						if componentModel.get("imageType") is "SVG"
-							console.log "SVG!!!"
 							result = Templates.SVGImage(componentModel.attributes)
 						else
 							result = Templates.Image(componentModel.attributes)
 					when "TextBox" then result = Templates
 						.TextBox(@convertTextBoxData(componentModel.attributes))
+					when "Video"
+						result = Templates.Video(componentModel.attributes)
 
 				new Handlebars.SafeString(result)
 			)

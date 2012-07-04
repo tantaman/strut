@@ -12,7 +12,6 @@ define(["vendor/amd/Handlebars", "./Templates"], function(Handlebars, Templates)
         switch (componentModel.get("type")) {
           case "ImageModel":
             if (componentModel.get("imageType") === "SVG") {
-              console.log("SVG!!!");
               result = Templates.SVGImage(componentModel.attributes);
             } else {
               result = Templates.Image(componentModel.attributes);
@@ -20,6 +19,9 @@ define(["vendor/amd/Handlebars", "./Templates"], function(Handlebars, Templates)
             break;
           case "TextBox":
             result = Templates.TextBox(_this.convertTextBoxData(componentModel.attributes));
+            break;
+          case "Video":
+            result = Templates.Video(componentModel.attributes);
         }
         return new Handlebars.SafeString(result);
       });

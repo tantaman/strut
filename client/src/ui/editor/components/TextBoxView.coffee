@@ -23,6 +23,9 @@ define(["./ComponentView",
 			@model.on("edit", @edit, @)
 			#@model.on("change:style", @_styleChanged, @)
 
+
+		scaleStart: () ->
+		
 		scale: (e, deltas) ->
 			currSize = @model.get("size")
 

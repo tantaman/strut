@@ -1,0 +1,4 @@
+{{> ComponentContainer}}
+<video src="{{src}}"></video>
+</div>
+</div>

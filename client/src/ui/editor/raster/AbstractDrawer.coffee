@@ -7,7 +7,7 @@ define(() ->
 			@g2d.translate(bbox.x, bbox.y)
 
 			if scale?
-				@g2d.scale(scale, scale)
+				@g2d.scale(scale.x, scale.y)
 
 			@g2d.translate(bbox.width/2, bbox.height/2)
 

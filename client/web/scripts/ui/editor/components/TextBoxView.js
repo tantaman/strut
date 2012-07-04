@@ -28,6 +28,7 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
       this._lastDx = 0;
       return this.model.on("edit", this.edit, this);
     },
+    scaleStart: function() {},
     scale: function(e, deltas) {
       var currSize, sign;
       currSize = this.model.get("size");

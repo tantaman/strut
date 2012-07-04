@@ -32,7 +32,7 @@ define(["./ComponentView"],
 				)
 
 				scale = @model.get("scale")
-				if scale
+				if scale and scale.width
 					@$el.css(
 						width: scale.width
 						height: scale.height

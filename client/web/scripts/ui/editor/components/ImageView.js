@@ -38,7 +38,7 @@ define(["./ComponentView"], function(ComponentView) {
           height: "100%"
         });
         scale = this.model.get("scale");
-        if (scale) {
+        if (scale && scale.width) {
           this.$el.css({
             width: scale.width,
             height: scale.height

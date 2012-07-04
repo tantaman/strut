@@ -12,7 +12,7 @@ define(function() {
       scale = component.get("scale");
       this.g2d.translate(bbox.x, bbox.y);
       if (scale != null) {
-        this.g2d.scale(scale, scale);
+        this.g2d.scale(scale.x, scale.y);
       }
       this.g2d.translate(bbox.width / 2, bbox.height / 2);
       if (rotation != null) {
