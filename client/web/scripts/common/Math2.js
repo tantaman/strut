@@ -15,5 +15,33 @@ define({
   },
   compare: function(v1, v2, thresh) {
     return Math.abs(v1 - v2) < thresh;
+  },
+  transformPt: function(pt, rot) {
+    var newPt;
+    if (rot > 0) {
+      return newPt = {
+        x: pt.x * Math.cos(rot) + pt.y * Math.sin(rot),
+        y: -1 * pt.x * Math.sin(rot) + pt.y * Math.cos(rot)
+      };
+    } else {
+      return newPt = {
+        x: pt.x * Math.cos(rot) - pt.y * Math.sin(rot),
+        y: pt.x * Math.sin(rot) + pt.y * Math.cos(rot)
+      };
+    }
+  },
+  transformPtE: function(pt, rot) {
+    var newPt;
+    if (rot > 0) {
+      return newPt = {
+        left: pt.left * Math.cos(rot) + pt.top * Math.sin(rot),
+        top: -1 * pt.left * Math.sin(rot) + pt.top * Math.cos(rot)
+      };
+    } else {
+      return newPt = {
+        left: pt.left * Math.cos(rot) - pt.top * Math.sin(rot),
+        top: pt.left * Math.sin(rot) + pt.top * Math.cos(rot)
+      };
+    }
   }
 });

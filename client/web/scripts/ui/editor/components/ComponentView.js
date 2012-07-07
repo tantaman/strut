@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, empty) {
+define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, Math2, empty) {
   return Backbone.View.extend({
     transforms: ["skewX", "skewY"],
     className: "component",
@@ -112,7 +112,7 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
     _calcRot: function(point) {
       return Math.atan2(point.y - this._origin.y, point.x - this._origin.x);
     },
-    scaleStart: function() {
+    scaleStart: function(e) {
       this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
       this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
       if (!(this.origSize != null)) {
@@ -123,10 +123,15 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       }
     },
     scale: function(e, deltas) {
-      var newHeight, newWidth, offset, scale;
+      var newHeight, newWidth, offset, rot, scale;
       offset = this.$el.offset();
-      newWidth = (deltas.x - offset.left) / this.dragScale;
-      newHeight = (deltas.y - offset.top) / this.dragScale;
+      rot = this.model.get("rotate");
+      if (rot) {
+        deltas = Math2.transformPt(deltas, rot);
+        offset = Math2.transformPtE(offset, rot);
+      }
+      newWidth = Math.abs(deltas.x - offset.left) / this.dragScale;
+      newHeight = Math.abs(deltas.y - offset.top) / this.dragScale;
       scale = {
         x: newWidth / this.origSize.width,
         y: newHeight / this.origSize.height,
@@ -209,20 +214,6 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       }
       this._setUpdatedTransform();
       return this.$el;
-    },
-    _fixScaling: function(scale) {
-      var dh, dw, height, pos, width;
-      pos = this.$el.position();
-      width = this.$el.width() * scale;
-      height = this.$el.height() * scale;
-      dw = width - this.$el.width();
-      dh = height - this.$el.height();
-      return this.$el.css({
-        width: width,
-        height: height,
-        left: pos.left - dw / 2,
-        top: pos.top - dh / 2
-      });
     },
     __getTemplate: function() {
       return Templates.Component;

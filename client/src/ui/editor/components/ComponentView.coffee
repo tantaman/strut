@@ -1,13 +1,14 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
-		"ui/widgets/DeltaDragControl",
+define(["vendor/amd/backbone"
+		"ui/widgets/DeltaDragControl"
 		"../Templates"
+		"common/Math2"
 		"css!../res/css/ComponentView.css"],
 # TODO:
 # Start pushing more of this functionality down into a model
-(Backbone, DeltaDragControl, Templates, empty) ->
+(Backbone, DeltaDragControl, Templates, Math2, empty) ->
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY"]
 		className: "component"
@@ -116,7 +117,7 @@ define(["vendor/amd/backbone",
 		_calcRot: (point) ->
 			Math.atan2(point.y - @_origin.y, point.x - @_origin.x)
 
-		scaleStart: () ->
+		scaleStart: (e) ->
 			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
 			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
 			# TEMPORARY! until the video element is updated
@@ -127,9 +128,15 @@ define(["vendor/amd/backbone",
 
 		scale: (e, deltas) ->
 			offset = @$el.offset()
+
+			rot = @model.get("rotate")
+			if rot
+				deltas = Math2.transformPt(deltas, rot)
+				offset = Math2.transformPtE(offset, rot)
+			#console.log deltas.x + " " + deltas.y
 			
-			newWidth = (deltas.x - offset.left) / @dragScale
-			newHeight = (deltas.y - offset.top) / @dragScale
+			newWidth = Math.abs(deltas.x - offset.left) / @dragScale
+			newHeight = Math.abs(deltas.y - offset.top) / @dragScale
 
 			scale =
 				x: newWidth / @origSize.width
@@ -138,7 +145,7 @@ define(["vendor/amd/backbone",
 				height: newHeight
 
 			@model.set("scale", scale)
-			@_setUpdatedTransform()		
+			@_setUpdatedTransform()
 
 		_setUpdatedTransform: () ->
 			transformStr = @buildTransformString()
@@ -214,18 +221,18 @@ define(["vendor/amd/backbone",
 
 			@$el
 
-		_fixScaling: (scale) ->
-			pos = @$el.position()
-			width = @$el.width() * scale
-			height = @$el.height() * scale
-			dw = width - @$el.width()
-			dh = height - @$el.height()
-			@$el.css(
-					width: width
-					height: height
-					left: pos.left - dw / 2
-					top: pos.top - dh / 2
-				);
+		#_fixScaling: (scale) ->
+		#	pos = @$el.position()
+		#	width = @$el.width() * scale
+		#	height = @$el.height() * scale
+		#	dw = width - @$el.width()
+		#	dh = height - @$el.height()
+		#	@$el.css(
+		#			width: width
+		#			height: height
+		#			left: pos.left - dw / 2
+		#			top: pos.top - dh / 2
+		#		);
 
 		__getTemplate: () ->
 			Templates.Component
