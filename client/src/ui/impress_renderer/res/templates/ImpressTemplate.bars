@@ -27,6 +27,22 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 </head>
 <body class="impress-not-supported">
+
+<!-- This is a work around / hack to get the user's browser to download the fonts 
+ if they decide to save the presentation. -->
+<div style="visibility: hidden; width: 0px; height: 0px">
+<img src="preview_export/css/Lato-Bold.woff" />
+<img src="preview_export/css/HammersmithOne.woff" />
+<img src="preview_export/css/Gorditas-Regular.woff" />
+<img src="preview_export/css/FredokaOne-Regular.woff" />
+<img src="preview_export/css/Ubuntu.woff" />
+<img src="preview_export/css/Ubuntu-Bold.woff" />
+<img src="preview_export/css/PressStart2P-Regular.woff" />
+<img src="preview_export/css/Lato-BoldItalic.woff" />
+<img src="preview_export/css/AbrilFatface-Regular.woff" />
+<img src="preview_export/css/Lato-Regular.woff" />
+</div>
+
 <div class="fallback-message">
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>

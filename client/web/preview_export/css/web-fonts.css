@@ -2,59 +2,59 @@
   font-family: 'Lato';
   font-style: normal;
   font-weight: 700;
-  src: local('Lato Bold'), local('Lato-Bold'), url(../fonts/qdgUG4U09HnJwhYI-uK18wLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
+  src: local('Lato Bold'), local('Lato-Bold'), url(Lato-Bold.woff) format('woff');
 }
 @font-face {
   font-family: 'Hammersmith One';
   font-style: normal;
   font-weight: 400;
-  src: local('Hammersmith One'), local('HammersmithOne'), url(../fonts/FWNn6ITYqL6or7ZTmBxRhgaS65eljNVkG0R6HbhLwtY.woff) format('woff');
+  src: local('Hammersmith One'), local('HammersmithOne'), url(HammersmithOne.woff) format('woff');
 }
 @font-face {
   font-family: 'Gorditas';
   font-style: normal;
   font-weight: 400;
-  src: local('Gorditas'), local('Gorditas-Regular'), url(../fonts/OofBftZK2azuDs_dfHbULHYhjbSpvc47ee6xR_80Hnw.woff) format('woff');
+  src: local('Gorditas'), local('Gorditas-Regular'), url(Gorditas-Regular.woff) format('woff');
 }
 @font-face {
   font-family: 'Fredoka One';
   font-style: normal;
   font-weight: 400;
-  src: local('Fredoka One'), local('FredokaOne-Regular'), url(../fonts/SL0aFUFfkFMMdariYQ3_YbrIa-7acMAeDBVuclsi6Gc.woff) format('woff');
+  src: local('Fredoka One'), local('FredokaOne-Regular'), url(FredokaOne-Regular.woff) format('woff');
 }
 @font-face {
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 400;
-  src: local('Ubuntu'), url(../fonts/vRvZYZlUaogOuHbBTT1SNevvDin1pK8aKteLpeZ5c0A.woff) format('woff');
+  src: local('Ubuntu'), url(Ubuntu.woff) format('woff');
 }
 @font-face {
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 700;
-  src: local('Ubuntu Bold'), local('Ubuntu-Bold'), url(../fonts/0ihfXUL2emPh0ROJezvraLO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+  src: local('Ubuntu Bold'), local('Ubuntu-Bold'), url(Ubuntu-Bold.woff) format('woff');
 }
 @font-face {
   font-family: 'Press Start 2P';
   font-style: normal;
   font-weight: 400;
-  src: local('Press Start 2P'), local('PressStart2P-Regular'), url(../fonts/8Lg6LX8-ntOHUQnvQ0E7o2jf3WypfQQP02nP_ZmoBRo.woff) format('woff');
+  src: local('Press Start 2P'), local('PressStart2P-Regular'), url(PressStart2P-Regular.woff) format('woff');
 }
 @font-face {
   font-family: 'Lato';
   font-style: italic;
   font-weight: 700;
-  src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(../fonts/HkF_qI1x_noxlxhrhMQYELO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+  src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(Lato-BoldItalic.woff) format('woff');
 }
 @font-face {
   font-family: 'Abril Fatface';
   font-style: normal;
   font-weight: 400;
-  src: local('Abril Fatface'), local('AbrilFatface-Regular'), url(../fonts/X1g_KwGeBV3ajZIXQ9VnDokaQb-UsZVONjobs91YQtw.woff) format('woff');
+  src: local('Abril Fatface'), local('AbrilFatface-Regular'), url(AbrilFatface-Regular.woff) format('woff');
 }
 @font-face {
   font-family: 'Lato';
   font-style: normal;
   font-weight: 400;
-  src: local('Lato Regular'), local('Lato-Regular'), url(../fonts/qIIYRU-oROkIk8vfvxw6QvesZW2xOQ-xsNqO47m55DA.woff) format('woff');
+  src: local('Lato Regular'), local('Lato-Regular'), url(Lato-Regular.woff) format('woff');
 }

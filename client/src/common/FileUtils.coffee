@@ -21,11 +21,16 @@ define(->
 				idx = uri.indexOf(";")
 				uri.substring(11, idx).toUpperCase()
 			else
-				idx = uri.lastIndexOf(".")
-				if idx isnt -1 and idx+1 < uri.length
-					extension = uri.substring(idx+1, uri.length)
-					idx = extension.lastIndexOf("?")
-					if idx isnt -1
-						extension = extension.substring(0, idx)
-					extension.toUpperCase()
+				FileUtils.extension(uri)
+
+		extension: (uri) ->
+			idx = uri.lastIndexOf(".")
+			if idx isnt -1 and idx+1 < uri.length
+				extension = uri.substring(idx+1, uri.length)
+				idx = extension.lastIndexOf("?")
+				if idx isnt -1
+					extension = extension.substring(0, idx)
+				extension.toUpperCase()
+			else
+				""
 )
