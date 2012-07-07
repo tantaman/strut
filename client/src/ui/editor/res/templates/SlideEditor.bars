@@ -71,8 +71,8 @@
                   <div class="btn-group iconBtns">
                         <a class="btn menuBarOption" data-option="textBox"><i class="icon-text-width"></i>Text</a>
                         <a class="btn btn menuBarOption" data-option="picture"><i class="icon-picture"></i>Image</a>
-                        <!--<a class="btn btn menuBarOption" data-option="iframe"><i class="icon-globe"></i>Website</a>
-                        <a class="btn btn menuBarOption" data-option="video"><i class="icon-facetime-video"></i>Video</a>-->
+                        <!--<a class="btn btn menuBarOption" data-option="iframe"><i class="icon-globe"></i>Website</a>-->
+                        <a class="btn btn menuBarOption" data-option="video"><i class="icon-facetime-video"></i>Video</a>
                         <!-- <a class="btn btn menuBarOption" data-option="table"><i class="icon-th"></i>Table</a>
                         <a class="btn btn menuBarOption" data-option="shapes"><i class="icon-star"></i>Shapes</a> -->
                   </div>

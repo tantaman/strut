@@ -10,9 +10,19 @@ define(["./ComponentView"],
 		initialize: () ->
 			ComponentView.prototype.initialize.apply(@, arguments)
 
+		_finishRender: ($video) ->
+			@origSize =
+				width: $video[0].videoWidth
+				height: $video[0].videoHeight
+			@_setUpdatedTransform()
+
 		render: () ->
 			ComponentView.prototype.render.call(@)
-			$video = $("<video src=#{@model.get('src')}></video>")
+
+			$video = $("<video controls></video>")
+			$video.append("<source preload='metadata' src='#{@model.get("src")}' type='#{@model.get("videoType")}' />")
+			$video.bind("loadedmetadata", => @_finishRender($video))
+
 			@$el.find(".content").append($video)
 
 			@$el

@@ -8,6 +8,9 @@ define(["./Component", "common/FileUtils"],
 			Component.prototype.initialize.apply(this, arguments)
 			@set("type", "Video")			
 
+			videoType = FileUtils.type(FileUtils.extension(@get('src')))
+			@set("videoType", videoType)
+
 		constructor: `function Video() {
 			Component.prototype.constructor.apply(this, arguments);
 		}`

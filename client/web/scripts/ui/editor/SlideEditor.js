@@ -98,7 +98,8 @@ define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./Operatin
       });
       videoGrabber = new ItemGrabber({
         tag: "video",
-        title: "Insert Video"
+        title: "Insert Video",
+        ignoreErrors: true
       });
       this.$el.append(pictureGrabber.render());
       this.$el.append(siteGrabber.render());

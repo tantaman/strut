@@ -42,6 +42,18 @@ define(function() {
       } else {
         return "";
       }
+    },
+    type: function(extension) {
+      switch (extension) {
+        case "MP4":
+          return "video/mp4";
+        case "WEBM":
+          return "video/webm";
+        case "OGG":
+          return "video/ogg";
+        default:
+          return "";
+      }
     }
   };
 });

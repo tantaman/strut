@@ -88,7 +88,7 @@ define(["vendor/amd/backbone", "./Templates",
 
 			pictureGrabber = new ItemGrabber(tag: "img", title: "Insert Image")
 			siteGrabber = new ItemGrabber(tag: "iframe", title: "Insert Website")
-			videoGrabber = new ItemGrabber(tag: "video", title: "Insert Video")
+			videoGrabber = new ItemGrabber(tag: "video", title: "Insert Video", ignoreErrors: true)
 			@$el.append(pictureGrabber.render())
 			@$el.append(siteGrabber.render())
 			@$el.append(videoGrabber.render())

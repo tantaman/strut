@@ -33,4 +33,11 @@ define(->
 				extension.toUpperCase()
 			else
 				""
+
+		type: (extension) ->
+			switch extension
+				when "MP4" then "video/mp4"
+				when "WEBM" then "video/webm"
+				when "OGG" then "video/ogg"
+				else ""
 )
