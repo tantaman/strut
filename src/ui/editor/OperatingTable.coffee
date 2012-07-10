@@ -63,7 +63,7 @@ define(["vendor/amd/backbone",
 				@_clipboard.set("item", item)
 				@model.remove(item)
 				item.set("selected", false)
-				false
+				#false
 
 		copy: () ->
 			item = @model.lastSelection
@@ -73,7 +73,7 @@ define(["vendor/amd/backbone",
 				newItem.set("x", item.get("x") + 25)
 				newItem.set("selected", false)
 				@_clipboard.set("item", newItem)
-				false
+				#false
 
 		paste: () ->
 			if @$el.find(".editable").length isnt 0
@@ -83,7 +83,7 @@ define(["vendor/amd/backbone",
 				item = @_clipboard.get("item")
 				if item?
 					@model.add(item.clone())
-				false
+				#false
 
 		_focus: () ->
 			if Keymaster.getScope() isnt "operatingTable"
