@@ -31,7 +31,7 @@ split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) tem
 
 ### Preview ###
 
-A github hosted preview is available at: http://tantaman.github.com/Strut/web/index.html
+A github hosted preview is available at: http://tantaman.github.com/Strut/client/web/index.html
 
 The preview currently points to the development version of Strut.
 
@@ -54,7 +54,7 @@ To compile the templates
 ### Running ###
 
 Strut can run enteirely from your local filesystem.  
-Just point your browser to `file:///path/to/strut/web/index.html` to view Strut.
+Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Contributing ###
 
