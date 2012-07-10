@@ -1,0 +1,10 @@
+{
+    "build_id": "20110214184307", 
+    "vendor": "Tantaman LLC", 
+    "name": "Showoff", 
+    "resizable": true, 
+    "developer_email": "matt.crinklaw@gmail.com", 
+    "module_dirs": ["lib"], 
+    "menubars": false, 
+    "version": "0.1"
+}
