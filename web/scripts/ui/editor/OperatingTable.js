@@ -60,8 +60,7 @@ define(["vendor/amd/backbone", "./Templates", "./components/ComponentViewFactory
       if ((item != null)) {
         this._clipboard.set("item", item);
         this.model.remove(item);
-        item.set("selected", false);
-        return false;
+        return item.set("selected", false);
       }
     },
     copy: function() {
@@ -71,8 +70,7 @@ define(["vendor/amd/backbone", "./Templates", "./components/ComponentViewFactory
         newItem = item.clone();
         newItem.set("x", item.get("x") + 25);
         newItem.set("selected", false);
-        this._clipboard.set("item", newItem);
-        return false;
+        return this._clipboard.set("item", newItem);
       }
     },
     paste: function() {
@@ -82,9 +80,8 @@ define(["vendor/amd/backbone", "./Templates", "./components/ComponentViewFactory
       } else {
         item = this._clipboard.get("item");
         if (item != null) {
-          this.model.add(item.clone());
+          return this.model.add(item.clone());
         }
-        return false;
       }
     },
     _focus: function() {
