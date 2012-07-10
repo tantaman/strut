@@ -41,6 +41,12 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="..&#x2F;classes/common.collections.LinkedList.html">common.collections.LinkedList</a></li>
+            
+                <li><a href="..&#x2F;classes/common.FileUtils.html">common.FileUtils</a></li>
+            
+                <li><a href="..&#x2F;classes/common.Math2.html">common.Math2</a></li>
+            
                 <li><a href="..&#x2F;classes/model.common_application.AutoSave.html">model.common_application.AutoSave</a></li>
             
                 <li><a href="..&#x2F;classes/model.common_application.UndoHistory.html">model.common_application.UndoHistory</a></li>
@@ -50,6 +56,10 @@
             </ul>
 
             <ul id="api-modules" class="apis modules">
+            
+                <li><a href="..&#x2F;modules/common.html">common</a></li>
+            
+                <li><a href="..&#x2F;modules/common.collections.html">common.collections</a></li>
             
                 <li><a href="..&#x2F;modules/model.common_application.html">model.common_application</a></li>
             
@@ -99,7 +109,7 @@
 @author Matt Crinklaw-Vogt
 *&#x2F;
 
-define([&quot;vendor&#x2F;amd&#x2F;backbone&quot;, &quot;model&#x2F;geom&#x2F;SpatialObject&quot;, &quot;.&#x2F;components&#x2F;ComponentFactory&quot;, &quot;common&#x2F;Math2&quot;], function(Backbone, SpatialObject, CompnentFactory, Math2) {
+define([&quot;vendor&#x2F;amd&#x2F;backbone&quot;, &quot;model&#x2F;geom&#x2F;SpatialObject&quot;, &quot;.&#x2F;components&#x2F;ComponentFactory&quot;, &quot;common&#x2F;Math2&quot;], function(Backbone, SpatialObject, ComponentFactory, Math2) {
   var defaults;
   defaults = {
     z: 0,
@@ -124,15 +134,8 @@ define([&quot;vendor&#x2F;amd&#x2F;backbone&quot;, &quot;model&#x2F;geom&#x2F;Sp
             comp = rawComp.clone();
             hydratedComps.push(comp);
           } else {
-            switch (rawComp.type) {
-              case &quot;ImageModel&quot;:
-                comp = CompnentFactory.createImage(rawComp);
-                hydratedComps.push(comp);
-                break;
-              case &quot;TextBox&quot;:
-                comp = CompnentFactory.createTextBox(rawComp);
-                hydratedComps.push(comp);
-            }
+            comp = ComponentFactory.create(rawComp);
+            hydratedComps.push(comp);
           }
           return _this._registerWithComponent(comp);
         });

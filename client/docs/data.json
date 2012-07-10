@@ -1,6 +1,17 @@
 {
     "project": {},
     "files": {
+        "web\\scripts\\common\\collections\\LinkedList.js": {
+            "name": "web\\scripts\\common\\collections\\LinkedList.js",
+            "modules": {
+                "common.collections": 1
+            },
+            "classes": {
+                "common.collections.LinkedList": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "web\\scripts\\common\\EventEmitter.js": {
             "name": "web\\scripts\\common\\EventEmitter.js",
             "modules": {},
@@ -8,10 +19,30 @@
             "fors": {},
             "namespaces": {}
         },
+        "web\\scripts\\common\\FileUtils.js": {
+            "name": "web\\scripts\\common\\FileUtils.js",
+            "modules": {
+                "common": 1
+            },
+            "classes": {
+                "common.FileUtils": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "web\\scripts\\common\\MapResolver.js": {
             "name": "web\\scripts\\common\\MapResolver.js",
             "modules": {},
             "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\common\\Math2.js": {
+            "name": "web\\scripts\\common\\Math2.js",
+            "modules": {},
+            "classes": {
+                "common.Math2": 1
+            },
             "fors": {},
             "namespaces": {}
         },
@@ -97,6 +128,33 @@
         }
     },
     "modules": {
+        "common.collections": {
+            "name": "common.collections",
+            "submodules": {},
+            "classes": {
+                "common.collections.LinkedList": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "web\\scripts\\common\\collections\\LinkedList.js",
+            "line": 9,
+            "author": "Matt Crinklaw-Vogt"
+        },
+        "common": {
+            "name": "common",
+            "submodules": {},
+            "classes": {
+                "common.FileUtils": 1,
+                "common.Math2": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 9,
+            "author": "Matt Crinklaw-Vogt"
+        },
         "model.common_application": {
             "name": "model.common_application",
             "submodules": {},
@@ -126,6 +184,48 @@
         }
     },
     "classes": {
+        "common.collections.LinkedList": {
+            "name": "common.collections.LinkedList",
+            "shortname": "common.collections.LinkedList",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "common.collections",
+            "namespace": "",
+            "file": "web\\scripts\\common\\collections\\LinkedList.js",
+            "line": 9,
+            "description": "Provides a linked list implementation"
+        },
+        "common.FileUtils": {
+            "name": "common.FileUtils",
+            "shortname": "common.FileUtils",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "common",
+            "namespace": "",
+            "file": "web\\scripts\\common\\FileUtils.js",
+            "line": 9,
+            "description": "Utilities for working with files, file paths and URIs."
+        },
+        "common.Math2": {
+            "name": "common.Math2",
+            "shortname": "common.Math2",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "common",
+            "namespace": "",
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 9,
+            "description": "Provides mathematical functions that one would expect to be in\nMath"
+        },
         "model.common_application.AutoSave": {
             "name": "model.common_application.AutoSave",
             "shortname": "model.common_application.AutoSave",
@@ -137,7 +237,7 @@
             "module": "model.common_application",
             "namespace": "",
             "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
-            "line": 13,
+            "line": 14,
             "description": "Auto saves a given model on a specified interval.\nThe model is expected to have a fileName attribute.\nThe model is saved by calling its toJSON method",
             "is_constructor": 1,
             "params": [
@@ -206,44 +306,137 @@
             "line": 1,
             "description": "The eventEmitter pattern from nodeJS ported to the browser.",
             "author": "Matt Crinklaw",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
         },
         {
             "file": "web\\scripts\\common\\EventEmitter.js",
             "line": 63,
             "description": "Publish an event on the given topic",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
         },
         {
             "file": "web\\scripts\\common\\EventEmitter.js",
             "line": 75,
             "description": "Publish an event on the given topic on the next iteration \nthrough the event loop",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
         },
         {
             "file": "web\\scripts\\common\\EventEmitter.js",
             "line": 84,
             "description": "Register a callback for the given topic.\nOptionally, a context may be provided.  The provided\ncontext will be used for the this argument to callback.",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
         },
         {
             "file": "web\\scripts\\common\\EventEmitter.js",
             "line": 117,
             "description": "Register a callback that will be removed after\nits first notification",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
         },
         {
             "file": "web\\scripts\\common\\EventEmitter.js",
             "line": 131,
             "description": "remove a listener.  If the listener was registerd\nwith a context, a context must be provided for its removal.",
-            "class": "model.common_application.AutoSave"
+            "class": "common.FileUtils",
+            "module": "common.collections"
+        },
+        {
+            "file": "web\\scripts\\common\\FileUtils.js",
+            "line": 17,
+            "description": "Returns the base name of the path\ne.g., baseName(\"path/to/some/file.txt\") will return \"file.txt\"\nbaseName(\"path/to/some/file.txt\", \"txt\") will return \"file\"\nbaseName(\"path/to/some/dir/\") will return \"dir\"",
+            "itemtype": "method",
+            "name": "baseName",
+            "params": [
+                {
+                    "name": "path",
+                    "description": "the path",
+                    "type": "String"
+                },
+                {
+                    "name": "extension",
+                    "description": "extension to be stripped",
+                    "type": "String",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "base name",
+                "type": "String"
+            },
+            "class": "common.FileUtils",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\FileUtils.js",
+            "line": 46,
+            "description": "Returns the image type of a URI based on its extension\nor data: attribute if it is a data url.",
+            "itemtype": "method",
+            "name": "imageType",
+            "params": [
+                {
+                    "name": "uri",
+                    "description": "url or data url to image",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "upper case extension or data: type",
+                "type": "String"
+            },
+            "class": "common.FileUtils",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\FileUtils.js",
+            "line": 64,
+            "description": "Returns the extension of the file pointed to be the URI\nIgnores query parameters that are a part of the URI",
+            "itemtype": "method",
+            "name": "extension",
+            "params": [
+                {
+                    "name": "uri",
+                    "description": "uri to file",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "upper case extension",
+                "type": "String"
+            },
+            "class": "common.FileUtils",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\FileUtils.js",
+            "line": 87,
+            "description": "Converts an extension to a mime type",
+            "itemtype": "method",
+            "name": "type",
+            "params": [
+                {
+                    "name": "extension",
+                    "description": "Upper cased extension",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "mime type",
+                "type": "String"
+            },
+            "class": "common.FileUtils",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\MapResolver.js",
             "line": 1,
             "fileoverview": "Utilties to resolve key strings to values\nin a map.",
             "author": "Matt Crinklaw",
-            "class": "model.common_application.AutoSave"
+            "class": "common.Math2",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\MapResolver.js",
@@ -260,21 +453,162 @@
                     "type": "String number array"
                 }
             ],
-            "class": "model.common_application.AutoSave"
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 16,
+            "description": "Rounds a number to the specified decimal place\ne.g., Math2.round(5.232, 2) will return 5.23",
+            "itemtype": "method",
+            "name": "round",
+            "params": [
+                {
+                    "name": "num",
+                    "description": "Number to be rounded",
+                    "type": "Number"
+                },
+                {
+                    "name": "dec",
+                    "description": "Number of decimal places to keep.  Defaults to 0.",
+                    "type": "Integer",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "rounder number",
+                "type": "Number"
+            },
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 32,
+            "description": "Converts radians to degrees",
+            "itemtype": "method",
+            "name": "toDeg",
+            "params": [
+                {
+                    "name": "rads",
+                    "description": "angle in radians",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "angle in degrees",
+                "type": "Number"
+            },
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 43,
+            "description": "Converts degrees to radians",
+            "itemtype": "method",
+            "name": "toRads",
+            "params": [
+                {
+                    "name": "deg",
+                    "description": "Angle in degrees",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "Angle in radians",
+                "type": "Number"
+            },
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 54,
+            "description": "Checks to see if two numbers are withing thresh of one another\ne.g., Math2.compare(1.5, 1.1, 0.5) would return true since 1.5 is 0.4 away from 1.1",
+            "itemtype": "method",
+            "name": "compare",
+            "params": [
+                {
+                    "name": "v1",
+                    "description": "Left hand value",
+                    "type": "Number"
+                },
+                {
+                    "name": "v2",
+                    "description": "Right hand value",
+                    "type": "Number"
+                },
+                {
+                    "name": "thresh",
+                    "description": "Threshold for equality",
+                    "type": "Number"
+                }
+            ],
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 67,
+            "description": "Rotates the given point by rot radians",
+            "itemtype": "method",
+            "name": "rotatePt",
+            "params": [
+                {
+                    "name": "pt",
+                    "description": "Point to rotate",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "x",
+                            "description": "x coordinate",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "y",
+                            "description": "y coordinate",
+                            "type": "Number"
+                        }
+                    ]
+                },
+                {
+                    "name": "rot",
+                    "description": "Angle in radians to rotate pt by",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "rotated point",
+                "type": "Object"
+            },
+            "class": "common.Math2",
+            "module": "common"
+        },
+        {
+            "file": "web\\scripts\\common\\Math2.js",
+            "line": 92,
+            "description": "Same as rotatePt but expects left and top instead of x and y",
+            "itemtype": "method",
+            "name": "rotatePtE",
+            "class": "common.Math2",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\Queue.js",
             "line": 1,
             "description": "A basic queue abstraction.",
             "author": "Matt Crinklaw",
-            "class": "model.common_application.AutoSave"
+            "class": "model.common_application.AutoSave",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\Throttler.js",
             "line": 1,
             "description": "Throttles an event back to occur at most 1 time in delay ms.",
             "author": "Matt Crinklaw",
-            "class": "model.common_application.AutoSave"
+            "class": "model.common_application.AutoSave",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\Throttler.js",
@@ -285,17 +619,19 @@
                     "description": "delay - minimum interval between execution of\nsubmitted tasks.  Throttler.submit takes various \nparameters that control what is done with the submitted tasks.\nSubmitted tasks can be queued or dropped."
                 }
             ],
-            "class": "model.common_application.AutoSave"
+            "class": "model.common_application.AutoSave",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\common\\Throttler.js",
             "line": 22,
             "description": "Runs the cb after delay if nothing is currently executing.\n\nadds the callback to a queue of infinite length\nif options.rejectionPolicy == queue.\n\nadds the callback to a queue of length 1 if\noptions.rejectionPolicy == runLast.  If the queue is filled,\nit replaces the element already in the queue.",
-            "class": "model.common_application.AutoSave"
+            "class": "model.common_application.AutoSave",
+            "module": "common"
         },
         {
             "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
-            "line": 34,
+            "line": 41,
             "description": "Starts the auto save task if not already started",
             "itemtype": "method",
             "name": "start",
@@ -304,7 +640,7 @@
         },
         {
             "file": "web\\scripts\\model\\common_application\\AutoSaver.js",
-            "line": 50,
+            "line": 57,
             "description": "Stops the auto save task if it is currently running",
             "itemtype": "method",
             "name": "stop",
@@ -500,7 +836,7 @@
         },
         {
             "file": "web\\scripts\\model\\presentation\\Slide.js",
-            "line": 75,
+            "line": 68,
             "description": "A pretty naive implementation but it should do the job just fine.\nPlaces a new component in a location that doesn't currently contain a component",
             "itemtype": "method",
             "name": "_placeComponent",

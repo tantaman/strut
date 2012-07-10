@@ -112,9 +112,25 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
     _calcRot: function(point) {
       return Math.atan2(point.y - this._origin.y, point.x - this._origin.x);
     },
-    scaleStart: function(e) {
+    scaleStart: function(e, deltas) {
+      var H, elHeight, elOffset, elWidth, theta;
       this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
       this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
+      this._initialScale = this.model.get("scale");
+      elOffset = this.$el.offset();
+      elWidth = this.$el.width() * this._initialScale.x;
+      elHeight = this.$el.height() * this._initialScale.y;
+      H = Math.sqrt((elWidth / 2) * (elWidth / 2) + (elHeight / 2) * (elHeight / 2));
+      theta = this.model.get("rotate") || 0;
+      theta = theta + Math.atan2(elHeight / 2, elWidth / 2);
+      this._scaleCenter = {
+        x: elOffset.left + Math.abs(Math.cos(theta)),
+        y: elOffset.top + Math.abs(Math.sin(theta))
+      };
+      this._scaleDeltas = {
+        x: Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale,
+        y: Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale
+      };
       if (!(this.origSize != null)) {
         return this.origSize = {
           width: this.$el.width(),
@@ -123,21 +139,15 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       }
     },
     scale: function(e, deltas) {
-      var newHeight, newWidth, offset, rot, scale;
-      offset = this.$el.offset();
-      rot = this.model.get("rotate");
-      if (rot) {
-        deltas = Math2.transformPt(deltas, rot);
-        offset = Math2.transformPtE(offset, rot);
-      }
-      newWidth = Math.abs(deltas.x - offset.left) / this.dragScale;
-      newHeight = Math.abs(deltas.y - offset.top) / this.dragScale;
+      var dx, dy, scale;
+      dx = Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale;
+      dy = Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale;
       scale = {
-        x: newWidth / this.origSize.width,
-        y: newHeight / this.origSize.height,
-        width: newWidth,
-        height: newHeight
+        x: this._initialScale.x * (dx / this._scaleDeltas.x),
+        y: this._initialScale.y * (dy / this._scaleDeltas.y)
       };
+      scale.width = scale.x * this.origSize.width;
+      scale.height = scale.y * this.origSize.height;
       this.model.set("scale", scale);
       return this._setUpdatedTransform();
     },

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>model.common_application.UndoHistory</title>
+    <title>common.FileUtils</title>
     <link rel="stylesheet" href="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;3.5.1&#x2F;build&#x2F;cssgrids&#x2F;cssgrids-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/css/main.css" id="site_styles">
@@ -100,7 +100,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>model.common_application.UndoHistory Class</h1>
+                        <h1>common.FileUtils Class</h1>
 <div class="box meta">
     
 
@@ -108,13 +108,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l9"><code>web\scripts\model\common_application\UndoHistory.js:9</code></a>
+            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_common_FileUtils.js.html#l9"><code>web\scripts\common\FileUtils.js:9</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/model.common_application.html">model.common_application</a>
+            Module: <a href="../modules/common.html">common</a>
         
     
 
@@ -124,101 +124,9 @@
 
 
 <div class="box intro">
-    <p>Maintains a list of commands in an undo history.
-Drops commands when they should no longer be reachable
-via standard undo/redo semantics.</p>
+    <p>Utilities for working with files, file paths and URIs.</p>
 </div>
 
-
-    <div class="constructor">
-        <h2>Constructor</h2>
-        <div id="method_model.common_application.UndoHistory" class="method item">
-    <h3 class="name"><code>model.common_application.UndoHistory</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>size</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l9"><code>web\scripts\model\common_application\UndoHistory.js:9</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">size</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Number of commands/actions to remember</p>
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-    </div>
 
 
 <div id="classdocs" class="tabview">
@@ -244,35 +152,28 @@ via standard undo/redo semantics.</p>
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_push">push</a>
+                                <a href="#method_baseName">baseName</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_redo">redo</a>
+                                <a href="#method_extension">extension</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_redoName">redoName</a>
+                                <a href="#method_imageType">imageType</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_undo">undo</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_undoName">undoName</a>
+                                <a href="#method_type">type</a>
 
                                 
                                 
@@ -294,8 +195,8 @@ via standard undo/redo semantics.</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_push" class="method item">
-    <h3 class="name"><code>push</code></h3>
+                    <div id="method_baseName" class="method item">
+    <h3 class="name"><code>baseName</code></h3>
 
     
         <div class="args">
@@ -303,7 +204,13 @@ via standard undo/redo semantics.</p>
             
                 <li class="arg">
                     
-                        <code>command</code>
+                        <code>path</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code class="optional">[extension]</code>
                     
                 </li>
             
@@ -311,6 +218,10 @@ via standard undo/redo semantics.</p>
         </div>
     
 
+    
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
     
 
     
@@ -336,7 +247,7 @@ via standard undo/redo semantics.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l30"><code>web\scripts\model\common_application\UndoHistory.js:30</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_FileUtils.js.html#l17"><code>web\scripts\common\FileUtils.js:17</code></a>
         
         </p>
 
@@ -347,8 +258,10 @@ via standard undo/redo semantics.</p>
     </div>
 
     <div class="description">
-        <p>Adds a new command to the undo history.
-This re-sets the re-do history</p>
+        <p>Returns the base name of the path
+e.g., baseName("path/to/some/file.txt") will return "file.txt"
+baseName("path/to/some/file.txt", "txt") will return "file"
+baseName("path/to/some/dir/") will return "dir"</p>
     </div>
 
     
@@ -359,14 +272,30 @@ This re-sets the re-do history</p>
             
                 <li class="param">
                     
-                        <code class="param-name">command</code>
-                        <span class="type">Command</span>
+                        <code class="param-name">path</code>
+                        <span class="type">String</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Command to be added to the history</p>
+                        <p>the path</p>
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[extension]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>extension to be stripped</p>
                     </div>
 
                     
@@ -377,73 +306,15 @@ This re-sets the re-do history</p>
     
 
     
-
-    
-</div>
-
-                
-                    <div id="method_redo" class="method item">
-    <h3 class="name"><code>redo</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l143"><code>web\scripts\model\common_application\UndoHistory.js:143</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Redoes a command</p>
-    </div>
-
-    
-
-    
         <div class="returns">
             <h4>Returns:</h4>
 
             <div class="returns-description">
                 
                     
-                        <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>:
+                        <span class="type">String</span>:
                     
-                    this
+                    base name
                 
             </div>
         </div>
@@ -453,11 +324,21 @@ This re-sets the re-do history</p>
 </div>
 
                 
-                    <div id="method_redoName" class="method item">
-    <h3 class="name"><code>redoName</code></h3>
+                    <div id="method_extension" class="method item">
+    <h3 class="name"><code>extension</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>uri</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
     
@@ -489,7 +370,7 @@ This re-sets the re-do history</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l95"><code>web\scripts\model\common_application\UndoHistory.js:95</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_FileUtils.js.html#l64"><code>web\scripts\common\FileUtils.js:64</code></a>
         
         </p>
 
@@ -500,10 +381,33 @@ This re-sets the re-do history</p>
     </div>
 
     <div class="description">
-        <p>This is useful for telling the user what command would be
-redone if they pressed redo</p>
+        <p>Returns the extension of the file pointed to be the URI
+Ignores query parameters that are a part of the URI</p>
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">uri</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>uri to file</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -515,7 +419,7 @@ redone if they pressed redo</p>
                     
                         <span class="type">String</span>:
                     
-                    name of the next command to be redone
+                    upper case extension
                 
             </div>
         </div>
@@ -525,82 +429,21 @@ redone if they pressed redo</p>
 </div>
 
                 
-                    <div id="method_undo" class="method item">
-    <h3 class="name"><code>undo</code></h3>
+                    <div id="method_imageType" class="method item">
+    <h3 class="name"><code>imageType</code></h3>
 
     
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
             
-                
-                <p>
-                
-                Defined in
-                
+                <li class="arg">
+                    
+                        <code>uri</code>
+                    
+                </li>
             
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l122"><code>web\scripts\model\common_application\UndoHistory.js:122</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Undoes a command</p>
-    </div>
-
-    
-
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>:
-                    
-                    this
-                
-            </div>
+            </ul><span class="paren">)</span>
         </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_undoName" class="method item">
-    <h3 class="name"><code>undoName</code></h3>
-
-    
-        <span class="paren">()</span>
     
 
     
@@ -632,7 +475,7 @@ redone if they pressed redo</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l72"><code>web\scripts\model\common_application\UndoHistory.js:72</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_FileUtils.js.html#l46"><code>web\scripts\common\FileUtils.js:46</code></a>
         
         </p>
 
@@ -643,10 +486,33 @@ redone if they pressed redo</p>
     </div>
 
     <div class="description">
-        <p>This is useful for telling the user what command would be undone
-if they pressed undo.</p>
+        <p>Returns the image type of a URI based on its extension
+or data: attribute if it is a data url.</p>
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">uri</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>url or data url to image</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -658,7 +524,111 @@ if they pressed undo.</p>
                     
                         <span class="type">String</span>:
                     
-                    name of the next command to be undone
+                    upper case extension or data: type
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_type" class="method item">
+    <h3 class="name"><code>type</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>extension</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="..&#x2F;files&#x2F;web_scripts_common_FileUtils.js.html#l87"><code>web\scripts\common\FileUtils.js:87</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Converts an extension to a mime type</p>
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">extension</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Upper cased extension</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">String</span>:
+                    
+                    mime type
                 
             </div>
         </div>

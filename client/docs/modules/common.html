@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>web\scripts\common\Queue.js</title>
+    <title>common</title>
     <link rel="stylesheet" href="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;3.5.1&#x2F;build&#x2F;cssgrids&#x2F;cssgrids-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/css/main.css" id="site_styles">
@@ -100,40 +100,55 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: web\scripts\common\Queue.js</h1>
+                        <h1>common Module</h1>
+<div class="box clearfix meta">
+    
 
-<div class="file">
-    <pre class="code prettyprint linenums">
-&#x2F;**
-A basic queue abstraction.
+    
 
-@author Matt Crinklaw
-*&#x2F;
-define(function() {
-	function Queue() {
-		this._queue = [];
-	}
-	
-	Queue.prototype = {
-		take: function() {
-			if (this._queue.length != 0)
-				return this._queue.shift();
-			else
-				return null;
-		},
-		
-		enqueue: function(item) {
-			this._queue.push(item);
-		}
-	};
-	
-	function create() {
-		return new Queue();
-	}
-	
-	return { create: create };
-});
-    </pre>
+    
+        <div class="foundat">
+            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l9"><code>web\scripts\common\Math2.js:9</code></a>
+        </div>
+    
+
+    
+</div>
+
+
+
+<div class="box intro">
+    
+</div>
+
+
+
+<div class="yui3-g">
+    <div class="yui3-u-1-2">
+        
+            <p>This module provides the following classes:</p>
+
+            <ul class="module-classes">
+            
+                <li class="module-class">
+                    <a href="..&#x2F;classes/common.FileUtils.html">
+                        common.FileUtils
+                    </a>
+                </li>
+            
+                <li class="module-class">
+                    <a href="..&#x2F;classes/common.Math2.html">
+                        common.Math2
+                    </a>
+                </li>
+            
+            </ul>
+        
+    </div>
+
+    <div class="yui3-u-1-2">
+        
+    </div>
 </div>
 
                     </div>

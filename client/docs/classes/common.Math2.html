@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>model.editor.button_bar.ButtonBarModel</title>
+    <title>common.Math2</title>
     <link rel="stylesheet" href="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;3.5.1&#x2F;build&#x2F;cssgrids&#x2F;cssgrids-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/css/main.css" id="site_styles">
@@ -100,7 +100,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>model.editor.button_bar.ButtonBarModel Class</h1>
+                        <h1>common.Math2 Class</h1>
 <div class="box meta">
     
 
@@ -108,13 +108,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l39"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:39</code></a>
+            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l9"><code>web\scripts\common\Math2.js:9</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/model.editor.html">model.editor</a>
+            Module: <a href="../modules/common.html">common</a>
         
     
 
@@ -124,69 +124,10 @@
 
 
 <div class="box intro">
-    <p>Maintains the state of the button bar and notifies interested
-parties of changes.  The ButtonBarModel also listens to the
-currently selected component in the slide editor and passes
-along the relevant changes that occur to that component.</p>
+    <p>Provides mathematical functions that one would expect to be in
+Math</p>
 </div>
 
-
-    <div class="constructor">
-        <h2>Constructor</h2>
-        <div id="method_model.editor.button_bar.ButtonBarModel" class="method item">
-    <h3 class="name"><code>model.editor.button_bar.ButtonBarModel</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l39"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:39</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-    </div>
 
 
 <div id="classdocs" class="tabview">
@@ -212,77 +153,42 @@ along the relevant changes that occur to that component.</p>
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_activeComponentChanged">activeComponentChanged</a>
+                                <a href="#method_compare">compare</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_colorSelected">colorSelected</a>
+                                <a href="#method_rotatePt">rotatePt</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fontColor">fontColor</a>
+                                <a href="#method_rotatePtE">rotatePtE</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fontConfig">fontConfig</a>
+                                <a href="#method_round">round</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fontDecoration">fontDecoration</a>
+                                <a href="#method_toDeg">toDeg</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fontFamily">fontFamily</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_fontSize">fontSize</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_fontStyle">fontStyle</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_fontWeight">fontWeight</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_imgConfig">imgConfig</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_textAlign">textAlign</a>
+                                <a href="#method_toRads">toRads</a>
 
                                 
                                 
@@ -304,8 +210,8 @@ along the relevant changes that occur to that component.</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_activeComponentChanged" class="method item">
-    <h3 class="name"><code>activeComponentChanged</code></h3>
+                    <div id="method_compare" class="method item">
+    <h3 class="name"><code>compare</code></h3>
 
     
         <div class="args">
@@ -313,7 +219,19 @@ along the relevant changes that occur to that component.</p>
             
                 <li class="arg">
                     
-                        <code>component</code>
+                        <code>v1</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>v2</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>thresh</code>
                     
                 </li>
             
@@ -346,7 +264,7 @@ along the relevant changes that occur to that component.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l129"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:129</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l54"><code>web\scripts\common\Math2.js:54</code></a>
         
         </p>
 
@@ -357,7 +275,8 @@ along the relevant changes that occur to that component.</p>
     </div>
 
     <div class="description">
-        <p>Sets what the ButtonBar knows as the active component</p>
+        <p>Checks to see if two numbers are withing thresh of one another
+e.g., Math2.compare(1.5, 1.1, 0.5) would return true since 1.5 is 0.4 away from 1.1</p>
     </div>
 
     
@@ -368,14 +287,44 @@ along the relevant changes that occur to that component.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">component</code>
-                        <span class="type">Object</span>
+                        <code class="param-name">v1</code>
+                        <span class="type">Number</span>
                     
 
                     
 
                     <div class="param-description">
-                         
+                        <p>Left hand value</p>
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">v2</code>
+                        <span class="type">Number</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Right hand value</p>
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">thresh</code>
+                        <span class="type">Number</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Threshold for equality</p>
                     </div>
 
                     
@@ -391,8 +340,8 @@ along the relevant changes that occur to that component.</p>
 </div>
 
                 
-                    <div id="method_colorSelected" class="method item">
-    <h3 class="name"><code>colorSelected</code></h3>
+                    <div id="method_rotatePt" class="method item">
+    <h3 class="name"><code>rotatePt</code></h3>
 
     
         <div class="args">
@@ -400,143 +349,18 @@ along the relevant changes that occur to that component.</p>
             
                 <li class="arg">
                     
-                        <code>hex</code>
+                        <code>pt</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>rot</code>
                     
                 </li>
             
             </ul><span class="paren">)</span>
         </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l116"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:116</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Sets the font color (and eventually shape color?)</p>
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">hex</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>CSS hex string</p>
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fontColor" class="method item">
-    <h3 class="name"><code>fontColor</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l159"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:159</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fontConfig" class="method item">
-    <h3 class="name"><code>fontConfig</code></h3>
-
-    
-        <span class="paren">()</span>
     
 
     
@@ -568,7 +392,7 @@ along the relevant changes that occur to that component.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l56"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:56</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l67"><code>web\scripts\common\Math2.js:67</code></a>
         
         </p>
 
@@ -579,10 +403,77 @@ along the relevant changes that occur to that component.</p>
     </div>
 
     <div class="description">
-        <p>Creates an object containing the currently
-selected font settings</p>
+        <p>Rotates the given point by rot radians</p>
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">pt</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Point to rotate</p>
+                    </div>
+
+                    
+                        <ul class="params-list">
+                            
+                            <li class="param">
+                                
+                                    <code class="param-name">x</code>
+                                    <span class="type">Number</span>
+                                
+
+                                <div class="param-description">
+                                    <p>x coordinate</p>
+                                </div>
+
+                                
+                            </li>
+                            
+                            <li class="param">
+                                
+                                    <code class="param-name">y</code>
+                                    <span class="type">Number</span>
+                                
+
+                                <div class="param-description">
+                                    <p>y coordinate</p>
+                                </div>
+
+                                
+                            </li>
+                            
+                        </ul>
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">rot</code>
+                        <span class="type">Number</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Angle in radians to rotate pt by</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -594,7 +485,7 @@ selected font settings</p>
                     
                         <span class="type">Object</span>:
                     
-                    currently selected font settings
+                    rotated point
                 
             </div>
         </div>
@@ -604,8 +495,8 @@ selected font settings</p>
 </div>
 
                 
-                    <div id="method_fontDecoration" class="method item">
-    <h3 class="name"><code>fontDecoration</code></h3>
+                    <div id="method_rotatePtE" class="method item">
+    <h3 class="name"><code>rotatePtE</code></h3>
 
     
         <span class="paren">()</span>
@@ -636,7 +527,7 @@ selected font settings</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l174"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:174</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l92"><code>web\scripts\common\Math2.js:92</code></a>
         
         </p>
 
@@ -647,7 +538,7 @@ selected font settings</p>
     </div>
 
     <div class="description">
-        
+        <p>Same as rotatePt but expects left and top instead of x and y</p>
     </div>
 
     
@@ -658,280 +549,8 @@ selected font settings</p>
 </div>
 
                 
-                    <div id="method_fontFamily" class="method item">
-    <h3 class="name"><code>fontFamily</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l154"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:154</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fontSize" class="method item">
-    <h3 class="name"><code>fontSize</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l146"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:146</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>The following are auto-generated methods for
-setting the various font peroprties AND updating
-the active component with that setting.</p>
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fontStyle" class="method item">
-    <h3 class="name"><code>fontStyle</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l164"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:164</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_fontWeight" class="method item">
-    <h3 class="name"><code>fontWeight</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l169"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:169</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_imgConfig" class="method item">
-    <h3 class="name"><code>imgConfig</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l74"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:74</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Why does this method even exist?</p>
-    </div>
-
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_textAlign" class="method item">
-    <h3 class="name"><code>textAlign</code></h3>
+                    <div id="method_round" class="method item">
+    <h3 class="name"><code>round</code></h3>
 
     
         <div class="args">
@@ -939,7 +558,13 @@ the active component with that setting.</p>
             
                 <li class="arg">
                     
-                        <code>value</code>
+                        <code>num</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code class="optional">[dec]</code>
                     
                 </li>
             
@@ -948,6 +573,10 @@ the active component with that setting.</p>
     
 
     
+        <span class="returns-inline">
+            <span class="type">Number</span>
+        </span>
+    
 
     
 
@@ -972,7 +601,7 @@ the active component with that setting.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_editor_button_bar_ButtonBarModel.js.html#l85"><code>web\scripts\model\editor\button_bar\ButtonBarModel.js:85</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l16"><code>web\scripts\common\Math2.js:16</code></a>
         
         </p>
 
@@ -983,7 +612,8 @@ the active component with that setting.</p>
     </div>
 
     <div class="description">
-        <p>Sets the text alignment</p>
+        <p>Rounds a number to the specified decimal place
+e.g., Math2.round(5.232, 2) will return 5.23</p>
     </div>
 
     
@@ -994,14 +624,30 @@ the active component with that setting.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">value</code>
-                        <span class="type">String</span>
+                        <code class="param-name">num</code>
+                        <span class="type">Number</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>css text-align property value</p>
+                        <p>Number to be rounded</p>
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name optional">[dec]</code>
+                        <span class="type">Integer</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Number of decimal places to keep.  Defaults to 0.</p>
                     </div>
 
                     
@@ -1011,6 +657,227 @@ the active component with that setting.</p>
         </div>
     
 
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">Number</span>:
+                    
+                    rounder number
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_toDeg" class="method item">
+    <h3 class="name"><code>toDeg</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>rads</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Number</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l32"><code>web\scripts\common\Math2.js:32</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Converts radians to degrees</p>
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">rads</code>
+                        <span class="type">Number</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>angle in radians</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">Number</span>:
+                    
+                    angle in degrees
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_toRads" class="method item">
+    <h3 class="name"><code>toRads</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>deg</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Number</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="..&#x2F;files&#x2F;web_scripts_common_Math2.js.html#l43"><code>web\scripts\common\Math2.js:43</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Converts degrees to radians</p>
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">deg</code>
+                        <span class="type">Number</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Angle in degrees</p>
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">Number</span>:
+                    
+                    Angle in radians
+                
+            </div>
+        </div>
     
 
     

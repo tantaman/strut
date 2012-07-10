@@ -41,6 +41,12 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="..&#x2F;classes/common.collections.LinkedList.html">common.collections.LinkedList</a></li>
+            
+                <li><a href="..&#x2F;classes/common.FileUtils.html">common.FileUtils</a></li>
+            
+                <li><a href="..&#x2F;classes/common.Math2.html">common.Math2</a></li>
+            
                 <li><a href="..&#x2F;classes/model.common_application.AutoSave.html">model.common_application.AutoSave</a></li>
             
                 <li><a href="..&#x2F;classes/model.common_application.UndoHistory.html">model.common_application.UndoHistory</a></li>
@@ -50,6 +56,10 @@
             </ul>
 
             <ul id="api-modules" class="apis modules">
+            
+                <li><a href="..&#x2F;modules/common.html">common</a></li>
+            
+                <li><a href="..&#x2F;modules/common.collections.html">common.collections</a></li>
             
                 <li><a href="..&#x2F;modules/model.common_application.html">model.common_application</a></li>
             
@@ -104,7 +114,8 @@
 define([&quot;storage&#x2F;FileStorage&quot;], function(FileStorage) {
   var AutoSaver, defaults;
   defaults = {
-    interval: 10
+    interval: 10,
+    onUnload: true
   };
   &#x2F;**
   	* Auto saves a given model on a specified interval.
@@ -121,10 +132,16 @@ define([&quot;storage&#x2F;FileStorage&quot;], function(FileStorage) {
   return AutoSaver = (function() {
 
     function AutoSaver(model, options) {
+      var _this = this;
       this.model = model;
       this.options = options;
       this.options || (this.options = {});
       _.defaults(this.options, defaults);
+      if (this.options.onUnload) {
+        $(window).unload(function() {
+          return _this._save();
+        });
+      }
     }
 
     &#x2F;**
@@ -161,7 +178,12 @@ define([&quot;storage&#x2F;FileStorage&quot;], function(FileStorage) {
       var fileName;
       fileName = this.model.get(&quot;fileName&quot;);
       if (!(fileName != null)) {
-        return;
+        fileName = &quot;presentation-1&quot;;
+        this.model.set(&quot;fileName&quot;, fileName);
+      }
+      if (fileName !== this._lastName) {
+        this._lastName = fileName;
+        localStorage.setItem(&quot;StrutLastPres&quot;, fileName);
       }
       return FileStorage.save(fileName, this.model.toJSON(false, true));
     };

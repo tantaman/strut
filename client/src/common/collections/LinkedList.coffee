@@ -1,7 +1,12 @@
-###
-@author Matt Crinklaw-Vogt
-###
+###*
+* @module common.collections
+* @author Matt Crinklaw-Vogt
+*###
 define(() ->
+	###*
+	* Provides a linked list implementation
+	* @class common.collections.LinkedList
+	*###
 	class LinkedList
 		constructor: () ->
 			@head = @tail = null

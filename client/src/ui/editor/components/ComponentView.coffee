@@ -117,9 +117,28 @@ define(["vendor/amd/backbone"
 		_calcRot: (point) ->
 			Math.atan2(point.y - @_origin.y, point.x - @_origin.x)
 
-		scaleStart: (e) ->
+		scaleStart: (e, deltas) ->
 			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
 			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
+			
+			@_initialScale = @model.get("scale")
+
+			elOffset = @$el.offset()
+			elWidth = @$el.width() * @_initialScale.x
+			elHeight = @$el.height() * @_initialScale.y
+			H = Math.sqrt((elWidth/2)*(elWidth/2) + (elHeight/2)*(elHeight/2))
+			theta = @model.get("rotate") || 0
+			theta = theta + Math.atan2(elHeight/2, elWidth/2)
+
+
+			@_scaleCenter =
+				x: elOffset.left + Math.abs(Math.cos(theta))
+				y: elOffset.top + Math.abs(Math.sin(theta))
+
+			@_scaleDeltas = 
+				x: Math.abs(deltas.x - @_scaleCenter.x) / @dragScale
+				y: Math.abs(deltas.y - @_scaleCenter.y) / @dragScale
+
 			# TEMPORARY! until the video element is updated
 			if not @origSize?
 				@origSize =
@@ -127,22 +146,14 @@ define(["vendor/amd/backbone"
 					height: @$el.height()
 
 		scale: (e, deltas) ->
-			offset = @$el.offset()
-
-			rot = @model.get("rotate")
-			if rot
-				deltas = Math2.transformPt(deltas, rot)
-				offset = Math2.transformPtE(offset, rot)
-			#console.log deltas.x + " " + deltas.y
-			
-			newWidth = Math.abs(deltas.x - offset.left) / @dragScale
-			newHeight = Math.abs(deltas.y - offset.top) / @dragScale
-
+			dx = Math.abs(deltas.x - @_scaleCenter.x) / @dragScale
+			dy = Math.abs(deltas.y - @_scaleCenter.y) / @dragScale
 			scale =
-				x: newWidth / @origSize.width
-				y: newHeight / @origSize.height
-				width: newWidth
-				height: newHeight
+				x: @_initialScale.x * (dx / @_scaleDeltas.x)
+				y: @_initialScale.y * (dy / @_scaleDeltas.y)
+
+			scale.width = scale.x * @origSize.width
+			scale.height = scale.y * @origSize.height
 
 			@model.set("scale", scale)
 			@_setUpdatedTransform()
