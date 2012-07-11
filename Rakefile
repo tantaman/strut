@@ -9,8 +9,10 @@ require 'rake'
 myDir = Dir.pwd
 
 cmdPprefix = ""
-if ENV['OS']['Windows'] != nil
-	cmdPrefix = "powershell "
+if ENV['OS'] != nil
+	if ENV['OS']['Windows'] != nil
+		cmdPrefix = "powershell "
+	end
 end
 
 task :compileTpls, :pretty do |t, args|
