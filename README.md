@@ -35,6 +35,9 @@ A github hosted preview is available at: http://tantaman.github.com/Strut/web/in
 
 The preview currently points to the development version of Strut.
 
+### Mailing List ###
+strut-presentation-editor@googlegroups.com
+
 ### Building ###
 
 Most of Strut is written in Coffeescript and uses precompiled templates for HTML rendering.
