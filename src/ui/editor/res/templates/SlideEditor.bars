@@ -1,7 +1,7 @@
 <div class="navbar">
   <div class="navbar-inner buttonBar">
     <div class="container">
-    	<ul class="nav">
+        <ul class="nav">
             <li style="width: 120px">
             	<div class="btn-group iconBtns newSlide">
             		<a class="btn btn btn-small menuBarOption" data-option="createSlide" href="#"><i class="icon-plus"></i>Slide</a>
@@ -54,7 +54,7 @@
                   <div class="btn-group menuBarOption normalBtns">
                         <a class="btn btn-small btn-inverse disabled fontButton" data-option="fontWeight" data-value="bold"><strong>B</strong></a>
                         <a class="btn btn-small btn-inverse disabled fontButton" data-option="fontStyle" data-value="italic"><em>I</em></a>
-                        <a class="btn btn-small btn-inverse underline disabled fontButton" data-option="fontDecoration" data-value="underline">U</a>
+                        <!-- disabled because it encourages bad style <a class="btn btn-small btn-inverse underline disabled fontButton" data-option="fontDecoration" data-value="underline">U</a> -->
                   </div>
             </li>
             <li>
@@ -62,7 +62,7 @@
                         <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="left"><i class="icon-align-left icon-white"></i></a>
                         <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="center"><i class="icon-align-center icon-white"></i></a>
                         <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="right"><i class="icon-align-right icon-white"></i></a>
-                        <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="justify"><i class="icon-align-justify icon-white"></i></a>
+                        <!-- disabled because there should be not that much text on the slide anyway <a class="btn btn-small btn-inverse disabled fontButton" data-option="textAlign" data-value="justify"><i class="icon-align-justify icon-white"></i></a> -->
                   </div>
             </li>
             <li class="divider-vertical">
