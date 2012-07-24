@@ -51,3 +51,21 @@
 	right: -60px;
 	top: 40%;
 }
+
+.component.transitionSlideSnapshot .rotates,
+.component.transitionSlideSnapshot .label.layer {
+	font-size: 20px;
+}
+.component.transitionSlideSnapshot .label.layer+input {
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .label.scales {
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	position: absolute;
+}
+.component.transitionSlideSnapshot .label.scales+input {
+	margin-left: 30px;
+}
