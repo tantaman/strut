@@ -7,11 +7,12 @@
 }
 
 .component .label.rotate {
-	font-size: 50px;
+	font-size: 25px;
 }
 
 .component .positioningCtrls .label {
-	font-size: 50px;
+	font-size: 30px;
+	margin-right: -10px;
 }
 
 .component input {
@@ -69,6 +70,7 @@
 	right: -35px;
 	bottom: -25px;
 	cursor: se-resize;
+	font-size: 40px;
 	transform: rotate(45deg);
 	-moz-transform: rotate(45deg);
 	-webkit-transform: rotate(45deg);
