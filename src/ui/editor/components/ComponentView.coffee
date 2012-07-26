@@ -5,10 +5,11 @@ define(["vendor/amd/backbone"
 		"ui/widgets/DeltaDragControl"
 		"../Templates"
 		"common/Math2"
-		"css!../res/css/ComponentView.css"],
+		"css!../res/css/ComponentView.css"
+		"vendor/amd/keymaster"],
 # TODO:
 # Start pushing more of this functionality down into a model
-(Backbone, DeltaDragControl, Templates, Math2, empty) ->
+(Backbone, DeltaDragControl, Templates, Math2, empty, key) ->
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY"]
 		className: "component"
@@ -100,7 +101,11 @@ define(["vendor/amd/backbone"
 		rotate: (e, deltas) ->
 			rot = @_calcRot(deltas) 
 				#((Math.pow(deltas.x, 2) + Math.pow(deltas.y, 2)) / Math.pow(1000, 2)) * (Math.PI*2)
-			@model.set("rotate", @_initialRotate + rot - @_rotOffset)
+			newRot = @_initialRotate + rot - @_rotOffset
+			# Snap to 1/16 angles (22.5 degrees) on Shift press
+			if key.shift
+				newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI
+			@model.set("rotate", newRot)
 			@_setUpdatedTransform()
 
 		rotateStart: (e, deltas) ->
