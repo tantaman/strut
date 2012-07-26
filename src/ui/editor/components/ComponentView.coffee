@@ -203,10 +203,12 @@ define(["vendor/amd/backbone"
 			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
 			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
 			@_dragging = true
-			@_prevPos = {
+			@_prevPos =
+				x: @model.get("x")
+				y: @model.get("y")
+			@_prevMousePos =
 				x: e.pageX
 				y: e.pageY
-			}
 
 		render: () ->
 			@$el.html(@__getTemplate()(@model.attributes))
@@ -274,17 +276,22 @@ define(["vendor/amd/backbone"
 
 		mousemove: (e) ->
 			if @_dragging and @allowDragging
-				x = @model.get("x")
-				y = @model.get("y")
-				dx = e.pageX - @_prevPos.x
-				dy = e.pageY - @_prevPos.y
-				newX = x + dx / @dragScale
-				newY = y + dy / @dragScale
+
+				snapToGrid = key.shift
+
+				dx = e.pageX - @_prevMousePos.x
+				dy = e.pageY - @_prevMousePos.y
+
+				newX = @_prevPos.x + dx / @dragScale
+				newY = @_prevPos.y + dy / @dragScale
+
+				if snapToGrid
+					gridSize = 20
+					newX = Math.floor(newX / gridSize) * gridSize
+					newY = Math.floor(newY / gridSize) * gridSize
 
 				@model.set("x", newX)
 				@model.set("y", newY)
-				@_prevPos.x = e.pageX
-				@_prevPos.y = e.pageY
 
 		stopdrag: () ->
 			@_dragging = false
