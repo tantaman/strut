@@ -5,10 +5,11 @@ define(["vendor/amd/backbone"
 		"ui/widgets/DeltaDragControl"
 		"../Templates"
 		"common/Math2"
-		"css!../res/css/ComponentView.css"],
+		"css!../res/css/ComponentView.css"
+		"vendor/amd/keymaster"],
 # TODO:
 # Start pushing more of this functionality down into a model
-(Backbone, DeltaDragControl, Templates, Math2, empty) ->
+(Backbone, DeltaDragControl, Templates, Math2, empty, key) ->
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY"]
 		className: "component"
@@ -100,7 +101,11 @@ define(["vendor/amd/backbone"
 		rotate: (e, deltas) ->
 			rot = @_calcRot(deltas) 
 				#((Math.pow(deltas.x, 2) + Math.pow(deltas.y, 2)) / Math.pow(1000, 2)) * (Math.PI*2)
-			@model.set("rotate", @_initialRotate + rot - @_rotOffset)
+			newRot = @_initialRotate + rot - @_rotOffset
+			# Snap to 1/16 angles (22.5 degrees) on Shift press
+			if key.shift
+				newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI
+			@model.set("rotate", newRot)
 			@_setUpdatedTransform()
 
 		rotateStart: (e, deltas) ->
@@ -146,11 +151,13 @@ define(["vendor/amd/backbone"
 					height: @$el.height()
 
 		scale: (e, deltas) ->
+			fixRatioDisabled = key.shift
+
 			dx = Math.abs(deltas.x - @_scaleCenter.x) / @dragScale
 			dy = Math.abs(deltas.y - @_scaleCenter.y) / @dragScale
 			scale =
 				x: @_initialScale.x * (dx / @_scaleDeltas.x)
-				y: @_initialScale.y * (dy / @_scaleDeltas.y)
+				y: @_initialScale.y * if fixRatioDisabled then (dy / @_scaleDeltas.y) else (dx / @_scaleDeltas.x)
 
 			scale.width = scale.x * @origSize.width
 			scale.height = scale.y * @origSize.height
@@ -191,15 +198,19 @@ define(["vendor/amd/backbone"
 			transformStr
 
 		mousedown: (e) ->
-			@model.set("selected", true)
-			@$el.css("zIndex", zTracker.next())
-			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
-			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
-			@_dragging = true
-			@_prevPos = {
-				x: e.pageX
-				y: e.pageY
-			}
+			# Only react to left mouse button (button 1)
+			if e.which == 1
+				@model.set("selected", true)
+				@$el.css("zIndex", zTracker.next())
+				@dragScale = @$el.parent().css(window.browserPrefix + "transform")
+				@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
+				@_dragging = true
+				@_prevPos =
+					x: @model.get("x")
+					y: @model.get("y")
+				@_prevMousePos =
+					x: e.pageX
+					y: e.pageY
 
 		render: () ->
 			@$el.html(@__getTemplate()(@model.attributes))
@@ -267,17 +278,22 @@ define(["vendor/amd/backbone"
 
 		mousemove: (e) ->
 			if @_dragging and @allowDragging
-				x = @model.get("x")
-				y = @model.get("y")
-				dx = e.pageX - @_prevPos.x
-				dy = e.pageY - @_prevPos.y
-				newX = x + dx / @dragScale
-				newY = y + dy / @dragScale
+
+				snapToGrid = key.shift
+
+				dx = e.pageX - @_prevMousePos.x
+				dy = e.pageY - @_prevMousePos.y
+
+				newX = @_prevPos.x + dx / @dragScale
+				newY = @_prevPos.y + dy / @dragScale
+
+				if snapToGrid
+					gridSize = 20
+					newX = Math.floor(newX / gridSize) * gridSize
+					newY = Math.floor(newY / gridSize) * gridSize
 
 				@model.set("x", newX)
 				@model.set("y", newY)
-				@_prevPos.x = e.pageX
-				@_prevPos.y = e.pageY
 
 		stopdrag: () ->
 			@_dragging = false
