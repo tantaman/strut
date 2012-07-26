@@ -198,17 +198,19 @@ define(["vendor/amd/backbone"
 			transformStr
 
 		mousedown: (e) ->
-			@model.set("selected", true)
-			@$el.css("zIndex", zTracker.next())
-			@dragScale = @$el.parent().css(window.browserPrefix + "transform")
-			@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
-			@_dragging = true
-			@_prevPos =
-				x: @model.get("x")
-				y: @model.get("y")
-			@_prevMousePos =
-				x: e.pageX
-				y: e.pageY
+			# Only react to left mouse button (button 1)
+			if e.which == 1
+				@model.set("selected", true)
+				@$el.css("zIndex", zTracker.next())
+				@dragScale = @$el.parent().css(window.browserPrefix + "transform")
+				@dragScale = parseFloat(@dragScale.substring(7, @dragScale.indexOf(","))) or 1
+				@_dragging = true
+				@_prevPos =
+					x: @model.get("x")
+					y: @model.get("y")
+				@_prevMousePos =
+					x: e.pageX
+					y: e.pageY
 
 		render: () ->
 			@$el.html(@__getTemplate()(@model.attributes))
