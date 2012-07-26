@@ -151,11 +151,13 @@ define(["vendor/amd/backbone"
 					height: @$el.height()
 
 		scale: (e, deltas) ->
+			fixRatio = key.shift
+
 			dx = Math.abs(deltas.x - @_scaleCenter.x) / @dragScale
 			dy = Math.abs(deltas.y - @_scaleCenter.y) / @dragScale
 			scale =
 				x: @_initialScale.x * (dx / @_scaleDeltas.x)
-				y: @_initialScale.y * (dy / @_scaleDeltas.y)
+				y: @_initialScale.y * if fixRatio then (dx / @_scaleDeltas.x) else (dy / @_scaleDeltas.y)
 
 			scale.width = scale.x * @origSize.width
 			scale.height = scale.y * @origSize.height
