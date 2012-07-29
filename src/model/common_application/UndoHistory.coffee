@@ -35,7 +35,6 @@ define(["common/EventEmitter",
 						value: action
 					if not @cursor
 						@actions.head = node
-						@actions.tail = node
 						@actions.length = 1
 					else
 						node.prev = @cursor
@@ -43,16 +42,23 @@ define(["common/EventEmitter",
 						@cursor.next = node
 						@actions.length += 1
 						@actions.length = (@actions.length - @undoCount)
+
+					@actions.tail = node
 					@undoCount = 0
 					@cursor = null
 				else
 					@actions.push(action)
+					@cursor = null
 			else
 				@actions.shift()
 				@actions.push(action)
 
 			@emit("updated")
 			@
+
+		pushdo: (action) ->
+			action.do()
+			@push(action)
 
 		###*
 		* This is useful for telling the user what command would be undone

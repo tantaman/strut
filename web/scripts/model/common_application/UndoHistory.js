@@ -47,7 +47,6 @@ define(["common/EventEmitter", "common/collections/LinkedList"], function(EventE
           };
           if (!this.cursor) {
             this.actions.head = node;
-            this.actions.tail = node;
             this.actions.length = 1;
           } else {
             node.prev = this.cursor;
@@ -56,10 +55,12 @@ define(["common/EventEmitter", "common/collections/LinkedList"], function(EventE
             this.actions.length += 1;
             this.actions.length = this.actions.length - this.undoCount;
           }
+          this.actions.tail = node;
           this.undoCount = 0;
           this.cursor = null;
         } else {
           this.actions.push(action);
+          this.cursor = null;
         }
       } else {
         this.actions.shift();
@@ -67,6 +68,11 @@ define(["common/EventEmitter", "common/collections/LinkedList"], function(EventE
       }
       this.emit("updated");
       return this;
+    };
+
+    UndoHistory.prototype.pushdo = function(action) {
+      action["do"]();
+      return this.push(action);
     };
 
     /**
