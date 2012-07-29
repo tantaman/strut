@@ -5,6 +5,8 @@ require.config({
 	}
 });
 
-require(['test/ServiceRegistryLite'], function() {
+require(['test/ServiceRegistryLite',
+		'test/UndoHistory'],
+function() {
 	
 });
