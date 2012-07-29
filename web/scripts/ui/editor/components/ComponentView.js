@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../res/css/ComponentView.css"], function(Backbone, DeltaDragControl, Templates, Math2, empty) {
+define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../res/css/ComponentView.css", "vendor/amd/keymaster"], function(Backbone, DeltaDragControl, Templates, Math2, empty, key) {
   return Backbone.View.extend({
     transforms: ["skewX", "skewY"],
     className: "component",
@@ -91,9 +91,13 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       return this.model.setInt("y", e.target.value);
     },
     rotate: function(e, deltas) {
-      var rot;
+      var newRot, rot;
       rot = this._calcRot(deltas);
-      this.model.set("rotate", this._initialRotate + rot - this._rotOffset);
+      newRot = this._initialRotate + rot - this._rotOffset;
+      if (key.shift) {
+        newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI;
+      }
+      this.model.set("rotate", newRot);
       return this._setUpdatedTransform();
     },
     rotateStart: function(e, deltas) {
@@ -139,12 +143,13 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       }
     },
     scale: function(e, deltas) {
-      var dx, dy, scale;
+      var dx, dy, fixRatioDisabled, scale;
+      fixRatioDisabled = key.shift;
       dx = Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale;
       dy = Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale;
       scale = {
         x: this._initialScale.x * (dx / this._scaleDeltas.x),
-        y: this._initialScale.y * (dy / this._scaleDeltas.y)
+        y: this._initialScale.y * (fixRatioDisabled ? dy / this._scaleDeltas.y : dx / this._scaleDeltas.x)
       };
       scale.width = scale.x * this.origSize.width;
       scale.height = scale.y * this.origSize.height;
@@ -187,15 +192,21 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       return transformStr;
     },
     mousedown: function(e) {
-      this.model.set("selected", true);
-      this.$el.css("zIndex", zTracker.next());
-      this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
-      this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
-      this._dragging = true;
-      return this._prevPos = {
-        x: e.pageX,
-        y: e.pageY
-      };
+      if (e.which === 1) {
+        this.model.set("selected", true);
+        this.$el.css("zIndex", zTracker.next());
+        this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
+        this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
+        this._dragging = true;
+        this._prevPos = {
+          x: this.model.get("x"),
+          y: this.model.get("y")
+        };
+        return this._prevMousePos = {
+          x: e.pageX,
+          y: e.pageY
+        };
+      }
     },
     render: function() {
       var size,
@@ -250,18 +261,20 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       return $doc.unbind("mousemove", this._mousemove);
     },
     mousemove: function(e) {
-      var dx, dy, newX, newY, x, y;
+      var dx, dy, gridSize, newX, newY, snapToGrid;
       if (this._dragging && this.allowDragging) {
-        x = this.model.get("x");
-        y = this.model.get("y");
-        dx = e.pageX - this._prevPos.x;
-        dy = e.pageY - this._prevPos.y;
-        newX = x + dx / this.dragScale;
-        newY = y + dy / this.dragScale;
+        snapToGrid = key.shift;
+        dx = e.pageX - this._prevMousePos.x;
+        dy = e.pageY - this._prevMousePos.y;
+        newX = this._prevPos.x + dx / this.dragScale;
+        newY = this._prevPos.y + dy / this.dragScale;
+        if (snapToGrid) {
+          gridSize = 20;
+          newX = Math.floor(newX / gridSize) * gridSize;
+          newY = Math.floor(newY / gridSize) * gridSize;
+        }
         this.model.set("x", newX);
-        this.model.set("y", newY);
-        this._prevPos.x = e.pageX;
-        return this._prevPos.y = e.pageY;
+        return this.model.set("y", newY);
       }
     },
     stopdrag: function() {
