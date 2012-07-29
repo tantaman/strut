@@ -3,47 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_application/UndoHistory"], function(Backbone, SlideCollection, Slide, UndoHistory) {
-  var NewSlideAction, RemoveSlideAction;
-  NewSlideAction = function(deck) {
-    this.deck = deck;
-    return this;
-  };
-  NewSlideAction.prototype = {
-    "do": function() {
-      var slides;
-      slides = this.deck.get("slides");
-      if (!(this.slide != null)) {
-        this.slide = new Slide({
-          num: slides.length
-        });
-      }
-      slides.add(this.slide);
-      return this.slide;
-    },
-    undo: function() {
-      this.deck.get("slides").remove(this.slide);
-      return this.slide;
-    },
-    name: "Create Slide"
-  };
-  RemoveSlideAction = function(deck, slide) {
-    this.deck = deck;
-    this.slide = slide;
-    return this;
-  };
-  RemoveSlideAction.prototype = {
-    "do": function() {
-      var slides;
-      slides = this.deck.get("slides");
-      slides.remove(this.slide);
-      return this.slide;
-    },
-    undo: function() {
-      return this.deck.get("slides").add(this.slide);
-    },
-    name: "Remove Slide"
-  };
+define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_application/UndoHistory", "model/commands/SlideCommands"], function(Backbone, SlideCollection, Slide, UndoHistory, SlideCommands) {
   return Backbone.Model.extend({
     initialize: function() {
       var slides;
@@ -56,10 +16,10 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       return this._lastSelected = null;
     },
     newSlide: function() {
-      var action, slide;
-      action = new NewSlideAction(this);
-      slide = action["do"]();
-      this.undoHistory.push(action);
+      var createCmd, slide;
+      createCmd = new SlideCommands.Create(this);
+      slide = createCmd["do"]();
+      this.undoHistory.push(createCmd);
       return slide;
     },
     set: function(key, value) {
@@ -151,10 +111,7 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/common_applicat
       return slide.on("dispose", this._slideDisposed, this);
     },
     removeSlide: function(slide) {
-      var action;
-      action = new RemoveSlideAction(this, slide);
-      slide = action["do"]();
-      this.undoHistory.push(action);
+      this.undoHistory.pushdo(new SlideCommands.Remove(this, slide));
       return slide;
     },
     addSlide: function(slide) {

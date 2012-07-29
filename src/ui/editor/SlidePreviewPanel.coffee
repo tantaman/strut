@@ -25,10 +25,18 @@ define(["vendor/amd/backbone",
 			CutCopyPasteBindings.applyTo(@, "slidePreviewPanel")
 			@_clipboard = new Clipboard()
 
-		_slideCreated: (slide) ->
+		_slideCreated: (slide, collection, options) ->
 			snapshot = new SlideSnapshot({model: slide, deck: @model})
 			snapshot.on("removeClicked", @slideRemoveClicked, @)
-			@$el.append(snapshot.render())
+
+			if options?
+				$children = @$el.children()
+				if $children.length > 0 and options.index < $children.length
+					$children.eq(options.index).before(snapshot.render())
+				else
+					@$el.append(snapshot.render())
+			else
+				@$el.append(snapshot.render())
 
 		_slidesReset: (newSlides) ->
 			newSlides.each((slide) =>

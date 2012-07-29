@@ -19,14 +19,23 @@ define(["vendor/amd/backbone", "./SlideSnapshot", "vendor/amd/keymaster", "ui/in
       CutCopyPasteBindings.applyTo(this, "slidePreviewPanel");
       return this._clipboard = new Clipboard();
     },
-    _slideCreated: function(slide) {
-      var snapshot;
+    _slideCreated: function(slide, collection, options) {
+      var $children, snapshot;
       snapshot = new SlideSnapshot({
         model: slide,
         deck: this.model
       });
       snapshot.on("removeClicked", this.slideRemoveClicked, this);
-      return this.$el.append(snapshot.render());
+      if (options != null) {
+        $children = this.$el.children();
+        if ($children.length > 0 && options.index < $children.length) {
+          return $children.eq(options.index).before(snapshot.render());
+        } else {
+          return this.$el.append(snapshot.render());
+        }
+      } else {
+        return this.$el.append(snapshot.render());
+      }
     },
     _slidesReset: function(newSlides) {
       var _this = this;

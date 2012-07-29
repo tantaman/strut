@@ -3,43 +3,9 @@
 ###
 define(["common/Calcium", "./SlideCollection",
 		"./Slide",
-		"model/common_application/UndoHistory"],
-(Backbone, SlideCollection, Slide, UndoHistory) ->
-	NewSlideAction = (deck) ->
-		@deck = deck
-		@
-
-	NewSlideAction.prototype =
-		do: () ->
-			slides = @deck.get("slides")
-			if not @slide?
-				@slide = new Slide({num: slides.length})
-			slides.add(@slide)
-			@slide
-
-		undo: () ->
-			@deck.get("slides").remove(@slide)
-			@slide
-
-		name: "Create Slide"
-
-	RemoveSlideAction = (deck, slide) ->
-		@deck = deck
-		@slide = slide
-		@
-
-	RemoveSlideAction.prototype =
-		do: () ->
-			slides = @deck.get("slides")
-			slides.remove(@slide)
-			@slide
-
-		undo: () ->
-			@deck.get("slides").add(@slide)
-
-		name: "Remove Slide"
-
-
+		"model/common_application/UndoHistory",
+		"model/commands/SlideCommands"],
+(Backbone, SlideCollection, Slide, UndoHistory, SlideCommands) ->
 	Backbone.Model.extend(
 		initialize: () ->
 			@undoHistory = new UndoHistory(20)
@@ -51,9 +17,9 @@ define(["common/Calcium", "./SlideCollection",
 			@_lastSelected = null
 			
 		newSlide: () ->
-			action = new NewSlideAction(@)
-			slide = action.do()
-			@undoHistory.push(action)
+			createCmd = new SlideCommands.Create(@)
+			slide = createCmd.do()
+			@undoHistory.push(createCmd)
 			slide
 
 		set: (key, value) ->
@@ -140,9 +106,7 @@ define(["common/Calcium", "./SlideCollection",
 			slide.on("dispose", @_slideDisposed, @)
 
 		removeSlide: (slide) ->
-			action = new RemoveSlideAction(@, slide)
-			slide = action.do()
-			@undoHistory.push(action)
+			@undoHistory.pushdo(new SlideCommands.Remove(@, slide))
 			slide
 
 		addSlide: (slide) ->
