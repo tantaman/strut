@@ -91,10 +91,30 @@
             "fors": {},
             "namespaces": {}
         },
+        "web\\scripts\\model\\presentation\\Deck.js": {
+            "name": "web\\scripts\\model\\presentation\\Deck.js",
+            "modules": {
+                "model.presentation": 1
+            },
+            "classes": {
+                "model.presentation.Deck": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "web\\scripts\\model\\presentation\\Slide.js": {
             "name": "web\\scripts\\model\\presentation\\Slide.js",
             "modules": {},
             "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js": {
+            "name": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "modules": {},
+            "classes": {
+                "ServiceRegsitry": 1
+            },
             "fors": {},
             "namespaces": {}
         },
@@ -181,6 +201,20 @@
             "file": "web\\scripts\\model\\editor\\button_bar\\ButtonBarModel.js",
             "line": 39,
             "author": "Matt Crinklaw-Vogt / Tantaman"
+        },
+        "model.presentation": {
+            "name": "model.presentation",
+            "submodules": {},
+            "classes": {
+                "model.presentation.Deck": 1,
+                "ServiceRegsitry": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 5,
+            "author": "Matt Crinklaw-Vogt"
         }
     },
     "classes": {
@@ -298,6 +332,34 @@
             "line": 39,
             "description": "Maintains the state of the button bar and notifies interested\nparties of changes.  The ButtonBarModel also listens to the\ncurrently selected component in the slide editor and passes\nalong the relevant changes that occur to that component.",
             "is_constructor": 1
+        },
+        "model.presentation.Deck": {
+            "name": "model.presentation.Deck",
+            "shortname": "model.presentation.Deck",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "model.presentation",
+            "namespace": "",
+            "file": "web\\scripts\\model\\presentation\\Deck.js",
+            "line": 9,
+            "description": "This represents a slide deck.  It has a title, a currently active\nslide, a collection of slides, the filename on \"disk\" and\nthe overarching presentation background color."
+        },
+        "ServiceRegsitry": {
+            "name": "ServiceRegsitry",
+            "shortname": "ServiceRegsitry",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "model.presentation",
+            "namespace": "",
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 5,
+            "description": "Allows on to register objects or functions under interface names\nand later retrieve them under those same interface names.\n\nMultiple services may be registered under the same interface name.\nA single service may be also registered under multiple interface names."
         }
     },
     "classitems": [
@@ -665,7 +727,7 @@
         },
         {
             "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
-            "line": 72,
+            "line": 78,
             "description": "This is useful for telling the user what command would be undone\nif they pressed undo.",
             "itemtype": "method",
             "name": "undoName",
@@ -678,7 +740,7 @@
         },
         {
             "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
-            "line": 95,
+            "line": 101,
             "description": "This is useful for telling the user what command would be\nredone if they pressed redo",
             "itemtype": "method",
             "name": "redoName",
@@ -691,7 +753,7 @@
         },
         {
             "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
-            "line": 122,
+            "line": 128,
             "description": "Undoes a command",
             "itemtype": "method",
             "name": "undo",
@@ -704,7 +766,7 @@
         },
         {
             "file": "web\\scripts\\model\\common_application\\UndoHistory.js",
-            "line": 143,
+            "line": 149,
             "description": "Redoes a command",
             "itemtype": "method",
             "name": "redo",
@@ -835,6 +897,47 @@
             "module": "model.editor"
         },
         {
+            "file": "web\\scripts\\model\\presentation\\Deck.js",
+            "line": 26,
+            "description": "Creates a new slide and adds it as the last slide in the deck.\nThe newly created slide is set as the active slide in the deck.",
+            "itemtype": "method",
+            "name": "newSlide\n*",
+            "class": "model.presentation.Deck",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\model\\presentation\\Deck.js",
+            "line": 46,
+            "description": "Method to import an existing presentation into this deck.\nTODO: this method should be a bit less brittle.  If new properties are added\nto a deck, this won't set them.",
+            "itemtype": "method",
+            "name": "import",
+            "params": [
+                {
+                    "name": "rawObj",
+                    "description": "the \"json\" representation of a deck\n*",
+                    "type": "Object"
+                }
+            ],
+            "class": "model.presentation.Deck",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\model\\presentation\\Deck.js",
+            "line": 137,
+            "description": "Removes the specified slide from the deck",
+            "itemtype": "method",
+            "name": "removeSlide",
+            "params": [
+                {
+                    "name": "slide",
+                    "description": "the slide to remove.\n*",
+                    "type": "model.presentation.Slide"
+                }
+            ],
+            "class": "model.presentation.Deck",
+            "module": "model.presentation"
+        },
+        {
             "file": "web\\scripts\\model\\presentation\\Slide.js",
             "line": 68,
             "description": "A pretty naive implementation but it should do the job just fine.\nPlaces a new component in a location that doesn't currently contain a component",
@@ -847,15 +950,79 @@
                     "type": "Component"
                 }
             ],
-            "class": "",
-            "module": "model.editor"
+            "class": "ServiceRegsitry",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 1,
+            "author": "Matt Crinklaw-Vogt",
+            "class": "ServiceRegsitry",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 18,
+            "description": "Register the service under the given interface name(s)",
+            "itemtype": "method",
+            "name": "register",
+            "params": [
+                {
+                    "name": "interfaces",
+                    "description": "string or array of strings of the interface names",
+                    "type": "Array|String"
+                },
+                {
+                    "name": "service",
+                    "description": "service to be registered",
+                    "type": "Object|function"
+                }
+            ],
+            "class": "ServiceRegsitry",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 40,
+            "description": "Get the first service that has been registered under the given interface\nname(s)",
+            "itemtype": "method",
+            "name": "get",
+            "params": [
+                {
+                    "name": "interface",
+                    "description": "or interfaces that the service should implement",
+                    "type": "Array|String"
+                }
+            ],
+            "return": {
+                "description": "the registered service or null",
+                "type": "Object|Function"
+            },
+            "class": "ServiceRegsitry",
+            "module": "model.presentation"
+        },
+        {
+            "file": "web\\scripts\\vendor\\amd\\ServiceRegistryLite.js",
+            "line": 54,
+            "description": "Get all services registered under the given interface(s)",
+            "itemtype": "method",
+            "name": "getAll",
+            "params": [
+                {
+                    "name": "interfaces",
+                    "description": "",
+                    "type": "Array|String"
+                }
+            ],
+            "class": "ServiceRegsitry",
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
             "line": 1,
             "description": "JSZip - A Javascript class for generating Zip files\n<http://stuartk.com/jszip>\n(c) 2009 Stuart Knightley <stuart [at] stuartk.com>\nLicenced under the GPLv3 and the MIT licences\nUsage:\n   zip = new JSZip();\n   zip.file(\"hello.txt\", \"Hello, World!\").add(\"tempfile\", \"nothing\");\n   zip.folder(\"images\").file(\"smile.gif\", base64Data, {base64: true});\n   zip.file(\"Xmas.txt\", \"Ho ho ho !\", {date : new Date(\"December 25, 2007 00:00:01\")});\n   zip.remove(\"tempfile\");\n   base64zip = zip.generate();",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -875,7 +1042,7 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -900,7 +1067,7 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -911,7 +1078,7 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -922,7 +1089,7 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -947,7 +1114,7 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -967,7 +1134,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -987,7 +1154,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1017,7 +1184,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1037,7 +1204,7 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1057,7 +1224,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1087,7 +1254,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1110,7 +1277,7 @@
                 "type": "JSZip"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1128,7 +1295,7 @@
                 "type": "Array"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1156,7 +1323,7 @@
                 "type": "JSZip|Object|Array"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1174,7 +1341,7 @@
                 "type": "JSZip"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1192,7 +1359,7 @@
                 "type": "JSZip"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
@@ -1210,42 +1377,42 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
             "line": 511,
             "description": "Javascript crc32\n  http://www.webtoolkit.info/",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
             "line": 554,
             "description": "http://www.webtoolkit.info/javascript-utf8.html",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
             "line": 583,
             "description": "http://www.webtoolkit.info/javascript-utf8.html",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd\\jszip.js",
             "line": 644,
             "description": "Base64 encode / decode\n  http://www.webtoolkit.info/\nHacked so that it doesn't utf8 en/decode everything",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
             "line": 1,
             "license": "RequireJS text 1.0.2 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/requirejs for details",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
@@ -1263,7 +1430,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\amd_plugins\\text.js",
@@ -1280,7 +1447,7 @@
                 "description": "Boolean"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\vendor\\A-jquery-1.7-matt.js",
@@ -1294,42 +1461,42 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1,
             "license": "RequireJS 2.0.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/requirejs for details",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 48,
             "description": "Helper function for iterating over an array. If the func returns\na true value, it will break out of the loop.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 63,
             "description": "Helper function for iterating over an array backwards. If the func\nreturns a true value, it will break out of the loop.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 82,
             "description": "Cycles over properties in an object and calls a function for each\nproperty value. If the function returns a truthy value, then the\niteration is stopped.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 98,
             "description": "Simple function to mix in properties from source into target,\nbut only if target does not already have a property of the same name.\nThis is not robust in IE for transferring methods that match\nObject.prototype names, but the uses of mixin here seem unlikely to\ntrigger a problem related to that.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1358,7 +1525,7 @@
                 "type": "Error"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1372,7 +1539,7 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1400,7 +1567,7 @@
                 "type": "String"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1434,28 +1601,28 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 538,
             "description": "Internal method to transfer globalQueue items to this context's\ndefQueue.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 554,
             "description": "Helper function that creates a require function object to give to\nmodules that ask for it as a dependency. It needs to be specific\nper module because of the implication of path mappings that may\nneed to be relative to the module name.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 938,
             "description": "Checks is the module is ready to define itself, and if so,\ndefine it. If the silent argument is true, then it will just\ndefine, but not notify listeners, and not ask for a context-wide\ncheck of all loaded modules. That is useful for cycle breaking.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1473,7 +1640,7 @@
                 "type": "Object"
             },
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1487,14 +1654,14 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1502,
             "description": "Called to enable a module if it is still in the registry\nawaiting enablement. parent module is passed in for context,\nused by the optimizer.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1508,21 +1675,21 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1572,
             "description": "Converts a module name + .extension into an URL path.\n*Requires* the use of a module name. It does not support using\nplain URLs like nameToUrl.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1589,
             "description": "Converts a module name to a file path. Supports cases where\nmoduleName may actually be just an URL.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1531,7 +1698,7 @@
             "access": "private",
             "tagname": "",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1545,35 +1712,35 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1692,
             "description": "Callback for script errors.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1704,
             "description": "Main entry point.\n\nIf the only argument to require is a string, then the module that\nis represented by that string is fetched for the appropriate context.\n\nIf the first argument is an array, then it will be treated as an array\nof dependency string names to fetch. An optional function callback can\nbe specified to execute when all of those dependencies are available.\n\nMake a local req variable to help Caja compliance (it assumes things\non a require that are not standardized), and to give a short\nname for minification/local scope use.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1754,
             "description": "Support require.config() to make it easier to cooperate with other\nAMD loaders on globally agreed names.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1762,
             "description": "Export require as a global, but only if it does not already exist.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1587,7 +1754,7 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1611,14 +1778,14 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
             "line": 1951,
             "description": "The function that handles definitions of modules. Differs from\nrequire() in that a string for the module should be the first argument,\nand the function to execute after dependencies are loaded should\nreturn a value to define the module corresponding to the first argument's\nname.",
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         },
         {
             "file": "web\\scripts\\require.js",
@@ -1632,7 +1799,7 @@
                 }
             ],
             "class": "",
-            "module": "model.editor"
+            "module": "model.presentation"
         }
     ]
 }

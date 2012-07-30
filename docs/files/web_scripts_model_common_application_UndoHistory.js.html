@@ -53,6 +53,10 @@
             
                 <li><a href="..&#x2F;classes/model.editor.button_bar.ButtonBarModel.html">model.editor.button_bar.ButtonBarModel</a></li>
             
+                <li><a href="..&#x2F;classes/model.presentation.Deck.html">model.presentation.Deck</a></li>
+            
+                <li><a href="..&#x2F;classes/ServiceRegsitry.html">ServiceRegsitry</a></li>
+            
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -64,6 +68,8 @@
                 <li><a href="..&#x2F;modules/model.common_application.html">model.common_application</a></li>
             
                 <li><a href="..&#x2F;modules/model.editor.html">model.editor</a></li>
+            
+                <li><a href="..&#x2F;modules/model.presentation.html">model.presentation</a></li>
             
             </ul>
         </div>
@@ -153,7 +159,6 @@ define([&quot;common&#x2F;EventEmitter&quot;, &quot;common&#x2F;collections&#x2F
           };
           if (!this.cursor) {
             this.actions.head = node;
-            this.actions.tail = node;
             this.actions.length = 1;
           } else {
             node.prev = this.cursor;
@@ -162,10 +167,12 @@ define([&quot;common&#x2F;EventEmitter&quot;, &quot;common&#x2F;collections&#x2F
             this.actions.length += 1;
             this.actions.length = this.actions.length - this.undoCount;
           }
+          this.actions.tail = node;
           this.undoCount = 0;
           this.cursor = null;
         } else {
           this.actions.push(action);
+          this.cursor = null;
         }
       } else {
         this.actions.shift();
@@ -173,6 +180,11 @@ define([&quot;common&#x2F;EventEmitter&quot;, &quot;common&#x2F;collections&#x2F
       }
       this.emit(&quot;updated&quot;);
       return this;
+    };
+
+    UndoHistory.prototype.pushdo = function(action) {
+      action[&quot;do&quot;]();
+      return this.push(action);
     };
 
     &#x2F;**

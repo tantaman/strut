@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>model.common_application.UndoHistory</title>
+    <title>model.presentation.Deck</title>
     <link rel="stylesheet" href="http:&#x2F;&#x2F;yui.yahooapis.com&#x2F;3.5.1&#x2F;build&#x2F;cssgrids&#x2F;cssgrids-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="..&#x2F;assets/css/main.css" id="site_styles">
@@ -106,7 +106,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>model.common_application.UndoHistory Class</h1>
+                        <h1>model.presentation.Deck Class</h1>
 <div class="box meta">
     
 
@@ -114,13 +114,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l9"><code>web\scripts\model\common_application\UndoHistory.js:9</code></a>
+            Defined in: <a href="..&#x2F;files&#x2F;web_scripts_model_presentation_Deck.js.html#l9"><code>web\scripts\model\presentation\Deck.js:9</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/model.common_application.html">model.common_application</a>
+            Module: <a href="../modules/model.presentation.html">model.presentation</a>
         
     
 
@@ -130,101 +130,11 @@
 
 
 <div class="box intro">
-    <p>Maintains a list of commands in an undo history.
-Drops commands when they should no longer be reachable
-via standard undo/redo semantics.</p>
+    <p>This represents a slide deck.  It has a title, a currently active
+slide, a collection of slides, the filename on "disk" and
+the overarching presentation background color.</p>
 </div>
 
-
-    <div class="constructor">
-        <h2>Constructor</h2>
-        <div id="method_model.common_application.UndoHistory" class="method item">
-    <h3 class="name"><code>model.common_application.UndoHistory</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>size</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l9"><code>web\scripts\model\common_application\UndoHistory.js:9</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">size</code>
-                        <span class="type">Integer</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Number of commands/actions to remember</p>
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-    </div>
 
 
 <div id="classdocs" class="tabview">
@@ -250,35 +160,23 @@ via standard undo/redo semantics.</p>
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_push">push</a>
+                                <a href="#method_import">import</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_redo">redo</a>
+                                <a href="#method_newSlide
+*">newSlide
+*</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_redoName">redoName</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_undo">undo</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
-                                <a href="#method_undoName">undoName</a>
+                                <a href="#method_removeSlide">removeSlide</a>
 
                                 
                                 
@@ -300,8 +198,8 @@ via standard undo/redo semantics.</p>
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_push" class="method item">
-    <h3 class="name"><code>push</code></h3>
+                    <div id="method_import" class="method item">
+    <h3 class="name"><code>import</code></h3>
 
     
         <div class="args">
@@ -309,7 +207,7 @@ via standard undo/redo semantics.</p>
             
                 <li class="arg">
                     
-                        <code>command</code>
+                        <code>rawObj</code>
                     
                 </li>
             
@@ -342,7 +240,7 @@ via standard undo/redo semantics.</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l30"><code>web\scripts\model\common_application\UndoHistory.js:30</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_model_presentation_Deck.js.html#l46"><code>web\scripts\model\presentation\Deck.js:46</code></a>
         
         </p>
 
@@ -353,8 +251,9 @@ via standard undo/redo semantics.</p>
     </div>
 
     <div class="description">
-        <p>Adds a new command to the undo history.
-This re-sets the re-do history</p>
+        <p>Method to import an existing presentation into this deck.
+TODO: this method should be a bit less brittle.  If new properties are added
+to a deck, this won't set them.</p>
     </div>
 
     
@@ -365,14 +264,15 @@ This re-sets the re-do history</p>
             
                 <li class="param">
                     
-                        <code class="param-name">command</code>
-                        <span class="type">Command</span>
+                        <code class="param-name">rawObj</code>
+                        <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Command to be added to the history</p>
+                        <p>the "json" representation of a deck
+*</p>
                     </div>
 
                     
@@ -388,17 +288,15 @@ This re-sets the re-do history</p>
 </div>
 
                 
-                    <div id="method_redo" class="method item">
-    <h3 class="name"><code>redo</code></h3>
+                    <div id="method_newSlide
+*" class="method item">
+    <h3 class="name"><code>newSlide
+*</code></h3>
 
     
         <span class="paren">()</span>
     
 
-    
-        <span class="returns-inline">
-            <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>
-        </span>
     
 
     
@@ -424,7 +322,7 @@ This re-sets the re-do history</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l149"><code>web\scripts\model\common_application\UndoHistory.js:149</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_model_presentation_Deck.js.html#l26"><code>web\scripts\model\presentation\Deck.js:26</code></a>
         
         </p>
 
@@ -435,41 +333,35 @@ This re-sets the re-do history</p>
     </div>
 
     <div class="description">
-        <p>Redoes a command</p>
+        <p>Creates a new slide and adds it as the last slide in the deck.
+The newly created slide is set as the active slide in the deck.</p>
     </div>
 
     
 
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>:
-                    
-                    this
-                
-            </div>
-        </div>
     
 
     
 </div>
 
                 
-                    <div id="method_redoName" class="method item">
-    <h3 class="name"><code>redoName</code></h3>
+                    <div id="method_removeSlide" class="method item">
+    <h3 class="name"><code>removeSlide</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>slide</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
-    
-        <span class="returns-inline">
-            <span class="type">String</span>
-        </span>
     
 
     
@@ -495,7 +387,7 @@ This re-sets the re-do history</p>
             
         
         
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l101"><code>web\scripts\model\common_application\UndoHistory.js:101</code></a>
+        <a href="..&#x2F;files&#x2F;web_scripts_model_presentation_Deck.js.html#l137"><code>web\scripts\model\presentation\Deck.js:137</code></a>
         
         </p>
 
@@ -506,168 +398,35 @@ This re-sets the re-do history</p>
     </div>
 
     <div class="description">
-        <p>This is useful for telling the user what command would be
-redone if they pressed redo</p>
+        <p>Removes the specified slide from the deck</p>
     </div>
 
     
+        <div class="params">
+            <h4>Parameters:</h4>
 
-    
-        <div class="returns">
-            <h4>Returns:</h4>
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">slide</code>
+                        <span class="type">model.presentation.Slide</span>
+                    
 
-            <div class="returns-description">
-                
                     
-                        <span class="type">String</span>:
+
+                    <div class="param-description">
+                        <p>the slide to remove.
+*</p>
+                    </div>
+
                     
-                    name of the next command to be redone
-                
-            </div>
+                </li>
+            
+            </ul>
         </div>
     
 
-    
-</div>
-
-                
-                    <div id="method_undo" class="method item">
-    <h3 class="name"><code>undo</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l128"><code>web\scripts\model\common_application\UndoHistory.js:128</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Undoes a command</p>
-    </div>
-
-    
-
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type"><a href="..\classes\model.common_application.UndoHistory.html" class="crosslink">model.common_application.UndoHistory</a></span>:
-                    
-                    this
-                
-            </div>
-        </div>
-    
-
-    
-</div>
-
-                
-                    <div id="method_undoName" class="method item">
-    <h3 class="name"><code>undoName</code></h3>
-
-    
-        <span class="paren">()</span>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">String</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="..&#x2F;files&#x2F;web_scripts_model_common_application_UndoHistory.js.html#l78"><code>web\scripts\model\common_application\UndoHistory.js:78</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>This is useful for telling the user what command would be undone
-if they pressed undo.</p>
-    </div>
-
-    
-
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type">String</span>:
-                    
-                    name of the next command to be undone
-                
-            </div>
-        </div>
     
 
     

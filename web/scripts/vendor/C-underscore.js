@@ -780,7 +780,7 @@
 
   // Is a given variable an object?
   _.isObject = function(obj) {
-    return obj === Object(obj);
+    return obj === Object(obj) && typeof obj !== 'string';
   };
 
   // Is a given variable an arguments object?
