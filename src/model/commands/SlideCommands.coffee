@@ -28,6 +28,7 @@ define(['model/presentation/Slide'],
 			slides = @deck.get("slides")
 			@_idx = slides.indexOf(@slide)
 			slides.remove(@slide)
+			@slide.off()
 			@slide
 
 		undo: () ->

@@ -35,6 +35,7 @@ define(['model/presentation/Slide'], function(Slide) {
       slides = this.deck.get("slides");
       this._idx = slides.indexOf(this.slide);
       slides.remove(this.slide);
+      this.slide.off();
       return this.slide;
     },
     undo: function() {
