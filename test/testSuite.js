@@ -14,7 +14,8 @@ window.slideConfig = {
 
 require(['test/ServiceRegistryLite',
 		'test/UndoHistory',
-		'test/Deck'],
+		'test/Deck',
+		'test/Slide'],
 function() {
 	
 });
