@@ -13,7 +13,7 @@ Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com
 
 ### Preview ###
 
-A github hosted preview is available at (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/web/index.html
+A github hosted preview is available at: http://tantaman.github.com/Strut/web/index.html (Firefox, Chrome and Safari only)
 
 The preview currently points to the development version of Strut.
 
