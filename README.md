@@ -9,29 +9,11 @@ I hope this project can also serve as an example of a browser based rich client 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 And here is a video of the very first version of Strut: http://www.youtube.com/watch?v=zA5s8wwme44
 
-Strut live preview: http://tantaman.github.com/Strut/web/index.html
-
-### Prior Art ###
-
-Whats the difference between ```Strut``` and ```Impressionist```?
-From a developer's perspective, everything.  
-
-In ```Strut``` there is an object for each major component.  The 
-[Slides](https://github.com/tantaman/Strut/blob/master/src/model/presentation/Slide.coffee), 
-[SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
-[TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionEditor.coffee), 
-[SlideEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/SlideEditor.coffee),
-etc. all have their own objects so its easy to
-track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
-focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
-view layers.  
-
-In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/src/ui/editor/res/templates) is also 
-split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
+Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/web/index.html
 
 ### Preview ###
 
-A github hosted preview is available at: http://tantaman.github.com/Strut/web/index.html
+A github hosted preview is available at: http://tantaman.github.com/Strut/web/index.html (Firefox, Chrome and Safari only)
 
 The preview currently points to the development version of Strut.
 
@@ -61,6 +43,19 @@ Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Contributing ###
 
+In ```Strut``` there is an object for each major component.  The 
+[Slides](https://github.com/tantaman/Strut/blob/master/src/model/presentation/Slide.coffee), 
+[SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
+[TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionEditor.coffee), 
+[SlideEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/SlideEditor.coffee),
+etc. all have their own objects so its easy to
+track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
+focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
+view layers.  
+
+In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/src/ui/editor/res/templates) is also 
+split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
+
 Here is the basic layout of the source:
 
 * Presentation Model: src/model/presentation
@@ -72,7 +67,6 @@ in order to package related markup and backing UI (not model) code into modules.
 
 ### Acknowledgements ###
 
-* Impressionist https://github.com/hsivaramx/Impressionist
 * ImpressJS (of course) https://github.com/bartaz/impress.js/
 * BackboneJS http://documentcloud.github.com/backbone/
 * CoffeeScript http://coffeescript.org/
@@ -82,3 +76,4 @@ in order to package related markup and backing UI (not model) code into modules.
 * HandlebarsJS http://handlebarsjs.com/
 * DustJS http://akdubya.github.com/dustjs/
 * Class class http://ejohn.org/blog/simple-javascript-inheritance/
+* Impressionist https://github.com/hsivaramx/Impressionist
