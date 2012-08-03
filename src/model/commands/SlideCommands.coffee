@@ -47,7 +47,6 @@ define(['model/presentation/Slide'],
 			@model.set(@endLoc)
 
 		undo: () ->
-			console.log("UNDO?")
 			@model.set(@startLoc)
 
 		name: "Move"

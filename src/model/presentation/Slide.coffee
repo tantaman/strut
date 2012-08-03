@@ -5,8 +5,9 @@
 define(["vendor/amd/backbone",
 		"model/geom/SpatialObject",
 		"./components/ComponentFactory",
-		"common/Math2"],
-(Backbone, SpatialObject, ComponentFactory, Math2) ->
+		"common/Math2",
+		"model/commands/ComponentCommands"],
+(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) ->
 	defaults =
 		z: 0
 		impScale: 1
@@ -84,6 +85,12 @@ define(["vendor/amd/backbone",
 			# Component will need to know if it is new or the result of an undo
 			# undo is currently broken as hell anyways though
 			@_placeComponent(component)
+
+			cmd = new ComponentCommands.Add(@, component)
+			cmd.do()
+			window.undoHistory.push(cmd)
+
+		__doAdd: (component) ->
 			@attributes.components.push(component)
 			@_registerWithComponent(component)
 			@trigger("contentsChanged")
@@ -119,6 +126,12 @@ define(["vendor/amd/backbone",
 			@off("dispose")
 
 		remove: (component) ->
+			cmd = new ComponentCommands.Remove(@, component)
+
+			cmd.do()
+			window.undoHistory.push(cmd)
+
+		__doRemove: (component) ->
 			idx = @attributes.components.indexOf(component)
 			if idx != -1
 				@attributes.components.splice(idx, 1)

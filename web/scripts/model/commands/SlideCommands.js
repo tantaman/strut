@@ -59,7 +59,6 @@ define(['model/presentation/Slide'], function(Slide) {
       return this.model.set(this.endLoc);
     },
     undo: function() {
-      console.log("UNDO?");
       return this.model.set(this.startLoc);
     },
     name: "Move"

@@ -5,7 +5,7 @@
 *
 */
 
-define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2"], function(Backbone, SpatialObject, ComponentFactory, Math2) {
+define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2", "model/commands/ComponentCommands"], function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
   var defaults;
   defaults = {
     z: 0,
@@ -87,7 +87,13 @@ define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/Compone
     */
 
     add: function(component) {
+      var cmd;
       this._placeComponent(component);
+      cmd = new ComponentCommands.Add(this, component);
+      cmd["do"]();
+      return window.undoHistory.push(cmd);
+    },
+    __doAdd: function(component) {
       this.attributes.components.push(component);
       this._registerWithComponent(component);
       this.trigger("contentsChanged");
@@ -123,6 +129,12 @@ define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/Compone
       return this.off("dispose");
     },
     remove: function(component) {
+      var cmd;
+      cmd = new ComponentCommands.Remove(this, component);
+      cmd["do"]();
+      return window.undoHistory.push(cmd);
+    },
+    __doRemove: function(component) {
       var idx;
       idx = this.attributes.components.indexOf(component);
       if (idx !== -1) {
