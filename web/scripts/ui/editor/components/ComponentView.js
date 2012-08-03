@@ -287,8 +287,10 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
       var cmd;
       if (this._dragging) {
         this._dragging = false;
-        cmd = new SlideCommands.Move(this.dragStartLoc, this.model);
-        window.undoHistory.push(cmd);
+        if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
+          cmd = new SlideCommands.Move(this.dragStartLoc, this.model);
+          window.undoHistory.push(cmd);
+        }
         this.dragStartLoc = void 0;
       }
       return true;

@@ -304,8 +304,11 @@ define(["vendor/amd/backbone"
 		stopdrag: () ->
 			if @_dragging
 				@_dragging = false
-				cmd = new SlideCommands.Move(@dragStartLoc, @model)
-				window.undoHistory.push(cmd)
+
+				if @dragStartLoc? and @dragStartLoc.x isnt @model.get("x") and @dragStartLoc.y isnt @model.get("y")
+					cmd = new SlideCommands.Move(@dragStartLoc, @model)
+					window.undoHistory.push(cmd)
+
 				@dragStartLoc = undefined
 			true
 
