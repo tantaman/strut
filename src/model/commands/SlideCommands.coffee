@@ -36,8 +36,21 @@ define(['model/presentation/Slide'],
 
 		name: "Remove Slide"
 
-	Move = () ->
+	Move = (@startLoc, @model) ->
+		@endLoc = 
+			x: @model.get("x")
+			y: @model.get("y")
+		@
 
+	Move.prototype =
+		do: () ->
+			@model.set(@endLoc)
+
+		undo: () ->
+			console.log("UNDO?")
+			@model.set(@startLoc)
+
+		name: "Move"
 
 	result =
 		Create: Create

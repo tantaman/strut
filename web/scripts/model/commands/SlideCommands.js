@@ -45,7 +45,25 @@ define(['model/presentation/Slide'], function(Slide) {
     },
     name: "Remove Slide"
   };
-  Move = function() {};
+  Move = function(startLoc, model) {
+    this.startLoc = startLoc;
+    this.model = model;
+    this.endLoc = {
+      x: this.model.get("x"),
+      y: this.model.get("y")
+    };
+    return this;
+  };
+  Move.prototype = {
+    "do": function() {
+      return this.model.set(this.endLoc);
+    },
+    undo: function() {
+      console.log("UNDO?");
+      return this.model.set(this.startLoc);
+    },
+    name: "Move"
+  };
   return result = {
     Create: Create,
     Remove: Remove,

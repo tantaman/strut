@@ -4,9 +4,8 @@
 *###
 define(["common/Calcium", "./SlideCollection",
 		"./Slide",
-		"model/common_application/UndoHistory",
 		"model/commands/SlideCommands"],
-(Backbone, SlideCollection, Slide, UndoHistory, SlideCommands) ->
+(Backbone, SlideCollection, Slide, SlideCommands) ->
 	###*
 	This represents a slide deck.  It has a title, a currently active
 	slide, a collection of slides, the filename on "disk" and
@@ -15,7 +14,7 @@ define(["common/Calcium", "./SlideCollection",
 	###
 	Backbone.Model.extend(
 		initialize: () ->
-			@undoHistory = new UndoHistory(20)
+			@undoHistory = window.undoHistory
 			@set("slides", new SlideCollection())
 			slides = @get("slides")
 			slides.on("add", @_slideAdded, @)

@@ -3,7 +3,7 @@
 @author Matt Crinklaw-Vogt
 */
 
-define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../res/css/ComponentView.css", "vendor/amd/keymaster"], function(Backbone, DeltaDragControl, Templates, Math2, empty, key) {
+define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../res/css/ComponentView.css", "vendor/amd/keymaster", "model/commands/SlideCommands"], function(Backbone, DeltaDragControl, Templates, Math2, empty, key, SlideCommands) {
   return Backbone.View.extend({
     transforms: ["skewX", "skewY"],
     className: "component",
@@ -274,11 +274,23 @@ define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "c
           newY = Math.floor(newY / gridSize) * gridSize;
         }
         this.model.set("x", newX);
-        return this.model.set("y", newY);
+        this.model.set("y", newY);
+        if (!(this.dragStartLoc != null)) {
+          return this.dragStartLoc = {
+            x: newX,
+            y: newY
+          };
+        }
       }
     },
     stopdrag: function() {
-      this._dragging = false;
+      var cmd;
+      if (this._dragging) {
+        this._dragging = false;
+        cmd = new SlideCommands.Move(this.dragStartLoc, this.model);
+        window.undoHistory.push(cmd);
+        this.dragStartLoc = void 0;
+      }
       return true;
     },
     constructor: function ComponentView() {

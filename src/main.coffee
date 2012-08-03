@@ -39,8 +39,10 @@ else
 	continuation = () ->
 		requirejs(["ui/editor/Editor",
 				"model/presentation/Deck",
-				"storage/FileStorage"],
-		(Editor, Deck, FileStorage) ->
+				"storage/FileStorage",
+				"model/common_application/UndoHistory"],
+		(Editor, Deck, FileStorage, UndoHistory) ->
+			window.undoHistory = new UndoHistory(20)
 			deck = new Deck()
 			editor = new Editor({model: deck})
 

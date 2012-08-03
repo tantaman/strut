@@ -52,8 +52,9 @@ if (window.location.href.indexOf("preview=true") !== -1) {
 
 } else {
   continuation = function() {
-    return requirejs(["ui/editor/Editor", "model/presentation/Deck", "storage/FileStorage"], function(Editor, Deck, FileStorage) {
+    return requirejs(["ui/editor/Editor", "model/presentation/Deck", "storage/FileStorage", "model/common_application/UndoHistory"], function(Editor, Deck, FileStorage, UndoHistory) {
       var deck, editor, lastPres, pres;
+      window.undoHistory = new UndoHistory(20);
       deck = new Deck();
       editor = new Editor({
         model: deck
