@@ -110,10 +110,7 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
       });
     },
     exportZIP: function(e) {
-      var archive, archiver;
-      archiver = new Archiver(this.model);
-      archive = archiver.create();
-      return window.location.href = "data:application/zip;base64," + archive;
+      return $('#exportModal').modal('show');
     }
   };
   return Backbone.View.extend({
@@ -251,6 +248,7 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
       this.saveAsDialog.$el.on('hide', hideCB);
       this.$el.append(this.openDialog.render());
       this.$el.append(this.saveAsDialog.render());
+      $('#exportModal').modal();
       this.backgroundPickerModal = new BackgroundPicker({
         bgOpts: {
           type: "radial",

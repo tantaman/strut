@@ -41,6 +41,22 @@ define(["vendor/amd/jszip", "./Deck", "ui/impress_renderer/ImpressRenderer", "co
       return this.archive.generate();
     };
 
+    Archiver.prototype.createSimple = function() {
+      var showStr;
+      this.archive = new JSZip();
+      this.previewExportDir = this.archive.folder("preview_export");
+      this.imagesDir = this.previewExportDir.folder("images");
+      this.scriptsDir = this.previewExportDir.folder("scripts");
+      this.fontsDir = this.previewExportDir.folder("fonts");
+      this.cssDir = this.previewExportDir.folder("css");
+      showStr = "<!doctype html><html>" + ImpressRenderer.render(this.presentation.attributes) + "</html>";
+      this._archiveIndexHtml(showStr);
+      this._archiveScripts();
+      this._archiveFonts();
+      this._archiveCss();
+      return this.archive.generate();
+    };
+
     Archiver.prototype.processComponents = function(components) {
       var _this = this;
       return components.forEach(function(component) {

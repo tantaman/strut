@@ -97,9 +97,10 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			)
 
 		exportZIP: (e) ->
-			archiver = new Archiver(@model)
-			archive = archiver.create()
-			window.location.href="data:application/zip;base64,"+archive;
+			#archiver = new Archiver(@model)
+			#archive = archiver.createSimple()
+			#window.location.href="data:application/zip;base64,"+archive;
+			$('#exportModal').modal('show')
 
 	Backbone.View.extend(
 		className: "editor"
@@ -226,6 +227,8 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 
 			@$el.append(@openDialog.render())
 			@$el.append(@saveAsDialog.render())
+
+			$('#exportModal').modal()
 
 			# TEMP
 			@backgroundPickerModal = new BackgroundPicker(

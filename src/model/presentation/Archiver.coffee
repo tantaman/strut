@@ -60,6 +60,25 @@ define(["vendor/amd/jszip",
 			@_archivedImages = {}
 			@archive.generate();
 
+		createSimple: () ->
+			@archive = new JSZip()
+			@previewExportDir = @archive.folder("preview_export")
+
+			@imagesDir = @previewExportDir.folder("images")
+			@scriptsDir = @previewExportDir.folder("scripts")
+			@fontsDir = @previewExportDir.folder("fonts")
+			@cssDir = @previewExportDir.folder("css")
+
+			showStr = "<!doctype html><html>" \
+			+ ImpressRenderer.render(@presentation.attributes) + "</html>"
+
+			@_archiveIndexHtml(showStr)
+			@_archiveScripts()
+			@_archiveFonts()
+			@_archiveCss()
+
+			@archive.generate();
+
 		processComponents: (components) ->
 			components.forEach((component) =>
 				@processComponent(component)
