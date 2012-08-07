@@ -39,5 +39,6 @@ define(() ->
 
 		mouseup: (e) ->
 			@dragging = false
+			@$el.trigger("deltadragStop")
 			true
 )

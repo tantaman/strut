@@ -27,6 +27,12 @@ define(["common/EventEmitter", "common/collections/LinkedList"], function(EventE
       _.extend(this, new EventEmitter());
     }
 
+    UndoHistory.prototype.clear = function() {
+      this.cursor = null;
+      this.undoCount = null;
+      return this.actions = new LinkedList();
+    };
+
     /**
     		* Adds a new command to the undo history.
     		* This re-sets the re-do history

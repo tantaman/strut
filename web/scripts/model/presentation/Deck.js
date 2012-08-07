@@ -63,6 +63,7 @@ define(["common/Calcium", "./SlideCollection", "./Slide", "model/commands/SlideC
       this.set("activeSlide", null);
       this.set("background", rawObj.background);
       this.set("fileName", rawObj.fileName);
+      this.undoHistory.clear();
       return slides.reset(rawObj.slides);
     },
     _activeSlideChanging: function(newActive) {

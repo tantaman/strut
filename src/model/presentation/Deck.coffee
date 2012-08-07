@@ -58,6 +58,8 @@ define(["common/Calcium", "./SlideCollection",
 			@set("background", rawObj.background)
 			@set("fileName", rawObj.fileName)
 
+			@undoHistory.clear()
+
 			slides.reset(rawObj.slides)
 			#@set("activeSlide", slides.at(0))
 

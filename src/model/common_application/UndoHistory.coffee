@@ -20,6 +20,11 @@ define(["common/EventEmitter",
 			@undoCount = 0
 			_.extend(@, new EventEmitter())
 
+		clear: () ->
+			@cursor = null
+			@undoCount = null
+			@actions = new LinkedList()
+
 		###*
 		* Adds a new command to the undo history.
 		* This re-sets the re-do history
