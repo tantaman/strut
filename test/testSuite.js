@@ -12,10 +12,17 @@ window.slideConfig = {
 		}
 	};
 
-require(['test/ServiceRegistryLite',
+require(['model/common_application/UndoHistory'], function(UndoHistory) {
+	window.undoHistory = new UndoHistory(20);
+	continuation();
+});
+
+function continuation() {
+	require(['test/ServiceRegistryLite',
 		'test/UndoHistory',
 		'test/Deck',
 		'test/Slide'],
-function() {
-	
-});
+	function() {
+
+	});
+}
