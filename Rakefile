@@ -79,6 +79,11 @@ task :compileCoffee, :watch do |t,args|
 	system %{coffee #{watch} -b --compile --output web/scripts/ src/}
 end
 
+task :zipForLocal => [:compileCoffee, :compileTpls] do
+	system "tar -c web > Strut.tar"
+	system "gzip Strut.tar"
+end
+
 task :docs do
 	system %{yuidoc web/scripts -o docs}
 end
