@@ -52,6 +52,6 @@
 	user-select: none;
 }
 
-.navbar .btn, .navbar .btn-group {
+.navbar .btn, .navbar .btn-group:not(.normalBtns) {
 	margin-top: 5px;
 }
