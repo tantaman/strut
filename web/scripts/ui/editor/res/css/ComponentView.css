@@ -109,14 +109,12 @@
 }
 
 .component.selected {
-	outline: 2px dashed black;
-	outline-offset: 1px;
+	border: 2px dashed black;
 }
 
 .component.editable {
 	cursor: auto;
-	outline: 0px;
-	outline: 2px solid red;
+	border: 2px solid red;
 	-moz-user-select: text;
 	-webkit-user-select: text;
 }
