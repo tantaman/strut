@@ -90,6 +90,9 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         height: 768
       }
     };
+    _.extend(etch.config.buttonClasses, {
+      "default": ['bold', 'italic', 'justify-left', 'justify-center', 'justify-right', 'link', 'clear-formatting']
+    });
     return continuation();
   });
 }

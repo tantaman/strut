@@ -2,17 +2,20 @@
 @author Tantaman
 ###
 define(["./ComponentView",
+		"vendor/amd/etch"
 		"../Templates"],
-(ComponentView, Templates) ->
+(ComponentView, etch, Templates) ->
 	styles = ["family", "size", "weight", "style", "color", "decoration", "align"]
 	ComponentView.extend(
 		className: "component textBox"
 		tagName: "div"
+
 		events: () ->
 			parentEvents = ComponentView.prototype.events.call(@)
 			myEvents = 
 				"dblclick": "dblclicked"
 				"editComplete": "editCompleted"
+				"mousedown": "mousedown"
 			_.extend(parentEvents, myEvents)
 
 		initialize: () ->
@@ -36,8 +39,16 @@ define(["./ComponentView",
 		dblclicked: (e) ->
 			@$el.addClass("editable")
 			@$el.find(".content").attr("contenteditable", true) #selectText()
+			etch.editableInit.call(@, e)
 			@allowDragging = false
 			@editing = true
+
+		mousedown: (e) ->
+			if @editing
+				etch.editableInit.call(@, e)
+			else
+				ComponentView.prototype.mousedown.apply(@, arguments)
+			true
 
 		editCompleted: () ->
 			text = @$textEl.html()
