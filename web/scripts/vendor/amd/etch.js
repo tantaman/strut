@@ -51,7 +51,9 @@ define(['vendor/amd/backbone'], function(Backbone) {
       'click .etch-link': 'toggleLink',
       'click .etch-image': 'getImage',
       'click .etch-save': 'save',
-      'click .etch-clear-formatting': 'clearFormatting'
+      'click .etch-clear-formatting': 'clearFormatting',
+      'click .etch-font-size-option': 'setFontSize',
+      'click .etch-font-family-option': 'setFontFamily'
     },
         
     changeEditable: function() {
@@ -76,7 +78,7 @@ define(['vendor/amd/backbone'], function(Backbone) {
       if (!buttons.length) { $(this.el).hide(); return; }
             
       _.each(this.model.get('buttons'), function(button){
-        var $buttonEl = $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
+        var $buttonEl = etch.buttonElFactory(button);
         view.$el.append($buttonEl);
       });
             
@@ -99,6 +101,14 @@ define(['vendor/amd/backbone'], function(Backbone) {
     clearFormatting: function(e) {
       e.preventDefault();
       document.execCommand('removeFormat', false, null);
+    },
+
+    setFontFamily: function(e) {
+
+    },
+
+    setFontSize: function(e) {
+
     },
         
     toggleBold: function(e) {
@@ -354,6 +364,28 @@ define(['vendor/amd/backbone'], function(Backbone) {
       }
     });
   }
+
+  // TODO: how do we really want to do this?
+  // Allow a template to be provided?
+  // Construct based on some options object?
+  etch.buttonElFactory = function(button) {
+    switch (button) {
+      case 'font-size':
+        return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+           + button.replace('-', ' ') + 
+           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+            + button + '"><li><a href="#">Wee2</a></li></ul>');
+      case 'font-family':
+       return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+           + button.replace('-', ' ') + 
+           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+            + button + '"><li><a href="#">Wee</a></li></ul>');
+      break;
+      default:
+        return $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
+      break;
+    }
+  };
 
   $.fn.etchFindEditable = function() {
     // function that looks for the editable selector on itself or its parents

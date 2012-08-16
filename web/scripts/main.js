@@ -91,7 +91,7 @@ if (window.location.href.indexOf("preview=true") !== -1) {
       }
     };
     _.extend(etch.config.buttonClasses, {
-      "default": ['bold', 'italic', 'justify-left', 'justify-center', 'justify-right', 'link', 'clear-formatting']
+      "default": ['bold', 'italic', 'justify-left', 'justify-center', 'justify-right', 'link', 'font-family', 'font-size', 'color']
     });
     return continuation();
   });
