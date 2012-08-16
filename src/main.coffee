@@ -64,8 +64,9 @@ else
 		)
 	
 	requirejs(["vendor/amd/backbone",
-			"state/DefaultState"],
-	(Backbone, DefaultState) ->
+			"state/DefaultState",
+			"vendor/amd/etch"],
+	(Backbone, DefaultState, etch) ->
 		Backbone.sync = (method, model, options) ->
 			if options.keyTrail?
 				options.success(DefaultState.get(options.keyTrail))

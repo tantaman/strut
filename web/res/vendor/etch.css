@@ -1,0 +1,39 @@
+/* === Editor === */
+.etch-editor-panel { display: none; padding: 5px; position: absolute; z-index: 10000;
+    background: #dadada; border: 1px solid #bdbdbd; color: #535353; text-shadow: 0 1px 0 #fff;
+    background-image: -moz-linear-gradient(center bottom, #ccc 0%, #ddd 100%);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#ccc));
+    -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;
+    -webkit-box-shadow: inset 1px 0 0 #dfdfdf, inset 0 1px 0 #dfdfdf, inset -1px 0 0 #dfdfdf, inset 0 -1px 0 #dfdfdf, 0 0 5px rgba(0,0,0,.3);
+ }
+.etch-editor-button { display: block; float: left; margin-right: 3px; position: relative; text-decoration: none;
+    display: block; width: 27px; height: 27px; background: #dadada; border: 1px solid #aaa; color: #535353; text-shadow: 0 1px 0 #fff;
+    background: -moz-linear-gradient(center bottom, #e1e1e1 0%, #efefef 100%);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fFfFfF), to(#f1f1f1));
+    -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;
+     }
+
+.etch-editor-button:last-child { margin-right: 0; }
+.etch-editor-button:hover { background: #fff; border-color: #999; }
+.etch-editor-button span:active { box-shadow: inset 0 0 15px rgba(0,0,0,.5); border-color: #999; }
+
+.etch-editor-button span,
+.etch-editor-button span { background: url('images/editor_icons.png') no-repeat;
+    display: block; height: 100%; width: 100%;
+}
+
+.etch-editor-panel .etch-bold span { background-position: 0 0; }
+.etch-editor-panel .etch-italic span { background-position: -30px 0; }
+.etch-editor-panel .etch-underline span { background-position: -60px 0; }
+.etch-editor-panel .etch-unordered-list span { background-position: -90px 0; }
+.etch-editor-panel .etch-ordered-list span { background-position: -120px 0; }
+.etch-editor-panel .etch-image span { background-position: -150px 0; }
+.etch-editor-panel .etch-link span { background-position: -180px 0; }
+.etch-editor-panel .etch-save span { background-position: -210px 0; }
+.etch-editor-panel .etch-justify-left span { background-position: -240px 0; }
+.etch-editor-panel .etch-justify-center span { background-position: -270px 0; }
+.etch-editor-panel .etch-justify-right span { background-position: -300px 0; }
+.etch-editor-panel .etch-cite span { background-position: -330px 0; }
+.etch-editor-panel .etch-heading span { background-position: -360px 0; }
+.etch-editor-panel .etch-clear-formatting span { background-position: -390px 0; }
+

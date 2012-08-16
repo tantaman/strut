@@ -78,7 +78,7 @@ if (window.location.href.indexOf("preview=true") !== -1) {
       }
     });
   };
-  requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+  requirejs(["vendor/amd/backbone", "state/DefaultState", "vendor/amd/etch"], function(Backbone, DefaultState, etch) {
     Backbone.sync = function(method, model, options) {
       if (options.keyTrail != null) {
         return options.success(DefaultState.get(options.keyTrail));
