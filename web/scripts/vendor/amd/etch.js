@@ -76,10 +76,18 @@ define(['vendor/amd/backbone'], function(Backbone) {
             
       // hide editor panel if there are no buttons in it and exit early
       if (!buttons.length) { $(this.el).hide(); return; }
-            
+      
+      var $container = view.$el;  
       _.each(this.model.get('buttons'), function(button){
-        var $buttonEl = etch.buttonElFactory(button);
-        view.$el.append($buttonEl);
+        if (button == "<group>") {
+          $container = etch.groupElFactory();
+          view.$el.append($container);
+        } else if (button == "</group>") {
+          $container = view.$el;
+        } else {
+          var $buttonEl = etch.buttonElFactory(button);
+          $container.append($buttonEl);
+        }
       });
             
       $(this.el).show('fast');
@@ -369,22 +377,7 @@ define(['vendor/amd/backbone'], function(Backbone) {
   // Allow a template to be provided?
   // Construct based on some options object?
   etch.buttonElFactory = function(button) {
-    switch (button) {
-      case 'font-size':
-        return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
-           + button.replace('-', ' ') + 
-           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
-            + button + '"><li><a href="#">Wee2</a></li></ul>');
-      case 'font-family':
-       return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
-           + button.replace('-', ' ') + 
-           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
-            + button + '"><li><a href="#">Wee</a></li></ul>');
-      break;
-      default:
-        return $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
-      break;
-    }
+      return $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
   };
 
   $.fn.etchFindEditable = function() {
