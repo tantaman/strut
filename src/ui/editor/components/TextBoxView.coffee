@@ -39,13 +39,14 @@ define(["./ComponentView",
 		dblclicked: (e) ->
 			@$el.addClass("editable")
 			@$el.find(".content").attr("contenteditable", true) #selectText()
-			etch.editableInit.call(@, e)
+			if e?
+				etch.editableInit.call(@, e, @model.get("y") * @dragScale + 35)
 			@allowDragging = false
 			@editing = true
 
 		mousedown: (e) ->
 			if @editing
-				etch.editableInit.call(@, e)
+				etch.editableInit.call(@, e, @model.get("y") * @dragScale + 35)
 			else
 				ComponentView.prototype.mousedown.apply(@, arguments)
 			true

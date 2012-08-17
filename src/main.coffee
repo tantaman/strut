@@ -99,7 +99,6 @@ else
 				when "font-family" then EtchTemplates.fontFamilySelection viewData
 				else 
 					if button.indexOf("justify") isnt -1
-						console.log button
 						viewData.icon = button.substring button.indexOf('-')+1, button.length
 						EtchTemplates.align viewData
 					else
