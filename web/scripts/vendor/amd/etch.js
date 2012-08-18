@@ -91,6 +91,8 @@ define(['vendor/amd/backbone'], function(Backbone) {
       });
             
       $(this.el).show('fast');
+
+      this.$el.find('.dropdown-toggle').dropdown();
     },
 
     changePosition: function() {
@@ -263,11 +265,11 @@ define(['vendor/amd/backbone'], function(Backbone) {
 
     // This function is to be used as callback to whatever event
     // you use to initialize editing 
-    editableInit: function(e) {
+    editableInit: function(e, overrideY) {
       e.stopPropagation();
       var target = e.target || e.srcElement;
       var $editable = $(target).etchFindEditable();
-      $editable.attr('contenteditable', true);
+      //$editable.attr('contenteditable', true);
 
       // if the editor isn't already built, build it
       var $editor = $('.etch-editor-panel');
@@ -339,7 +341,7 @@ define(['vendor/amd/backbone'], function(Backbone) {
         }
       });
 
-      editorModel.set({position: {x: e.pageX - 15, y: e.pageY - 80}});
+      editorModel.set({position: {x: e.pageX - 15, y: overrideY || (e.pageY - 80)}});
     }
   });
 

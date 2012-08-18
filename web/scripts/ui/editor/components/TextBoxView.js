@@ -40,13 +40,15 @@ define(["./ComponentView", "vendor/amd/etch", "../Templates"], function(Componen
     dblclicked: function(e) {
       this.$el.addClass("editable");
       this.$el.find(".content").attr("contenteditable", true);
-      etch.editableInit.call(this, e);
+      if (e != null) {
+        etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+      }
       this.allowDragging = false;
       return this.editing = true;
     },
     mousedown: function(e) {
       if (this.editing) {
-        etch.editableInit.call(this, e);
+        etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
       } else {
         ComponentView.prototype.mousedown.apply(this, arguments);
       }

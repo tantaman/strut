@@ -107,7 +107,6 @@ if (window.location.href.indexOf("preview=true") !== -1) {
           return EtchTemplates.fontFamilySelection(viewData);
         default:
           if (button.indexOf("justify") !== -1) {
-            console.log(button);
             viewData.icon = button.substring(button.indexOf('-') + 1, button.length);
             return EtchTemplates.align(viewData);
           } else {
