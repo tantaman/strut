@@ -22,6 +22,15 @@ define(['vendor/amd/backbone'], function(Backbone) {
     }
   };
 
+  function extractValue(e){
+      var value = e.target.dataset.value;
+      if (value == null) {
+        $target = $(e.target);
+        value = $target.parent()[0].dataset.value;
+      }
+      return value;
+  }
+
   models.Editor = Backbone.Model;
 
   views.Editor = Backbone.View.extend({
@@ -52,8 +61,8 @@ define(['vendor/amd/backbone'], function(Backbone) {
       'click .etch-image': 'getImage',
       'click .etch-save': 'save',
       'click .etch-clear-formatting': 'clearFormatting',
-      'click .etch-font-size-option': 'setFontSize',
-      'click .etch-font-family-option': 'setFontFamily'
+      'click [data-option="fontSize"]': 'setFontSize',
+      'click [data-option="fontFamily"]': 'setFontFamily'
     },
         
     changeEditable: function() {
@@ -92,7 +101,8 @@ define(['vendor/amd/backbone'], function(Backbone) {
             
       $(this.el).show('fast');
 
-      this.$el.find('.dropdown-toggle').dropdown();
+      var $toggle = this.$el.find('.dropdown-toggle');
+      $toggle.dropdown();
     },
 
     changePosition: function() {
@@ -114,7 +124,13 @@ define(['vendor/amd/backbone'], function(Backbone) {
     },
 
     setFontFamily: function(e) {
-
+      console.log("wtf2");
+      e.preventDefault();
+      var value = extractValue(e);
+      console.log(value);
+      document.execCommand('fontName', false, value);
+      value = value.substr(value.indexOf("'")+1, value.lastIndexOf("'")-1)
+      this.$el.find(".fontFamilyBtn .text").text(value)
     },
 
     setFontSize: function(e) {
