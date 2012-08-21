@@ -119,11 +119,17 @@ define(["./AbstractButtonBarView",
 
 		render: () ->
 			$colorChooser = @$el.find(".color-chooser");
+			hex = '333'
 			$colorChooser.ColorPicker({
+				color: '#' + hex
 				onChange: (hsb, hex, rgb) =>
 					$colorChooser.find("div").css("backgroundColor", "#" + hex)
 					@model.colorSelected(hex)
 			})
+
+			$colorChooser.find("div").css("backgroundColor", '#' + hex)
+			@model.colorSelected(hex)
+
 			@$el
 	)
 )
