@@ -124,17 +124,24 @@ define(['vendor/amd/backbone'], function(Backbone) {
     },
 
     setFontFamily: function(e) {
-      console.log("wtf2");
       e.preventDefault();
       var value = extractValue(e);
-      console.log(value);
       document.execCommand('fontName', false, value);
       value = value.substr(value.indexOf("'")+1, value.lastIndexOf("'")-1)
-      this.$el.find(".fontFamilyBtn .text").text(value)
+      this.$el.find(".fontFamilyBtn .text").text(value);
     },
 
     setFontSize: function(e) {
+      var textBox = this.model.get('editableModel');
+      var value = extractValue(e);
 
+      textBox.set('size', (value |= 0));
+
+      // TODO: we need to bind this to the editable model...
+      // whenever that changes.
+      // so that way we have the correct font readouts when someone
+      // uses the scale control
+      this.$el.find(".fontSizeBtn .text").text(value);
     },
         
     toggleBold: function(e) {
