@@ -135,15 +135,19 @@ define(["./AbstractButtonBarView", "model/editor/button_bar/ButtonBarModel", "mo
       return this.deck.off("change:activeSlide", this.activeSlideChanged, this);
     },
     render: function() {
-      var $colorChooser,
+      var $colorChooser, hex,
         _this = this;
       $colorChooser = this.$el.find(".color-chooser");
+      hex = '333';
       $colorChooser.ColorPicker({
+        color: '#' + hex,
         onChange: function(hsb, hex, rgb) {
           $colorChooser.find("div").css("backgroundColor", "#" + hex);
           return _this.model.colorSelected(hex);
         }
       });
+      $colorChooser.find("div").css("backgroundColor", '#' + hex);
+      this.model.colorSelected(hex);
       return this.$el;
     }
   });
