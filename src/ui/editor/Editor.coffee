@@ -96,11 +96,29 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 				@model.set("background", bgState)
 			)
 
-		exportZIP: (e) ->
-			#archiver = new Archiver(@model)
-			#archive = archiver.createSimple()
-			#window.location.href="data:application/zip;base64,"+archive;
+		exportWebpage: () ->
 			$('#exportModal').modal('show')
+
+		exportZIP: (e) ->
+			archiver = new Archiver(@model)
+			archive = archiver.createSimple((archive) =>
+				#window.location.href="data:application/zip;base64,"+archive;
+				#$('#zipModal').find('a')
+				#	.attr('href', "data:application/zip;base64," + archive)
+				Downloadify.create('downloadify', {
+					filename: 'StrutPresentation.zip'
+					data: archive
+					dataType: 'base64'
+					swf: 'res/downloadify/media/downloadify.swf'
+					downloadImage: 'res/downloadify/images/download.png'
+					width: 100
+					height: 30
+					transparent: true
+					append: false
+				})
+				$('#zipModal').modal('show')
+			)
+			
 
 	Backbone.View.extend(
 		className: "editor"
@@ -229,6 +247,7 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			@$el.append(@saveAsDialog.render())
 
 			$('#exportModal').modal()
+			$('#zipModal').modal()
 
 			# TEMP
 			@backgroundPickerModal = new BackgroundPicker(

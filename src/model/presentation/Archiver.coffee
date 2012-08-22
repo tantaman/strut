@@ -60,24 +60,22 @@ define(["vendor/amd/jszip",
 			@_archivedImages = {}
 			@archive.generate();
 
-		createSimple: () ->
+		createSimple: (cb) ->
 			@archive = new JSZip()
 			@previewExportDir = @archive.folder("preview_export")
 
-			@imagesDir = @previewExportDir.folder("images")
 			@scriptsDir = @previewExportDir.folder("scripts")
-			@fontsDir = @previewExportDir.folder("fonts")
 			@cssDir = @previewExportDir.folder("css")
 
 			showStr = "<!doctype html><html>" \
 			+ ImpressRenderer.render(@presentation.attributes) + "</html>"
 
 			@_archiveIndexHtml(showStr)
-			@_archiveScripts()
-			@_archiveFonts()
-			@_archiveCss()
-
-			@archive.generate();
+			@_archiveScripts(() =>
+				@_archiveCss(() =>
+					cb(@archive.generate())
+				)
+			)
 
 		processComponents: (components) ->
 			components.forEach((component) =>
@@ -93,12 +91,20 @@ define(["vendor/amd/jszip",
 			@archive.file("index.html", str);
 
 		# use the !text plugin to load these?
-		_archiveScripts: () ->
+		_archiveScripts: (cb) ->
+			requirejs(['text!../preview_export/scripts/impress.js'], (impress) =>
+				@scriptsDir.file('impress.js', impress)
+				cb()
+			)
 
 		# how could we archive fonts though...?
 		_archiveFonts: () ->
 
-		_archiveCss: () ->
+		_archiveCss: (cb) ->
+			requirejs(['text!../zip/main.css'], (css) =>
+				@cssDir.file('main.css', css)
+				cb()
+			)
 
 		_archiveImage: (component) ->
 			# TODO: check the origin on the image

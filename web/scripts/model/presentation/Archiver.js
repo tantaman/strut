@@ -41,20 +41,20 @@ define(["vendor/amd/jszip", "./Deck", "ui/impress_renderer/ImpressRenderer", "co
       return this.archive.generate();
     };
 
-    Archiver.prototype.createSimple = function() {
-      var showStr;
+    Archiver.prototype.createSimple = function(cb) {
+      var showStr,
+        _this = this;
       this.archive = new JSZip();
       this.previewExportDir = this.archive.folder("preview_export");
-      this.imagesDir = this.previewExportDir.folder("images");
       this.scriptsDir = this.previewExportDir.folder("scripts");
-      this.fontsDir = this.previewExportDir.folder("fonts");
       this.cssDir = this.previewExportDir.folder("css");
       showStr = "<!doctype html><html>" + ImpressRenderer.render(this.presentation.attributes) + "</html>";
       this._archiveIndexHtml(showStr);
-      this._archiveScripts();
-      this._archiveFonts();
-      this._archiveCss();
-      return this.archive.generate();
+      return this._archiveScripts(function() {
+        return _this._archiveCss(function() {
+          return cb(_this.archive.generate());
+        });
+      });
     };
 
     Archiver.prototype.processComponents = function(components) {
@@ -76,11 +76,23 @@ define(["vendor/amd/jszip", "./Deck", "ui/impress_renderer/ImpressRenderer", "co
       return this.archive.file("index.html", str);
     };
 
-    Archiver.prototype._archiveScripts = function() {};
+    Archiver.prototype._archiveScripts = function(cb) {
+      var _this = this;
+      return requirejs(['text!../preview_export/scripts/impress.js'], function(impress) {
+        _this.scriptsDir.file('impress.js', impress);
+        return cb();
+      });
+    };
 
     Archiver.prototype._archiveFonts = function() {};
 
-    Archiver.prototype._archiveCss = function() {};
+    Archiver.prototype._archiveCss = function(cb) {
+      var _this = this;
+      return requirejs(['text!../zip/main.css'], function(css) {
+        _this.cssDir.file('main.css', css);
+        return cb();
+      });
+    };
 
     Archiver.prototype._archiveImage = function(component) {
       var fileName, img;

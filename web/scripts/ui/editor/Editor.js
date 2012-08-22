@@ -109,8 +109,27 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
         return _this.model.set("background", bgState);
       });
     },
-    exportZIP: function(e) {
+    exportWebpage: function() {
       return $('#exportModal').modal('show');
+    },
+    exportZIP: function(e) {
+      var archive, archiver,
+        _this = this;
+      archiver = new Archiver(this.model);
+      return archive = archiver.createSimple(function(archive) {
+        Downloadify.create('downloadify', {
+          filename: 'StrutPresentation.zip',
+          data: archive,
+          dataType: 'base64',
+          swf: 'res/downloadify/media/downloadify.swf',
+          downloadImage: 'res/downloadify/images/download.png',
+          width: 100,
+          height: 30,
+          transparent: true,
+          append: false
+        });
+        return $('#zipModal').modal('show');
+      });
     }
   };
   return Backbone.View.extend({
@@ -249,6 +268,7 @@ define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionE
       this.$el.append(this.openDialog.render());
       this.$el.append(this.saveAsDialog.render());
       $('#exportModal').modal();
+      $('#zipModal').modal();
       this.backgroundPickerModal = new BackgroundPicker({
         bgOpts: {
           type: "radial",
