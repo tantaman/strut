@@ -7,7 +7,7 @@
  *
  * Original code can be found here: http://www.onicos.com/staff/iz/amuse/javascript/expert/deflate.txt
  */
-
+define(['vendor/amd/jszip-deflate'], function(JSZip) {
 if(!JSZip)
 {
    throw "JSZip not defined";
@@ -1693,3 +1693,4 @@ if(!JSZip.compressions["DEFLATE"]) {
 }
 
 })();
+});
