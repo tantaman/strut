@@ -1,4 +1,4 @@
--Currently out on vacation.  I won't be returning or responding to issues until Sept. 4th.-
+-Currently out on vacation.  I'll be returning and responding to issues on Sept. 4th.-
 
 Strut
 =======
