@@ -94,9 +94,13 @@ else
 				title: button.replace('-', ' ')
 				display: button.substring(0, 1).toUpperCase()
 
+			if button is 'link'
+				viewData.display = ''
+
 			switch button
 				when "font-size" then EtchTemplates.fontSizeSelection viewData
 				when "font-family" then EtchTemplates.fontFamilySelection viewData
+				when "color" then EtchTemplates.colorChooser viewData
 				else 
 					if button.indexOf("justify") isnt -1
 						viewData.icon = button.substring button.indexOf('-')+1, button.length

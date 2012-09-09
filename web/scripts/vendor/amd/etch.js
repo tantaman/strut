@@ -38,10 +38,13 @@ define(['vendor/amd/backbone'], function(Backbone) {
       this.$el = $(this.el);
             
       // Model attribute event listeners:
-      _.bindAll(this, 'changeButtons', 'changePosition', 'changeEditable', 'insertImage');
+      _.bindAll(this, 'changeButtons', 'changePosition', 'changeEditable', 'insertImage',
+              '_editableModelChanged');
       this.model.bind('change:buttons', this.changeButtons);
       this.model.bind('change:position', this.changePosition);
       this.model.bind('change:editable', this.changeEditable);
+
+      this.model.on('change:editableModel', this._editableModelChanged);
 
       // Init Routines:
       this.changeEditable();
@@ -63,6 +66,10 @@ define(['vendor/amd/backbone'], function(Backbone) {
       'click .etch-clear-formatting': 'clearFormatting',
       'click [data-option="fontSize"]': 'setFontSize',
       'click [data-option="fontFamily"]': 'setFontFamily'
+    },
+
+    _editableModelChanged: function(model, newEditable) {
+      console.log(arguments);
     },
         
     changeEditable: function() {
@@ -100,6 +107,25 @@ define(['vendor/amd/backbone'], function(Backbone) {
       });
             
       $(this.el).show('fast');
+
+      var $colorChooser = this.$el.find(".color-chooser");
+      if ($colorChooser.length > 0) {
+        var hex = '333';
+        $colorChooser.ColorPicker({
+          color: '#' + hex,
+          onChange: function (hsb, hex, rgb) {
+            $colorChooser.find("div").css("backgroundColor", "#" + hex);
+            // Set the color of the actual text
+          }
+        });
+
+        // $(".colorpicker").click(function(e) {
+        //   e.stopPropagation();
+        //   return false;
+        // });
+
+        $colorChooser.find("div").css("backgroundColor", '#' + hex)
+      }
 
       var $toggle = this.$el.find('.dropdown-toggle');
       $toggle.dropdown();

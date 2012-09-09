@@ -100,11 +100,16 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         title: button.replace('-', ' '),
         display: button.substring(0, 1).toUpperCase()
       };
+      if (button === 'link') {
+        viewData.display = '';
+      }
       switch (button) {
         case "font-size":
           return EtchTemplates.fontSizeSelection(viewData);
         case "font-family":
           return EtchTemplates.fontFamilySelection(viewData);
+        case "color":
+          return EtchTemplates.colorChooser(viewData);
         default:
           if (button.indexOf("justify") !== -1) {
             viewData.icon = button.substring(button.indexOf('-') + 1, button.length);
