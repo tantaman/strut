@@ -123,7 +123,6 @@ define(['vendor/amd/backbone'], function(Backbone) {
 
         var prevent = function(e) {
           e.preventDefault();
-          return false;
         };
 
         $(".colorpicker").click(prevent);

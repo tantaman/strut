@@ -91,7 +91,7 @@ if (window.location.href.indexOf("preview=true") !== -1) {
       }
     };
     _.extend(etch.config.buttonClasses, {
-      "default": ['<group>', 'bold', 'italic', '</group>', '<group>', 'justify-left', 'justify-center', 'justify-right', '</group>', '<group>', 'link', '</group>', 'font-family', 'font-size', '<group>', 'color', '</group>']
+      "default": ['<group>', 'clear-formatting', '</group>', '<group>', 'bold', 'italic', '</group>', '<group>', 'unordered-list', 'ordered-list', '</group>', '<group>', 'justify-left', 'justify-center', 'justify-right', '</group>', '<group>', 'link', '</group>', 'font-family', 'font-size', '<group>', 'color', '</group>']
     });
     etch.buttonElFactory = function(button) {
       var viewData;
@@ -100,7 +100,7 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         title: button.replace('-', ' '),
         display: button.substring(0, 1).toUpperCase()
       };
-      if (button === 'link') {
+      if (button === 'link' || button === 'clear-formatting' || button === 'ordered-list' || button === 'unordered-list') {
         viewData.display = '';
       }
       switch (button) {

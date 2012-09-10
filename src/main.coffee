@@ -81,7 +81,10 @@ else
 				height: 768
 
 		_.extend(etch.config.buttonClasses,
-			default: ['<group>', 'bold', 'italic', '</group>',
+			default: [
+				'<group>', 'clear-formatting', '</group>',
+				'<group>', 'bold', 'italic', '</group>',
+				'<group>', 'unordered-list', 'ordered-list', '</group>',
 				'<group>', 'justify-left', 'justify-center', 'justify-right', '</group>',
 				'<group>', 'link', '</group>',
 				'font-family', 'font-size',
@@ -94,7 +97,7 @@ else
 				title: button.replace('-', ' ')
 				display: button.substring(0, 1).toUpperCase()
 
-			if button is 'link'
+			if button is 'link' or button is 'clear-formatting' or button is 'ordered-list' or button is 'unordered-list'
 				viewData.display = ''
 
 			switch button

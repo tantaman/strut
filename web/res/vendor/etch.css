@@ -28,15 +28,37 @@
 .etch-editor-panel .etch-unordered-list span { background-position: -90px 0; }
 .etch-editor-panel .etch-ordered-list span { background-position: -120px 0; }
 .etch-editor-panel .etch-image span { background-position: -150px 0; }*/
-.etch-editor-panel .etch-link span { 
+
+.etch-editor-panel .etch-link span,
+.etch-editor-panel .etch-clear-formatting span,
+.etch-editor-panel .etch-unordered-list span,
+.etch-editor-panel .etch-ordered-list span {
     background: url('images/editor_icons.png') no-repeat;
-    background-position: -180px 0; 
     width: 24px;
     height: 21px;
     display: inline-block;
 }
 
-.etch-editor-panel .etch-link {
+.etch-editor-panel .etch-link span { 
+    background-position: -180px 0; 
+}
+
+.etch-editor-panel .etch-clear-formatting span { 
+    background-position: -390px 0; 
+}
+
+.etch-editor-panel .etch-unordered-list span {
+    background-position: -90px 0;
+}
+
+.etch-editor-panel .etch-ordered-list span {
+    background-position: -120px 0;
+}
+
+.etch-editor-panel .etch-link,
+.etch-editor-panel .etch-clear-formatting,
+.etch-editor-panel .etch-unordered-list,
+.etch-editor-panel .etch-ordered-list {
     padding: 0;
 }
 
