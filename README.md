@@ -22,7 +22,7 @@ strut-presentation-editor@googlegroups.com
 
 ### Building ###
 
-Most of Strut is written in Coffeescript and uses precompiled templates for HTML rendering.
+Most of Strut is written in CoffeeScript and uses precompiled templates for HTML rendering.
 
 To compile the CoffeeScript
 
@@ -38,7 +38,7 @@ To compile the templates
 
 ### Running ###
 
-Strut can run enteirely from your local filesystem.  
+Strut can run entirely from your local filesystem.  
 Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Contributing ###
@@ -48,7 +48,7 @@ In ```Strut``` there is an object for each major component.  The
 [SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
 [TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionEditor.coffee), 
 [SlideEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/SlideEditor.coffee),
-etc. all have their own objects so its easy to
+etc. all have their own objects so it's easy to
 track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
 focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
 view layers.  
