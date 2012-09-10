@@ -85,6 +85,7 @@ define(['vendor/amd/backbone'], function(Backbone) {
     },
 
     changeButtons: function() {
+      console.log("Change btns");
       // render the buttons into the editor-panel
       this.$el.empty();
       var view = this;
@@ -337,6 +338,9 @@ define(['vendor/amd/backbone'], function(Backbone) {
           editable: $editable,
           editableModel: this.model
         });
+        $editor.css("display", "block");
+      } else {
+        $editor.css("display", "block");
       }
       
       // Firefox seems to be only browser that defaults to `StyleWithCSS == true`
@@ -372,9 +376,10 @@ define(['vendor/amd/backbone'], function(Backbone) {
       $('body').bind('mousedown.editor', function(e) {
         // check to see if the click was in an etch tool
         var target = e.target || e.srcElement;
-        if ($(target).not('.etch-editor-panel, .etch-editor-panel *, .etch-image-tools, .etch-image-tools *').size()) {
+        if ($(target).not('.colorpicker *, .etch-editor-panel, .etch-editor-panel *, .etch-image-tools, .etch-image-tools *').size()) {
           // remove editor
-          $editor.remove();
+          $editor.css("display", "none");
+          //$editor.remove();
                     
                     
           if (models.EditableImage) {
