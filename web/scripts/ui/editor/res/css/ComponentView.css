@@ -6,6 +6,10 @@
 	text-shadow: 0 0 .2em rgba(50, 50, 50, .7) !important;
 }
 
+.component.textBox li {
+	line-height: 1em;
+}
+
 .component .label.rotate {
 	font-size: 25px;
 }
