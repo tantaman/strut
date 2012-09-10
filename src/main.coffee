@@ -64,8 +64,11 @@ else
 		)
 	
 	requirejs(["vendor/amd/backbone",
-			"state/DefaultState"],
-	(Backbone, DefaultState) ->
+			"state/DefaultState",
+			"vendor/amd/etch",
+			"ui/etch/Templates",
+			"css!ui/etch/res/css/etchOverrides.css"],
+	(Backbone, DefaultState, etch, EtchTemplates) ->
 		Backbone.sync = (method, model, options) ->
 			if options.keyTrail?
 				options.success(DefaultState.get(options.keyTrail))
@@ -76,5 +79,56 @@ else
 			size:
 				width: 1024
 				height: 768
+
+		_.extend(etch.config.buttonClasses,
+			default: [
+				'<group>', 'clear-formatting', '</group>',
+				'<group>', 'bold', 'italic', '</group>',
+				'<group>', 'unordered-list', 'ordered-list', '</group>',
+				'<group>', 'justify-left', 'justify-center', 'justify-right', '</group>',
+				'<group>', 'link', '</group>',
+				'font-family', 'font-size',
+				'<group>', 'color', '</group>']
+		)
+
+		etch.buttonElFactory = (button) ->
+			viewData =
+				button: button
+				title: button.replace('-', ' ')
+				display: button.substring(0, 1).toUpperCase()
+
+			if button is 'link' or button is 'clear-formatting' or button is 'ordered-list' or button is 'unordered-list'
+				viewData.display = ''
+
+			switch button
+				when "font-size" then EtchTemplates.fontSizeSelection viewData
+				when "font-family" then EtchTemplates.fontFamilySelection viewData
+				when "color" then EtchTemplates.colorChooser viewData
+				else 
+					if button.indexOf("justify") isnt -1
+						viewData.icon = button.substring button.indexOf('-')+1, button.length
+						EtchTemplates.align viewData
+					else
+						EtchTemplates.defaultButton(viewData)
+
+		etch.groupElFactory = () ->
+			return $('<div class="btn-group">')
+			
 		continuation()
 	)
+
+	###
+	switch (button) {
+      case 'font-size':
+        return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+           + button.replace('-', ' ') + 
+           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+            + button + '"><li><a href="#">Wee2</a></li></ul>');
+      case 'font-family':
+       return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+           + button.replace('-', ' ') + 
+           '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+            + button + '"><li><a href="#">Wee</a></li></ul>');
+      break;
+      default:
+	###

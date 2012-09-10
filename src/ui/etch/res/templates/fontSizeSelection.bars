@@ -1,0 +1,18 @@
+<div class="btn-group">
+	<a class="btn btn-small btn-inverse dropdown-toggle" data-toggle="dropdown" title="Choose the font size"><span class="text">72</span>
+		<span class="caret"></span></a>
+	<ul class="dropdown-menu menuBarOption" data-option="fontSize">
+		<li>
+                  <a href="#" data-value="144">144</a>
+                  <a href="#" data-value="96">96</a>
+                  <a href="#" data-value="72">72</a>
+			<a href="#" data-value="64">64</a>
+                  <a href="#" data-value="48">48</a>
+                  <a href="#" data-value="36">36</a>
+                  <a href="#" data-value="24">24</a>
+                  <a href="#" data-value="16">16</a>
+                  <a href="#" data-value="12">12</a>
+                  <a href="#" data-value="8">8</a>
+		</li>
+     	</ul>
+</div>

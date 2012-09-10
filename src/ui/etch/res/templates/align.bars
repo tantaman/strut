@@ -1,0 +1,2 @@
+<a href="#" 
+	class="btn btn-small etch-{{button}}" title="{{title}}"><i class="icon-align-{{icon}}"></i></a>

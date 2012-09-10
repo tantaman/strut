@@ -3,7 +3,7 @@
 @author Tantaman
 */
 
-define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
+define(["./ComponentView", "vendor/amd/etch", "../Templates"], function(ComponentView, etch, Templates) {
   var styles;
   styles = ["family", "size", "weight", "style", "color", "decoration", "align"];
   return ComponentView.extend({
@@ -14,7 +14,8 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
       parentEvents = ComponentView.prototype.events.call(this);
       myEvents = {
         "dblclick": "dblclicked",
-        "editComplete": "editCompleted"
+        "editComplete": "editCompleted",
+        "mousedown": "mousedown"
       };
       return _.extend(parentEvents, myEvents);
     },
@@ -39,8 +40,19 @@ define(["./ComponentView", "../Templates"], function(ComponentView, Templates) {
     dblclicked: function(e) {
       this.$el.addClass("editable");
       this.$el.find(".content").attr("contenteditable", true);
+      if (e != null) {
+        etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+      }
       this.allowDragging = false;
       return this.editing = true;
+    },
+    mousedown: function(e) {
+      if (this.editing) {
+        etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+      } else {
+        ComponentView.prototype.mousedown.apply(this, arguments);
+      }
+      return true;
     },
     editCompleted: function() {
       var text;

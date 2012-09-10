@@ -78,7 +78,7 @@ if (window.location.href.indexOf("preview=true") !== -1) {
       }
     });
   };
-  requirejs(["vendor/amd/backbone", "state/DefaultState"], function(Backbone, DefaultState) {
+  requirejs(["vendor/amd/backbone", "state/DefaultState", "vendor/amd/etch", "ui/etch/Templates", "css!ui/etch/res/css/etchOverrides.css"], function(Backbone, DefaultState, etch, EtchTemplates) {
     Backbone.sync = function(method, model, options) {
       if (options.keyTrail != null) {
         return options.success(DefaultState.get(options.keyTrail));
@@ -90,6 +90,54 @@ if (window.location.href.indexOf("preview=true") !== -1) {
         height: 768
       }
     };
+    _.extend(etch.config.buttonClasses, {
+      "default": ['<group>', 'clear-formatting', '</group>', '<group>', 'bold', 'italic', '</group>', '<group>', 'unordered-list', 'ordered-list', '</group>', '<group>', 'justify-left', 'justify-center', 'justify-right', '</group>', '<group>', 'link', '</group>', 'font-family', 'font-size', '<group>', 'color', '</group>']
+    });
+    etch.buttonElFactory = function(button) {
+      var viewData;
+      viewData = {
+        button: button,
+        title: button.replace('-', ' '),
+        display: button.substring(0, 1).toUpperCase()
+      };
+      if (button === 'link' || button === 'clear-formatting' || button === 'ordered-list' || button === 'unordered-list') {
+        viewData.display = '';
+      }
+      switch (button) {
+        case "font-size":
+          return EtchTemplates.fontSizeSelection(viewData);
+        case "font-family":
+          return EtchTemplates.fontFamilySelection(viewData);
+        case "color":
+          return EtchTemplates.colorChooser(viewData);
+        default:
+          if (button.indexOf("justify") !== -1) {
+            viewData.icon = button.substring(button.indexOf('-') + 1, button.length);
+            return EtchTemplates.align(viewData);
+          } else {
+            return EtchTemplates.defaultButton(viewData);
+          }
+      }
+    };
+    etch.groupElFactory = function() {
+      return $('<div class="btn-group">');
+    };
     return continuation();
   });
+  /*
+  	switch (button) {
+        case 'font-size':
+          return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+             + button.replace('-', ' ') + 
+             '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+              + button + '"><li><a href="#">Wee2</a></li></ul>');
+        case 'font-family':
+         return $('<a class="etch-editor-button dropdown-toggle disabled" data-toggle="dropdown" title="'
+             + button.replace('-', ' ') + 
+             '"><span class="text">Lato</span></a><ul class="dropdown-menu etch-'
+              + button + '"><li><a href="#">Wee</a></li></ul>');
+        break;
+        default:
+  */
+
 }
