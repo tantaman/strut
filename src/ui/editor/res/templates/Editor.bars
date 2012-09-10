@@ -32,7 +32,8 @@
                     Slideshow<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li data-option="exportZIP"><a href="#">Export as Webpage</a></li>
+                    <li data-option="exportWebpage"><a href="#">Export as Webpage</a></li>
+                    <li data-option="exportZIP"><a href="#">Zip Presentation</a></li>
                     <li class="divider"></li>
                     <li data-option="exportJSON"><a href="#">Export to JSON</a></li>
                     <li data-option="importJSON"><a href="#">Import from JSON</a></li>
@@ -66,5 +67,20 @@
   </div>
   <div class="modal-footer">
     <a href="#" class="btn btn-inverse" data-dismiss="modal">Ok</a>
+  </div>
+</div>
+
+<div class="modal hide" id="zipModal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Export as Webpage</h3>
+  </div>
+  <div class="modal-body">
+    Zip Created!
+  </div>
+  <div class="modal-footer">
+    <p id="downloadify">
+        You must have Flash 10 installed to download this file.
+    </p>
   </div>
 </div>
