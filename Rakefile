@@ -15,6 +15,10 @@ if ENV['OS'] != nil
 	end
 end
 
+task :updateCoffeeIgnore do
+	system "./updateCoffeeIgnore.sh"
+end
+
 task :compileTpls, :pretty do |t, args|
 	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
