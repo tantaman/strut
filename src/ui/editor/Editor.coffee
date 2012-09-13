@@ -76,7 +76,6 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			if perspective?
 				perspective.paste()
 
-
 		transitionEditor: (e) ->
 			@changePerspective(e, {perspective: "transitionEditor"})
 		slideEditor: (e) ->
@@ -85,6 +84,7 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			@$el.trigger("preview")
 		exportJSON: (e) ->
 			@rawTextModal.show(null, JSON.stringify(@model.toJSON(false, true)))
+			@rawTextModal.makeDownloadable()
 
 		importJSON: (e) ->
 			@rawTextModal.show((json) =>

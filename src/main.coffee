@@ -21,6 +21,9 @@ else if $.browser.opera
 else if $.browser.webkit
 	window.browserPrefix = "-webkit-"
 
+window.URL = window.webkitURL or window.URL
+window.Blob = window.Blob or window.WebKitBlob or window.MozBlob
+
 if not window.localStorage?
 	window.localStorage =
 		setItem: () ->
