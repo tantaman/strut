@@ -4,16 +4,16 @@
 }
 
 .editor .menuBar {
-	height: 25px;
+	height: 36px;
 	position: relative;
 }
 
 .editor .menuBar > div {
-	height: 25px;
+	height: 36px;
 }
 
 .editor .manuBar > div > .container {
-	height: 25px;
+	height: 36px;
 }
 
 .menuBar .brand {
@@ -22,7 +22,7 @@
 }
 
 .menuBar .nav > li > a {
-	padding: 2px 10px 3px;
+	padding: 7px 10px 8px;
 }
 
 .editor .nav .active a:hover {
