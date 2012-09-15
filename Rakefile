@@ -19,6 +19,13 @@ task :updateCoffeeIgnore do
 	system "./updateCoffeeIgnore.sh"
 end
 
+task :coffee, :watch do |t, args|
+	Rake::Task["compileCoffee"].invoke args[:watch]
+end
+
+task :templates => [:compileTpls] do
+end
+
 task :compileTpls, :pretty do |t, args|
 	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
