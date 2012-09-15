@@ -1,6 +1,7 @@
 define(["vendor/amd/Handlebars",
-		"./Templates"],
-(Handlebars, Templates) ->
+		"./Templates",
+		"common/Math2"],
+(Handlebars, Templates, Math2) ->
 	class ImpressRenderer
 		constructor: () ->
 			Handlebars.registerHelper("renderComponent", (componentModel) =>
@@ -35,6 +36,10 @@ define(["vendor/amd/Handlebars",
 
 			Handlebars.registerHelper("negate", (v) ->
 				-1 * v
+			)
+
+			Handlebars.registerHelper("round", (v) ->
+				Math2.round(v, 2)
 			)
 
 			Handlebars.registerHelper("extractBG", (styles) ->
