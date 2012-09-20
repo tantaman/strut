@@ -85,10 +85,9 @@ else
 
 		_.extend(etch.config.buttonClasses,
 			default: [
-				'<group>', 'clear-formatting', '</group>',
 				'<group>', 'bold', 'italic', '</group>',
 				'<group>', 'unordered-list', 'ordered-list', '</group>',
-				'<group>', 'justify-left', 'justify-center', 'justify-right', '</group>',
+				'<group>', 'justify-left', 'justify-center', '</group>',
 				'<group>', 'link', '</group>',
 				'font-family', 'font-size',
 				'<group>', 'color', '</group>']
