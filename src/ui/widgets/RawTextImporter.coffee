@@ -26,7 +26,7 @@ define(["vendor/amd/backbone",
 		makeDownloadable: () ->
 			MIME_TYPE = 'application\/json'
 			blob = new Blob([@$txtArea.val()], type: MIME_TYPE)
-			a = $('<a class="downloadLink btn btn-inverse" title="Download"><i class="icon-download-alt icon-white"></i></a>')[0]
+			a = $('<a class="downloadLink btn btn-inverse" target="_blank" title="Download"><i class="icon-download-alt icon-white"></i></a>')[0]
 			a.download = 'presentation.json' # needs a real name
 			a.href = window.URL.createObjectURL(blob)
 			a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':')
