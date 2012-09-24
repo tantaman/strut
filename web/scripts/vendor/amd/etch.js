@@ -117,7 +117,8 @@ define(['vendor/amd/backbone'], function(Backbone) {
           onChange: function (hsb, hex, rgb) {
             $colorChooser.find("div").css("backgroundColor", "#" + hex);
             // Set the color of the actual text
-            view.model.get('editableModel').set('color', hex)
+            //view.model.get('editableModel').set('color', hex)
+            document.execCommand('foreColor', false, hex);
           }
         });
 
@@ -125,8 +126,8 @@ define(['vendor/amd/backbone'], function(Backbone) {
           e.preventDefault();
         };
 
-        $(".colorpicker").click(prevent);
-        $colorChooser.click(prevent);
+        $(".colorpicker").mousedown(prevent);
+        $colorChooser.mousedown(prevent);
 
         $colorChooser.find("div").css("backgroundColor", '#' + hex)
       }
