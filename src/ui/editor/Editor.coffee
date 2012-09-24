@@ -164,14 +164,16 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			window.previewWind = window.open("index.html?preview=true");
 			sourceWind = window;
 
-			cb = () ->
+			cb = () =>
 					if (not sourceWind.previewWind.startImpress?)
 						setTimeout(cb, 200)
 					else
 						sourceWind.previewWind.document.getElementsByTagName("html")[0].innerHTML = showStr;
 						if not sourceWind.previewWind.impressStarted
 							sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
-							sourceWind.previewWind.impress().init();
+							sourceWind.previewWind.imp = sourceWind.previewWind.impress()
+							sourceWind.previewWind.imp.init()
+							sourceWind.previewWind.imp.goto(@model.get("activeSlide").get("num"))
 			
 			$(window.previewWind.document).ready(cb)
 			#window.location = "index.html?preview=" + showStr;
