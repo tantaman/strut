@@ -36,15 +36,15 @@ define(["./ComponentView",
 		# writing them by hand...
 		rotateX: (e, deltas) ->
 			rot = (deltas.dy * .02) % twoPI
-			@model.set("rotateX", @_initialRotX + rot)
+			@model.setFloat("rotateX", @_initialRotX + rot)
 
 		rotateY: (e, deltas) ->
 			rot = (deltas.dx * .02) % twoPI
-			@model.set("rotateY", @_initialRotY + rot)
+			@model.setFloat("rotateY", @_initialRotY + rot)
 
 		rotateZ: (e, deltas) ->
 			rot = @_calcRot(deltas)
-			@model.set("rotateZ", @_initialRotZ + rot - @_rotZOffset)
+			@model.setFloat("rotateZ", @_initialRotZ + rot - @_rotZOffset)
 
 		# TODO: we could be smarter and auto-generate all these methods
 		manualMoveScale: (e) ->
@@ -82,15 +82,15 @@ define(["./ComponentView",
 			@$rotZInput = @$el.find("[data-option='rotateZ']")
 
 		_rotXChanged: (model, value) ->
-			@$rotXInput.val(Math2.toDeg(value))
+			@$rotXInput.val(Math2.round(Math2.toDeg(value), 2))
 			@_setUpdatedTransform()
 
 		_rotYChanged: (model, value) ->
-			@$rotYInput.val(Math2.toDeg(value))
+			@$rotYInput.val(Math2.round(Math2.toDeg(value), 2))
 			@_setUpdatedTransform()
 
 		_rotZChanged: (model, value) ->
-			@$rotZInput.val(Math2.toDeg(value))
+			@$rotZInput.val(Math2.round(Math2.toDeg(value), 2))
 			@_setUpdatedTransform()
 
 

@@ -3,7 +3,7 @@
 ###
 define(["common/Calcium",
 		"common/Math2"]
-(Backbone) ->
+(Backbone, Math2) ->
 	Backbone.Model.extend(
 		initialize: () ->
 
@@ -24,8 +24,8 @@ define(["common/Calcium",
 				catch e
 					return
 
-			if dec?
-				value = Math2.round(value, dec)
+			dec || (dec = 2)
+			value = Math2.round(value, dec)
 
 			@set(name, value)
 

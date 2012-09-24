@@ -80,14 +80,14 @@ define(["vendor/amd/backbone"
 			@remove()
 
 		skewX: (e, deltas) ->
-			@model.set("skewX", @_initialSkewX + Math.atan2(deltas.dx, 22))
+			@model.setFloat("skewX", @_initialSkewX + Math.atan2(deltas.dx, 22))
 			@_setUpdatedTransform()
 
 		skewXStart: () ->
 			@_initialSkewX = @model.get("skewX") || 0
 
 		skewY: (e, deltas) ->
-			@model.set("skewY", @_initialSkewY + Math.atan2(deltas.dy, 22))
+			@model.setFloat("skewY", @_initialSkewY + Math.atan2(deltas.dy, 22))
 			@_setUpdatedTransform()
 
 		skewYStart: () ->
@@ -106,7 +106,7 @@ define(["vendor/amd/backbone"
 			# Snap to 1/16 angles (22.5 degrees) on Shift press
 			if key.shift
 				newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI
-			@model.set("rotate", newRot)
+			@model.setFloat("rotate", newRot)
 			@_setUpdatedTransform()
 
 		rotateStart: (e, deltas) ->
@@ -293,8 +293,8 @@ define(["vendor/amd/backbone"
 					newX = Math.floor(newX / gridSize) * gridSize
 					newY = Math.floor(newY / gridSize) * gridSize
 
-				@model.set("x", newX)
-				@model.set("y", newY)
+				@model.setInt("x", newX)
+				@model.setInt("y", newY)
 
 				if not @dragStartLoc?
 					@dragStartLoc =
