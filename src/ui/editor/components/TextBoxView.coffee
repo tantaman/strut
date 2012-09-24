@@ -69,7 +69,8 @@ define(["./ComponentView",
 
 		edit: () ->
 			@model.set("selected", true)
-			@dblclicked()
+			e = $.Event("click", pageX: @model.get("x"))
+			@dblclicked(e)
 			@$el.find(".content").selectText()
 
 		_styleChanged: (model, style, opts) ->
