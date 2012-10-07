@@ -9,6 +9,7 @@
 
 require 'rake'
 require 'fileutils'
+require 'listen'
 
 myDir = Dir.pwd
 
@@ -72,8 +73,33 @@ task :templates, :pretty do |t, args|
 	end
 end
 
+def watchAndCopy(source, destination, options)
+	options[:relative_paths] = true
+	listener = Listen::Listener.new(source, options) do |modified, added, removed|
+		# TODO: how can I assign this to a lambda and pass it to each?
+		puts modified
+		puts added
+		puts removed
+		added.each do |fname|
+			FileUtils.mkdir_p File.dirname "#{destination}/#{File.dirname(fname)}"
+			FileUtils.cp "#{source}/#{fname}", "#{destination}/#{fname}"
+		end
+
+		modified.each do |fname|
+			FileUtils.cp "#{source}/#{fname}", "#{destination}/#{fname}"
+		end
+
+		removed.each do |fname|
+			FileUtils.rm "#{destination}/#{fname}"
+		end
+	end
+
+	listener.start(false)
+end
+
 # TODO: add the ability to watch js files for changes
 task :copyjs, :watch do |t, args|
+	puts "Copying intial js files"
 	FileList["src/main/js/**/*.js"].each do |fname|
 		dest = File.dirname(fname).sub("src/main/js", "web/scripts")
 		FileUtils.mkdir_p dest
@@ -85,9 +111,15 @@ task :copyjs, :watch do |t, args|
 		FileUtils.mkdir_p dest
 		FileUtils.cp fname, dest
 	end
+
+	if args[:watch]
+		puts "Wathing for js changes"
+		watchAndCopy "src/main/js", "web/scripts", :filter => /\.js/
+	end
 end
 
-task :copyresources, :watch do |tar, args|
+task :copyresources, :watch do |t, args|
+	puts "Copying initial resources"
 	FileList["src/main/resources/**/*"].exclude(/templates/).each do |fname|
 		if not File.directory? fname
 			dest = File.dirname(fname).sub("src/main/resources", "web/scripts")
@@ -95,13 +127,18 @@ task :copyresources, :watch do |tar, args|
 			FileUtils.cp fname, dest
 		end
 	end
+
+	if args[:watch]
+		puts "Watching for resource changes"
+		watchAndCopy "src/main/resources", "web/scripts", :ignore => /templates/
+	end
 end
 
-task :devbuild => [:coffee, :templates, :copyjs, :copyresources] do
+task :devbuild, [:watch] => [:coffee, :templates, :copyjs, :copyresources] do |t, args|
 end
 
 task :clean do
-	FileUtils.rm_rf "web/scripts"
+	FileUtils.rm_r "web/scripts"
 end
 
 task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify] do
@@ -129,7 +166,8 @@ task :zipForLocal => [:coffee, :templates] do
 	system "gzip Strut.tar"
 end
 
-task :docs do
+# yuidoc only parses javascript code (afaik) so we have to compile it first.
+task :docs => [:coffee, :copyjs] do
 	system %{yuidoc web/scripts -o docs}
 end
 
