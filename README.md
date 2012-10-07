@@ -28,13 +28,17 @@ To compile the CoffeeScript
 
 1. Install CoffeeScript (sudo npm install -g coffee-script)
 2. cd to the Strut directory
-3. run `rake compileCoffee[w]`  (omit [w] to not watch for changes)
+3. run `rake coffee[w]`  (omit [w] to not watch for changes)
 
 To compile the templates
 
 1. Install Handlebars (sudo npm install -g handlebars)
 2. cd to the Strut directory
-3. run `rake compileTpls`
+3. run `rake templates`
+
+Alternatively, everything can be compiled on one go with:
+
+`rake build`
 
 ### Running ###
 

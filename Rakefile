@@ -26,6 +26,9 @@ end
 task :templates => [:compileTpls] do
 end
 
+task :build => [:coffee, :templates] do
+end
+
 task :compileTpls, :pretty do |t, args|
 	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
 		pretty = args[:pretty]
