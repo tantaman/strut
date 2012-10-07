@@ -17,11 +17,15 @@
 		<link href='res/vendor/etch.css' rel='stylesheet' type='text/css'></link>
 		<link rel="shortcut icon" href="res/img/strut-icon.png">
 		<link rel="apple-touch-icon-precomposed" href="res/img/strut-touch.png">
+
+		<!-- VENDOR -->
 		<script type="text/javascript" src="scripts/vendor/A-jquery-1.7-matt.js"></script>
 		<script type="text/javascript" src="scripts/vendor/B-jqueryUI.js"></script>
 		<script type="text/javascript" src="scripts/vendor/C-underscore.js"></script>
 		<script type="text/javascript" src="scripts/vendor/D-bootstrap.js"></script>
 		<script type="text/javascript" src="scripts/vendor/E-bootstrapDropdown.js"></script>
+		<!-- /VENDOR -->
+
 		<script type="text/javascript" src="res/jqplugins/colorpicker/js/colorpicker.js"></script>
 		<script type="text/javascript" src="res/jqplugins/gradient_picker/jquery.gradientPicker.js"></script>
     	<script>
@@ -43,9 +47,12 @@
 		};
     	</script>
     	
+    	<!-- MAIN -->
 		<script type="text/javascript" data-main="scripts/main" src="scripts/vendor/require.js"></script>
-		<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
+		<!-- /MAIN -->
 
+		<!-- We have to include impress.js here in order to correctly render previews... -->
+		<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 		<script type="text/javascript" src="res/downloadify/js/downloadify.min.js"></script>
 		<script type="text/javascript" src="res/downloadify/js/swfobject.js"></script>
 	</head>

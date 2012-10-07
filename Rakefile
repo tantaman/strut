@@ -4,9 +4,6 @@
 # -compiles stylus styles
 # -eventually cleans up web to be a dist only thinger
 
-
-#node ../../r.js -o name=main out=main-built.js baseUrl=. paths.css=vendor/amd_plugins/css paths.text=vendor/amd_plugins/text
-
 require 'rake'
 require 'fileutils'
 require 'listen'
@@ -139,15 +136,56 @@ end
 
 task :clean do
 	FileUtils.rm_r "web/scripts"
+	FileUtils.rm_r "web-dist"
+end
+
+task :minify => [:buildVendor] do
+	puts "Minifying"
+	Dir.chdir("web/scripts") do
+		system "node ../../r.js -o name=main out=main-built.js baseUrl=. paths.css=vendor/amd_plugins/css paths.text=vendor/amd_plugins/text"
+	end
 end
 
 task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify] do
+	distDir = "web-dist"
+
+	FileUtils.mkdir_p "#{distDir}/scripts/vendor"
+
+	FileUtils.cp_r "web/preview_export", distDir
+	FileUtils.cp_r "web/zip", distDir
+	FileUtils.cp_r "web/res", distDir
+
+	FileUtils.cp "web/scripts/main-built.js", "#{distDir}/scripts"
+	FileUtils.cp "web/scripts/vendor/vendor-built.js", "#{distDir}/scripts/vendor"
+	FileUtils.cp "web/scripts/vendor/require.js", "#{distDir}/scripts/vendor"
+
+	ignore = false
+	newIndex = File.open("#{distDir}/index.html", "w")
+	File.readlines("web/index.html").each do |line|
+		if not ignore
+			newIndex.write line
+		end
+
+		if line["/VENDOR"]
+			ignore = false
+		elsif line["VENDOR"]
+			newIndex.write '<script type="text/javascript" src="scripts/vendor/vendor-built.js"></script>'
+			ignore = true
+		elsif line["/MAIN"]
+			ignore = false
+		elsif line["MAIN"]
+			newIndex.write '<script type="text/javascript" data-main="scripts/main-built" src="scripts/vendor/require.js"></script>'
+			ignore = true
+		end
+	end
 end
 
 task :compileStylus do
 end
 
 task :buildVendor do
+	puts "Minifying vendor"
+	FileUtils.mkdir_p "web/scripts/vendor/temp"
 	system "#{cmdPrefix}rm web/scripts/vendor/vendor-built.js"
 	system "#{cmdPrefix}rm web/scripts/vendor/temp/*"
 	FileList["web/scripts/vendor/*.js"].each do |fname|
@@ -159,6 +197,8 @@ task :buildVendor do
 	else
 		system %{cat web/scripts/vendor/temp/* >> web/scripts/vendor/vendor-built.js}
 	end
+
+	FileUtils.rm_r "web/scripts/vendor/temp"
 end
 
 task :zipForLocal => [:coffee, :templates] do
