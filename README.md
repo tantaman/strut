@@ -21,24 +21,22 @@ The preview currently points to the development version of Strut.
 strut-presentation-editor@googlegroups.com
 
 ### Building ###
+*Note: You can get pre-built versions of Strut here: https://github.com/tantaman/Strut/downloads*
 
 Most of Strut is written in CoffeeScript and uses precompiled templates for HTML rendering.
+Strut also uses a Maven directory layout so code needs to be copied to the web directory.
 
-To compile the CoffeeScript
+You'll need CoffeeScript and Handlebars installed in order to build Strut.
+* Install CoffeeScript (sudo npm install -g coffee-script)
+* Install HandleBars (sudo npm install -g handlebars)
 
-1. Install CoffeeScript (sudo npm install -g coffee-script)
-2. cd to the Strut directory
-3. run `rake coffee[w]`  (omit [w] to not watch for changes)
+To build everything in one shot, run: `rake devbuild`
 
-To compile the templates
+*A task to build a minified version suitable for production deployment is being added.*
 
-1. Install Handlebars (sudo npm install -g handlebars)
-2. cd to the Strut directory
-3. run `rake templates`
+You can compile CoffeeScript whenever there is a change by running `rake coffee[w]`
 
-Alternatively, everything can be compiled on one go with:
-
-`rake build`
+*A `rake devbuild[w]` which will watch templates, coffee, resource and js files is also in the works.*
 
 ### Running ###
 
