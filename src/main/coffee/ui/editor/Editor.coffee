@@ -13,7 +13,7 @@ define(["vendor/amd/backbone",
 		"ui/widgets/BackgroundPicker",
 		"model/common_application/AutoSaver",
 		"model/presentation/Archiver",
-		"css!./res/css/Editor.css"],
+		"css!./css/Editor.css"],
 (Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
 FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 	editorId = 0

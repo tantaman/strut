@@ -7,7 +7,7 @@ define(["vendor/amd/backbone",
 		"vendor/amd/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard"
-		"css!./res/css/OperatingTable.css"],
+		"css!./css/OperatingTable.css"],
 (Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"

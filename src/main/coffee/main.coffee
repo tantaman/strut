@@ -70,7 +70,7 @@ else
 			"state/DefaultState",
 			"vendor/amd/etch",
 			"ui/etch/Templates",
-			"css!ui/etch/res/css/etchOverrides.css"],
+			"css!ui/etch/css/etchOverrides.css"],
 	(Backbone, DefaultState, etch, EtchTemplates) ->
 		Backbone.sync = (method, model, options) ->
 			if options.keyTrail?

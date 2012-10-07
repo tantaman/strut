@@ -4,7 +4,7 @@
 define(["vendor/amd/backbone",
 		"./Templates",
 		"storage/FileStorage",
-		"css!./res/css/OpenDialog.css"],
+		"css!./css/OpenDialog.css"],
 (Backbone, Templates, FileStorage, empty) ->
 	Backbone.View.extend(
 		className: "openDialog modal"

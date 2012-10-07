@@ -5,7 +5,7 @@ define(["vendor/amd/backbone"
 		"ui/widgets/DeltaDragControl"
 		"../Templates"
 		"common/Math2"
-		"css!../res/css/ComponentView.css"
+		"css!../css/ComponentView.css"
 		"vendor/amd/keymaster"
 		"model/commands/SlideCommands"],
 # TODO:

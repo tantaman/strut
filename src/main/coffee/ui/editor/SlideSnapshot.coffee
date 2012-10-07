@@ -3,7 +3,7 @@
 ###
 define(["vendor/amd/backbone",
 		"./Templates",
-		"css!./res/css/SlideSnapshot.css",
+		"css!./css/SlideSnapshot.css",
 		"./raster/SlideDrawer"],
 (Backbone, Templates, empty, SlideDrawer) ->
 	Backbone.View.extend(

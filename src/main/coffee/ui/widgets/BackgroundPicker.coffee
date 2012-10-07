@@ -1,6 +1,6 @@
 define(["vendor/amd/backbone",
 		"./Templates",
-		"css!./res/css/BackgroundPicker.css"]
+		"css!./css/BackgroundPicker.css"]
 (Backbone, Templates, empty) ->
 	gradOptions =
 		type: (value) ->
