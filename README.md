@@ -23,9 +23,6 @@ strut-presentation-editor@googlegroups.com
 ### Building ###
 *Note: You can get pre-built versions of Strut here: https://github.com/tantaman/Strut/downloads*
 
-Most of Strut is written in CoffeeScript and uses precompiled templates for HTML rendering.
-Strut also uses a Maven directory layout so code needs to be copied to the web directory.
-
 You'll need CoffeeScript and Handlebars installed in order to build Strut.
 * Install CoffeeScript (sudo npm install -g coffee-script)
 * Install HandleBars (sudo npm install -g handlebars)
@@ -45,17 +42,19 @@ Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Contributing ###
 
+Strut uses a Maven directory layout so code and resource will be found in `src/main`
+
 In ```Strut``` there is an object for each major component.  The 
-[Slides](https://github.com/tantaman/Strut/blob/master/src/model/presentation/Slide.coffee), 
-[SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
-[TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/transition_editor/TransitionEditor.coffee), 
-[SlideEditor](https://github.com/tantaman/Strut/blob/master/src/ui/editor/SlideEditor.coffee),
+[Slides](https://github.com/tantaman/Strut/blob/master/src/main/coffee/model/presentation/Slide.coffee), 
+[SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
+[TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/transition_editor/TransitionEditor.coffee), 
+[SlideEditor](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/SlideEditor.coffee),
 etc. all have their own objects so it's easy to
 track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
 focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
 view layers.  
 
-In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/src/ui/editor/res/templates) is also 
+In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/src/main/resources/ui/editor/templates) is also 
 split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
 
 Here is the basic layout of the source:
