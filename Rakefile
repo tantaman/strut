@@ -4,7 +4,11 @@
 # -compiles stylus styles
 # -eventually cleans up web to be a dist only thinger
 
+
+#node ../../r.js -o name=main out=main-built.js baseUrl=. paths.css=vendor/amd_plugins/css paths.text=vendor/amd_plugins/text
+
 require 'rake'
+require 'fileutils'
 
 myDir = Dir.pwd
 
@@ -19,18 +23,18 @@ task :updateCoffeeIgnore do
 	system "./updateCoffeeIgnore.sh"
 end
 
-task :coffee, :watch do |t, args|
-	Rake::Task["compileCoffee"].invoke args[:watch]
+task :coffee, :watch do |t,args|
+	watch = ""
+	if args[:watch]
+		watch = "--watch"
+	end
+
+	system %{coffee #{watch} -b --compile --output web/scripts/ src/main/coffee}
 end
 
-task :templates => [:compileTpls] do
-end
-
-task :build => [:coffee, :templates] do
-end
-
-task :compileTpls, :pretty do |t, args|
-	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
+# TODO: add the ability to watch templates for changes
+task :templates, :pretty do |t, args|
+	FileList[myDir + "/src/main/resources/ui/**/templates"].each do |filename|
 		pretty = args[:pretty]
 		puts "Processing: #{filename}"
 		compiledTemplates = '''
@@ -58,13 +62,45 @@ task :compileTpls, :pretty do |t, args|
 			end
   		end
 
-  		destination = filename.sub("/src/ui/", "/web/scripts/ui/").sub("/res/templates", "")
+  		destination = filename.sub("/src/main/resources/ui/", "/web/scripts/ui/").sub("/templates", "")
+  		FileUtils.mkdir_p destination
   		puts "#{destination}/Templates.js"
   		File.open("#{destination}/Templates.js", 'w') {|f|
   			f.write(compiledTemplates)
   			f.write("\n}});");
   		}
 	end
+end
+
+# TODO: add the ability to watch js files for changes
+task :copyjs, :watch do |t, args|
+	FileList["src/main/js/**/*.js"].each do |fname|
+		dest = File.dirname(fname).sub("src/main/js", "web/scripts")
+		FileUtils.mkdir_p dest
+		FileUtils.cp fname, dest
+	end
+
+	FileList["src/vendor/**/*.js"].each do |fname|
+		dest = File.dirname(fname).sub("src/vendor", "web/scripts/vendor")
+		FileUtils.mkdir_p dest
+		FileUtils.cp fname, dest
+	end
+end
+
+task :copyresources, :watch do |tar, args|
+	FileList["src/main/resources/**/*"].exclude(/templates/).each do |fname|
+		if not File.directory? fname
+			dest = File.dirname(fname).sub("src/main/resources", "web/scripts")
+			FileUtils.mkdir_p dest
+			FileUtils.cp fname, dest
+		end
+	end
+end
+
+task :devbuild => [:coffee, :templates, :copyjs, :copyresources] do
+end
+
+task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify] do
 end
 
 task :compileStylus do
@@ -84,16 +120,7 @@ task :buildVendor do
 	end
 end
 
-task :compileCoffee, :watch do |t,args|
-	watch = ""
-	if args[:watch]
-		watch = "--watch"
-	end
-
-	system %{coffee #{watch} -b --compile --output web/scripts/ src/}
-end
-
-task :zipForLocal => [:compileCoffee, :compileTpls] do
+task :zipForLocal => [:coffee, :templates] do
 	system "tar -c web > Strut.tar"
 	system "gzip Strut.tar"
 end
