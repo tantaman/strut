@@ -100,6 +100,10 @@ end
 task :devbuild => [:coffee, :templates, :copyjs, :copyresources] do
 end
 
+task :clean do
+	FileUtils.rm_rf "web/scripts"
+end
+
 task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify] do
 end
 
