@@ -115,15 +115,19 @@ task :copyjs, :watch do |t, args|
 	end
 end
 
-task :copyresources, :watch do |t, args|
+def copyResources(destination)
 	puts "Copying initial resources"
 	FileList["src/main/resources/**/*"].exclude(/templates/).each do |fname|
 		if not File.directory? fname
-			dest = File.dirname(fname).sub("src/main/resources", "web/scripts")
+			dest = File.dirname(fname).sub("src/main/resources", destination)
 			FileUtils.mkdir_p dest
 			FileUtils.cp fname, dest
 		end
 	end
+end
+
+task :copyresources, :watch do |t, args|
+	copyResources "web/scripts"
 
 	if args[:watch]
 		puts "Watching for resource changes"
@@ -159,6 +163,8 @@ task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify]
 	FileUtils.cp "web/scripts/vendor/vendor-built.js", "#{distDir}/scripts/vendor"
 	FileUtils.cp "web/scripts/vendor/require.js", "#{distDir}/scripts/vendor"
 
+	copyResources "#{distDir}/scripts"
+
 	ignore = false
 	newIndex = File.open("#{distDir}/index.html", "w")
 	File.readlines("web/index.html").each do |line|
@@ -166,6 +172,7 @@ task :productionbuild => [:coffee, :templates, :copyjs, :copyresources, :minify]
 			newIndex.write line
 		end
 
+		# just keep a map of "tagname" -> "replacement"
 		if line["/VENDOR"]
 			ignore = false
 		elsif line["VENDOR"]
@@ -188,7 +195,7 @@ task :buildVendor do
 	FileUtils.mkdir_p "web/scripts/vendor/temp"
 	system "#{cmdPrefix}rm web/scripts/vendor/vendor-built.js"
 	system "#{cmdPrefix}rm web/scripts/vendor/temp/*"
-	FileList["web/scripts/vendor/*.js"].each do |fname|
+	FileList["web/scripts/vendor/*.js"].exclude(/require/).each do |fname|
 		system %{uglifyjs #{fname} > web/scripts/vendor/temp/#{File.basename(fname, ".js")}.min.js}
 	end
 
