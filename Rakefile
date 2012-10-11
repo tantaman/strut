@@ -4,9 +4,13 @@
 # -compiles stylus styles
 # -eventually cleans up web to be a dist only thinger
 
+LANG="en_US.UTF-8"
+LC_ALL="en_US.UTF-8"
+
 require 'rake'
 require 'fileutils'
 require 'listen'
+
 
 myDir = Dir.pwd
 
