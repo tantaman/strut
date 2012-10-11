@@ -6,14 +6,18 @@ define(["vendor/amd/backbone",
 		"./components/ComponentViewFactory",
 		"vendor/amd/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
-		"model/system/Clipboard"
+		"model/system/Clipboard",
+		"model/presentation/components/ComponentFactory",
 		"css!./css/OperatingTable.css"],
-(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, empty) ->
+(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, ComponentFactory, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"
 		events:
 			"click": "clicked"
 			"focused": "_focus"
+			"dragover": "_dragover"
+			"drop": "_drop"
+
 		initialize: () ->
 			# Set up keymaster events
 			CutCopyPasteBindings.applyTo(@, "operatingTable")
@@ -28,6 +32,25 @@ define(["vendor/amd/backbone",
 				@model.on("change:components.add", @_componentAdded, @)
 			# re-render ourselves
 			@render(prevModel)
+
+		_dragover: (e) ->
+			e.stopPropagation()
+			e.preventDefault()
+			e.originalEvent.dataTransfer.dropEffect = 'copy'
+
+		_drop: (e) ->
+			e.stopPropagation()
+			e.preventDefault()
+			f = e.originalEvent.dataTransfer.files[0]
+
+			if (!f.type.match('image.*'))
+				return
+
+			reader = new FileReader()
+			reader.onload = (e) =>
+				@model.add(ComponentFactory.createImage(src: e.target.result))
+
+			reader.readAsDataURL(f)
 
 		resized: () ->
 			slideSize = window.slideConfig.size
