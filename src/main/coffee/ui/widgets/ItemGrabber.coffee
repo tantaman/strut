@@ -9,6 +9,8 @@ define(["vendor/amd/backbone",
 		className: "itemGrabber modal"
 		events:
 			"click .ok": "okClicked"
+			"click div[data-option='browse']": "browseClicked"
+			"change input[type='file']": "fileChosen"
 			"keyup input[name='itemUrl']": "urlChanged"
 			"paste input[name='itemUrl']": "urlChanged"
 			"hidden": "hidden"
@@ -24,6 +26,23 @@ define(["vendor/amd/backbone",
 			if !@$el.find(".ok").hasClass("disabled")
 				@cb(@src)
 				@$el.modal('hide')
+
+		fileChosen: (e) ->
+			f = e.target.files[0]
+
+			if (!f.type.match('image.*'))
+				return
+
+			reader = new FileReader()
+
+			reader.onload = (e) =>
+								@$input.val(e.target.result)
+								@urlChanged(which: -1)
+
+			reader.readAsDataURL(f)
+
+		browseClicked: () ->
+			@$el.find('input[type="file"]').click()
 
 		hidden: () ->
 			if @$input?
