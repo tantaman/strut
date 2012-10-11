@@ -26,6 +26,7 @@ strut-presentation-editor@googlegroups.com
 You'll need CoffeeScript and Handlebars installed in order to build Strut.
 * Install CoffeeScript (sudo npm install -g coffee-script)
 * Install HandleBars (sudo npm install -g handlebars)
+* Install listen (sudo gem install listen)
 
 To build everything in one shot, run: `rake devbuild`
 
