@@ -30,11 +30,11 @@ You'll need CoffeeScript and Handlebars installed in order to build Strut.
 
 To build everything in one shot, run: `rake devbuild`
 
-*A task to build a minified version suitable for production deployment is being added.*
+To build and minify everything for a production deployment, run: `rake productionbuild`  (the production build will put its results into web-dist instead of web)
 
 You can compile CoffeeScript whenever there is a change by running `rake coffee[w]`
 
-*A `rake devbuild[w]` which will watch templates, coffee, resource and js files is also in the works.*
+*A `rake devbuild[w]` which will automatically rebuild on changes is also in the works.*
 
 ### Running ###
 
