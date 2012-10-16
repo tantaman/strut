@@ -23,18 +23,17 @@ strut-presentation-editor@googlegroups.com
 ### Building ###
 *Note: You can get pre-built versions of Strut here: https://github.com/tantaman/Strut/downloads*
 
-You'll need CoffeeScript and Handlebars installed in order to build Strut.
+You'll need CoffeeScript and Handlebars installed in order to build Strut, as well as some ruby gems.
 * Install CoffeeScript (sudo npm install -g coffee-script)
 * Install HandleBars (sudo npm install -g handlebars)
-* Install listen (sudo gem install listen)
+* Install bundler (sudo gem install bundler)
+* Run `bundle` in the root Strut directory
 
 To build everything in one shot, run: `rake devbuild`
 
 To build and minify everything for a production deployment, run: `rake productionbuild`  (the production build will put its results into web-dist instead of web)
 
-You can compile CoffeeScript whenever there is a change by running `rake coffee[w]`
-
-*A `rake devbuild[w]` which will automatically rebuild on changes is also in the works.*
+You can produce a new devbuild whenever a resource in the Strut directory changes by running `guard` from the root Strut directory.
 
 ### Running ###
 
