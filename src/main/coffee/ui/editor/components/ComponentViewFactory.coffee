@@ -15,5 +15,5 @@ define(["./ImageView",
 				when "ImageModel" then new ImageView(model: model)
 				when "Table" then new TableView(model: model)
 				when "WebFrame" then new WebFrameView(model: model)
-				when "Video" then new VideoView(model: model)
+				when "Video" then VideoView.create(model: model)
 )
