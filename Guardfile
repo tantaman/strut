@@ -1,5 +1,7 @@
 # TODO: Share the code that is common between the Rakefile and Guardfile
 
+system 'rake devbuild'
+
 guard 'coffeescript', :input => 'src/main/coffee', :output => 'web/scripts'
 
 guard 'shell' do
