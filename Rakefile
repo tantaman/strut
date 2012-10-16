@@ -7,11 +7,24 @@ require 'fileutils'
 
 myDir = Dir.pwd
 
+def setWinPath()
+	ENV['PATH'] = '.\\node_modules\\.bin;' + ENV['PATH']
+end
+
+def setNixPath()
+	ENV['PATH'] = './node_modules/.bin:' + ENV['PATH']
+end
+
 cmdPprefix = ""
 if ENV['OS'] != nil
 	if ENV['OS']['Windows'] != nil
 		cmdPrefix = "powershell "
+		setWinPath()
+	else
+		setNixPath()
 	end
+else
+	setNixPath()
 end
 
 task :updateCoffeeIgnore do
