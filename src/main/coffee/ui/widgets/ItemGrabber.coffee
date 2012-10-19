@@ -74,7 +74,7 @@ define(["vendor/amd/backbone",
 			@item = @$el.find(@options.tag)[0]
 
 			if (@options.tag == "video")
-				@$el.find(".modal-body").prepend("<div class='alert alert-success'>Supports <strong>mp4, webm</strong>.<br/>Try out: http://clips.vorwaerts-gmbh.de/VfE_html5.mp4 <br/>or: http://media.w3.org/2010/05/sintel/trailer.mp4</div>")
+				@$el.find(".modal-body").prepend("<div class='alert alert-success'>Supports <strong>webm & YouTube</strong>.<br/>Try out: http://www.youtube.com/watch?v=vHUsdkmr-SM</div>")
 
 			if !@options.ignoreErrors
 				@item.onerror = => @_itemLoadError()

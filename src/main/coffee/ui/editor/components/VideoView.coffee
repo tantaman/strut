@@ -1,8 +1,8 @@
 ###
 @author Tantaman
 ###
-define(["./ComponentView"],
-(ComponentView) ->
+define(["./ComponentView", './Mixers'],
+(ComponentView, Mixers) ->
 	# grab a random frame for the thumbnail .. . ?
 	# allow scrubbing to find correct thumb?
 	Html5 = ComponentView.extend(
@@ -32,6 +32,7 @@ define(["./ComponentView"],
 		className: 'component videoView'
 		initialize: () ->
 			ComponentView.prototype.initialize.apply(@, arguments)
+			@scale = Mixers.scaleObjectEmbed
 
 		render: () ->
 			ComponentView.prototype.render.call(@)
@@ -41,11 +42,17 @@ define(["./ComponentView"],
 			# so maybe we can move the SVG scale method into a mixin.
 			#frame = '<iframe id="player" type="text/html" width="800" height="600" src="http://www.youtube.com/embed/' + @model.get('src') + '?enablejsapi=1&origin=http://localhost" frameborder="0"></iframe>'
 
-			frame = '<object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/' + @model.get('shortSrc') + '&hl=en&fs=1"><param name="allowFullScreen" value="true"><embed src="http://www.youtube.com/v/' + @model.get('shortSrc') + '&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></object>'
+			object = '<object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/' + @model.get('shortSrc') + '&hl=en&fs=1"><param name="allowFullScreen" value="true"><embed src="http://www.youtube.com/v/' + @model.get('shortSrc') + '&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></object>'
 
-			$video = $(frame)
+			@$object = $(object)
+			@$embed = @$object.find('embed')
 
-			@$el.find('.content').append($video) #.append('<div class="overlay"></div>')
+			scale = @model.get("scale")
+			if scale and scale.width
+				@$object.attr(scale)
+				@$embed.attr(scale)
+
+			@$el.find('.content').append(@$object) #.append('<div class="overlay"></div>')
 
 			@$el
 	)

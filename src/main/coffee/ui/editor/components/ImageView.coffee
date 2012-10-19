@@ -1,26 +1,15 @@
 ###
 @author Tantaman
 ###
-define(["./ComponentView"],
-(ComponentView) ->
-
-	svgScale = (e, deltas) ->
-		offset = @$el.offset()
-		width = (deltas.x - offset.left) / @dragScale
-		height = (deltas.y - offset.top) / @dragScale
-		@$el.css(
-			width: width
-			height: height
-		)
-		@model.set("scale", {width: width, height: height})
-
+define(["./ComponentView", './Mixers'],
+(ComponentView, Mixers) ->
 	ComponentView.extend(
 		className: "component imageView"
 		tagName: "div"
 		initialize: () ->
 			ComponentView.prototype.initialize.apply(@, arguments)
 			if @model.get("imageType") is "SVG"
-				@scale = svgScale
+				@scale = Mixers.scaleByResize
 
 		_finishRender: ($img) ->
 			naturalWidth = $img[0].naturalWidth
