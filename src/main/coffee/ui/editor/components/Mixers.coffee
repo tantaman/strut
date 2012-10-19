@@ -17,5 +17,9 @@ define( ->
 			size = width: width, height: height
 			@$object.attr(size)
 			@$embed.attr(size)
+			@$el.css(
+				width: width
+				height: height
+			)
 			@model.set("scale", size)
 )
