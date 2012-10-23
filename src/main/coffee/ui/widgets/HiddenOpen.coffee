@@ -1,7 +1,7 @@
 define(['vendor/amd/backbone'],
 (Backbone) ->
 	Backbone.View.extend(
-		className: 'dispNone'
+		className: 'disp-none'
 		events:
 			"change input[type='file']": '_fileChosen'
 
