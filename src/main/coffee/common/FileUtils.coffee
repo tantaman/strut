@@ -77,4 +77,24 @@ define(->
 				when "WEBM" then "video/webm"
 				when "OGG" then "video/ogg"
 				else ""
+
+		createDownloadAttrs: (mimeType, value, name) ->
+			blob = new Blob([value], type: mimeType)
+			href = window.URL.createObjectURL(blob)
+			attrs =
+				href: href
+				download: name
+				downloadurl: [mimeType, name, href].join(':')
+
+			attrs
+
+		toText: (file, cb) ->
+			console.log file.type
+			if file?
+				reader = new FileReader()
+
+				reader.onload = (e) ->
+									cb(e.target.result)
+
+				reader.readAsText(file)
 )

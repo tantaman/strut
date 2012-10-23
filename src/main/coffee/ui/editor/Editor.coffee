@@ -6,16 +6,18 @@ define(["vendor/amd/backbone",
 		"./transition_editor/TransitionEditor",
 		"./Templates",
 		"ui/impress_renderer/ImpressRenderer",
-		"ui/widgets/RawTextImporter",
+		"ui/widgets/DownloadDialog",
 		"ui/widgets/OpenDialog",
 		"ui/widgets/SaveAsDialog",
 		"storage/FileStorage",
 		"ui/widgets/BackgroundPicker",
 		"model/common_application/AutoSaver",
 		"model/presentation/Archiver",
+		'ui/widgets/HiddenOpen',
+		'common/FileUtils',
 		"css!./css/Editor.css"],
-(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, RawTextModal, OpenDialog, SaveAsDialog, \
-FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
+(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, DownloadDialog, OpenDialog, SaveAsDialog, \
+FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty) ->
 	editorId = 0
 
 	menuOptions =
@@ -83,13 +85,22 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 		preview: (e) ->
 			@$el.trigger("preview")
 		exportJSON: (e) ->
-			@rawTextModal.show(null, JSON.stringify(@model.toJSON(false, true)))
-			@rawTextModal.makeDownloadable()
+			###@hiddenDownload.trigger(
+				mimeType: 'application\/json'
+				name: @model.get('fileName')
+				value: @model.toJSON(false, true)
+			)###
+			@downloadDialog.show(JSON.stringify(@model.toJSON(false, true)), @model.get('fileName'))
 
 		importJSON: (e) ->
-			@rawTextModal.show((json) =>
-				@model.import(JSON.parse(json))
+			@hiddenOpen.trigger((file) =>
+				json = FileUtils.toText(file, (json) =>
+					@model.import(JSON.parse(json))
+				)
 			)
+			#@importDialog.show((json) =>
+			#	@model.import(JSON.parse(json))
+			#)
 
 		changeBackground: () ->
 			@backgroundPickerModal.show((bgState) =>
@@ -231,8 +242,11 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, empty) ->
 			)
 
 			@undoHistoryChanged()
-			@rawTextModal = new RawTextModal()
-			@$el.append(@rawTextModal.render())
+			@downloadDialog = new DownloadDialog()
+			@$el.append(@downloadDialog.render())
+
+			@hiddenOpen = new HiddenOpen()
+			@$el.append(@hiddenOpen.render())
 
 			@openDialog = new OpenDialog()
 			@saveAsDialog = new SaveAsDialog()
