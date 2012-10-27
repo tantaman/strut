@@ -12,8 +12,16 @@ define(["./ComponentView"],
 
 		render: () ->
 			ComponentView.prototype.render.call(@)
-			$frame = $("<iframe src=#{@model.get('src')}></iframe>")
+			$frame = $("<iframe width='960' height='768' src=#{@model.get('src')}></iframe>")
+
 			@$el.find(".content").append($frame)
+			@$el.append('<div class="overlay"></div>')
+
+			scale = @model.get('scale')
+			@$el.css(
+				width: 960 * scale.x
+				height: 768 * scale.y
+			)
 
 			@$el
 	)

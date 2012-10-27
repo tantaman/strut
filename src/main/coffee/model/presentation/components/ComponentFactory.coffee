@@ -25,4 +25,6 @@ define(["./Image",
 					new TextBox(rawComp)
 				when "Video"
 					new Video(rawComp)
+				when "WebFrame"
+					new WebFrame(rawComp)
 )

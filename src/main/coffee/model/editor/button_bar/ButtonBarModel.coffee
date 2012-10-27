@@ -73,6 +73,15 @@ define(["vendor/amd/backbone"],
 				src: src
 			}
 
+		iframeConfig: (src) ->
+			{
+				src: src
+				scale: {
+					x: 0.75
+					y: 0.75
+				}
+			}
+
 		###*
 		* Sets the text alignment
 		* @method textAlign

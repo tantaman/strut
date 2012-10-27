@@ -20,6 +20,8 @@ define(["vendor/amd/Handlebars",
 							result = Templates.Video(componentModel.attributes)
 						else
 							result = Templates.Youtube(componentModel.attributes)
+					when "WebFrame"
+						result = Templates.WebFrame(componentModel.attributes)
 
 				new Handlebars.SafeString(result)
 			)
