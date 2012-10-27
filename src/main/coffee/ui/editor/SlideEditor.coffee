@@ -86,7 +86,7 @@ define(["vendor/amd/backbone", "./Templates",
 			if @_buttonBar?
 				@_buttonBar.dispose()
 
-			pictureGrabber = new ItemGrabber(tag: "img", title: "Insert Image")
+			pictureGrabber = new ItemGrabber(tag: "img", title: "Insert Image", browsable: true)
 			siteGrabber = new ItemGrabber(tag: "iframe", title: "Insert Website")
 			videoGrabber = new ItemGrabber(tag: "video", title: "Insert Video", ignoreErrors: true)
 			@$el.append(pictureGrabber.render())

@@ -48,6 +48,10 @@
 	visibility: visible;
 }
 
+.component .removeBtn {
+	z-index: 100;
+}
+
 .component.selected input {
 	visibility: visible;
 }
