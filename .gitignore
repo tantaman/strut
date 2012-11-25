@@ -3,3 +3,4 @@ node_modules
 *.gz
 web-dist
 Gemfile.lock
+temp
