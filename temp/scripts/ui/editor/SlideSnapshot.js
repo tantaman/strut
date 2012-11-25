@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "css!./css/SlideSnapshot.css", "./raster/SlideDrawer"], function(Backbone, Templates, empty, SlideDrawer) {
+  define(["backbone", "css!styles/editor/SlideSnapshot.css", "./raster/SlideDrawer"], function(Backbone, empty, SlideDrawer) {
     return Backbone.View.extend({
       className: "slideSnapshot",
       events: {
@@ -60,7 +60,7 @@
         if (this.slideDrawer != null) {
           this.slideDrawer.dispose();
         }
-        this.$el.html(Templates.SlideSnapshot(this.model.attributes));
+        this.$el.html(JST["editor/SlideSnapshot"](this.model.attributes));
         g2d = this.$el.find("canvas")[0].getContext("2d");
         this.slideDrawer = new SlideDrawer(this.model, g2d);
         setTimeout(function() {

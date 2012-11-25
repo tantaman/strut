@@ -2,9 +2,8 @@
 @author Matt Crinklaw-Vogt
 ###
 define(["./ComponentView",
-		"../Templates",
 		"common/Math2"],
-(ComponentView, Templates, Math2) ->
+(ComponentView, Math2) ->
 	twoPI = Math.PI * 2
 	ComponentView.extend(
 		transforms: ["rotateX", "rotateY", "rotateZ", "scale"]
@@ -95,7 +94,7 @@ define(["./ComponentView",
 
 
 		__getTemplate: () ->
-			Templates.ThreeDRotableComponentView
+			null
 
 		constructor: `function ThreeDRotableComponentView() {
 			ComponentView.prototype.constructor.apply(this, arguments);

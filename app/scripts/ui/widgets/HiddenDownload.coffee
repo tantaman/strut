@@ -1,4 +1,4 @@
-define(['vendor/amd/backbone',
+define(['backbone',
 		'common/FileUtils'],
 (Backbone, FileUtils) ->
 	Backbone.View.extend(

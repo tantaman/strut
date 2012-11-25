@@ -1,4 +1,4 @@
-define(["vendor/amd/backbone"],
+define(["backbone"],
 (Backbone) ->
 	toDeg = 180 / Math.PI
 	silent = {silent: true}

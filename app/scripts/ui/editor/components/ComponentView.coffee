@@ -1,16 +1,15 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone"
+define(["backbone"
 		"ui/widgets/DeltaDragControl"
-		"../Templates"
 		"common/Math2"
-		"css!../css/ComponentView.css"
-		"vendor/amd/keymaster"
+		"css!styles/editor/ComponentView.css"
+		"libs/keymaster"
 		"model/commands/SlideCommands"],
 # TODO:
 # Start pushing more of this functionality down into a model
-(Backbone, DeltaDragControl, Templates, Math2, empty, key, SlideCommands) ->
+(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands) ->
 	Backbone.View.extend(
 		transforms: ["skewX", "skewY"]
 		className: "component"
@@ -258,7 +257,7 @@ define(["vendor/amd/backbone"
 		#		);
 
 		__getTemplate: () ->
-			Templates.Component
+			JST["editor/Component"]
 
 		_unrender: () ->
 			@remove(true)

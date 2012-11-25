@@ -1,4 +1,4 @@
-define(["vendor/amd/jszip",
+define(["libs/jszip",
 		"./Deck",
 		# egh... Someone is in the wrong spot.  Either impress renderer or archiver.
 		"ui/impress_renderer/ImpressRenderer",

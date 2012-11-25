@@ -1,10 +1,9 @@
 ###
 @author Matt Crinklaw-Vot
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
+define(["backbone",
 		'common/FileUtils'],
-(Backbone, Templates, FileUtils) ->
+(Backbone, FileUtils) ->
 	# TODO: should be more configurable.  Right now this only accepts JSON and you can't configure the filename.
 	Backbone.View.extend(
 		className: "downloadDialog modal"
@@ -51,7 +50,7 @@ define(["vendor/amd/backbone",
 				window.URL.revokeObjectURL(@$download.attr('href'))
 
 		render: () ->
-			@$el.html(Templates.DownloadDialog())
+			@$el.html(JST["widgets/DownloadDialog"]())
 			@$el.modal()
 			@$el.modal("hide")
 			@$download = @$el.find('.downloadLink')

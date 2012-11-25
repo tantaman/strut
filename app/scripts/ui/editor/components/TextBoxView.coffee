@@ -2,9 +2,8 @@
 @author Tantaman
 ###
 define(["./ComponentView",
-		"vendor/amd/etch"
-		"../Templates"],
-(ComponentView, etch, Templates) ->
+		"libs/etch"],
+(ComponentView, etch) ->
 	styles = ["family", "size", "weight", "style", "color", "decoration", "align"]
 	ComponentView.extend(
 		className: "component textBox"

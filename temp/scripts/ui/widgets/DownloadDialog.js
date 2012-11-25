@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", 'common/FileUtils'], function(Backbone, Templates, FileUtils) {
+  define(["backbone", 'common/FileUtils'], function(Backbone, FileUtils) {
     return Backbone.View.extend({
       className: "downloadDialog modal",
       events: {
@@ -56,7 +56,7 @@
         }
       },
       render: function() {
-        this.$el.html(Templates.DownloadDialog());
+        this.$el.html(JST["widgets/DownloadDialog"]());
         this.$el.modal();
         this.$el.modal("hide");
         this.$download = this.$el.find('.downloadLink');

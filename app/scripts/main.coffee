@@ -15,29 +15,28 @@ require.config({
     backbone: "../scripts/libs/backbone",
     css: "../scripts/plugins/css",
     text: "../scripts/plugins/text",
-    bootstrap: "../components/bootstrap/bootstrap.js",
+    bootstrap: "../components/bootstrap/bootstrap",
     bootstrapDropdown: "../components/bootstrap/bootstrapDropdown",
     colorpicker: "../components/colorpicker/js/colorpicker",
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     # impress to correctly render previews
     impress: "../preview_Export/scripts/impress.js",
     downloadify: "../components/downloadify/js/downloadify.min.js",
-    swfobject: "../components/downloadify/js/swfobject.js"
+    swfobject: "../components/downloadify/js/swfobject.js",
+    jqueryUI: "../scripts/libs/jqueryUI"
   },
 
   shim: {
-    # Backbone library depends on lodash and Zepto.
-    backbone: {
-      deps: ["lodash", "jquery"],
-      exports: "Backbone"
-    },
-
     bootstrap: {
       deps: ["jquery"]
     },
 
     bootstrapDropdown: {
-      deps: ["boostrap", "jquery"]
+      deps: ["bootstrap", "jquery"]
+    },
+
+    jqueryUI: {
+      deps: ["jquery"]
     },
 
     colorpicker: {
@@ -101,10 +100,20 @@ else
   requirejs(["backbone",
       "state/DefaultState",
       "libs/etch",
-      "ui/etch/Templates",
       "jquery",
-      "css!styles/ui/etch/etchOverrides.css"],
-  (Backbone, DefaultState, etch, EtchTemplates, $) ->
+      "libs/Handlebars",
+      "jqueryUI",
+      "bootstrap",
+      "bootstrapDropdown",
+      "colorpicker",
+      "gradientPicker",
+      "css!styles/etch/etchOverrides.css"],
+  (Backbone, DefaultState, etch, $, Handlebars) ->
+    window.Handlebars = Handlebars;
+
+    for tpl,func of JST
+      JST[tpl] = Handlebars.template(func)
+
     Backbone.sync = (method, model, options) ->
       if options.keyTrail?
         options.success(DefaultState.get(options.keyTrail))
@@ -158,15 +167,15 @@ else
         viewData.display = ''
 
       switch button
-        when "font-size" then EtchTemplates.fontSizeSelection viewData
-        when "font-family" then EtchTemplates.fontFamilySelection viewData
-        when "color" then EtchTemplates.colorChooser viewData
+        when "font-size" then JST["etch/fontSizeSelection"] viewData
+        when "font-family" then JST["etch/fontFamilySelection"] viewData
+        when "color" then JST["etch/colorChooser"] viewData
         else 
           if button.indexOf("justify") isnt -1
             viewData.icon = button.substring button.indexOf('-')+1, button.length
-            EtchTemplates.align viewData
+            JST["etch/align"] viewData
           else
-            EtchTemplates.defaultButton(viewData)
+            JST["etch/defaultButton"] viewData
 
     etch.groupElFactory = () ->
       return $('<div class="btn-group">')

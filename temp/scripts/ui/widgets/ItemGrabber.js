@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "common/Throttler"], function(Backbone, Templates, Throttler) {
+  define(["backbone", "common/Throttler"], function(Backbone, Throttler) {
     return Backbone.View.extend({
       className: "itemGrabber modal",
       events: {
@@ -78,7 +78,7 @@
       },
       render: function() {
         var _this = this;
-        this.$el.html(Templates.ItemGrabber(this.options));
+        this.$el.html(JST["widgets/ItemGrabber"](this.options));
         this.$el.modal();
         this.$el.modal("hide");
         this.item = this.$el.find(this.options.tag)[0];

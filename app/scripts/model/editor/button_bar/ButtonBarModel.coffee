@@ -2,7 +2,7 @@
 * @module model.editor
 * @author Matt Crinklaw-Vogt / Tantaman
 *###
-define(["vendor/amd/backbone"],
+define(["backbone"],
 (Backbone) ->
 	fontSettings = [
 		"size",

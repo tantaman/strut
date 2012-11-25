@@ -1,9 +1,8 @@
 ###
-@author Matt Crinklaw-Vot
+@author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
-		"./Templates",],
-(Backbone, Templates) ->
+define(["backbone"],
+(Backbone) ->
 	Backbone.View.extend(
 		className: "rawTextImporter modal"
 		events:
@@ -51,7 +50,7 @@ define(["vendor/amd/backbone",
 				$prevLink.remove()
 
 		render: () ->
-			@$el.html(Templates.RawTextImporter())
+			@$el.html(JST["widgets/RawTextImporter"]())
 			@$el.modal()
 			@$el.modal("hide")
 			@$txtArea = @$el.find("textarea")

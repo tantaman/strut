@@ -1,11 +1,10 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
-		"css!./css/SlideSnapshot.css",
+define(["backbone",
+		"css!styles/editor/SlideSnapshot.css",
 		"./raster/SlideDrawer"],
-(Backbone, Templates, empty, SlideDrawer) ->
+(Backbone, empty, SlideDrawer) ->
 	Backbone.View.extend(
 		className: "slideSnapshot"
 		events:
@@ -54,7 +53,7 @@ define(["vendor/amd/backbone",
 		render: () ->
 			if @slideDrawer?
 				@slideDrawer.dispose()
-			@$el.html(Templates.SlideSnapshot(@model.attributes))
+			@$el.html(JST["editor/SlideSnapshot"](@model.attributes))
 			g2d = @$el.find("canvas")[0].getContext("2d")
 			@slideDrawer = new SlideDrawer(@model, g2d)
 			setTimeout(=>

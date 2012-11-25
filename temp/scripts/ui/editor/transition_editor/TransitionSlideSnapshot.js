@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["../components/ThreeDRotableComponentView", "../Templates", "../raster/SlideDrawer", "css!../css/TransitionSlideSnapshot.css"], function(ThreeDComponentView, Templates, SlideDrawer, empty) {
+  define(["../components/ThreeDRotableComponentView", "../raster/SlideDrawer", "css!styles/editor/TransitionSlideSnapshot.css"], function(ThreeDComponentView, SlideDrawer, empty) {
     return ThreeDComponentView.extend({
       className: "component transitionSlideSnapshot",
       events: function() {
@@ -46,7 +46,7 @@
         return this.$el;
       },
       __getTemplate: function() {
-        return Templates.TransitionSlideSnapshot;
+        return JST["editor/TeansitionSlideSnapshot"];
       },
       constructor: function TransitionSlideSnapshot() {
 			ThreeDComponentView.prototype.constructor.apply(this, arguments);

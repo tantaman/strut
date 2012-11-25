@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["./ComponentView", "../Templates", "common/Math2"], function(ComponentView, Templates, Math2) {
+  define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
     var twoPI;
     twoPI = Math.PI * 2;
     return ComponentView.extend({
@@ -98,7 +98,7 @@
         return this._setUpdatedTransform();
       },
       __getTemplate: function() {
-        return Templates.ThreeDRotableComponentView;
+        return null;
       },
       constructor: function ThreeDRotableComponentView() {
 			ComponentView.prototype.constructor.apply(this, arguments);

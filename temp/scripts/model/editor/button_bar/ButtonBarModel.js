@@ -8,7 +8,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone"], function(Backbone) {
+  define(["backbone"], function(Backbone) {
     var fontMethods, fontSettings, longSetting, setting, toggleable, _i, _len;
     fontSettings = ["size", "family", "color", "style", "weight", "decoration"];
     toggleable = function(setting) {

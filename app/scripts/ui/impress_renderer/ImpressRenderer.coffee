@@ -1,7 +1,6 @@
-define(["vendor/amd/Handlebars",
-		"./Templates",
+define(["libs/Handlebars",
 		"common/Math2"],
-(Handlebars, Templates, Math2) ->
+(Handlebars, Math2) ->
 	class ImpressRenderer
 		constructor: () ->
 			Handlebars.registerHelper("renderComponent", (componentModel) =>
@@ -10,18 +9,18 @@ define(["vendor/amd/Handlebars",
 				switch componentModel.get("type")
 					when "ImageModel"
 						if componentModel.get("imageType") is "SVG"
-							result = Templates.SVGImage(componentModel.attributes)
+							result = JST["impress_rednerer/SVGImage"](componentModel.attributes)
 						else
-							result = Templates.Image(componentModel.attributes)
-					when "TextBox" then result = Templates
-						.TextBox(@convertTextBoxData(componentModel.attributes))
+							result = JST["impress_rednerer/Image"](componentModel.attributes)
+					when "TextBox" then result = 
+						JST["impress_rednerer/TextBox"](@convertTextBoxData(componentModel.attributes))
 					when "Video"
 						if componentModel.get("videoType") is "html5"
-							result = Templates.Video(componentModel.attributes)
+							result = JST["impress_rednerer/Video"](componentModel.attributes)
 						else
-							result = Templates.Youtube(componentModel.attributes)
+							result = JST["impress_rednerer/Youtube"](componentModel.attributes)
 					when "WebFrame"
-						result = Templates.WebFrame(componentModel.attributes)
+						result = JST["impress_rednerer/WebFrame"](componentModel.attributes)
 
 				new Handlebars.SafeString(result)
 			)
@@ -67,9 +66,9 @@ define(["vendor/amd/Handlebars",
 					""
 			)
 
-			Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer)
-			Handlebars.registerPartial("TransformContainer", Templates.TransformContainer)
-			Handlebars.registerPartial("SVGContainer", Templates.SVGContainer)
+			Handlebars.registerPartial("ComponentContainer", JST["impress_rednerer/ComponentContainer"])
+			Handlebars.registerPartial("TransformContainer", JST["impress_rednerer/TransformContainer"])
+			Handlebars.registerPartial("SVGContainer", JST["impress_rednerer/SVGContainer"])
 
 		render: (deckAttrs) ->
 			slides = deckAttrs.slides
@@ -82,7 +81,7 @@ define(["vendor/amd/Handlebars",
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
 				++cnt)
-			Templates.ImpressTemplate(deckAttrs)
+			JST["impress_rednerer/ImpressTemplate"](deckAttrs)
 
 		convertTextBoxData: (attrs) ->
 			copy = _.extend({}, attrs)

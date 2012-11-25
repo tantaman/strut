@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["./ComponentView", "vendor/amd/etch", "../Templates"], function(ComponentView, etch, Templates) {
+  define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
     var styles;
     styles = ["family", "size", "weight", "style", "color", "decoration", "align"];
     return ComponentView.extend({

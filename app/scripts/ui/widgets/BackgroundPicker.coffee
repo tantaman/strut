@@ -1,7 +1,6 @@
-define(["vendor/amd/backbone",
-		"./Templates",
-		"css!./css/BackgroundPicker.css"]
-(Backbone, Templates, empty) ->
+define(["backbone",
+		"css!styles/widgets/BackgroundPicker.css"]
+(Backbone, empty) ->
 	gradOptions =
 		type: (value) ->
 			@_updatePicker(type: value)
@@ -43,7 +42,7 @@ define(["vendor/amd/backbone",
 
 
 		render: () ->
-			@$el.html(Templates.BackgroundPicker())
+			@$el.html(JST["widgets/BackgroundPicker"]())
 			@$el.modal()
 
 			@$gradientPicker = @$el.find(".gradientPicker")

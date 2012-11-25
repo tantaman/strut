@@ -2,7 +2,7 @@
 @module model.presentation
 @author Matt Crinklaw-Vogt
 *###
-define(["vendor/amd/backbone",
+define(["backbone",
 		"model/geom/SpatialObject",
 		"./components/ComponentFactory",
 		"common/Math2",

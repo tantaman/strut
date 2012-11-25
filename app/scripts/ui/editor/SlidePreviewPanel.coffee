@@ -1,13 +1,13 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
+define(["backbone",
 		"./SlideSnapshot",
-		"vendor/amd/keymaster",
+		"libs/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard",
 		"./SlideCopyPaste",
-		"css!./css/SlidePreviewPanel.css"],
+		"css!styles/editor/SlidePreviewPanel.css"],
 (Backbone, SlideSnapshot, Keymaster, CutCopyPasteBindings, Clipboard, SlideCopyPaste, empty) ->
 	Backbone.View.extend(
 		className: "slidePreviewPanel"

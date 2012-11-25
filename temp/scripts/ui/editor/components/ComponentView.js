@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "ui/widgets/DeltaDragControl", "../Templates", "common/Math2", "css!../css/ComponentView.css", "vendor/amd/keymaster", "model/commands/SlideCommands"], function(Backbone, DeltaDragControl, Templates, Math2, empty, key, SlideCommands) {
+  define(["backbone", "ui/widgets/DeltaDragControl", "common/Math2", "css!styles/editor/ComponentView.css", "libs/keymaster", "model/commands/SlideCommands"], function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands) {
     return Backbone.View.extend({
       transforms: ["skewX", "skewY"],
       className: "component",
@@ -240,7 +240,7 @@
         return this.$el;
       },
       __getTemplate: function() {
-        return Templates.Component;
+        return JST["editor/Component"];
       },
       _unrender: function() {
         return this.remove(true);

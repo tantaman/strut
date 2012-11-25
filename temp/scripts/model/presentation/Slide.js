@@ -8,7 +8,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2", "model/commands/ComponentCommands"], function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
+  define(["backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2", "model/commands/ComponentCommands"], function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
     var defaults;
     defaults = {
       z: 0,

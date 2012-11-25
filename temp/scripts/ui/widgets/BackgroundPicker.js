@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "css!./css/BackgroundPicker.css"], function(Backbone, Templates, empty) {
+  define(["backbone", "css!styles/widgets/BackgroundPicker.css"], function(Backbone, empty) {
     var gradOptions;
     gradOptions = {
       type: function(value) {
@@ -48,7 +48,7 @@
       render: function() {
         var bgOpts,
           _this = this;
-        this.$el.html(Templates.BackgroundPicker());
+        this.$el.html(JST["widgets/BackgroundPicker"]());
         this.$el.modal();
         this.$gradientPicker = this.$el.find(".gradientPicker");
         this.$gradientPreview = this.$el.find(".gradientPreview");

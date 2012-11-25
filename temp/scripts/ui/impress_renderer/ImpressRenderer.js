@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/Handlebars", "./Templates", "common/Math2"], function(Handlebars, Templates, Math2) {
+  define(["libs/Handlebars", "common/Math2"], function(Handlebars, Math2) {
     var ImpressRenderer;
     ImpressRenderer = (function() {
 
@@ -12,23 +12,23 @@
           switch (componentModel.get("type")) {
             case "ImageModel":
               if (componentModel.get("imageType") === "SVG") {
-                result = Templates.SVGImage(componentModel.attributes);
+                result = JST["impress_rednerer/SVGImage"](componentModel.attributes);
               } else {
-                result = Templates.Image(componentModel.attributes);
+                result = JST["impress_rednerer/Image"](componentModel.attributes);
               }
               break;
             case "TextBox":
-              result = Templates.TextBox(_this.convertTextBoxData(componentModel.attributes));
+              result = JST["impress_rednerer/TextBox"](_this.convertTextBoxData(componentModel.attributes));
               break;
             case "Video":
               if (componentModel.get("videoType") === "html5") {
-                result = Templates.Video(componentModel.attributes);
+                result = JST["impress_rednerer/Video"](componentModel.attributes);
               } else {
-                result = Templates.Youtube(componentModel.attributes);
+                result = JST["impress_rednerer/Youtube"](componentModel.attributes);
               }
               break;
             case "WebFrame":
-              result = Templates.WebFrame(componentModel.attributes);
+              result = JST["impress_rednerer/WebFrame"](componentModel.attributes);
           }
           return new Handlebars.SafeString(result);
         });
@@ -62,9 +62,9 @@
             return "";
           }
         });
-        Handlebars.registerPartial("ComponentContainer", Templates.ComponentContainer);
-        Handlebars.registerPartial("TransformContainer", Templates.TransformContainer);
-        Handlebars.registerPartial("SVGContainer", Templates.SVGContainer);
+        Handlebars.registerPartial("ComponentContainer", JST["impress_rednerer/ComponentContainer"]);
+        Handlebars.registerPartial("TransformContainer", JST["impress_rednerer/TransformContainer"]);
+        Handlebars.registerPartial("SVGContainer", JST["impress_rednerer/SVGContainer"]);
       }
 
       ImpressRenderer.prototype.render = function(deckAttrs) {
@@ -82,7 +82,7 @@
           }
           return ++cnt;
         });
-        return Templates.ImpressTemplate(deckAttrs);
+        return JST["impress_rednerer/ImpressTemplate"](deckAttrs);
       };
 
       ImpressRenderer.prototype.convertTextBoxData = function(attrs) {

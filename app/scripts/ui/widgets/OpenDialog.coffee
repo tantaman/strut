@@ -1,11 +1,10 @@
 ###
 @author Matt Crinklaw-Vot
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
+define(["backbone",
 		"storage/FileStorage",
-		"css!./css/OpenDialog.css"],
-(Backbone, Templates, FileStorage, empty) ->
+		"css!styles/widgets/OpenDialog.css"],
+(Backbone, FileStorage, empty) ->
 	Backbone.View.extend(
 		className: "openDialog modal"
 		events: () ->
@@ -41,7 +40,7 @@ define(["vendor/amd/backbone",
 			@$el.html(@__template()({fileNames: FileStorage.fileNames()}))
 
 		__template: () ->
-			Templates.OpenDialog
+			JST["widgets/OpenDialog"]
 
 		render: () ->
 			@_renderPartial()

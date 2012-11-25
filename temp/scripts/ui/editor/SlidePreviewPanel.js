@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./SlideSnapshot", "vendor/amd/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "./SlideCopyPaste", "css!./css/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot, Keymaster, CutCopyPasteBindings, Clipboard, SlideCopyPaste, empty) {
+  define(["backbone", "./SlideSnapshot", "libs/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "./SlideCopyPaste", "css!styles/editor/SlidePreviewPanel.css"], function(Backbone, SlideSnapshot, Keymaster, CutCopyPasteBindings, Clipboard, SlideCopyPaste, empty) {
     return Backbone.View.extend({
       className: "slidePreviewPanel",
       events: {

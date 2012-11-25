@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "./Templates", "ui/impress_renderer/ImpressRenderer", "ui/widgets/DownloadDialog", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "model/common_application/AutoSaver", "model/presentation/Archiver", 'ui/widgets/HiddenOpen', 'common/FileUtils', "css!./css/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, DownloadDialog, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty) {
+  define(["backbone", "./SlideEditor", "./transition_editor/TransitionEditor", "ui/impress_renderer/ImpressRenderer", "ui/widgets/DownloadDialog", "ui/widgets/OpenDialog", "ui/widgets/SaveAsDialog", "storage/FileStorage", "ui/widgets/BackgroundPicker", "model/common_application/AutoSaver", "model/presentation/Archiver", 'ui/widgets/HiddenOpen', 'common/FileUtils', "css!styles/editor/Editor.css"], function(Backbone, SlideEditor, TransitionEditor, ImpressRenderer, DownloadDialog, OpenDialog, SaveAsDialog, FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty) {
     var editorId, menuOptions;
     editorId = 0;
     menuOptions = {
@@ -251,7 +251,7 @@
             name: perspective.name
           };
         });
-        this.$el.html(Templates.Editor({
+        this.$el.html(JST["editor/Editor"]({
           id: this.id,
           perspectives: perspectives
         }));

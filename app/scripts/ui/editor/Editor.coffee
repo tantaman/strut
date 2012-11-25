@@ -1,10 +1,9 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
+define(["backbone",
 		"./SlideEditor",
 		"./transition_editor/TransitionEditor",
-		"./Templates",
 		"ui/impress_renderer/ImpressRenderer",
 		"ui/widgets/DownloadDialog",
 		"ui/widgets/OpenDialog",
@@ -15,8 +14,8 @@ define(["vendor/amd/backbone",
 		"model/presentation/Archiver",
 		'ui/widgets/HiddenOpen',
 		'common/FileUtils',
-		"css!./css/Editor.css"],
-(Backbone, SlideEditor, TransitionEditor, Templates, ImpressRenderer, DownloadDialog, OpenDialog, SaveAsDialog, \
+		"css!styles/editor/Editor.css"],
+(Backbone, SlideEditor, TransitionEditor, ImpressRenderer, DownloadDialog, OpenDialog, SaveAsDialog, \
 FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty) ->
 	editorId = 0
 
@@ -225,7 +224,7 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty
 					name: perspective.name
 				}
 			)
-			@$el.html(Templates.Editor({
+			@$el.html(JST["editor/Editor"]({
 				id: @id
 				perspectives: perspectives
 			}))

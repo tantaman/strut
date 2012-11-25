@@ -1,10 +1,12 @@
 //     Backbone.js 0.9.2
-
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.
 //     For all details and documentation:
 //     http://backbonejs.org
-
+define(["lodash", "jquery"], function(_, jquery) {
+  var obj = {};
+  obj._ = _;
+  obj.jQuery = jquery;
 (function(){
 
   // Initial Setup
@@ -36,7 +38,7 @@
 
   // Require Underscore, if we're on the server, and it's not already present.
   var _ = root._;
-  if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
+  //if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
   // For Backbone's purposes, jQuery, Zepto, or Ender owns the `$` variable.
   var $ = root.jQuery || root.Zepto || root.ender;
@@ -738,12 +740,13 @@
     reset: function(models, options) {
       models  || (models = []);
       options || (options = {});
+      var oldModels = this.models;
       for (var i = 0, l = this.models.length; i < l; i++) {
         this._removeReference(this.models[i]);
       }
       this._reset();
       this.add(models, _.extend({silent: true}, options));
-      if (!options.silent) this.trigger('reset', this, options);
+      if (!options.silent) this.trigger('reset', this, options, oldModels);
       return this;
     },
 
@@ -1428,4 +1431,7 @@
     throw new Error('A "url" property or function must be specified');
   };
 
-}).call(this);
+}).call(obj);
+
+return obj.Backbone;
+});

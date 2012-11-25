@@ -1,15 +1,15 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone", "./Templates",
+define(["backbone",
 		"./SlidePreviewPanel",
 		"./OperatingTable",
 		"common/EventEmitter",
-		"css!./css/SlideEditor.css",
+		"css!styles/editor/SlideEditor.css",
 		"./button_bar/ButtonBarView",
 		"ui/widgets/ItemGrabber",
-		"vendor/amd/keymaster"],
-(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) ->
+		"libs/keymaster"],
+(Backbone, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) ->
 
 	Backbone.View.extend(
 		className: "slideEditor"
@@ -65,7 +65,7 @@ define(["vendor/amd/backbone", "./Templates",
 				@hiddenActiveChange = newSlide
 
 		render: () ->
-			@$el.html(Templates.SlideEditor(@model))
+			@$el.html(JST["editor/SlideEditor"](@model))
 			@$el.find(".dropdown-toggle").dropdown()
 			$items = @$el.find("a[title]");
 			$items.tooltip({

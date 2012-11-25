@@ -1,12 +1,12 @@
 
 /*
-@author Matt Crinklaw-Vot
+@author Matt Crinklaw-Vogt
 */
 
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates"], function(Backbone, Templates) {
+  define(["backbone"], function(Backbone) {
     return Backbone.View.extend({
       className: "rawTextImporter modal",
       events: {
@@ -61,7 +61,7 @@
         }
       },
       render: function() {
-        this.$el.html(Templates.RawTextImporter());
+        this.$el.html(JST["widgets/RawTextImporter"]());
         this.$el.modal();
         this.$el.modal("hide");
         this.$txtArea = this.$el.find("textarea");

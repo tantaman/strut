@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/backbone"], function(Backbone) {
+  define(["backbone"], function(Backbone) {
     return Backbone.View.extend({
       initialize: function(callbacks) {
         return this.buttonBarOptions = callbacks;

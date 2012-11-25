@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "./OpenDialog"], function(Backbone, Templates, OpenDialog) {
+  define(["backbone", "./OpenDialog"], function(Backbone, OpenDialog) {
     return OpenDialog.extend({
       initialize: function() {
         return OpenDialog.prototype.initialize.apply(this, arguments);
@@ -23,7 +23,7 @@
         return this.$el.modal("hide");
       },
       __template: function() {
-        return Templates.SaveAsDialog;
+        return JST["widgets/SaveAsDialog"];
       },
       _renderPartial: function() {
         OpenDialog.prototype._renderPartial.call(this);

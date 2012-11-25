@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "./components/ComponentViewFactory", "vendor/amd/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "model/presentation/components/ComponentFactory", "css!./css/OperatingTable.css"], function(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, ComponentFactory, empty) {
+  define(["backbone", "./components/ComponentViewFactory", "libs/keymaster", "ui/interactions/CutCopyPasteBindings", "model/system/Clipboard", "model/presentation/components/ComponentFactory", "css!styles/editor/OperatingTable.css"], function(Backbone, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, ComponentFactory, empty) {
     return Backbone.View.extend({
       className: "operatingTable",
       events: {

@@ -1,10 +1,9 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
+define(["backbone",
 		"common/Throttler"],
-(Backbone, Templates, Throttler) ->
+(Backbone, Throttler) ->
 	Backbone.View.extend(
 		className: "itemGrabber modal"
 		events:
@@ -68,7 +67,7 @@ define(["vendor/amd/backbone",
 			@$el.find(".alert").addClass("disp-none")
 
 		render: () ->
-			@$el.html(Templates.ItemGrabber(@options))
+			@$el.html(JST["widgets/ItemGrabber"](@options))
 			@$el.modal()
 			@$el.modal("hide")
 			@item = @$el.find(@options.tag)[0]

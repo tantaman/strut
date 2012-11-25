@@ -1,10 +1,9 @@
 ###
 @author Matt Crinklaw-Vot
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
+define(["backbone",
 		"./OpenDialog"],
-(Backbone, Templates, OpenDialog) ->
+(Backbone, OpenDialog) ->
 	OpenDialog.extend(
 		initialize: () ->
 			OpenDialog.prototype.initialize.apply(@, arguments)
@@ -20,7 +19,7 @@ define(["vendor/amd/backbone",
 			@$el.modal("hide")
 
 		__template: () ->
-			Templates.SaveAsDialog
+			JST["widgets/SaveAsDialog"]
 
 		_renderPartial: () ->
 			OpenDialog.prototype._renderPartial.call(@)

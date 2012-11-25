@@ -11,24 +11,24 @@
       backbone: "../scripts/libs/backbone",
       css: "../scripts/plugins/css",
       text: "../scripts/plugins/text",
-      bootstrap: "../components/bootstrap/bootstrap.js",
+      bootstrap: "../components/bootstrap/bootstrap",
       bootstrapDropdown: "../components/bootstrap/bootstrapDropdown",
       colorpicker: "../components/colorpicker/js/colorpicker",
       gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
       impress: "../preview_Export/scripts/impress.js",
       downloadify: "../components/downloadify/js/downloadify.min.js",
-      swfobject: "../components/downloadify/js/swfobject.js"
+      swfobject: "../components/downloadify/js/swfobject.js",
+      jqueryUI: "../scripts/libs/jqueryUI"
     },
     shim: {
-      backbone: {
-        deps: ["lodash", "jquery"],
-        exports: "Backbone"
-      },
       bootstrap: {
         deps: ["jquery"]
       },
       bootstrapDropdown: {
-        deps: ["boostrap", "jquery"]
+        deps: ["bootstrap", "jquery"]
+      },
+      jqueryUI: {
+        deps: ["jquery"]
       },
       colorpicker: {
         deps: ["jquery"]
@@ -93,7 +93,13 @@
         }
       });
     };
-    requirejs(["backbone", "state/DefaultState", "libs/etch", "ui/etch/Templates", "jquery", "css!styles/ui/etch/etchOverrides.css"], function(Backbone, DefaultState, etch, EtchTemplates, $) {
+    requirejs(["backbone", "state/DefaultState", "libs/etch", "jquery", "libs/Handlebars", "jqueryUI", "bootstrap", "bootstrapDropdown", "colorpicker", "gradientPicker", "css!styles/etch/etchOverrides.css"], function(Backbone, DefaultState, etch, $, Handlebars) {
+      var func, tpl;
+      window.Handlebars = Handlebars;
+      for (tpl in JST) {
+        func = JST[tpl];
+        JST[tpl] = Handlebars.template(func);
+      }
       Backbone.sync = function(method, model, options) {
         if (options.keyTrail != null) {
           return options.success(DefaultState.get(options.keyTrail));
@@ -146,17 +152,17 @@
         }
         switch (button) {
           case "font-size":
-            return EtchTemplates.fontSizeSelection(viewData);
+            return JST["etch/fontSizeSelection"](viewData);
           case "font-family":
-            return EtchTemplates.fontFamilySelection(viewData);
+            return JST["etch/fontFamilySelection"](viewData);
           case "color":
-            return EtchTemplates.colorChooser(viewData);
+            return JST["etch/colorChooser"](viewData);
           default:
             if (button.indexOf("justify") !== -1) {
               viewData.icon = button.substring(button.indexOf('-') + 1, button.length);
-              return EtchTemplates.align(viewData);
+              return JST["etch/align"](viewData);
             } else {
-              return EtchTemplates.defaultButton(viewData);
+              return JST["etch/defaultButton"](viewData);
             }
         }
       };

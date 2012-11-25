@@ -2,10 +2,9 @@
 @author Matt Crinklaw-Vogt
 ###
 define(["../components/ThreeDRotableComponentView",
-		"../Templates",
 		"../raster/SlideDrawer"
-		"css!../css/TransitionSlideSnapshot.css"],
-(ThreeDComponentView, Templates, SlideDrawer, empty) ->
+		"css!styles/editor/TransitionSlideSnapshot.css"],
+(ThreeDComponentView, SlideDrawer, empty) ->
 	ThreeDComponentView.extend(
 		className: "component transitionSlideSnapshot"
 		events: () ->
@@ -42,7 +41,7 @@ define(["../components/ThreeDRotableComponentView",
 			@$el
 
 		__getTemplate: () ->
-			Templates.TransitionSlideSnapshot
+			JST["editor/TeansitionSlideSnapshot"]
 
 		constructor: `function TransitionSlideSnapshot() {
 			ThreeDComponentView.prototype.constructor.apply(this, arguments);

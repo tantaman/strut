@@ -1,17 +1,16 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
+define(["backbone",
 		"./TransitionSlideSnapshot",
-		"../Templates",
 		"./TransitionEditorButtonBarView",
 		"model/editor/transition_editor/TransitionEditorButtonBarModel",
-		"vendor/amd/keymaster",
+		"libs/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"../SlideCopyPaste",
 		"model/system/Clipboard",
-		"css!../css/TransitionEditor.css"],
-(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) ->
+		"css!styles/editor/TransitionEditor.css"],
+(Backbone, TransitionSlideSnapshot, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) ->
 	Backbone.View.extend(
 		className: "transitionEditor"
 		events:
@@ -58,7 +57,7 @@ define(["vendor/amd/backbone",
 			@_snapshots = []
 
 		render: () ->
-			@$el.html(Templates.TransitionEditor())
+			@$el.html(JST["editor/TransitionEditor"]())
 
 			@buttonBarView = new ButtonBarView({
 				model: new ButtonBarModel({deck: @model}),

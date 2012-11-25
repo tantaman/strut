@@ -1,15 +1,14 @@
 ###
 @author Matt Crinklaw-Vogt
 ###
-define(["vendor/amd/backbone",
-		"./Templates",
+define(["backbone",
 		"./components/ComponentViewFactory",
-		"vendor/amd/keymaster",
+		"libs/keymaster",
 		"ui/interactions/CutCopyPasteBindings",
 		"model/system/Clipboard",
 		"model/presentation/components/ComponentFactory",
-		"css!./css/OperatingTable.css"],
-(Backbone, Templates, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, ComponentFactory, empty) ->
+		"css!styles/editor/OperatingTable.css"],
+(Backbone, ComponentViewFactory, Keymaster, CutCopyPasteBindings, Clipboard, ComponentFactory, empty) ->
 	Backbone.View.extend(
 		className: "operatingTable"
 		events:

@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/backbone"], function(Backbone) {
+  define(["backbone"], function(Backbone) {
     var silent, toDeg;
     toDeg = 180 / Math.PI;
     silent = {

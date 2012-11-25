@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./TransitionSlideSnapshot", "../Templates", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "vendor/amd/keymaster", "ui/interactions/CutCopyPasteBindings", "../SlideCopyPaste", "model/system/Clipboard", "css!../css/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, Templates, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) {
+  define(["backbone", "./TransitionSlideSnapshot", "./TransitionEditorButtonBarView", "model/editor/transition_editor/TransitionEditorButtonBarModel", "libs/keymaster", "ui/interactions/CutCopyPasteBindings", "../SlideCopyPaste", "model/system/Clipboard", "css!styles/editor/TransitionEditor.css"], function(Backbone, TransitionSlideSnapshot, ButtonBarView, ButtonBarModel, Keymaster, CutCopyPasteBindings, SlideCopyPaste, Clipboard, empty) {
     return Backbone.View.extend({
       className: "transitionEditor",
       events: {
@@ -47,7 +47,7 @@
         return this._snapshots = [];
       },
       render: function() {
-        this.$el.html(Templates.TransitionEditor());
+        this.$el.html(JST["editor/TransitionEditor"]());
         this.buttonBarView = new ButtonBarView({
           model: new ButtonBarModel({
             deck: this.model

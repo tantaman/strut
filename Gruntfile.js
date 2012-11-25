@@ -1,3 +1,4 @@
+var path  = require('path');
 module.exports = function( grunt ) {
   'use strict';
 
@@ -21,15 +22,15 @@ module.exports = function( grunt ) {
       compile: {
         files: {
           "temp/scripts/compiled-templates.js": [
-            "app/templates/*/*.bars"
+            "app/templates/**/*.bars"
           ]
         },
         options: {
-          namespace: 'MyApp.Templates',
+          namespace: 'JST',
           processName: function(filename) {
-            // funky name processing here
             return filename
-                    .replace(/\.bars$/, '');
+              .replace(/^app\/templates\//, '')
+              .replace(/\.bars$/, '');
           }
         }
       }
@@ -79,7 +80,7 @@ module.exports = function( grunt ) {
       },
       handlebars: {
         files: [
-          'app/templates/*/*.bars'
+          'app/templates/**/*.bars'
         ],
         tasks: 'handlebars reload'
       },
@@ -128,12 +129,12 @@ module.exports = function( grunt ) {
         browser: true
       },
       globals: {
-        Zepto: true
+        jQuery: true
       }
     },
 
     server: {
-      app: 'clean lint compass coffee handlebars open-browser watch'
+      app: 'clean compass coffee handlebars watch'
     },
 
     // Build configuration

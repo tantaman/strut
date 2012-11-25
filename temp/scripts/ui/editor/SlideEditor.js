@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!./css/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/ItemGrabber", "vendor/amd/keymaster"], function(Backbone, Templates, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) {
+  define(["backbone", "./SlidePreviewPanel", "./OperatingTable", "common/EventEmitter", "css!styles/editor/SlideEditor.css", "./button_bar/ButtonBarView", "ui/widgets/ItemGrabber", "libs/keymaster"], function(Backbone, SlidePreviewPanel, OperatingTable, EventEmitter, empty, ButtonBarView, ItemGrabber, Keymaster) {
     return Backbone.View.extend({
       className: "slideEditor",
       initialize: function() {
@@ -70,7 +70,7 @@
       },
       render: function() {
         var $items, $mainContent, pictureGrabber, siteGrabber, videoGrabber;
-        this.$el.html(Templates.SlideEditor(this.model));
+        this.$el.html(JST["editor/SlideEditor"](this.model));
         this.$el.find(".dropdown-toggle").dropdown();
         $items = this.$el.find("a[title]");
         $items.tooltip({

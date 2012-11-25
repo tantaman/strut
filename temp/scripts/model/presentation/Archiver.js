@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/jszip", "./Deck", "ui/impress_renderer/ImpressRenderer", "common/FileUtils"], function(JSZip, Deck, ImpressRenderer, FileUtils) {
+  define(["libs/jszip", "./Deck", "ui/impress_renderer/ImpressRenderer", "common/FileUtils"], function(JSZip, Deck, ImpressRenderer, FileUtils) {
     var Archiver, defaults;
     defaults = {
       includeImages: true,

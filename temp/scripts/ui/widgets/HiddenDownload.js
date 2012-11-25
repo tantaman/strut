@@ -1,6 +1,6 @@
 (function() {
 
-  define(['vendor/amd/backbone', 'common/FileUtils'], function(Backbone, FileUtils) {
+  define(['backbone', 'common/FileUtils'], function(Backbone, FileUtils) {
     return Backbone.View.extend({
       className: 'dispNone',
       initialize: function(triggerElem, infoProvider) {

@@ -6,7 +6,7 @@
 
 (function() {
 
-  define(["vendor/amd/backbone", "./Templates", "storage/FileStorage", "css!./css/OpenDialog.css"], function(Backbone, Templates, FileStorage, empty) {
+  define(["backbone", "storage/FileStorage", "css!styles/widgets/OpenDialog.css"], function(Backbone, FileStorage, empty) {
     return Backbone.View.extend({
       className: "openDialog modal",
       events: function() {
@@ -45,7 +45,7 @@
         }));
       },
       __template: function() {
-        return Templates.OpenDialog;
+        return JST["widgets/OpenDialog"];
       },
       render: function() {
         this._renderPartial();

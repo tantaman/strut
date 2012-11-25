@@ -1,6 +1,6 @@
 (function() {
 
-  define(["vendor/amd/keymaster"], function(Keymaster) {
+  define(["libs/keymaster"], function(Keymaster) {
     var funcs, result;
     funcs = ["cut", "copy", "paste"];
     return result = {
