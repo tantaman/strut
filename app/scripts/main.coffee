@@ -20,9 +20,9 @@ require.config({
     colorpicker: "../components/colorpicker/js/colorpicker",
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     # impress to correctly render previews
-    impress: "../preview_Export/scripts/impress.js",
-    downloadify: "../components/downloadify/js/downloadify.min.js",
-    swfobject: "../components/downloadify/js/swfobject.js",
+    impress: "../preview_export/scripts/impress",
+    downloadify: "../components/downloadify/js/downloadify.min",
+    swfobject: "../components/downloadify/js/swfobject",
     jqueryUI: "../scripts/libs/jqueryUI"
   },
 
@@ -68,7 +68,11 @@ if not Function.bind? or Function.prototype.bind?
       fn.apply(ctx, arguments)
 
 if window.location.href.indexOf("preview=true") isnt -1
-  # do nothing...
+  requirejs(["impress", "jquery"], (impress, jquery) -> 
+    window.impress = impress
+    window.jQuery = jquery
+    window.$ = jquery
+  )
 else
   continuation = () ->
     requirejs(["ui/editor/Editor",
@@ -107,6 +111,8 @@ else
       "bootstrapDropdown",
       "colorpicker",
       "gradientPicker",
+      "downloadify",
+      "swfobject",
       "css!styles/etch/etchOverrides.css"],
   (Backbone, DefaultState, etch, $, Handlebars) ->
     window.Handlebars = Handlebars;

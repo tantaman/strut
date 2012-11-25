@@ -9,18 +9,18 @@ define(["libs/Handlebars",
 				switch componentModel.get("type")
 					when "ImageModel"
 						if componentModel.get("imageType") is "SVG"
-							result = JST["impress_rednerer/SVGImage"](componentModel.attributes)
+							result = JST["impress_renderer/SVGImage"](componentModel.attributes)
 						else
-							result = JST["impress_rednerer/Image"](componentModel.attributes)
+							result = JST["impress_renderer/Image"](componentModel.attributes)
 					when "TextBox" then result = 
-						JST["impress_rednerer/TextBox"](@convertTextBoxData(componentModel.attributes))
+						JST["impress_renderer/TextBox"](@convertTextBoxData(componentModel.attributes))
 					when "Video"
 						if componentModel.get("videoType") is "html5"
-							result = JST["impress_rednerer/Video"](componentModel.attributes)
+							result = JST["impress_renderer/Video"](componentModel.attributes)
 						else
-							result = JST["impress_rednerer/Youtube"](componentModel.attributes)
+							result = JST["impress_renderer/Youtube"](componentModel.attributes)
 					when "WebFrame"
-						result = JST["impress_rednerer/WebFrame"](componentModel.attributes)
+						result = JST["impress_renderer/WebFrame"](componentModel.attributes)
 
 				new Handlebars.SafeString(result)
 			)
@@ -66,9 +66,9 @@ define(["libs/Handlebars",
 					""
 			)
 
-			Handlebars.registerPartial("ComponentContainer", JST["impress_rednerer/ComponentContainer"])
-			Handlebars.registerPartial("TransformContainer", JST["impress_rednerer/TransformContainer"])
-			Handlebars.registerPartial("SVGContainer", JST["impress_rednerer/SVGContainer"])
+			Handlebars.registerPartial("ComponentContainer", JST["impress_renderer/ComponentContainer"])
+			Handlebars.registerPartial("TransformContainer", JST["impress_renderer/TransformContainer"])
+			Handlebars.registerPartial("SVGContainer", JST["impress_renderer/SVGContainer"])
 
 		render: (deckAttrs) ->
 			slides = deckAttrs.slides
@@ -81,7 +81,7 @@ define(["libs/Handlebars",
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
 				++cnt)
-			JST["impress_rednerer/ImpressTemplate"](deckAttrs)
+			JST["impress_renderer/ImpressTemplate"](deckAttrs)
 
 		convertTextBoxData: (attrs) ->
 			copy = _.extend({}, attrs)

@@ -119,8 +119,8 @@ FileStorage, BackgroundPicker, AutoSaver, Archiver, HiddenOpen, FileUtils, empty
 					filename: 'StrutPresentation.zip'
 					data: archive
 					dataType: 'base64'
-					swf: 'res/downloadify/media/downloadify.swf'
-					downloadImage: 'res/downloadify/images/download.png'
+					swf: 'components/downloadify/media/downloadify.swf'
+					downloadImage: 'components/downloadify/images/download.png'
 					width: 100
 					height: 30
 					transparent: true
