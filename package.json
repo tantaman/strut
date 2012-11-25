@@ -1,8 +1,11 @@
-{ 
-	"name" : "Strut",
-	"version" : "0.4.0",
-	"dependencies" : {
-		"handlebars" : "*",
-		"coffee-script" : "*"
-	}
+{
+  "name": "Strut",
+  "version": "0.4.0",
+  "dependencies": {
+    "handlebars": "*",
+    "coffee-script": "*"
+  },
+  "devDependencies": {
+    "grunt-contrib-handlebars": "~0.3.3"
+  }
 }
