@@ -134,7 +134,7 @@ module.exports = function( grunt ) {
     },
 
     server: {
-      app: 'clean compass coffee handlebars watch'
+      app: 'clean compass coffee handlebars open-browser watch'
     },
 
     // Build configuration
