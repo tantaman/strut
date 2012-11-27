@@ -20,13 +20,18 @@ The preview currently points to the development version of Strut.
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
 
-### Built packages of Strut ###
-*You can get pre-built versions of strut here: https://github.com/tantaman/Strut/downloads*
-The built versions of Strut can run entirely from your local filesystem.  
+### Pre-Built versions of Strut ###
+
+You can get pre-built versions of strut here: https://github.com/tantaman/Strut/downloads
+
+
+### Running ###
+
+The pre-built versions of Strut can be run entirely from your local filesystem.  
 Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Development/Building ###
-To build your own version of Strut you'll need v0.9.3 or later of Yeoman.  If v0.9.3 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
+To build your own version of Strut you'll need Yeoman v0.9.3 or later.  If Yeoman 0.9.3 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
 
 * Clone `Strut`
 * cd to the root `Strut` directory
@@ -38,12 +43,6 @@ Yeoman will automatically compile your coffeescript and templates and reload you
 
 To make a production build of Strut run `yeoman build`.
 The resulting build will be location in `Strut/dist`.  
-
-
-### Running ###
-
-Strut can run entirely from your local filesystem.  
-Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 ### Contributing ###
 
