@@ -2,8 +2,6 @@
 require.config({
 
   # Initialize the application with the main application file.
-  deps: ["main"],
-
   paths: {
     # JavaScript folders.
     libs: "../scripts/libs",
@@ -20,7 +18,6 @@ require.config({
     colorpicker: "../components/colorpicker/js/colorpicker",
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     # impress to correctly render previews
-    impress: "../preview_export/scripts/impress",
     downloadify: "../components/downloadify/js/downloadify.min",
     swfobject: "../components/downloadify/js/swfobject",
     jqueryUI: "../scripts/libs/jqueryUI"
@@ -45,6 +42,10 @@ require.config({
 
     gradientPicker: {
       deps: ["jquery", "colorpicker"]
+    },
+
+    "../preview_export/scripts/impress": {
+      exports: "startImpress"
     }
   }
 })
@@ -68,9 +69,9 @@ if not Function.bind? or Function.prototype.bind?
       fn.apply(ctx, arguments)
 
 if window.location.href.indexOf("preview=true") isnt -1
-  requirejs(["impress", "jquery"], (impress, jquery) -> 
-    window.impress = impress
+  requirejs(["../preview_export/scripts/impress", "jquery"], (impress, jquery) -> 
     window.jQuery = jquery
+    window.startImpress = impress
     window.$ = jquery
   )
 else

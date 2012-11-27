@@ -201,7 +201,7 @@ module.exports = function( grunt ) {
       optimize: 'none',
       baseUrl: './scripts',
       wrap: true,
-      name: 'config'
+      name: 'main'
     },
   });
 
