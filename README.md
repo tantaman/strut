@@ -20,20 +20,25 @@ The preview currently points to the development version of Strut.
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
 
-### Building ###
-*Note: You can get pre-built versions of Strut here: https://github.com/tantaman/Strut/downloads*
+### Built packages of Strut ###
+*You can get pre-built versions of strut here: https://github.com/tantaman/Strut/downloads*
+The built versions of Strut can run entirely from your local filesystem.  
+Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
-You'll need CoffeeScript and Handlebars installed in order to build Strut, as well as some ruby gems.
-* Install CoffeeScript (sudo npm install -g coffee-script)
-* Install HandleBars (sudo npm install -g handlebars)
-* Install bundler (sudo gem install bundler)
-* Run `bundle` in the root Strut directory
+### Development/Building ###
+To build your own version of Strut you'll need v0.9.3 or later of Yeoman.  If v0.9.3 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
 
-To build everything in one shot, run: `rake devbuild`
+* Clone `Strut`
+* cd to the root `Strut` directory
+* run `npm install` to get the required node modules
+* run `yeoman server` to build and start watching for updates
+* If your browser didn't open Strut automatically then go to http://localhost:3501/ in a browser
 
-To build and minify everything for a production deployment, run: `rake productionbuild`  (the production build will put its results into web-dist instead of web)
+Yeoman will automatically compile your coffeescript and templates and reload your browser whenever there is a code change.
 
-You can produce a new devbuild whenever a resource in the Strut directory changes by running `guard` from the root Strut directory.
+To make a production build of Strut run `yeoman build`.
+The resulting build will be location in `Strut/dist`.  
+
 
 ### Running ###
 
