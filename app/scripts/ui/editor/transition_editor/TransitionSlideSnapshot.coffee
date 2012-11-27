@@ -41,7 +41,7 @@ define(["../components/ThreeDRotableComponentView",
 			@$el
 
 		__getTemplate: () ->
-			JST["editor/TeansitionSlideSnapshot"]
+			JST["editor/TransitionSlideSnapshot"]
 
 		constructor: `function TransitionSlideSnapshot() {
 			ThreeDComponentView.prototype.constructor.apply(this, arguments);

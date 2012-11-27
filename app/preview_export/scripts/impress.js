@@ -183,7 +183,7 @@ window.impressStarted = true;
                           // but some mobile devices need to be blacklisted,
                           // because their CSS 3D support or hardware is not
                           // good enough to run impress.js properly, sorry...
-                           ( ua.search(/(iphone)|(ipod)|(android)/) === -1 );
+                           ( ua.search(/(iphone)/) === -1 );
     
     if (!impressSupported) {
         // we can't be sure that `classList` is supported
@@ -800,6 +800,11 @@ window.impressStarted = true;
     }, false);
         
 })(document, window);
+
+}
+
+if ( typeof define === "function" && define.amd ) {
+    define(function () { return startImpress; } );
 }
 // THAT'S ALL FOLKS!
 //
