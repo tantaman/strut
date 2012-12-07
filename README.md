@@ -32,6 +32,8 @@ Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
 
 To run a non pre-built version, or a zip of Master, run `yeoman server` in the root Strut directory.
 
+Alternatively you can run `yeoman dist` in the root Strut directory and navigate to `file:///path/to/Strut/dist/index.html`
+
 ### Development/Building ###
 To build your own version of Strut you'll need Yeoman v0.9.3 or later.  If Yeoman 0.9.3 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
 
