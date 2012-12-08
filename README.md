@@ -1,7 +1,7 @@
 Strut
 =======
 
-*note:* Strut is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
+**Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
 on the progress of the re-write on the rewrite branch.
 
 #### GUI / Authoring Tool for ImpressJS ####
