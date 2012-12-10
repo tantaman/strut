@@ -31,7 +31,8 @@ define(function() {
 		},
 
 		get: function(key) {
-			return this._map[key];
+			var result = this._map[key];
+			return result || [];
 		},
 
 		// We don't overload remove

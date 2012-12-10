@@ -21,8 +21,8 @@ define([
       expect(map.get('second')).to.deep.equal([2]);
     });
 
-    it('Returns an array of values or undefined on get', function() {
-      expect(map.get('key2')).to.be.undefined;
+    it('Returns an array of values or emptry array on get', function() {
+      expect(map.get('key2')).to.deep.equal([]);
       expect(map.get('second')).to.be.instanceof(Array);
     });
 
@@ -32,12 +32,12 @@ define([
 
     it('Allows the removal of all values under a given key', function() {
       map.removeAll('key1');
-      expect(map.get('key1')).to.be.undefined;
+      expect(map.get('key1')).to.deep.equal([]);
     });
 
     it('Removes the key when all its values are removed', function() {
       map.remove('second', 2);
-      expect(map.get('second')).to.be.undefined;
+      expect(map.get('second')).to.deep.equal([]);
     });
 
     it('Allows the removal of single values under a given key', function() {
