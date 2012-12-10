@@ -44,6 +44,16 @@ require.config({
   }
 });
 
-require(['features', 'bundles/editor/main'], function(empty, Editor) {
-	Editor.start();
+require(['features',
+         'bundles/editor/view/Editor',
+         'bundles/editor/model/Editor'
+        ],
+function(registry, EditorView, EditorModel) {
+  var model = new EditorModel({registry: registry});
+
+	var editor = new EditorView({model: model});
+
+  editor.render();
+
+  $('body').append(editor.$el);
 });

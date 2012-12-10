@@ -1,12 +1,12 @@
 define([
-	'bundles/editor/main',
-	'bundles/header/main'
-
+	'framework/ServiceRegistry',
+	// 'bundles/editor/main',
+	// 'bundles/header/main'
 	// 'bundles/local_storage',
 	// 'bundles/dropbox',
 	// 'bundles/mode_buttons',
 	// 'bundles/'
 	],
-function() {
-
+function(ServiceRegistry) {
+	return new ServiceRegistry();
 });
