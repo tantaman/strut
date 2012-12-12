@@ -46,12 +46,21 @@ require.config({
 
 require(['features',
          'bundles/editor/view/Editor',
-         'bundles/editor/model/Editor'
+         'bundles/editor/model/Editor',
+         'libs/Handlebars'
         ],
-function(registry, EditorView, EditorModel) {
+function(registry, EditorView, EditorModel, Handlebars) {
+  for (tpl in JST) {
+    JST[tpl] = Handlebars.template(JST[tpl]);
+  }
+
   var model = new EditorModel({registry: registry});
 
-	var editor = new EditorView({model: model});
+  // TODO: the model will need to tell us when it is set to go
+  // since there may be some awkward handshaking going on with storage
+  // providers
+
+	var editor = new EditorView({model: model, registry: registry});
 
   editor.render();
 

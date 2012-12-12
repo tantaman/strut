@@ -22,14 +22,14 @@ module.exports = function( grunt ) {
       compile: {
         files: {
           "temp/scripts/compiled-templates.js": [
-            "app/templates/**/*.bars"
+            "app/bundles/**/templates/*.bars"
           ]
         },
         options: {
           namespace: 'JST',
           processName: function(filename) {
             return filename
-              .replace(/^app\/templates\//, '')
+              .replace(/^app\//, '')
               .replace(/\.bars$/, '');
           }
         }
@@ -80,7 +80,7 @@ module.exports = function( grunt ) {
       },
       handlebars: {
         files: [
-          'app/templates/**/*.bars'
+          "app/bundles/**/templates/*.bars"
         ],
         tasks: 'handlebars reload'
       },

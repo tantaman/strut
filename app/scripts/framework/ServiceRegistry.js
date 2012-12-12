@@ -91,6 +91,19 @@ function(EventEmitter, MultiMap) {
 		return result;
 	};
 
+	proto.getInvoke = function(srvcOpts, methName, args) {
+		var services = this.get(srvcOpts);
+
+		var items = {};
+		services.forEach(function(entry) {
+			var srvc = entry.service();
+			var item = srvc[methName].apply(srvc, args);
+			items[item.id] = item;
+		}, this);
+
+		return items;
+	};
+
 	function ServiceEntry(interfaces, meta, service) {
 		this._interfaces = interfaces;
 		this._meta = meta || {};
