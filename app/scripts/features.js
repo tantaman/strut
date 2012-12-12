@@ -1,12 +1,14 @@
 define([
 	'framework/ServiceRegistry',
-	// 'bundles/editor/main',
-	// 'bundles/header/main'
+	'bundles/slide_editor/main'
 	// 'bundles/local_storage',
 	// 'bundles/dropbox',
-	// 'bundles/mode_buttons',
 	// 'bundles/'
 	],
-function(ServiceRegistry) {
-	return new ServiceRegistry();
+function(ServiceRegistry, SlideEditorBundle) {
+	var registry = new ServiceRegistry();
+
+	SlideEditorBundle.initialize(registry);
+
+	return registry;
 });

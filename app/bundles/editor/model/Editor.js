@@ -8,11 +8,18 @@ function(Backbone, Header) {
 
 			this.set('header', new Header(this.registry));
 
-			this.set('activeMode', this.activeMode());
+			this._createMode();
 		},
 
-		activeMode: function() {
-			return undefined;
+		_createMode: function() {
+			var modeId = 'slide-editor';
+			var modeService = this.registry.getBest({
+				interfaces: 'strut.EditMode',
+				meta: { id: modeId }
+			});
+
+			if (modeService)
+				this.set('activeMode', modeService.createMode(this.model));
 		},
 
 		_loadLastPresentation: function() {
