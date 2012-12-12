@@ -3,25 +3,35 @@ define(['libs/backbone',
 function(Backbone, Header) {
 	return Backbone.View.extend({
 		initialize: function() {
-			this._modes = this.options.registry
-				.getInvoke('strut.ModeContributor', 'createView', this.model);
+			this._header = new Header({model: this.model.get('header')});
+			this._createMode();
+		},
 
-			this._header = new Header(this.model.get('header'));
-			this._template = JST['bundles/editor/templates/Editor'];
+		_createMode: function() {
+			var modeId = this.model.get('activeMode');
+			var modeService = this.options.registry.getBest({
+				interfaces: 'strut.EditMode',
+				meta: { id: modeId }
+			});
+
+			if (modeService)
+				this.activeMode = modeService.createMode(this.model);
 		},
 
 		render: function() {
-			var activeModeId = this.model.activeMode();
 			this.$el.html('');
 
 			this.$el.append(this._header.render().$el);
-			var currentMode = this._modes[activeModeId];
-			this.$el.append(currentMode.render().$el);
-
-			// Now render the header an put it in the correct location...
-			// And then da mode
+			if (this.activeMode)
+				this.$el.append(this.activeMode.render().$el);
+			else
+				this._renderNoMode();
 
 			return this;
+		},
+
+		_renderNoMode: function() {
+			this.$el.append('<div class="alert alert-error">No modes available.  Did some plugins fail to load?</div>');
 		}
 	});
 });

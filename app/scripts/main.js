@@ -54,7 +54,7 @@ function(registry, EditorView, EditorModel, Handlebars) {
     JST[tpl] = Handlebars.template(JST[tpl]);
   }
 
-  var model = new EditorModel({registry: registry});
+  var model = new EditorModel(registry);
 
   // TODO: the model will need to tell us when it is set to go
   // since there may be some awkward handshaking going on with storage

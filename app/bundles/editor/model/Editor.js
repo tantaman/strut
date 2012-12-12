@@ -6,13 +6,13 @@ function(Backbone, Header) {
 			this._loadStorageProviders();
 			this._loadLastPresentation();
 
-			this._loadModes();
+			this.set('header', new Header(this.registry));
 
-			this.set('header', new Header());
+			this.set('activeMode', this.activeMode());
 		},
 
 		activeMode: function() {
-
+			return undefined;
 		},
 
 		_loadLastPresentation: function() {
@@ -22,20 +22,14 @@ function(Backbone, Header) {
 			// attempt connection to prefferd provider
 		},
 
-		_loadModes: function() {
-			// Look for mode contributors
-			// Load them into the editor
-			var modes = this.get('registry').getInvoke('strut.ModeContributor', 'createModel', [this]);
-			this.set('modes', modes);
-		},
-
 		_loadStorageProviders: function() {
-			var providers = this.get('registry').getInvoke('strut.StorageProvider', 'create');
+			var providers = this.registry.getInvoke('strut.StorageProvider', 'create');
 			this.set('storageProviders', providers);
 		},
 
-		constructor: function Editor() {
-			Backbone.Model.prototype.constructor.apply(this, arguments);
+		constructor: function Editor(registry) {
+			this.registry = registry;
+			Backbone.Model.prototype.constructor.call(this);
 		}
 	});
 });
