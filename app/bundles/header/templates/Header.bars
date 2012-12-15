@@ -1,6 +1,12 @@
-<div class="logo">
-</div>
-<div class="create-comp-buttons">
-</div>
-<div class="mode-buttons">
+<div class="navbar-inner">
+	<ul class="nav">
+		<li class="logo-holder">
+		</li>
+		<li class="divider-vertical">
+		</li>
+		<li class="create-comp-buttons">
+		</li>
+		<li class="mode-buttons">
+		</li>
+	</ul>
 </div>

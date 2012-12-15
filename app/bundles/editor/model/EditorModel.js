@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/header/model/Header'],
+		'bundles/header/model/HeaderModel'],
 function(Backbone, Header) {
 	return Backbone.Model.extend({
 		initialize: function() {

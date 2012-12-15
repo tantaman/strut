@@ -8,7 +8,6 @@ require.config({
     css: "../scripts/libs/css",
     text: "../scripts/libs/text",
     bootstrap: "../components/bootstrap/bootstrap",
-    bootstrapDropdown: "../components/bootstrap/bootstrapDropdown",
     colorpicker: "../components/colorpicker/js/colorpicker",
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     downloadify: "../components/downloadify/js/downloadify.min",
@@ -21,11 +20,7 @@ require.config({
     bootstrap: {
       deps: ["jquery"]
     },
-
-    bootstrapDropdown: {
-      deps: ["bootstrap", "jquery"]
-    },
-
+    
     jqueryUI: {
       deps: ["jquery"]
     },
@@ -45,9 +40,10 @@ require.config({
 });
 
 require(['features',
-         'bundles/editor/view/Editor',
-         'bundles/editor/model/Editor',
-         'libs/Handlebars'
+         'bundles/editor/view/EditorView',
+         'bundles/editor/model/EditorModel',
+         'libs/Handlebars',
+         'bootstrap'
         ],
 function(registry, EditorView, EditorModel, Handlebars) {
   for (tpl in JST) {

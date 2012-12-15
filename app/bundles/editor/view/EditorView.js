@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/header/view/Header'],
+		'bundles/header/view/HeaderView'],
 function(Backbone, Header) {
 	return Backbone.View.extend({
 		initialize: function() {

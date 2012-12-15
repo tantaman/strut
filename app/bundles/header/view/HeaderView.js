@@ -1,12 +1,18 @@
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone',
+		'bundles/logo_button/view/LogoView'],
+function(Backbone, LogoView) {
 	return Backbone.View.extend({
+		className: 'navbar navbar-inverse navbar-fixed-top',
+
 		initialize: function() {
 			this._template = JST['bundles/header/templates/Header'];
+			this._logoButton = new LogoView();
 		},
 
 		render: function() {
 			this.$el.html(this._template());
+
+			this.$el.find('.logo-holder').append(this._logoButton.render().$el);
 
 			var $modeButtons = this.$el.find('.mode-buttons');
 			this.model.get('modeButtons').forEach(function(button) {

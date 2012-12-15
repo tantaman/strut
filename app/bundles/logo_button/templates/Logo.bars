@@ -1,0 +1,6 @@
+<a class="logo btn dropdown-toggle" data-toggle="dropdown" href="#">
+    <span class="caret"></span>
+</a>
+<ul class="dropdown-menu">
+    <li><a href="#">New Slide</a></li>
+</ul>
