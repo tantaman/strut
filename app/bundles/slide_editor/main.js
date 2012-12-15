@@ -1,11 +1,12 @@
-define([],
-function() {
+define(['bundles/slide_editor/model/SlideEditorModel',
+		'bundles/slide_editor/view/SlideEditorView'],
+function(SlideEditorModel, SlideEditorView) {
 	var service = {
 		createMode: function(editorModel) {
-			var model = new SlideEditModel(editorModel);
+			var model = new SlideEditorModel(editorModel);
 
 			return {
-				view: new SlideEditView({model: model}),
+				view: new SlideEditorView({model: model}),
 				model: model,
 				id: 'slide-editor'
 			};
