@@ -1,26 +1,7 @@
 define(['bundles/slide_editor/model/SlideEditorModel',
-		'bundles/slide_editor/view/SlideEditorView'],
-function(SlideEditorModel, SlideEditorView) {
-	function ModeButton(editorModel) {
-		this.$el = $(JST['bundles/slide_editor/templates/Button']());
-		this.$el.click(function() {
-			editorModel.changeActiveMode('slide-editor');
-		});
-		this.el = this.$el[0];
-
-		editorModel.on('change:activeMode', function(model, value) {
-			if (model.get('modeId') == 'slide-editor') {
-				this.$el.addClass('dispNone');
-			} else {
-				this.$el.removeClass('dispNone');
-			}
-		}, this);
-	}
-
-	ModeButton.prototype.render = function() {
-		return this;
-	}
-
+		'bundles/slide_editor/view/SlideEditorView',
+		'bundles/widgets/ModeButton'],
+function(SlideEditorModel, SlideEditorView, ModeButton) {
 	var service = {
 		getMode: function(editorModel, registry) {
 			var model = new SlideEditorModel(editorModel);
@@ -36,7 +17,8 @@ function(SlideEditorModel, SlideEditorView) {
 		},
 
 		createButton: function(editorModel) {
-			return new ModeButton(editorModel);
+			return new ModeButton(editorModel, 'slide-editor',
+						JST['bundles/slide_editor/templates/Button']);
 		}
 	};
 
