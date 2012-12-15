@@ -1,6 +1,7 @@
 define(['libs/backbone',
-		'bundles/logo_button/view/LogoView'],
-function(Backbone, LogoView) {
+		'bundles/logo_button/view/LogoView',
+		'css!styles/header/header.css'],
+function(Backbone, LogoView, empty) {
 	return Backbone.View.extend({
 		className: 'navbar navbar-inverse navbar-fixed-top',
 

@@ -3,10 +3,13 @@
 	width: 100px;
 	height: 32px;
 	background-position: 5px;
-	margin-top: 5px;
 	margin-left: 5px;
 	padding: 0px 20px 0px 5px;
 	background-repeat: no-repeat;
+}
+
+.logo-holder {
+	margin-top: 5px;
 }
 
 .btn-group.open .logo {

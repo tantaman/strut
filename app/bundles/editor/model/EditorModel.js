@@ -6,20 +6,32 @@ function(Backbone, Header) {
 			this._loadStorageProviders();
 			this._loadLastPresentation();
 
-			this.set('header', new Header(this.registry));
+			this.set('header', new Header(this.registry, this));
 
+			this.set('modeId', 'slide-editor');
 			this._createMode();
 		},
 
+		changeActiveMode: function(modeId) {
+			if (modeId != this.get('modeId')) {
+				this.set('modeId', modeId);
+				this._createMode();
+			}
+		},
+
 		_createMode: function() {
-			var modeId = 'slide-editor';
+			var modeId = this.get('modeId');
 			var modeService = this.registry.getBest({
 				interfaces: 'strut.EditMode',
 				meta: { id: modeId }
 			});
 
-			if (modeService)
-				this.set('activeMode', modeService.createMode(this.model, this.registry));
+			if (modeService) {
+				var prevMode = this.get('activeMode');
+				if (prevMode)
+					prevMode.close();
+				this.set('activeMode', modeService.getMode(this.model, this.registry));
+			}
 		},
 
 		_loadLastPresentation: function() {

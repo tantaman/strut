@@ -39,3 +39,7 @@ border-bottom-color: #000;
 .iconBtns {
   margin-bottom: 5px;
 }
+
+.dispNone {
+  display: none;
+}
