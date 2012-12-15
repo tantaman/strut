@@ -5,20 +5,19 @@ function(Backbone) {
 			this._createModeButtons();
 			this._createCreateCompButtons();
 
-			this.registry.on('register:strut.CreateCompButtonProvider',
+			this.registry.on('registered:strut.CreateCompButtonProvider',
 				this._createCompProviderRegistered, this);
-			this.registry.on('register:strut.EditMode',
-				this._editModeRegistered, this);
+			this.registry.on('registered:strut.ModeButton',
+				this._modeButtonRegistered, this);
 		},
 
 		_createModeButtons: function() {
 			this._disposeObjects(this.get('modeButtons'));
-			var editModes = this.registry.get('strut.EditMode');
-
+			var buttonEntries = this.registry.get('strut.ModeButton');
+			console.log(buttonEntries);
 			var modeButtons = [];
-			editModes.forEach(function(mode) {
-				var button = mode.service().createButton();
-				modeButtons.push(button);
+			buttonEntries.forEach(function(buttonEntry) {
+				modeButtons.push(buttonEntry.service());
 			}, this);
 
 			this.set('modeButtons', modeButtons);
@@ -37,9 +36,9 @@ function(Backbone) {
 			this.set('createCompButtons', createCompButtons);
 		},
 
-		_editModeRegistered: function(service) {
-			var newButton = service.createButton();
-			this.get('modeButtons').push(service.createButton());
+		_modeButtonRegistered: function(newButton) {
+			newButton = newButton.service();
+			this.get('modeButtons').push(newButton);
 			this.trigger('change:modeButtons.push', this.get('modeButtons'), newButton);
 		},
 

@@ -19,7 +19,7 @@ function(Backbone, Header) {
 			});
 
 			if (modeService)
-				this.set('activeMode', modeService.createMode(this.model));
+				this.set('activeMode', modeService.createMode(this.model, this.registry));
 		},
 
 		_loadLastPresentation: function() {

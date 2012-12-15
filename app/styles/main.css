@@ -30,3 +30,12 @@ margin-top: 6px;
 border-top-color: #000;
 border-bottom-color: #000;
 }
+
+.iconBtns i {
+  display: block;
+  margin: 0 auto;
+}
+
+.iconBtns {
+  margin-bottom: 5px;
+}

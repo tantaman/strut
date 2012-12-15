@@ -6,6 +6,8 @@
 		</li>
 		<li class="create-comp-buttons">
 		</li>
+	</ul>
+	<ul class="nav pull-right">
 		<li class="mode-buttons">
 		</li>
 	</ul>
