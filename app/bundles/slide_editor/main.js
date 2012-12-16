@@ -31,5 +31,5 @@ function(SlideEditorModel, SlideEditorView, ModeButton) {
 				}
 			}, service);
 		}
-	}
+	};
 });
