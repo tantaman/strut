@@ -4,6 +4,8 @@ function(Backbone, Header) {
 	return Backbone.View.extend({
 		initialize: function() {
 			this._header = new Header({model: this.model.get('header')});
+
+			this.model.on('change:activeMode', this._modeChanged, this);
 		},
 
 		render: function() {
@@ -17,6 +19,10 @@ function(Backbone, Header) {
 				this._renderNoMode();
 
 			return this;
+		},
+
+		_modeChanged: function(model, mode) {
+			this.$el.append(mode.view.render().$el);
 		},
 
 		_renderNoMode: function() {

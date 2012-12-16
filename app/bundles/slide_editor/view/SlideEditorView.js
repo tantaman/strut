@@ -1,8 +1,10 @@
 define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
+		className: 'slideEditor',
+
 		initialize: function() {
-			this._template = JST['bundles/slide_editor/templates/SlideEditor'];
+			//this._template = JST['bundles/slide_editor/templates/SlideEditor'];
 		},
 
 		remove: function() {
@@ -11,7 +13,7 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html(this._template());
+			this.$el.html(); //this._template()
 			return this;
 		}
 	});
