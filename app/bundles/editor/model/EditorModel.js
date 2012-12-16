@@ -1,11 +1,14 @@
 define(['libs/backbone',
-		'bundles/header/model/HeaderModel'],
-function(Backbone, Header) {
+		'bundles/header/model/HeaderModel',
+		'bundles/presentation_generator/model/PresentationGeneratorCollection'],
+function(Backbone, Header, PresentationGeneratorCollection) {
 	return Backbone.Model.extend({
 		initialize: function() {
 			this._loadStorageProviders();
 			this._loadLastPresentation();
 
+			this.set('presentationGenerators', 
+				new PresentationGeneratorCollection(this));
 			this.set('header', new Header(this.registry, this));
 
 			this.set('modeId', 'slide-editor');
@@ -44,6 +47,10 @@ function(Backbone, Header) {
 		_loadStorageProviders: function() {
 			var providers = this.registry.getInvoke('strut.StorageProvider', 'create');
 			this.set('storageProviders', providers);
+		},
+
+		_loadGenerators: function() {
+			
 		},
 
 		constructor: function Editor(registry) {

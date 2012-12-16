@@ -1,16 +1,16 @@
 define(['libs/backbone',
 		'bundles/logo_button/view/LogoView',
-		'bundles/preview_generator/view/PreviewGeneratorButton',
+		'bundles/presentation_generator/view/PreviewButton',
 		'css!styles/header/header.css'],
-function(Backbone, LogoView, PreviewGeneratorButton, empty) {
+function(Backbone, LogoView, PreviewButton, empty) {
 	return Backbone.View.extend({
 		className: 'navbar navbar-inverse navbar-fixed-top',
 
 		initialize: function() {
 			this._template = JST['bundles/header/templates/Header'];
 			this._logoButton = new LogoView();
-			this._previewGeneratorButton = 
-				new PreviewGeneratorButton({editorModel: this.model.editorModel()});
+			this._previewButton = 
+				new PreviewButton({editorModel: this.model.editorModel()});
 		},
 
 		// TODO: need to respond to addition/removal of
@@ -31,7 +31,7 @@ function(Backbone, LogoView, PreviewGeneratorButton, empty) {
 			}, this);
 
 			//var $generatorButton = this.$el.find('.preview-generator-button');
-			$modeButtons.append(this._previewGeneratorButton.render().$el);
+			$modeButtons.append(this._previewButton.render().$el);
 
 			return this;
 		},
