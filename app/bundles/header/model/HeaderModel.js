@@ -11,6 +11,8 @@ function(Backbone) {
 				this._modeRegistered, this);
 		},
 
+		editorModel: function() { return this._editorModel; },
+
 		_createModeButtons: function() {
 			this._disposeObjects(this.get('modeButtons'));
 			var buttonEntries = this.registry.get('strut.EditMode');
