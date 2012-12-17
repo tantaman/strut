@@ -1,7 +1,8 @@
 define(['libs/backbone',
 		'bundles/header/model/HeaderModel',
-		'bundles/presentation_generator/model/PresentationGeneratorCollection'],
-function(Backbone, Header, PresentationGeneratorCollection) {
+		'bundles/presentation_generator/model/PresentationGeneratorCollection',
+		'bundles/deck/Deck'],
+function(Backbone, Header, PresentationGeneratorCollection, Deck) {
 	return Backbone.Model.extend({
 		initialize: function() {
 			this._loadStorageProviders();
@@ -22,6 +23,10 @@ function(Backbone, Header, PresentationGeneratorCollection) {
 			}
 		},
 
+		deck: function() {
+			return this._deck;
+		},
+
 		_createMode: function() {
 			var modeId = this.get('modeId');
 			var modeService = this.registry.getBest({
@@ -33,7 +38,7 @@ function(Backbone, Header, PresentationGeneratorCollection) {
 				var prevMode = this.get('activeMode');
 				if (prevMode)
 					prevMode.close();
-				this.set('activeMode', modeService.getMode(this.model, this.registry));
+				this.set('activeMode', modeService.getMode(this, this.registry));
 			}
 		},
 
@@ -42,6 +47,7 @@ function(Backbone, Header, PresentationGeneratorCollection) {
 			// and access information
 
 			// attempt connection to prefferd provider
+			this._deck = new Deck();
 		},
 
 		_loadStorageProviders: function() {
@@ -53,7 +59,7 @@ function(Backbone, Header, PresentationGeneratorCollection) {
 			
 		},
 
-		constructor: function Editor(registry) {
+		constructor: function EditorModel(registry) {
 			this.registry = registry;
 			Backbone.Model.prototype.constructor.call(this);
 		}

@@ -2,6 +2,7 @@ define(['libs/backbone',
 		'bundles/header/view/HeaderView'],
 function(Backbone, Header) {
 	return Backbone.View.extend({
+		className: 'container-fluid',
 		initialize: function() {
 			this._header = new Header({model: this.model.get('header')});
 

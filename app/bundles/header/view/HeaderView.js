@@ -4,7 +4,7 @@ define(['libs/backbone',
 		'css!styles/header/header.css'],
 function(Backbone, LogoView, PreviewButton, empty) {
 	return Backbone.View.extend({
-		className: 'navbar navbar-inverse navbar-fixed-top',
+		className: 'row-fluid header',
 
 		initialize: function() {
 			this._template = JST['bundles/header/templates/Header'];

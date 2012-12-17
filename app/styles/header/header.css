@@ -1,3 +1,11 @@
 .header .divider-vertical {
 	height: 54px;
 }
+
+.header .navbar-inner {
+	border-radius: 0;
+}
+
+.header .navbar {
+	margin-bottom: 0;
+}

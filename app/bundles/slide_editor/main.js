@@ -4,7 +4,7 @@ define(['bundles/slide_editor/model/SlideEditorModel',
 function(SlideEditorModel, SlideEditorView, ModeButton) {
 	var service = {
 		getMode: function(editorModel, registry) {
-			var model = new SlideEditorModel(editorModel);
+			var model = new SlideEditorModel({editorModel: editorModel});
 
 			return {
 				view: new SlideEditorView({model: model}),

@@ -1,10 +1,12 @@
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone',
+		'bundles/slide_well/view/SlideWell'],
+function(Backbone, SlideWell) {
 	return Backbone.View.extend({
-		className: 'slideEditor',
+		className: 'slideEditor row-fluid',
 
 		initialize: function() {
 			//this._template = JST['bundles/slide_editor/templates/SlideEditor'];
+			this._well = new SlideWell(this.model.deck());
 		},
 
 		remove: function() {
@@ -14,7 +16,12 @@ function(Backbone) {
 
 		render: function() {
 			this.$el.html(); //this._template()
+			this.$el.append(this._well.render().$el);
 			return this;
+		},
+
+		constructor: function SlideEditorView() {
+			Backbone.View.prototype.constructor.apply(this, arguments);
 		}
 	});
 });

@@ -1,14 +1,18 @@
-<div class="navbar-inner header">
-	<ul class="nav">
-		<li class="logo-holder">
-		</li>
-		<li class="divider-vertical">
-		</li>
-		<li class="create-comp-buttons">
-		</li>
-	</ul>
-	<ul class="nav pull-right">
-		<li class="mode-buttons">
-		</li>
-	</ul>
+<div class="navbar navbar-inverse span12">
+	<div class="navbar-inner">
+		<ul class="nav">
+			<li class="logo-holder">
+			</li>
+			<li class="divider-vertical">
+			</li>
+			<li class="create-comp-buttons">
+			</li>
+		</ul>
+		<ul class="nav pull-right">
+			<li class="divider-vertical">
+			</li>
+			<li class="mode-buttons">
+			</li>
+		</ul>
+	</div>
 </div>
