@@ -47,9 +47,8 @@ To build your own version of Strut you'll need Yeoman v0.9.6 or later.  If Yeoma
 3. `git checkout 79e74f161559d4c4bbac2136d2b1b84961614af`
 4. `cd cli`
 5. `npm install -g`
-6. `npm link`
+6. `npm link  --skip-updater`
 
-(if Yeoman tries to auto update kill it quick and run again)
 
 Building Strut
 
