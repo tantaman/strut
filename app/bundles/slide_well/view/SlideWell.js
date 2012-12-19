@@ -13,6 +13,13 @@ function(Backbone, SlideSnapshot, empty) {
 			// Append it in the correct position in the well
 		},
 
+		render: function() {
+			this._deck.get('slides').forEach(function(slide) {
+				this.$el.append(new SlideSnapshot({model: slide}));
+			}, this);
+			return this;
+		},
+
 		constructor: function SlideWell(deck) {
 			this._deck = deck;
 			Backbone.View.prototype.constructor.call(this);

@@ -1,4 +1,9 @@
 .slideWell {
-	width: 151px;
-	border-left: 1px solid #333;
+	width: 157px;
+	/*background: white;*/
+	border-right: 2px groove #333;
+	position: absolute;
+	left: 0px;
+	top: 56px;
+	bottom: 0px;
 }
