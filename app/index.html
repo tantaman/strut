@@ -21,7 +21,16 @@
 	</head>
 	<body>
 
-		<script>window.isOptimized = false;</script>
+		<script>
+		window.isOptimized = false;
+		Function.prototype.bind = function(ctx) {
+		    var fn;
+    		fn = this;
+    		return function() {
+      			return fn.apply(ctx, arguments);
+    		};
+  		};
+		</script>
 		<!-- build:js scripts/amd-app.js -->
 		<script type="text/javascript" src="scripts/compiled-templates.js"></script>
     	<script type="text/javascript" data-main="scripts/main" src="scripts/libs/require.js"></script>
