@@ -16,6 +16,12 @@ function(Calcium, Slide) {
 			if (!(slide instanceof Calcium.Model)) {
 				slide = new Slide(slide);
 			}
+
+			this.get('slides').add(slide);
+		},
+
+		constructor: function Deck() {
+			Calcium.Model.prototype.constructor.apply(this, arguments);
 		}
 	});
 });

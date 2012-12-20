@@ -14,8 +14,10 @@ function(Backbone, SlideSnapshot, empty) {
 		},
 
 		render: function() {
+			console.log('Rendering well');
 			this._deck.get('slides').forEach(function(slide) {
-				this.$el.append(new SlideSnapshot({model: slide}));
+				console.log('???');
+				this.$el.append(new SlideSnapshot({model: slide, deck: this._deck}));
 			}, this);
 			return this;
 		},
