@@ -7,7 +7,7 @@ function(SlideEditorModel, SlideEditorView, ModeButton) {
 			var model = new SlideEditorModel({editorModel: editorModel});
 
 			return {
-				view: new SlideEditorView({model: model}),
+				view: new SlideEditorView({model: model, registry: registry}),
 				model: model,
 				id: 'slide-editor',
 				close: function() {

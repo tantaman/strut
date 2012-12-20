@@ -6,7 +6,7 @@ function(Backbone, SlideWell) {
 
 		initialize: function() {
 			//this._template = JST['bundles/slide_editor/templates/SlideEditor'];
-			this._well = new SlideWell(this.model.deck());
+			this._well = new SlideWell(this.model.deck(), this.options.registry);
 		},
 
 		remove: function() {

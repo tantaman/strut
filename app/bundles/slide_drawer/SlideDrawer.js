@@ -2,7 +2,7 @@ define(
 function() {
 	'use strict';
 
-	function SlideDrawer(model, g2d) {
+	function SlideDrawer(model, g2d, registry) {
 		this.model = model;
 		this.g2d = g2d;
 
@@ -20,12 +20,39 @@ function() {
 			y: this.size.height / config.slide.size.height
 		};
 
-		
+		var drawerEntries = registry.get('strut.SlideComponentDrawer');
+		this._drawers = {};
+		drawerEntries.forEach(function(entry) {
+			var drawer = entry.service();
+			this._drawers[drawer.componentType] = drawer;
+			drawer.scale = this.scale;
+		}, this);
 	}
 
 	SlideDrawer.prototype = {
+		repaint: function() {
+			this._paint();
+		},
 
+		_paint: function() {
+			this.g2d.clearRect(0, 0, this.size.width, this.size.height);
+			var components = this.model.get('components');
+
+			components.forEach(function(component) {
+				var type = component.get('type');
+				var drawer = this.drawers[type];
+				if (drawer) {
+					this.g2d.save();
+					drawer.paint(component);
+					this.g2d.restore();
+				}
+			}, this);
+		},
+
+		dispose: function() {
+			this.model.off(null, null, this);
+		}
 	};
 
 	return SlideDrawer;
-}
+});

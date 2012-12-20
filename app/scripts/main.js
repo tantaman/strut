@@ -43,14 +43,16 @@ require(['features',
          'bundles/editor/view/EditorView',
          'bundles/editor/model/EditorModel',
          'libs/Handlebars',
+         'bundles/strut_config/config',
          'bootstrap'
         ],
-function(registry, EditorView, EditorModel, Handlebars) {
+function(registry, EditorView, EditorModel, Handlebars, config) {
   for (tpl in JST) {
     JST[tpl] = Handlebars.template(JST[tpl]);
   }
 
   var model = new EditorModel(registry);
+  window.config = config;
 
   // TODO: the model will need to tell us when it is set to go
   // since there may be some awkward handshaking going on with storage

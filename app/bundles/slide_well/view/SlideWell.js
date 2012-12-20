@@ -2,6 +2,7 @@ define(['libs/backbone',
 		'bundles/slide_snapshot/SlideSnapshot',
 		'css!styles/slide_well/slideWell.css'],
 function(Backbone, SlideSnapshot, empty) {
+	'use strict';
 	return Backbone.View.extend({
 		className: 'slideWell',
 
@@ -14,16 +15,16 @@ function(Backbone, SlideSnapshot, empty) {
 		},
 
 		render: function() {
-			console.log('Rendering well');
 			this._deck.get('slides').forEach(function(slide) {
-				console.log('???');
-				this.$el.append(new SlideSnapshot({model: slide, deck: this._deck}));
+				var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
+				this.$el.append(snapshot.render().$el);
 			}, this);
 			return this;
 		},
 
-		constructor: function SlideWell(deck) {
+		constructor: function SlideWell(deck, registry) {
 			this._deck = deck;
+			this._registry = registry;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

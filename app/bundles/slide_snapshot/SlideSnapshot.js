@@ -1,5 +1,6 @@
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone',
+		'bundles/slide_drawer/SlideDrawer'],
+function(Backbone, SlideDrawer) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -61,7 +62,7 @@ function(Backbone) {
 
 			this.$el.html(this._template(this.model.attributes));
 			var g2d = this.$el.find('canvas')[0].getContext('2d');
-			this._slideDrawer = new SlideDrawer(this.model, g2d);
+			this._slideDrawer = new SlideDrawer(this.model, g2d, this.options.registry);
 			var self = this;
 			setTimeout(function() {
 				self._slideDrawer.repaint();
