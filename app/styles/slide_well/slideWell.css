@@ -1,11 +1,12 @@
 .slideWell {
-	width: 157px;
+	width: 149px;
 	/*background: white;*/
-	border-right: 2px groove #333;
+	/*border-right: 2px groove #333;*/
 	position: absolute;
 	left: 0px;
 	top: 56px;
 	bottom: 0px;
+	background-image: url('linen-gray.png');
 }
 
 .slideWell .slideSnapshot {

@@ -17,6 +17,7 @@ function(Backbone, SlideWell) {
 		render: function() {
 			this.$el.html(); //this._template()
 			this.$el.append(this._well.render().$el);
+			this.$el.append('<div class="operatingTable"></div>');
 			return this;
 		},
 
