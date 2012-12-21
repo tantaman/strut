@@ -47,6 +47,15 @@ require(['features',
          'bootstrap'
         ],
 function(registry, EditorView, EditorModel, Handlebars, config) {
+  if ($.browser.mozilla)
+  window.browserPrefix = "-moz-"
+else if ($.browser.msie)
+  window.browserPrefix = "-ms-"
+else if ($.browser.opera)
+  window.browserPrefix = "-o-"
+else if ($.browser.webkit)
+  window.browserPrefix = "-webkit-"
+
   for (tpl in JST) {
     JST[tpl] = Handlebars.template(JST[tpl]);
   }

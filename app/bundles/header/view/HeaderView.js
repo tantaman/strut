@@ -25,7 +25,7 @@ function(Backbone, LogoView, PreviewButton, empty) {
 				$modeButtons.append(button.render().el);
 			}, this);
 
-			var $createCompButtons = this.$el.find('.create-comp-buttons');
+			var $createCompButtons = this.$el.find('.create-comp-buttons > div');
 			this.model.get('createCompButtons').forEach(function(button) {
 				$createCompButtons.append(button.render().el);
 			}, this);

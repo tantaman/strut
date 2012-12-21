@@ -27,6 +27,10 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck) {
 			return this._deck;
 		},
 
+		createComponent: function(type) {
+
+		},
+
 		_createMode: function() {
 			var modeId = this.get('modeId');
 			var modeService = this.registry.getBest({

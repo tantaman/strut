@@ -5,7 +5,11 @@
 			</li>
 			<li class="divider-vertical">
 			</li>
+		</ul>
+		<ul class="nav" style="margin-left: 5%">
 			<li class="create-comp-buttons">
+				<div class="btn-group iconBtns">
+				</div>
 			</li>
 		</ul>
 		<ul class="nav pull-right">

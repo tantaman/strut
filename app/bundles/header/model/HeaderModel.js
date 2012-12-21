@@ -30,7 +30,7 @@ function(Backbone) {
 
 			var createCompButtons = [];
 			providers.forEach(function(provider) {
-				var buttons = provider.createButtons();
+				var buttons = provider.service().createButtons(this._editorModel);
 				createCompButtons = createCompButtons.concat(buttons);
 			}, this);
 
