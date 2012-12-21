@@ -2,6 +2,7 @@ define(['libs/backbone',
 		'./SlideWell',
 		'./OperatingTable'],
 function(Backbone, SlideWell, OperatingTable) {
+	'use stict';
 	return Backbone.View.extend({
 		className: 'slideEditor row-fluid',
 

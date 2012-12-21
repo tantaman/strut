@@ -5,7 +5,7 @@ function(Backbone) {
 			this._createModeButtons();
 			this._createCreateCompButtons();
 
-			this.registry.on('registered:strut.CreateCompButtonProvider',
+			this.registry.on('registered:strut.ComponentButtonProvider',
 				this._createCompProviderRegistered, this);
 			this.registry.on('registered:strut.EditMode',
 				this._modeRegistered, this);
@@ -26,7 +26,7 @@ function(Backbone) {
 
 		_createCreateCompButtons: function() {
 			this._disposeObjects(this.get('createCompButtons'));
-			var providers = this.registry.get('strut.CreateCompButtonProvider');
+			var providers = this.registry.get('strut.ComponentButtonProvider');
 
 			var createCompButtons = [];
 			providers.forEach(function(provider) {
