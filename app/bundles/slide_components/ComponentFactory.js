@@ -6,20 +6,45 @@ define(function() {
 		// ComponentType must be same in model and view.
 		// it is how they are mapped to one another.
 
-		var models = registry.get('strut.ComponentModel');
+		var modelEntries = registry.get('strut.ComponentModel');
+		this._modelCtors = {};
+		modelEntries.forEach(function(entry) {
+			this._modelCtors[entry.meta().type] = entry.service();
+		}, this);
+
+		this._viewCtors = {};
+		var viewEntries = registry.get('strut.ComponentView');
+		viewEntries.forEach(function(entry) {
+			this._viewCtors[entry.meta().type] = entry.service();
+		}, this);
+
+		this._drawerCtors = {};
+		var drawerEntries = registry.get('strut.ComponentDrawer');
+		drawerEntries.forEach(function(entry) {
+			this._drawerCtors[entry.meta().type] = entry.service();
+		}, this);
 	}
 
 	ComponentFactory.prototype = {
 		createView: function(model) {
-
+			var type = model.get('type');
+			var ctor = this._viewCtors[type];
+			if (ctor) {
+				return new ctor({model: model});
+			}
 		},
 
 		createModel: function(rawModel) {
-
+			var type = rawModel.type;
+			var ctor = this._modelCtors[type];
+			if (ctor)
+				return new ctor(rawModel);
 		},
 
 		getDrawer: function(type) {
-
+			var ctor = this._drawerCtors[type];
+			if (ctor)
+				return new ctor();
 		}
 	};
 

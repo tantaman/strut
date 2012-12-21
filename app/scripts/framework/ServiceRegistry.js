@@ -1,5 +1,6 @@
 define(['common/EventEmitter', 'common/collections/MultiMap'],
 function(EventEmitter, MultiMap) {
+	'use strict';
 	var identifier = 0;
 
 	function ServiceRegistry() {
@@ -117,6 +118,10 @@ function(EventEmitter, MultiMap) {
 
 		service: function() {
 			return this._service;
+		},
+
+		meta: function() {
+			return this._meta;
 		},
 
 		// TODO: this should be a deep comparison
