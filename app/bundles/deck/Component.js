@@ -1,6 +1,7 @@
 define(['./SpatialObject'],
 function(SpatialObject) {
 	'use strict';
+	var config = window.config;
 	var defaults = {
 		x: config.slide.size.width / 3,
 		y: config.slide.size.height / 3

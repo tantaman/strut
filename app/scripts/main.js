@@ -39,14 +39,14 @@ require.config({
   }
 });
 
-require(['features',
+require(['bundles/strut_config/config',
+         'features',
          'bundles/editor/view/EditorView',
          'bundles/editor/model/EditorModel',
          'libs/Handlebars',
-         'bundles/strut_config/config',
          'bootstrap'
         ],
-function(registry, EditorView, EditorModel, Handlebars, config) {
+function(config, registry, EditorView, EditorModel, Handlebars) {
   if ($.browser.mozilla)
   window.browserPrefix = "-moz-"
 else if ($.browser.msie)

@@ -1,5 +1,5 @@
-define(['./Component'],
-function() {
+define(['bundles/deck/Component'],
+function(Component) {
 	'use strict';
 	return Component.extend({
 		initialize: function() {

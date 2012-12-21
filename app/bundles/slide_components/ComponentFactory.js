@@ -1,9 +1,12 @@
 define(function() {
+	'use strict';
 	function ComponentFactory(registry) {
-		// Look up strut.ComponentButtonProvider s
+		// Look up strut.Component s
 		// create our view map based on their component types
 		// ComponentType must be same in model and view.
 		// it is how they are mapped to one another.
+
+		var models = registry.get('strut.ComponentModel');
 	}
 
 	ComponentFactory.prototype = {
@@ -20,5 +23,5 @@ define(function() {
 		}
 	};
 
-	return ComponentViewFactory;
+	return ComponentFactory;
 });

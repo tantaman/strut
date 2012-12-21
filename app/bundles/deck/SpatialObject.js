@@ -20,7 +20,7 @@ function(Calcium, Math2) {
 		},
 
 		setFloat: function(name, value, dec) {
-			if (typeof value is "string") {
+			if (typeof value === "string") {
 				try {
 					value = parseFloat(value);
 				} catch (e) {

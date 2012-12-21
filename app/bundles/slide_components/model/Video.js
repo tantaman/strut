@@ -37,9 +37,9 @@ function(Component, FileUtils) {
 	{
 		type: 'html5',
 		reg: /(.*)/,
-		srcType: (src) -> FileUtils.type(FileUtils.extension(src))
+		srcType: function() {FileUtils.type(FileUtils.extension(src))}
 	}
 	];
 
-	return video;
+	return Video;
 });

@@ -27,9 +27,6 @@ function(Backbone, SlideSnapshot, empty) {
 			var width = this.$el.width();
 			var height = this.$el.height();
 
-			console.log(width);
-			console.log(height);
-
 			var slideSize = config.slide.size;
 
 			var xScale = width / slideSize.width;
