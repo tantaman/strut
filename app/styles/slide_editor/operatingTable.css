@@ -1,0 +1,12 @@
+.operatingTable {
+  webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+
+  position: absolute;
+  left: 150px;
+  z-index: 1;
+  top: 56px;
+  bottom: 0px;
+  right: 0px;
+}
