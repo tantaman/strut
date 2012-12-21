@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/slide_drawer/SlideDrawer',
+		'./SlideDrawer',
 		'css!styles/slide_snapshot/slideSnapshot.css'],
 function(Backbone, SlideDrawer, css) {
 	'use strict';

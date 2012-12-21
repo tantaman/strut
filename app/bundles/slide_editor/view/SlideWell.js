@@ -1,6 +1,6 @@
 define(['libs/backbone',
 		'bundles/slide_snapshot/SlideSnapshot',
-		'css!styles/slide_well/slideWell.css'],
+		'css!styles/slide_editor/slideWell.css'],
 function(Backbone, SlideSnapshot, empty) {
 	'use strict';
 	return Backbone.View.extend({

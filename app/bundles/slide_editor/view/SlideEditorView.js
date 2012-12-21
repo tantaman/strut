@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/slide_well/view/SlideWell'],
+		'./SlideWell'],
 function(Backbone, SlideWell) {
 	return Backbone.View.extend({
 		className: 'slideEditor row-fluid',
