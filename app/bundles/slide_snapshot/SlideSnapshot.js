@@ -1,6 +1,7 @@
 define(['libs/backbone',
-		'bundles/slide_drawer/SlideDrawer'],
-function(Backbone, SlideDrawer) {
+		'bundles/slide_drawer/SlideDrawer',
+		'css!styles/slide_snapshot/slideSnapshot.css'],
+function(Backbone, SlideDrawer, css) {
 	'use strict';
 
 	return Backbone.View.extend({
