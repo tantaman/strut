@@ -34,7 +34,11 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 		},
 
 		createComponent: function(type) {
-
+			var slide = this._deck.get('activeSlide');
+			if (slide) {
+				var comp = componentFactory.createModel(type);
+				slide.addComponent(comp);
+			}
 		},
 
 		_createMode: function() {

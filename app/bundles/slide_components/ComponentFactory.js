@@ -18,10 +18,10 @@ define(function() {
 			this._viewCtors[entry.meta().type] = entry.service();
 		}, this);
 
-		this._drawerCtors = {};
+		this._drawers = {};
 		var drawerEntries = registry.get('strut.ComponentDrawer');
 		drawerEntries.forEach(function(entry) {
-			this._drawerCtors[entry.meta().type] = entry.service();
+			this._drawers[entry.meta().type] = entry.service();
 		}, this);
 	}
 
@@ -42,9 +42,7 @@ define(function() {
 		},
 
 		getDrawer: function(type) {
-			var ctor = this._drawerCtors[type];
-			if (ctor)
-				return new ctor();
+			return this._drawers[type];
 		}
 	};
 
