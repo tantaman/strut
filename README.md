@@ -4,6 +4,9 @@ Strut
 **Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
 on the progress of the re-write on the rewrite branch.
 
+`Strut` is getting a facelift too:
+![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)
+
 #### GUI / Authoring Tool for ImpressJS ####
 
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
