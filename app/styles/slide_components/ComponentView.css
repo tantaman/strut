@@ -1,0 +1,139 @@
+.component .label {
+	visibility: hidden;
+	background: none;
+	font-size: 100px;
+	color: rgba(255, 255, 255, .7);
+	text-shadow: 0 0 .2em rgba(50, 50, 50, .7) !important;
+}
+
+.component.textBox li {
+	line-height: 1em;
+}
+
+.component .label.rotate {
+	font-size: 25px;
+}
+
+.component .positioningCtrls .label {
+	font-size: 30px;
+	margin-right: -10px;
+}
+
+.component input {
+	visibility: hidden;
+}
+
+.component .content-scale {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+}
+
+.component .content {
+	-webkit-transform-origin: 50% 50%;
+	-moz-transform-origin: 50% 50%;
+	transform-origin: 50% 50%;
+	white-space: nowrap;
+}
+
+.component .content-scale:not(.svg) {
+	display: inline-block;
+}
+
+.component .content:not(.svg) {
+	display: inline-block;
+}
+
+.component.selected .label {
+	visibility: visible;
+}
+
+.component .removeBtn {
+	z-index: 100;
+}
+
+.component.selected input {
+	visibility: visible;
+}
+
+.component .topLabel {
+	position: absolute;
+	left: 40%;
+	top: -20px;
+	cursor: w-resize;
+}
+
+.component .leftLabel {
+	position: absolute;
+	left: -35px;
+	top: 40%;
+	cursor: s-resize;
+	transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-webkit-transform: rotate(-90deg);
+}
+
+.component .scale {
+	position: absolute;
+	right: -35px;
+	bottom: -25px;
+	cursor: se-resize;
+	font-size: 40px;
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+}
+
+.component .rightLabel {
+	position: absolute;
+	right: -45px;
+	top: 50%;
+	cursor: n-resize;
+}
+
+.component .positioningCtrls {
+	position: absolute;
+	bottom: -35px;
+	font-size: 18px;
+}
+
+.component input {
+	width: 25px;
+	height: 12px;
+	line-height: 12px;
+}
+
+.component {
+	position: absolute;
+	line-height: normal;
+	/*padding: 2px;*/
+	cursor: pointer;
+	margin: 0px;
+}
+
+.component {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+.component.selected {
+	border: 2px dashed black;
+}
+
+.component.editable {
+	cursor: auto;
+	border: 2px solid red;
+	-moz-user-select: text;
+	-webkit-user-select: text;
+}
+
+.component .close-btn-red-20 {
+	display: none;
+	position: absolute;
+	top: 0px;
+	left: -7px;
+}
+
+.component:hover .close-btn-red-20 {
+	display: inline;
+}
