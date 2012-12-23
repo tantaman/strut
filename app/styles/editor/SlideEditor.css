@@ -1,5 +1,6 @@
 .slideEditor {
 	/*height: 100%;*/
+	background-image: url('../../img/linen-gray.png');
 }
 
 .slideEditor .navbar .caret {

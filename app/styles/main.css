@@ -9,6 +9,8 @@
 html, body, .editor {
 	height: 100%;
 	background: #222;
+
+	background-image: url('../img/linen-lighter.png');
 }
 
 .overlay {
