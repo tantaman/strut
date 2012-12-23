@@ -4,7 +4,6 @@ define(['libs/backbone',
 		'bundles/deck/Deck',
 		'bundles/slide_components/ComponentFactory'],
 function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
-	var componentFactory = ComponentFactory.instance;
 	return Backbone.Model.extend({
 		initialize: function() {
 			this._loadStorageProviders();
@@ -30,13 +29,13 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 		},
 
 		addSlide: function() {
-
+			this._deck.newSlide();
 		},
 
 		addComponent: function(type) {
 			var slide = this._deck.get('activeSlide');
 			if (slide) {
-				var comp = componentFactory.createModel(type);
+				var comp = ComponentFactory.instance.createModel(type);
 				slide.addComponent(comp);
 			}
 		},
@@ -62,6 +61,7 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 
 			// attempt connection to prefferd provider
 			this._deck = new Deck();
+			this.addSlide();
 		},
 
 		_loadStorageProviders: function() {
