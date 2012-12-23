@@ -4,7 +4,7 @@ define(['libs/backbone',
 		'bundles/deck/Deck',
 		'bundles/slide_components/ComponentFactory'],
 function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
-	var componentFactory = null;
+	var componentFactory = ComponentFactory.instance;
 	return Backbone.Model.extend({
 		initialize: function() {
 			this._loadStorageProviders();
@@ -16,10 +16,6 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 
 			this.set('modeId', 'slide-editor');
 			this._createMode();
-
-			if (componentFactory == null) {
-				componentFactory = new ComponentFactory(this.registry);
-			}
 		},
 
 		changeActiveMode: function(modeId) {
@@ -33,7 +29,11 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 			return this._deck;
 		},
 
-		createComponent: function(type) {
+		addSlide: function() {
+
+		},
+
+		addComponent: function(type) {
 			var slide = this._deck.get('activeSlide');
 			if (slide) {
 				var comp = componentFactory.createModel(type);

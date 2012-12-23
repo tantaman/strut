@@ -8,11 +8,12 @@ define(['./view/ComponentButton',
 		'./view/WebFrameView',
 		'./view/VideoView',
 		'./drawers/TextBoxDrawer',
-		'./drawers/ImageDrawer'],
+		'./drawers/ImageDrawer',
+		'./ComponentFactory'],
 function(Button,
 		Image, TextBox, WebFrame, Video,
 		ImageView, TextBoxView, WebFrameView, VideoView,
-		TextBoxDrawer, ImageDrawer) {
+		TextBoxDrawer, ImageDrawer, ComponentFactory) {
 	var service = {
 		createButtons: function(editorModel) {
 			var buttons = [];
@@ -127,7 +128,9 @@ function(Button,
 				meta: {
 					type: 'TextBox'
 				}
-			}, TextBoxDrawer)
+			}, TextBoxDrawer);
+
+			ComponentFactory.initialize(registry);
 		}
 	};
 });

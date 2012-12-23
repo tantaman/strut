@@ -46,5 +46,10 @@ define(function() {
 		}
 	};
 
-	return ComponentFactory;
+	return {
+		initialize: function(registry) {
+			if (!this.instance)
+				this.instance = new ComponentFactory(registry);
+		}
+	};
 });

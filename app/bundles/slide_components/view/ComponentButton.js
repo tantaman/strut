@@ -14,7 +14,7 @@ function(Backbone) {
 		},
 
 		_clicked: function() {
-			this.options.editorModel.createComponent(this.options.componentType);
+			this.options.editorModel.addComponent(this.options.componentType);
 		},
 
 		render: function() {
