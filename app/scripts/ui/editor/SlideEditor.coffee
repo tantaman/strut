@@ -81,7 +81,9 @@ define(["backbone",
 
 			$mainContent.append(@$slidePreviewPanel)
 			$mainContent.append(@$operatingTable)
-			@resized()
+			setTimeout(() =>
+				@resized()
+			, 0)
 
 			if @_buttonBar?
 				@_buttonBar.dispose()
@@ -105,15 +107,17 @@ define(["backbone",
 
 		resized: () ->
 			if @$operatingTable
-				@$slidePreviewPanel.css("height", window.innerHeight-80)
+
+				@$slidePreviewPanel.css("height", @$operatingTable.height())
+				@operatingTable.resized()
 				#scalex = (window.innerWidth-168) / window.slideConfig.size.width
 				#scaley = (window.innerHeight-80) / window.slideConfig.size.height
 				
-				@$operatingTable.css(
-					height: window.innerHeight - 80
-					width: window.innerWidth - 150
-				)
-				@operatingTable.resized()
+				#@$operatingTable.css(
+				#	height: window.innerHeight - 80
+				#	width: window.innerWidth - 150
+				#)
+				#@operatingTable.resized()
 				#window.slideConfig.size.height
 				 #window.slideConfig.size.width
 

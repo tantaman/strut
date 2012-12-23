@@ -1,6 +1,5 @@
 .slideEditor {
 	/*height: 100%;*/
-	background-image: url('../../img/linen-gray.png');
 }
 
 .slideEditor .navbar .caret {
@@ -26,20 +25,26 @@
 }
 
 .slideEditor .slidePreviewPanel {
+	position: absolute;
+	top: 88px;
+	left: 0px;
+	bottom: 0px;
 	width: 150px;
-	height: 100%;
-	float: left;
 	border-right: 1px solid #333;
 	background: #222;
 	overflow:auto;
+	background-image: url('../../img/linen-gray.png');
 }
 
 .slideEditor .operatingTable {
-	height: 100%;
+	/*height: 100%;
 	width: 100%;
-	margin-left: 151px;
+	margin-left: 151px;*/
 	position: absolute;
 	overflow: hidden;
+  	webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  	-moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  	box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
 }
 
 .slideEditor .divider-vertical {

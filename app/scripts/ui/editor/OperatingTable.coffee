@@ -65,6 +65,8 @@ define(["backbone",
 				scale = xScale
 
 			@$slideContainer.css(window.browserPrefix + "transform", "scale(" + scale + ")")
+			remainingWidth = tableSize.width - slideSize.width * scale
+			@$slideContainer.css("margin-left", remainingWidth / 2);
 
 
 		clicked: (e) ->
