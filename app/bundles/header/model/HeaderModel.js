@@ -54,7 +54,7 @@ function(Backbone) {
 			if (objects)
 				objects.forEach(function(object) {
 					object.dispose();
-				})
+				});
 		},
 
 		constructor: function HeaderModel(registry, editorModel) {

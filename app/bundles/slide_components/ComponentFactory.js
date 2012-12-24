@@ -35,7 +35,10 @@ define(function() {
 		},
 
 		createModel: function(rawModel) {
-			var type = rawModel.type;
+            if (typeof rawModel === 'string')
+                var type = rawModel;
+            else
+			    var type = rawModel.type;
 			var ctor = this._modelCtors[type];
 			if (ctor)
 				return new ctor(rawModel);

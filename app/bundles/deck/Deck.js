@@ -1,19 +1,17 @@
 /**
 * @module model.presentation
 * @author Matt Crinklaw-Vogt
-*
 */
 define(["common/Calcium",
         "./SlideCollection",
-        "./Slide",
         "./SlideCommands",
         'bundles/undo_support/CmdListFactory'],
-function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
+function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
     /**
-    	This represents a slide deck.  It has a title, a currently active
-    	slide, a collection of slides, the filename on "disk" and
-    	the overarching presentation background color.
-    	@class model.presentation.Deck
+        This represents a slide deck.  It has a title, a currently active
+        slide, a collection of slides, the filename on "disk" and
+        the overarching presentation background color.
+        @class model.presentation.Deck
     */
     return Backbone.Model.extend({
       initialize: function() {
@@ -24,13 +22,13 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
         slides.on("add", this._slideAdded, this);
         slides.on("remove", this._slideRemoved, this);
         slides.on("reset", this._slidesReset, this);
-        return this._lastSelected = null;
+        return this._lastSelected = undefined;
       },
       /**
-      		Creates a new slide and adds it as the last slide in the deck.
-      		The newly created slide is set as the active slide in the deck.
-      		@method newSlide
-      		*
+            Creates a new slide and adds it as the last slide in the deck.
+            The newly created slide is set as the active slide in the deck.
+            @method newSlide
+            *
       */
 
       newSlide: function() {
@@ -47,22 +45,22 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
         return Backbone.Model.prototype.set.apply(this, arguments);
       },
       /**
-      		Method to import an existing presentation into this deck.
-      		TODO: this method should be a bit less brittle.  If new properties are added
-      		to a deck, this won't set them.
-      		@method import
-      		@param {Object} rawObj the "json" representation of a deck
-      		*
+            Method to import an existing presentation into this deck.
+            TODO: this method should be a bit less brittle.  If new properties are added
+            to a deck, this won't set them.
+            @method import
+            @param {Object} rawObj the "json" representation of a deck
+            *
       */
 
       "import": function(rawObj) {
         var activeSlide, slides;
         slides = this.get("slides");
         activeSlide = this.get("activeSlide");
-        if (activeSlide != null) {
+        if (activeSlide !== undefined) {
           activeSlide.unselectComponents();
         }
-        this.set("activeSlide", null);
+        this.set("activeSlide", undefined);
         this.set("background", rawObj.background);
         this.set("fileName", rawObj.fileName);
         this.undoHistory.clear();
@@ -72,16 +70,16 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
         var lastActive;
         lastActive = this.get("activeSlide");
         if (newActive === lastActive) {
-          return null;
+          return undefined;
         }
-        if (lastActive != null) {
+        if (lastActive !== undefined) {
           lastActive.unselectComponents();
           lastActive.set({
             active: false,
             selected: false
           });
         }
-        if (newActive != null) {
+        if (newActive !== undefined) {
           return newActive.set({
             selected: true,
             active: true
@@ -103,7 +101,7 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
           } else if (options.index > 0) {
             this.set("activeSlide", collection.at(options.index - 1));
           } else {
-            this.set("activeSlide", null);
+            this.set("activeSlide", undefined);
           }
         }
         return slide.dispose();
@@ -128,7 +126,7 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
         }
       },
       _slideSelected: function(slide, value) {
-        if ((this._lastSelected != null) && value && this._lastSelected !== slide) {
+        if ((this._lastSelected !== undefined) && value && this._lastSelected !== slide) {
           this._lastSelected.set("selected", false);
         }
         return this._lastSelected = slide;
@@ -139,10 +137,10 @@ function(Backbone, SlideCollection, Slide, SlideCommands, CmdListFactory) {
         return slide.on("dispose", this._slideDisposed, this);
       },
       /**
-      		Removes the specified slide from the deck
-      		@method removeSlide
-      		@param {model.presentation.Slide} slide the slide to remove.
-      		*
+            Removes the specified slide from the deck
+            @method removeSlide
+            @param {model.presentation.Slide} slide the slide to remove.
+            *
       */
 
       removeSlide: function(slide) {

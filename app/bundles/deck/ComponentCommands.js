@@ -1,5 +1,5 @@
  define(function() {
-    var AddComponent, RemoveComponent, result;
+    var AddComponent, RemoveComponent;
     AddComponent = function(slide, component) {
       this.slide = slide;
       this.component = component;
@@ -26,7 +26,7 @@
       },
       name: "Remove Comp"
     };
-    return result = {
+    return {
       Add: AddComponent,
       Remove: RemoveComponent
     };

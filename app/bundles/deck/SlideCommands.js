@@ -8,7 +8,7 @@ define(['bundles/deck/Slide'], function(Slide) {
       "do": function() {
         var slides;
         slides = this.deck.get("slides");
-        if (!(this.slide != null)) {
+        if (this.slide === undefined) {
           this.slide = new Slide({
             num: slides.length
           });
@@ -61,7 +61,7 @@ define(['bundles/deck/Slide'], function(Slide) {
       },
       name: "Move"
     };
-    return result = {
+    return {
       Create: Create,
       Remove: Remove,
       Move: Move

@@ -107,7 +107,10 @@ module.exports = function( grunt ) {
     lint: {
       files: [
         'Gruntfile.js',
-        'app/scripts/**/*.js',
+        'app/bundles/**/*.js',
+        'app/scripts/*.js',
+        'app/scripts/common/*.js',
+        'app/scripts/framework/*.js',
         'spec/**/*.js'
       ]
     },
@@ -116,11 +119,12 @@ module.exports = function( grunt ) {
     // https://github.com/cowboy/grunt/blob/master/docs/task_lint.md#specifying-jshint-options-and-globals
     jshint: {
       options: {
-        curly: true,
+        curly: false,
         eqeqeq: true,
         immed: true,
         latedef: true,
         newcap: true,
+        unused: false,
         noarg: true,
         sub: true,
         undef: true,
@@ -202,7 +206,7 @@ module.exports = function( grunt ) {
       baseUrl: './scripts',
       wrap: true,
       name: 'main'
-    },
+    }
   });
 
   // Alias the `test` task to run the `mocha` task instead

@@ -22,7 +22,7 @@ function(Backbone, Header) {
 			return this;
 		},
 
-		_modeChanged: function(model, mode) {
+		_modeChanged: function(undefined, mode) {
 			this.$el.append(mode.view.render().$el);
 		},
 

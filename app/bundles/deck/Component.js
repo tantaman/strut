@@ -8,6 +8,7 @@
       x: config.slide.size.width / 3,
       y: config.slide.size.height / 3
     };
+
     defaultScale = {
       x: 1,
       y: 1
@@ -15,7 +16,7 @@
     return SpatialObject.extend({
       initialize: function() {
         _.defaults(this.attributes, defaults);
-        if (!(this.attributes.scale != null)) {
+        if (this.attributes.scale === undefined) {
           this.attributes.scale = {};
           return _.defaults(this.attributes.scale, defaultScale);
         }

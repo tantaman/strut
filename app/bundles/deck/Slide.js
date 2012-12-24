@@ -13,6 +13,7 @@
           "common/Math2", "./ComponentCommands"],
 function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
     var defaults;
+
     defaults = {
       z: 0,
       impScale: 1,
@@ -21,16 +22,16 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
       rotateZ: 0
     };
     /**
-    	Represents a slide in the presentation!
-    	Slides contain components (text boxes, videos, images, etc.)
-    	Slide fires a "contentsChanged" event whenever any of their
-    	components are updated.
+        Represents a slide in the presentation!
+        Slides contain components (text boxes, videos, images, etc.)
+        Slide fires a "contentsChanged" event whenever any of their
+        components are updated.
     
-    	Slide fires "change:components.add/remove" events when components are
-    	added or removed.
-    	@class model.presentation.Slide
-    	@extend model.geom.SpatialObject
-    	*
+        Slide fires "change:components.add/remove" events when components are
+        added or removed.
+        @class model.presentation.Slide
+        @extend model.geom.SpatialObject
+        *
     */
 
     return SpatialObject.extend({
@@ -38,7 +39,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
         var components, hydratedComps,
           _this = this;
         components = this.get("components");
-        if (!(components != null)) {
+        if (components === undefined) {
           this.set("components", []);
         } else {
           hydratedComps = [];
@@ -80,16 +81,16 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
         };
       },
       /**
-      		Adds a component in a space that has not already
-      		been occupied.  Triggers "contentsChanged"
-      		and "change:components.add" events.
+            Adds a component in a space that has not already
+            been occupied.  Triggers "contentsChanged"
+            and "change:components.add" events.
       
-      		The contentsChanged event is used by the preview canvas to re-render itself.
-      		The change:components.add is used by the operating table to know to render the new component.
-      		@method
-      		@param {model.presentation.components.Component} component The component (text box,
-      		image, video, etc. to be added)
-      		*
+            The contentsChanged event is used by the preview canvas to re-render itself.
+            The change:components.add is used by the operating table to know to render the new component.
+            @method
+            @param {model.presentation.components.Component} component The component (text box,
+            image, video, etc. to be added)
+            *
       */
 
       add: function(component) {
@@ -106,11 +107,11 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
         return this.trigger("change:components.add", this, component);
       },
       /**
-      		* A pretty naive implementation but it should do the job just fine.
-      		* Places a new component in a location that doesn't currently contain a component
-      		* @method _placeComponent
-      		* @param {Component} component The component to be placed
-      		*
+            * A pretty naive implementation but it should do the job just fine.
+            * Places a new component in a location that doesn't currently contain a component
+            * @method _placeComponent
+            * @param {Component} component The component to be placed
+            *
       */
 
       _placeComponent: function(component) {
@@ -151,7 +152,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
           component.off(null, null, this);
           return component;
         } else {
-          return null;
+          return undefined;
         }
       },
       componentChanged: function(model, value) {
@@ -174,13 +175,13 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
           }
           return this.trigger("change:activeComponent", this, model, selected);
         } else {
-          this.trigger("change:activeComponent", this, null);
-          return this.lastSelection = null;
+          this.trigger("change:activeComponent", this, undefined);
+          return this.lastSelection = undefined;
         }
       },
       constructor: function Slide() {
-			SpatialObject.prototype.constructor.apply(this, arguments);
-		}
+            SpatialObject.prototype.constructor.apply(this, arguments);
+        }
     });
   });
 

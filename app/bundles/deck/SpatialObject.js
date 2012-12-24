@@ -10,7 +10,7 @@ function(Calcium, Math2) {
 		setInt: function(name, value) {
 			if (typeof value === "string") {
 				try {
-					value = parseInt(value);
+					value = parseInt(value, 10);
 				} catch (e) {
 					return;
 				}

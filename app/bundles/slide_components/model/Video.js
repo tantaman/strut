@@ -7,7 +7,7 @@ function(Component, FileUtils) {
 			Component.prototype.initialize.apply(this, arguments);
 			this.set('type', 'Video');
 
-			for (matcher in matchers) {
+			for (var matcher in matchers) {
 				var regResult = matcher.reg.exec(this.get('src'));
 				if (regResult) {
 					this._handleMatch(regResult, matcher);

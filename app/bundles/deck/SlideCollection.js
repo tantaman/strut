@@ -22,7 +22,8 @@
       sort: function(opts) {
         var swapped,
           _this = this;
-        opts || (opts = {});
+        if (!opts)
+          opts = {};
         swapped = {};
         this.models.forEach(function(model, idx) {
           var num;
