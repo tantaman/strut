@@ -40,7 +40,7 @@ function() {
 
 			components.forEach(function(component) {
 				var type = component.get('type');
-				var drawer = this.drawers[type];
+				var drawer = this._drawers[type];
 				if (drawer) {
 					this.g2d.save();
 					drawer.paint(component);

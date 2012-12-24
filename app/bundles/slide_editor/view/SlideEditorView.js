@@ -15,6 +15,7 @@ function(Backbone, SlideWell, OperatingTable) {
 		remove: function() {
 			Backbone.View.prototype.remove.call(this);
 			this.model.dispose();
+			this._opTable.dispose();
 		},
 
 		render: function() {

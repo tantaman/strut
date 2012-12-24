@@ -10,8 +10,10 @@
   define(["libs/backbone",
           "./SpatialObject",
           "bundles/slide_components/ComponentFactory",
-          "common/Math2", "./ComponentCommands"],
-function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
+          "common/Math2", "./ComponentCommands",
+          'bundles/undo_support/CmdListFactory'],
+function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, CmdListFactory) {
+    var undoHistory = CmdListFactory.managedInstance('editor');
     var defaults;
 
     defaults = {
@@ -98,7 +100,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
         this._placeComponent(component);
         cmd = new ComponentCommands.Add(this, component);
         cmd["do"]();
-        return window.undoHistory.push(cmd);
+        return undoHistory.push(cmd);
       },
       __doAdd: function(component) {
         this.attributes.components.push(component);
