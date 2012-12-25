@@ -1,0 +1,327 @@
+.close-btn-18 {
+  display: block;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  height: 0;
+  width: 18px;
+  padding: 18px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 2.04545454545455px solid #ffffff;
+  -moz-border-radius: 18px;
+  -webkit-border-radius: 18px;
+  border-radius: 18px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-18:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 18px;
+  position: absolute;
+  top: -1.8px;
+  left: 0;
+  font-size: 18px;
+  line-height: 18px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+  top: -2px;
+  left: 1px;
+}
+.close-btn-20 {
+  display: block;
+  position: absolute;
+  top: -8.88888888888889px;
+  right: -8.88888888888889px;
+  height: 0;
+  width: 20px;
+  padding: 20px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 2.27272727272727px solid #ffffff;
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-20:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 20px;
+  position: absolute;
+  top: -2px;
+  left: 0;
+  font-size: 20px;
+  line-height: 20px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-24 {
+  display: block;
+  position: absolute;
+  top: -10.6666666666667px;
+  right: -10.6666666666667px;
+  height: 0;
+  width: 24px;
+  padding: 24px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 2.72727272727273px solid #ffffff;
+  -moz-border-radius: 24px;
+  -webkit-border-radius: 24px;
+  border-radius: 24px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-24:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 24px;
+  position: absolute;
+  top: -2.4px;
+  left: 0;
+  font-size: 24px;
+  line-height: 24px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-26 {
+  display: block;
+  position: absolute;
+  top: -11.5555555555556px;
+  right: -11.5555555555556px;
+  height: 0;
+  width: 26px;
+  padding: 26px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 2.95454545454545px solid #ffffff;
+  -moz-border-radius: 26px;
+  -webkit-border-radius: 26px;
+  border-radius: 26px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-26:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 26px;
+  position: absolute;
+  top: -2.6px;
+  left: 0;
+  font-size: 26px;
+  line-height: 26px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-32 {
+  display: block;
+  position: absolute;
+  top: -14.2222222222222px;
+  right: -14.2222222222222px;
+  height: 0;
+  width: 32px;
+  padding: 32px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 3.63636363636364px solid #ffffff;
+  -moz-border-radius: 32px;
+  -webkit-border-radius: 32px;
+  border-radius: 32px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-32:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 32px;
+  position: absolute;
+  top: -3.2px;
+  left: 0;
+  font-size: 32px;
+  line-height: 32px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-36 {
+  display: block;
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  height: 0;
+  width: 36px;
+  padding: 36px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 4.09090909090909px solid #ffffff;
+  -moz-border-radius: 36px;
+  -webkit-border-radius: 36px;
+  border-radius: 36px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-36:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 36px;
+  position: absolute;
+  top: -3.6px;
+  left: 0;
+  font-size: 36px;
+  line-height: 36px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-42 {
+  display: block;
+  position: absolute;
+  top: -18.6666666666667px;
+  right: -18.6666666666667px;
+  height: 0;
+  width: 42px;
+  padding: 42px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 4.77272727272727px solid #ffffff;
+  -moz-border-radius: 42px;
+  -webkit-border-radius: 42px;
+  border-radius: 42px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-42:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 42px;
+  position: absolute;
+  top: -4.2px;
+  left: 0;
+  font-size: 42px;
+  line-height: 42px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-48 {
+  display: block;
+  position: absolute;
+  top: -21.3333333333333px;
+  right: -21.3333333333333px;
+  height: 0;
+  width: 48px;
+  padding: 48px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 5.45454545454545px solid #ffffff;
+  -moz-border-radius: 48px;
+  -webkit-border-radius: 48px;
+  border-radius: 48px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.close-btn-48:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 48px;
+  position: absolute;
+  top: -4.8px;
+  left: 0;
+  font-size: 48px;
+  line-height: 48px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}
+.close-btn-red-20 {
+  display: block;
+  position: absolute;
+  top: -8.88888888888889px;
+  right: -8.88888888888889px;
+  height: 0;
+  width: 20px;
+  padding: 20px 0 0 0;
+  overflow: hidden;
+  background: #000000 none;
+  border: 2.27272727272727px solid #ffffff;
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 6px #000000, 1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px 1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), 1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3), -1.63636363636364px -1.63636363636364px 1.63636363636364px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background-color: #9f0909;
+}
+.close-btn-red-20:before {
+  content: "\D7";
+  display: block;
+  text-align: center;
+  width: 20px;
+  position: absolute;
+  top: -2px;
+  left: 0;
+  font-size: 20px;
+  line-height: 20px;
+  font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;
+}

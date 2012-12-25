@@ -14,6 +14,14 @@
 	font-size: 25px;
 }
 
+.component .label.skewx {
+	font-size: 25px;
+}
+
+.component .label.skewy {
+	font-size: 25px;
+}
+
 .component .positioningCtrls .label {
 	font-size: 30px;
 	margin-right: -10px;

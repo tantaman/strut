@@ -237,7 +237,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands) {
         return this.$el;
       },
       __getTemplate: function() {
-        return JST["editor/Component"];
+        return JST["bundles/slide_components/templates/Component"];
       },
       _unrender: function() {
         return this.remove(true);

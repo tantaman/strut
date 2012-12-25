@@ -14,9 +14,8 @@ function(Calcium, Math2) {
 				} catch (e) {
 					return;
 				}
-
-				this.set(name, Math.round(value));
 			}
+			this.set(name, Math.round(value));
 		},
 
 		setFloat: function(name, value, dec) {

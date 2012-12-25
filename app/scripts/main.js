@@ -44,6 +44,13 @@ var __hasProp = {}.hasOwnProperty,
 
 window.__extends = __extends;
 
+window.zTracker = {
+  z: 0,
+  next: function() {
+    ++this.z;
+  }
+};
+
 require(['bundles/strut_config/config',
          'features',
          'bundles/editor/view/EditorView',

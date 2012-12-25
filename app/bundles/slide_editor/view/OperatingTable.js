@@ -18,6 +18,7 @@ function(Backbone, empty, ComponentFactory) {
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', this.setModel, this);
+			this.setModel(this._deck.get('activeSlide'));
 		},
 
 		render: function() {
@@ -51,6 +52,11 @@ function(Backbone, empty, ComponentFactory) {
 
 		},
 
+		_componentAdded: function(model, comp) {
+			var view = ComponentFactory.instance.createView(comp);
+			this._$slideContainer.append(view.render());
+		},
+
 		setModel: function(model) {
 			var prevModel = this.model;
 			if (this.model === model) return;
@@ -58,7 +64,7 @@ function(Backbone, empty, ComponentFactory) {
 			if (this.model != null) {
 				this.model.off(null, null, this);
 			}
-			this.model = slide;
+			this.model = model;
 			if (this.model != null) {
 				this.model.on('change:components.add', this._componentAdded, this);
 			}
@@ -67,7 +73,7 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		dispose: function() {
-			$(window).off(this._resize);
+			$(window).off('resize', this._resize);
 		},
 
 		_renderContents: function(prevModel) {
@@ -80,8 +86,8 @@ function(Backbone, empty, ComponentFactory) {
 			if (this.model != null) {
 				var components = this.model.get('components');
 				components.forEach(function(comp) {
-					var view = ComponentFactory.createView(comp);
-					this.$slideContainer.append(view.render());
+					var view = ComponentFactory.instance.createView(comp);
+					this._$slideContainer.append(view.render());
 				}, this);
 			}
 		},
