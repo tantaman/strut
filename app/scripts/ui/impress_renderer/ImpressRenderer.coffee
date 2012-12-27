@@ -75,12 +75,31 @@ define(["libs/Handlebars",
 			colCnt = 6
 			cnt = 0
 			# TODO FIXME
+
+			minX = null;
+			minY = null;
+			maxX = null;
+			maxY = null;
 			slides.each((slide) =>
 				x = slide.get("x")
+				y = slide.get("y")
 				if not x?
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
+
+				if not minX? or x < minX
+					minX = x
+				if not minY? or y < minY
+					minY = y
+				if not maxX? or x > maxX
+					maxX = x
+				if not maxY? or y > maxY
+					maxY = y
+
 				++cnt)
+
+			deckAttrs.overviewX = (maxX + minX) / 2
+			deckAttrs.overviewY = (maxY + minY) / 2
 			JST["impress_renderer/ImpressTemplate"](deckAttrs)
 
 		convertTextBoxData: (attrs) ->

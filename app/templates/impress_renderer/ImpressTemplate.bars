@@ -62,6 +62,7 @@
 </div>
 {{/slides.models}}
 
+<div id="overview" class="step active" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
 </div>
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
