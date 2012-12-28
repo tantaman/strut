@@ -37,11 +37,19 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		_clicked: function() {
+			this.model.get('components').forEach(function(comp) {
+				if (comp.get('selected')) {
+					comp.set('selected', false);
+				}
+			});
+			this.$el.find('.editable').removeClass('editable').attr('contenteditable', false)
+				.trigger('editComplete');
 
+			this._focus();
 		},
 
 		_focus: function() {
-
+			
 		},
 
 		_dragover: function() {

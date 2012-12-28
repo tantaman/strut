@@ -99,7 +99,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
         var cmd;
         this._placeComponent(component);
         cmd = new ComponentCommands.Add(this, component);
-        cmd["do"]();
+        cmd.do();
         return undoHistory.push(cmd);
       },
       __doAdd: function(component) {
@@ -140,8 +140,8 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
       remove: function(component) {
         var cmd;
         cmd = new ComponentCommands.Remove(this, component);
-        cmd["do"]();
-        return window.undoHistory.push(cmd);
+        cmd.do();
+        return undoHistory.push(cmd);
       },
       __doRemove: function(component) {
         var idx;

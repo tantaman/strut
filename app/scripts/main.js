@@ -51,37 +51,40 @@ window.zTracker = {
   }
 };
 
-require(['bundles/strut_config/config',
+require([
+         'colorpicker',
+         'bundles/strut_config/config',
          'features',
-         'bundles/editor/view/EditorView',
-         'bundles/editor/model/EditorModel',
+         'bundles/editor/EditorView',
+         'bundles/editor/EditorModel',
          'libs/Handlebars',
          'bootstrap'
         ],
-function(config, registry, EditorView, EditorModel, Handlebars) {
-  if ($.browser.mozilla)
-  window.browserPrefix = "-moz-"
-else if ($.browser.msie)
-  window.browserPrefix = "-ms-"
-else if ($.browser.opera)
-  window.browserPrefix = "-o-"
-else if ($.browser.webkit)
-  window.browserPrefix = "-webkit-"
+function(empty, config, registry, EditorView, EditorModel, Handlebars) {
+    'use strict';
+    if ($.browser.mozilla)
+        window.browserPrefix = "-moz-"
+    else if ($.browser.msie)
+        window.browserPrefix = "-ms-"
+    else if ($.browser.opera)
+        window.browserPrefix = "-o-"
+    else if ($.browser.webkit)
+        window.browserPrefix = "-webkit-"
 
-  for (tpl in JST) {
-    JST[tpl] = Handlebars.template(JST[tpl]);
-  }
+    for (var tpl in JST) {
+        JST[tpl] = Handlebars.template(JST[tpl]);
+    }
 
-  var model = new EditorModel(registry);
-  window.config = config;
+    var model = new EditorModel(registry);
+    window.config = config;
 
   // TODO: the model will need to tell us when it is set to go
   // since there may be some awkward handshaking going on with storage
   // providers
 
-	var editor = new EditorView({model: model, registry: registry});
+    var editor = new EditorView({model: model, registry: registry});
 
-  editor.render();
+    editor.render();
 
-  $('body').append(editor.$el);
+    $('body').append(editor.$el);
 });

@@ -1,5 +1,6 @@
 define([
 	'framework/ServiceRegistry',
+	'bundles/etch_extension/main',
 	'bundles/slide_editor/main',
 	'bundles/transition_editor/main',
 	'bundles/slide_components/main'
@@ -8,6 +9,7 @@ define([
 	// 'bundles/'
 	],
 function(ServiceRegistry,
+		EtchExtension,
 		SlideEditorBundle,
 		TransitionEditorBundle,
 		SlideComponents) {

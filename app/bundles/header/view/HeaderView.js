@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/logo_button/view/LogoView',
+		'bundles/logo_button/LogoView',
 		'bundles/presentation_generator/view/PreviewButton',
 		'css!styles/header/header.css'],
 function(Backbone, LogoView, PreviewButton, empty) {

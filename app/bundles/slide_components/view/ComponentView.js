@@ -2,8 +2,10 @@
          "bundles/widgets/DeltaDragControl",
          "common/Math2", "css!styles/slide_components/ComponentView.css",
          "libs/keymaster",
-         "bundles/deck/SlideCommands"],
-function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands) {
+         "bundles/deck/SlideCommands",
+         "bundles/undo_support/CmdListFactory"],
+function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFactory) {
+  var undoHistory = CmdListFactory.managedInstance('editor');
     return Backbone.View.extend({
       transforms: ["skewX", "skewY"],
       className: "component",
@@ -289,7 +291,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands) {
           this._dragging = false;
           if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
             cmd = new SlideCommands.Move(this.dragStartLoc, this.model);
-            window.undoHistory.push(cmd);
+            undoHistory.push(cmd);
           }
           this.dragStartLoc = void 0;
         }
