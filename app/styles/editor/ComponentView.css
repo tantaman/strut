@@ -10,6 +10,14 @@
 	line-height: 1em;
 }
 
+.component .label.skewx {
+	font-size: 25px;
+}
+
+.component .label.skewy {
+	font-size: 25px;
+}
+
 .component .label.rotate {
 	font-size: 25px;
 }
