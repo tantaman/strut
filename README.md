@@ -15,11 +15,11 @@ I hope this project can also serve as an example of a browser based rich client 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 And here is a video of the very first version of Strut: http://www.youtube.com/watch?v=zA5s8wwme44
 
-Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/web-dist/index.html
+Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/dist/index.html
 
 ### Preview ###
 
-A github hosted preview is available at: http://tantaman.github.com/Strut/web-dist/index.html (Firefox, Chrome and Safari only)
+A github hosted preview is available at: http://tantaman.github.com/Strut/dist/index.html (Firefox, Chrome and Safari only)
 
 The preview currently points to the development version of Strut.
 
