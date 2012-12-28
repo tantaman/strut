@@ -22,6 +22,7 @@
 </style>
 <link href="preview_export/css/main.css" rel="stylesheet" />
 <link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css'>
+<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 
 <link rel="shortcut icon" href="favicon.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
