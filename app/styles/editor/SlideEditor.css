@@ -31,9 +31,7 @@
 	bottom: 0px;
 	width: 150px;
 	border-right: 1px solid #333;
-	background: #222;
 	overflow:auto;
-	background-image: url('../../img/linen-gray.png');
 }
 
 .slideEditor .operatingTable {

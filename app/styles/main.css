@@ -13,6 +13,11 @@ html, body, .editor {
 	background-image: url('../img/linen-lighter.png');
 }
 
+.slideEditor .slidePreviewPanel {
+  background: #222;
+  background-image: url('../img/linen-gray.png');
+}
+
 .overlay {
 	width: 100%;
 	height: 100%;
