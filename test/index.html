@@ -8,14 +8,15 @@
 </head>
 <body>
   <div id="mocha"></div>
+  <script>window.isOptimized = true;</script>
   <script src="lib/mocha/mocha.js"></script>
   <!-- define globals for mocha -->
-  <script>mocha.setup({ ui: 'bdd', globals: ['_', '$', 'jQuery*', 'Backbone', 'JST'] })</script>
+  <script>mocha.setup({ ui: 'bdd', globals: ['_', '$', 'jQuery*', 'Backbone', 'JST', 'browserPrefix'] })</script>
   <!-- assertion framework -->
   <script src="lib/chai.js"></script>
   <script>expect = chai.expect</script>
   <!-- Load application -->
-  <script data-main="../app/scripts/main" src="../app/scripts/libs/require.js"></script>
+  <script data-main="../app/scripts/blank" src="../app/scripts/libs/require.js"></script>
   <!-- trigger the mocha runner -->
   <script src="runner/mocha.js"></script>
 </body>

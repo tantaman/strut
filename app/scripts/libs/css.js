@@ -1,6 +1,6 @@
 define(function() {
 	var path = undefined;
-	if (typeof process !== "undefined") {
+	if (typeof process !== "undefined" && typeof nodeRequire !== 'undefined') {
 		var fs = nodeRequire('fs');
 		path = nodeRequire('path');
 		var fname = null;

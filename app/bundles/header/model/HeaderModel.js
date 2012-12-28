@@ -6,7 +6,7 @@ function(Backbone) {
 			this._createCreateCompButtons();
 
 			this.registry.on('registered:strut.ComponentButtonProvider',
-				this._createCompProviderRegistered, this);
+				this._compBtnProviderRegistered, this);
 			this.registry.on('registered:strut.EditMode',
 				this._modeRegistered, this);
 		},
@@ -43,7 +43,7 @@ function(Backbone) {
 			this.trigger('change:modeButtons.push', this.get('modeButtons'), newButton);
 		},
 
-		_createCompProviderRegistered: function(service) {
+		_compBtnProviderRegistered: function(service) {
 			var newButtons = service.createButtons();
 			this.set('createCompButtons', this.get('createCompButtons').concat(newButtons));
 			this.trigger('change:createCompButtons.concat',

@@ -29,8 +29,8 @@ function(EventEmitter, MultiMap) {
 		interfaces.forEach(function(iface) {
 			this._services.put(iface, entry);
 			this.emit('registered:' + iface, entry);
-			this.emit('registered', entry);
 		}, this);
+		this.emit('registered', entry);
 	};
 
 	// proto.deregister = function() {
@@ -48,7 +48,7 @@ function(EventEmitter, MultiMap) {
 		return this.get(opts)[0];
 	};
 
-	proto.get = function(opts) {
+	proto.normalize = function Normalize(opts) {
 		var parms = {};
 		if (typeof opts === 'string') {
 			parms.interfaces = [opts];
@@ -60,6 +60,12 @@ function(EventEmitter, MultiMap) {
 				parms.interfaces = [parms.interfaces];
 		}
 
+		return parms;
+	};
+
+	proto.get = function(opts) {
+		var parms = this.normalize(opts);
+
 		var seen;
 		var prevSeen = {};
 		// For each interface
@@ -68,7 +74,7 @@ function(EventEmitter, MultiMap) {
 			// Get the services with that interface
 			this._services.get(iface).forEach(function(entry) {
 				// see if they match the query options
-				if (entry.matches(opts.meta)) {
+				if (entry.metaMatches(opts.meta)) {
 					// If this is the first interface through or the service
 					// has all the previous requested interfaces, add it
 					// to 'seen'
@@ -124,8 +130,21 @@ function(EventEmitter, MultiMap) {
 			return this._meta;
 		},
 
+		matches: function(opts) {
+			opts = Normalize(opts);
+			var ifSet = {};
+
+			opts.interfaces.forEach(function(iface) {
+				ifSet[iface] = true;
+			});
+
+			return this._interfaces.every(function(iface) {
+				return ifSet[iface];
+			});
+		},
+
 		// TODO: this should be a deep comparison
-		matches: function(meta) {
+		metaMatches: function(meta) {
 			if (meta == null) return true;
 
 			for (var key in meta) {
