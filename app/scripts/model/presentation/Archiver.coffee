@@ -91,8 +91,9 @@ define(["libs/jszip",
 			@archive.file("index.html", str);
 
 		# use the !text plugin to load these?
+		# TODO: just do a standard XHR request for this garbage
 		_archiveScripts: (cb) ->
-			requirejs(['text!../preview_export/scripts/impress.js'], (impress) =>
+			$.get('preview_export/scripts/impress.js', (impress) =>
 				@scriptsDir.file('impress.js', impress)
 				cb()
 			)
@@ -101,7 +102,7 @@ define(["libs/jszip",
 		_archiveFonts: () ->
 
 		_archiveCss: (cb) ->
-			requirejs(['text!../zip/main.css'], (css) =>
+			$.get('zip/main.css', (css) =>
 				@cssDir.file('main.css', css)
 				cb()
 			)
