@@ -28,13 +28,13 @@ strut-presentation-editor@googlegroups.com
 
 ### Pre-Built versions of Strut ###
 
-You can get pre-built versions of strut here: https://github.com/tantaman/Strut/downloads
+You can get pre-built versions of strut here: http://code.google.com/p/strut/downloads/list
 
 
 ### Running ###
 
 The pre-built versions of Strut can be run entirely from your local filesystem.  
-Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
+Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut.
 
 To run a non pre-built version, or a zip of Master, run `yeoman server` in the root Strut directory.
 
