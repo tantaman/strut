@@ -12,11 +12,17 @@ define(["backbone",
 			"hidden": "hidden"
 
 		initialize: () ->
+			@_dlSupported = `('download' in document.createElement('a'))`
 
 		show: (val, name) ->
 			if val?
 				@_val = val
-				@_makeDownloadable(name)
+				if @_dlSupported
+					@_makeDownloadable(name)
+				else
+					$('.download-txt').val(@_val)
+
+				@_val = ''
 
 			@$el.modal("show")
 
@@ -50,7 +56,10 @@ define(["backbone",
 				window.URL.revokeObjectURL(@$download.attr('href'))
 
 		render: () ->
-			@$el.html(JST["widgets/DownloadDialog"]())
+			if @_dlSupported
+				@$el.html(JST["widgets/DownloadDialog"]())
+			else
+				@$el.html(JST['widgets/NoDownloadDialog']())
 			@$el.modal()
 			@$el.modal("hide")
 			@$download = @$el.find('.downloadLink')
