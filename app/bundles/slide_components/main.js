@@ -1,4 +1,5 @@
 define(['./view/ComponentButton',
+		'./view/ImportingComponentButton',
 		'./model/Image',
 		'./model/TextBox',
 		'./model/WebFrame',
@@ -9,11 +10,12 @@ define(['./view/ComponentButton',
 		'./view/VideoView',
 		'./drawers/TextBoxDrawer',
 		'./drawers/ImageDrawer',
-		'./ComponentFactory'],
-function(Button,
+		'./ComponentFactory',
+		'lang'],
+function(Button, ImportingComponentButton,
 		Image, TextBox, WebFrame, Video,
 		ImageView, TextBoxView, WebFrameView, VideoView,
-		TextBoxDrawer, ImageDrawer, ComponentFactory) {
+		TextBoxDrawer, ImageDrawer, ComponentFactory, lang) {
 	var service = {
 		createButtons: function(editorModel) {
 			var buttons = [];
@@ -25,24 +27,31 @@ function(Button,
 				editorModel: editorModel
 			}));
 
-			buttons.push(new Button({
+			buttons.push(new ImportingComponentButton({
 				componentType: 'Image',
 				icon: 'icon-picture',
 				name: 'Image',
+				tag: 'img',
+				title: lang.insert_image,
 				editorModel: editorModel
 			}));
 
-			buttons.push(new Button({
+			buttons.push(new ImportingComponentButton({
 				componentType: 'Video',
 				icon: 'icon-facetime-video',
 				name: 'Video',
-				editorModel: editorModel
+				tag: 'video',
+				title: lang.insert_video,
+				editorModel: editorModel,
+				ignoreErrors: true
 			}));
 
-			buttons.push(new Button({
+			buttons.push(new ImportingComponentButton({
 				componentType: 'WebFrame',
 				icon: 'icon-globe',
 				name: 'Website',
+				tag: 'iframe',
+				title: lang.insert_website,
 				editorModel: editorModel
 			}));
 

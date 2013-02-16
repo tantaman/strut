@@ -13,7 +13,8 @@ require.config({
     downloadify: "../components/downloadify/js/downloadify.min",
     swfobject: "../components/downloadify/js/swfobject",
     jqueryUI: "../scripts/libs/jqueryUI",
-    bundles: "../bundles"
+    bundles: "../bundles",
+    lang: "../locales/en"
   },
 
   shim: {
@@ -74,6 +75,15 @@ function(empty, config, registry, EditorView, EditorModel, Handlebars) {
     for (var tpl in JST) {
         JST[tpl] = Handlebars.template(JST[tpl]);
     }
+
+    (function($) {
+      jQuery.event.special.destroyed = {
+          remove: function(o) {
+              if (o.handler)
+                  o.handler();
+          }
+      };
+    })(jQuery);
 
     var model = new EditorModel(registry);
     window.config = config;
