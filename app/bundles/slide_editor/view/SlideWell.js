@@ -42,7 +42,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 			// if (offsetY == null)
 				// offsetY = e.originalEvent.layerY;
 
-			var newPos = (((offsetY+40) / 100) | 0) * 100;
+			var newPos = (((offsetY+40) / 112) | 0) * 112 - 5;
 			this._contextMenu.reposition({x: this.$el.width() / 2 - this._contextMenu.$el.width() / 2, y: newPos});
 		},
 
