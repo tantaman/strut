@@ -16,6 +16,10 @@ body {
   padding: 0px;
 }
 
+.absolute {
+  position: absolute;
+}
+
 .overlay {
   width: 100%;
   height: 100%;
