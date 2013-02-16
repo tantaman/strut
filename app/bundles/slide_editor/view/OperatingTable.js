@@ -128,9 +128,9 @@ function(Backbone, empty, ComponentFactory) {
 			this._$slideContainer.css(window.browserPrefix + 'transform', 'scale(' + scale + ')')
 		},
 
-		constructor: function OperatingTable(deck, registry) {
-			this._deck = deck;
-			this._registry = registry;
+		constructor: function OperatingTable(editorModel) {
+			this._deck = editorModel.deck();
+			this._registry = editorModel.registry;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

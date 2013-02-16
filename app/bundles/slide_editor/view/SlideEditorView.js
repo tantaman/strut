@@ -8,8 +8,8 @@ function(Backbone, SlideWell, OperatingTable) {
 
 		initialize: function() {
 			//this._template = JST['bundles/slide_editor/templates/SlideEditor'];
-			this._well = new SlideWell(this.model.deck(), this.options.registry);
-			this._opTable = new OperatingTable(this.model.deck(), this.options.registry);
+			this._well = new SlideWell(this.model._editorModel);
+			this._opTable = new OperatingTable(this.model._editorModel);
 		},
 
 		remove: function() {

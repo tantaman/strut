@@ -57,7 +57,7 @@ function(Queue) {
 			} else if (this._runLast) {
 				var runLast = this._runLast;
 				this._runLast = null;
-				this._handle = this._internalSubmit(runLast);
+				this._internalSubmit(runLast);
 			} else {
 				this._handle = null;
 			}
