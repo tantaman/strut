@@ -24,6 +24,7 @@ function (EventEmitter) {
 		if (entry.matches(this._lookup)) {
 			var item = this._converter(entry);
 			this.push(item);
+			this.emit('add', this, item);
 		}
 	};
 
@@ -33,6 +34,10 @@ function (EventEmitter) {
 			var item = this._converter(entry);
 			this.push(item);
 		}, this)
+	};
+
+	proto.dispose = function() {
+		this._registry.off(null, null, this);
 	};
 
 	return ServiceCollection;

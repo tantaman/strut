@@ -52,6 +52,10 @@ window.zTracker = {
   }
 };
 
+window.logger = function(msg) {
+  console.log(msg);
+};
+
 require([
          'colorpicker',
          'bundles/strut_config/config',

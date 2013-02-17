@@ -4,23 +4,26 @@ define([
 	'bundles/slide_editor/main',
 	'bundles/transition_editor/main',
 	'bundles/slide_components/main',
-	'bundles/slide_well_context_buttons/main'
-	// 'bundles/local_storage',
-	// 'bundles/dropbox',
-	// 'bundles/remote_storage'
+	'bundles/slide_well_context_buttons/main',
+	'bundles/storage/main'
+	// 'bundles/local_storage/main',
+	// 'bundles/dropbox/main',
+	// 'bundles/remote_storage/main'
 	],
 function(ServiceRegistry,
 		EtchExtension,
 		SlideEditorBundle,
 		TransitionEditorBundle,
 		SlideComponents,
-		SlideWellContextButtons) {
+		SlideWellContextButtons,
+		Storage) {
 	var registry = new ServiceRegistry();
 
 	SlideEditorBundle.initialize(registry);
 	TransitionEditorBundle.initialize(registry);
 	SlideComponents.initialize(registry);
 	SlideWellContextButtons.initialize(registry);
+	Storage.initialize(registry);
 
 	return registry;
 });
