@@ -14,7 +14,7 @@ function (EventEmitter) {
 		this._populateItems();
 	}
 
-	var proto = ServiceCollection.prorotype = Object.create(Array.prototype);
+	var proto = ServiceCollection.prototype = Object.create(Array.prototype);
 
 	proto._register = function() {
 		this._registry.on('registered', this._serviceRegistered, this);
@@ -23,8 +23,7 @@ function (EventEmitter) {
 	proto._serviceRegistered = function(entry) {
 		if (entry.matches(this._lookup)) {
 			var item = this._converter(entry);
-			this.push(item);
-			this.emit('add', this, item);
+			this._handleItem(item);
 		}
 	};
 
@@ -32,9 +31,19 @@ function (EventEmitter) {
 		var entries = this._registry.get(this._lookup);
 		entries.forEach(function(entry) {
 			var item = this._converter(entry);
-			this.push(item);
+			this._handleItem(item);
 		}, this)
 	};
+
+	proto._handleItem = function(item) {
+		if (Array.isArray(item)) {
+			item.forEach(function(i) {
+				this.push(i);
+			}, this);
+		} else {
+			this.push(item);
+		}
+	}
 
 	proto.dispose = function() {
 		this._registry.off(null, null, this);

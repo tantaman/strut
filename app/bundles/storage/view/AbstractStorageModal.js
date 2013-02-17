@@ -1,6 +1,7 @@
 define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
+		className: "storageModal modal hide",
 		events: {
 			'click .providerTab': '_providerSelected'
 		},
@@ -11,7 +12,7 @@ function(Backbone) {
 			delete this.options.storageProviders;
 			delete this.options.editorModel;
 
-			this.template = JST['bundles/storage/view/StorageModal'];
+			this.template = JST['bundles/storage/templates/StorageModal'];
 
 			this.storageProviders.on('change:providers', this.render, this);
 		},
@@ -28,14 +29,21 @@ function(Backbone) {
 				tabs: providerNames
 			}));
 
-			// select each tab...
-			// construct the view for that tab.
+			this._renderProvider(this.storageProviders.currentProvider())
+		},
+
+		show: function() {
+			this.$el.modal('show');
 		},
 
 		__title: function() { return 'none'; },
 
 		_providerSelected: function() {
 
+		},
+
+		_renderProvider: function(provider) {
+			
 		},
 
 		constructor: function AbstractStorageModal() {

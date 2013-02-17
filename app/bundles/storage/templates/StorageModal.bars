@@ -4,7 +4,7 @@
 </div>
 <div class="modal-body" style="overflow: hidden">
 	{{#tabs}}
-		{{.}}
+		{{name}} - {{id}}
 	{{/tabs}}
 </div>
 <div class="modal-footer">

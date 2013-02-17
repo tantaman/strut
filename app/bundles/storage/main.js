@@ -1,13 +1,14 @@
 define(['./view/OpenModal',
 		'./view/SaveAsModal',
 		'./view/SaveMenuItem',
-		'./model/StorageProvidersWrapper'],
-function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper) {
+		'./model/StorageProvidersWrapper',
+		'lang'],
+function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
 	'use strict';
 	var storageProvidersWrapper = null;
 
 	function MenuItem(title, modal) {
-		this.$el = $('<span>' + title + '</span>');
+		this.$el = $('<li><a>' + title + '</a></li>');
 		this.$el.click(function() {
 			modal.show();
 		});
@@ -48,10 +49,10 @@ function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper) {
 				$modals.append(saveAsModal.$el);
 			}
 
-			menuItems.push(new MenuItem('Open', openModal));
+			menuItems.push(new MenuItem(lang.open, openModal));
 
 			menuItems.push(new SaveMenuItem(saveAsModal, editorModel));
-			menuItems.push(new MenuItem('Save As...', saveAsModal));
+			menuItems.push(new MenuItem(lang.save_as, saveAsModal));
 
 			return menuItems;
 		}

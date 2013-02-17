@@ -13,6 +13,7 @@ function(Backbone) {
 	}
 
 	_.extend(StorageProvidersWrapper.prototype, Backbone.Events, {
+		_currentProviderIdx: 0,
 		_providerRegistered: function(providerEntry) {
 			var provider = providerEntry.service();
 			this.providers.push(provider);
@@ -32,7 +33,19 @@ function(Backbone) {
 		},
 
 		providerNames: function() {
-			return _.pluck(this.providers, 'name');
+			var result = [];
+
+			var id = 0;
+			this.providers.forEach(function(provider) {
+				result.push({
+					name: provider.name,
+					id: ++id
+				});
+			}, this);
+		},
+
+		currentProvider: function() {
+			return this.providers[this._currentProviderIdx];
 		}
 	});
 
