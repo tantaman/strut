@@ -17,6 +17,10 @@
 	background-image: url('/img/strut-logo-32.png');
 }
 
+.logo:active {
+  background-image: url('/img/strut-logo-32.png');
+}
+
 .logo:hover {
 	background-position: 5px 0;
 }
