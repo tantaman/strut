@@ -3,6 +3,8 @@ define(function() {
 
 	function LocalStorageProvider() {
 		this.impl = localStorage;
+		this.name = "Local Storage";
+		this.id = "localstorage";
 	}
 
 	LocalStorageProvider.prototype = {

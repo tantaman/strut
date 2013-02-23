@@ -1,5 +1,6 @@
 define(['libs/backbone'],
 function(Backbone) {
+	'use strict';
 	// TODO: make a general class to handle all this service boilerplate.
 	// ServiceCollection does most of it.
 	function StorageProvidersWrapper(registry) {
@@ -13,10 +14,13 @@ function(Backbone) {
 	}
 
 	_.extend(StorageProvidersWrapper.prototype, Backbone.Events, {
-		_currentProviderIdx: 0,
+		_currentProviderId: null,
 		_providerRegistered: function(providerEntry) {
 			var provider = providerEntry.service();
-			this.providers.push(provider);
+			this.providers[provider.id] = provider;
+
+			if (this._currentProviderId == null)
+				this._currentProviderId = provider.id;
 
 			this.trigger('change:providers.push', this.providers, provider);
 			this.trigger('change:providers', this.providers, provider);
@@ -24,9 +28,13 @@ function(Backbone) {
 
 		_getProviders: function() {
 			var providerEntries = this.registry.get('strut.StorageProvider');
-			var providers = [];
+			var providers = {};
 			providerEntries.forEach(function(providerEntry) {
-				providers.push(providerEntry.service());
+				var provider = providerEntry.service();
+				providers[provider.id] = provider;
+
+				if (this._currentProviderId == null)
+					this._currentProviderId = provider.id;
 			}, this);
 
 			this.providers = providers;
@@ -35,13 +43,12 @@ function(Backbone) {
 		providerNames: function() {
 			var result = [];
 
-			var id = 0;
-			this.providers.forEach(function(provider) {
+			for (var id in this.providers) {
 				result.push({
-					name: provider.name,
-					id: ++id
+					name: this.providers[id].name,
+					id: id
 				});
-			}, this);
+			}
 		},
 
 		currentProvider: function() {

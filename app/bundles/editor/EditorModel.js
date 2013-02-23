@@ -6,7 +6,6 @@ define(['libs/backbone',
 function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
 	return Backbone.Model.extend({
 		initialize: function() {
-			this._loadStorageProviders();
 			this._loadLastPresentation();
 
 			this.set('presentationGenerators', 
@@ -62,11 +61,6 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 			// attempt connection to prefferd provider
 			this._deck = new Deck();
 			this.addSlide();
-		},
-
-		_loadStorageProviders: function() {
-			var providers = this.registry.getInvoke('strut.StorageProvider', 'create');
-			this.set('storageProviders', providers);
 		},
 
 		_loadGenerators: function() {

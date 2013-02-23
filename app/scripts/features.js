@@ -5,8 +5,8 @@ define([
 	'bundles/transition_editor/main',
 	'bundles/slide_components/main',
 	'bundles/slide_well_context_buttons/main',
-	'bundles/storage/main'
-	// 'bundles/local_storage/main',
+	'bundles/storage/main',
+	'bundles/local_storage/main'
 	// 'bundles/dropbox/main',
 	// 'bundles/remote_storage/main'
 	],
@@ -16,7 +16,8 @@ function(ServiceRegistry,
 		TransitionEditorBundle,
 		SlideComponents,
 		SlideWellContextButtons,
-		Storage) {
+		Storage,
+		LocalStorage) {
 	var registry = new ServiceRegistry();
 
 	SlideEditorBundle.initialize(registry);
@@ -24,6 +25,7 @@ function(ServiceRegistry,
 	SlideComponents.initialize(registry);
 	SlideWellContextButtons.initialize(registry);
 	Storage.initialize(registry);
+	LocalStorage.initialize(registry);
 
 	return registry;
 });
