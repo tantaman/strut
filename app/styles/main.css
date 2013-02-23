@@ -16,6 +16,10 @@ body {
   padding: 0px;
 }
 
+a {
+  cursor: pointer;
+}
+
 .absolute {
   position: absolute;
 }

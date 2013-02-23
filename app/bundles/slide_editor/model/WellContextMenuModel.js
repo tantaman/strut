@@ -8,7 +8,8 @@ function(Backbone) {
 			this._createButtons();
 
 			this._registry.on('registered:strut.WellContextButtonProvider',
-				this._buttonRegistered, this);
+			this._buttonRegistered, this);
+      this._slideIndex = 0;
 		},
 
 		// TODO: good opportunity to start using Mixers.js...
@@ -17,14 +18,21 @@ function(Backbone) {
 			var contextButtons = [];
 			buttonEntries.forEach(function(buttonEntry) {
 				contextButtons = 
-					contextButtons.concat(buttonEntry.service().createButtons(this.editorModel));
+					contextButtons.concat(buttonEntry.service().createButtons(this.editorModel, this));
 			}, this);
 
 			this.set('contextButtons', contextButtons);
 		},
 
+    slideIndex: function(i) {
+      if (i == null)
+        return this._slideIndex;
+      else
+         this._slideIndex = i;
+    },
+
 		_buttonRegistered: function(buttonEntry) {
-			var newButtons = buttonEntry.service().createButtons(this.editorModel);
+			var newButtons = buttonEntry.service().createButtons(this.editorModel, this);
 
 			var contextButtons = this.get('contextButtons');
 			newButtons.forEach(function(newButton) {

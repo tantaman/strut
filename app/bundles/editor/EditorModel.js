@@ -28,8 +28,8 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 			return this._deck;
 		},
 
-		addSlide: function() {
-			this._deck.newSlide();
+		addSlide: function(index) {
+			this._deck.newSlide(index);
 		},
 
 		addComponent: function(type) {

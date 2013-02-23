@@ -7,7 +7,7 @@ function(Backbone) {
 		},
 
 		_addSlide: function() {
-			this._editorModel.addSlide();
+			this._editorModel.addSlide(this._wellMenuModel.slideIndex());
 		},
 
 		render: function() {
@@ -15,8 +15,9 @@ function(Backbone) {
 			return this;
 		},
 
-		constructor: function AddSlideButton(editorModel) {
+		constructor: function AddSlideButton(editorModel, wellMenuModel) {
 			this._editorModel = editorModel;
+      this._wellMenuModel = wellMenuModel;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

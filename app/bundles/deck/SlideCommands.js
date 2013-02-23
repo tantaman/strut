@@ -1,7 +1,8 @@
 define(['bundles/deck/Slide'], function(Slide) {
     var Create, Move, Remove, result;
-    Create = function(deck) {
+    Create = function(deck, index) {
       this.deck = deck;
+      this.index = index;
       return this;
     };
     Create.prototype = {
@@ -13,7 +14,11 @@ define(['bundles/deck/Slide'], function(Slide) {
             num: slides.length
           });
         }
-        slides.add(this.slide);
+
+        if (this.index == null)
+          slides.add(this.slide);
+        else
+          slides.add(this.slide, {at: this.index})
         return this.slide;
       },
       undo: function() {

@@ -14,10 +14,10 @@ function(AddSlideButton, lang) {
 	};
 
 	var service = {
-		createButtons: function(editorModel) {
+		createButtons: function(editorModel, wellMenuModel) {
 			var result = [];
 
-			result.push(new AddSlideButton(editorModel));
+			result.push(new AddSlideButton(editorModel, wellMenuModel));
 
 			return result;
 		},

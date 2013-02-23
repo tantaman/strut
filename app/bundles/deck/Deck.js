@@ -31,9 +31,9 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
             *
       */
 
-      newSlide: function() {
+      newSlide: function(index) {
         var createCmd, slide;
-        createCmd = new SlideCommands.Create(this);
+        createCmd = new SlideCommands.Create(this, index);
         slide = createCmd["do"]();
         this.undoHistory.push(createCmd);
         return slide;
@@ -86,8 +86,9 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
           });
         }
       },
-      _slideAdded: function(slide, collection) {
+      _slideAdded: function(slide, collection, options) {
         this.set("activeSlide", slide);
+        this.trigger("slideAdded", slide, options.index);
         return this._registerWithSlide(slide);
       },
       _slideDisposed: function(slide) {

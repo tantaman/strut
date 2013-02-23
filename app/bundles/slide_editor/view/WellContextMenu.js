@@ -1,5 +1,6 @@
 define(['libs/backbone',
-		'../model/WellContextMenuModel'],
+		'../model/WellContextMenuModel',
+    'css!styles/slide_editor/wellContextMenu.css'],
 function(Backbone, Model) {
 	'use strict';
 
@@ -33,6 +34,10 @@ function(Backbone, Model) {
 			this._hidden = true;
 			this.$el.addClass('dispNone');
 		},
+
+    slideIndex: function(i) {
+      this.model.slideIndex(i);
+    },
 
 		render: function() {
 			// this.$el.html(this._template(this.model.get('contextButtons')));
