@@ -7,6 +7,7 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
       __extends(TextBoxDrawer, _super);
 
       function TextBoxDrawer(g2d) {
+        AbstractDrawer.apply(this, arguments);
         this.g2d = g2d;
       }
 

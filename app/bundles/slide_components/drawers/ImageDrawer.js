@@ -10,7 +10,7 @@ define(['./AbstractDrawer'], function(AbstractDrawer) {
       }
 
       ImageModelDrawer.prototype.paint = function(imageModel) {
-        return this._imageLoaded(imageModel.cachedImage, imageModel);
+        return this._imageLoaded(imageModel._cachedImage, imageModel);
       };
 
       ImageModelDrawer.prototype._imageLoaded = function(image, imageModel) {

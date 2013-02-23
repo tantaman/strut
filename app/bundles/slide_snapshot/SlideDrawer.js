@@ -20,11 +20,11 @@ function() {
 			y: this.size.height / config.slide.size.height
 		};
 
-		var drawerEntries = registry.get('strut.SlideComponentDrawer');
+		var drawerEntries = registry.get('strut.ComponentDrawer');
 		this._drawers = {};
 		drawerEntries.forEach(function(entry) {
 			var drawer = entry.service();
-			this._drawers[drawer.componentType] = drawer;
+			drawer = this._drawers[entry.meta().type] = new drawer(this.g2d);
 			drawer.scale = this.scale;
 		}, this);
 	}

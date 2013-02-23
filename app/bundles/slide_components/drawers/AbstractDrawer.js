@@ -2,7 +2,8 @@ define(function() {
     var AbstractDrawer;
     return AbstractDrawer = (function() {
 
-      function AbstractDrawer() {}
+      function AbstractDrawer() {
+      }
 
       AbstractDrawer.prototype.applyTransforms = function(component, bbox) {
         var rotation, scale, skewX, skewY, transform;
