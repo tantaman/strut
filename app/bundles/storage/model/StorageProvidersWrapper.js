@@ -11,6 +11,7 @@ function(Backbone) {
 
 		this._getProviders();
 		// TODO: handle de-registrations
+		this._updateCurrentProvider();
 	}
 
 	_.extend(StorageProvidersWrapper.prototype, Backbone.Events, {
@@ -52,7 +53,12 @@ function(Backbone) {
 		},
 
 		currentProvider: function() {
-			return this.providers[this._currentProviderIdx];
+			return this.providers[this._currentProviderId];
+		},
+
+		_updateCurrentProvider: function() {
+			if (window.sessionMeta.lastProvider)
+				this._currentProviderId = window.sessionMeta.lastProvider;
 		}
 	});
 

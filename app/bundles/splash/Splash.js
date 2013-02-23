@@ -19,13 +19,7 @@ define(function() {
 		},
 
 		start: function() {
-			var taskEntries = registry.get('strut.StartupTask');
-			var countdown = new Concurrent.countdown(taskEntries.length,
-				this._step, this._complete);
-			taskEntries.forEach(function(taskEntry) {
-				var task = taskEntry.service();
-				task.run(countdown.decrement);
-			});
+			
 		},
 
 		_step: function(err) {
