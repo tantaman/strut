@@ -27,7 +27,7 @@ function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
 	
 	var service = {
 		createMenuItems: function(editorModel) {
-			logger('Creating storage menu items');
+			log('Creating storage menu items');
 			var menuItems = [];
 
 			

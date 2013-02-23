@@ -51,7 +51,7 @@ define(function() {
 
 	return {
 		initialize: function(registry) {
-			console.log('Initing');
+			log('Initing');
 			if (!this.instance)
 				this.instance = new ComponentFactory(registry);
 		}

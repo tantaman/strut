@@ -52,9 +52,26 @@ window.zTracker = {
   }
 };
 
-window.logger = function(msg) {
-  console.log(msg);
+window.log = function(msg) {
+  if (log.enabled.log)
+    console.log(msg);
 };
+
+log.enabled = {
+  notice: true,
+  err: true,
+  log: true
+};
+
+log.err = function(msg) {
+  if (log.enabeld.err)
+    console.error(msg);
+};
+
+log.notice = function(msg) {
+  if (log.enabled.notice)
+    console.log(msg);
+}
 
 require([
          'colorpicker',

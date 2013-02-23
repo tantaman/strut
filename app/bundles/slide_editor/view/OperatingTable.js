@@ -68,7 +68,7 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		setModel: function(model) {
-      console.log(model);
+      log(model);
 			var prevModel = this.model;
 			if (this.model === model) return;
 
