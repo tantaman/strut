@@ -1,6 +1,12 @@
 Strut
 =======
 
+**Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
+on the progress of the re-write on the rewrite branch.
+
+`Strut` is getting a facelift too:
+![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)
+
 #### GUI / Authoring Tool for ImpressJS ####
 
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
@@ -9,41 +15,45 @@ I hope this project can also serve as an example of a browser based rich client 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 And here is a video of the very first version of Strut: http://www.youtube.com/watch?v=zA5s8wwme44
 
-Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/web-dist/index.html
+Strut live preview (Firefox, Chrome and Safari only): http://tantaman.github.com/Strut/dist/index.html
 
 ### Preview ###
 
-A github hosted preview is available at: http://tantaman.github.com/Strut/web-dist/index.html (Firefox, Chrome and Safari only)
+A github hosted preview is available at: http://tantaman.github.com/Strut/dist/index.html (Firefox, Chrome and Safari only)
 
 The preview currently points to the development version of Strut.
 
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
 
-### Built packages of Strut ###
-*You can get pre-built versions of strut here: https://github.com/tantaman/Strut/downloads*
-The built versions of Strut can run entirely from your local filesystem.  
-Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
+### Pre-Built versions of Strut ###
 
-### Development/Building ###
-To build your own version of Strut you'll need v0.9.3 or later of Yeoman.  If v0.9.3 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
-
-* Clone `Strut`
-* cd to the root `Strut` directory
-* run `npm install` to get the required node modules
-* run `yeoman server` to build and start watching for updates
-* If your browser didn't open Strut automatically then go to http://localhost:3501/ in a browser
-
-Yeoman will automatically compile your coffeescript and templates and reload your browser whenever there is a code change.
-
-To make a production build of Strut run `yeoman build`.
-The resulting build will be location in `Strut/dist`.  
+You can get pre-built versions of strut here: http://code.google.com/p/strut/downloads/list
 
 
 ### Running ###
 
-Strut can run entirely from your local filesystem.  
-Just point your browser to `file:///path/to/Strut/web/index.html` to view Strut.
+The pre-built versions of Strut can be run entirely from your local filesystem.  
+Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut.
+
+
+### Development/Building ###
+To build your own version of Strut you'll need Yeoman v1.0 beta or later.
+Contrary to what they say on their website, Yeoman beta v1.0 does work on windows.  Just run the following commands
+from Git-Bash (i.e., MinGW).
+
+Note: these instructions currently only work for the **rewrite** branch of Strut as that is where developing is currently occurring.
+
+1. Install the latest Yeoman: `npm install -g yo grunt-cli bower`
+2. Clone Strut: `git clone git://github.com/tantaman/Strut.git`
+3. `cd Strut`
+4. Install Strut's development dependencies: `npm install`
+5. Run Strut: `grunt server`
+
+Yeoman will automatically compile your coffeescript and templates and reload your browser whenever there is a code change.
+
+To make a production build of Strut run `grunt build`.
+The resulting build will be location in `Strut/dist`.  
 
 ### Contributing ###
 
