@@ -79,10 +79,9 @@ require([
          'features',
          'bundles/editor/EditorView',
          'bundles/editor/EditorModel',
-         'libs/Handlebars',
          'bootstrap'
         ],
-function(empty, config, registry, EditorView, EditorModel, Handlebars) {
+function(empty, config, registry, EditorView, EditorModel) {
     'use strict';
     if ($.browser.mozilla)
         window.browserPrefix = "-moz-"
@@ -93,18 +92,16 @@ function(empty, config, registry, EditorView, EditorModel, Handlebars) {
     else if ($.browser.webkit)
         window.browserPrefix = "-webkit-"
 
-    for (var tpl in JST) {
-        JST[tpl] = Handlebars.template(JST[tpl]);
-    }
+    // for (var tpl in JST) {
+    //     JST[tpl] = Handlebars.template(JST[tpl]);
+    // }
 
-    (function($) {
-      jQuery.event.special.destroyed = {
+      $.event.special.destroyed = {
           remove: function(o) {
               if (o.handler)
                   o.handler();
           }
-      };
-    })(jQuery);
+        };
 
     var model = new EditorModel(registry);
     window.config = config;
