@@ -36,34 +36,23 @@ You can get pre-built versions of strut here: http://code.google.com/p/strut/dow
 The pre-built versions of Strut can be run entirely from your local filesystem.  
 Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut.
 
-To run a non pre-built version, or a zip of Master, run `yeoman server` in the root Strut directory.
-
-Alternatively you can run `yeoman dist` in the root Strut directory and navigate to `file:///path/to/Strut/dist/index.html`
 
 ### Development/Building ###
-To build your own version of Strut you'll need Yeoman v0.9.6 or later.  If Yeoman 0.9.6 has not yet been released then you can find instructions for installing the very latest version of Yeoman here: https://github.com/yeoman/yeoman/wiki/Additional-FAQ
+To build your own version of Strut you'll need Yeoman v1.0 beta or later.
+Contrary to what they say on their website, Yeoman beta v1.0 does work on windows.  Just run the following commands
+from Git-Bash (i.e., MinGW).
 
-**Note:** Yeoman from master is currently broken and Yeoman v0.9.6 was delivered with some missing features.  To install a version of Yeoman that works, follow these steps:
+Note: these instructions currently only work for the **rewrite** branch of Strut as that is where developing is currently occurring.
 
-1. `git clone git://github.com/yeoman/yeoman.git`
-2. `cd yeoman`
-3. `git checkout 79e74f161559d4c4bbac2136d2b1b84961614af`
-4. `cd cli`
-5. `npm install -g`
-6. `npm link  --skip-updater`
-
-
-Building Strut
-
-* Clone `Strut`
-* cd to the root `Strut` directory
-* run `npm install` to get the required node modules
-* run `yeoman server` to build and start watching for updates
-* If your browser didn't open Strut automatically then go to http://localhost:3501/ in a browser
+1. Install the latest Yeoman: `npm install -g yo grunt-cli bower`
+2. Clone Strut: `git clone git://github.com/tantaman/Strut.git`
+3. `cd Strut`
+4. Install Strut's development dependencies: `npm install`
+5. Run Strut: `grunt server`
 
 Yeoman will automatically compile your coffeescript and templates and reload your browser whenever there is a code change.
 
-To make a production build of Strut run `yeoman build`.
+To make a production build of Strut run `grunt build`.
 The resulting build will be location in `Strut/dist`.  
 
 ### Contributing ###
