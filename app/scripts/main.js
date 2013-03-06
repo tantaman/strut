@@ -77,11 +77,10 @@ require([
          'colorpicker',
          'bundles/strut_config/config',
          'features',
-         'bundles/editor/EditorView',
-         'bundles/editor/EditorModel',
+         './StrutLoader',
          'bootstrap'
         ],
-function(empty, config, registry, EditorView, EditorModel) {
+function(empty, config, registry, StrutLoader) {
     'use strict';
     if ($.browser.mozilla)
         window.browserPrefix = "-moz-"
@@ -92,27 +91,12 @@ function(empty, config, registry, EditorView, EditorModel) {
     else if ($.browser.webkit)
         window.browserPrefix = "-webkit-"
 
-    // for (var tpl in JST) {
-    //     JST[tpl] = Handlebars.template(JST[tpl]);
-    // }
+    $.event.special.destroyed = {
+      remove: function(o) {
+          if (o.handler)
+            o.handler();
+      }
+    };
 
-      $.event.special.destroyed = {
-          remove: function(o) {
-              if (o.handler)
-                  o.handler();
-          }
-        };
-
-    var model = new EditorModel(registry);
-    window.config = config;
-
-  // TODO: the model will need to tell us when it is set to go
-  // since there may be some awkward handshaking going on with storage
-  // providers
-
-    var editor = new EditorView({model: model, registry: registry});
-
-    editor.render();
-
-    $('body').append(editor.$el);
+    StrutLoader.start(registry, function(){}, function(){});
 });

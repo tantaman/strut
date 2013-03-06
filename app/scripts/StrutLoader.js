@@ -1,4 +1,5 @@
-define(function() {
+define(['common/Concurrent'],
+function(Concurrent) {
 	var started = false;
 	return {
 		start: function(registry, stepCb, completeCb) {

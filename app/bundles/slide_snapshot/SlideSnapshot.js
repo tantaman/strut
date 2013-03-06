@@ -26,7 +26,7 @@ function(Backbone, SlideDrawer, css) {
 
 		_removeClicked: function(e) {
 			this.remove();
-			this.stopPropagation();
+			e.stopPropagation();
 		},
 
 		remove: function() {
