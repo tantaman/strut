@@ -1,6 +1,4 @@
 define(function() {
-	var prefix = 'Strut-pres-';
-
 	function LocalStorageProvider() {
 		this.impl = localStorage;
 		this.name = "Local Storage";
@@ -8,14 +6,14 @@ define(function() {
 	}
 
 	LocalStorageProvider.prototype = {
-		ls: function(path, cb) {
+		ls: function(path, regex, cb) {
 			// Paths are currently ignored
 			var numFiles = this.impl.length;
 			var fnames = [];
 			for (var i = 0; i < numFiles; ++i) {
 				var fname = this.impl.key(i);
-				if (fname.indexOf(prefix) !== -1) {
-					fnames.push(fname.replace(prefix, ''));
+				if (regex == null || regex.exec(fname) != null) {
+					fnames.push(fname);
 				}
 			}
 
@@ -28,7 +26,7 @@ define(function() {
 			return this;
 		},
 
-		rm: function(path) {
+		rm: function(path, cb) {
 			this.impl.removeItem(prefix + path);
 			return this;
 		},
@@ -47,7 +45,7 @@ define(function() {
 			return this;
 		},
 
-		setContents: function(path, data) {
+		setContents: function(path, data, cb) {
 			this.impl.setItem(prefix + path, JSON.stringify(data));
 			return this;
 		}

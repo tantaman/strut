@@ -7,14 +7,14 @@ function(Backbone) {
 		},
 
 		initialize: function() {
-			this.storageProviders = this.options.storageProviders;
+			this.storageInterface = this.options.storageInterface;
 			this.editorModel = this.options.editorModel;
-			delete this.options.storageProviders;
+			delete this.options.storageInterface;
 			delete this.options.editorModel;
 
 			this.template = JST['bundles/storage/templates/StorageModal'];
 
-			this.storageProviders.on('change:providers', this.render, this);
+			this.storageInterface.on('change:providers', this.render, this);
 		},
 
 		render: function() {
@@ -23,13 +23,13 @@ function(Backbone) {
 			// and also have a 'save' or 'open' button.
 
 			// Don't load the data for a provider until its tab is selected...
-			var providerNames = this.storageProviders.providerNames();
+			var providerNames = this.storageInterface.providerNames();
 			this.$el.html(this.template({
 				title: this.__title(),
 				tabs: providerNames
 			}));
 
-			this._renderProvider(this.storageProviders.currentProvider())
+			this._renderProvider(this.storageInterface.currentProvider())
 		},
 
 		show: function() {

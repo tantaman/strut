@@ -1,11 +1,15 @@
 define(['./view/OpenModal',
 		'./view/SaveAsModal',
 		'./view/SaveMenuItem',
-		'./model/StorageProvidersWrapper',
+		'./model/StorageInterface',
 		'lang'],
-function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
+function(OpenModal,
+		SaveAsModal,
+		SaveMenuItem,
+		StorageInterface,
+		lang) {
 	'use strict';
-	var storageProvidersWrapper = null;
+	var storageInterface = null;
 
 	function MenuItem(title, modal) {
 		this.$el = $('<li><a>' + title + '</a></li>');
@@ -34,7 +38,7 @@ function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
 			if (openModal == null) {
 				openModal = new OpenModal({
 					editorModel: editorModel,
-					storageProviders: storageProvidersWrapper
+					storageInterface: storageInterface
 				});
 				openModal.render();
 				$modals.append(openModal.$el);
@@ -43,7 +47,7 @@ function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
 			if (saveAsModal == null) {
 				saveAsModal = new SaveAsModal({
 					editorModel: editorModel,
-					storageProviders: storageProvidersWrapper
+					storageInterface: storageInterface
 				});
 				saveAsModal.render();
 				$modals.append(saveAsModal.$el);
@@ -60,7 +64,7 @@ function(OpenModal, SaveAsModal, SaveMenuItem, StorageProvidersWrapper, lang) {
 
 	return {
 		initialize: function(registry) {
-			storageProvidersWrapper = new StorageProvidersWrapper(registry);
+			storageInterface = new StorageInterface(registry);
 			registry.register({
 				interfaces: 'strut.LogoMenuItemProvider'
 			}, service);
