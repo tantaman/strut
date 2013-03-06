@@ -2,8 +2,27 @@ define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
 		tagName: 'li',
-		constructor: function SaveMenuItem(modal, editorModel) {
+		events: {
+			click: 'save'
+		},
+
+		constructor: function SaveMenuItem(modal, model, storageInterface) {
 			Backbone.View.prototype.constructor.call(this);
+			this.model = model;
+			this.saveAsModal = modal;
+			this.storageInterface = storageInterface;
+		},
+
+		save: function() {
+			fileName = this.model.fileName();
+			if (fileName == null) {
+				this.saveAsModal.show();
+			} else {
+				this.storageInterface.save(fileName, this.model.exportPresentation(),
+					function() {
+						// TODO: error handling?
+					});
+			}
 		},
 
 		render: function() {

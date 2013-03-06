@@ -55,7 +55,7 @@ function(OpenModal,
 
 			menuItems.push(new MenuItem(lang.open, openModal));
 
-			menuItems.push(new SaveMenuItem(saveAsModal, editorModel));
+			menuItems.push(new SaveMenuItem(saveAsModal, editorModel, storageInterface));
 			menuItems.push(new MenuItem(lang.save_as, saveAsModal));
 
 			return menuItems;
@@ -68,6 +68,10 @@ function(OpenModal,
 			registry.register({
 				interfaces: 'strut.LogoMenuItemProvider'
 			}, service);
+
+			registry.register({
+				interfaces: 'strut.StorageInterface'
+			}, storageInterface)
 		}
 	}
 });

@@ -6,7 +6,9 @@ define(['libs/backbone',
 function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
 	return Backbone.Model.extend({
 		initialize: function() {
-			this._loadLastPresentation();
+			// this._loadLastPresentation();
+			this._deck = new Deck();
+			this.addSlide();
 
 			this.set('presentationGenerators', 
 				new PresentationGeneratorCollection(this));
@@ -21,6 +23,20 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 				this.set('modeId', modeId);
 				this._createMode();
 			}
+		},
+
+		importPresentation: function(rawObj) {
+			// if (this._deck != null)
+			// 	this._deck.dispose();
+			this._deck.import(rawObj);
+		},
+
+		exportPresentation: function() {
+			return this._deck.toJSON(false, true);
+		},
+
+		fileName: function() {
+			return this._deck.get('fileName');
 		},
 
 		deck: function() {
@@ -52,19 +68,6 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 					prevMode.close();
 				this.set('activeMode', modeService.getMode(this, this.registry));
 			}
-		},
-
-		_loadLastPresentation: function() {
-			// Look in localStorage for a preferred provider
-			// and access information
-
-			// attempt connection to prefferd provider
-			this._deck = new Deck();
-			this.addSlide();
-		},
-
-		_loadGenerators: function() {
-			
 		},
 
 		constructor: function EditorModel(registry) {
