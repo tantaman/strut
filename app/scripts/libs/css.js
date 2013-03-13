@@ -33,7 +33,10 @@ define(function() {
 	    load: function (name, req, onLoad, config) {
 	    	if (path && !fname) {
 	    		//fname = path.dirname(config.out) + "/built.css";
-	    		fs.mkdirSync("dist/styles");
+          if (!fs.existsSync("dist"))
+            fs.mkdirSync("dist");
+          if (!fs.existsSync("dist/styles"))
+  	    		fs.mkdirSync("dist/styles");
 	    		fname = "dist/styles/built.css";
 	    	}
 	    	loadCss(name);
