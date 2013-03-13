@@ -14,7 +14,8 @@ require.config({
     swfobject: "../components/downloadify/js/swfobject",
     jqueryUI: "../scripts/libs/jqueryUI",
     bundles: "../bundles",
-    lang: "../locales/en"
+    lang: "../locales/en",
+    handlebars: '../scripts/libs/Handlebars'
   },
 
   shim: {
@@ -32,6 +33,10 @@ require.config({
 
     gradientPicker: {
       deps: ["jquery", "colorpicker"]
+    },
+
+    handlebars: {
+      exports: "Handlebars"
     },
 
     "../preview_export/scripts/impress": {
@@ -74,13 +79,14 @@ log.notice = function(msg) {
 }
 
 require([
+         'compiled-templates',
          'colorpicker',
          'bundles/strut_config/config',
          'features',
          './StrutLoader',
          'bootstrap'
         ],
-function(empty, config, registry, StrutLoader) {
+function(empt, empty, config, registry, StrutLoader) {
     'use strict';
     if ($.browser.mozilla)
         window.browserPrefix = "-moz-"

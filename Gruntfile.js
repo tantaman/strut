@@ -27,7 +27,7 @@ module.exports = function (grunt) {
         handlebars: {
           compile: {
                 files: {
-                    ".tmp/scripts/compiled-templates.js": [
+                    "app/scripts/compiled-templates.js": [
                     "app/bundles/**/templates/*.bars"
                 ]
             },
@@ -37,8 +37,20 @@ module.exports = function (grunt) {
                         return filename
                         .replace(/^app\//, '')
                         .replace(/\.bars$/, '');
-                    }
+                    },
+                    amd: true
                 }
+            }
+        },
+
+        replace: {
+            compile: {
+                src: ['dist/index.html'],
+                overwrite: true,                 // overwrite matched source files
+                replacements: [{ 
+                    from: "window.isOptimized = false;",
+                    to: "window.isOptimized = true;"
+                }]
             }
         },
 
@@ -221,16 +233,16 @@ module.exports = function (grunt) {
                 }]
             }
         },
-        cssmin: {
-            dist: {
-                files: {
-                    '<%= yeoman.dist %>/styles/main.css': [
-                        '.tmp/styles/{,*/}*.css',
-                        '<%= yeoman.app %>/styles/{,*/}*.css'
-                    ]
-                }
-            }
-        },
+        // cssmin: {
+        //     dist: {
+        //         files: {
+        //             '<%= yeoman.dist %>/styles/main.css': [
+        //                 '.tmp/styles/{,*/}*.css',
+        //                 '<%= yeoman.app %>/styles/{,*/}*.css'
+        //             ]
+        //         }
+        //     }
+        // },
         htmlmin: {
             dist: {
                 options: {
@@ -260,8 +272,18 @@ module.exports = function (grunt) {
                     cwd: '<%= yeoman.app %>',
                     dest: '<%= yeoman.dist %>',
                     src: [
-                        '*.{ico,txt}',
-                        '.htaccess'
+                        '.htaccess',
+                        'preview_export/**'
+                    ]
+                },
+                {
+                    expand: true,
+                    dot: true,
+                    flatten: true,
+                    cwd: '<%= yeoman.app %>',
+                    dest: '<%= yeoman.dist %>/styles/img',
+                    src: [
+                        '**/*.{ico,txt,png,jpg,gif}',
                     ]
                 }]
             }
@@ -310,9 +332,10 @@ module.exports = function (grunt) {
         'imagemin',
         'htmlmin',
         'concat',
-        'cssmin',
+        // 'cssmin',
         'uglify',
         'copy',
+        'replace',
         'usemin'
     ]);
 

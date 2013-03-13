@@ -23,7 +23,7 @@ define(function() {
 	}
 
 	function addToBuild(url) {
-		var contents = fs.readFile(url, "utf8", function(err, data) {
+		var contents = fs.readFile('app/' + url, "utf8", function(err, data) {
 			if (err) throw err;
 			fs.appendFileSync(fname, data + "\n");
 		});
@@ -32,7 +32,9 @@ define(function() {
 	return {
 	    load: function (name, req, onLoad, config) {
 	    	if (path && !fname) {
-	    		fname = path.dirname(config.out) + "/built.css";
+	    		//fname = path.dirname(config.out) + "/built.css";
+	    		fs.mkdirSync("dist/styles");
+	    		fname = "dist/styles/built.css";
 	    	}
 	    	loadCss(name);
 	        onLoad(null);

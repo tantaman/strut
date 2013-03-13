@@ -1,5 +1,5 @@
 .logo {
-	background-image: url('/img/strut-logo-32.png');
+	background-image: url('img/strut-logo-32.png');
 	width: 100px;
 	height: 32px;
 	background-position: 5px;
@@ -14,11 +14,11 @@
 }
 
 .btn-group.open .logo {
-	background-image: url('/img/strut-logo-32.png');
+	background-image: url('img/strut-logo-32.png');
 }
 
 .logo:active {
-  background-image: url('/img/strut-logo-32.png');
+  background-image: url('img/strut-logo-32.png');
 }
 
 .logo:hover {

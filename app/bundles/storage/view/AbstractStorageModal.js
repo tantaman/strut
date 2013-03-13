@@ -1,5 +1,5 @@
 define(['libs/backbone', './ProviderTab'],
-function(Backbone) {
+function(Backbone, ProviderTab) {
 	return Backbone.View.extend({
 		className: "storageModal modal hide",
 		events: {
@@ -44,7 +44,7 @@ function(Backbone) {
 		},
 
 		_renderProvider: function(provider) {
-			this.providerTab.update(provider);
+			//this.providerTab.update(provider);
 		},
 
 		constructor: function AbstractStorageModal() {
