@@ -50,6 +50,8 @@ function(Backbone) {
 					id: id
 				});
 			}
+
+			return result;
 		},
 
 		currentProvider: function() {

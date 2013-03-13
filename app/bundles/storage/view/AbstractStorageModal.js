@@ -1,4 +1,4 @@
-define(['libs/backbone'],
+define(['libs/backbone', './ProviderTab'],
 function(Backbone) {
 	return Backbone.View.extend({
 		className: "storageModal modal hide",
@@ -15,6 +15,7 @@ function(Backbone) {
 			this.template = JST['bundles/storage/templates/StorageModal'];
 
 			this.storageInterface.on('change:providers', this.render, this);
+			this.providerTab = new ProviderTab(this.storageInterface, this.editorModel);
 		},
 
 		render: function() {
@@ -29,7 +30,7 @@ function(Backbone) {
 				tabs: providerNames
 			}));
 
-			this._renderProvider(this.storageInterface.currentProvider())
+			this._renderProvider(this.storageInterface.currentProvider());
 		},
 
 		show: function() {
@@ -43,7 +44,7 @@ function(Backbone) {
 		},
 
 		_renderProvider: function(provider) {
-			
+			this.providerTab.update(provider);
 		},
 
 		constructor: function AbstractStorageModal() {

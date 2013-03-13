@@ -4,7 +4,6 @@ function(StorageProviders) {
 
 	function StorageInterface(registry) {
 		this._providers = new StorageProviders(registry);
-
 	}
 
 	StorageInterface.prototype = {
