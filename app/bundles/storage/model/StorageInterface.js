@@ -11,12 +11,16 @@ function(StorageProviders) {
 			return this._providers.providerNames();
 		},
 
-		providerReady: function() {
-			return this.currentProvider().ready();
+		providerReady: function($el) {
+			return this.currentProvider().ready($el);
 		},
 
 		activateProvider: function($el) {
-			this.currentProvider().activate();
+			this.currentProvider().activate($el);
+		},
+
+		selectProvider: function(providerId) {
+			this._providers.selectProvider(providerId);
 		},
 
 		currentProvider: function() {

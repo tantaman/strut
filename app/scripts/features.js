@@ -6,29 +6,20 @@ define([
 	'bundles/slide_components/main',
 	'bundles/slide_well_context_buttons/main',
 	'bundles/local_storage/main',
+	'bundles/remote_storage/main',
 	'bundles/storage/main',
 	'bundles/default_startup/main',
 	// 'bundles/dropbox/main',
-	// 'bundles/remote_storage/main'
 	],
-function(ServiceRegistry,
-		EtchExtension,
-		SlideEditorBundle,
-		TransitionEditorBundle,
-		SlideComponents,
-		SlideWellContextButtons,
-		Storage,
-		LocalStorage,
-		DefaultStartup) {
+function(ServiceRegistry) {
 	var registry = new ServiceRegistry();
 
-	SlideEditorBundle.initialize(registry);
-	TransitionEditorBundle.initialize(registry);
-	SlideComponents.initialize(registry);
-	SlideWellContextButtons.initialize(registry);
-	Storage.initialize(registry);
-	LocalStorage.initialize(registry);
-	DefaultStartup.initialize(registry);
+	var args = Array.prototype.slice.call(arguments, 0);
+
+	var i = 0;
+	for (var i = 1; i < args.length; ++i) {
+		args[i].initialize(registry);
+	}
 
 	return registry;
 });

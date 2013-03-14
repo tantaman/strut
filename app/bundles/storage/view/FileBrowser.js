@@ -4,6 +4,7 @@ function(Backbone) {
 		className: "fileBrowser",
 
 		initialize: function() {
+			console.log("NEW FILE BROWSER")
 			this.render = this.render.bind(this);
 			this.storageInterface.on("change:currentProvider", this.render);
 
@@ -12,7 +13,7 @@ function(Backbone) {
 
 		render: function() {
 			this.$el.html('');
-			if (this.storageInterface.providerReady()) {
+			if (this.storageInterface.providerReady(this.$el)) {
 				this.renderListing();
 			} else {
 				this.storageInterface.activateProvider(this.$el);

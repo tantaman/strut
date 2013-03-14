@@ -3,7 +3,7 @@ function(Backbone, FileBrowser) {
 	return Backbone.View.extend({
 		className: "storageModal modal hide",
 		events: {
-			'click .providerTab': '_providerSelected'
+			'click a[data-provider]': '_providerSelected'
 		},
 
 		initialize: function() {
@@ -39,9 +39,10 @@ function(Backbone, FileBrowser) {
 
 		__title: function() { return 'none'; },
 
-		_providerSelected: function() {
+		_providerSelected: function(e) {
 			// change the storage interface's selected
 			// storage provider
+			this.storageInterface.selectProvider(e.target.dataset.provider);
 		},
 
 		constructor: function AbstractStorageModal() {

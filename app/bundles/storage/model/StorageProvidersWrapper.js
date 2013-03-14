@@ -41,6 +41,14 @@ function(Backbone) {
 			this.providers = providers;
 		},
 
+		selectProvider: function(providerId) {
+			if (providerId != this._currentProviderId) {
+				this.currentProvider().bg();
+				this._currentProviderId = providerId;
+				this.trigger('change:currentProvider');
+			}
+		},
+
 		providerNames: function() {
 			var result = [];
 

@@ -10,6 +10,10 @@ define(function() {
 			return true;
 		},
 
+		bg: function() {
+
+		},
+
 		ls: function(path, regex, cb) {
 			// Paths are currently ignored
 			var numFiles = this.impl.length;

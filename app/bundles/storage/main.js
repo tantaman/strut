@@ -35,14 +35,14 @@ function(OpenModal,
 			var menuItems = [];
 
 			
-			if (openModal == null) {
-				openModal = new OpenModal({
-					editorModel: editorModel,
-					storageInterface: storageInterface
-				});
-				openModal.render();
-				$modals.append(openModal.$el);
-			}
+			// if (openModal == null) {
+			// 	openModal = new OpenModal({
+			// 		editorModel: editorModel,
+			// 		storageInterface: storageInterface
+			// 	});
+			// 	openModal.render();
+			// 	$modals.append(openModal.$el);
+			// }
 
 			if (saveAsModal == null) {
 				saveAsModal = new SaveAsModal({
@@ -53,7 +53,7 @@ function(OpenModal,
 				$modals.append(saveAsModal.$el);
 			}
 
-			menuItems.push(new MenuItem(lang.open, openModal));
+			menuItems.push(new MenuItem(lang.open, saveAsModal));
 
 			menuItems.push(new SaveMenuItem(saveAsModal, editorModel, storageInterface));
 			menuItems.push(new MenuItem(lang.save_as, saveAsModal));
