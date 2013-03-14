@@ -3,10 +3,14 @@
 	<h3>{{title}}</h3>
 </div>
 <div class="modal-body" style="overflow: hidden">
-	{{#tabs}}
-		{{name}} - {{id}}
-	{{/tabs}}
+	<ul class="nav nav-tabs">
+		{{#tabs}}
+			<li class="providerTab"><a data-provider="{{id}}">{{name}}</a></li>
+		{{/tabs}}
+	</ul>
+	<div class="tabContent">
+	</div>
 </div>
 <div class="modal-footer">
-	<a href="#" class="btn btn-primary ok btn-inverse">Ok</a>
+	<a href="#" class="btn btn-primary ok btn-inverse" data-dismiss="modal">Ok</a>
 </div>

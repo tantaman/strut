@@ -21,11 +21,7 @@ module.exports = function (grunt) {
         dist: 'dist'
     };
 
-    grunt.initConfig({
-        yeoman: yeomanConfig,
-
-        handlebars: {
-          compile: {
+    var barstaskdef = {
                 files: {
                     "app/scripts/compiled-templates.js": [
                     "app/bundles/**/templates/*.bars"
@@ -40,7 +36,13 @@ module.exports = function (grunt) {
                     },
                     amd: true
                 }
-            }
+            };
+
+    grunt.initConfig({
+        yeoman: yeomanConfig,
+
+        handlebars: {
+          compile: barstaskdef
         },
 
         replace: {
@@ -63,7 +65,7 @@ module.exports = function (grunt) {
                 files: [
                     "app/bundles/**/templates/*.bars"
                 ],
-                tasks: 'handlebars reload'
+                tasks: 'handlebars livereload'
             },
             coffeeTest: {
                 files: ['test/spec/{,*/}*.coffee'],

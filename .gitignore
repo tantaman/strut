@@ -4,3 +4,4 @@ temp/
 dist/
 .DS_STORE
 .tmp/
+compiled-templates.js

@@ -6,6 +6,10 @@ define(function() {
 	}
 
 	LocalStorageProvider.prototype = {
+		ready: function() {
+			return true;
+		},
+
 		ls: function(path, regex, cb) {
 			// Paths are currently ignored
 			var numFiles = this.impl.length;

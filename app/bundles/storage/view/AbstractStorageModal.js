@@ -1,5 +1,5 @@
-define(['libs/backbone', './ProviderTab'],
-function(Backbone, ProviderTab) {
+define(['libs/backbone', './FileBrowser', 'css!styles/storage/storageModal.css'],
+function(Backbone, FileBrowser) {
 	return Backbone.View.extend({
 		className: "storageModal modal hide",
 		events: {
@@ -15,7 +15,7 @@ function(Backbone, ProviderTab) {
 			this.template = JST['bundles/storage/templates/StorageModal'];
 
 			this.storageInterface.on('change:providers', this.render, this);
-			this.providerTab = new ProviderTab(this.storageInterface, this.editorModel);
+			this.fileBrowser = new FileBrowser(this.storageInterface, this.editorModel);
 		},
 
 		render: function() {
@@ -30,7 +30,7 @@ function(Backbone, ProviderTab) {
 				tabs: providerNames
 			}));
 
-			this._renderProvider(this.storageInterface.currentProvider());
+			this.$el.find('.tabContent').append(this.fileBrowser.render().$el);
 		},
 
 		show: function() {
@@ -40,11 +40,8 @@ function(Backbone, ProviderTab) {
 		__title: function() { return 'none'; },
 
 		_providerSelected: function() {
-
-		},
-
-		_renderProvider: function(provider) {
-			//this.providerTab.update(provider);
+			// change the storage interface's selected
+			// storage provider
 		},
 
 		constructor: function AbstractStorageModal() {
