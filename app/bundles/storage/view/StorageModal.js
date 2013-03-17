@@ -18,6 +18,10 @@ function(Backbone, FileBrowser) {
 			this.fileBrowser = new FileBrowser(this.storageInterface, this.editorModel);
 		},
 
+		title: function(title) {
+			this.$el.find('.title').html(title);
+		},
+
 		render: function() {
 			// Create a tab for each provider?
 			// Each tab will list the presentations currently saved with that provider
@@ -33,7 +37,8 @@ function(Backbone, FileBrowser) {
 			this.$el.find('.tabContent').append(this.fileBrowser.render().$el);
 		},
 
-		show: function() {
+		show: function(actionHandler, title) {
+			this.title(title);
 			this.$el.modal('show');
 		},
 

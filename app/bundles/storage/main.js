@@ -1,10 +1,8 @@
-define(['./view/OpenModal',
-		'./view/SaveAsModal',
+define(['./view/StorageModal',
 		'./view/SaveMenuItem',
 		'./model/StorageInterface',
 		'lang'],
-function(OpenModal,
-		SaveAsModal,
+function(StorageModal,
 		SaveMenuItem,
 		StorageInterface,
 		lang) {
@@ -14,7 +12,7 @@ function(OpenModal,
 	function MenuItem(title, modal) {
 		this.$el = $('<li><a>' + title + '</a></li>');
 		this.$el.click(function() {
-			modal.show();
+			modal.show(null, title);
 		});
 	}
 
@@ -25,8 +23,7 @@ function(OpenModal,
 		}
 	};
 
-	var openModal = null;
-	var saveAsModal = null;
+	var storageModal = null;
 	var $modals = $('#modals');
 	
 	var service = {
@@ -34,29 +31,19 @@ function(OpenModal,
 			log('Creating storage menu items');
 			var menuItems = [];
 
-			
-			// if (openModal == null) {
-			// 	openModal = new OpenModal({
-			// 		editorModel: editorModel,
-			// 		storageInterface: storageInterface
-			// 	});
-			// 	openModal.render();
-			// 	$modals.append(openModal.$el);
-			// }
-
-			if (saveAsModal == null) {
-				saveAsModal = new SaveAsModal({
+			if (storageModal == null) {
+				storageModal = new StorageModal({
 					editorModel: editorModel,
 					storageInterface: storageInterface
 				});
-				saveAsModal.render();
-				$modals.append(saveAsModal.$el);
+				storageModal.render();
+				$modals.append(storageModal.$el);
 			}
 
-			menuItems.push(new MenuItem(lang.open, saveAsModal));
+			menuItems.push(new MenuItem(lang.open, storageModal));
 
-			menuItems.push(new SaveMenuItem(saveAsModal, editorModel, storageInterface));
-			menuItems.push(new MenuItem(lang.save_as, saveAsModal));
+			menuItems.push(new SaveMenuItem(storageModal, editorModel, storageInterface));
+			menuItems.push(new MenuItem(lang.save_as, storageModal));
 
 			return menuItems;
 		}
