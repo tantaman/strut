@@ -52,6 +52,9 @@ function(remoteStorage, presentations) {
 		},
 
 		ls: function(path, filter, callback) {
+			if (path == "/")
+				path = "";
+			
 			presentations.private.list(path, function(listing) {
 				// TODO: apply filter
 				callback(listing);

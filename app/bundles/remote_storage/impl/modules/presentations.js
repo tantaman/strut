@@ -7,22 +7,26 @@ define(['../remoteStorage'], function (remoteStorage) {
 
     PresentationStorage.prototype = {
       list: function(directory, cb) {
-        return this.client.getListing((directory || ''), cb); // TODO: do I need to do any trimming of /'s?
+        return this.client.getListing((directory || ''))
+        .then(cb); // TODO: do I need to do any trimming of /'s?
       },
 
-      get: function(path) {
-        return this.client.getObject(path);
+      get: function(path, cb) {
+        return this.client.getFile(path).then(function(file) {
+          cb(JSON.parse(file.data));
+        });
       },
 
-      set: function(path, presentation) {
-        this.client.storeObject(type, path, presentation);
+      set: function(path, presentation, cb) {
+        // We don't want schema validation.  Doing storeFile.
+        this.client.storeFile('text', path, JSON.stringify(presentation)).then(cb);
         return this;
       },
 
       // TODO: add convenience methods for extract metadata from a presentation?
 
       remove: function(path, cb) {
-        this.client.remove(path, cb);
+        this.client.remove(path).then(cb);
         return this;
       }
     };

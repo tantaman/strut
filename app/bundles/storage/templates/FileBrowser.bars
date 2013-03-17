@@ -1,4 +1,4 @@
-<input type="text"></input>
+<input type="text" class="fileName"></input>
 <ul>
 	{{#files}}
 	<li>{{.}}</li>

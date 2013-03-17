@@ -34,6 +34,7 @@ function(Backbone) {
 		renderListing: function() {
 			var self = this;
 			this.storageInterface.listPresentations("/", function(list, err) {
+				console.log('Listing presentations!');
 				if (err) {
 					self.$el.html(err);
 				} else {
