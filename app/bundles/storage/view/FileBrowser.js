@@ -17,7 +17,7 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html('');
+			this.$el.html('<div class="browserContent">');
 			if (this.storageInterface.providerReady(this.$el)) {
 				this.renderListing();
 			} else {
@@ -36,9 +36,9 @@ function(Backbone) {
 			this.storageInterface.listPresentations("/", function(list, err) {
 				console.log('Listing presentations!');
 				if (err) {
-					self.$el.html(err);
+					self.$el.find('.browserContent').html(err);
 				} else {
-					self.$el.html(self.template({files: list}));
+					self.$el.find('.browserContent').html(self.template({files: list}));
 				}
 			});
 		},
