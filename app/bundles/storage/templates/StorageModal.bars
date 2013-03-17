@@ -12,5 +12,5 @@
 	</div>
 </div>
 <div class="modal-footer">
-	<a href="#" class="btn btn-primary ok btn-inverse" data-dismiss="modal">Ok</a>
+	<a href="#" class="btn btn-primary ok btn-inverse">Ok</a>
 </div>

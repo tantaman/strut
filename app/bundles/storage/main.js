@@ -1,18 +1,20 @@
 define(['./view/StorageModal',
 		'./view/SaveMenuItem',
 		'./model/StorageInterface',
+		'./model/ActionHandlers',
 		'lang'],
 function(StorageModal,
 		SaveMenuItem,
 		StorageInterface,
+		ActionHandlers,
 		lang) {
 	'use strict';
 	var storageInterface = null;
 
-	function MenuItem(title, modal) {
+	function MenuItem(title, modal, handler) {
 		this.$el = $('<li><a>' + title + '</a></li>');
 		this.$el.click(function() {
-			modal.show(null, title);
+			modal.show(handler, title);
 		});
 	}
 
@@ -28,7 +30,6 @@ function(StorageModal,
 	
 	var service = {
 		createMenuItems: function(editorModel) {
-			log('Creating storage menu items');
 			var menuItems = [];
 
 			if (storageModal == null) {
@@ -40,10 +41,10 @@ function(StorageModal,
 				$modals.append(storageModal.$el);
 			}
 
-			menuItems.push(new MenuItem(lang.open, storageModal));
+			menuItems.push(new MenuItem(lang.open, storageModal, ActionHandlers.open));
 
 			menuItems.push(new SaveMenuItem(storageModal, editorModel, storageInterface));
-			menuItems.push(new MenuItem(lang.save_as, storageModal));
+			menuItems.push(new MenuItem(lang.save_as, storageModal, ActionHandlers.save));
 
 			return menuItems;
 		}

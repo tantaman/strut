@@ -15,8 +15,8 @@ function(StorageProviders) {
 			return this.currentProvider().ready($el);
 		},
 
-		activateProvider: function($el) {
-			this.currentProvider().activate($el);
+		activateProvider: function($el, cb) {
+			this.currentProvider().activate($el, cb);
 		},
 
 		selectProvider: function(providerId) {
@@ -25,6 +25,10 @@ function(StorageProviders) {
 
 		currentProvider: function() {
 			return this._providers.currentProvider();
+		},
+
+		currentProviderId: function() {
+			return this._providers._currentProviderId;
 		},
 
 		on: function() {

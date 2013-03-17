@@ -1,1 +1,6 @@
-Stuff
+<input type="text"></input>
+<ul>
+	{{#files}}
+	<li>{{.}}</li>
+	{{/files}}
+</ul>

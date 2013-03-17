@@ -1,14 +1,19 @@
 define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
+		events: {
+			destroyed: 'dispose'
+		},
+
 		className: "fileBrowser",
 
 		initialize: function() {
-			console.log("NEW FILE BROWSER")
 			this.render = this.render.bind(this);
 			this.storageInterface.on("change:currentProvider", this.render);
 
 			this.template = JST['bundles/storage/templates/FileBrowser'];
+
+			this.renderListing = this.renderListing.bind(this);
 		},
 
 		render: function() {
@@ -16,10 +21,14 @@ function(Backbone) {
 			if (this.storageInterface.providerReady(this.$el)) {
 				this.renderListing();
 			} else {
-				this.storageInterface.activateProvider(this.$el);
+				this.storageInterface.activateProvider(this.$el, this.renderListing);
 			}
 
 			return this;
+		},
+
+		dispose: function() {
+			this.storageInterface.off(null, null, this);
 		},
 
 		renderListing: function() {
@@ -28,9 +37,13 @@ function(Backbone) {
 				if (err) {
 					self.$el.html(err);
 				} else {
-					self.$el.html(self.template(list));
+					self.$el.html(self.template({files: list}));
 				}
 			});
+		},
+
+		fileName: function() {
+			return this.selectedFile;
 		},
 
 		constructor: function ProviderTab(storageInterface, editorModel) {

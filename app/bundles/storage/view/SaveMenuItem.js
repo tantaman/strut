@@ -1,5 +1,5 @@
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone', '../model/ActionHandlers', 'bundles/widgets/ErrorModal', 'lang'],
+function(Backbone, ActionHandlers, ErrorModal, lang) {
 	return Backbone.View.extend({
 		tagName: 'li',
 		events: {
@@ -16,12 +16,11 @@ function(Backbone) {
 		save: function() {
 			fileName = this.model.fileName();
 			if (fileName == null) {
-				this.saveAsModal.show();
+				this.saveAsModal.show(function(storageInterface, model) {
+					ActionHandlers.save(storageInterface, model, ErrorModal.show);
+				}, lang.save_as);
 			} else {
-				this.storageInterface.save(fileName, this.model.exportPresentation(),
-					function() {
-						// TODO: error handling?
-					});
+				ActionHandlers.save(this.storageInterface, this.model, ErrorModal.show);
 			}
 		},
 

@@ -21,8 +21,8 @@ define(['../remoteStorage'], function (remoteStorage) {
 
       // TODO: add convenience methods for extract metadata from a presentation?
 
-      remove: function(path) {
-        this.client.remove(path);
+      remove: function(path, cb) {
+        this.client.remove(path, cb);
         return this;
       }
     };

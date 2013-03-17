@@ -1,5 +1,5 @@
 define(['./impl/remoteStorage', './impl/modules/presentations'],
-function(remoteStorage, Presentations) {
+function(remoteStorage, presentations) {
 	function RemoteStorageProvider() {
 		this.id = "remoteStorage";
 		this.name = "Remote Storage";
@@ -8,7 +8,7 @@ function(remoteStorage, Presentations) {
 	var setup = false;
 	var activated = false;
 	var $widget;
-	function oneTimeSetup($el) {
+	function oneTimeSetup($el, cb) {
 		$widget = $('<div id="remotestorage-connect"></div>');
 		$el.append($widget);
 
@@ -19,21 +19,24 @@ function(remoteStorage, Presentations) {
 
 				remoteStorage.onWidget('ready', function() {
 					activated = true;
+					cb();
 				});
 
 				remoteStorage.onWidget('disconnect', function() {
 					activated = false;
+					cb();
 				})
 			});
 		}, 0);
 	}
 
 	RemoteStorageProvider.prototype = {
-		activate: function($el) {
+		activate: function($el, cb) {
 			if (!setup) {
-				oneTimeSetup($el);
+				oneTimeSetup($el, cb);
 			} else {
 				$el.append($widget);
+				cb();
 			}
 		},
 
@@ -43,31 +46,31 @@ function(remoteStorage, Presentations) {
 
 		ready: function($el) {
 			if (activated) {
-				console.log("APPENDING")
-				console.log($widget);
 				$el.append($widget);
 			}
 			return activated;
 		},
 
-		ls: function() {
-
+		ls: function(path, filter, callback) {
+			presentations.private.list(path, function(listing) {
+				// TODO: apply filter
+				callback(listing);
+			});
 		},
 
-		cd: function() {
-
+		rm: function(path, cb) {
+			presentations.private.remove(path, cb);
 		},
 
-		rm: function() {
-
+		getContents: function(path, cb) {
+			// TODO: the remoteStorage Promise API looks like..?
+			presentations.private.get(path).then(cb);
 		},
 
-		getContents: function() {
-
-		},
-
-		setContents: function() {
-
+		setContents: function(path, data, cb) {
+			// TODO: what type of confirmation does set provide, if any?
+			presentations.private.set(path, data);
+			cb(true);
 		}
 	};
 

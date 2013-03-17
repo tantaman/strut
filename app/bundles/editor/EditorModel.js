@@ -31,7 +31,10 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 			this._deck.import(rawObj);
 		},
 
-		exportPresentation: function() {
+		exportPresentation: function(filename) {
+			if (filename) {
+				this._deck.set('fileName', filename);
+			}
 			return this._deck.toJSON(false, true);
 		},
 

@@ -1,4 +1,5 @@
 define(function() {
+	var prefix = "";
 	function LocalStorageProvider() {
 		this.impl = localStorage;
 		this.name = "Local Storage";
@@ -30,12 +31,9 @@ define(function() {
 			return this;
 		},
 
-		cd: function(path) {
-			return this;
-		},
-
 		rm: function(path, cb) {
 			this.impl.removeItem(prefix + path);
+			cb(true);
 			return this;
 		},
 
@@ -55,6 +53,7 @@ define(function() {
 
 		setContents: function(path, data, cb) {
 			this.impl.setItem(prefix + path, JSON.stringify(data));
+			cb(true);
 			return this;
 		}
 	};
