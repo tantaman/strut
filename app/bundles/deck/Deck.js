@@ -115,6 +115,7 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         oldSlides.forEach(function(slide) {
           return slide.dispose();
         });
+        this.trigger('slidesReset', newSlides);
         return newSlides.forEach(function(slide) {
           _this._registerWithSlide(slide);
           if (slide.get("active")) {

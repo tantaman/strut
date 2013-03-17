@@ -50,6 +50,7 @@ function(Backbone, FileBrowser) {
 			this.actionHandler = actionHandler;
 			this.title(title);
 			this.$el.modal('show');
+			this.fileBrowser.render();
 		},
 
 		_providerChanged: function() {
@@ -68,7 +69,7 @@ function(Backbone, FileBrowser) {
 
 		_okClicked: function() {
 			if (this.actionHandler) {
-				if (!this.fileBrowser.fileName()) {
+				if (this.fileBrowser.fileName() == "") {
 					// Present some message..
 					return;
 				}

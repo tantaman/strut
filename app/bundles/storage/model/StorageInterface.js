@@ -58,6 +58,15 @@ function(StorageProviders) {
 		listPresentations: function(path, cb) {
 			this.currentProvider().ls(path, /.*\.strut$/, cb)
 			return this;
+		},
+
+		savePresentation: function(identifier, data, cb) {
+			var idx = identifier.indexOf('.strut');
+			if (idx + '.strut'.length != identifier.length) {
+				identifier += '.strut';
+			}
+
+			this.save(identifier, data, cb);
 		}
 	};
 

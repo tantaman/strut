@@ -52,7 +52,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
               comp = rawComp.clone();
               hydratedComps.push(comp);
             } else {
-              comp = ComponentFactory.create(rawComp);
+              comp = ComponentFactory.instance.createModel(rawComp);
               hydratedComps.push(comp);
             }
             return _this._registerWithComponent(comp);

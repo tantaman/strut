@@ -16,11 +16,9 @@ function(Backbone, ActionHandlers, ErrorModal, lang) {
 		save: function() {
 			fileName = this.model.fileName();
 			if (fileName == null) {
-				this.saveAsModal.show(function(storageInterface, model) {
-					ActionHandlers.save(storageInterface, model, ErrorModal.show);
-				}, lang.save_as);
+				this.saveAsModal.show(ActionHandlers.save, lang.save_as);
 			} else {
-				ActionHandlers.save(this.storageInterface, this.model, ErrorModal.show);
+				ActionHandlers.save(this.storageInterface, this.model, fileName, ErrorModal.show);
 			}
 		},
 

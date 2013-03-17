@@ -16,6 +16,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 
 		initialize: function() {
 			this._deck.on('slideAdded', this._slideAdded, this);
+			this._deck.on('slidesReset', this._slidesReset, this);
 			this._doShowContextMenu = this._doShowContextMenu.bind(this);
 			this._throttler = new Throttler(100);
 			this._contextMenu = new WellContextMenu(this._editorModel);
@@ -45,6 +46,14 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 			var newPos = (((offsetY+40) / 112) | 0) * 112 - 5;
 			this._contextMenu.reposition({x: this.$el.width() / 2 - this._contextMenu.$el.width() / 2, y: newPos});
       this._contextMenu.slideIndex(Math.ceil(newPos / 112));
+		},
+
+		_slidesReset: function(newSlides) {
+			var i = 0;
+			newSlides.forEach(function(slide) {
+				this._slideAdded(slide, i);
+				i += 1;
+			}, this);
 		},
 
 		_slideAdded: function(slide, index) {

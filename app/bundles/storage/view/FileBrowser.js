@@ -2,7 +2,9 @@ define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
 		events: {
-			destroyed: 'dispose'
+			destroyed: 'dispose',
+			'click li[data-filename]': '_fileClicked',
+			'click button.close': '_deleteClicked'
 		},
 
 		className: "fileBrowser",
@@ -31,20 +33,37 @@ function(Backbone) {
 			this.storageInterface.off(null, null, this);
 		},
 
+		_fileClicked: function(e) {
+			this.$fileName.val(e.currentTarget.dataset.filename);
+			this.$el.find('.active').removeClass('active');
+			$(e.target).addClass('active');
+		},
+
+		_deleteClicked: function(e) {
+			var $target = $(e.currentTarget);
+			var $li = $target.parent().parent();
+			this.storageInterface.remove($li.attr('data-filename'));
+			$li.remove();
+
+			e.stopPropagation();
+			return false;
+		},
+
 		renderListing: function() {
 			var self = this;
 			this.storageInterface.listPresentations("/", function(list, err) {
-				console.log('Listing presentations!');
 				if (err) {
 					self.$el.find('.browserContent').html(err);
 				} else {
 					self.$el.find('.browserContent').html(self.template({files: list}));
 				}
+
+				self.$fileName = self.$el.find('.fileName');
 			});
 		},
 
 		fileName: function() {
-			return this.selectedFile;
+			return this.$fileName.val();
 		},
 
 		constructor: function ProviderTab(storageInterface, editorModel) {
