@@ -38,13 +38,11 @@ Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut
 
 
 ### Development/Building ###
-To build your own version of Strut you'll need Yeoman v1.0 beta or later.
-Contrary to what they say on their website, Yeoman beta v1.0 does work on windows.  Just run the following commands
-from Git-Bash (i.e., MinGW).
+To build your own version of Strut you'll need Grunt v4.0 or later.
 
 Note: these instructions currently only work for the **rewrite** branch of Strut as that is where developing is currently occurring.
 
-1. Install the latest Yeoman: `npm install -g yo grunt-cli bower`
+1. Install the latest Grunt: `npm install -g grunt-cli`
 2. Clone Strut: `git clone git://github.com/tantaman/Strut.git`
 3. `cd Strut`
 4. Install Strut's development dependencies: `npm install`
