@@ -30,6 +30,12 @@ function(remoteStorage, presentations) {
 		}, 0);
 	}
 
+	function trimPath(path) {
+		if (path.indexOf("/") == 0)
+			return path.substring(1);
+		return path;
+	}
+
 	RemoteStorageProvider.prototype = {
 		activate: function($el, cb) {
 			if (!setup) {
@@ -52,28 +58,24 @@ function(remoteStorage, presentations) {
 		},
 
 		ls: function(path, filter, callback) {
-			if (path == "/")
-				path = "";
-			
-			presentations.private.list(path, function(listing) {
+			presentations.private.list(trimPath(path), function(listing) {
 				// TODO: apply filter
 				callback(listing);
 			});
 		},
 
 		rm: function(path, cb) {
-			presentations.private.remove(path, cb);
+			presentations.private.remove(trimPath(path), cb);
 		},
 
 		getContents: function(path, cb) {
 			// TODO: the remoteStorage Promise API looks like..?
-			presentations.private.get(path).then(cb);
+			presentations.private.get(trimPath(path), cb);
 		},
 
 		setContents: function(path, data, cb) {
 			// TODO: what type of confirmation does set provide, if any?
-			presentations.private.set(path, data);
-			cb(true);
+			presentations.private.set(trimPath(path), data, cb);
 		}
 	};
 

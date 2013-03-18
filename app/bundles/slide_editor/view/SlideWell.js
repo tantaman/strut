@@ -45,7 +45,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 
 			var newPos = (((offsetY+40) / 112) | 0) * 112 - 5;
 			this._contextMenu.reposition({x: this.$el.width() / 2 - this._contextMenu.$el.width() / 2, y: newPos});
-      this._contextMenu.slideIndex(Math.ceil(newPos / 112));
+      		this._contextMenu.slideIndex(Math.ceil(newPos / 112));
 		},
 
 		_slidesReset: function(newSlides) {
@@ -58,17 +58,17 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 
 		_slideAdded: function(slide, index) {
 			// Append it in the correct position in the well
-      var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
-      if (index == 0) {
-        this.$el.prepend(snapshot.render().$el);
-      } else {
-        var $slides = $('.slideSnapshot');
-        if (index >= $slides.length) {
-          this.$el.append(snapshot.render().$el);
-        } else {
-          $($slides[index]).before(snapshot.render().$el);
-        }
-      }
+      		var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
+      		if (index == 0) {
+        		this.$el.prepend(snapshot.render().$el);
+      		} else {
+        		var $slides = $('.slideSnapshot');
+        		if (index >= $slides.length) {
+          			this.$el.append(snapshot.render().$el);
+        		} else {
+          			$($slides[index]).before(snapshot.render().$el);
+        		}
+      		}
 		},
 
 		render: function() {

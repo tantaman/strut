@@ -1,5 +1,5 @@
 define(function() {
-	var prefix = "";
+	var prefix = "strut-";
 	function LocalStorageProvider() {
 		this.impl = localStorage;
 		this.name = "Local Storage";
@@ -21,8 +21,9 @@ define(function() {
 			var fnames = [];
 			for (var i = 0; i < numFiles; ++i) {
 				var fname = this.impl.key(i);
-				if (regex == null || regex.exec(fname) != null) {
-					fnames.push(fname);
+				if (fname.indexOf(prefix) == 0 &&
+					(regex == null || regex.exec(fname) != null)) {
+					fnames.push(fname.substring(prefix.length));
 				}
 			}
 
@@ -33,7 +34,8 @@ define(function() {
 
 		rm: function(path, cb) {
 			this.impl.removeItem(prefix + path);
-			cb(true);
+			if (cb)
+				cb(true);
 			return this;
 		},
 
