@@ -1,4 +1,4 @@
-define(['libs/backbone', './FileBrowser', 'css!styles/storage/storageModal.css'],
+define(['libs/backbone', 'bundles/widgets/FileBrowser', 'css!styles/storage/storageModal.css'],
 function(Backbone, FileBrowser) {
 	return Backbone.View.extend({
 		className: "storageModal modal hide",

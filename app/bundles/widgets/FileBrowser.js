@@ -1,10 +1,11 @@
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone', 'css!styles/widgets/fileBrowser.css'],
+function(Backbone, empty) {
 	return Backbone.View.extend({
 		events: {
 			destroyed: 'dispose',
 			'click li[data-filename]': '_fileClicked',
-			'click button.close': '_deleteClicked'
+			'click button.close': '_deleteClicked',
+			'dblclick li[data-filename]': '_fileChosen'
 		},
 
 		className: "fileBrowser",
@@ -13,7 +14,7 @@ function(Backbone) {
 			this.render = this.render.bind(this);
 			this.storageInterface.on("change:currentProvider", this.render);
 
-			this.template = JST['bundles/storage/templates/FileBrowser'];
+			this.template = JST['bundles/widgets/templates/FileBrowser'];
 
 			this.renderListing = this.renderListing.bind(this);
 		},
@@ -36,7 +37,11 @@ function(Backbone) {
 		_fileClicked: function(e) {
 			this.$fileName.val(e.currentTarget.dataset.filename);
 			this.$el.find('.active').removeClass('active');
-			$(e.target).addClass('active');
+			$(e.currentTarget).addClass('active');
+		},
+
+		_fileChosen: function(e) {
+			this.$el.trigger('fileChosen', e.currentTarget.dataset.fileName);
 		},
 
 		_deleteClicked: function(e) {
