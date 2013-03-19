@@ -4,10 +4,10 @@ define(['bundles/widgets/ModeButton',
 function(ModeButton, TransitionEditorModel, TransitionEditorView) {
 	var service = {
 		getMode: function(editorModel, registry) {
-			var model = new TransitionEditorModel(editorModel);
+			var model = new TransitionEditorModel(editorModel, registry);
 
 			return {
-				view: new TransitionEditorView(),
+				view: new TransitionEditorView({model: model}),
 				model: model,
 				id: 'transition-editor',
 				close: function() {

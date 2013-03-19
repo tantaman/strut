@@ -19,8 +19,8 @@ function(Backbone, empty, ComponentFactory) {
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
-        this.setModel(model);
-      }, this);
+        		this.setModel(model);
+      		}, this);
 			this.setModel(this._deck.get('activeSlide'));
 		},
 
@@ -69,7 +69,6 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		setModel: function(model) {
-      log(model);
 			var prevModel = this.model;
 			if (this.model === model) return;
 
