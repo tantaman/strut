@@ -6,6 +6,7 @@ function(Backbone, Model) {
 
 	return Backbone.View.extend({
 		className: 'wellContextMenu dispNone absolute',
+
 		initialize: function() {
 			this.model = new Model(this._editorModel);
 			this._template = JST['bundles/slide_editor/WellContextMenu'];
@@ -35,9 +36,13 @@ function(Backbone, Model) {
 			this.$el.addClass('dispNone');
 		},
 
-    slideIndex: function(i) {
-      this.model.slideIndex(i);
-    },
+    	slideIndex: function(i) {
+      		this.model.slideIndex(i);
+    	},
+
+    	dispose: function() {
+    		this.model.dispose();
+    	},
 
 		render: function() {
 			// this.$el.html(this._template(this.model.get('contextButtons')));

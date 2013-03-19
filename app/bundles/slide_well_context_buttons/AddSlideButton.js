@@ -17,7 +17,7 @@ function(Backbone) {
 
 		constructor: function AddSlideButton(editorModel, wellMenuModel) {
 			this._editorModel = editorModel;
-      this._wellMenuModel = wellMenuModel;
+     		this._wellMenuModel = wellMenuModel;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

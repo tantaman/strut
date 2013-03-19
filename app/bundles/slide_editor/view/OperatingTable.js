@@ -9,7 +9,8 @@ function(Backbone, empty, ComponentFactory) {
         	"click": "_clicked",
         	"focused": "_focus",
         	"dragover": "_dragover",
-        	"drop": "_drop"
+        	"drop": "_drop",
+        	destroyed: 'dispose'
       	},
 
 		initialize: function() {
@@ -85,6 +86,9 @@ function(Backbone, empty, ComponentFactory) {
 
 		dispose: function() {
 			$(window).off('resize', this._resize);
+			this._deck.off(null, null, this);
+			if (this.model)
+				this.model.off(null, null, this);
 		},
 
 		_renderContents: function(prevModel) {

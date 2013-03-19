@@ -8,7 +8,8 @@ function(Backbone, SlideDrawer, css) {
 		className: 'slideSnapshot',
 		events: {
 			'click': '_selected',
-			'click .removeBtn': '_removeClicked'
+			'click .removeBtn': '_removeClicked',
+			destroyed: 'dispose'
 		},
 
 		initialize: function() {
@@ -46,7 +47,10 @@ function(Backbone, SlideDrawer, css) {
 		},
 
 		dispose: function() {
-			this.remove();
+			if (!this.disposed) {
+				this.disposed = true;
+				this.remove();
+			}
 		},
 
 		_bgChanged: function() {

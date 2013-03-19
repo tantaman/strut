@@ -9,7 +9,8 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 	return Backbone.View.extend({
 		events: {
 			mousemove: '_showContextMenu',
-			mouseleave: '_hideContextMenu'
+			mouseleave: '_hideContextMenu',
+			destroyed: 'dispose'
 		},
 
 		className: 'slideWell',
@@ -79,6 +80,12 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 			}, this);
 			this.$el.append(this._contextMenu.$el);
 			return this;
+		},
+
+		dispose: function() {
+			console.log('DISPOING WELL');
+			this._deck.off(null, null, this);
+			this._contextMenu.dispose();
 		},
 
 		constructor: function SlideWell(editorModel) {

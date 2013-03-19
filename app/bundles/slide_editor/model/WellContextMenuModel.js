@@ -4,12 +4,13 @@ function(Backbone) {
 
 	return Backbone.Model.extend({
 		initialize: function() {
+			this.subs = [];
 			this._registry = this.editorModel.registry;
 			this._createButtons();
 
-			this._registry.on('registered:strut.WellContextButtonProvider',
-			this._buttonRegistered, this);
-      this._slideIndex = 0;
+			this.subs.push(this._registry.on('registered:strut.WellContextButtonProvider',
+			this._buttonRegistered, this));
+      		this._slideIndex = 0;
 		},
 
 		// TODO: good opportunity to start using Mixers.js...
@@ -24,12 +25,19 @@ function(Backbone) {
 			this.set('contextButtons', contextButtons);
 		},
 
-    slideIndex: function(i) {
-      if (i == null)
-        return this._slideIndex;
-      else
-         this._slideIndex = i;
-    },
+    	slideIndex: function(i) {
+      		if (i == null)
+        		return this._slideIndex;
+      		else
+         		this._slideIndex = i;
+    	},
+
+    	dispose: function() {
+    		console.log('DISPOSING CONTEXT MENU!');
+    		this.subs.forEach(function(sub) {
+    			sub.dispose();
+    		});
+    	},
 
 		_buttonRegistered: function(buttonEntry) {
 			var newButtons = buttonEntry.service().createButtons(this.editorModel, this);
