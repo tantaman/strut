@@ -1,0 +1,71 @@
+.transitionSlideSnapshot {
+	position: absolute;
+	border: 1px solid black;
+}
+
+.transitionSlideSnapshot .content {
+	width: 150px;
+	height: 100px;
+	background: #EEE; /*replace with slide bg*/
+}
+
+.transitionSlideSnapshot canvas {
+	width: 100%;
+	height: 100%;
+}
+
+.transitionSlideSnapshot .badge {
+	position: absolute;
+	bottom: -7px;
+	left: -7px;
+}
+
+.transitionSlideSnapshot .spinners {
+	position: absolute;
+	bottom: -40px;
+}
+
+.transitionSlideSnapshot .spinners .smartspinner {
+	text-align: left;
+	color: #848484;
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .positioningCtrls {
+	bottom: -30px;
+}
+
+.component.transitionSlideSnapshot .topLabel {
+	left: 30px;
+	top: -25px;
+}
+
+.component.transitionSlideSnapshot .leftLabel {
+	left: -60px;
+}
+
+.component.transitionSlideSnapshot .rightLabel {
+	transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	right: -60px;
+	top: 40%;
+}
+
+.component.transitionSlideSnapshot .rotates,
+.component.transitionSlideSnapshot .label.layer {
+	font-size: 20px;
+}
+.component.transitionSlideSnapshot .label.layer+input {
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .label.scales {
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	position: absolute;
+}
+.component.transitionSlideSnapshot .label.scales+input {
+	margin-left: 30px;
+}

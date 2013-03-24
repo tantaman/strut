@@ -46,6 +46,10 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 			return this._deck;
 		},
 
+		slides: function() {
+			return this._deck.get('slides');
+		},
+
 		addSlide: function(index) {
 			this._deck.newSlide(index);
 		},
