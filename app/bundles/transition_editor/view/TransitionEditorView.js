@@ -25,14 +25,12 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 		},
 
 		render: function() {
-			console.log('Rendering transition editor');
 			this.$el.html('');
 			var deck = this.model.deck();
 
 			var colCnt = 6;
 			var cnt = 0;
 			deck.get('slides').forEach(function(slide) {
-				console.log(this);
 				var x = slide.get('x');
 
 				if (x == null) {

@@ -1,3 +1,9 @@
+-We need the storage interface to be completely generic (i.e. reusable across projects)
+	-So we need to split that storage bundle into the generic storage interface
+	and the strut specific storage interface.
+->Re-visit all components and split them according to the above advice.
+->Re-visit wrappers (e.g., storageProviderWrapper) and update to use ServiceCollection.
+
 -Re-visit the command structure and redo/undo
 -Multi select
 -Re-visit keyboard shortcut handling.
