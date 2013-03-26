@@ -1,0 +1,5 @@
+-Re-visit the command structure and redo/undo
+-Multi select
+-Re-visit keyboard shortcut handling.
+-Make place component smarter
+-Handle z-ordering on slides
