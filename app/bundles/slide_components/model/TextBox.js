@@ -1,4 +1,4 @@
-define(['bundles/deck/Component'],
+define(['strut/deck/Component'],
 function(Component) {
 	'use strict';
 	return Component.extend({

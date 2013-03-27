@@ -1,4 +1,4 @@
-define(['bundles/deck/Slide'], function(Slide) {
+define(['strut/deck/Slide'], function(Slide) {
     var Create, Move, Remove, result;
     Create = function(deck, index) {
       this.deck = deck;

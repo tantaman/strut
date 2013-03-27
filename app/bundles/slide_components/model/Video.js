@@ -1,4 +1,4 @@
-define(['bundles/deck/Component',
+define(['strut/deck/Component',
 		'common/FileUtils'],
 function(Component, FileUtils) {
 	'use strict';

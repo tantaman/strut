@@ -34,6 +34,8 @@ module.exports = function (grunt) {
                         .replace(/^app\//, '')
                         .replace(/\.bars$/, '')
                         .replace('bundles/', '')
+                        .replace('app/', '') // TODO: just make a regex once moving is complete
+                        .replace('common/', '') // see above todo
                         .replace('templates/', '');
                     },
                     amd: true

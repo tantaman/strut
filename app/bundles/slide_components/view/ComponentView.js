@@ -2,7 +2,7 @@
          "bundles/widgets/DeltaDragControl",
          "common/Math2", "css!styles/slide_components/ComponentView.css",
          "libs/keymaster",
-         "bundles/deck/SlideCommands",
+         "strut/deck/SlideCommands",
          "bundles/undo_support/CmdListFactory"],
 function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFactory) {
   var undoHistory = CmdListFactory.managedInstance('editor');

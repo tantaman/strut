@@ -1,7 +1,7 @@
 define(['libs/backbone',
 		'bundles/header/model/HeaderModel',
 		'bundles/presentation_generator/model/PresentationGeneratorCollection',
-		'bundles/deck/Deck',
+		'strut/deck/Deck',
 		'bundles/slide_components/ComponentFactory'],
 function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
 	return Backbone.Model.extend({
