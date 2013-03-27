@@ -14,7 +14,8 @@ require.config({
     swfobject: "../components/downloadify/js/swfobject",
     bundles: "../bundles",
     lang: "../locales/en",
-    handlebars: '../scripts/libs/Handlebars'
+    handlebars: '../scripts/libs/Handlebars',
+    'strut/deck': '../bundles/app/strut.deck'
 
     // 'strut/config': 'bundles/app/strut.config',
     // 'com/tantaman/web/storage': 'bundles/runtime/com.tantaman.web.storage'
