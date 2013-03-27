@@ -7,7 +7,7 @@ function(Backbone, LogoView, PreviewButton, empty) {
 		className: 'row-fluid header',
 
 		initialize: function() {
-			this._template = JST['bundles/header/templates/Header'];
+			this._template = JST['header/Header'];
 			this._logoButton = new LogoView({editorModel: this.model.editorModel()});
 			this._previewButton = 
 				new PreviewButton({editorModel: this.model.editorModel()});

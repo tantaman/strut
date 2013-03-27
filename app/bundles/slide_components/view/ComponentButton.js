@@ -10,7 +10,7 @@ function(Backbone) {
 		},
 
 		initialize: function() {
-			this._template = JST['bundles/slide_components/templates/ComponentButton']
+			this._template = JST['slide_components/ComponentButton']
 		},
 
 		_clicked: function() {

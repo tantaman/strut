@@ -32,7 +32,9 @@ module.exports = function (grunt) {
                     processName: function(filename) {
                         return filename
                         .replace(/^app\//, '')
-                        .replace(/\.bars$/, '');
+                        .replace(/\.bars$/, '')
+                        .replace('bundles/', '')
+                        .replace('templates/', '');
                     },
                     amd: true
                 }

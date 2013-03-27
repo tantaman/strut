@@ -15,6 +15,9 @@ require.config({
     bundles: "../bundles",
     lang: "../locales/en",
     handlebars: '../scripts/libs/Handlebars'
+
+    // 'strut/config': 'bundles/app/strut.config',
+    // 'com/tantaman/web/storage': 'bundles/runtime/com.tantaman.web.storage'
   },
 
   shim: {

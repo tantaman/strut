@@ -30,17 +30,17 @@ function(etch) {
 
         switch (button) {
             case 'font-size':
-                return JST['bundles/etch_extension/templates/fontSizeSelection'](viewData);
+                return JST['etch_extension/fontSizeSelection'](viewData);
             case 'font-family':
-                return JST['bundles/etch_extension/templates/fontFamilySelection'](viewData);
+                return JST['etch_extension/fontFamilySelection'](viewData);
             case 'color':
-                return JST['bundles/etch_extension/templates/colorChooser'](viewData);
+                return JST['etch_extension/colorChooser'](viewData);
             default:
                 if (button.indexOf('justify') !== -1) {
                     viewData.icon = button.substring(button.indexOf('-')+1, button.length);
-                    return JST['bundles/etch_extension/templates/align'](viewData);
+                    return JST['etch_extension/align'](viewData);
                 } else {
-                    return JST['bundles/etch_extension/templates/defaultButton'](viewData);
+                    return JST['etch_extension/defaultButton'](viewData);
                 }
         }
     };

@@ -18,7 +18,7 @@ function(SlideEditorModel, SlideEditorView, ModeButton) {
 
 		createButton: function(editorModel) {
 			return new ModeButton(editorModel, 'slide-editor',
-						JST['bundles/slide_editor/templates/Button']);
+						JST['slide_editor/Button']);
 		}
 	};
 

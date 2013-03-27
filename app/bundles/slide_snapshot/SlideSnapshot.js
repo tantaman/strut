@@ -17,7 +17,7 @@ function(Backbone, SlideDrawer, css) {
 			this.model.on('dispose', this.dispose, this);
 			this.options.deck.on('change:background', this._bgChanged, this);
 
-			this._template = JST['bundles/slide_snapshot/templates/SlideSnapshot'];
+			this._template = JST['slide_snapshot/SlideSnapshot'];
 		},
 
 		_selected: function() {

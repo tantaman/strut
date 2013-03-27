@@ -18,7 +18,7 @@ function(ModeButton, TransitionEditorModel, TransitionEditorView) {
 
 		createButton: function(editorModel) {
 			return new ModeButton(editorModel, 'transition-editor',
-					JST['bundles/transition_editor/templates/Button']);
+					JST['transition_editor/Button']);
 		}
 	};
 

@@ -14,7 +14,7 @@ function(Backbone, empty) {
 			this.render = this.render.bind(this);
 			this.storageInterface.on("change:currentProvider", this.render);
 
-			this.template = JST['bundles/widgets/templates/FileBrowser'];
+			this.template = JST['widgets/FileBrowser'];
 
 			this.renderListing = this.renderListing.bind(this);
 		},
