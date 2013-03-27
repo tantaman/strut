@@ -12,7 +12,6 @@ require.config({
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     downloadify: "../components/downloadify/js/downloadify.min",
     swfobject: "../components/downloadify/js/swfobject",
-    jqueryUI: "../scripts/libs/jqueryUI",
     bundles: "../bundles",
     lang: "../locales/en",
     handlebars: '../scripts/libs/Handlebars'
@@ -20,10 +19,6 @@ require.config({
 
   shim: {
     bootstrap: {
-      deps: ["jquery"]
-    },
-    
-    jqueryUI: {
       deps: ["jquery"]
     },
 

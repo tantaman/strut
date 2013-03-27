@@ -15,7 +15,7 @@ define(function() {
 	}
 
 	Saver.prototype = {
-		__save: function() {
+		__save: function(exportable) {
 			var data = exportable.export();
 			var identifier = exportable.identifier();
 

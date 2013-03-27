@@ -1,3 +1,5 @@
+TODO: remove jquery and use zepto -or- use jquery 2
+
 So end result:
 config.js -> list bundle names and rmap location
 rmap -> map bundle names to physical locations
