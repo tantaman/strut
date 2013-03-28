@@ -11,8 +11,8 @@ require.config({
     colorpicker: "../components/colorpicker/js/colorpicker",
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     downloadify: "../components/downloadify/js/downloadify.min",
-    swfobject: "../components/downloadify/js/swfobject",
-    bundles: "../bundles",
+    // swfobject: "../components/downloadify/js/swfobject",
+    // bundles: "../bundles",
     lang: "../locales/en",
     handlebars: '../scripts/libs/Handlebars',
 

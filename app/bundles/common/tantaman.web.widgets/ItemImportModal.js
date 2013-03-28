@@ -73,7 +73,7 @@ define(['libs/backbone'], function(Backbone) {
     },
     render: function() {
       var _this = this;
-      this.$el.html(JST["widgets/ItemImportModal"](this.options));
+      this.$el.html(JST["tantaman.web.widgets/ItemImportModal"](this.options));
       this.$el.modal();
       this.$el.modal("hide");
       this.item = this.$el.find(this.options.tag)[0];

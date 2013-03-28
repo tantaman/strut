@@ -7,7 +7,7 @@ function(Backbone, LogoModel) {
 		className: 'logo-group btn-group',
 
 		initialize: function() {
-			this._template = JST['logo_button/Logo'];
+			this._template = JST['strut.logo_button/Logo'];
 			this.model = new LogoModel(this.options.editorModel);
 			delete this.options.editorModel;
 		},

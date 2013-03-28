@@ -44,7 +44,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       return this;
     },
     __getTemplate: function() {
-      return JST["slide_snapshot/TransitionSlideSnapshot"];
+      return JST["strut.slide_snapshot/TransitionSlideSnapshot"];
     },
     constructor: function TransitionSlideSnapshot() {
 			ThreeDComponentView.prototype.constructor.apply(this, arguments);

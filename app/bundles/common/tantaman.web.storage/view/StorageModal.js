@@ -14,7 +14,7 @@ function(Backbone, FileBrowser) {
 			delete this.options.storageInterface;
 			delete this.options.editorModel;
 
-			this.template = JST['storage/StorageModal'];
+			this.template = JST['tantaman.web.storage/StorageModal'];
 
 			this.storageInterface.on('change:providers', this.render, this);
 			this.storageInterface.on('change:currentProvider', this._providerChanged, this);

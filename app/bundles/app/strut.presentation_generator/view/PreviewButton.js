@@ -8,7 +8,7 @@ function(Backbone, PreviewGeneratorModel) {
 
 			delete this.options.editorModel;
 
-			this._template = JST['presentation_generator/Button'];
+			this._template = JST['strut.presentation_generator/Button'];
 		},
 
 		render: function() {

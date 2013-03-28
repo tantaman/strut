@@ -7,7 +7,7 @@ function(Backbone, SlideWell, OperatingTable) {
 		className: 'slideEditor row-fluid',
 
 		initialize: function() {
-			//this._template = JST['slide_editor/SlideEditor'];
+			//this._template = JST['strut.slide_editor/SlideEditor'];
 			this._well = new SlideWell(this.model._editorModel);
 			this._opTable = new OperatingTable(this.model._editorModel);
 		},

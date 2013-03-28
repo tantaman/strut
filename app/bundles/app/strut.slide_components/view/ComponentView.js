@@ -239,7 +239,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         return this.$el;
       },
       __getTemplate: function() {
-        return JST["slide_components/Component"];
+        return JST["strut.slide_components/Component"];
       },
       _unrender: function() {
         return this.remove(true);
