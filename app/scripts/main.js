@@ -16,7 +16,7 @@ require.config({
     lang: "../locales/en",
     handlebars: '../scripts/libs/Handlebars',
 
-    // build - bundles
+    // build - rmap
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
@@ -39,7 +39,7 @@ require.config({
     'tantaman/web/storage': '../bundles/common/tantaman.web.storage',
     'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
     'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets'
-    // end build - bundles
+    // end build - rmap
 
     // 'strut/config': 'bundles/app/strut.config',
     // 'com/tantaman/web/storage': 'bundles/runtime/com.tantaman.web.storage'
