@@ -1,4 +1,4 @@
-define(['./ComponentButton', 'bundles/widgets/ItemImportModal'],
+define(['./ComponentButton', 'tantaman/web/widgets/ItemImportModal'],
 function(ComponentButton, ItemImportModal) {
 	'use strict';
 

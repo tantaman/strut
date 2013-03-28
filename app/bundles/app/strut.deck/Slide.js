@@ -9,9 +9,9 @@
 
   define(["libs/backbone",
           "./SpatialObject",
-          "bundles/slide_components/ComponentFactory",
+          "strut/slide_components/ComponentFactory",
           "common/Math2", "./ComponentCommands",
-          'bundles/undo_support/CmdListFactory'],
+          'tantaman/web/undo_support/CmdListFactory'],
 function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, CmdListFactory) {
     var undoHistory = CmdListFactory.managedInstance('editor');
     var defaults;

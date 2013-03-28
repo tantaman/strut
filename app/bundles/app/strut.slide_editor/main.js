@@ -1,6 +1,6 @@
-define(['bundles/slide_editor/model/SlideEditorModel',
-		'bundles/slide_editor/view/SlideEditorView',
-		'bundles/widgets/ModeButton'],
+define(['strut/slide_editor/model/SlideEditorModel',
+		'strut/slide_editor/view/SlideEditorView',
+		'tantaman/web/widgets/ModeButton'],
 function(SlideEditorModel, SlideEditorView, ModeButton) {
 	var service = {
 		getMode: function(editorModel, registry) {

@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/slide_snapshot/TransitionSlideSnapshot',
+		'strut/slide_snapshot/TransitionSlideSnapshot',
 		'css!styles/transition_editor/slideTable.css'],
 function(Backbone, TransitionSlideSnapshot, empty) {
 	'use strict';

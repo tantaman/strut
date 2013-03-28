@@ -1,6 +1,6 @@
 define(['libs/backbone',
-		'bundles/logo_button/LogoView',
-		'bundles/presentation_generator/view/PreviewButton',
+		'strut/logo_button/LogoView',
+		'strut/presentation_generator/view/PreviewButton',
 		'css!styles/header/header.css'],
 function(Backbone, LogoView, PreviewButton, empty) {
 	return Backbone.View.extend({

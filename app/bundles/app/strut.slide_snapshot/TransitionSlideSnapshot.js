@@ -1,7 +1,7 @@
 /*
 @author Matt Crinklaw-Vogt
 */
-define(["bundles/slide_components/view/ThreeDRotatableComponentView",
+define(["strut/slide_components/view/ThreeDRotatableComponentView",
         "./SlideDrawer",
         "css!styles/transition_editor/TransitionSlideSnapshot.css"],
 function(ThreeDComponentView, SlideDrawer, empty) {

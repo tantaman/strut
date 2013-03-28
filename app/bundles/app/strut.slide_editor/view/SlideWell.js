@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/slide_snapshot/SlideSnapshot',
+		'strut/slide_snapshot/SlideSnapshot',
 		'common/Throttler',
 		'./WellContextMenu',
 		'css!styles/slide_editor/slideWell.css'],

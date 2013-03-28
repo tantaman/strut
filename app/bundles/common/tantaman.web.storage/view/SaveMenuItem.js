@@ -1,4 +1,4 @@
-define(['libs/backbone', '../model/ActionHandlers', 'bundles/widgets/ErrorModal', 'lang'],
+define(['libs/backbone', '../model/ActionHandlers', 'tantaman/web/widgets/ErrorModal', 'lang'],
 function(Backbone, ActionHandlers, ErrorModal, lang) {
 	return Backbone.View.extend({
 		tagName: 'li',

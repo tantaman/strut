@@ -15,7 +15,31 @@ require.config({
     bundles: "../bundles",
     lang: "../locales/en",
     handlebars: '../scripts/libs/Handlebars',
-    'strut/deck': '../bundles/app/strut.deck'
+
+    // build - bundles
+    'strut/deck': '../bundles/app/strut.deck',
+    'strut/startup': '../bundles/app/strut.startup',
+    'strut/editor': '../bundles/app/strut.editor',
+    'strut/etch_extension': '../bundles/app/strut.etch_extension',
+    'strut/header': '../bundles/app/strut.header',
+    'strut/impress_generator': '../bundles/app/strut.impress_generator',
+    'strut/logo_button': '../bundles/app/strut.logo_button',
+    'strut/presentation_generator': '../bundles/app/strut.presentation_generator',
+    'strut/reveal_generator': '../bundles/app/strut.reveal_generator',
+    'strut/slide_components': '../bundles/app/strut.slide_components',
+    'strut/slide_editor': '../bundles/app/strut.slide_editor',
+    'strut/slide_snapshot': '../bundles/app/strut.slide_snapshot',
+    'strut/well_context_buttons': '../bundles/app/strut.well_context_buttons',
+    'strut/config': '../bundles/app/strut.config',
+    'strut/transition_editor': '../bundles/app/strut.transition_editor',
+
+    'tantaman/web/local_storage': '../bundles/common/tantaman.web.local_storage',
+    'tantaman/web/remote_storage': '../bundles/common/tantaman.web.remote_storage',
+    'tantaman/web/saver': '../bundles/common/tantaman.web.saver',
+    'tantaman/web/storage': '../bundles/common/tantaman.web.storage',
+    'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
+    'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets'
+    // end build - bundles
 
     // 'strut/config': 'bundles/app/strut.config',
     // 'com/tantaman/web/storage': 'bundles/runtime/com.tantaman.web.storage'
@@ -80,7 +104,7 @@ log.notice = function(msg) {
 require([
          'compiled-templates',
          'colorpicker',
-         'bundles/strut_config/config',
+         'strut/config/config',
          'features',
          './StrutLoader',
          'bootstrap'

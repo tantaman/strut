@@ -1,5 +1,5 @@
 define(['libs/backbone',
-		'bundles/header/view/HeaderView'],
+		'strut/header/view/HeaderView'],
 function(Backbone, Header) {
 	return Backbone.View.extend({
 		className: 'container-fluid',

@@ -1,6 +1,6 @@
-define(['bundles/widgets/ModeButton',
-		'bundles/transition_editor/model/TransitionEditorModel',
-		'bundles/transition_editor/view/TransitionEditorView'],
+define(['tantaman/web/widgets/ModeButton',
+		'strut/transition_editor/model/TransitionEditorModel',
+		'strut/transition_editor/view/TransitionEditorView'],
 function(ModeButton, TransitionEditorModel, TransitionEditorView) {
 	var service = {
 		getMode: function(editorModel, registry) {

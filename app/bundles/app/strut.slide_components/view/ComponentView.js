@@ -1,9 +1,9 @@
  define(["libs/backbone",
-         "bundles/widgets/DeltaDragControl",
+         "tantaman/web/widgets/DeltaDragControl",
          "common/Math2", "css!styles/slide_components/ComponentView.css",
          "libs/keymaster",
          "strut/deck/SlideCommands",
-         "bundles/undo_support/CmdListFactory"],
+         "tantaman/web/undo_support/CmdListFactory"],
 function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFactory) {
   var undoHistory = CmdListFactory.managedInstance('editor');
     return Backbone.View.extend({

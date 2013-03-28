@@ -1,5 +1,5 @@
-define(['bundles/editor/EditorView',
-        'bundles/editor/EditorModel'],
+define(['strut/editor/EditorView',
+        'strut/editor/EditorModel'],
 function(EditorView, EditorModel) {
 	var registry = null;
 	var editorStartup = {

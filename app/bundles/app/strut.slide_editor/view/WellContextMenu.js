@@ -9,7 +9,7 @@ function(Backbone, Model) {
 
 		initialize: function() {
 			this.model = new Model(this._editorModel);
-			this._template = JST['bundles/slide_editor/WellContextMenu'];
+			this._template = JST['strut/slide_editor/WellContextMenu'];
 
 			//this.model.on('')
 			this._currentPos = -1;

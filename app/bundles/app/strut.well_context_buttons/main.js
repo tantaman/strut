@@ -1,3 +1,5 @@
+// TODO: get rid of these.  Context buttons should be added
+// based on available capabilities...
 define(['./AddSlideButton', 'lang'],
 function(AddSlideButton, lang) {
 	'use strict';

@@ -1,6 +1,6 @@
 define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
-		'bundles/slide_components/ComponentFactory'],
+		'strut/slide_components/ComponentFactory'],
 function(Backbone, empty, ComponentFactory) {
 	'use strict';
 	return Backbone.View.extend({

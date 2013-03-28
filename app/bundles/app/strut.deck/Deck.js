@@ -5,7 +5,7 @@
 define(["common/Calcium",
         "./SlideCollection",
         "./SlideCommands",
-        'bundles/undo_support/CmdListFactory'],
+        'tantaman/web/undo_support/CmdListFactory'],
 function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
     /**
         This represents a slide deck.  It has a title, a currently active
