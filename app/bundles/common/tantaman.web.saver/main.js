@@ -8,12 +8,12 @@ function(ExitSaver, TimedSaver) {
 	*/
 
 	var service = {
-		timedSaver: function(exportable) {
-			return new TimedSaver(exportable);
+		timedSaver: function(exportable, duration, storageInterface) {
+			return new TimedSaver(exportable, duration, storageInterface);
 		},
 
-		exitSaver: function(exportable) {
-			return new ExitSaver(exportable);
+		exitSaver: function(exportable, storageInterface) {
+			return new ExitSaver(exportable, storageInterface);
 		}
 	};
 

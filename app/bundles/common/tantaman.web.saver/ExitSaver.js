@@ -10,9 +10,7 @@ function(Saver) {
 	var proto = ExitSaver.prototype = Object.create(Saver.prototype);
 
 	proto._unloaded = function() {
-		this.exportables.forEach(function(exportable) {
-			this.__save(exportable);
-		}, this);
+		this.__save();
 	};
 
 	proto.dispose = function() {

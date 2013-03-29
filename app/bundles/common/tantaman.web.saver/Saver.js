@@ -11,13 +11,16 @@ define(function() {
 	}
 
 	Saver.prototype = {
-		__save: function(exportable) {
-			var data = exportable.export();
-			var identifier = exportable.identifier();
+		__save: function() {
+			// var data = exportable.export();
+			// var identifier = exportable.identifier();
+			this.exportables.forEach(function(exportable) {
+				var data = exportable.export();
+				var identifier = exportable.identifier();
+				//storageInterface.store(identifier, data);
+			});
 		}
 	};
-
-	Saver.idGenerator = DefaultIdentifierGenerator;
 
 	return Saver;
 });

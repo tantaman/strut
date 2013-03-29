@@ -14,4 +14,4 @@ function(Saver) {
 	};
 
 	return TimedSaver;
-})
+});

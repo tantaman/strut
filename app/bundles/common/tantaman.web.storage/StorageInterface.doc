@@ -1,0 +1,44 @@
+providerNames: function() {
+
+},
+
+providerReady: function($el) {
+	
+},
+
+activateProvider: function($el, cb) {
+	
+},
+
+selectProvider: function(providerId) {
+	
+},
+
+currentProvider: function() {
+	
+},
+
+currentProviderId: function() {
+	
+},
+
+on: function() {
+	
+},
+
+store: function(identifier, data, cb) {
+	
+	
+},
+
+load: function(identifier, cb) {
+	
+},
+
+remove: function(identifier, cb) {
+	
+},
+
+list: function(path, cb) {
+	
+},

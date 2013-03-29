@@ -29,6 +29,7 @@ require.config({
     'strut/slide_components': '../bundles/app/strut.slide_components',
     'strut/slide_editor': '../bundles/app/strut.slide_editor',
     'strut/slide_snapshot': '../bundles/app/strut.slide_snapshot',
+    'strut/storage': '../bundles/app/strut.storage',
     'strut/well_context_buttons': '../bundles/app/strut.well_context_buttons',
     'strut/config': '../bundles/app/strut.config',
     'strut/transition_editor': '../bundles/app/strut.transition_editor',

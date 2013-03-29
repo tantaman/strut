@@ -10,6 +10,13 @@ function(Backbone,
 		 Deck,
 		 ComponentFactory,
 		 Adapter) {
+
+	function adaptStorageInterfaceForSavers(storageInterface) {
+		return new Adapter(storageInterface, {
+			store: 'savePresentation'
+		});
+	}
+
 	return Backbone.Model.extend({
 		initialize: function() {
 			// this._loadLastPresentation();
@@ -29,9 +36,10 @@ function(Backbone,
 			});
 
 			var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
-			var storageInterface = null;
-			//var storageInterface = this.registry.getBest('tantaman.web.');
 			if (savers) {
+				var storageInterface = null;
+				//var storageInterface = this.registry.getBest('tantaman.web.');
+				//storageInterface = adaptStorageInterface(storageInterface);
 				this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
 				this._timedSaver = savers.timedSaver(this.exportable, 10000, storageInterface);
 			}

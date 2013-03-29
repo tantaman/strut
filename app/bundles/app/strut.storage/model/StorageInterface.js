@@ -1,4 +1,4 @@
-define(['./StorageProvidersWrapper'],
+define(['tantaman/web/storage/StorageProvidersWrapper'],
 function(StorageProviders) {
 	'use strict';
 
