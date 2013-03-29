@@ -27,6 +27,14 @@ function(Backbone,
 				export: 'exportPresentation',
 				identifier: 'fileName'
 			});
+
+			var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
+			var storageInterface = null;
+			//var storageInterface = this.registry.getBest('tantaman.web.');
+			if (savers) {
+				this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
+				this._timedSaver = savers.timedSaver(this.exportable, 10000, storageInterface);
+			}
 		},
 
 		changeActiveMode: function(modeId) {
@@ -36,9 +44,14 @@ function(Backbone,
 			}
 		},
 
+		dispose: function() {
+			throw "EditorModel can not be disposed yet"
+			this._exitSaver.dispose();
+			this._timedSaver.dispose();
+		},
+
 		importPresentation: function(rawObj) {
-			// if (this._deck != null)
-			// 	this._deck.dispose();
+			// deck disposes iteself on import?
 			this._deck.import(rawObj);
 		},
 
@@ -50,7 +63,14 @@ function(Backbone,
 		},
 
 		fileName: function() {
-			return this._deck.get('fileName');
+			var fname = this._deck.get('fileName');
+			if (fname == null) {
+				// TODO...
+				fname = 'presentation-unnamed';
+				this._deck.set('fileName', fname);
+			}
+			
+			return fname;
 		},
 
 		deck: function() {

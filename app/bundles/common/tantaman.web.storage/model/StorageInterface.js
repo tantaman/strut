@@ -2,6 +2,8 @@ define(['./StorageProvidersWrapper'],
 function(StorageProviders) {
 	'use strict';
 
+	// TODO: update to use ServiceCollection
+	// remove presentation specific garbage
 	function StorageInterface(registry) {
 		this._providers = new StorageProviders(registry);
 	}
@@ -35,7 +37,7 @@ function(StorageProviders) {
 			return this._providers.on.apply(this._providers, arguments);
 		},
 
-		save: function(identifier, data, cb) {
+		store: function(identifier, data, cb) {
 			this.currentProvider().setContents(identifier, data, cb);
 			return this;
 		},
@@ -66,7 +68,7 @@ function(StorageProviders) {
 				identifier += '.strut';
 			}
 
-			this.save(identifier, data, cb);
+			this.store(identifier, data, cb);
 		}
 	};
 

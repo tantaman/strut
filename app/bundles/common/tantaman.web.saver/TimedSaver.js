@@ -1,8 +1,8 @@
 define(['./Saver'],
 function(Saver) {
 	'use strict';
-	function TimedSaver(exportables, idGenerator, duration) {
-		Saver.apply(this, arguments);
+	function TimedSaver(exportables, duration, storageInterface) {
+		Saver.call(this, exportables, storageInterface);
 
 		this._intervalH = setInterval(this.__save.bind(this), duration);
 	}

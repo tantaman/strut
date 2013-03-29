@@ -1,12 +1,8 @@
 define(function() {
 	'use strict';
-	
-	function DefaultIdentifierGenerator(exportable) {
-		return ''; // TODO: uuid
-	}
 
-	function Saver(exportables, identifierGenerator) {
-		this.identifierGenerator = identifierGenerator || DefaultIdentifierGenerator;
+	function Saver(exportables, storageInterface) {
+		this.storageInterface = storageInterface;
 		if (Array.isArray(exportables)) {
 			this.exportables = exportables;
 		} else {
@@ -18,11 +14,6 @@ define(function() {
 		__save: function(exportable) {
 			var data = exportable.export();
 			var identifier = exportable.identifier();
-
-			if (identifier == null) {
-				identifier = this.identifierGenerator(exportable);
-				exportable.identifier(identifier);
-			}
 		}
 	};
 
