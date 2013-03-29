@@ -4,9 +4,8 @@ function(RemoteStorageProvider) {
 
 	return {
 		initialize: function(registry) {
-			console.log("Remote init...");
 			registry.register({
-				interfaces: 'strut.StorageProvider'
+				interfaces: 'tantaman.web.StorageProvider'
 			}, service);
 		}
 	};

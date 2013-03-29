@@ -6,7 +6,7 @@ function(Backbone) {
 	function StorageProvidersWrapper(registry) {
 		this.registry = registry;
 
-		this.registry.on('registered:strut.StorageProvider',
+		this.registry.on('registered:tantaman.web.StorageProvider',
 			this._providerRegistered, this);
 
 		this._getProviders();
@@ -28,7 +28,7 @@ function(Backbone) {
 		},
 
 		_getProviders: function() {
-			var providerEntries = this.registry.get('strut.StorageProvider');
+			var providerEntries = this.registry.get('tantaman.web.StorageProvider');
 			var providers = {};
 			providerEntries.forEach(function(providerEntry) {
 				var provider = providerEntry.service();

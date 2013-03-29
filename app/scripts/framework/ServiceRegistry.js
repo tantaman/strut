@@ -31,11 +31,33 @@ function(EventEmitter, MultiMap) {
 			this.emit('registered:' + iface, entry);
 		}, this);
 		this.emit('registered', entry);
+
+		return this;
 	};
 
-	// proto.deregister = function() {
+	proto.deregister = function(opts) {
+		opts = this.normalize(opts);
+		this._deregister(opts);
 
-	// }
+		return this;
+	};
+
+	proto._deregister = function(opts) {
+		var removed = [];
+		opts.interfaces.forEach(function(iface) {
+			var entries = this._services.get(iface);
+			entries.forEach(function (entry, idx) {
+				if (entry._matches(opts)) {
+					this._services.remove(iface, entry);
+					removed.push(entry);
+				}
+			}, this);
+		}, this);
+
+		removed.forEach(function(entry) {
+			this.emit('deregistered', entry);
+		}, this);
+	};
 
 	proto.getBest = function(opts) {
 		var entry = this.getBestEntry(opts);

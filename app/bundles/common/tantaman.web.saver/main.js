@@ -20,7 +20,7 @@ function(ExitSaver, TimedSaver) {
 	return {
 		initialize: function(registry) {
 			registry.register({
-				interfaces: 'strut.AutoSaver'
+				interfaces: 'tantaman.web.AutoSavers'
 			}, service);
 		}
 	};

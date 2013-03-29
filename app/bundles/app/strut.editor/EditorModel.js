@@ -2,8 +2,14 @@ define(['libs/backbone',
 		'strut/header/model/HeaderModel',
 		'strut/presentation_generator/model/PresentationGeneratorCollection',
 		'strut/deck/Deck',
-		'strut/slide_components/ComponentFactory'],
-function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFactory) {
+		'strut/slide_components/ComponentFactory',
+		'common/Adapter'],
+function(Backbone,
+		 Header,
+		 PresentationGeneratorCollection,
+		 Deck,
+		 ComponentFactory,
+		 Adapter) {
 	return Backbone.Model.extend({
 		initialize: function() {
 			// this._loadLastPresentation();
@@ -16,6 +22,11 @@ function(Backbone, Header, PresentationGeneratorCollection, Deck, ComponentFacto
 
 			this.set('modeId', 'slide-editor');
 			this._createMode();
+
+			this.exportable = new Adapter(this, {
+				export: 'exportPresentation',
+				identifier: 'fileName'
+			});
 		},
 
 		changeActiveMode: function(modeId) {

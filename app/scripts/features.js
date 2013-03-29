@@ -8,8 +8,7 @@ define([
 	'tantaman/web/local_storage/main',
 	'tantaman/web/remote_storage/main',
 	'tantaman/web/storage/main',
-	'strut/startup/main',
-	// 'bundles/dropbox/main',
+	'strut/startup/main'
 	],
 function(ServiceRegistry) {
 	var registry = new ServiceRegistry();

@@ -1,3 +1,6 @@
+vert.x and clojure for strut service?
+
+
 TODO: remove jquery and use zepto -or- use jquery 2
 
 So end result:

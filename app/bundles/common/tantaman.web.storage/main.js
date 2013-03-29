@@ -51,9 +51,13 @@ function(StorageModal,
 	};
 
 	return {
+		// TODO: break strut dependencies!
 		initialize: function(registry) {
 			storageInterface = new StorageInterface(registry);
 			registry.register({
+				// TODO: shouldn't be logomenuitemprovider
+				// should be brought into the logo
+				// based on its capabilities
 				interfaces: 'strut.LogoMenuItemProvider'
 			}, service);
 

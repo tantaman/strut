@@ -5,7 +5,7 @@ function(LocalStorageProvider) {
 	return {
 		initialize: function(registry) {
 			registry.register({
-				interfaces: 'strut.StorageProvider'
+				interfaces: 'tantaman.web.StorageProvider'
 			}, service);
 		}
 	};
