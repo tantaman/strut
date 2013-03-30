@@ -59,15 +59,25 @@ function(Backbone,
 			this._timedSaver.dispose();
 		},
 
+		newPresentation: function() {
+			var num = window.sessionMeta.num || 0;
+
+			num += 1;
+			window.sessionMeta.num = num;
+
+			this.importPresentation({
+        		fileName: "presentation-" + num,
+        		slides: []
+      		});
+      		this._deck.newSlide();
+		},
+
 		importPresentation: function(rawObj) {
 			// deck disposes iteself on import?
 			this._deck.import(rawObj);
 		},
 
-		exportPresentation: function(filename) {
-			if (filename) {
-				this._deck.set('fileName', filename);
-			}
+		exportPresentation: function() {
 			return this._deck.toJSON(false, true);
 		},
 

@@ -130,9 +130,9 @@ function(empt, empty, config, registry, StrutLoader) {
       }
     };
 
+    StrutLoader.start(registry, function(){}, function(){});
+
     $(window).unload(function() {
       localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
     });
-
-    StrutLoader.start(registry, function(){}, function(){});
 });

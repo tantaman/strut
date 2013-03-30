@@ -17,6 +17,10 @@ function() {
 
 				cb(null, err);
 			});
+		},
+
+		new_: function(model) {
+			model.newPresentation();
 		}
 	};
 });

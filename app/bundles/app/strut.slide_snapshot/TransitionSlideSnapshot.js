@@ -41,6 +41,11 @@ function(ThreeDComponentView, SlideDrawer, empty) {
         left: this.model.get("x"),
         top: this.model.get("y")
       });
+
+      var tform = window.browserPrefix + 'transform';
+      var scale = 'scale(' + this.model.get('impScale') + ')';
+      this.$el.css(tform, scale);
+
       return this;
     },
     __getTemplate: function() {

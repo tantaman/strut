@@ -18,7 +18,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
 
     defaults = {
       z: 0,
-      impScale: 1,
+      impScale: 3,
       rotateX: 0,
       rotateY: 0,
       rotateZ: 0

@@ -8,5 +8,6 @@ define({
 	overview: 'Overview',
 	open: 'Open',
 	save: 'Save',
-	save_as: 'Save as...'
+	save_as: 'Save as...',
+	new_: 'New'
 });
