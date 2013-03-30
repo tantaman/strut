@@ -30,6 +30,9 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
       this.model.on("change:rotateY", this._rotYChanged, this);
       return this.model.on("change:rotateZ", this._rotZChanged, this);
     },
+    dispose: function() {
+      this.model.off(null, null, this);
+    },
     rotateX: function(e, deltas) {
       var rot;
       rot = (deltas.dy * .02) % twoPI;
