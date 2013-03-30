@@ -77,7 +77,7 @@ window.__extends = __extends;
 window.zTracker = {
   z: 0,
   next: function() {
-    ++this.z;
+    return ++this.z;
   }
 };
 

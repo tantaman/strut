@@ -32,7 +32,9 @@ function(ThreeDComponentView, SlideDrawer, empty) {
     },
     clicked: function() {
       ThreeDComponentView.prototype.clicked.apply(this, arguments);
-      return this.model.set("active", true);
+      this.model.set("active", true);
+
+      this.$el.css('z-index', zTracker.next());
     },
     _impScaleChanged: function() {
       var tform = window.browserPrefix + 'transform';

@@ -64,6 +64,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         return this.$yInput.val(value);
       },
       clicked: function(e) {
+        this.$el.css('z-index', zTracker.next());
         this.$el.trigger("focused");
         e.stopPropagation();
         return false;
