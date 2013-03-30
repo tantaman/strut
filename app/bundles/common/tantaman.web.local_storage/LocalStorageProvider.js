@@ -55,7 +55,8 @@ define(function() {
 
 		setContents: function(path, data, cb) {
 			this.impl.setItem(prefix + path, JSON.stringify(data));
-			cb(true);
+			if (cb)
+				cb(true);
 			return this;
 		}
 	};

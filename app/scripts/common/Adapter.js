@@ -4,7 +4,7 @@ define(function() {
 		keys.forEach(function(from) {
 			var to = methodMap[from];
 			this[from] = function() {
-				return wrapped[to].apply(this, arguments);
+				return wrapped[to].apply(wrapped, arguments);
 			}
 		}, this);
 	}

@@ -18,5 +18,6 @@ define(function () {
 
 	window.config = config;
 	window.sessionMeta = sessionMeta;
+
 	return config;
 });

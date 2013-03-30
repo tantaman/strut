@@ -11,7 +11,7 @@ function(EditorView, EditorModel) {
 
     		if (sessionMeta.lastPresentation != null) {
     			// Load it up.
-    			var storageInterface = registry.getBest('Strut.StorageInterface');
+    			var storageInterface = registry.getBest('strut.StorageInterface');
     			storageInterface.load(sessionMeta.lastPresentation, function(pres, err) {
     				model.importPresentation(pres);
     			});

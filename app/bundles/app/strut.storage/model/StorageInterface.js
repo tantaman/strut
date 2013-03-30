@@ -67,6 +67,7 @@ function(StorageProviders) {
 			if (idx + '.strut'.length != identifier.length) {
 				identifier += '.strut';
 			}
+			window.sessionMeta.lastPresentation = identifier;
 
 			this.store(identifier, data, cb);
 		}

@@ -10,6 +10,7 @@ function(Backbone,
 		 Deck,
 		 ComponentFactory,
 		 Adapter) {
+	'use strict';
 
 	function adaptStorageInterfaceForSavers(storageInterface) {
 		return new Adapter(storageInterface, {
@@ -38,8 +39,8 @@ function(Backbone,
 			var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
 			if (savers) {
 				var storageInterface = null;
-				//var storageInterface = this.registry.getBest('tantaman.web.');
-				//storageInterface = adaptStorageInterface(storageInterface);
+				var storageInterface = this.registry.getBest('strut.StorageInterface');
+				storageInterface = adaptStorageInterfaceForSavers(storageInterface);
 				this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
 				this._timedSaver = savers.timedSaver(this.exportable, 10000, storageInterface);
 			}

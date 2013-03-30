@@ -17,8 +17,8 @@ define(function() {
 			this.exportables.forEach(function(exportable) {
 				var data = exportable.export();
 				var identifier = exportable.identifier();
-				//storageInterface.store(identifier, data);
-			});
+				this.storageInterface.store(identifier, data);
+			}, this);
 		}
 	};
 
