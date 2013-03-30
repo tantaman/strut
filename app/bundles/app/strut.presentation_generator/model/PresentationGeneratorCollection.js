@@ -7,7 +7,7 @@ function(Backbone) {
 		},
 
 		_loadGenerators: function() {
-			var generatorEntries = this._registry.get('strut.PresentationGenerator');
+			var generatorEntries = this._registry.get('strut.presentation_generator');
 			generatorEntries.forEach(function() {
 				
 			});

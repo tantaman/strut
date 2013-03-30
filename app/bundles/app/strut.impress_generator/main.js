@@ -11,7 +11,7 @@ function(ImpressRenderer) {
 	return {
 		initialize: function(registry) {
 			registry.register({
-				'strut.Presentation_generator'
+				'strut.presentation_generator'
 			}, service);
 		}
 	};
