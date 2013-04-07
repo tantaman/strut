@@ -1,11 +1,7 @@
 Strut
 =======
 
-**Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
-on the progress of the [re-write](https://github.com/tantaman/Strut/tree/rewrite) on the [rewrite branch](https://github.com/tantaman/Strut/tree/rewrite).
-
-`Strut` is getting a facelift too:
-![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)
+**Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.
 
 #### GUI / Authoring Tool for ImpressJS ####
 
@@ -40,7 +36,6 @@ Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut
 ### Development/Building ###
 To build your own version of Strut you'll need Grunt v0.4.0 or later.
 
-Note: these instructions currently only work for the **rewrite** branch of Strut as that is where developing is currently occurring.
 
 1. Install the latest Grunt: `npm install -g grunt-cli`
 2. Clone Strut: `git clone git://github.com/tantaman/Strut.git`
@@ -53,10 +48,9 @@ The resulting build will be location in `Strut/dist`.
 
 ### Contributing ###
 
-Please make contributions to the **rewrite** branch.  The rewrite will be merged into master by 4/15/13.
 
 `Strut` is composed of several bundles which provide distinct features to `Strut`.  The set of bundles that compose
-`Strut` are defined in https://github.com/tantaman/Strut/blob/rewrite/app/scripts/features.js
+`Strut` are defined in https://github.com/tantaman/Strut/blob/master/app/scripts/features.js
 
 This design allows features to be added and removed from `Strut` just by adding or removing bundles from the list
  in features.js.  E.g., if you wanted a build of Strut without `RemoteStorage` you can just remove
@@ -64,7 +58,7 @@ the `RemoteStorage` bundle from features.js.  If you didn't want any slide compo
 `strut/slide_components/main` from features.js.
 
 Bundles contribute functionality to `Strut` by registering that functionality with the `ServiceRegistry`.
-You can take a look at the `RemoteStorage` bundle for an example: https://github.com/tantaman/Strut/blob/rewrite/app/bundles/common/tantaman.web.remote_storage/main.js
+You can take a look at the `RemoteStorage` bundle for an example: https://github.com/tantaman/Strut/blob/master/app/bundles/common/tantaman.web.remote_storage/main.js
 
 If a service is missing `Strut` continues to run without the functionality provided by that service.
 
