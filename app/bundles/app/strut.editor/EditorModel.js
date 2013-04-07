@@ -70,10 +70,13 @@ function(Backbone,
 
 		importPresentation: function(rawObj) {
 			// deck disposes iteself on import?
+			console.log('New file name: ' + rawObj.fileName);
 			this._deck.import(rawObj);
 		},
 
-		exportPresentation: function() {
+		exportPresentation: function(filename) {
+			if (filename)
+				this._deck.set('fileName', filename);
 			return this._deck.toJSON(false, true);
 		},
 
