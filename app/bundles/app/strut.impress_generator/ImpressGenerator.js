@@ -1,7 +1,7 @@
 define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
   var ImpressGenerator;
   var slideConfig = window.config.slide;
-  
+
   ImpressGenerator = (function() {
 
     function ImpressGenerator() {
@@ -10,7 +10,7 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
         var result;
         result = "";
         switch (componentModel.get("type")) {
-          case "ImageModel":
+          case "Image":
             if (componentModel.get("imageType") === "SVG") {
               result = JST["strut.impress_generator/SVGImage"](componentModel.attributes);
             } else {
