@@ -157,6 +157,14 @@ body {
 	line-height: 1em;
 }
 
+.component .label.skewx {
+	font-size: 25px;
+}
+
+.component .label.skewy {
+	font-size: 25px;
+}
+
 .component .label.rotate {
 	font-size: 25px;
 }
@@ -365,6 +373,14 @@ body {
 	margin-left: 30px;
 }
 
+.slideTable .transitionSlideSnapshot .badge:before {
+	counter-increment: transSlide;
+	content: counter(transSlide);
+}
+
+.slideTable {
+	counter-reset: transSlide;
+}
 .slideTable {
 	position: absolute;
 	left: 0px;
