@@ -73,15 +73,33 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
       slides = deckAttrs.slides;
       colCnt = 6;
       cnt = 0;
+
+      var minX, minY, maxX, maxY;
+
       slides.each(function(slide) {
         var x;
         x = slide.get("x");
+        y = slide.get('y');
         if (!(x != null)) {
           slide.set("x", cnt * 160 + 30);
           slide.set("y", ((cnt / colCnt) | 0) * 160 + 80);
         }
+
+        if (minX == null || x < minX)
+          minX = x;
+        if (minY == null || y < minY)
+          minY = y;
+        if (maxX == null || x > maxX)
+          maxX = x;
+        if (maxY == null || y > maxY)
+          maxY = y;
+
         return ++cnt;
       });
+
+      deckAttrs.overviewX = (maxX + minX) / 2;
+      deckAttrs.overviewY = (maxY + minY) / 2;
+
       return JST["strut.impress_generator/ImpressTemplate"](deckAttrs);
     };
 

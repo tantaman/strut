@@ -1,6 +1,6 @@
 {{> ComponentContainer}}
 <video controls>
-	<source src="{{src}}" type="{{videoType}}"></source>
+	<source src="{{src}}" type="{{srcType}}" preload="metadata"></source>
 </video>
 </div>
 </div>
