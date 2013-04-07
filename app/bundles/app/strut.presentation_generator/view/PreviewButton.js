@@ -3,8 +3,8 @@ function(Backbone, PreviewGeneratorModel) {
 	return Backbone.View.extend({
 		className: 'btn-group iconBtns',
 		initialize: function() {
-			this.generators = 
-				this.options.editorModel.get('presentationGenerators');
+			this.generators = this.options.editorModel.registry
+				.getBest('strut.presentation_generator.GeneratorCollection');
 
 			delete this.options.editorModel;
 
@@ -12,7 +12,7 @@ function(Backbone, PreviewGeneratorModel) {
 		},
 
 		render: function() {
-			this.$el.html(this._template(this.generators.models));
+			this.$el.html(this._template({}));
 			return this;
 		}
 	});

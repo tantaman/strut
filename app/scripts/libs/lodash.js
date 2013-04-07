@@ -8,6 +8,8 @@
 ;(function(window, undefined) {
   'use strict';
 
+  console.log("LOADING LODASH!!!!")
+
   /** Detect free variable `exports` */
   var freeExports = typeof exports == 'object' && exports &&
     (typeof global == 'object' && global && global == global.global && (window = global), exports);

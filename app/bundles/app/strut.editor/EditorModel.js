@@ -1,12 +1,10 @@
 define(['libs/backbone',
 		'strut/header/model/HeaderModel',
-		'strut/presentation_generator/model/PresentationGeneratorCollection',
 		'strut/deck/Deck',
 		'strut/slide_components/ComponentFactory',
 		'common/Adapter'],
 function(Backbone,
 		 Header,
-		 PresentationGeneratorCollection,
 		 Deck,
 		 ComponentFactory,
 		 Adapter) {
@@ -24,8 +22,6 @@ function(Backbone,
 			this._deck = new Deck();
 			this.addSlide();
 
-			this.set('presentationGenerators', 
-				new PresentationGeneratorCollection(this));
 			this.set('header', new Header(this.registry, this));
 
 			this.set('modeId', 'slide-editor');

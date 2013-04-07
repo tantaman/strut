@@ -1,5 +1,5 @@
-define(['common/EventEmitter'],
-function (EventEmitter) {
+define(['common/EventEmitter', 'lodash'],
+function (EventEmitter, _) {
 	'use strict';
 
 	var identity = function(p) {return p;};

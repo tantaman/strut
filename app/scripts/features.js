@@ -2,6 +2,7 @@ define([
 	'framework/ServiceRegistry',
 	'strut/etch_extension/main',
 	'strut/storage/main',
+	'strut/presentation_generator/main',
 	'tantaman/web/saver/main',
 	'strut/slide_editor/main',
 	'strut/transition_editor/main',

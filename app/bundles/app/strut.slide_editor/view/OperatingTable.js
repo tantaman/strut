@@ -129,7 +129,7 @@ function(Backbone, empty, ComponentFactory) {
 			this._$slideContainer.css({
 				'margin-left': remainingWidth / 2,
 				'margin-right': remainingWidth / 2
-			})
+			});
 
 			this._$slideContainer.css(window.browserPrefix + 'transform', 'scale(' + scale + ')')
 		},

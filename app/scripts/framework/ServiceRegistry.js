@@ -70,7 +70,7 @@ function(EventEmitter, MultiMap) {
 		return this.get(opts)[0];
 	};
 
-	proto.normalize = function Normalize(opts) {
+	var Normalize = proto.normalize = function Normalize(opts) {
 		var parms = {};
 		if (typeof opts === 'string') {
 			parms.interfaces = [opts];
