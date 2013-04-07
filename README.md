@@ -2,7 +2,7 @@ Strut
 =======
 
 **Note:** `Strut` is being largely re-written to support 3rd party extensions and mobile devices.  You can check 
-on the progress of the re-write on the rewrite branch.
+on the progress of the [re-write](https://github.com/tantaman/Strut/tree/rewrite) on the [rewrite branch](https://github.com/tantaman/Strut/tree/rewrite).
 
 `Strut` is getting a facelift too:
 ![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)
@@ -38,7 +38,7 @@ Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut
 
 
 ### Development/Building ###
-To build your own version of Strut you'll need Grunt v4.0 or later.
+To build your own version of Strut you'll need Grunt v0.4.0 or later.
 
 Note: these instructions currently only work for the **rewrite** branch of Strut as that is where developing is currently occurring.
 
@@ -48,36 +48,34 @@ Note: these instructions currently only work for the **rewrite** branch of Strut
 4. Install Strut's development dependencies: `npm install`
 5. Run Strut: `grunt server`
 
-Yeoman will automatically compile your coffeescript and templates and reload your browser whenever there is a code change.
-
 To make a production build of Strut run `grunt build`.
 The resulting build will be location in `Strut/dist`.  
 
 ### Contributing ###
 
-Strut uses a Maven directory layout so code and resource will be found in `src/main`
+Please make contributions to the **rewrite** branch.  The rewrite will be merged into master by 4/15/13.
 
-In ```Strut``` there is an object for each major component.  The 
-[Slides](https://github.com/tantaman/Strut/blob/master/src/main/coffee/model/presentation/Slide.coffee), 
-[SlidePreviews](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/transition_editor/TransitionSlideSnapshot.coffee), 
-[TransitionEditor](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/transition_editor/TransitionEditor.coffee), 
-[SlideEditor](https://github.com/tantaman/Strut/blob/master/src/main/coffee/ui/editor/SlideEditor.coffee),
-etc. all have their own objects so it's easy to
-track down and make changes to a component.  ```Strut``` uses [RequireJS](http://requirejs.org/) to keep source files small and
-focused.  [BackboneJS](http://documentcloud.github.com/backbone/) is used for ```Strut's``` data model and serialization as well as for binding events in the 
-view layers.  
+`Strut` is composed of several bundles which provide distinct features to `Strut`.  The set of bundles that compose
+`Strut` are defined in https://github.com/tantaman/Strut/blob/rewrite/app/scripts/features.js
 
-In addition to having organized code, the [markup for Strut](https://github.com/tantaman/Strut/tree/master/src/main/resources/ui/editor/templates) is also 
-split up by component and placed in [HandlebarsJS](http://handlebarsjs.com/) template files. 
+This design allows features to be added and removed from `Strut` just by adding or removing bundles from the list
+ in features.js.  E.g., if you wanted a build of Strut without `RemoteStorage` you can just remove
+the `RemoteStorage` bundle from features.js.  If you didn't want any slide components for some reason then you can remove
+`strut/slide_components/main` from features.js.
 
-Here is the basic layout of the source:
+Bundles contribute functionality to `Strut` by registering that functionality with the `ServiceRegistry`.
+You can take a look at the `RemoteStorage` bundle for an example: https://github.com/tantaman/Strut/blob/rewrite/app/bundles/common/tantaman.web.remote_storage/main.js
 
-* Presentation Model: src/model/presentation
-* Editor UI Layer: src/ui/editor
-* Model -> ImpressJS Rendering: src/ui/impress_renderer
+If a service is missing `Strut` continues to run without the functionality provided by that service.
 
-templates for UI components are contained in src/ui/COMPONENT_NAME/res/templates
-in order to package related markup and backing UI (not model) code into modules.
+New development that isn't essential to the core of Strut should follow this pattern in order to keep the code 
+modular and allow the removal of features that don't pan out or can only exist in specific environments.  For example,
+`RemoteStorage` can't be loaded if `Strut` is being served from a `file://` url.
+
+The `ServiceRegistry` also allows for runtime modularity.  I.e., services can be added and removed at runtime and `Strut`
+will update to reflect the current set of features & services that are isntalled.  Try to keep in mind the
+fact that services won't necessarily be present or if they are present they might go away.  This 
+approach allows the user to add and remove plugins from 3rd parties at runtime.
 
 ### Acknowledgements ###
 
