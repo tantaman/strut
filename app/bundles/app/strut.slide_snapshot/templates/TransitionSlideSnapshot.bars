@@ -19,4 +19,4 @@
 	<span class="label scales">↔</span>
 	<input class="position" type="text" data-option="scale" value="{{impScale}}"/>
 </div>
-<span class="badge badge-inverse"></span>
+<span class="badge badge-inverse"> </span>

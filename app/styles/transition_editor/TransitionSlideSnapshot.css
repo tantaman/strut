@@ -69,3 +69,12 @@
 .component.transitionSlideSnapshot .label.scales+input {
 	margin-left: 30px;
 }
+
+.slideTable .transitionSlideSnapshot .badge:before {
+	counter-increment: transSlide;
+	content: counter(transSlide);
+}
+
+.slideTable {
+	counter-reset: transSlide;
+}
