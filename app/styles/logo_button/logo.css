@@ -1,0 +1,32 @@
+.logo {
+	background-image: url('img/strut-logo-32.png');
+	width: 100px;
+	height: 32px;
+	background-position: 5px;
+	margin-left: 5px;
+	padding: 0px 20px 0px 5px;
+	background-repeat: no-repeat;
+}
+
+.logo-holder {
+	margin-top: 5px;
+	margin-left: -8px;
+}
+
+.btn-group.open .logo {
+	background-image: url('img/strut-logo-32.png');
+}
+
+.logo:active {
+  background-image: url('img/strut-logo-32.png');
+}
+
+.logo:hover {
+	background-position: 5px 0;
+}
+
+.logo .caret {
+	position: absolute;
+	right: 6px;
+	top: 5px;
+}

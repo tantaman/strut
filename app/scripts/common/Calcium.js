@@ -1,4 +1,4 @@
-define(["backbone"],
+define(["libs/backbone"],
 function(Backbone) {
 	function isModelish(obj) {
 		return obj instanceof Backbone.Model ||

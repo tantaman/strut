@@ -38,6 +38,15 @@ function(Queue) {
 				}
 			}
 		},
+
+		cancel: function() {
+			this._queue = Queue.create();
+			this._runLast = null;
+			if (this._handle != null) {
+				clearTimeout(this._handle);
+				this._handle = null;
+			}
+		},
 		
 		_internalSubmit: function(cb, options) {
 			var self = this;
@@ -57,7 +66,7 @@ function(Queue) {
 			} else if (this._runLast) {
 				var runLast = this._runLast;
 				this._runLast = null;
-				this._handle = this._internalSubmit(runLast);
+				this._internalSubmit(runLast[0], runLast[1]);
 			} else {
 				this._handle = null;
 			}
@@ -69,7 +78,7 @@ function(Queue) {
 				this._queue.enqueue(cb);
 				break;
 			case 'runLast':
-				this._runLast = cb;
+				this._runLast = [cb, options];
 				break;
 			case 'drop':
 				break;
