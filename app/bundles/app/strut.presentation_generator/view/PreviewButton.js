@@ -12,7 +12,7 @@ function(Backbone, PreviewGeneratorModel) {
 		},
 
 		render: function() {
-			this.$el.html(this._template({}));
+			this.$el.html(this._template({generators: this.generators}));
 			return this;
 		}
 	});

@@ -1,17 +1,19 @@
-define(['./ImpressRenderer'],
-function(ImpressRenderer) {
+define(['./ImpressGenerator'],
+function(ImpressGenerator) {
 	'use strict';
 
 	var service = {
+		displayName: 'Impress',
+		id: 'impress',
 		generate: function(deckAttrs) {
-			return ImpressRenderer.render(deckAttrs);
+			return ImpressGenerator.render(deckAttrs);
 		}
 	};
 
 	return {
 		initialize: function(registry) {
 			registry.register({
-				'strut.presentation_generator'
+				interfaces: 'strut.presentation_generator'
 			}, service);
 		}
 	};

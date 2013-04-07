@@ -72,7 +72,7 @@ Handlebars.registerHelper('blockHelperMissing', function(context, options) {
     return fn(this);
   } else if(context === false || context == null) {
     return inverse(this);
-  } else if(type === "[object Array]") {
+  } else if(type === "[object Array]" || context instanceof Array) {
     if(context.length > 0) {
       return Handlebars.helpers.each(context, options);
     } else {

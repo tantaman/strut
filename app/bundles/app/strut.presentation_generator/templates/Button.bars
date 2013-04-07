@@ -4,6 +4,6 @@
 </button>
 <ul class="dropdown-menu">
 	{{#generators}}
-    <li data-option="{{id}}">{{name}}</li>
+    <li data-option="{{id}}"><a>{{displayName}}</a></li>
     {{/generators}}
 </ul>
