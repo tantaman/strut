@@ -1,0 +1,5 @@
+<div class="componentContainer" style="top: {{#round y}}{{/round}}px; left: {{#round x}}{{/round}}px;
+-webkit-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+-moz-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}}">
+{{> TransformContainer}}

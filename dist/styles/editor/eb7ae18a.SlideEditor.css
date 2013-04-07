@@ -1,0 +1,92 @@
+.slideEditor {
+	/*height: 100%;*/
+}
+
+.slideEditor .navbar .caret {
+	margin-left: 2px;
+}
+
+.slideEditor div.newSlide {
+	margin-left: 25px;
+}
+
+.slideEditor .btn-warning {
+	font-size: 12px;
+}
+
+.slideEditor .btn .icon-arrow-right {
+	margin-left: 8px;
+	margin-right: -6px;
+}
+
+.slideEditor .mainContent {
+	margin-top: -18px;
+	/*height: 100%;*/
+}
+
+.slideEditor .slidePreviewPanel {
+	position: absolute;
+	top: 88px;
+	left: 0px;
+	bottom: 0px;
+	width: 150px;
+	border-right: 1px solid #333;
+	overflow:auto;
+}
+
+.slideEditor .operatingTable {
+	/*height: 100%;
+	width: 100%;
+	margin-left: 151px;*/
+	position: absolute;
+	overflow: hidden;
+  	webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  	-moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  	box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+}
+
+.slideEditor .divider-vertical {
+	height: 51px;
+}
+
+.slideEditor .nav > li { /* TODO: fixme */
+	height: 52px;
+}
+
+.transitionEditor .nav > li { /* TODO: fixme */
+	height: 52px;
+}
+
+.iconBtns i {
+	display: block;
+	margin: 0 auto;
+}
+
+.slideEditor .normalBtns {
+	margin-top: 10px;
+}
+
+.slideEditor .slideContainer {
+	/*TODO: this would be replaced by the user's desired BG*/
+	background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+	background: radial-gradient(#F0F0F0, #BEBEBE);
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	margin: 10px auto;
+	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+.lato { font-family:'Lato', sans-serif; }
+.ubuntu { font-family:'Ubuntu', sans-serif; }
+.abril { font-family:'Abril Fatface', cursive; }
+.hammersmith { font-family:'Hammersmith One', sans-serif; }
+.fredoka { font-family:'Fredoka One', cursive; }
+.gorditas { font-family:'Gorditas', cursive; }
+.pressstart { font-family:'Press Start 2P', cursive; }

@@ -1,0 +1,33 @@
+<div class="navbar">
+  <div class="navbar-inner buttonBar">
+    <div class="container">
+      <ul class="nav cameraSettings">
+        <li>
+         <!-- <div class="btn-group cameraControls">
+            <button class="btn"><i class="icon-camera"></i></button>
+            <a class="btn active" data-option="lookDownZ">Z</a>
+            <a class="btn" data-option="lookDownY">Y</a>
+            <a class="btn" data-option="lookDownX">X</a>
+          </div> -->
+        </li>
+        <li class="divider-vertical">
+        </li>
+        <li>
+          <span class="label label-inverse">Interval:</span><input type="text" data-option="interval" value="0"></input>
+        </li>
+      </ul>
+    	<ul class="nav pull-right">
+    		<li>
+    			<div class="btn-group iconBtns" style="display: inline-block">
+                        <a class="btn menuBarOption" data-option="slideEditor"><i class="icon-th-list"></i><span>Slides</span></a>
+          </div>
+          <div class="btn-group iconBtns" style="display: inline-block">
+                        <a class="btn btn-success menuBarOption" data-option="preview"><i class="icon-play icon-white"></i><span>Present</span></a>
+          </div>
+    		</li>
+    	</ul>
+   	</div>
+  </div>
+</div>
+<div class="transitionSlides">
+</div>

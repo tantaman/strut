@@ -1,0 +1,10 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>Download Ready</h3>
+</div>
+<div class="modal-body">
+	<h4>Click below to download</h4>
+</div>
+<div class="modal-footer">
+	<a class="downloadLink btn btn-inverse" target="_blank" title="Download"><i class="icon-download-alt icon-white"></i></a>
+</div>

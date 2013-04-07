@@ -1,0 +1,184 @@
+
+/**
+@module model.presentation
+@author Matt Crinklaw-Vogt
+*
+*/
+
+
+(function() {
+
+  define(["backbone", "model/geom/SpatialObject", "./components/ComponentFactory", "common/Math2", "model/commands/ComponentCommands"], function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands) {
+    var defaults;
+    defaults = {
+      z: 0,
+      impScale: 1,
+      rotateX: 0,
+      rotateY: 0,
+      rotateZ: 0
+    };
+    /**
+    	Represents a slide in the presentation!
+    	Slides contain components (text boxes, videos, images, etc.)
+    	Slide fires a "contentsChanged" event whenever any of their
+    	components are updated.
+    
+    	Slide fires "change:components.add/remove" events when components are
+    	added or removed.
+    	@class model.presentation.Slide
+    	@extend model.geom.SpatialObject
+    	*
+    */
+
+    return SpatialObject.extend({
+      initialize: function() {
+        var components, hydratedComps,
+          _this = this;
+        components = this.get("components");
+        if (!(components != null)) {
+          this.set("components", []);
+        } else {
+          hydratedComps = [];
+          this.set("components", hydratedComps);
+          components.forEach(function(rawComp) {
+            var comp;
+            if (rawComp instanceof Backbone.Model) {
+              comp = rawComp.clone();
+              hydratedComps.push(comp);
+            } else {
+              comp = ComponentFactory.create(rawComp);
+              hydratedComps.push(comp);
+            }
+            return _this._registerWithComponent(comp);
+          });
+        }
+        _.defaults(this.attributes, defaults);
+        return this.on("unrender", this._unrendered, this);
+      },
+      _unrendered: function() {
+        return this.get("components").forEach(function(component) {
+          return component.trigger("unrender", true);
+        });
+      },
+      _registerWithComponent: function(component) {
+        component.on("dispose", this.remove, this);
+        component.on("change:selected", this.selectionChanged, this);
+        return component.on("change", this.componentChanged, this);
+      },
+      getPositionData: function() {
+        return {
+          x: this.attributes.x,
+          y: this.attributes.y,
+          z: this.attributes.z,
+          impScale: this.attributes.impScale,
+          rotateX: this.attributes.rotateX,
+          rotateY: this.attributes.rotateY,
+          rotateZ: this.attributes.rotateZ
+        };
+      },
+      /**
+      		Adds a component in a space that has not already
+      		been occupied.  Triggers "contentsChanged"
+      		and "change:components.add" events.
+      
+      		The contentsChanged event is used by the preview canvas to re-render itself.
+      		The change:components.add is used by the operating table to know to render the new component.
+      		@method
+      		@param {model.presentation.components.Component} component The component (text box,
+      		image, video, etc. to be added)
+      		*
+      */
+
+      add: function(component) {
+        var cmd;
+        this._placeComponent(component);
+        cmd = new ComponentCommands.Add(this, component);
+        cmd["do"]();
+        return window.undoHistory.push(cmd);
+      },
+      __doAdd: function(component) {
+        this.attributes.components.push(component);
+        this._registerWithComponent(component);
+        this.trigger("contentsChanged");
+        return this.trigger("change:components.add", this, component);
+      },
+      /**
+      		* A pretty naive implementation but it should do the job just fine.
+      		* Places a new component in a location that doesn't currently contain a component
+      		* @method _placeComponent
+      		* @param {Component} component The component to be placed
+      		*
+      */
+
+      _placeComponent: function(component) {
+        return this.attributes.components.forEach(function(existingComponent) {
+          var existingX, existingY;
+          existingX = existingComponent.get("x");
+          existingY = existingComponent.get("y");
+          if (Math2.compare(existingX, component.get("x"), 5) && Math2.compare(existingY, component.get("y"), 5)) {
+            return component.set({
+              x: existingX + 20,
+              y: existingY + 20
+            });
+          }
+        });
+      },
+      dispose: function() {
+        this.set({
+          active: false,
+          selected: false
+        });
+        this.trigger("dispose", this);
+        return this.off("dispose");
+      },
+      remove: function(component) {
+        var cmd;
+        cmd = new ComponentCommands.Remove(this, component);
+        cmd["do"]();
+        return window.undoHistory.push(cmd);
+      },
+      __doRemove: function(component) {
+        var idx;
+        idx = this.attributes.components.indexOf(component);
+        if (idx !== -1) {
+          this.attributes.components.splice(idx, 1);
+          this.trigger("contentsChanged");
+          this.trigger("change:components.remove", this, component);
+          component.trigger("unrender");
+          component.off(null, null, this);
+          return component;
+        } else {
+          return null;
+        }
+      },
+      componentChanged: function(model, value) {
+        return this.trigger("contentsChanged");
+      },
+      unselectComponents: function() {
+        if (this.lastSelection) {
+          return this.lastSelection.set("selected", false);
+        }
+      },
+      selectionChanged: function(model, selected) {
+        if (selected) {
+          if (this.lastSelection !== model) {
+            this.attributes.components.forEach(function(component) {
+              if (component !== model) {
+                return component.set("selected", false);
+              }
+            });
+            this.lastSelection = model;
+          }
+          return this.trigger("change:activeComponent", this, model, selected);
+        } else {
+          this.trigger("change:activeComponent", this, null);
+          return this.lastSelection = null;
+        }
+      },
+      constructor: function Slide() {
+			SpatialObject.prototype.constructor.apply(this, arguments);
+		}
+    });
+  });
+
+}).call(this);

@@ -1,0 +1,35 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>Save as...</h3>
+</div>
+<div class="modal-body">
+	<!-- <ul class="nav nav-tabs">
+  		<li class="active"><a href="#saveLocalTab">Local</a></li>
+  		<li><a href="#saveRemoteTab">Remote</a></li>
+	</ul> -->
+
+	<!-- <div class="tab-content">
+  		<div class="tab-pane active" id="saveLocalTab"> -->
+		  	<h4>Name</h4>
+			<input type="text"></input>
+			<ul class="nav nav-list">
+				{{#each fileNames}}
+					<li><a href="#"><span>{{.}}</span><button class="close">x</button></a></li>
+				{{/each}}
+			</ul>
+  		<!-- </div>
+  		<div class="tab-pane" id="saveRemoteTab">
+  			<h4>Name</h4>
+			<input type="text"></input>
+			<ul class="nav nav-list">
+				{{#each fileNames}}
+					<li><a href="#"><span>{{.}}</span><button class="close">x</button></a></li>
+				{{/each}}
+			</ul>
+  		</div>
+	</div> -->
+</div>
+<div class="modal-footer">
+	<a href="#" class="btn btn-inverse ok">OK</a>
+	<a href="#" class="btn" data-dismiss="modal">Cancel</a>
+</div>

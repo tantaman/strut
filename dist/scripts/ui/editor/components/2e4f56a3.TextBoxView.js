@@ -1,0 +1,131 @@
+
+/*
+@author Tantaman
+*/
+
+
+(function() {
+
+  define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
+    var styles;
+    styles = ["family", "size", "weight", "style", "color", "decoration", "align"];
+    return ComponentView.extend({
+      className: "component textBox",
+      tagName: "div",
+      events: function() {
+        var myEvents, parentEvents;
+        parentEvents = ComponentView.prototype.events.call(this);
+        myEvents = {
+          "dblclick": "dblclicked",
+          "editComplete": "editCompleted",
+          "mousedown": "mousedown"
+        };
+        return _.extend(parentEvents, myEvents);
+      },
+      initialize: function() {
+        var style, _i, _len;
+        ComponentView.prototype.initialize.apply(this, arguments);
+        for (_i = 0, _len = styles.length; _i < _len; _i++) {
+          style = styles[_i];
+          this.model.on("change:" + style, this._styleChanged, this);
+        }
+        this._lastDx = 0;
+        return this.model.on("edit", this.edit, this);
+      },
+      scaleStart: function() {},
+      scale: function(e, deltas) {
+        var currSize, sign;
+        currSize = this.model.get("size");
+        sign = deltas.dx - this._lastDx > 0 ? 1 : -1;
+        this.model.set("size", currSize + Math.round(sign * Math.sqrt(Math.abs(deltas.dx - this._lastDx))));
+        return this._lastDx = deltas.dx;
+      },
+      dblclicked: function(e) {
+        this.$el.addClass("editable");
+        this.$el.find(".content").attr("contenteditable", true);
+        if (e != null) {
+          etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+        }
+        this.allowDragging = false;
+        return this.editing = true;
+      },
+      mousedown: function(e) {
+        if (this.editing) {
+          etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+        } else {
+          ComponentView.prototype.mousedown.apply(this, arguments);
+        }
+        return true;
+      },
+      editCompleted: function() {
+        var text;
+        text = this.$textEl.html();
+        this.editing = false;
+        if (text === "") {
+          return this.remove();
+        } else {
+          this.model.set("text", text);
+          this.$el.find(".content").attr("contenteditable", false);
+          this.$el.removeClass("editable");
+          return this.allowDragging = true;
+        }
+      },
+      __selectionChanged: function(model, selected) {
+        ComponentView.prototype.__selectionChanged.apply(this, arguments);
+        if (!selected && this.editing) {
+          return this.editCompleted();
+        }
+      },
+      edit: function() {
+        var e;
+        this.model.set("selected", true);
+        e = $.Event("click", {
+          pageX: this.model.get("x")
+        });
+        this.dblclicked(e);
+        return this.$el.find(".content").selectText();
+      },
+      _styleChanged: function(model, style, opts) {
+        var key, value, _ref, _results;
+        _ref = opts.changes;
+        _results = [];
+        for (key in _ref) {
+          value = _ref[key];
+          if (value) {
+            if (key === "decoration" || key === "align") {
+              console.log("DECORATION CHANGE");
+              key = "text" + key.substring(0, 1).toUpperCase() + key.substr(1);
+            } else if (key !== "color") {
+              key = "font" + key.substr(0, 1).toUpperCase() + key.substr(1);
+            }
+            _results.push(this.$el.css(key, style));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      },
+      render: function() {
+        ComponentView.prototype.render.call(this);
+        this.$textEl = this.$el.find(".content");
+        this.$textEl.html(this.model.get("text"));
+        this.$el.css({
+          fontFamily: this.model.get("family"),
+          fontSize: this.model.get("size"),
+          fontWeight: this.model.get("weight"),
+          fontStyle: this.model.get("style"),
+          color: "#" + this.model.get("color"),
+          top: this.model.get("y"),
+          left: this.model.get("x"),
+          textDecoration: this.model.get("decoration"),
+          textAlign: this.model.get("align")
+        });
+        return this.$el;
+      },
+      constructor: function TextBoxView() {
+			ComponentView.prototype.constructor.apply(this, arguments);
+		}
+    });
+  });
+
+}).call(this);

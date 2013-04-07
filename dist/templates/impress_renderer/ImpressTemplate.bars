@@ -1,0 +1,94 @@
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1024" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Deck Title</title>
+
+<meta name="description" content="TODO" />
+<meta name="author" content="TODO" />
+
+<style>
+.componentContainer {
+    position: absolute;
+    -webkit-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    transform-origin: 0 0;
+}
+
+.bg {
+    width: 100%;
+    height: 100%;
+}
+</style>
+<link href="preview_export/css/main.css" rel="stylesheet" />
+<link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css'>
+<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
+
+<link rel="shortcut icon" href="favicon.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+</head>
+<body class="impress-not-supported">
+
+<!-- This is a work around / hack to get the user's browser to download the fonts 
+ if they decide to save the presentation. -->
+<div style="visibility: hidden; width: 0px; height: 0px">
+<img src="preview_export/css/Lato-Bold.woff" />
+<img src="preview_export/css/HammersmithOne.woff" />
+<img src="preview_export/css/Gorditas-Regular.woff" />
+<img src="preview_export/css/FredokaOne-Regular.woff" />
+<img src="preview_export/css/Ubuntu.woff" />
+<img src="preview_export/css/Ubuntu-Bold.woff" />
+<img src="preview_export/css/PressStart2P-Regular.woff" />
+<img src="preview_export/css/Lato-BoldItalic.woff" />
+<img src="preview_export/css/AbrilFatface-Regular.woff" />
+<img src="preview_export/css/Lato-Regular.woff" />
+</div>
+
+<div class="fallback-message">
+    <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+    <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+<div class="bg" style="{{#extractBG background.styles}}{{/extractBG}}">
+<div id="impress">
+
+{{#slides.models}}
+{{#attributes}}
+<div class="step" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}} {{#if z}}data-z="{{z}}"{{/if}} {{#if impScale}}data-scale="{{impScale}}"{{/if}}>
+<div style="width: 1024px; height: 768px">
+{{#components}}
+{{#renderComponent .}}{{/renderComponent}}
+{{/components}}
+</div>
+{{/attributes}}
+</div>
+{{/slides.models}}
+
+<div id="overview" class="step active" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
+</div>
+<div class="hint">
+    <p>Use a spacebar or arrow keys to navigate</p>
+</div>
+<script>
+if ("ontouchstart" in document.documentElement) { 
+    document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
+}
+</script>
+
+{{#interval}}
+<script>
+var interval = {{.}};
+if (interval >= 1000) {
+    setInterval(function() {
+        impress().next();
+    }, interval);
+}
+</script>
+{{/interval}}
+</div>
+<script>
+if (!window.impressStarted) {
+    startImpress(document, window);
+    impress().init();   
+}
+</script>
+</body>

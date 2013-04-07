@@ -1,0 +1,42 @@
+body {
+	background: -webkit-radial-gradient(#242222, #020000);
+	background: -moz-radial-gradient(#242222, #020000);
+	background: -ms-radial-gradient(#242222, #020000);
+	background: -o-radial-gradient(#242222, #020000);
+	background: radial-gradient(#242222, #020000);
+	width: 100%;
+	height: 100%;
+	color: #bbb;
+}
+
+html {
+	height: 100%;
+}
+
+.container {
+	min-height: 100%;
+	text-align: center;
+}
+
+h1 {
+	font-size: 200px;
+	line-height: 200px;
+    margin:150px auto 0;
+}
+
+.description {
+    font-size:25px;
+}
+
+.description a, .description a:hover, .description a:focus {
+    color:rgb(189, 54, 47);
+}
+
+.btn-large {
+	font-size: 35px;
+	margin-top: 20px;
+}
+
+.first {
+	margin-right: 40px;
+}

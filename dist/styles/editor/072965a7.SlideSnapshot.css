@@ -1,0 +1,43 @@
+.slideSnapshot {
+	box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, 0.5);
+	position: relative;
+}
+
+.slideSnapshot:hover {
+	box-shadow:inset 0 0 10px #000000;
+}
+
+.slideSnapshot .close-btn-red-20 {
+	display: none;
+	position: absolute;
+	top: -5px;
+	left: -5px;
+}
+
+.slideSnapshot:hover .close-btn-red-20 {
+	display: inline;
+}
+
+.slideSnapshot .badge {
+	/*-webkit-transform-origin: 50% 50%;
+	-moz-transform-origin: 50% 50%;
+	-webkit-transform: scale(0.5);
+	-moz-transform: scale(0.5);*/
+	position: absolute;
+	bottom: -7px;
+	left: -7px;
+}
+
+.slideSnapshot {
+	border: 1px solid grey;
+}
+
+.slideSnapshot.active {
+	box-shadow:inset 0 0 10px #000000;
+	border: 1px solid #5BB75B;
+}
+
+.slideSnapshot canvas {
+	width: 100%;
+	height: 100%;
+}

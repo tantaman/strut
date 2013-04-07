@@ -1,0 +1,49 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>Change Background</h3>
+</div>
+<div class="modal-body">
+	<div class="pull-left">
+		<div><h4>Gradient</h4></div>
+		<div class="gradientPicker">
+		</div>
+		<div class="gradientOptions">
+			<div class="btn-group">
+	  			<button class="btn">Type</button>
+	  			<button class="btn dropdown-toggle" data-toggle="dropdown">
+	    			<span class="caret"></span>
+	  			</button>
+	  			<ul class="dropdown-menu" data-option="type">
+	    			<li><a href="#" data-value="linear">Linear</a></li>
+	    			<li><a href="#" data-value="radial">Radial</a></li>
+	  			</ul>
+			</div>
+			<div class="btn-group">
+	  			<button class="btn">Direction</button>
+	  			<button class="btn dropdown-toggle" data-toggle="dropdown">
+	    			<span class="caret"></span>
+	  			</button>
+	  			<ul class="dropdown-menu" data-option="direction">
+	    			<li><a href="#" data-value="top">Top</a></li>
+	    			<li><a href="#" data-value="left">Left</a></li>
+	    			<li><a href="#" data-value="15deg">15&deg;</a></li>
+	    			<li><a href="#" data-value="30deg">30&deg;</a></li>
+	    			<li><a href="#" data-value="45deg">45&deg;</a></li>
+	    			<li><a href="#" data-value="105deg">105&deg;</a></li>
+	    			<li><a href="#" data-value="120deg">120&deg;</a></li>
+	    			<li><a href="#" data-value="135deg">135&deg;</a></li>
+	  			</ul>
+			</div>
+		</div>
+	</div>
+	<div class="pull-left bgPreview">
+		<div><h4>Background Preview</h4></div>
+		<div class="gradientPreview">
+		</div>
+	</div>
+	<div style="clear: both"></div>
+</div>
+<div class="modal-footer">
+	<a href="#" class="btn btn-inverse ok">OK</a>
+	<a href="#" class="btn" data-dismiss="modal">Cancel</a>
+</div>

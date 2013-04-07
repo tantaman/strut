@@ -1,0 +1,56 @@
+# BG UPDATED (undefined, #undefined)
+CACHE MANIFEST
+
+# Time: Wed Feb 20 2013 23:38:42 GMT-0500 (Eastern Standard Time)
+# This manifest was created by confess.js, http://github.com/jamesgpearce/confess
+#
+# Retrieved URL: http://localhost:3501/
+# User-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
+#
+# Config:
+#  task: appcache
+#  userAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
+#  wait: 0
+#  consolePrefix: #
+#  verbose: true
+#  appcache:
+#   urlsFromDocument: true
+#   urlsFromRequests: false
+#   cacheFilter: .*
+#   networkFilter: null
+#  url: http://localhost:3501
+#  configFile: E:\dev\workspace\yeoman\cli\lib\support\confess.json
+
+CACHE:
+components/bootstrap/css/bootstrap.css
+components/colorpicker/css/colorpicker.css
+components/etch/etch.css
+components/gradient_picker/jquery.gradientPicker.css
+http://localhost:3501/components/bootstrap/img/glyphicons-halflings-white.png
+http://localhost:3501/components/bootstrap/img/glyphicons-halflings.png
+http://localhost:3501/components/colorpicker/images/colorpicker_background.png
+http://localhost:3501/components/colorpicker/images/colorpicker_hex.png
+http://localhost:3501/components/colorpicker/images/colorpicker_hsb_b.png
+http://localhost:3501/components/colorpicker/images/colorpicker_hsb_h.png
+http://localhost:3501/components/colorpicker/images/colorpicker_hsb_s.png
+http://localhost:3501/components/colorpicker/images/colorpicker_indic.gif
+http://localhost:3501/components/colorpicker/images/colorpicker_overlay.png
+http://localhost:3501/components/colorpicker/images/colorpicker_rgb_b.png
+http://localhost:3501/components/colorpicker/images/colorpicker_rgb_g.png
+http://localhost:3501/components/colorpicker/images/colorpicker_rgb_r.png
+http://localhost:3501/components/colorpicker/images/colorpicker_select.gif
+http://localhost:3501/components/colorpicker/images/colorpicker_submit.png
+http://localhost:3501/components/colorpicker/images/select.png
+http://localhost:3501/components/etch/images/editor_icons.png
+http://localhost:3501/components/gradient_picker/circle_remove.png
+http://localhost:3501/img/linen-gray.png
+http://localhost:3501/img/linen-lighter.png
+img/strut-logo-32-light.png
+preview_export/css/web-fonts.css
+scripts/a0172966.amd-app.js
+scripts/built.css
+styles/0abe8b78.main.css
+styles/5265a6dd.close-btn.css
+
+NETWORK:
+*

@@ -1,0 +1,15 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>Open</h3>
+</div>
+<div class="modal-body">
+	<ul class="nav nav-list">
+		{{#each fileNames}}
+			<li><a href="#"><span>{{.}}</span><button class="close">x</button></a></li>
+		{{/each}}
+	</ul>
+</div>
+<div class="modal-footer">
+	<a href="#" class="btn btn-inverse ok">OK</a>
+	<a href="#" class="btn" data-dismiss="modal">Cancel</a>
+</div>

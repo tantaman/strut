@@ -1,0 +1,86 @@
+<div class="navbar navbar-fixed-top menuBar">
+  <div class="btn-inverse temp">
+    <div class="container">
+    	<a class="brand" href="#"><img src="img/strut-logo-32-light.png" alt="Strut 0.2"/></a>
+     	<ul class="nav">
+     		<li class="dropdown active">
+     			<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+     				File<b class="caret"></b>
+     			</a>
+     			<ul class="dropdown-menu">
+     		 		<li data-option="new"><a href="#">New</a></li>
+     				<li data-option="open"><a href="#">Open...</a></li>
+<!--     				<li data-option="openRecent"><a href="#">Open Recent...</a></li> -->
+     				<li data-option="save"><a href="#">Save</a></li>
+     				<li data-option="saveAs"><a href="#">Save As...</a></li>
+     			</ul>
+     		</li>
+            <li class="dropdown active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Edit<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li data-option="undo"><a href="#">Undo <span class="undoName label"></span></a></li>
+                    <li data-option="redo"><a href="#">Redo <span class="redoName label"></span></a></li>
+                    <li data-option="cut"><a href="#">Cut</a></li>
+                    <li data-option="copy"><a href="#">Copy</a></li>
+                    <li data-option="paste"><a href="#">Paste</a></li>
+                </ul>
+            </li>
+            <li class="dropdown active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Slideshow<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li data-option="exportWebpage"><a href="#">Export as Webpage</a></li>
+                    <li data-option="exportZIP"><a href="#">Zip Presentation</a></li>
+                    <li class="divider"></li>
+                    <li data-option="exportJSON"><a href="#">Export to JSON</a></li>
+                    <li data-option="importJSON"><a href="#">Import from JSON</a></li>
+                    <li class="divider"></li>
+                    <li data-option="changeBackground"><a href="#">Change Background</a></li>
+                </ul>
+            </li>
+     	</ul>
+    </div>
+  </div>
+</div>
+
+<div class="perspectives-container">
+</div>
+
+<div class="modal hide" id="exportModal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Export as Webpage</h3>
+  </div>
+  <div class="modal-body">
+    <p>Currently the best way to export your presentation
+    as a webpage is to use your browser's built in "save page" feature.
+    <ol>
+        <li>Click <em>Preview</em> to view your presentation</li>
+        <li>Press <code>Ctrl+S</code> or <code>⌘+s</code></li>
+        <li>Choose <code>Webpage, Complete</code> for your save as type</li>
+        <li>Click <code>Save</code></li>
+    </ol>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn btn-inverse" data-dismiss="modal">Ok</a>
+  </div>
+</div>
+
+<div class="modal hide" id="zipModal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Export as Webpage</h3>
+  </div>
+  <div class="modal-body">
+    Zip Created!
+  </div>
+  <div class="modal-footer">
+    <p id="downloadify">
+        You must have Flash 10 installed to download this file.
+    </p>
+  </div>
+</div>

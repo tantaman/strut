@@ -1,0 +1,22 @@
+.backgroundPicker .gradientPicker {
+	width: 250px;
+	height: 20px;
+}
+
+.backgroundPicker .bgPreview {
+	margin-left: 40px;
+}
+
+.backgroundPicker .gradientPreview {
+	width: 200px;
+	height: 200px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.backgroundPicker .gradientOptions {
+	margin-top: 40px;
+}
+
+.backgroundPicker .gradientOptions .btn-group {
+	float: left;
+}
