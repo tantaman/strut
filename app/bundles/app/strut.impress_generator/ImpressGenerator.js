@@ -1,8 +1,10 @@
 define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
-  var ImpressRenderer;
-  ImpressRenderer = (function() {
+  var ImpressGenerator;
+  var slideConfig = window.config.slide;
+  
+  ImpressGenerator = (function() {
 
-    function ImpressRenderer() {
+    function ImpressGenerator() {
       var _this = this;
       Handlebars.registerHelper("renderComponent", function(componentModel) {
         var result;
@@ -65,7 +67,7 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
       Handlebars.registerPartial("SVGContainer", JST["strut.impress_generator/SVGContainer"]);
     }
 
-    ImpressRenderer.prototype.render = function(deckAttrs) {
+    ImpressGenerator.prototype.render = function(deckAttrs) {
       var cnt, colCnt, slides,
         _this = this;
       slides = deckAttrs.slides;
@@ -83,15 +85,15 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
       return JST["strut.impress_generator/ImpressTemplate"](deckAttrs);
     };
 
-    ImpressRenderer.prototype.convertTextBoxData = function(attrs) {
+    ImpressGenerator.prototype.convertTextBoxData = function(attrs) {
       var copy;
       copy = _.extend({}, attrs);
       copy.text = new Handlebars.SafeString(attrs.text);
       return copy;
     };
 
-    return ImpressRenderer;
+    return ImpressGenerator;
 
   })();
-  return new ImpressRenderer();
+  return new ImpressGenerator();
 });

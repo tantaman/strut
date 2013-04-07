@@ -100,6 +100,10 @@ function(Backbone,
 			this._deck.newSlide(index);
 		},
 
+		activeSlide: function() {
+			return this._deck.get('activeSlide');
+		},
+
 		addComponent: function(type) {
 			var slide = this._deck.get('activeSlide');
 			if (slide) {

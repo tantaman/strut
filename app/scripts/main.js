@@ -102,37 +102,45 @@ log.notice = function(msg) {
     console.log(msg);
 }
 
-require([
-         'compiled-templates',
-         'colorpicker',
-         'strut/config/config',
-         'features',
-         './StrutLoader',
-         'bootstrap'
-        ],
-function(empt, empty, config, registry, StrutLoader) {
-    'use strict';
-    var agent = window.navigator.userAgent;
-    if (agent.indexOf('WebKit') >= 0)
-        window.browserPrefix = "-webkit-"
-    else if (agent.indexOf('Mozilla') >= 0)
-        window.browserPrefix = "-moz-"
-    else if (agent.indexOf('Microsoft') >= 0)
-        window.browserPrefix = "-ms-"
-    else
-        window.browserPrefix = ""
-        
+if (window.location.href.indexOf("preview=true") != -1) {
+  require(['../preview_export/scripts/impress', 'jquery'], function(impress, jquery) {
+    window.jQuery = jquery;
+    window.startImpress = impress;
+    window.$ = jquery;
+  });
+} else {
+  require([
+           'compiled-templates',
+           'colorpicker',
+           'strut/config/config',
+           'features',
+           './StrutLoader',
+           'bootstrap'
+          ],
+  function(empt, empty, config, registry, StrutLoader) {
+      'use strict';
+      var agent = window.navigator.userAgent;
+      if (agent.indexOf('WebKit') >= 0)
+          window.browserPrefix = "-webkit-"
+      else if (agent.indexOf('Mozilla') >= 0)
+          window.browserPrefix = "-moz-"
+      else if (agent.indexOf('Microsoft') >= 0)
+          window.browserPrefix = "-ms-"
+      else
+          window.browserPrefix = ""
+          
 
-    $.event.special.destroyed = {
-      remove: function(o) {
-          if (o.handler)
-            o.handler();
-      }
-    };
+      $.event.special.destroyed = {
+        remove: function(o) {
+            if (o.handler)
+              o.handler();
+        }
+      };
 
-    StrutLoader.start(registry, function(){}, function(){});
+      StrutLoader.start(registry, function(){}, function(){});
 
-    $(window).unload(function() {
-      localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
-    });
-});
+      $(window).unload(function() {
+        localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
+      });
+  });
+}
