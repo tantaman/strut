@@ -1,4 +1,4 @@
-Showoff - An ImpressJS Authoring Tool / An ImpreeJS GUI
+Strut - An ImpressJS Authoring Tool / An ImpreeJS GUI
 
 Copyright (c) 2012 Tantaman LLC
 
