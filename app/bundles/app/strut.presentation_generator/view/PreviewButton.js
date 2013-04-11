@@ -3,7 +3,7 @@ function(Backbone, PreviewLauncher) {
 	return Backbone.View.extend({
 		className: 'btn-group iconBtns',
 		events: {
-			click: '_launchDefault'
+			'click .act': '_launchDefault'
 		},
 
 		initialize: function() {

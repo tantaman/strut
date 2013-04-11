@@ -1,5 +1,5 @@
-<button class="btn btn-success"><i class="icon-play icon-white"/>Present</button>
-  <button class="btn dropdown-toggle btn-success iconBtnsSplit" data-toggle="dropdown">
+<button class="btn btn-success act"><i class="icon-play icon-white"/>Present</button>
+<button class="btn dropdown-toggle btn-success iconBtnsSplit" data-toggle="dropdown">
   <span class="caret whiteCaret"></span>
 </button>
 <ul class="dropdown-menu">

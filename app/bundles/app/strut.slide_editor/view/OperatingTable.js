@@ -1,7 +1,8 @@
 define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
-		'strut/slide_components/ComponentFactory'],
-function(Backbone, empty, ComponentFactory) {
+		'strut/slide_components/ComponentFactory',
+		'libs/keymaster'],
+function(Backbone, empty, ComponentFactory, key) {
 	'use strict';
 	return Backbone.View.extend({
 		className: 'operatingTable',
@@ -40,6 +41,7 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		_clicked: function() {
+			this._focus();
 			this.model.get('components').forEach(function(comp) {
 				if (comp.get('selected')) {
 					comp.set('selected', false);
@@ -52,15 +54,34 @@ function(Backbone, empty, ComponentFactory) {
 		},
 
 		_focus: function() {
-			
+			key.setScope('operatingTable');
 		},
 
-		_dragover: function() {
-
+		_dragover: function(e) {
+			e.stopPropagation()
+			e.preventDefault()
+			e.originalEvent.dataTransfer.dropEffect = 'copy'
 		},
 
-		_drop: function() {
+		_drop: function(e) {
+			e.stopPropagation()
+			e.preventDefault()
+			var f = e.originalEvent.dataTransfer.files[0]
 
+			if (!f.type.match('image.*'))
+				return
+
+			var reader = new FileReader()
+			var self = this;
+			reader.onload = function(e) {
+				self.model.add(
+					ComponentFactory.instance.createModel({
+						type: 'Image',
+						src: e.target.result
+				}));
+			};
+
+			reader.readAsDataURL(f)
 		},
 
 		_componentAdded: function(model, comp) {
