@@ -69,7 +69,7 @@ module.exports = function (grunt) {
                 files: [
                     "app/bundles/**/templates/*.bars"
                 ],
-                tasks: 'handlebars livereload'
+                tasks: ['handlebars livereload']
             },
             coffeeTest: {
                 files: ['test/spec/{,*/}*.coffee'],
@@ -315,7 +315,6 @@ module.exports = function (grunt) {
             'compass:server',
             'livereload-start',
             'connect:livereload',
-            'open',
             'watch'
         ]);
     });
