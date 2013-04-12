@@ -23,8 +23,9 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 			this._throttler = new Throttler(100);
 			this._contextMenu = new WellContextMenu(this._editorModel);
 			this._contextMenu.render();
+			this.$slides = $('<div>');
 			this._sortable = new Sortable({
-				container: this.$el,
+				container: this.$slides,
 				selector: '> .slideSnapshot'
 			});
 		},
@@ -66,11 +67,11 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 			// Append it in the correct position in the well
       		var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
       		if (index == 0) {
-        		this.$el.prepend(snapshot.render().$el);
+        		this.$slides.prepend(snapshot.render().$el);
       		} else {
         		var $slides = $('.slideSnapshot');
         		if (index >= $slides.length) {
-          			this.$el.append(snapshot.render().$el);
+          			this.$slides.append(snapshot.render().$el);
         		} else {
           			$($slides[index]).before(snapshot.render().$el);
         		}
@@ -78,10 +79,11 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 		},
 
 		render: function() {
-			this.$el.html('');
+			this.$slides.html('');
+			this.$el.html(this.$slides);
 			this._deck.get('slides').forEach(function(slide) {
 				var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
-				this.$el.append(snapshot.render().$el);
+				this.$slides.append(snapshot.render().$el);
 			}, this);
 			this.$el.append(this._contextMenu.$el);
 			return this;
