@@ -46,12 +46,12 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 		},
 
 		_doShowContextMenu: function(e) {
-			var offsetY = e.pageY - this.$el.offset().top;
+			var offsetY = e.pageY - this.$slides.position().top;
 			// if (offsetY == null)
 				// offsetY = e.originalEvent.layerY;
 
 			var newPos = (((offsetY+40) / 112) | 0) * 112 - 5;
-			this._contextMenu.reposition({x: this.$el.width() / 2 - this._contextMenu.$el.width() / 2, y: newPos});
+			this._contextMenu.reposition({x: this.$slides.width() / 2 - this._contextMenu.$el.outerWidth() / 2, y: newPos});
       		this._contextMenu.slideIndex(Math.ceil(newPos / 112));
 		},
 

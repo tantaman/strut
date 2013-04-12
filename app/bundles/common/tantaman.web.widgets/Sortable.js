@@ -79,7 +79,6 @@ define(function() {
 		},
 
 		_released: function(e) {
-			//TODO: replace placeholder
 			this._dragging = false;
 			if (!this._$currentTarget) return;
 			this._$currentTarget.css({
@@ -97,10 +96,6 @@ define(function() {
 			this._$currentTarget = undefined;
 			this._$lastItem = undefined;
 			this._$placeholder = undefined;
-
-			// determine if we can drop it
-			// if not, reset it
-			// if so, place it into the DOM at the correct position
 		},
 
 		_moved: function(e) {
@@ -134,7 +129,6 @@ define(function() {
 
 			var r = (offY / this._h) | 0;
 			var c = (offX / this._w) | 0;
-			// console.log(r);
 
 			var targetY = e.pageY - this._internalOffset.y;
 			var targetX = e.pageX - this._internalOffset.x;
