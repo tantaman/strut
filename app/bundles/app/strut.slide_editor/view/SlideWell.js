@@ -2,8 +2,9 @@ define(['libs/backbone',
 		'strut/slide_snapshot/SlideSnapshot',
 		'common/Throttler',
 		'./WellContextMenu',
+		'tantaman/web/widgets/Sortable',
 		'css!styles/slide_editor/slideWell.css'],
-function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
+function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -22,6 +23,10 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 			this._throttler = new Throttler(100);
 			this._contextMenu = new WellContextMenu(this._editorModel);
 			this._contextMenu.render();
+			this._sortable = new Sortable({
+				container: this.$el,
+				selector: '> .slideSnapshot'
+			});
 		},
 
 		_showContextMenu: function(e) {
@@ -86,6 +91,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, empty) {
 			console.log('DISPOING WELL');
 			this._deck.off(null, null, this);
 			this._contextMenu.dispose();
+			this._sortable.dispose();
 		},
 
 		constructor: function SlideWell(editorModel) {
