@@ -9,6 +9,7 @@ function(Backbone, SlideDrawer, css) {
 		events: {
 			'click': '_selected',
 			'click .removeBtn': '_removeClicked',
+			'mousedown .removeBtn': '_removePressed',
 			destroyed: 'dispose'
 		},
 
@@ -27,6 +28,10 @@ function(Backbone, SlideDrawer, css) {
 
 		_removeClicked: function(e) {
 			this.remove();
+			e.stopPropagation();
+		},
+
+		_removePressed: function(e) {
 			e.stopPropagation();
 		},
 
