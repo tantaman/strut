@@ -42,6 +42,7 @@ function(Backbone, SlideDrawer, css) {
 			this.model.off(null, null, this);
 			this.options.deck.off(null, null, this);
 			Backbone.View.prototype.remove.apply(this, arguments);
+			this.options.deck.removeSlide(this.model);
 		},
 
 		_activated: function(model, value) {
