@@ -143,17 +143,17 @@ define(function() {
 					this._$lastItem = $item;
 					this._lastDirection = 'after';
 				} else {
-					var itemOffset = $item.position();
-					var itemY = itemOffset.top + $item.outerHeight() / 2;
-					var itemX = itemOffset.left + $item.outerWidth() / 2;
+					// var itemOffset = $item.position();
+					// var itemY = itemOffset.top + $item.outerHeight() / 2;
+					// var itemX = itemOffset.left + $item.outerWidth() / 2;
 
-					if (targetY < itemY
-						&& targetX < itemX && this._lastDirection != 'before') {
-						$item.before(this._$placeholder);
-					} else if (targetY > itemY
-						&& targetX > itemX && this._lastDirection != 'after') {
-						$item.after(this._$placeholder);
-					}
+					// if (targetY < itemY
+					// 	&& targetX < itemX && this._lastDirection != 'before') {
+					// 	$item.before(this._$placeholder);
+					// } else if (targetY > itemY
+					// 	&& targetX > itemX && this._lastDirection != 'after') {
+					// 	$item.after(this._$placeholder);
+					// }
 				}
 			}
 

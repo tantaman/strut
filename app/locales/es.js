@@ -9,5 +9,9 @@ define({
 	open: 'Abrir',
 	save: 'Guardar',
 	save_as: 'Guardar como...',
-	new_: 'Nuevo'
-};)
+	new_: 'Nuevo',
+	text: 'Texto',
+	image: 'Imagen',
+	video: 'Vídeo',
+	website: 'Sitio Web'
+});
