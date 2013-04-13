@@ -1,6 +1,6 @@
 <div class="btn-group iconBtns">
 	<a class="btn">
 		<i class="icon-th-list"></i>
-		Slides
+		{{#lang 'slides'}}{{/lang}}
 	</a>
 </div>

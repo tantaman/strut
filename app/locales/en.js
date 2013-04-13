@@ -13,5 +13,6 @@ define({
 	text: 'Text',
 	image: 'Image',
 	video: 'Video',
-	website: 'Website'
+	website: 'Website',
+	present: 'Present'
 });

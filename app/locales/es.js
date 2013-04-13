@@ -13,5 +13,6 @@ define({
 	text: 'Texto',
 	image: 'Imagen',
 	video: 'Vídeo',
-	website: 'Sitio Web'
+	website: 'Sitio Web',
+	present: 'Presentar'
 });

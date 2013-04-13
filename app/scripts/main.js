@@ -110,6 +110,7 @@ if (window.location.href.indexOf("preview=true") != -1) {
   });
 } else {
   require([
+           'lang',
            'compiled-templates',
            'colorpicker',
            'strut/config/config',
@@ -117,7 +118,7 @@ if (window.location.href.indexOf("preview=true") != -1) {
            './StrutLoader',
            'bootstrap'
           ],
-  function(empt, empty, config, registry, StrutLoader) {
+  function(lang, empt, empty, config, registry, StrutLoader) {
       'use strict';
       var agent = window.navigator.userAgent;
       if (agent.indexOf('WebKit') >= 0)
