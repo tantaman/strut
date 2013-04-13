@@ -69,7 +69,7 @@ module.exports = function (grunt) {
                 files: [
                     "app/bundles/**/templates/*.bars"
                 ],
-                tasks: ['handlebars livereload']
+                tasks: ['handlebars', 'livereload']
             },
             coffeeTest: {
                 files: ['test/spec/{,*/}*.coffee'],
