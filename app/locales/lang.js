@@ -8,9 +8,6 @@ function(de, en, es, handlebars) {
 
 	var result = langs[window.navigator.language.split('-')[0]];
 	handlebars.registerHelper("lang", function(key) {
-		console.log('WTFFFF');
-		console.log(key);
-		console.log(result[key]);
 		return result[key];
 	});
 
