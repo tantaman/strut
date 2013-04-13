@@ -1,9 +1,10 @@
-define(['../locales/de', '../locales/en', '../locales/es', 'handlebars'],
-function(de, en, es, handlebars) {
+define(['../locales/de', '../locales/en', '../locales/es', '../locales/fr', 'handlebars'],
+function(de, en, es, fr, handlebars) {
 	var langs = {
 		en: en,
 		de: de,
-		es: es
+		es: es,
+		fr: fr
 	};
 
 	var result = langs[window.navigator.language.split('-')[0]];
