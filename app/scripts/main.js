@@ -13,7 +13,7 @@ require.config({
     downloadify: "../components/downloadify/js/downloadify.min",
     // swfobject: "../components/downloadify/js/swfobject",
     // bundles: "../bundles",
-    lang: "../locales/en",
+    lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
 
     // build - rmap
