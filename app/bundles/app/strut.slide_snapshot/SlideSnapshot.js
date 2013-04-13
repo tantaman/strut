@@ -27,7 +27,7 @@ function(Backbone, SlideDrawer, css) {
 		},
 
 		_removeClicked: function(e) {
-			this.remove();
+			this.remove(true);
 			e.stopPropagation();
 		},
 
@@ -35,14 +35,16 @@ function(Backbone, SlideDrawer, css) {
 			e.stopPropagation();
 		},
 
-		remove: function() {
+		remove: function(removeModel) {
 			this._slideDrawer.dispose();
 			this.off();
 			this.$el.data('jsView', null);
 			this.model.off(null, null, this);
 			this.options.deck.off(null, null, this);
 			Backbone.View.prototype.remove.apply(this, arguments);
-			this.options.deck.removeSlide(this.model);
+
+			if (removeModel)
+				this.options.deck.removeSlide(this.model);
 		},
 
 		_activated: function(model, value) {
