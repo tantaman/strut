@@ -15,6 +15,7 @@
 	margin: 0 auto;
 	background: white;
 	margin-top: 20px;
+	cursor: pointer;
 }
 
 .slideWell .slideSnapshot .badge:before {

@@ -26,7 +26,8 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 			this.$slides = $('<div>');
 			this._sortable = new Sortable({
 				container: this.$slides,
-				selector: '> .slideSnapshot'
+				selector: '> .slideSnapshot',
+				scrollParent: this.$el[0]
 			});
 		},
 

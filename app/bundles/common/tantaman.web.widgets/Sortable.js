@@ -15,6 +15,7 @@ define(function() {
 		this._$document = $(document);
 		this._$document.on('mouseup', this._released);
 		this._$document.on('mousemove', this._moved);
+		this._scrollParent = options.scrollParent;
 
 		this._delta = {
 			x: 0,
@@ -36,10 +37,17 @@ define(function() {
 
 			this._startOffset = this._$currentTarget.position();
 
+			this._startIndex = {
+				r: (this._startOffset.top / this._h) | 0,
+				c: (this._startOffset.left / this._w) | 0
+			};
+
 			this._internalOffset = {
 				x: e.pageX - this._startOffset.left,
 				y: e.pageY - this._startOffset.top
 			};
+
+			e.preventDefault();
 		},
 
 		_buildIndex: function($items) {
@@ -74,6 +82,9 @@ define(function() {
 					row[c] = $item;
 				}
 			});
+
+			index.first = $items[0];
+			index.last = $items[$items.length - 1];
 
 			return index;
 		},
@@ -116,6 +127,7 @@ define(function() {
 					});
 					this._$currentTarget.after(this._$placeholder);
 				}
+
 				this._doDrag(e);
 			}
 		},
@@ -136,24 +148,23 @@ define(function() {
 			var row = this._index[r];
 			var $item = this._getClosest(row && row[c], targetX, targetY);
 
-			if ($item && $item[0] != this._$currentTarget[0]
-				&& $item.next()[0] != this._$currentTarget[0]) {
+			if ($item && $item[0] != this._$currentTarget[0]) {
 				if ($item != this._$lastItem) {
 					$item.after(this._$placeholder);
 					this._$lastItem = $item;
-					this._lastDirection = 'after';
-				} else {
-					// var itemOffset = $item.position();
-					// var itemY = itemOffset.top + $item.outerHeight() / 2;
-					// var itemX = itemOffset.left + $item.outerWidth() / 2;
-
-					// if (targetY < itemY
-					// 	&& targetX < itemX && this._lastDirection != 'before') {
-					// 	$item.before(this._$placeholder);
-					// } else if (targetY > itemY
-					// 	&& targetX > itemX && this._lastDirection != 'after') {
-					// 	$item.after(this._$placeholder);
-					// }
+				} else if ($item[0] == this._index.first) {
+					// TODO: generalize to work for 2 dimensional sortables like
+					// everything else.
+					if (targetY < $item.position().top) {
+						var placeholderTop = this._$placeholder.position().top;
+						if (this._lastDir != 'before' && targetY < placeholderTop) {
+							this._lastDir = 'before';
+							$item.before(this._$placeholder);
+						} else if (this._lastDir != 'after' && targetY > placeholderTop) {
+							this._lastDir = 'after';
+							$item.after(this._$placeholder);
+						}
+					}
 				}
 			}
 
