@@ -19,6 +19,10 @@
 .etch-italic {
   font-style: italic;
 }
+.fileBrowser .nav-pills .close {
+	position: relative;
+	top: -4px;
+} 
 .storageModal .modal-body {
 	padding: 15px 0px;
 }
@@ -69,14 +73,50 @@
 	width: 100%;
 	height: 100%;
 }
-.fileBrowser .nav-pills .close {
-	position: relative;
-	top: -4px;
-} 
 .wellContextMenu {
   z-index: 2;
 }
 
+.slideWell {
+	width: 149px;
+	/*background: white;*/
+	/*border-right: 2px groove #333;*/
+	position: absolute;
+	left: 0px;
+	top: 56px;
+	bottom: 0px;
+	background-image: url('img/linen-gray.png');
+}
+
+.slideWell .slideSnapshot {
+	width: 120px;
+	height: 90px;
+	margin: 0 auto;
+	background: white;
+	margin-top: 20px;
+	cursor: pointer;
+}
+
+.slideWell .slideSnapshot .badge:before {
+	counter-increment: slideSnapshot;
+	content: counter(slideSnapshot);
+}
+
+.slideWell {
+	overflow: auto;
+	border-right: 1px solid black;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	overflow-x: hidden;
+}
+
+body {
+	counter-reset: slideSnapshot;
+}
 .operatingTable {
   webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
   -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
@@ -263,22 +303,14 @@
 	display: inline;
 }
 
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-}
 .transitionSlideSnapshot {
 	position: absolute;
 	border: 1px solid black;
 }
 
 .transitionSlideSnapshot .content {
-	width: 150px;
-	height: 100px;
+	width: 75px;
+	height: 50px;
 	background: #EEE; /*replace with slide bg*/
 }
 
@@ -306,11 +338,14 @@
 
 .component.transitionSlideSnapshot .positioningCtrls {
 	bottom: -30px;
+	width: 150px;
+	left: -25px;
 }
 
 .component.transitionSlideSnapshot .topLabel {
-	left: 30px;
+	left: -5px;
 	top: -25px;
+	width: 100px;
 }
 
 .component.transitionSlideSnapshot .leftLabel {
@@ -322,7 +357,7 @@
 	-moz-transform: rotate(90deg);
 	-webkit-transform: rotate(90deg);
 	right: -60px;
-	top: 40%;
+	top: 20%;
 }
 
 .component.transitionSlideSnapshot .rotates,
@@ -351,45 +386,13 @@
 .slideTable {
 	counter-reset: transSlide;
 }
-.slideWell {
-	width: 149px;
-	/*background: white;*/
-	/*border-right: 2px groove #333;*/
+.slideTable {
 	position: absolute;
 	left: 0px;
+	z-index: 1;
 	top: 56px;
 	bottom: 0px;
-	background-image: url('img/linen-gray.png');
-}
-
-.slideWell .slideSnapshot {
-	width: 120px;
-	height: 90px;
-	margin: 0 auto;
-	background: white;
-	margin-top: 20px;
-	cursor: pointer;
-}
-
-.slideWell .slideSnapshot .badge:before {
-	counter-increment: slideSnapshot;
-	content: counter(slideSnapshot);
-}
-
-.slideWell {
-	overflow: auto;
-	border-right: 1px solid black;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	overflow-x: hidden;
-}
-
-body {
-	counter-reset: slideSnapshot;
+	right: 0px;
 }
 .logo {
 	background-image: url('img/strut-logo-32.png');
