@@ -4,8 +4,8 @@
 }
 
 .transitionSlideSnapshot .content {
-	width: 150px;
-	height: 100px;
+	width: 75px;
+	height: 50px;
 	background: #EEE; /*replace with slide bg*/
 }
 
@@ -33,11 +33,14 @@
 
 .component.transitionSlideSnapshot .positioningCtrls {
 	bottom: -30px;
+	width: 150px;
+	left: -25px;
 }
 
 .component.transitionSlideSnapshot .topLabel {
-	left: 30px;
+	left: -5px;
 	top: -25px;
+	width: 100px;
 }
 
 .component.transitionSlideSnapshot .leftLabel {
@@ -49,7 +52,7 @@
 	-moz-transform: rotate(90deg);
 	-webkit-transform: rotate(90deg);
 	right: -60px;
-	top: 40%;
+	top: 20%;
 }
 
 .component.transitionSlideSnapshot .rotates,

@@ -5,6 +5,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
         "./SlideDrawer",
         "css!styles/transition_editor/TransitionSlideSnapshot.css"],
 function(ThreeDComponentView, SlideDrawer, empty) {
+  var overviewSize = window.config.slide.overviewSize;
   return ThreeDComponentView.extend({
     className: "component transitionSlideSnapshot",
     events: function() {
@@ -37,9 +38,15 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       this.$el.css('z-index', zTracker.next());
     },
     _impScaleChanged: function() {
-      var tform = window.browserPrefix + 'transform';
-      var scale = 'scale(' + this.model.get('impScale')/2 + ')';
-      this.$el.css(tform, scale);
+      var scaleFactor = this.model.get('impScale') | 0;
+      var $content = this.$el.find('.content');
+      var width = overviewSize.width * scaleFactor;
+      var height = overviewSize.height * scaleFactor;
+
+      $content.css({
+        width: width,
+        height: height
+      });
     },
 
     render: function() {

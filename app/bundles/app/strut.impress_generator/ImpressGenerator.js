@@ -33,10 +33,10 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
         return new Handlebars.SafeString(result);
       });
       Handlebars.registerHelper("scaleX", function(x) {
-        return x * slideConfig.size.width / 150;
+        return x * slideConfig.size.width / slideConfig.overviewSize.width;
       });
       Handlebars.registerHelper("scaleY", function(y) {
-        return y * slideConfig.size.width / 150;
+        return y * slideConfig.size.width / slideConfig.overviewSize.width;
       });
       Handlebars.registerHelper("toDeg", function(v) {
         return v * 180 / Math.PI;

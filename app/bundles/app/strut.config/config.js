@@ -4,6 +4,10 @@ define(function () {
 			size: {
 				width: 1024,
 				height: 768
+			},
+			overviewSize: {
+				width: 75,
+				height: 50
 			}
 		}
 	};
