@@ -47,6 +47,8 @@ define(function() {
 				y: e.pageY - this._startOffset.top
 			};
 
+			this._startScroll = this._scrollParent.scrollTop;
+
 			e.preventDefault();
 		},
 
@@ -133,7 +135,9 @@ define(function() {
 		},
 
 		_doDrag: function(e) {
-			var dy = e.pageY - this._origPoint.y;
+			// TODO: support x and y scrolls
+			var scrollDelta = this._startScroll - this._scrollParent.scrollTop;
+			var dy = (e.pageY - scrollDelta) - this._origPoint.y;
 			var dx = e.pageX - this._origPoint.x;
 
 			var offY = this._startOffset.top + dy;
@@ -142,7 +146,7 @@ define(function() {
 			var r = (offY / this._h) | 0;
 			var c = (offX / this._w) | 0;
 
-			var targetY = e.pageY - this._internalOffset.y;
+			var targetY = (e.pageY - scrollDelta) - this._internalOffset.y;
 			var targetX = e.pageX - this._internalOffset.x;
 
 			var row = this._index[r];
