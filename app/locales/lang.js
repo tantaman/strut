@@ -7,7 +7,7 @@ function(de, en, es, fr, handlebars) {
 		fr: fr
 	};
 
-	var result = langs[window.navigator.language.split('-')[0]];
+	var result = langs[window.navigator.language.split('-')[0]] || langs.en;
 	handlebars.registerHelper("lang", function(key) {
 		return result[key];
 	});
