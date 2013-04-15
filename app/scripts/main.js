@@ -12,7 +12,6 @@ require.config({
     gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
     downloadify: "../components/downloadify/js/downloadify.min",
     // swfobject: "../components/downloadify/js/swfobject",
-    // bundles: "../bundles",
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
 
@@ -21,6 +20,8 @@ require.config({
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
     'strut/etch_extension': '../bundles/app/strut.etch_extension',
+    'strut/exporter': '../bundles/app/strut.exporter',
+    'strut/exporter/json': '../bundles/app/strut.exporter.json',
     'strut/header': '../bundles/app/strut.header',
     'strut/impress_generator': '../bundles/app/strut.impress_generator',
     'strut/logo_button': '../bundles/app/strut.logo_button',
@@ -41,9 +42,6 @@ require.config({
     'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
     'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets'
     // end build - rmap
-
-    // 'strut/config': 'bundles/app/strut.config',
-    // 'com/tantaman/web/storage': 'bundles/runtime/com.tantaman.web.storage'
   },
 
   shim: {

@@ -14,5 +14,6 @@ define({
 	image: 'Bild',
 	video: 'Video',
 	website: 'Webseite',
-	present: 'Präsentieren'
+	present: 'Präsentieren',
+	export: 'Exportieren...'
 });

@@ -1,0 +1,4 @@
+/*
+A modal backed by a ServiceCollection.
+Each entry in the collection gets a new tab.
+*/

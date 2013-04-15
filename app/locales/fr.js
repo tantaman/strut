@@ -14,5 +14,6 @@ define({
 	image: 'Image',
 	video: 'Vidéo',
 	website: 'Site wen',
-	present: 'Courant'
+	present: 'Courant',
+	export: 'Exporter...'
 });

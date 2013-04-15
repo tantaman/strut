@@ -15,6 +15,10 @@ function (EventEmitter, _) {
 		this._populateItems();
 	}
 
+	ServiceCollection.toServiceConverter = function(entry) {
+		return entry.service();
+	}
+
 	var proto = ServiceCollection.prototype = Object.create(Array.prototype);
 
 	proto._register = function() {

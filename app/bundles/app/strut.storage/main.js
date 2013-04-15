@@ -2,31 +2,16 @@ define(['./view/StorageModal',
 		'./view/SaveMenuItem',
 		'./model/StorageInterface',
 		'./model/ActionHandlers',
+		'tantaman/web/widgets/MenuItem',
 		'lang'],
 function(StorageModal,
 		SaveMenuItem,
 		StorageInterface,
 		ActionHandlers,
+		MenuItem,
 		lang) {
 	'use strict';
 	var storageInterface = null;
-
-	function MenuItem(title, modal, handler, editorModel) {
-		this.$el = $('<li><a>' + title + '</a></li>');
-		this.$el.click(function() {
-			if (modal)
-				modal.show(handler, title);
-			else
-				handler(editorModel);
-		});
-	}
-
-	MenuItem.prototype = {
-		render: function() {
-			this.$el.html();
-			return this;
-		}
-	};
 
 	var storageModal = null;
 	var $modals = $('#modals');
