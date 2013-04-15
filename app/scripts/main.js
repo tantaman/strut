@@ -16,6 +16,7 @@ require.config({
     handlebars: '../scripts/libs/Handlebars',
 
     // build - rmap
+    'strut/bespoke_generator': '../bundles/app/strut.bespoke_generator',
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',

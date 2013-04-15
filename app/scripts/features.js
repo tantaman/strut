@@ -4,6 +4,7 @@ define([
 	'strut/storage/main',
 	'strut/exporter/main',
 	'strut/impress_generator/main',
+	'strut/bespoke_generator/main',
 	'strut/presentation_generator/main',
 	'tantaman/web/saver/main',
 	'strut/slide_editor/main',
