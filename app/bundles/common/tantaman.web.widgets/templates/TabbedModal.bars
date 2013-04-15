@@ -1,0 +1,16 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3 class="title">{{title}}</h3>
+</div>
+<div class="modal-body" style="overflow: hidden">
+	<ul class="nav nav-tabs">
+		{{#.}}
+			<li class="providerTab" data-provider="{{id}}"><a>{{name}}</a></li>
+		{{/.}}
+	</ul>
+	<div class="tabContent">
+	</div>
+</div>
+<div class="modal-footer">
+	<a href="#!" class="btn btn-primary ok btn-inverse">Ok</a>
+</div>

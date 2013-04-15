@@ -2,6 +2,7 @@ define([
 	'framework/ServiceRegistry',
 	'strut/etch_extension/main',
 	'strut/storage/main',
+	'strut/exporter/json/main',
 	'strut/exporter/main',
 	'strut/impress_generator/main',
 	'strut/bespoke_generator/main',

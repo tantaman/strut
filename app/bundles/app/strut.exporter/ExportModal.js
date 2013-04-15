@@ -1,29 +1,21 @@
-define(['libs/backbone'],
-function(Backbone) {
-	return Backbone.View.extend({
+define(['tantaman/web/widgets/TabbedModal'],
+function(TabbedModal) {
+	return TabbedModal.extend({
 		intialize: function() {
-			// need to look at available exporters and generate tabs...
-			this._template = JST['strut.exporter/ExportModal']
 		},
 
-		show: function(nothing, title) {
-
+		__providerSelected: function(provider, e) {
+			TabbedModal.prototype.__providerSelected.apply(this, arguments);
+			// override the ok button with the
+			// provider's button
 		},
 
-		render: function() {
-			var exporterNames = _.map(this.exporters, function(exporter) {
-				return exporter.name;
+		constructor: function ExportModal(editorModel, exporterServices) {
+			var tabs = [];
+			exporterServices.forEach(function(exporter) {
+				tabs.push(exporter.createView(editorModel.exportable));
 			});
-			
-			// this.$el.html(this._template({
-			// 	tabs: exporterNames
-			// }));
-		},
-
-		constructor: function ExportModal(editorModel, exporters) {
-			this.editorModel = editorModel;
-			this.exporters = exporters;
-			Backbone.View.prototype.constructor.call(this);
+			TabbedModal.prototype.constructor.call(this, tabs);
 		}
 	});
 });
