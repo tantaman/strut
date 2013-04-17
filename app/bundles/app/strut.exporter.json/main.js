@@ -3,8 +3,8 @@ function(View) {
 	'use strict';
 
 	var service = {
-		createView: function(exportable) {
-			return new View(exportable);
+		createView: function(editorModel) {
+			return new View(editorModel.exportable);
 		}
 	};
 

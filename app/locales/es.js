@@ -15,5 +15,6 @@ define({
 	video: 'Vídeo',
 	website: 'Sitio Web',
 	present: 'Presentar',
-	export: 'Exportar...'
+	export: 'Exportar...',
+	import: 'Importar...'
 });

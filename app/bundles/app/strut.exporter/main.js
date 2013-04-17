@@ -1,6 +1,6 @@
 define(['tantaman/web/widgets/MenuItem',
 		'framework/ServiceCollection',
-		'./ExportModal',
+		'./ExportImportModal',
 		'lang'],
 function(MenuItem, ServiceCollection, ExportModal, lang) {
 	'use strict';
@@ -9,7 +9,7 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 
 	var exportModal = null;
 	var exporterCollection = null;
-	var service = {
+	var menuProvider = {
 		createMenuItems: function(editorModel) {
 			if (exportModal == null) {
 				exportModal = new ExportModal(editorModel, exporterCollection);
@@ -17,7 +17,6 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 				$modals.append(exportModal.$el);
 			}
 
-			// we need.. just export? and it'll launch a modal?
 			var menuItem = new MenuItem(lang.export, exportModal);
 			var divider = {
 				$el: $('<li class="divider"></li>'),
@@ -38,7 +37,7 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 			registry.register({
 				// again, shouldn't call out LogoMenuItemProvider explicitly
 				interfaces: ['strut.LogoMenuItemProvider']
-			}, service);
+			}, menuProvider);
 
 			registry.register({
 				interfaces: 'strut.exporter.Collection'

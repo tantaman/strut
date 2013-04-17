@@ -35,7 +35,7 @@ function(Backbone) {
 			if (this.__currentProvider)
 				this.__currentProvider.hide();
 
-			this.__currentProvider = this.__tabProviders[i];
+			this.__currentProvider = this.__tabCollection[i];
 
 			this.__providerSelected(this.__currentProvider, e);
 		},
@@ -44,18 +44,20 @@ function(Backbone) {
 		},
 
 		_hidden: function() {
-			this.__currentProvider.hidden();
+			if (this.__currentProvider)
+				this.__currentProvider.hidden();
 		},
 
 		show: function(cb, title) {
 			this.__cb = cb;
 			this.__$title.text(title);
-			this.__currentProvider.show(this.$tabContent, this.$el);
+			if (this.__currentProvider)
+				this.__currentProvider.show(this.$tabContent, this.$el);
 			this.$el.modal('show');
 		},
 
 		render: function() {
-			this.$el.html(this.__template()(this.__tabProviders));
+			this.$el.html(this.__template()(this.__tabCollection));
 			this.__$ok = this.$el.find('.ok');
 			this.__$title = this.$el.find('.title');
 			this.$tabContent = this.$el.find('.tabContent');
@@ -69,7 +71,7 @@ function(Backbone) {
 				});
 			});
 
-			if (this.__tabProviders.length > 0)
+			if (this.__tabCollection.length > 0)
 				self._providerSelected(0, {currentTarget: $tabs[0]});
 
 			return this;
@@ -78,8 +80,8 @@ function(Backbone) {
 		// TODO: listen for tab additions and removals.
 		// tabProviders should just be a "tabProvider" that can be listened to
 		// and provides tabs.
-		constructor: function TabbedModal(tabProviders) {
-			this.__tabProviders = tabProviders;
+		constructor: function TabbedModal(tabCollection) {
+			this.__tabCollection = tabCollection;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

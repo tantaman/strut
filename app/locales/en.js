@@ -15,5 +15,6 @@ define({
 	video: 'Video',
 	website: 'Website',
 	present: 'Present',
-	export: 'Export...'
+	export: 'Export...',
+	import: 'Import...'
 });

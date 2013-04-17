@@ -15,5 +15,6 @@ define({
 	video: 'Vidéo',
 	website: 'Site wen',
 	present: 'Courant',
-	export: 'Exporter...'
+	export: 'Exporter...',
+	import: 'Importer...'
 });
