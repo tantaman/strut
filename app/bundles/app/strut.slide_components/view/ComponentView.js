@@ -24,7 +24,8 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
           "deltadragStart span[data-delta='skewX']": "skewXStart",
           "deltadragStart span[data-delta='skewY']": "skewYStart",
           "deltadragStart span[data-delta='rotate']": "rotateStart",
-          "deltadragStart span[data-delta='scale']": "scaleStart"
+          "deltadragStart span[data-delta='scale']": "scaleStart",
+          'destroyed': 'remove'
         };
       },
       initialize: function() {
@@ -72,7 +73,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
       },
       removeClicked: function(e) {
         e.stopPropagation();
-        return this.remove();
+        return this.remove(true);
       },
       skewX: function(e, deltas) {
         this.model.setFloat("skewX", this._initialSkewX + Math.atan2(deltas.dx, 22));
@@ -244,9 +245,9 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         return JST["strut.slide_components/Component"];
       },
       _unrender: function() {
-        return this.remove(true);
+        return this.remove(false);
       },
-      remove: function(keepModel) {
+      remove: function(disposeModel) {
         var $doc, deltaDrag, idx, _ref;
         Backbone.View.prototype.remove.call(this);
         _ref = this._deltaDrags;
@@ -254,7 +255,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
           deltaDrag = _ref[idx];
           deltaDrag.dispose();
         }
-        if (!keepModel) {
+        if (disposeModel) {
           this.model.dispose();
         }
 

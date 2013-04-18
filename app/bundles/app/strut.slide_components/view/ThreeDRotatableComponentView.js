@@ -21,7 +21,8 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
         "change input[data-option='scale']": "manualMoveScale",
         "change input[data-option='rotateX']": "manualRotX",
         "change input[data-option='rotateY']": "manualRotY",
-        "change input[data-option='rotateZ']": "manualRotZ"
+        "change input[data-option='rotateZ']": "manualRotZ",
+        'destroyed': 'remove'
       };
     },
     initialize: function() {
