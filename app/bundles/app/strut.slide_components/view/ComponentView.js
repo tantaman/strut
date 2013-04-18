@@ -256,13 +256,12 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         }
         if (!keepModel) {
           this.model.dispose();
-          this.model.off(null, null, this);
-        } else {
-          this.model.off(null, null, this);
         }
+
+        this.model.off(null, null, this);
         $doc = $(document);
         $doc.unbind("mouseup", this._mouseup);
-        return $doc.unbind("mousemove", this._mousemove);
+        $doc.unbind("mousemove", this._mousemove);
       },
       mousemove: function(e) {
         var dx, dy, gridSize, newX, newY, snapToGrid;

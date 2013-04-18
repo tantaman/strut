@@ -13,7 +13,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       parentEvents = ThreeDComponentView.prototype.events();
       return _.extend(parentEvents, {
         "click": "clicked",
-        'destroyed': 'dispose'
+        'destroyed': 'remove'
       });
     },
     initialize: function() {
