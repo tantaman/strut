@@ -2,7 +2,7 @@
          "tantaman/web/widgets/DeltaDragControl",
          "common/Math2",
          "css!styles/slide_components/ComponentView.css",
-         "libs/keymaster",
+         "strut/editor/GlobalEvents",
          "strut/deck/SlideCommands",
          "tantaman/web/undo_support/CmdListFactory"],
 function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFactory) {
@@ -98,7 +98,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         var newRot, rot;
         rot = this._calcRot(deltas);
         newRot = this._initialRotate + rot - this._rotOffset;
-        if (key.shift) {
+        if (key.pressed.shift) {
           newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI;
         }
         this.model.setFloat("rotate", newRot);
@@ -148,7 +148,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
       },
       scale: function(e, deltas) {
         var dx, dy, fixRatioDisabled, scale;
-        fixRatioDisabled = key.shift;
+        fixRatioDisabled = key.pressed.shift;
         dx = Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale;
         dy = Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale;
         scale = {
@@ -267,7 +267,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
       mousemove: function(e) {
         var dx, dy, gridSize, newX, newY, snapToGrid;
         if (this._dragging && this.allowDragging) {
-          snapToGrid = key.shift;
+          snapToGrid = key.pressed.shift;
           dx = e.pageX - this._prevMousePos.x;
           dy = e.pageY - this._prevMousePos.y;
           newX = this._prevPos.x + dx / this.dragScale;

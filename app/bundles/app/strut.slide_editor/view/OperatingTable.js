@@ -1,7 +1,7 @@
 define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
 		'strut/slide_components/ComponentFactory',
-		'libs/keymaster'],
+		'strut/editor/GlobalEvents'],
 function(Backbone, empty, ComponentFactory, key) {
 	'use strict';
 	return Backbone.View.extend({
@@ -54,7 +54,7 @@ function(Backbone, empty, ComponentFactory, key) {
 		},
 
 		_focus: function() {
-			key.setScope('operatingTable');
+			// key.setScope('operatingTable');
 		},
 
 		_dragover: function(e) {
