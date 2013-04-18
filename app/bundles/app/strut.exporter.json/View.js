@@ -31,7 +31,7 @@ function(Backbone, FileUtils) {
 
 		_makeDownloadable: function($ok) {
 			var attrs = FileUtils.createDownloadAttrs('application\/json',
-				JSON.stringify(this._exportable.export()),
+				JSON.stringify(this._exportable.export(), null, 2),
 				this._exportable.identifier() + '.json');
 
 			var a = $ok[0];
