@@ -303,6 +303,14 @@ body {
 	display: inline;
 }
 
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
+}
 .transitionSlideSnapshot {
 	position: absolute;
 	border: 1px solid black;
@@ -385,14 +393,6 @@ body {
 
 .slideTable {
 	counter-reset: transSlide;
-}
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
 }
 .logo {
 	background-image: url('img/strut-logo-32.png');
