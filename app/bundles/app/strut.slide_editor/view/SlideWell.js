@@ -2,7 +2,7 @@ define(['libs/backbone',
 		'strut/slide_snapshot/SlideSnapshot',
 		'common/Throttler',
 		'./WellContextMenu',
-		'tantaman/web/widgets/Sortable',
+		'tantaman/web/interactions/Sortable',
 		'css!styles/slide_editor/slideWell.css'],
 function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 	'use strict';
