@@ -21,7 +21,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
     },
     remove: function() {
       this.dispose();
-      ThreeDComponentView.prototype.remove.call(this, true);
+      ThreeDComponentView.prototype.remove.call(this, false);
       this.model.set("selected", false);
     },
     dispose: function() {

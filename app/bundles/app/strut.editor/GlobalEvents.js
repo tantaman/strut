@@ -4,7 +4,7 @@ function(mousetrap, Backbone) {
 
 	var result = _.extend({
 		pressed: mousetrap.pressed
-	}, Backbone.Events)
+	}, Backbone.Events);
 
 	mousetrap.bind(['ctrl+x', 'command+x'], function(e) {
 		result.trigger('cut', e);
