@@ -38,7 +38,7 @@
 }
 
 .component.transitionSlideSnapshot .topLabel {
-	left: -5px;
+	left: 20%;
 	top: -25px;
 	width: 100px;
 }
