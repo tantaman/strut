@@ -29,6 +29,12 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 				selector: '> .slideSnapshot',
 				scrollParent: this.$el[0]
 			});
+
+			this._sortable.on('sortstop', this._sortStopped, this);
+		},
+
+		_sortStopped: function(startIndex, endIndex) {
+			this._deck.resortSlides(startIndex, endIndex);
 		},
 
 		_showContextMenu: function(e) {

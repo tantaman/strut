@@ -44,6 +44,31 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         }
         return Backbone.Model.prototype.set.apply(this, arguments);
       },
+
+      resortSlides: function(sourceIndex, destIndex) {
+        var slides = this.get('slides');
+        
+        for (var i = 0; i < slides.models.length; ++i) {
+          if (sourceIndex < destIndex) {
+            if (i <= destIndex && i > sourceIndex) {
+              slides.models[i].set('num', i-1);
+            }
+            if (i == sourceIndex) {
+              slides.models[i].set('num', destIndex);
+            }
+          } else if (destIndex < sourceIndex) {
+            if (i >= destIndex && i < sourceIndex) {
+              slides.models[i].set('num', i + 1);
+            }
+            if (i == sourceIndex) {
+              slides.models[i].set('num', destIndex);
+            }
+          }
+        }
+
+        slides.sort();
+      },
+
       /**
             Method to import an existing presentation into this deck.
             TODO: this method should be a bit less brittle.  If new properties are added

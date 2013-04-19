@@ -1,4 +1,5 @@
-define(function() {
+define(['common/EventEmitter'],
+function(EventEmitter) {
 	'use strict';
 
 	function Sortable(options) {
@@ -21,6 +22,8 @@ define(function() {
 			x: 0,
 			y: 0
 		};
+
+		_.extend(this, new EventEmitter());
 	}
 
 	Sortable.prototype = {
@@ -106,9 +109,19 @@ define(function() {
 				this._$placeholder.after(this._$currentTarget);
 				this._$placeholder.remove();
 			}
-			this._$currentTarget = undefined;
-			this._$lastItem = undefined;
-			this._$placeholder = undefined;
+
+			if (!this._$children)
+				return;
+
+			var self = this;
+			self._sortableEnd = 
+				this._$container.find(this._selector).index(self._$currentTarget[0]);
+
+			self._$currentTarget = undefined;
+			self._$lastItem = undefined;
+			self._$placeholder = undefined;
+
+			self.emit('sortstop', self._sortableStart, self._sortableEnd);
 		},
 
 		_moved: function(e) {
@@ -127,6 +140,10 @@ define(function() {
 						position: 'absolute',
 						'z-index': 1
 					});
+
+
+					this._sortableStart = this._$children.index(this._$currentTarget[0]);
+
 					this._$currentTarget.after(this._$placeholder);
 				}
 
@@ -198,6 +215,7 @@ define(function() {
 		dispose: function(e) {
 			this._$document.off('mouseup', this._released);
 			this._$document.off('mousemove', this._moved);
+			this.removeAllListeners();
 		}
 	};
 
