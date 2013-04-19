@@ -1,29 +1,22 @@
-define(['libs/mousetrap'],
-function(mousetrap) {
+define(['libs/mousetrap', 'libs/backbone'],
+function(mousetrap, Backbone) {
 	'use strict';
 
-	var result = {
-		pressed: mousetrap.pressed,
-		copy: function() {
+	var result = _.extend({
+		pressed: mousetrap.pressed
+	}, Backbone.Events)
 
-		},
+	mousetrap.bind(['ctrl+x', 'command+x'], function(e) {
+		result.trigger('cut', e);
+	});
 
-		paste: function() {
+	mousetrap.bind(['ctrl+c', 'command+c'], function(e) {
+		result.trigger('copy', e);
+	});
 
-		},
-
-		cut: function() {
-
-		},
-
-		undo: function() {
-
-		},
-
-		redo: function() {
-
-		}
-	};
+	mousetrap.bind(['ctrl+v', 'command+v'], function(e) {
+		result.trigger('paste', e);
+	});
 
 	return result;
 });

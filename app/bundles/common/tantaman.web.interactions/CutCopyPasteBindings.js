@@ -1,21 +1,20 @@
-define(["libs/mousetrap"],
-function(Keymaster) {
+define(["strut/editor/GlobalEvents"],
+function(GlobalEvents) {
 	'use strict';
 	
 	var funcs = ["cut", "copy", "paste"]
 
 	result = {
-		applyTo: function(obj, scope) {
+		applyTo: function(obj) {
 			_.bindAll(obj, funcs)
 
-
-			Keymaster("ctrl+x, command+x", scope, obj.cut)
-			Keymaster("ctrl+c, command+c", scope, obj.copy)
-			Keymaster("ctrl+v, command+v", scope, obj.paste)
+			GlobalEvents.on('cut', obj.cut, obj);
+			GlobalEvents.on('copy', obj.copy, obj);
+			GlobalEvents.on('paste', obj.paste, obj);
 		},
 
-		unapply: function(obj, scope) {
-
+		unapply: function(obj) {
+			GlobalEvents.off(null, null, obj);
 		}
 	};
 })
