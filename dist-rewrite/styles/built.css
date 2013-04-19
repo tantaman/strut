@@ -303,14 +303,6 @@ body {
 	display: inline;
 }
 
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-}
 .transitionSlideSnapshot {
 	position: absolute;
 	border: 1px solid black;
@@ -351,7 +343,7 @@ body {
 }
 
 .component.transitionSlideSnapshot .topLabel {
-	left: -5px;
+	left: 20%;
 	top: -25px;
 	width: 100px;
 }
@@ -437,4 +429,12 @@ body {
 
 .header .navbar {
 	margin-bottom: 0;
+}
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
 }
