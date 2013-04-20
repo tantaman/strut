@@ -45,29 +45,37 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         return Backbone.Model.prototype.set.apply(this, arguments);
       },
 
-      resortSlides: function(sourceIndex, destIndex) {
+      // TODO: this should be a command so we can undo it
+      moveSlide: function(sourceIndex, destIndex) {
         var slides = this.get('slides');
-        
-        for (var i = 0; i < slides.models.length; ++i) {
-          if (sourceIndex < destIndex) {
-            if (i <= destIndex && i > sourceIndex) {
-              slides.models[i].set('num', i-1);
-            }
-            if (i == sourceIndex) {
-              slides.models[i].set('num', destIndex);
-            }
-          } else if (destIndex < sourceIndex) {
-            if (i >= destIndex && i < sourceIndex) {
-              slides.models[i].set('num', i + 1);
-            }
-            if (i == sourceIndex) {
-              slides.models[i].set('num', destIndex);
-            }
-          }
-        }
-
-        slides.sort();
+        var slide = slides.at(sourceIndex);
+        slides.remove(slide, {silent: true});
+        slides.add(slide, {at: destIndex, silent: true});
       },
+
+      // resortSlides: function(sourceIndex, destIndex) {
+      //   var slides = this.get('slides');
+        
+      //   for (var i = 0; i < slides.models.length; ++i) {
+      //     if (sourceIndex < destIndex) {
+      //       if (i <= destIndex && i > sourceIndex) {
+      //         slides.models[i].set('num', i-1);
+      //       }
+      //       if (i == sourceIndex) {
+      //         slides.models[i].set('num', destIndex);
+      //       }
+      //     } else if (destIndex < sourceIndex) {
+      //       if (i >= destIndex && i < sourceIndex) {
+      //         slides.models[i].set('num', i + 1);
+      //       }
+      //       if (i == sourceIndex) {
+      //         slides.models[i].set('num', destIndex);
+      //       }
+      //     }
+      //   }
+
+      //   slides.sort();
+      // },
 
       /**
             Method to import an existing presentation into this deck.

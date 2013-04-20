@@ -4,8 +4,10 @@ define(['libs/backbone',
 		'./WellContextMenu',
 		'tantaman/web/interactions/Sortable',
 		'strut/editor/GlobalEvents',
+		'tantaman/web/interactions/Clipboard',
 		'css!styles/slide_editor/slideWell.css'],
-function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, empty) {
+function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents,
+		Clipboard, empty) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -36,9 +38,12 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 			GlobalEvents.on('cut', this._cut, this);
 			GlobalEvents.on('copy', this._copy, this);
 			GlobalEvents.on('paste', this._paste, this);
+
+			this._clipboard = new Clipboard();
 		},
 
 		_cut: function() {
+			var slide = this._deck.get('activeSlide');
 
 		},
 
@@ -51,7 +56,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 		},
 
 		_sortStopped: function(startIndex, endIndex) {
-			this._deck.resortSlides(startIndex, endIndex);
+			this._deck.moveSlide(startIndex, endIndex);
 		},
 
 		_showContextMenu: function(e) {
