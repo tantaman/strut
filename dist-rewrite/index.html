@@ -15,13 +15,15 @@
 
 		<script>
 		window.isOptimized = true;
-		Function.prototype.bind = function(ctx) {
-		    var fn;
-    		fn = this;
-    		return function() {
-      			return fn.apply(ctx, arguments);
-    		};
-  		};
+		if (!Function.prototype.bind) {
+			Function.prototype.bind = function(ctx) {
+		    	var fn;
+    			fn = this;
+    			return function() {
+      				return fn.apply(ctx, arguments);
+    			};
+  			};
+  		}
 		</script>
 		<script data-main="scripts/amd-app" src="scripts/vendor/require.js"></script>
 		<div id="modals">
