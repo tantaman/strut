@@ -198,6 +198,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
       },
       mousedown: function(e) {
         if (e.which === 1) {
+          e.preventDefault();
           this.model.set("selected", true);
           this.$el.css("zIndex", zTracker.next());
           this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");

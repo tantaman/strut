@@ -22,6 +22,7 @@ define(function() {
       };
 
       DragControl.prototype.mousedown = function(e) {
+        e.preventDefault();
         this.dragging = true;
         this._startPos = {
           x: e.pageX,
