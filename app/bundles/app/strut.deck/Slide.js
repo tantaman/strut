@@ -61,6 +61,7 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
         _.defaults(this.attributes, defaults);
         return this.on("unrender", this._unrendered, this);
       },
+      type: 'slide',
       _unrendered: function() {
         return this.get("components").forEach(function(component) {
           return component.trigger("unrender", true);
@@ -151,7 +152,8 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
           this.trigger("contentsChanged");
           this.trigger("change:components.remove", this, component);
           component.trigger("unrender");
-          component.off(null, null, this);
+        //  component.off(null, null, this);
+          component.off();
           return component;
         } else {
           return undefined;

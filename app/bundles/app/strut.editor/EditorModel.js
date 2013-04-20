@@ -2,12 +2,14 @@ define(['libs/backbone',
 		'strut/header/model/HeaderModel',
 		'strut/deck/Deck',
 		'strut/slide_components/ComponentFactory',
-		'common/Adapter'],
+		'common/Adapter',
+		'tantaman/web/interactions/Clipboard'],
 function(Backbone,
 		 Header,
 		 Deck,
 		 ComponentFactory,
-		 Adapter) {
+		 Adapter,
+		 Clipboard) {
 	'use strict';
 
 	function adaptStorageInterfaceForSavers(storageInterface) {
@@ -25,7 +27,6 @@ function(Backbone,
 			this.set('header', new Header(this.registry, this));
 
 			this.set('modeId', 'slide-editor');
-			this._createMode();
 
 			this.exportable = new Adapter(this, {
 				export: 'exportPresentation',
@@ -40,6 +41,9 @@ function(Backbone,
 				this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
 				this._timedSaver = savers.timedSaver(this.exportable, 10000, storageInterface);
 			}
+
+			this.clipboard = new Clipboard();
+			this._createMode();
 		},
 
 		changeActiveMode: function(modeId) {

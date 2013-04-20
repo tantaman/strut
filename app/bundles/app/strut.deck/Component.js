@@ -21,6 +21,7 @@
           return _.defaults(this.attributes.scale, defaultScale);
         }
       },
+      
       dispose: function() {
         this.trigger("dispose", this);
         return this.off();

@@ -4,17 +4,16 @@ define(['libs/backbone',
 		'./WellContextMenu',
 		'tantaman/web/interactions/Sortable',
 		'strut/editor/GlobalEvents',
-		'tantaman/web/interactions/Clipboard',
 		'css!styles/slide_editor/slideWell.css'],
-function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents,
-		Clipboard, empty) {
+function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, empty) {
 	'use strict';
 
 	return Backbone.View.extend({
 		events: {
 			mousemove: '_showContextMenu',
 			mouseleave: '_hideContextMenu',
-			destroyed: 'dispose'
+			destroyed: 'dispose',
+			mousedown: '_focused'
 		},
 
 		className: 'slideWell',
@@ -39,20 +38,35 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 			GlobalEvents.on('copy', this._copy, this);
 			GlobalEvents.on('paste', this._paste, this);
 
-			this._clipboard = new Clipboard();
+			this._clipboard = this._editorModel.clipboard;
+		},
+
+		_focused: function() {
+			this._editorModel.set('scope', 'slideWell');
 		},
 
 		_cut: function() {
-			var slide = this._deck.get('activeSlide');
-
+			if (this._editorModel.get('scope') == 'slideWell') {
+				var slide = this._deck.get('activeSlide');
+				this._deck.removeSlide(slide);
+				this._clipboard.item = slide.clone();
+				slide.dispose();
+			}
 		},
 
 		_copy: function() {
-
+			if (this._editorModel.get('scope') == 'slideWell') {
+				var slide = this._deck.get('activeSlide');
+				this._clipboard.item = slide;
+			}
 		},
 
 		_paste: function() {
+			var item = this._clipboard.item;
+			if (item != null && item.type == 'slide')
+				this._deck.addSlide(item.clone());
 
+			// TODO: scroll to the new item...
 		},
 
 		_sortStopped: function(startIndex, endIndex) {

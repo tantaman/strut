@@ -1,8 +1,9 @@
 define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
 		'strut/slide_components/ComponentFactory',
-		'strut/editor/GlobalEvents'],
-function(Backbone, empty, ComponentFactory, key) {
+		'strut/editor/GlobalEvents',
+		'strut/deck/Component'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 	'use strict';
 	return Backbone.View.extend({
 		className: 'operatingTable',
@@ -23,6 +24,12 @@ function(Backbone, empty, ComponentFactory, key) {
         		this.setModel(model);
       		}, this);
 			this.setModel(this._deck.get('activeSlide'));
+
+			GlobalEvents.on('cut', this._cut, this);
+			GlobalEvents.on('copy', this._copy, this);
+			GlobalEvents.on('paste', this._paste, this);
+
+			this._clipboard = this._editorModel.clipboard;
 		},
 
 		render: function() {
@@ -40,6 +47,40 @@ function(Backbone, empty, ComponentFactory, key) {
 			return this;
 		},
 
+		// TODO: make the cut/copy/paste interfaces identical for
+		// slides and slide components so we can mix this code into both?
+		_cut: function() {
+			if (this._editorModel.get('scope') == 'operatingTable') {
+				var comp = this.model.lastSelection;
+				if (comp) {
+					this.model.remove(comp);
+					this._clipboard.item = comp.clone();
+					comp.dispose();
+				}
+			}
+		},
+
+		_copy: function() {
+			if (this._editorModel.get('scope') == 'operatingTable') {
+				var comp = this.model.lastSelection;
+				if (comp) {
+					this._clipboard.item = comp;
+				}
+			}
+		},
+
+		_paste: function() {
+			var item = this._clipboard.item;
+			if (item != null && item instanceof Component) {
+				var comp = item.clone();
+				comp.set({
+					selected: false,
+					active: false
+				});
+				this.model.add(comp);
+			}
+		},
+
 		_clicked: function() {
 			this._focus();
 			this.model.get('components').forEach(function(comp) {
@@ -54,7 +95,7 @@ function(Backbone, empty, ComponentFactory, key) {
 		},
 
 		_focus: function() {
-			// key.setScope('operatingTable');
+			this._editorModel.set('scope', 'operatingTable');
 		},
 
 		_dragover: function(e) {
@@ -158,6 +199,7 @@ function(Backbone, empty, ComponentFactory, key) {
 		constructor: function OperatingTable(editorModel) {
 			this._deck = editorModel.deck();
 			this._registry = editorModel.registry;
+			this._editorModel = editorModel;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});
