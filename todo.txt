@@ -1,3 +1,9 @@
+Should have a strut.command interface...
+and certain command will go into the menu...
+
+metadata will dictate where they go..
+
+
 push to back, pull to front
 z-tracker!!!
 

@@ -212,7 +212,7 @@ function(EventEmitter) {
 				return items;
 		},
 
-		dispose: function(e) {
+		dispose: function() {
 			this._$document.off('mouseup', this._released);
 			this._$document.off('mousemove', this._moved);
 			this.removeAllListeners();

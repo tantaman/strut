@@ -3,8 +3,9 @@ define(['libs/backbone',
 		'common/Throttler',
 		'./WellContextMenu',
 		'tantaman/web/interactions/Sortable',
+		'strut/editor/GlobalEvents',
 		'css!styles/slide_editor/slideWell.css'],
-function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
+function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, empty) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -31,6 +32,22 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 			});
 
 			this._sortable.on('sortstop', this._sortStopped, this);
+
+			GlobalEvents.on('cut', this._cut, this);
+			GlobalEvents.on('copy', this._copy, this);
+			GlobalEvents.on('paste', this._paste, this);
+		},
+
+		_cut: function() {
+
+		},
+
+		_copy: function() {
+
+		},
+
+		_paste: function() {
+
 		},
 
 		_sortStopped: function(startIndex, endIndex) {
@@ -101,6 +118,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, empty) {
 			this._deck.off(null, null, this);
 			this._contextMenu.dispose();
 			this._sortable.dispose();
+			GlobalEvents.off(null, null, this);
 		},
 
 		constructor: function SlideWell(editorModel) {
