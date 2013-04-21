@@ -5,7 +5,7 @@ function(FileUtils) {
 	var importer = {
 		import: function(file, editorModel, next) {
 			// TODO: why do the files have no mime type???
-			if (file.type == 'text/json' || file.type == '') {
+			if (file.type == 'text/json' || file.type == '' || file.type == 'application/json') {
 				FileUtils.toText(file, function(json) {
 					editorModel.importPresentation(JSON.parse(json));
 				});
