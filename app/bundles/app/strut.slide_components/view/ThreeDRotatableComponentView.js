@@ -10,6 +10,7 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
     events: function() {
       return {
         "mousedown": "mousedown",
+        "mousedown .form-inline": "stopProp",
         "click": "clicked",
         "deltadrag span[data-delta='rotateX']": "rotateX",
         "deltadrag span[data-delta='rotateY']": "rotateY",
@@ -30,6 +31,9 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
       this.model.on("change:rotateX", this._rotXChanged, this);
       this.model.on("change:rotateY", this._rotYChanged, this);
       return this.model.on("change:rotateZ", this._rotZChanged, this);
+    },
+    stopProp: function(e) {
+      e.stopPropagation();
     },
     dispose: function() {
       this.model.off(null, null, this);

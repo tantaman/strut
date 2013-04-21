@@ -7,8 +7,6 @@ define(function() {
 
 	PreviewLauncher.prototype = {
 		launch: function(generator) {
-			console.log('Launching preview with generator:');
-			console.log(generator);
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
 			window.previewWind = window.open('index.html?preview=true');
 			var sourceWind = window;
