@@ -4,6 +4,9 @@
 </button>
 <ul class="dropdown-menu">
 	{{#generators}}
-    <li data-option="{{id}}"><a>{{displayName}}</a></li>
+    <li data-option="{{id}}"><a>
+    		<span class="check" style="visibility: hidden;">&#10003;</span>
+    		{{displayName}}
+    </a></li>
     {{/generators}}
 </ul>
