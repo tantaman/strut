@@ -35,7 +35,7 @@ function(MenuItem, ServiceCollection, HiddenOpen, Iterator, lang) {
 
 	var menuProvider = {
 		createMenuItems: function(editorModel) {
-			return new MenuItem(lang.import, null, fileBrowserLauncher, editorModel);	
+			return new MenuItem({ title: lang.import, handler: fileBrowserLauncher, model: editorModel});	
 		}
 	};
 
