@@ -108,20 +108,24 @@ function(EventEmitter) {
 			if (this._$placeholder) {
 				this._$placeholder.after(this._$currentTarget);
 				this._$placeholder.remove();
+			} else {
+				this._$currentTarget = undefined;
+				this._$lastItem = undefined;
+				this._$children = undefined;
+				return;
 			}
 
 			if (!this._$children)
 				return;
 
-			var self = this;
-			self._sortableEnd = 
-				this._$container.find(this._selector).index(self._$currentTarget[0]);
+			this._sortableEnd = 
+				this._$container.find(this._selector).index(this._$currentTarget[0]);
 
-			self._$currentTarget = undefined;
-			self._$lastItem = undefined;
-			self._$placeholder = undefined;
+			this._$currentTarget = undefined;
+			this._$lastItem = undefined;
+			this._$placeholder = undefined;
 
-			self.emit('sortstop', self._sortableStart, self._sortableEnd);
+			this.emit('sortstop', this._sortableStart, this._sortableEnd);
 		},
 
 		_moved: function(e) {

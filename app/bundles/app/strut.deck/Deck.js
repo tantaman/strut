@@ -47,6 +47,7 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
 
       // TODO: this should be a command so we can undo it
       moveSlide: function(sourceIndex, destIndex) {
+        if (sourceIndex == destIndex) return;
         var slides = this.get('slides');
         var slide = slides.at(sourceIndex);
         slides.remove(slide, {silent: true});
