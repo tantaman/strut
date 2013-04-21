@@ -338,7 +338,7 @@ define(["lodash", "jquery"], function(_, jquery) {
       this._changing  = true;
 
       if (!changing) {
-        this._previousAttributes = _.clone(this.attributes);
+      //  this._previousAttributes = _.clone(this.attributes);
         this.changed = {};
       }
       current = this.attributes, prev = this._previousAttributes;
@@ -350,17 +350,18 @@ define(["lodash", "jquery"], function(_, jquery) {
       for (attr in attrs) {
         val = attrs[attr];
         if (!_.isEqual(current[attr], val)) changes.push(attr);
-        if (!_.isEqual(prev[attr], val)) {
+      /*  if (!_.isEqual(prev[attr], val)) {
           this.changed[attr] = val;
         } else {
           delete this.changed[attr];
-        }
+        } */
         unset ? delete current[attr] : current[attr] = val;
       }
 
       // Trigger all relevant attribute changes.
       if (!silent) {
         if (changes.length) this._pending = true;
+        options.changes = changes;
         for (var i = 0, l = changes.length; i < l; i++) {
           this.trigger('change:' + changes[i], this, current[changes[i]], options);
         }

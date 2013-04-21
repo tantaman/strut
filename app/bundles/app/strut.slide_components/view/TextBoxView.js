@@ -80,10 +80,11 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
       },
       _styleChanged: function(model, style, opts) {
         var key, value, _ref, _results;
-        _ref = model.changed; // opts.changes
+        _ref = opts.changes; //model.changed;
         _results = [];
-        for (key in _ref) {
-          value = _ref[key];
+        for (var i = 0; i < _ref.length; ++i) {
+          key = _ref[i];
+          value = model.get(key);
           if (value) {
             if (key === "decoration" || key === "align") {
               console.log("DECORATION CHANGE");
