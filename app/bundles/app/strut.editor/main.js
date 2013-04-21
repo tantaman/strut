@@ -5,13 +5,15 @@ function(GlobalEvents, lang) {
 
 	return {
 		initialize: function(registry) {
-			var actions = [['cut', 'X'], ['copy', 'C'], ['paste', 'V']];
+			var actions = [['undo', 'Z'], ['redo', 'Y'],
+				['cut', 'X'], ['copy', 'C'], ['paste', 'V']];
 
 			actions.forEach(function(action) {
 				registry.register({
 					interfaces: 'strut.editor.glob.action',
 					meta: {
 						title: lang[action[0]],
+						action: action[0],
 						// TODO: detect OS and present correct ctrl char.
 						hotkey: 'Ctrl+' + action[1]
 					}

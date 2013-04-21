@@ -3,13 +3,17 @@ define(['libs/backbone',
 		'strut/deck/Deck',
 		'strut/slide_components/ComponentFactory',
 		'common/Adapter',
-		'tantaman/web/interactions/Clipboard'],
+		'tantaman/web/interactions/Clipboard',
+		'./GlobalEvents',
+		'tantaman/web/undo_support/CmdListFactory'],
 function(Backbone,
 		 Header,
 		 Deck,
 		 ComponentFactory,
 		 Adapter,
-		 Clipboard) {
+		 Clipboard,
+		 GlobalEvents,
+		 CmdListFactory) {
 	'use strict';
 
 	function adaptStorageInterfaceForSavers(storageInterface) {
@@ -44,6 +48,10 @@ function(Backbone,
 
 			this.clipboard = new Clipboard();
 			this._createMode();
+
+			this._cmdList = CmdListFactory.managedInstance('editor');
+			GlobalEvents.on('undo', this._cmdList.undo, this._cmdList);
+			GlobalEvents.on('redo', this._cmdList.redo, this._cmdList);
 		},
 
 		changeActiveMode: function(modeId) {

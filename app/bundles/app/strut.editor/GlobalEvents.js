@@ -18,5 +18,13 @@ function(mousetrap, Backbone) {
 		result.trigger('paste', e);
 	});
 
+	mousetrap.bind(['ctrl+z', 'command+z'], function(e) {
+		result.trigger('undo', e);
+	});
+
+	mousetrap.bind(['ctrl+y', 'command+y'], function(e) {
+		result.trigger('redo', e);
+	});
+
 	return result;
 });

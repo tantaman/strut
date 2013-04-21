@@ -13,7 +13,6 @@ define(function() {
 
 	MenuItem.prototype = {
 		render: function() {
-			this.$el.html();
 			return this;
 		}
 	};

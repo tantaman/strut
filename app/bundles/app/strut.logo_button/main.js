@@ -1,6 +1,27 @@
-define(['framework/ServiceCollection', 'tantaman/web/widgets/MenuItem'],
-function(ServiceCollection, MenuItem) {
+define(['framework/ServiceCollection', 'tantaman/web/widgets/MenuItem',
+		'tantaman/web/undo_support/CmdListFactory',
+		'tantaman/web/widgets/UndoRedoMenuItem'],
+function(ServiceCollection, MenuItem, CmdListFactory, UndoRedoMenuItem) {
 	'use strict';
+
+	var cmdList = CmdListFactory.managedInstance('editor');
+	function createMenuItem(actionEntry) {
+		if (actionEntry.meta().action == 'undo' || actionEntry.meta().action == 'redo') {
+			return new UndoRedoMenuItem({
+				cmdList: cmdList,
+				action: actionEntry.meta().action,
+				handler: actionEntry.service(),
+				hotkey: actionEntry.meta().hotkey,
+				title: actionEntry.meta().title
+			});
+		} else {
+			return new MenuItem({
+					title: actionEntry.meta().title,
+					handler: actionEntry.service(),
+					hotkey: actionEntry.meta().hotkey
+				});
+		}
+	}
 
 	var actionProviders;
 	var actionButtonProvider = {
@@ -11,11 +32,14 @@ function(ServiceCollection, MenuItem) {
 		createMenuItems: function() {
 			var menuItems = [];
 			actionProviders.forEach(function(actionEntry) {
-				menuItems.push(new MenuItem({
-					title: actionEntry.meta().title,
-					handler: actionEntry.service(),
-					hotkey: actionEntry.meta().hotkey
-				}));
+				menuItems.push(createMenuItem(actionEntry));
+				// ugh what a hax0r :/
+				if (actionEntry.meta().action == 'redo') {
+					menuItems.push({
+						$el: $('<li class="divider"></li>'),
+						render: function() { return this; }
+					});
+				}
 			});
 			menuItems.push({
 				$el: $('<li class="divider"></li>'),
