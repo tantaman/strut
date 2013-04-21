@@ -1,11 +1,13 @@
 define(function() {
-	function MenuItem(title, modal, handler, editorModel) {
-		this.$el = $('<li><a>' + title + '</a></li>');
+	function MenuItem(options) {
+		this.$el = $('<li><a>' + options.title + ' ' + 
+			((options.hotkey) ? '<span class="label pull-right">' + options.hotkey + '</span>' : '')
+		+ '</a></li>');
 		this.$el.click(function() {
-			if (modal)
-				modal.show(handler, title);
+			if (options.modal)
+				options.modal.show(options.handler, options.title);
 			else
-				handler(editorModel);
+				options.handler(options.model);
 		});
 	}
 

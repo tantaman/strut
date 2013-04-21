@@ -16,5 +16,10 @@ define({
 	website: 'Sitio Web',
 	present: 'Presentar',
 	export: 'Exportar...',
-	import: 'Importar...'
+	import: 'Importar...',
+	cut: 'Cortar',
+	copy: 'Copie',
+	paste: 'Pegar',
+	undo: 'Deshacer',
+	redo: 'Rehacer'
 });

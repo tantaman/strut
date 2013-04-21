@@ -16,5 +16,10 @@ define({
 	website: 'Site wen',
 	present: 'Courant',
 	export: 'Exporter...',
-	import: 'Importer...'
+	import: 'Importer...',
+	cut: 'Couper',
+	copy: 'Copier',
+	paste: 'Collez',
+	undo: 'Annuler',
+	redo: 'Refaire'
 });

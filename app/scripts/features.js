@@ -2,6 +2,8 @@ define([
 	'framework/ServiceRegistry',
 	'strut/etch_extension/main',
 	'strut/storage/main',
+	'strut/logo_button/main',
+	'strut/editor/main',
 	'strut/exporter/json/main',
 	'strut/importer/json/main',
 	'strut/importer/main',

@@ -17,7 +17,7 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 				$modals.append(exportModal.$el);
 			}
 
-			var menuItem = new MenuItem(lang.export, exportModal);
+			var menuItem = new MenuItem({ title: lang.export, modal: exportModal});
 			var divider = {
 				$el: $('<li class="divider"></li>'),
 				render: function() { return this; }

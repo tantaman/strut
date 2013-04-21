@@ -29,11 +29,11 @@ function(StorageModal,
 				$modals.append(storageModal.$el);
 			}
 
-			menuItems.push(new MenuItem(lang.new_, null, ActionHandlers.new_, editorModel));
-			menuItems.push(new MenuItem(lang.open, storageModal, ActionHandlers.open));
+			menuItems.push(new MenuItem({ title: lang.new_, handler: ActionHandlers.new_, model: editorModel }));
+			menuItems.push(new MenuItem({ title: lang.open, modal: storageModal, model: ActionHandlers.open }));
 
 			menuItems.push(new SaveMenuItem(storageModal, editorModel, storageInterface));
-			menuItems.push(new MenuItem(lang.save_as, storageModal, ActionHandlers.save));
+			menuItems.push(new MenuItem({title: lang.save_as, modal: storageModal, handler: ActionHandlers.save }));
 
 			menuItems.push({
 				$el: $('<li class="divider"></li>'),

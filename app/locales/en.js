@@ -16,5 +16,10 @@ define({
 	website: 'Website',
 	present: 'Present',
 	export: 'Export...',
-	import: 'Import...'
+	import: 'Import...',
+	cut: 'Cut',
+	copy: 'Copy',
+	paste: 'Paste',
+	undo: 'Undo',
+	redo: 'Redo'
 });

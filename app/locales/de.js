@@ -16,5 +16,10 @@ define({
 	website: 'Webseite',
 	present: 'Präsentieren',
 	export: 'Exportieren...',
-	import: 'Importieren...'
+	import: 'Importieren...',
+	cut: 'Geschnitten',
+	copy: 'Kopieren',
+	paste: 'Fügen',
+	undo: 'Rückgängig',
+	redo: 'Redo'
 });
