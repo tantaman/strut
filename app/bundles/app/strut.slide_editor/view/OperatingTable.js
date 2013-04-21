@@ -150,6 +150,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this._deck.off(null, null, this);
 			if (this.model)
 				this.model.off(null, null, this);
+			GlobalEvents.off(null, null, this);
 		},
 
 		_renderContents: function(prevModel) {
