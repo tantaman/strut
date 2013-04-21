@@ -13,15 +13,15 @@ define(function() {
 
 			var self = this;
 			function cb() {
-				if (!sourceWind.previewWind.startImpress) {
+				if (!sourceWind.previewWind.startPres) {
 					setTimeout(cb, 200);
 				} else {
 					sourceWind.
 						previewWind.document.
 							getElementsByTagName("html")[0].innerHTML = previewStr;
-					if (!sourceWind.previewWind.impressStarted) {
-						sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
-						sourceWind.previewWind.imp = sourceWind.previewWind.impress();
+					if (!sourceWind.previewWind.presStarted) {
+						sourceWind.previewWind.startPres(sourceWind.previewWind.document, sourceWind.previewWind);
+						sourceWind.previewWind.imp = sourceWind.previewWind.pres();
 						sourceWind.previewWind.imp.init();
 						sourceWind.previewWind.imp.goto(self._editorModel.activeSlideIndex());
 					}

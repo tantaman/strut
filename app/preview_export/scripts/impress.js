@@ -19,10 +19,10 @@
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, latedef:true, newcap:true,
          noarg:true, noempty:true, undef:true, strict:true, browser:true */
 
-function startImpress(document, window) {
-if (window.impressStarted)
+function startPres(document, window) {
+if (window.presStarted)
     return;
-window.impressStarted = true;
+window.presStarted = true;
 // You are one of those who like to know how thing work inside?
 // Let me show you the cogs that make impress.js run...
 (function ( document, window ) {
@@ -221,7 +221,7 @@ window.impressStarted = true;
     // It's the core `impress` function that returns the impress.js API
     // for a presentation based on the element with given id ('impress'
     // by default).
-    var impress = window.impress = function ( rootId ) {
+    var impress = window.pres = window.impress = function ( rootId ) {
         var previousInit = body.classList.contains("impress-enabled");
         // If impress.js is not supported by the browser return a dummy API
         // it may not be a perfect solution but we return early and avoid
@@ -804,7 +804,7 @@ window.impressStarted = true;
 }
 
 if ( typeof define === "function" && define.amd ) {
-    define(function () { return startImpress; } );
+    define(function () { return startPres; } );
 }
 // THAT'S ALL FOLKS!
 //
