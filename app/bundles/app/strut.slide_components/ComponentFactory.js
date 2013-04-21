@@ -35,6 +35,12 @@ define(function() {
 		},
 
 		createModel: function(rawModel) {
+			// TODO: temporary hack until
+			// everyone migrates to the new serialization format
+			if (rawModel.type == "ImageModel")
+				rawModel.type = "Image"
+
+
             if (typeof rawModel === 'string')
                 var type = rawModel;
             else
