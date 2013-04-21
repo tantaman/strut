@@ -173,6 +173,7 @@ function(EventEmitter) {
 				if ($item != this._$lastItem) {
 					$item.after(this._$placeholder);
 					this._$lastItem = $item;
+					this._lastDir = '';
 				} else if ($item[0] == this._index.first) {
 					// TODO: generalize to work for 2 dimensional sortables like
 					// everything else.
