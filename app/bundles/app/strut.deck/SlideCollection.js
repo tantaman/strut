@@ -11,8 +11,8 @@
     return Backbone.Collection.extend({
       model: Slide,
       initialize: function() {
-        this.on("add", this._updateNumbers, this);
-        return this.on("remove", this._updateNumbers, this);
+        // this.on("add", this._updateNumbers, this);
+        // return this.on("remove", this._updateNumbers, this);
       },
       _updateNumbers: function() {
         return this.models.forEach(function(model, idx) {

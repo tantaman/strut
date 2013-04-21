@@ -13,7 +13,12 @@ function(EditorView, EditorModel) {
     			// Load it up.
     			var storageInterface = registry.getBest('strut.StorageInterface');
     			storageInterface.load(sessionMeta.lastPresentation, function(pres, err) {
-    				model.importPresentation(pres);
+    				if (!err) {
+    					model.importPresentation(pres);
+    				} else {
+    					console.log(err);
+    					console.log(err.stack);
+    				}
     			});
     		}
 		}

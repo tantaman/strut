@@ -124,7 +124,7 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
       },
       _slideAdded: function(slide, collection, options) {
         this.set("activeSlide", slide);
-        this.trigger("slideAdded", slide, options.index);
+        this.trigger("slideAdded", slide, options.at || collection.length);
         return this._registerWithSlide(slide);
       },
       _slideDisposed: function(slide) {
@@ -143,9 +143,9 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         }
         return slide.dispose();
       },
-      _slidesReset: function(newSlides, options, oldSlides) {
+      _slidesReset: function(newSlides, options) {
         var _this = this;
-        oldSlides.forEach(function(slide) {
+        options.previousModels.forEach(function(slide) {
           return slide.dispose();
         });
         this.trigger('slidesReset', newSlides);

@@ -80,7 +80,7 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
       },
       _styleChanged: function(model, style, opts) {
         var key, value, _ref, _results;
-        _ref = opts.changes;
+        _ref = model.changed; // opts.changes
         _results = [];
         for (key in _ref) {
           value = _ref[key];
