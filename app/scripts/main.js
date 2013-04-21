@@ -16,7 +16,7 @@ require.config({
     handlebars: '../scripts/libs/Handlebars',
 
     // build - rmap
-    'strut/bespoke_generator': '../bundles/app/strut.bespoke_generator',
+    'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
@@ -27,7 +27,7 @@ require.config({
     'strut/header': '../bundles/app/strut.header',
     'strut/importer': '../bundles/app/strut.importer',
     'strut/importer/json': '../bundles/app/strut.importer.json',
-    'strut/impress_generator': '../bundles/app/strut.impress_generator',
+    'strut/presentation_generator/impress': '../bundles/app/strut.presentation_generator.impress',
     'strut/logo_button': '../bundles/app/strut.logo_button',
     'strut/presentation_generator': '../bundles/app/strut.presentation_generator',
     'strut/reveal_generator': '../bundles/app/strut.reveal_generator',

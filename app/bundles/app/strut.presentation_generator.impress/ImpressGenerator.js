@@ -12,23 +12,23 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
         switch (componentModel.get("type")) {
           case "Image":
             if (componentModel.get("imageType") === "SVG") {
-              result = JST["strut.impress_generator/SVGImage"](componentModel.attributes);
+              result = JST["strut.presentation_generator.impress/SVGImage"](componentModel.attributes);
             } else {
-              result = JST["strut.impress_generator/Image"](componentModel.attributes);
+              result = JST["strut.presentation_generator.impress/Image"](componentModel.attributes);
             }
             break;
           case "TextBox":
-            result = JST["strut.impress_generator/TextBox"](_this.convertTextBoxData(componentModel.attributes));
+            result = JST["strut.presentation_generator.impress/TextBox"](_this.convertTextBoxData(componentModel.attributes));
             break;
           case "Video":
             if (componentModel.get("videoType") === "html5") {
-              result = JST["strut.impress_generator/Video"](componentModel.attributes);
+              result = JST["strut.presentation_generator.impress/Video"](componentModel.attributes);
             } else {
-              result = JST["strut.impress_generator/Youtube"](componentModel.attributes);
+              result = JST["strut.presentation_generator.impress/Youtube"](componentModel.attributes);
             }
             break;
           case "WebFrame":
-            result = JST["strut.impress_generator/WebFrame"](componentModel.attributes);
+            result = JST["strut.presentation_generator.impress/WebFrame"](componentModel.attributes);
         }
         return new Handlebars.SafeString(result);
       });
@@ -62,9 +62,9 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
           return "";
         }
       });
-      Handlebars.registerPartial("ComponentContainer", JST["strut.impress_generator/ComponentContainer"]);
-      Handlebars.registerPartial("TransformContainer", JST["strut.impress_generator/TransformContainer"]);
-      Handlebars.registerPartial("SVGContainer", JST["strut.impress_generator/SVGContainer"]);
+      Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);
+      Handlebars.registerPartial("TransformContainer", JST["strut.presentation_generator.impress/TransformContainer"]);
+      Handlebars.registerPartial("SVGContainer", JST["strut.presentation_generator.impress/SVGContainer"]);
     }
 
     ImpressGenerator.prototype.render = function(deckAttrs) {
@@ -100,7 +100,7 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
       deckAttrs.overviewX = (maxX + minX) / 2;
       deckAttrs.overviewY = (maxY + minY) / 2;
 
-      return JST["strut.impress_generator/ImpressTemplate"](deckAttrs);
+      return JST["strut.presentation_generator.impress/ImpressTemplate"](deckAttrs);
     };
 
     ImpressGenerator.prototype.convertTextBoxData = function(attrs) {
