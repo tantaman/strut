@@ -23,7 +23,7 @@ define(function() {
 						sourceWind.previewWind.startImpress(sourceWind.previewWind.document, sourceWind.previewWind);
 						sourceWind.previewWind.imp = sourceWind.previewWind.impress();
 						sourceWind.previewWind.imp.init();
-						sourceWind.previewWind.imp.goto(self._editorModel.activeSlide().get('num'));
+						sourceWind.previewWind.imp.goto(self._editorModel.activeSlideIndex());
 					}
 				}
 			};

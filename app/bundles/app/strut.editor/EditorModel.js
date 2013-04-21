@@ -119,6 +119,10 @@ function(Backbone,
 			return this._deck.get('activeSlide');
 		},
 
+		activeSlideIndex: function() {
+			return this._deck.get('slides').indexOf(this._deck.get('activeSlide'));
+		},
+
 		addComponent: function(type) {
 			var slide = this._deck.get('activeSlide');
 			if (slide) {
