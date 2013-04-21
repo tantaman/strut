@@ -38,6 +38,8 @@ function(Backbone) {
 			this.__currentProvider = this.__tabCollection[i];
 
 			this.__providerSelected(this.__currentProvider, e);
+
+			this.__currentProvider.show(this.$tabContent, this.$el);
 		},
 
 		__providerSelected: function(provider, e) {

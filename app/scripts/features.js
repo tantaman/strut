@@ -5,6 +5,7 @@ define([
 	'strut/logo_button/main',
 	'strut/editor/main',
 	'strut/exporter/json/main',
+	'strut/exporter/zip/browser/main',
 	'strut/importer/json/main',
 	'strut/importer/main',
 	'strut/exporter/main',

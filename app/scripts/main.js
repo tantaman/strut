@@ -21,6 +21,7 @@ require.config({
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
     'strut/etch_extension': '../bundles/app/strut.etch_extension',
+    'strut/exporter/zip/browser': '../bundles/app/strut.exporter.zip.browser',
     'strut/exporter': '../bundles/app/strut.exporter',
     'strut/exporter/json': '../bundles/app/strut.exporter.json',
     'strut/header': '../bundles/app/strut.header',
