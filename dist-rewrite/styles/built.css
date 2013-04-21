@@ -30,10 +30,6 @@
 .storageModal .tabContent {
 	padding: 0px 15px;
 }
-.wellContextMenu {
-  z-index: 2;
-}
-
 .slideSnapshot {
 	box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, 0.5);
 	position: relative;
@@ -117,36 +113,10 @@
 body {
 	counter-reset: slideSnapshot;
 }
-.operatingTable {
-  webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
-  -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
-  box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
-
-  position: absolute;
-  left: 150px;
-  z-index: 1;
-  top: 56px;
-  bottom: 0px;
-  right: 0px;
+.wellContextMenu {
+  z-index: 2;
 }
 
-.operatingTable .slideContainer {
-	-webkit-transform-origin: 0 0;
-	transform-origin: 0 0;
-	-o-transform-origin: 0 0;
-	-moz-transform-origin: 0 0;
-	
-	margin: 10px auto;
-	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-
-	background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
-	background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
-	background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
-	background: -o-radial-gradient(#F0F0F0, #BEBEBE);
-	background: radial-gradient(#F0F0F0, #BEBEBE);
-}
 .component .label {
 	visibility: hidden;
 	background: none;
@@ -386,6 +356,14 @@ body {
 .slideTable {
 	counter-reset: transSlide;
 }
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
+}
 .logo {
 	background-image: url('img/strut-logo-32.png');
 	width: 100px;
@@ -419,14 +397,6 @@ body {
 	top: 5px;
 }
 
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-}
 .header .divider-vertical {
 	height: 54px;
 }
@@ -437,4 +407,34 @@ body {
 
 .header .navbar {
 	margin-bottom: 0;
+}
+.operatingTable {
+  webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+
+  position: absolute;
+  left: 150px;
+  z-index: 1;
+  top: 56px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.operatingTable .slideContainer {
+	-webkit-transform-origin: 0 0;
+	transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	
+	margin: 10px auto;
+	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+
+	background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+	background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+	background: radial-gradient(#F0F0F0, #BEBEBE);
 }
