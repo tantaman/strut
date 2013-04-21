@@ -30,6 +30,10 @@
 .storageModal .tabContent {
 	padding: 0px 15px;
 }
+.wellContextMenu {
+  z-index: 2;
+}
+
 .slideSnapshot {
 	box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, 0.5);
 	position: relative;
@@ -73,10 +77,6 @@
 	width: 100%;
 	height: 100%;
 }
-.wellContextMenu {
-  z-index: 2;
-}
-
 .slideWell {
 	width: 149px;
 	/*background: white;*/
@@ -146,141 +146,6 @@ body {
 	background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
 	background: -o-radial-gradient(#F0F0F0, #BEBEBE);
 	background: radial-gradient(#F0F0F0, #BEBEBE);
-}
-.transitionSlideSnapshot {
-	position: absolute;
-	border: 1px solid black;
-}
-
-.transitionSlideSnapshot .content {
-	width: 75px;
-	height: 50px;
-	background: #EEE; /*replace with slide bg*/
-}
-
-.transitionSlideSnapshot canvas {
-	width: 100%;
-	height: 100%;
-}
-
-.transitionSlideSnapshot .badge {
-	position: absolute;
-	bottom: -7px;
-	left: -7px;
-}
-
-.transitionSlideSnapshot .spinners {
-	position: absolute;
-	bottom: -40px;
-}
-
-.transitionSlideSnapshot .spinners .smartspinner {
-	text-align: left;
-	color: #848484;
-	margin-left: 10px;
-}
-
-.component.transitionSlideSnapshot .positioningCtrls {
-	bottom: -30px;
-	width: 150px;
-	left: -25px;
-}
-
-.component.transitionSlideSnapshot .topLabel {
-	left: 20%;
-	top: -25px;
-	width: 100px;
-}
-
-.component.transitionSlideSnapshot .leftLabel {
-	left: -60px;
-}
-
-.component.transitionSlideSnapshot .rightLabel {
-	transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-	-webkit-transform: rotate(90deg);
-	right: -60px;
-	top: 20%;
-}
-
-.component.transitionSlideSnapshot .rotates,
-.component.transitionSlideSnapshot .label.layer {
-	font-size: 20px;
-}
-.component.transitionSlideSnapshot .label.layer+input {
-	margin-left: 10px;
-}
-
-.component.transitionSlideSnapshot .label.scales {
-	transform: rotate(45deg);
-	-moz-transform: rotate(45deg);
-	-webkit-transform: rotate(45deg);
-	position: absolute;
-}
-.component.transitionSlideSnapshot .label.scales+input {
-	margin-left: 30px;
-}
-
-.slideTable .transitionSlideSnapshot .badge:before {
-	counter-increment: transSlide;
-	content: counter(transSlide);
-}
-
-.slideTable {
-	counter-reset: transSlide;
-}
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-}
-.logo {
-	background-image: url('img/strut-logo-32.png');
-	width: 100px;
-	height: 32px;
-	background-position: 5px;
-	margin-left: 5px;
-	padding: 0px 20px 0px 5px;
-	background-repeat: no-repeat;
-}
-
-.logo-holder {
-	margin-top: 5px;
-	margin-left: -8px;
-}
-
-.btn-group.open .logo {
-	background-image: url('img/strut-logo-32.png');
-}
-
-.logo:active {
-  background-image: url('img/strut-logo-32.png');
-}
-
-.logo:hover {
-	background-position: 5px 0;
-}
-
-.logo .caret {
-	position: absolute;
-	right: 6px;
-	top: 5px;
-}
-
-.header .divider-vertical {
-	height: 54px;
-}
-
-.header .navbar-inner {
-	border-radius: 0;
-}
-
-.header .navbar {
-	margin-bottom: 0;
 }
 .component .label {
 	visibility: hidden;
@@ -438,3 +303,138 @@ body {
 	display: inline;
 }
 
+.transitionSlideSnapshot {
+	position: absolute;
+	border: 1px solid black;
+}
+
+.transitionSlideSnapshot .content {
+	width: 75px;
+	height: 50px;
+	background: #EEE; /*replace with slide bg*/
+}
+
+.transitionSlideSnapshot canvas {
+	width: 100%;
+	height: 100%;
+}
+
+.transitionSlideSnapshot .badge {
+	position: absolute;
+	bottom: -7px;
+	left: -7px;
+}
+
+.transitionSlideSnapshot .spinners {
+	position: absolute;
+	bottom: -40px;
+}
+
+.transitionSlideSnapshot .spinners .smartspinner {
+	text-align: left;
+	color: #848484;
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .positioningCtrls {
+	bottom: -30px;
+	width: 150px;
+	left: -25px;
+}
+
+.component.transitionSlideSnapshot .topLabel {
+	left: 20%;
+	top: -25px;
+	width: 100px;
+}
+
+.component.transitionSlideSnapshot .leftLabel {
+	left: -60px;
+}
+
+.component.transitionSlideSnapshot .rightLabel {
+	transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	right: -60px;
+	top: 20%;
+}
+
+.component.transitionSlideSnapshot .rotates,
+.component.transitionSlideSnapshot .label.layer {
+	font-size: 20px;
+}
+.component.transitionSlideSnapshot .label.layer+input {
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .label.scales {
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	position: absolute;
+}
+.component.transitionSlideSnapshot .label.scales+input {
+	margin-left: 30px;
+}
+
+.slideTable .transitionSlideSnapshot .badge:before {
+	counter-increment: transSlide;
+	content: counter(transSlide);
+}
+
+.slideTable {
+	counter-reset: transSlide;
+}
+.logo {
+	background-image: url('img/strut-logo-32.png');
+	width: 100px;
+	height: 32px;
+	background-position: 5px;
+	margin-left: 5px;
+	padding: 0px 20px 0px 5px;
+	background-repeat: no-repeat;
+}
+
+.logo-holder {
+	margin-top: 5px;
+	margin-left: -8px;
+}
+
+.btn-group.open .logo {
+	background-image: url('img/strut-logo-32.png');
+}
+
+.logo:active {
+  background-image: url('img/strut-logo-32.png');
+}
+
+.logo:hover {
+	background-position: 5px 0;
+}
+
+.logo .caret {
+	position: absolute;
+	right: 6px;
+	top: 5px;
+}
+
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
+}
+.header .divider-vertical {
+	height: 54px;
+}
+
+.header .navbar-inner {
+	border-radius: 0;
+}
+
+.header .navbar {
+	margin-bottom: 0;
+}
