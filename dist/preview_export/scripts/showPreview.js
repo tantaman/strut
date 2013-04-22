@@ -11,6 +11,6 @@
 }*/
 
 $(function() {
-	startImpress(document, window);
-	impress().init();
+	startPres(document, window);
+	pres().init();
 });
