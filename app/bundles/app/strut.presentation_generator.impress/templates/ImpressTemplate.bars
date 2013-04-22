@@ -79,16 +79,16 @@ if ("ontouchstart" in document.documentElement) {
 var interval = {{.}};
 if (interval >= 1000) {
     setInterval(function() {
-        impress().next();
+        pres().next();
     }, interval);
 }
 </script>
 {{/interval}}
 </div>
 <script>
-if (!window.impressStarted) {
-    startImpress(document, window);
-    impress().init();   
+if (!window.presStarted) {
+    startPres(document, window);
+    pres().init();   
 }
 </script>
 </body>
