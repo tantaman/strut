@@ -5,7 +5,7 @@ function(AddSlideButton, lang) {
 	'use strict';
 
 	function NewSlideMenuItem(editorModel) {
-		this.$el = $('<li><a>' + lang.add_slide + '</a></li>');
+		this.$el = $('<li><a data-option="addSlide">' + lang.add_slide + '</a></li>');
 		this.$el.click(function() {
 			editorModel.addSlide();
 		});

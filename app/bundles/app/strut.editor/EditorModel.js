@@ -24,7 +24,9 @@ function(Backbone,
 
 	return Backbone.Model.extend({
 		initialize: function() {
-			// this._loadLastPresentation();
+			// is there a better way to do this?
+			window.uiTestAcc = this;
+
 			this._deck = new Deck();
 			this.addSlide();
 

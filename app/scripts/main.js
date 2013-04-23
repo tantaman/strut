@@ -87,7 +87,14 @@ window.zTracker = {
 // TODO: we'll have to make a more generic one that hooks into
 // the storage providers...
 window.clearPresentations = function() {
-  
+  var len = localStorage.length;
+  for (var i = 0; i < len; ++i) {
+    var key = localStorage.key(i);
+    if (key && key.indexOf(".strut") != -1) {
+      console.log('Removing: ' + key);
+      localStorage.removeItem(key);
+    }
+  }
 };
 
 window.log = function(msg) {
