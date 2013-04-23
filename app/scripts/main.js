@@ -84,6 +84,12 @@ window.zTracker = {
   }
 };
 
+// TODO: we'll have to make a more generic one that hooks into
+// the storage providers...
+window.clearPresentations = function() {
+  
+};
+
 window.log = function(msg) {
   if (log.enabled.log)
     console.log(msg);

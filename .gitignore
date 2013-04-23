@@ -6,3 +6,6 @@ deprecated/
 .DS_STORE
 .tmp/
 compiled-templates.js
+repl-port
+bin/
+ccw.repl.cmdhistory.prefs
