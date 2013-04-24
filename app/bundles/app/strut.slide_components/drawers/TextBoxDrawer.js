@@ -1,7 +1,8 @@
 define(["./AbstractDrawer"], function(AbstractDrawer) {
-    var TextBoxDrawer, newlineReg, spaceReg;
-    newlineReg = /<[^>]+>|<\/[^>]+>/;
+    var TextBoxDrawer, newlineReg, spaceReg, tagReg;
+    newlineReg = /<br>/;
     spaceReg = /&nbsp;/g;
+    tagReg = /<[^>]+>|<\/[^>]+>/g;
     return TextBoxDrawer = (function(_super) {
 
       __extends(TextBoxDrawer, _super);
@@ -30,6 +31,7 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
         cnt = 0;
         return lines.forEach(function(line) {
           if (line !== "") {
+            line = line.replace(tagReg, "");
             _this.g2d.fillText(line, bbox.x, bbox.y + bbox.height + cnt * lineHeight);
             return ++cnt;
           }
