@@ -10,7 +10,7 @@ function(Backbone) {
 		},
 
 		initialize: function() {
-			this._template = JST['strut.slide_components/ComponentButton']
+			this.$el.attr('data-compType', this.options.componentType);
 		},
 
 		_clicked: function() {

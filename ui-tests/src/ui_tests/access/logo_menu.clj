@@ -1,5 +1,5 @@
 (ns ui-tests.access.logo-menu
-  (:use [clj-webdriver.taxi :as t]
+  (:require [clj-webdriver.taxi :as t]
         [ui-tests.asserts :as asserts])
 )
 
@@ -11,11 +11,11 @@
 
 (defn new-pres []
   (open)
-  (click ".logo-group > ul > li a")
+  (t/click ".logo-group > ul > li a")
   (asserts/one-slide)
 )
 
 (defn add-slide []
   (open)
-  (click ".logo-group a[data-option='addSlide']")
+  (t/click ".logo-group a[data-option='addSlide']")
 )
