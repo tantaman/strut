@@ -96,6 +96,7 @@
 	margin: 0;
 	padding: 0;
 	height: 11px;
+	line-height: 10px;
 }
 .colorpicker_hex {
 	position: absolute;
