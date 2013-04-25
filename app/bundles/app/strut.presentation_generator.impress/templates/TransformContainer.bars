@@ -1,1 +1,3 @@
-<div class="transformContainer" style="-webkit-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}; -moz-transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}; transform: {{#if rotate}}rotate({{rotate}}rad){{/if}} {{#if skewX}}skewX({{skewX}}rad){{/if}} {{#if skewY}}skewY({{skewY}}rad){{/if}}">
+<div class="transformContainer" style="-webkit-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+-moz-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}}">

@@ -10,6 +10,13 @@
 <style>
 .componentContainer {
     position: absolute;
+    line-height: normal;
+    /*-webkit-transform-origin: 135% 135%;
+    -moz-transform-origin: 135% 135%;
+    transform-origin: 135% 135%;*/
+}
+
+.transformContainer {
     -webkit-transform-origin: 0 0;
     -moz-transform-origin: 0 0;
     transform-origin: 0 0;
