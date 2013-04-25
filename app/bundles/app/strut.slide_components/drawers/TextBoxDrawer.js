@@ -24,10 +24,11 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
         txtWidth = this._findWidestWidth(lines) * this.scale.x;
         bbox = {
           x: textBox.get("x") * this.scale.x,
-          y: textBox.get("y") * this.scale.y,
-          width: txtWidth + txtWidth,
-          height: textBox.get("size") * this.scale.y
+          y: textBox.get("y") * this.scale.y + lineHeight * this.scale.y,
+          width: txtWidth,
+          height: lineHeight * lines.length * this.scale.y
         };
+
         this.applyTransforms(textBox, bbox);
         lines.forEach(function(line, i) {
          this._renderLine(line, i, bbox, lineHeight);
@@ -56,9 +57,9 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
         widestWidth = 0;
         lines.forEach(function(line) {
           var width;
-          width = _this.g2d.measureText(line).width;
+          width = _this.g2d.measureText(line.replace(tagReg, "")).width;
           if (width > widestWidth) {
-            return widestWidth = width;
+             widestWidth = width;
           }
         });
         return widestWidth;

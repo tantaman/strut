@@ -9,14 +9,18 @@ define(function() {
         var rotation, scale, skewX, skewY, transform;
         rotation = component.get("rotate");
         scale = component.get("scale");
+
         this.g2d.translate(bbox.x, bbox.y);
-        if (scale != null) {
-          this.g2d.scale(scale.x, scale.y);
-        }
-        this.g2d.translate(bbox.width / 2, bbox.height / 2);
+        this.g2d.translate(scale.x * bbox.width / 2, scale.y * bbox.height / 2);
         if (rotation != null) {
           this.g2d.rotate(rotation);
         }
+
+        this.g2d.translate(-1*scale.x*(bbox.width / 2), -1*scale.y*(bbox.height / 2));
+        if (scale != null) {
+          this.g2d.scale(scale.x, scale.y);
+        }
+        
         skewX = component.get("skewX");
         skewY = component.get("skewY");
         if (skewX || skewY) {
@@ -29,7 +33,8 @@ define(function() {
           }
           this.g2d.transform.apply(this.g2d, transform);
         }
-        return this.g2d.translate(-1 * (bbox.width / 2 + bbox.x), -1 * (bbox.height / 2 + bbox.y));
+        return this.g2d.translate(-1 * (bbox.x),
+                -1 * (bbox.y));
       };
 
       return AbstractDrawer;
