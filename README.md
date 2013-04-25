@@ -46,6 +46,17 @@ To build your own version of Strut you'll need Grunt v0.4.0 or later.
 To make a production build of Strut run `grunt build`.
 The resulting build will be location in `Strut/dist`.  
 
+### RELEASE NOTES ###
+
+v0.5.3 - Positioning and transofmrations of components in edit mode
+now exactly match the positioning and transformations of components in the final presentation.
+
+v0.5.2 - Fixed a bug in 0.5.1 where presentation generation did not work
+
+v0.5.1 - Fixed slide sorting problems
+
+v0.5.0 - New UI and service oriented back-end
+
 ### Contributing ###
 
 
