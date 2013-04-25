@@ -121,7 +121,7 @@ log.notice = function(msg) {
 if (window.location.href.indexOf("preview=true") != -1) {
   require(['../preview_export/scripts/impress', 'jquery'], function(impress, jquery) {
     window.jQuery = jquery;
-    window.startImpress = impress;
+    window.startPres = impress;
     window.$ = jquery;
   });
 } else {
