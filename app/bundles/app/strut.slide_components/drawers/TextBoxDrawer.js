@@ -3,6 +3,7 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
     newlineReg = /<br>/;
     spaceReg = /&nbsp;/g;
     tagReg = /<[^>]+>|<\/[^>]+>/g;
+
     return TextBoxDrawer = (function(_super) {
 
       __extends(TextBoxDrawer, _super);
@@ -13,7 +14,7 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
       }
 
       TextBoxDrawer.prototype.paint = function(textBox) {
-        var bbox, cnt, lineHeight, lines, text, txtWidth,
+        var bbox, lineHeight, lines, text, txtWidth,
           _this = this;
         this.g2d.fillStyle = "#" + textBox.get("color");
         lineHeight = textBox.get("size") * this.scale.y;
@@ -28,14 +29,17 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
           height: textBox.get("size") * this.scale.y
         };
         this.applyTransforms(textBox, bbox);
-        cnt = 0;
-        return lines.forEach(function(line) {
-          if (line !== "") {
+        lines.forEach(function(line, i) {
+         this._renderLine(line, i, bbox, lineHeight);
+        }, this);
+      };
+
+      TextBoxDrawer.prototype._renderLine = function(line, cnt, bbox, lineHeight) {
+         if (line !== "") {
             line = line.replace(tagReg, "");
-            _this.g2d.fillText(line, bbox.x, bbox.y + bbox.height + cnt * lineHeight);
-            return ++cnt;
+            this.g2d.fillText(line, bbox.x, bbox.y + bbox.height + cnt * lineHeight);
+            ++cnt;
           }
-        });
       };
 
       TextBoxDrawer.prototype._extractLines = function(text) {
