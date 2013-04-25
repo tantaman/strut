@@ -22,6 +22,7 @@ define(["./AbstractDrawer"], function(AbstractDrawer) {
         text = this._convertSpaces(textBox.get("text"));
         lines = this._extractLines(text);
         txtWidth = this._findWidestWidth(lines) * this.scale.x;
+        txtWidth *= 3;
         bbox = {
           x: textBox.get("x") * this.scale.x,
           y: textBox.get("y") * this.scale.y + lineHeight * this.scale.y,
