@@ -23,10 +23,8 @@ define(function() {
 	}
 
 	function addToBuild(url) {
-		var contents = fs.readFile('app/' + url, "utf8", function(err, data) {
-			if (err) throw err;
-			fs.appendFileSync(fname, data + "\n");
-		});
+		var contents = fs.readFileSync('app/' + url, "utf8");
+		fs.appendFileSync(fname, contents + "\n");
 	}
 
 	return {
