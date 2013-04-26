@@ -14,6 +14,8 @@ License: MIT
     *zoom: 1;
     z-index: 2147483647;
     overflow: hidden;
+    height: 195px;
+    border: 2px solid rgba(111,111,111,0.1);
 }
 .sp-container.sp-flat {
     position: relative;
@@ -220,10 +222,12 @@ License: MIT
 
 /* Basic display options (colors, fonts, global widths) */
 .sp-container {
-    border-radius: 0;
-    background-color: #ECECEC;
-    border: solid 1px #f0c49B;
+    border-radius: 4px;
+    background: rgba(22,22,22,0.6);
     padding: 0;
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 }
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue
 {
@@ -233,6 +237,7 @@ License: MIT
     -ms-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 .sp-top
 {
     margin-bottom: 3px;
@@ -246,7 +251,7 @@ License: MIT
 .sp-input-container {
     float:right;
     width: 100px;
-    margin-bottom: 4px;
+    margin-top: 4px;
 }
 .sp-initial-disabled  .sp-input-container {
     width: 100%;
@@ -257,10 +262,16 @@ License: MIT
    padding: 4px 5px;
    margin: 0;
    width: 100%;
-   background:transparent;
+   background: #333;
    border-radius: 3px;
    color: #222;
 }
+
+input.sp-input {
+    background: #333;
+    color: #DDD;
+}
+
 .sp-input:focus  {
     border: 1px solid orange;
 }
@@ -280,19 +291,18 @@ License: MIT
 .sp-picker-container
 {
     width: 172px;
-    border-left: solid 1px #fff;
+    border-left: solid 1px #333;
 }
 
 /* Palettes */
 .sp-palette-container
 {
-    border-right: solid 1px #ccc;
+    border-right: solid 1px #333;
 }
 
 .sp-palette .sp-thumb-el {
     display: block;
     position:relative;
-    float:left;
     width: 24px;
     height: 15px;
     margin: 3px;

@@ -112,13 +112,20 @@ define(['libs/backbone'], function(Backbone) {
       var $colorChooser = this.$el.find(".color-chooser");
       if ($colorChooser.length > 0) {
         var hex = '333';
-        $colorChooser.ColorPicker({
+        $colorChooser.spectrum({
           color: '#' + hex,
-          onChange: function (hsb, hex, rgb) {
-            $colorChooser.find("div").css("backgroundColor", "#" + hex);
-            // Set the color of the actual text
+          showSelectionPalette: true,
+          localStorageKey: 'strut.fontColorChooser',
+          showPalette: true,
+          showInitial: true,
+          showInput: true,
+          palette: [],
+          clickoutFiresChange: true,
+          theme: 'sp-dark',
+          move: function (color) {
+            // $colorChooser.find("div").css("backgroundColor", "#" + hex);
             //view.model.get('editableModel').set('color', hex)
-            document.execCommand('foreColor', false, hex);
+            document.execCommand('foreColor', false, color.toHexString());
           }
         });
 
@@ -126,7 +133,8 @@ define(['libs/backbone'], function(Backbone) {
           e.preventDefault();
         };
 
-        $(".colorpicker").mousedown(prevent);
+        $(".sp-replacer").mousedown(prevent);
+        $(".sp-container").mousedown(prevent);
         $colorChooser.mousedown(prevent);
 
         $colorChooser.find("div").css("backgroundColor", '#' + hex)

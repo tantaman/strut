@@ -1,1 +1,1 @@
-<div class="color-chooser etch-{{button}}"><div></div></div>
+<input class="color-chooser colorpicker etch-{{button}}" />
