@@ -1,3 +1,9 @@
+-text writer
+-destroy event
+-gradient picker
+other things to jquery misc?
+
+
 Should have a strut.command interface...
 and certain command will go into the menu...
 
