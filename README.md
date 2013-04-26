@@ -1,7 +1,7 @@
 Strut
 =======
 
-![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)
+[![Facelift](https://f.cloud.github.com/assets/1009003/26512/13d10f44-4b39-11e2-80e4-578cc6acd3b3.png)](http://tantaman.com/Strut)
 
 #### A GUI / Authoring Tool for ImpressJS ####
 
@@ -48,7 +48,7 @@ The resulting build will be location in `Strut/dist`.
 
 ### RELEASE NOTES ###
 
-v0.5.3 - Positioning and transofmrations of components in edit mode
+v0.5.3 - Positioning and transformations of components in edit mode
 now exactly match the positioning and transformations of components in the final presentation.
 
 v0.5.2 - Fixed a bug in 0.5.1 where presentation generation did not work
