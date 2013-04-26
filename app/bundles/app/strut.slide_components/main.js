@@ -33,7 +33,8 @@ function(Button, ImportingComponentButton,
 				name: lang.image,
 				tag: 'img',
 				title: lang.insert_image,
-				editorModel: editorModel
+				editorModel: editorModel,
+				browsable: true
 			}));
 
 			buttons.push(new ImportingComponentButton({
