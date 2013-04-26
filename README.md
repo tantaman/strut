@@ -86,11 +86,12 @@ approach allows the user to add and remove plugins from 3rd parties at runtime.
 
 * ImpressJS (of course) https://github.com/bartaz/impress.js/
 * BackboneJS http://documentcloud.github.com/backbone/
-* CoffeeScript http://coffeescript.org/
+* Spectrum https://github.com/bgrins/spectrum
+* Etch http://etchjs.com/
+* Bootstrap http://twitter.github.io/bootstrap/
+* lodash http://lodash.com/
+* mousetrap http://craig.is/killing/mice
 * RequireJS http://requirejs.org/
 * JQuery http://jquery.com/
-* Rake http://rubyforge.org/projects/rake/
 * HandlebarsJS http://handlebarsjs.com/
-* DustJS http://akdubya.github.com/dustjs/
-* Class class http://ejohn.org/blog/simple-javascript-inheritance/
-* Impressionist https://github.com/hsivaramx/Impressionist
+* Grunt http://gruntjs.com/
