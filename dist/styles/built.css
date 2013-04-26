@@ -73,6 +73,10 @@
 	width: 100%;
 	height: 100%;
 }
+.wellContextMenu {
+  z-index: 2;
+}
+
 .slideWell {
 	width: 149px;
 	/*background: white;*/
@@ -113,10 +117,6 @@
 body {
 	counter-reset: slideSnapshot;
 }
-.wellContextMenu {
-  z-index: 2;
-}
-
 .operatingTable {
   webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
   -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
@@ -303,14 +303,6 @@ body {
 	display: inline;
 }
 
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-}
 .transitionSlideSnapshot {
 	position: absolute;
 	border: 1px solid black;
@@ -393,6 +385,14 @@ body {
 
 .slideTable {
 	counter-reset: transSlide;
+}
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
 }
 .logo {
 	background-image: url('img/strut-logo-32.png');
