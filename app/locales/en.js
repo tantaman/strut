@@ -21,5 +21,10 @@ define({
 	copy: 'Copy',
 	paste: 'Paste',
 	undo: 'Undo',
-	redo: 'Redo'
+	redo: 'Redo',
+	// TODO: bundles should contain their own translations!
+	strut_exporter_json: {
+		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
+		click_below: 'Click below to download'
+	}
 });

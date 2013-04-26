@@ -1,5 +1,5 @@
-define(['libs/backbone', 'common/FileUtils'],
-function(Backbone, FileUtils) {
+define(['libs/backbone', 'common/FileUtils', 'lang'],
+function(Backbone, FileUtils, lang) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -11,8 +11,9 @@ function(Backbone, FileUtils) {
 			*/
 			this._dlSupported = 'download' in document.createElement('a')
 
+			this.$el.html('<div class="alert">' + lang.strut_exporter_json.explain + '</div>');
 			if (this._dlSupported) {
-				this.$el.append('<div class="alert alert-success">Export Ready!</div><b>Click below to download</b>');
+				this.$el.append('<div class="alert alert-success">' + lang.strut_exporter_json.click_below + '</div>');
 			}
 		},
 
