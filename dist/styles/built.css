@@ -128,6 +128,7 @@ body {
   top: 56px;
   bottom: 0px;
   right: 0px;
+  overflow: hidden;
 }
 
 .operatingTable .slideContainer {
