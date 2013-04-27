@@ -46,6 +46,7 @@ define(['libs/backbone'], function(Backbone) {
 
       this.model.on('change:editableModel', this._editableModelChanged);
 
+      this._editableModelChanged(this.model, this.model.get('editableModel'));
       // Init Routines:
       this.changeEditable();
     },
@@ -69,7 +70,13 @@ define(['libs/backbone'], function(Backbone) {
     },
 
     _editableModelChanged: function(model, newEditable) {
-      console.log(arguments);
+      if (this._lastEditableModel != null) {
+        this._lastEditableModel.off(null, null, this);
+      }
+
+      this._lastEditableModel = newEditable;
+      
+      newEditable.on('change:size', this._fontSizeChanged, this);
     },
         
     changeEditable: function() {
@@ -82,6 +89,10 @@ define(['libs/backbone'], function(Backbone) {
       var editorModel = this.model;
       var buttonClass = editorModel.get('editable').attr('data-button-class') || 'default';
       editorModel.set({ buttons: etch.config.buttonClasses[buttonClass] });
+    },
+
+    _fontSizeChanged: function(model, value) {
+      this.$fontSizeReadout.text(value);
     },
 
     changeButtons: function() {
@@ -142,6 +153,7 @@ define(['libs/backbone'], function(Backbone) {
 
       var $toggle = this.$el.find('.dropdown-toggle');
       $toggle.dropdown();
+      this.$fontSizeReadout = this.$el.find('.fontSizeReadout');
     },
 
     changePosition: function() {
@@ -407,6 +419,7 @@ define(['libs/backbone'], function(Backbone) {
         }
       });
 
+      this.model.trigger('change:size', this.model, this.model.get('size'), {});
       editorModel.set({position: {x: e.pageX - 15, y: overrideY || (e.pageY - 80)}});
     }
   });

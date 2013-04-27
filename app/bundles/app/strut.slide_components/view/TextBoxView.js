@@ -81,7 +81,7 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
       _styleChanged: function(model, style, opts) {
         var key, value, _ref, _results;
         _ref = opts.changes; //model.changed;
-        _results = [];
+        if (!_ref) return;
         for (var i = 0; i < _ref.length; ++i) {
           key = _ref[i];
           value = model.get(key);
@@ -92,12 +92,9 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
             } else if (key !== "color") {
               key = "font" + key.substr(0, 1).toUpperCase() + key.substr(1);
             }
-            _results.push(this.$el.css(key, style));
-          } else {
-            _results.push(void 0);
+            this.$el.css(key, style);
           }
         }
-        return _results;
       },
       render: function() {
         ComponentView.prototype.render.call(this);
