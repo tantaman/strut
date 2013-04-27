@@ -102,6 +102,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         if (key.pressed.shift) {
           newRot = Math.floor(newRot / Math.PI * 8) / 8 * Math.PI;
         }
+        newRot = newRot % (2 * Math.PI);
         this.model.setFloat("rotate", newRot);
         return this._setUpdatedTransform();
       },
@@ -129,33 +130,45 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         elOffset = this.$el.offset();
         elWidth = this.$el.width() * this._initialScale.x;
         elHeight = this.$el.height() * this._initialScale.y;
-        H = Math.sqrt((elWidth / 2) * (elWidth / 2) + (elHeight / 2) * (elHeight / 2));
+
         theta = this.model.get("rotate") || 0;
-        theta = theta + Math.atan2(elHeight / 2, elWidth / 2);
-        this._scaleCenter = {
-          x: elOffset.left + Math.abs(Math.cos(theta)),
-          y: elOffset.top + Math.abs(Math.sin(theta))
-        };
-        this._scaleDeltas = {
-          x: Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale,
-          y: Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale
-        };
+        // theta = (theta + Math.atan2(elHeight / 2, elWidth / 2)) % (2 * Math.PI);
+
         if (!(this.origSize != null)) {
-          return this.origSize = {
+          this.origSize = {
             width: this.$el.width(),
             height: this.$el.height()
           };
         }
+
+        this._scaleDim = {
+          width: this._initialScale.x * this.origSize.width,
+          height: this._initialScale.y * this.origSize.height,
+          theta: theta
+        };
       },
       scale: function(e, deltas) {
         var dx, dy, fixRatioDisabled, scale;
         fixRatioDisabled = key.pressed.shift;
-        dx = Math.abs(deltas.x - this._scaleCenter.x) / this.dragScale;
-        dy = Math.abs(deltas.y - this._scaleCenter.y) / this.dragScale;
+
+        var xSignum = 1;
+        var ySignum = 1;
+        if (this._scaleDim.theta < -Math.PI / 2 && this._scaleDim.theta > -3/2 * Math.PI) {
+          xSignum = -1;
+          ySignum = -1;
+        } if (this._scaleDim.theta > Math.PI/2) {
+          xSignum = -1;
+        }
+
+        var scaleX = (xSignum * deltas.dx + this._scaleDim.width) / (this._scaleDim.width);
+        var scaleY = (ySignum * deltas.dy + this._scaleDim.height) / (this._scaleDim.height);
+        
+
         scale = {
-          x: this._initialScale.x * (dx / this._scaleDeltas.x),
-          y: this._initialScale.y * (fixRatioDisabled ? dy / this._scaleDeltas.y : dx / this._scaleDeltas.x)
+          x: this._initialScale.x * scaleX,
+          y: this._initialScale.y * (fixRatioDisabled ? scaleY : scaleX)
         };
+
         scale.width = scale.x * this.origSize.width;
         scale.height = scale.y * this.origSize.height;
         this.model.set("scale", scale);
