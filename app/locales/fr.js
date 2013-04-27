@@ -19,11 +19,11 @@ define({
 	import: 'Importer...',
 	cut: 'Couper',
 	copy: 'Copier',
-	paste: 'Collez',
+	paste: 'Coller',
 	undo: 'Annuler',
 	redo: 'Refaire',
 	strut_exporter_json: {
-		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
-		click_below: 'Click below to download'
+		explain: 'Vous pouvez sauvegarder la présentation dans fichier que vous pourrez réimporter dans Strut plus tard',
+		click_below: 'Cliquer ci-dessous pour télécharger le fichier'
 	}
 });
