@@ -23,7 +23,7 @@ function(Backbone, ActionHandlers, ErrorModal, lang) {
 		},
 
 		render: function() {
-			this.$el.html('<a>Save</a>');
+			this.$el.html('<a>' + lang.save + '</a>');
 			return this;
 		}
 	});
