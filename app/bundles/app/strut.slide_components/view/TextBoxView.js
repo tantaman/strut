@@ -11,7 +11,8 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
         myEvents = {
           "dblclick": "dblclicked",
           "editComplete": "editCompleted",
-          "mousedown": "mousedown"
+          "mousedown": "mousedown",
+          "mouseup": "mouseup"
         };
         return _.extend(parentEvents, myEvents);
       },
@@ -42,9 +43,15 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
         this.allowDragging = false;
         return this.editing = true;
       },
-      mousedown: function(e) {
+      mouseup: function(e) {
         if (this.editing) {
           etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+        }
+      },
+      mousedown: function(e) {
+        if (this.editing) {
+          e.stopPropagation();
+         // etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
         } else {
           ComponentView.prototype.mousedown.apply(this, arguments);
         }

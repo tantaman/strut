@@ -43,6 +43,7 @@ define(['libs/backbone'], function(Backbone) {
       this.model.bind('change:buttons', this.changeButtons);
       this.model.bind('change:position', this.changePosition);
       this.model.bind('change:editable', this.changeEditable);
+      this.model.bind('caretUpdated', this._caretUpdated, this);
 
       this.model.on('change:editableModel', this._editableModelChanged);
 
@@ -77,6 +78,21 @@ define(['libs/backbone'], function(Backbone) {
       this._lastEditableModel = newEditable;
       
       newEditable.on('change:size', this._fontSizeChanged, this);
+    },
+
+    _caretUpdated: function() {
+      var $container = $(getSelectionBoundaryElement(window));
+      var color = $container.attr('color');
+      var face = $container.attr('face');
+
+      color = color || $container.parents('font').attr('color') || '#333';
+      face = face || $container.parents('font').attr('face') || 'Helvetica Neue';
+
+      if (face)
+        face = face.split(',')[0]
+
+      this.$fontFamilyReadout.text(face);
+      this.$colorChooser.spectrum('set', color);
     },
         
     changeEditable: function() {
@@ -154,6 +170,8 @@ define(['libs/backbone'], function(Backbone) {
       var $toggle = this.$el.find('.dropdown-toggle');
       $toggle.dropdown();
       this.$fontSizeReadout = this.$el.find('.fontSizeReadout');
+      this.$colorChooser = $colorChooser;
+      this.$fontFamilyReadout = this.$el.find('.fontFamilyBtn > .text');
     },
 
     changePosition: function() {
@@ -420,6 +438,7 @@ define(['libs/backbone'], function(Backbone) {
       });
 
       this.model.trigger('change:size', this.model, this.model.get('size'), {});
+      editorModel.trigger('caretUpdated');
       editorModel.set({position: {x: e.pageX - 15, y: overrideY || (e.pageY - 80)}});
     }
   });

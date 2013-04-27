@@ -72,6 +72,32 @@ require.config({
   }
 });
 
+function getSelectionBoundaryElement(win, isStart) {
+    var range, sel, container = null;
+    var doc = win.document;
+
+    if (doc.selection) {
+        // IE branch
+        range = doc.selection.createRange();
+        range.collapse(isStart);
+        return range.parentElement();
+    } else if (win.getSelection) {
+        // Other browsers
+        sel = win.getSelection();
+
+        if (sel.rangeCount > 0) {
+            range = sel.getRangeAt(0);
+            container = range[isStart ? "startContainer" : "endContainer"];
+
+            // Check if the container is a text node and return its parent if so
+            if (container.nodeType === 3) {
+                container = container.parentNode;
+            }
+        }
+    }
+    return container;
+}
+
 var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
