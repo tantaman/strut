@@ -153,12 +153,12 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
 
         var xSignum = 1;
         var ySignum = 1;
-        if (this._scaleDim.theta < -Math.PI / 2 && this._scaleDim.theta > -3/2 * Math.PI) {
-          xSignum = -1;
-          ySignum = -1;
-        } if (this._scaleDim.theta > Math.PI/2) {
-          xSignum = -1;
-        }
+        // if (this._scaleDim.theta < -Math.PI / 2 && this._scaleDim.theta > -3/2 * Math.PI) {
+        //   xSignum = -1;
+        //   ySignum = -1;
+        // } if (this._scaleDim.theta > Math.PI/2) {
+        //   xSignum = -1;
+        // }
 
         var scaleX = (xSignum * deltas.dx + this._scaleDim.width) / (this._scaleDim.width);
         var scaleY = (ySignum * deltas.dy + this._scaleDim.height) / (this._scaleDim.height);
