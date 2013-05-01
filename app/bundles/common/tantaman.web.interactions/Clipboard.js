@@ -1,16 +1,17 @@
 define(function() {
 	function Clipboard() {
-		this._item;
+		this.item;
 	}	
 
 	Clipboard.prototype = {
-		set item(val) {
-			this._item = val;
-		},
+		// Not supported on mobile ;*(
+		// set item(val) {
+		// 	this._item = val;
+		// },
 
-		get item() {
-			return this._item;
-		}
+		// get item() {
+		// 	return this._item;
+		// }
 	};
 
 	return Clipboard;
