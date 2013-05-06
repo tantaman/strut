@@ -1,8 +1,9 @@
 define(['libs/backbone',
 		'strut/logo_button/LogoView',
 		'strut/presentation_generator/view/PreviewButton',
+		'./ThemeProviderView',
 		'css!styles/header/header.css'],
-function(Backbone, LogoView, PreviewButton, empty) {
+function(Backbone, LogoView, PreviewButton, ThemeProviderView, empty) {
 	return Backbone.View.extend({
 		className: 'row-fluid header',
 
@@ -11,6 +12,7 @@ function(Backbone, LogoView, PreviewButton, empty) {
 			this._logoButton = new LogoView({editorModel: this.model.editorModel()});
 			this._previewButton = 
 				new PreviewButton({editorModel: this.model.editorModel()});
+			this._themeProviderView = new ThemeProviderView(this.model.editorModel());
 		},
 
 		// TODO: need to respond to addition/removal of
@@ -32,6 +34,9 @@ function(Backbone, LogoView, PreviewButton, empty) {
 
 			//var $generatorButton = this.$el.find('.preview-generator-button');
 			$modeButtons.append(this._previewButton.render().$el);
+
+			var $themeButtons = this.$el.find('.theme-buttons');
+			$themeButtons.append(this._themeProviderView.render().$el);
 
 			return this;
 		},

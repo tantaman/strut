@@ -38,10 +38,6 @@ function(Backbone) {
 			this.set('createCompButtons', createCompButtons);
 		},
 
-		_createThemeButtons: function() {
-
-		},
-
 		_modeRegistered: function(newMode) {
 			var newButton = newMode.service().createButton(this._editorModel);
 			this.get('modeButtons').push(newButton);

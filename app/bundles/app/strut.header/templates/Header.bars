@@ -12,6 +12,8 @@
 				</div>
 			</li>
 		</ul>
+		<ul class="nav theme-buttons">
+		</ul>
 		<ul class="nav pull-right">
 			<li class="divider-vertical">
 			</li>
