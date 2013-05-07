@@ -1,0 +1,6 @@
+<a class="dropdown-toggle" data-toggle="dropdown">Background</a>
+<ul class="dropdown-menu" role="menu" style="min-width: 125px">
+{{#backgrounds}}
+<li><a class="{{klass}} thumbnail" alt="{{description}}"></a></li>
+{{/backgrounds}}
+</ul>

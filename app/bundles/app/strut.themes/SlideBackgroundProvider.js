@@ -1,43 +1,19 @@
-/*
-SlideBackgroundProvider {
-view() {
-	return {
-		renders a button that allows bg selection and what not
-	}
-}
-}
-
-model?
-
-
-registry.register({
-	interfaces: 'strut.ThemeProvider',
-	meta: {
-		modes: {
-			slideEditor: true
-		}
-	}
-}, backgroundProviderFactory);
-
-backgroundProviderFactory = {
-	create: function() {
-		return new SlideBackgroundProvider();
-	}
-}
-
-
-We need a horizontally scrolling dropdown...
-*/
-define(['./AvailableBackgrounds'],
-function(Backgrounds) {
+define(['./AvailableBackgrounds', 'tantaman/web/widgets/HorizontalDropdown'],
+function(Backgrounds, View) {
 	function SlideBackgroundProvider(editorModel) {
-		this._view = new SlideBgProviderView();
+		this._view = new View(Backgrounds, JST['strut.themes/BackgroundChooserDropdown']);
 		this._editorModel = editorModel;
+
+		// Bind to selection events fired from view
 	}
 
 	SlideBackgroundProvider.prototype = {
 		view: function() {
 			return this._view;
+		},
+
+		dispose: function() {
+			
 		}
 	};
 

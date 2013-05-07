@@ -10,6 +10,8 @@ function(Backbone, ServiceCollection) {
 				{
 					interfaces: 'strut.ThemeProvider'
 				});
+
+		this._modeChanged(this._editorModel.get('modeId'));
 	}
 	
 	ThemeProviderCollection.prototype = {
@@ -25,7 +27,7 @@ function(Backbone, ServiceCollection) {
 		},
 
 		_addProvider: function(providerEntry) {
-			var p = providerEntry.service().create(editorModel);
+			var p = providerEntry.service().create(this._editorModel);
 
 			if (Array.isArray(p)) {
 				this._activeProviders = this._activeProviders.concat(p);

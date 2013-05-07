@@ -17,11 +17,12 @@ function(SurfaceBackgroundProvider, SlideBackgroundProvider) {
 
 	return {
 		initialize: function(registry) {
+			console.log('Registering theme providers');
 			registry.register({
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						slideEditor: true
+						'slide-editor': true
 					}
 				}
 			}, slideBgProviderFactory);
@@ -30,7 +31,7 @@ function(SurfaceBackgroundProvider, SlideBackgroundProvider) {
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						transitionEditor: true
+						'transition-editor': true
 					}
 				}
 			}, surfaceBgProviderFactory);

@@ -13,7 +13,7 @@ function(Backbone, ThemeProviderCollection) {
 			this.$el.empty();
 
 			this._providerCollection.activeProviders().forEach(function(provider) {
-				this.$el.append(provider.view.render().$el);
+				this.$el.append(provider.view().render().$el);
 			}, this);
 
 			return this;

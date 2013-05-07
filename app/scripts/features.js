@@ -3,6 +3,7 @@ define([
 	'strut/etch_extension/main',
 	'strut/storage/main',
 	'strut/logo_button/main',
+	'strut/themes/main',
 	'strut/editor/main',
 	'strut/exporter/json/main',
 	'strut/exporter/zip/browser/main',

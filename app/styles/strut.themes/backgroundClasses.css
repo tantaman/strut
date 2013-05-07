@@ -1,0 +1,36 @@
+.bindingDark {
+	background: url(img/binding_dark.png);
+}
+
+.blackLozenge {
+	background: url(img/black_lozenge.png);
+}
+
+.debutDark {
+	background: url(img/debut_dark.png);
+}
+
+.escheresque {
+	background: url(img/escheresque_ste.png);
+}
+
+.greyWashWall {
+	background: url(img/grey_wash_wall.png);
+}
+
+.mochaGrunge {
+	background: url(img/mochaGrunge.png);
+}
+
+.nastyFabric {
+	background: url(img/nasty_fabric.png);
+}
+
+.wildOliva {
+	background: url(img/wild_oliva.png);
+}
+
+.themeProviders .thumbnail {
+	width: 20px;
+	height: 20px;
+}
