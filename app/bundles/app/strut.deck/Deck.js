@@ -22,6 +22,7 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         slides.on("add", this._slideAdded, this);
         slides.on("remove", this._slideRemoved, this);
         slides.on("reset", this._slidesReset, this);
+        this.set('background', 'defaultbg');
         return this._lastSelected = undefined;
       },
       /**

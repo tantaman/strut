@@ -30,7 +30,13 @@
 	background: url(img/wild_oliva.png);
 }
 
+.nobg {
+	background: url(img/nobg.png);
+	background-size: 40px 40px;
+}
+
 .themeProviders .thumbnail {
-	width: 20px;
 	height: 20px;
+	width: 20px;
+	padding: 10px;
 }

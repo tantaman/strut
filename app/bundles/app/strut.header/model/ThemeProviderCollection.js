@@ -11,11 +11,11 @@ function(Backbone, ServiceCollection) {
 					interfaces: 'strut.ThemeProvider'
 				});
 
-		this._modeChanged(this._editorModel.get('modeId'));
+		this._modeChanged(null, this._editorModel.get('modeId'));
 	}
 	
 	ThemeProviderCollection.prototype = {
-		_modeChanged: function(newMode) {
+		_modeChanged: function(model, newMode) {
 			this._disposePrevious();
 			this._themeProviders.forEach(function(providerEntry) {
 				if (newMode in providerEntry.meta().modes) {
@@ -40,6 +40,7 @@ function(Backbone, ServiceCollection) {
 			this._activeProviders.forEach(function(provider) {
 				provider.dispose();
 			}, this);
+			this._activeProviders = [];
 		},
 
 		activeProviders: function() {

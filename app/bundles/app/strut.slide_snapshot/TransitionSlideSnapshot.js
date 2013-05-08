@@ -62,6 +62,8 @@ function(ThreeDComponentView, SlideDrawer, empty) {
         top: this.model.get("y")
       });
 
+      // this.$el.class();
+
       this._impScaleChanged();
 
       return this;

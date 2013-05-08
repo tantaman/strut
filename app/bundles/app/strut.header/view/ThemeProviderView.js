@@ -12,6 +12,7 @@ function(Backbone, ThemeProviderCollection) {
 		render: function() {
 			this.$el.empty();
 
+			console.log(this._providerCollection.activeProviders());
 			this._providerCollection.activeProviders().forEach(function(provider) {
 				this.$el.append(provider.view().render().$el);
 			}, this);

@@ -28,7 +28,8 @@
 }
 </style>
 <link href="preview_export/css/main.css" rel="stylesheet" />
-<link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css'>
+<link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
+<link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 <script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 
 <link rel="shortcut icon" href="favicon.png" />
@@ -55,13 +56,13 @@
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
 </div>
-<div class="bg" style="{{#extractBG background.styles}}{{/extractBG}}">
+<div class="bg">
 <div id="impress">
 
 {{#slides.models}}
 {{#attributes}}
 <div class="step" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}} {{#if z}}data-z="{{z}}"{{/if}} {{#if impScale}}data-scale="{{impScale}}"{{/if}}>
-<div style="width: 1024px; height: 768px">
+<div class="{{../../background}}" style="width: 1024px; height: 768px">
 {{#components}}
 {{#renderComponent .}}{{/renderComponent}}
 {{/components}}

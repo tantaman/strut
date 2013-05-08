@@ -39,7 +39,7 @@ function(Button, ImportingComponentButton,
 
 			buttons.push(new ImportingComponentButton({
 				componentType: 'Video',
-				icon: 'icon-facetime-video',
+				icon: 'icon-film',
 				name: lang.video,
 				tag: 'video',
 				title: lang.insert_video,

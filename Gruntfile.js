@@ -302,6 +302,16 @@ module.exports = function (grunt) {
                     src: [
                         '**/*.woff'
                     ]
+                },
+                {
+                    expand: true,
+                    dot: true,
+                    flatten: true,
+                    cwd: '<%= yeoman.app %>/**/strut.themes/img',
+                    dest: '<%= yeoman.dist %>/preview_export/css/img',
+                    src: [
+                        '**/*.png'
+                    ]
                 }]
             }
         },

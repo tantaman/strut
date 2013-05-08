@@ -1,6 +1,9 @@
-<a class="dropdown-toggle" data-toggle="dropdown">Background</a>
-<ul class="dropdown-menu" role="menu" style="min-width: 125px">
+<a class="btn btn-plast dropdown-toggle" data-toggle="dropdown">
+	<i class="icon-picture icon-white"></i>
+	{{#lang 'background'}}{{/lang}}</a>
+<ul class="dropdown-menu horizontalDropdown" role="menu" style="min-width: 127px; width: 127px">
 {{#backgrounds}}
-<li><a class="{{klass}} thumbnail" alt="{{description}}"></a></li>
+<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 {{/backgrounds}}
+<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
 </ul>

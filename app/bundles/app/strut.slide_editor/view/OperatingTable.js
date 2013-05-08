@@ -23,6 +23,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this._deck.on('change:activeSlide', function(deck, model) {
         		this.setModel(model);
       		}, this);
+      		this._deck.on('change:background', this._updateBg, this);
 			this.setModel(this._deck.get('activeSlide'));
 
 			GlobalEvents.on('cut', this._cut, this);
@@ -37,6 +38,9 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
+			this._$slideContainer.addClass(this._deck.get('background') || 'defaultbg');
+			this._$slideContainer.data('background', this._deck.get('background') || 'defaultbg');
+
 			var self = this;
 			setTimeout(function() {
 				self._rendered = true;
@@ -45,6 +49,12 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			});
 
 			return this;
+		},
+
+		_updateBg: function(model, bg) {
+			this._$slideContainer.removeClass();
+			this._$slideContainer.addClass('slideContainer ' + bg);
+			this._$slideContainer.data('background', bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for

@@ -3,7 +3,7 @@ define(['css!styles/strut.themes/backgroundClasses.css'], function() {
 	backgrounds: [
 	// TODO: translate descriptions
 		{klass: 'bindingDark', description: 'Binding Dark'},
-		{klass: 'blockLozenge', description: 'Black Lozenge'},
+		{klass: 'blackLozenge', description: 'Black Lozenge'},
 		{klass: 'debutDark', description: 'Debut Dark'},
 		{klass: 'escheresque', description: 'Escheresque'},
 		{klass: 'greyWashWall', description: 'Grey Wash Wall'},
