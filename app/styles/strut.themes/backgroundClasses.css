@@ -30,6 +30,57 @@
 	background: url(img/wild_oliva.png);
 }
 
+[class*="solid-bg-"] {
+	border: 1px solid rgba(0, 0, 0, .3);
+	border-radius: 10px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+	text-shadow: 0 2px 2px rgba(0, 0, 0, .1);
+}
+
+.solid-bg-orange {
+	background-color: #FF4040;
+}
+
+.solid-bg-black {
+	background-color: #111;
+}
+
+.solid-bg-light {
+	background-color: white;
+}
+
+.solid-bg-smoke {
+	background-color: #DDD;
+}
+
+.solid-bg-yellow {
+	background-color: #FFBF40;
+}
+
+.solid-bg-grass {
+	background-color: #369100;
+}
+
+.solid-bg-darkgreen {
+	background-color: #134952;
+}
+
+.solid-bg-sky {
+	background-color: #4962D6;
+}
+
+.solid-bg-lavender {
+	background-color: #3B0470;
+}
+
+.solid-bg-purple {
+	background-color: #8D41D6;
+}
+
+.solid-bg-salmon {
+	background-color: #FF7373;
+}
+
 .nobg {
 	background: url(img/nobg.png);
 	background-size: 40px 40px;
