@@ -65,7 +65,10 @@ function(Backbone, SlideDrawer, css) {
 			console.log('BGGGG');
 			var bg = this.options.deck.get('background') || 'defaultbg';
 			this.$el.removeClass();
-			this.$el.addClass('slideSnapshot ' + bg);
+			var classStr = 'slideSnapshot ' + bg;
+			if (this.model.get('active'))
+				classStr += ' active';
+			this.$el.addClass(classStr);
 				// this.$el.css('background-image', bg.styles[0]);
 				// this.$el.css('background-image', bg.styles[1]);
 		},
