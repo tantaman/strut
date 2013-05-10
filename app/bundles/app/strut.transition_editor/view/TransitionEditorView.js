@@ -40,7 +40,7 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 				++cnt;
 
 				var snapshot = new TransitionSlideSnapshot({model: slide,
-					registry: this.model.registry});
+					registry: this.model.registry, deck: deck});
 				this._snapshots.push(snapshot);
 				this.$el.append(snapshot.render().$el);
 			}, this);

@@ -62,7 +62,6 @@ function(Backbone, SlideDrawer, css) {
 		},
 
 		_bgChanged: function() {
-			console.log('BGGGG');
 			var bg = this.options.deck.get('background') || 'defaultbg';
 			this.$el.removeClass();
 			var classStr = 'slideSnapshot ' + bg;

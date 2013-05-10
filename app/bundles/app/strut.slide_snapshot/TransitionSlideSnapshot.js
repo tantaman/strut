@@ -54,7 +54,8 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       if (this.slideDrawer != null) {
         this.slideDrawer.dispose();
       }
-      g2d = this.$el.find("canvas")[0].getContext("2d");
+      var $canvas = this.$el.find('canvas');
+      g2d = $canvas[0].getContext("2d");
       this.slideDrawer = new SlideDrawer(this.model, g2d, this.options.registry);
       this.slideDrawer.repaint();
       this.$el.css({
@@ -63,6 +64,8 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       });
 
       // this.$el.class();
+      var bg = this.options.deck.get('background') || 'defaultbg';
+      this.$el.find('.content').addClass(bg);
 
       this._impScaleChanged();
 

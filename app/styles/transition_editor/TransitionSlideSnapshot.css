@@ -6,7 +6,6 @@
 .transitionSlideSnapshot .content {
 	width: 75px;
 	height: 50px;
-	background: #EEE; /*replace with slide bg*/
 }
 
 .transitionSlideSnapshot canvas {
