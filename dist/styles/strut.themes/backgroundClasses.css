@@ -1,0 +1,93 @@
+.bindingDark {
+	background: url(img/binding_dark.png);
+}
+
+.blackLozenge {
+	background: url(img/black_lozenge.png);
+}
+
+.debutDark {
+	background: url(img/debut_dark.png);
+}
+
+.escheresque {
+	background: url(img/escheresque_ste.png);
+}
+
+.greyWashWall {
+	background: url(img/grey_wash_wall.png);
+}
+
+.mochaGrunge {
+	background: url(img/mochaGrunge.png);
+}
+
+.nastyFabric {
+	background: url(img/nasty_fabric.png);
+}
+
+.wildOliva {
+	background: url(img/wild_oliva.png);
+}
+
+[class*="solid-bg-"] {
+	border: 1px solid rgba(0, 0, 0, .3);
+	border-radius: 10px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+	text-shadow: 0 2px 2px rgba(0, 0, 0, .3);
+}
+
+.solid-bg-orange {
+	background-color: #FF4040;
+}
+
+.solid-bg-black {
+	background-color: #111;
+}
+
+.solid-bg-light {
+	background-color: white;
+}
+
+.solid-bg-smoke {
+	background-color: #DDD;
+}
+
+.solid-bg-yellow {
+	background-color: #FFBF40;
+}
+
+.solid-bg-grass {
+	background-color: #369100;
+}
+
+.solid-bg-darkgreen {
+	background-color: #134952;
+}
+
+.solid-bg-sky {
+	background-color: #4962D6;
+}
+
+.solid-bg-lavender {
+	background-color: #3B0470;
+}
+
+.solid-bg-purple {
+	background-color: #8D41D6;
+}
+
+.solid-bg-salmon {
+	background-color: #FF7373;
+}
+
+.nobg {
+	background: url(img/nobg.png);
+	background-size: 40px 40px;
+}
+
+.themeProviders .thumbnail {
+	height: 20px;
+	width: 20px;
+	padding: 10px;
+}
