@@ -305,12 +305,11 @@ module.exports = function (grunt) {
                 },
                 {
                     expand: true,
-                    dot: true,
-                    flatten: true,
-                    cwd: '<%= yeoman.app %>/**/strut.themes/img',
-                    dest: '<%= yeoman.dist %>/preview_export/css/img',
+                    cwd: '<%= yeoman.app %>/styles/strut.themes',
+                    dest: '<%= yeoman.dist %>/styles/strut.themes',
                     src: [
-                        '**/*.png'
+                        '**/*.png',
+                        '*.css'
                     ]
                 }]
             }
