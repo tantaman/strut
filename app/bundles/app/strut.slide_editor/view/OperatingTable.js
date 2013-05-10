@@ -53,8 +53,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 
 		_updateBg: function(model, bg) {
 			this._$slideContainer.removeClass();
-			this._$slideContainer.addClass('slideContainer ' + bg);
-			this._$slideContainer.data('background', bg);
+			this._$slideContainer.addClass('slideContainer ' + (bg || 'defaultbg'));
+			this._$slideContainer.data('background', (bg || 'defaultbg'));
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for
