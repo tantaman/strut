@@ -126,7 +126,8 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
       },
       _slideAdded: function(slide, collection, options) {
         this.set("activeSlide", slide);
-        this.trigger("slideAdded", slide, options.at || collection.length);
+        var idx = (options.at == null) ? collection.length : options.at;
+        this.trigger("slideAdded", slide, idx);
         return this._registerWithSlide(slide);
       },
       _slideDisposed: function(slide) {
