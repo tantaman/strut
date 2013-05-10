@@ -1,17 +1,18 @@
-define(['./SurfaceBackgroundProvider',
-		'./SlideBackgroundProvider'],
-function(SurfaceBackgroundProvider, SlideBackgroundProvider) {
+define(['./BackgroundProvider',
+		'./AvailableBackgrounds',
+		'./AvailableSurfaces'],
+function(BackgroundProvider, Backgrounds, Surfaces) {
 	'use strict';
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new SlideBackgroundProvider(editorModel);
+			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'background');
 		}
 	};
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new SurfaceBackgroundProvider(editorModel);
+			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'surface');
 		}
 	};
 

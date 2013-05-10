@@ -1,6 +1,6 @@
 <a class="btn btn-plast dropdown-toggle" data-toggle="dropdown">
 	<i class="icon-tint icon-white"></i>
-	{{#lang 'background'}}{{/lang}}</a>
+	{{#lang title}}{{/lang}}</a>
 <ul class="dropdown-menu horizontalDropdown" role="menu" style="min-width: 127px; width: 127px">
 {{#backgrounds}}
 <li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
