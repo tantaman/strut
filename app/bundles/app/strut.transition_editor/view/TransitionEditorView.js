@@ -22,11 +22,19 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 
 		initialize: function() {
 			this._snapshots = [];
+
+			this.model.deck().on('change:surface', this._surfaceChanged, this);
+		},
+
+		_surfaceChanged: function(model, surf) {
+			this.$el.removeClass();
+			this.$el.addClass('slideTable ' + surf);
 		},
 
 		render: function() {
 			this.$el.html('');
 			var deck = this.model.deck();
+			this.$el.addClass(deck.get('surface') || 'defaultbg');
 
 			var colCnt = 6;
 			var cnt = 0;
@@ -46,6 +54,15 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 			}, this);
 
 			return this;
+		},
+
+		remove: function() {
+			Backbone.View.prototype.remove.call(this);
+			this.dispose();
+		},
+
+		dispose: function() {
+			this.model.deck().off(null, null, this);
 		},
 
 		constructor: function TransitionEditorView() {

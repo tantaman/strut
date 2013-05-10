@@ -26,5 +26,6 @@ define({
 		explain: 'Vous pouvez sauvegarder la présentation dans fichier que vous pourrez réimporter dans Strut plus tard',
 		click_below: 'Cliquer ci-dessous pour télécharger le fichier'
 	},
-	background: 'Fond'
+	background: 'Fond',
+	surface: 'Surface'
 });

@@ -30,12 +30,13 @@
 <link href="preview_export/css/main.css" rel="stylesheet" />
 <link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
+<link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
 <script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 
 <link rel="shortcut icon" href="favicon.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 </head>
-<body class="impress-not-supported">
+<body class="impress-not-supported {{surface}}">
 
 <!-- This is a work around / hack to get the user's browser to download the fonts 
  if they decide to save the presentation. -->

@@ -10,8 +10,7 @@ function(Backbone, Header) {
 		},
 
 		render: function() {
-			this.$el.html('');
-
+			this.$el.empty();
 			this.$el.append(this._header.render().$el);
 			var activeMode = this.model.get('activeMode');
 			if (activeMode)

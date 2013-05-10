@@ -18,6 +18,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
     initialize: function() {
       ThreeDComponentView.prototype.initialize.apply(this, arguments);
       this.model.on('change:impScale', this._impScaleChanged, this);
+      this.options.deck.on('change:background', this._backgroundChanged, this);
     },
     remove: function() {
       this.dispose();
@@ -29,6 +30,8 @@ function(ThreeDComponentView, SlideDrawer, empty) {
         this.slideDrawer.dispose();
       }
       ThreeDComponentView.prototype.dispose.call(this);
+      this.model.off(null, null, this);
+      this.options.deck.off(null, null, this);
     },
     clicked: function() {
       ThreeDComponentView.prototype.clicked.apply(this, arguments);
@@ -48,6 +51,11 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       });
     },
 
+    _backgroundChanged: function(deck, bg) {
+     this._$content.removeClass();
+     this._$content.addClass('content ' + bg);
+    },
+
     render: function() {
       var g2d;
       ThreeDComponentView.prototype.render.apply(this, arguments);
@@ -65,7 +73,8 @@ function(ThreeDComponentView, SlideDrawer, empty) {
 
       // this.$el.class();
       var bg = this.options.deck.get('background') || 'defaultbg';
-      this.$el.find('.content').addClass(bg);
+      this._$content = this.$el.find('.content');
+      this._$content.addClass(bg);
 
       this._impScaleChanged();
 

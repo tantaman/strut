@@ -98,6 +98,7 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         this.set("activeSlide", undefined);
         this.set("background", rawObj.background);
         this.set("fileName", rawObj.fileName);
+        this.set('surface', rawObj.surface);
         this.undoHistory.clear();
 
         // TODO: go through and dispose of all old slides...?

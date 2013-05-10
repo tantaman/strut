@@ -23,7 +23,8 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						'slide-editor': true
+						'slide-editor': true,
+						'transition-editor': true
 					}
 				}
 			}, slideBgProviderFactory);
