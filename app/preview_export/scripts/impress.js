@@ -801,6 +801,13 @@ window.presStarted = true;
         
 })(document, window);
 
+
+document.addEventListener("keydown", function(e) {
+    if (e.keyCode == 27) {
+        impress().goto('overview');
+    }
+}, false);
+
 }
 
 if ( typeof define === "function" && define.amd ) {
