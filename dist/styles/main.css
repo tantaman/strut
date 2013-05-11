@@ -8131,7 +8131,9 @@ a {
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff444444', endColorstr='#ff222222', GradientType=0);
   filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
 
+.btn {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
