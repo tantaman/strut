@@ -42,6 +42,7 @@ define(['strut/deck/Slide'], function(Slide) {
         return this.slide;
       },
       undo: function() {
+        this.slide.on('unrender', this.slide._unrendered, this.slide);
         return this.deck.get("slides").add(this.slide, {
           at: this._idx
         });
