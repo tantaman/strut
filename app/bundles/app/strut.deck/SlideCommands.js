@@ -49,27 +49,9 @@ define(['strut/deck/Slide'], function(Slide) {
       },
       name: "Remove Slide"
     };
-    Move = function(startLoc, model) {
-      this.startLoc = startLoc;
-      this.model = model;
-      this.endLoc = {
-        x: this.model.get("x"),
-        y: this.model.get("y")
-      };
-      return this;
-    };
-    Move.prototype = {
-      "do": function() {
-        return this.model.set(this.endLoc);
-      },
-      undo: function() {
-        return this.model.set(this.startLoc);
-      },
-      name: "Move"
-    };
+   
     return {
       Create: Create,
-      Remove: Remove,
-      Move: Move
+      Remove: Remove
     };
   });

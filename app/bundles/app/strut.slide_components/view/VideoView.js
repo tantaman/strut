@@ -29,7 +29,8 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
       className: 'component videoView',
       initialize: function() {
         ComponentView.prototype.initialize.apply(this, arguments);
-        return this.scale = Mixers.scaleObjectEmbed;
+        this.scale = Mixers.scaleObjectEmbed;
+        this.scaleStop = Mixers.scaleObjectEmbedStop;
       },
       render: function() {
         var object, scale;

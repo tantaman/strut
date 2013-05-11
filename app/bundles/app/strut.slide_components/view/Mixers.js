@@ -31,6 +31,12 @@ define(function() {
           height: height
         });
         return this.model.set("scale", size);
+      },
+      scaleObjectEmbedStop: function() {
+
+      },
+      scaleByResizeStop: function() {
+        
       }
     };
   });

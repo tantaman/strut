@@ -34,6 +34,7 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
         this.model.set("size", currSize + Math.round(sign * Math.sqrt(Math.abs(deltas.dx - this._lastDx))));
         return this._lastDx = deltas.dx;
       },
+      scaleStop: function() {},
       dblclicked: function(e) {
         this.$el.addClass("editable");
         this.$el.find(".content").attr("contenteditable", true);

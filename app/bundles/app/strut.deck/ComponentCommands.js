@@ -26,8 +26,67 @@
       },
       name: "Remove Comp"
     };
+
+    function BaseCommand(initial, model, attr, name) {
+      this.start = initial;
+      this.end = model.get(attr) || 0;
+      this.model = model;
+      this.name = name;
+      this.attr = attr;
+    }
+
+    BaseCommand.prototype = {
+       "do": function() {
+        this.model.set(this.attr, this.end);
+      },
+      undo: function() {
+        this.model.set(this.attr, this.start);
+      }
+    };
+
+    Move = function(startLoc, model) {
+      this.startLoc = startLoc;
+      this.model = model;
+      this.endLoc = {
+        x: this.model.get("x"),
+        y: this.model.get("y")
+      };
+      return this;
+    };
+    Move.prototype = {
+      "do": function() {
+        return this.model.set(this.endLoc);
+      },
+      undo: function() {
+        return this.model.set(this.startLoc);
+      },
+      name: "Move"
+    };
+
     return {
       Add: AddComponent,
-      Remove: RemoveComponent
+      Remove: RemoveComponent,
+      Move: Move,
+      SkewX: function(initial, component) {
+        return new BaseCommand(initial, component, 'skewX', 'Skew X');
+      },
+      SkewY: function(initial, component) {
+        return new BaseCommand(initial, component, 'skewY', 'Skew Y');
+      },
+      Rotate: function(initial, component) {
+        return new BaseCommand(initial, component, 'rotate', 'Rotate');
+      },
+      Scale: function(initial, component) {
+        return new BaseCommand(initial || {x:1,y:1}, component, 'scale', 'Scale');
+      },
+      TextScale: function() {
+
+      },
+      ResizeScale: function() {
+
+      },
+      EmbedScale: function() {
+        
+      }
     };
   });

@@ -5,7 +5,8 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
       initialize: function() {
         ComponentView.prototype.initialize.apply(this, arguments);
         if (this.model.get("imageType") === "SVG") {
-          return this.scale = Mixers.scaleByResize;
+          this.scale = Mixers.scaleByResize;
+          this.scaleStop = Mixers.scaleByResizeStop;
         }
       },
       _finishRender: function($img) {

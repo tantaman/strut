@@ -57,8 +57,10 @@ define(function() {
       };
 
       DragControl.prototype.mouseup = function(e) {
-        this.dragging = false;
-        this.$el.trigger("deltadragStop");
+        if (this.dragging) {
+          this.dragging = false;
+          this.$el.trigger("deltadragStop");
+        }
         return true;
       };
 

@@ -3,9 +3,9 @@
          "common/Math2",
          "css!styles/slide_components/ComponentView.css",
          "strut/editor/GlobalEvents",
-         "strut/deck/SlideCommands",
+         "strut/deck/ComponentCommands",
          "tantaman/web/undo_support/CmdListFactory"],
-function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFactory) {
+function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdListFactory) {
   var undoHistory = CmdListFactory.managedInstance('editor');
     return Backbone.View.extend({
       transforms: ["skewX", "skewY"],
@@ -25,6 +25,10 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
           "deltadragStart span[data-delta='skewY']": "skewYStart",
           "deltadragStart span[data-delta='rotate']": "rotateStart",
           "deltadragStart span[data-delta='scale']": "scaleStart",
+          "deltadragStop span[data-delta='scale']": "scaleStop",
+          "deltadragStop span[data-delta='rotate']": "rotateStop",
+          "deltadragStop span[data-delta='skewX']": "skewXStop",
+          "deltadragStop span[data-delta='skewY']": "skewYStop",
           'destroyed': 'remove'
         };
       },
@@ -306,13 +310,34 @@ function(Backbone, DeltaDragControl, Math2, empty, key, SlideCommands, CmdListFa
         if (this._dragging) {
           this._dragging = false;
           if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
-            cmd = new SlideCommands.Move(this.dragStartLoc, this.model);
+            cmd = new ComponentCommands.Move(this.dragStartLoc, this.model);
             undoHistory.push(cmd);
           }
           this.dragStartLoc = void 0;
         }
         return true;
       },
+
+      scaleStop: function() {
+        var cmd = new ComponentCommands.Scale(this._initialScale, this.model);
+        undoHistory.push(cmd);
+      },
+
+      rotateStop: function() {
+        var cmd = new ComponentCommands.Rotate(this._initialRotate, this.model);
+        undoHistory.push(cmd);
+      },
+
+      skewXStop: function() {
+        var cmd = new ComponentCommands.SkewX(this._initialSkewX, this.model);
+        undoHistory.push(cmd);
+      },
+
+      skewYStop: function() {
+        var cmd = new ComponentCommands.SkewY(this._initialSkewY, this.model);
+        undoHistory.push(cmd);
+      },
+
       constructor: function ComponentView() {
 			Backbone.View.prototype.constructor.apply(this, arguments);
 		}
