@@ -30,7 +30,8 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
       initialize: function() {
         ComponentView.prototype.initialize.apply(this, arguments);
         this.scale = Mixers.scaleObjectEmbed;
-        this.scaleStop = Mixers.scaleObjectEmbedStop;
+        this.model.off("change:scale", this._setUpdatedTransform, this);
+        this.model.on("change:scale", Mixers.scaleChangeObjectEmbed, this);
       },
       render: function() {
         var object, scale;

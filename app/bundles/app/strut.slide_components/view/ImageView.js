@@ -6,7 +6,8 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
         ComponentView.prototype.initialize.apply(this, arguments);
         if (this.model.get("imageType") === "SVG") {
           this.scale = Mixers.scaleByResize;
-          this.scaleStop = Mixers.scaleByResizeStop;
+          this.model.off("change:scale", this._setUpdatedTransform, this);
+          this.model.on("change:scale", Mixers.scaleChangeByResize, this);
         }
       },
       _finishRender: function($img) {
@@ -27,10 +28,10 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
           } else {
             width = Math.max(naturalWidth, 50);
             height = Math.max(naturalHeight, 50);
-            this.$el.css({
-              width: width,
-              height: height
-            });
+            // this.$el.css({
+            //   width: width,
+            //   height: height
+            // });
             this.model.set("scale", {
               width: width,
               height: height

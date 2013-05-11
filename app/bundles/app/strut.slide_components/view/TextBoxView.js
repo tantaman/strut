@@ -1,5 +1,9 @@
-define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
+define(["./ComponentView", "libs/etch",
+        "strut/deck/ComponentCommands",
+        "tantaman/web/undo_support/CmdListFactory"],
+function(ComponentView, etch, ComponentCommands, CmdListFactory) {
 	'use strict';
+    var undoHistory = CmdListFactory.managedInstance('editor');
     var styles;
     styles = ["family", "size", "weight", "style", "color", "decoration", "align"];
     return ComponentView.extend({
@@ -26,7 +30,9 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
         this._lastDx = 0;
         return this.model.on("edit", this.edit, this);
       },
-      scaleStart: function() {},
+      scaleStart: function() {
+        this._initialSize = this.model.get('size');
+      },
       scale: function(e, deltas) {
         var currSize, sign;
         currSize = this.model.get("size");
@@ -34,7 +40,10 @@ define(["./ComponentView", "libs/etch"], function(ComponentView, etch) {
         this.model.set("size", currSize + Math.round(sign * Math.sqrt(Math.abs(deltas.dx - this._lastDx))));
         return this._lastDx = deltas.dx;
       },
-      scaleStop: function() {},
+      scaleStop: function() {
+        var cmd = ComponentCommands.TextScale(this._initialSize, this.model);
+        undoHistory.push(cmd);
+      },
       dblclicked: function(e) {
         this.$el.addClass("editable");
         this.$el.find(".content").attr("contenteditable", true);

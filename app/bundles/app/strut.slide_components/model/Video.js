@@ -11,7 +11,6 @@ function(Component, FileUtils) {
         for (_i = 0, _len = matchers.length; _i < _len; _i++) {
           matcher = matchers[_i];
           regResult = matcher.reg.exec(this.get('src'));
-          console.log(regResult);
           if (regResult != null) {
             this._handleMatch(regResult, matcher);
             break;

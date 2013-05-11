@@ -6,15 +6,15 @@ define(function() {
         offset = this.$el.offset();
         width = (deltas.x - offset.left) / this.dragScale;
         height = (deltas.y - offset.top) / this.dragScale;
-        this.$el.css({
-          width: width,
-          height: height
-        });
         return this.model.set("scale", {
           width: width,
           height: height
         });
       },
+      scaleChangeByResize: function(model, size) {
+        this.$el.css(size);
+      },
+
       scaleObjectEmbed: function(e, deltas) {
         var height, offset, size, width;
         offset = this.$el.offset();
@@ -24,19 +24,12 @@ define(function() {
           width: width,
           height: height
         };
-        this.$object.attr(size);
-        this.$embed.attr(size);
-        this.$el.css({
-          width: width,
-          height: height
-        });
         return this.model.set("scale", size);
       },
-      scaleObjectEmbedStop: function() {
-
-      },
-      scaleByResizeStop: function() {
-        
+      scaleChangeObjectEmbed: function(model, size) {
+          this.$object.attr(size);
+          this.$embed.attr(size);
+          this.$el.css(size);
       }
     };
   });

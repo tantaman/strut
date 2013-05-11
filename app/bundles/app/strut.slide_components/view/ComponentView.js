@@ -46,6 +46,10 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         this.model.on("rerender", this._setUpdatedTransform, this);
         this.model.on("change:x", this._xChanged, this);
         this.model.on("change:y", this._yChanged, this);
+        this.model.on("change:skewX", this._setUpdatedTransform, this);
+        this.model.on("change:skewY", this._setUpdatedTransform, this);
+        this.model.on("change:rotate", this._setUpdatedTransform, this);
+        this.model.on("change:scale", this._setUpdatedTransform, this);
         return this._lastDeltas = {
           dx: 0,
           dy: 0
@@ -81,14 +85,12 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
       },
       skewX: function(e, deltas) {
         this.model.setFloat("skewX", this._initialSkewX + Math.atan2(deltas.dx, 22));
-        return this._setUpdatedTransform();
       },
       skewXStart: function() {
         return this._initialSkewX = this.model.get("skewX") || 0;
       },
       skewY: function(e, deltas) {
         this.model.setFloat("skewY", this._initialSkewY + Math.atan2(deltas.dy, 22));
-        return this._setUpdatedTransform();
       },
       skewYStart: function() {
         return this._initialSkewY = this.model.get("skewY") || 0;
@@ -108,7 +110,6 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         }
         newRot = newRot % (2 * Math.PI);
         this.model.setFloat("rotate", newRot);
-        return this._setUpdatedTransform();
       },
       rotateStart: function(e, deltas) {
         this.updateOrigin();
@@ -176,7 +177,6 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         scale.width = scale.x * this.origSize.width;
         scale.height = scale.y * this.origSize.height;
         this.model.set("scale", scale);
-        return this._setUpdatedTransform();
       },
       _setUpdatedTransform: function() {
         var newHeight, newWidth, obj, scale, transformStr;

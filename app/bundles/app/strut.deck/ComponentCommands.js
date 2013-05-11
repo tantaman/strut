@@ -79,14 +79,8 @@
       Scale: function(initial, component) {
         return new BaseCommand(initial || {x:1,y:1}, component, 'scale', 'Scale');
       },
-      TextScale: function() {
-
-      },
-      ResizeScale: function() {
-
-      },
-      EmbedScale: function() {
-        
+      TextScale: function(initial, component) {
+        return new BaseCommand(initial, component, 'size', 'Scale');
       }
     };
   });
