@@ -77,7 +77,7 @@
         return new BaseCommand(initial, component, 'rotate', 'Rotate');
       },
       Scale: function(initial, component) {
-        return new BaseCommand(initial || {x:1,y:1}, component, 'scale', 'Scale');
+        return new BaseCommand(initial, component, 'scale', 'Scale');
       },
       TextScale: function(initial, component) {
         return new BaseCommand(initial, component, 'size', 'Scale');

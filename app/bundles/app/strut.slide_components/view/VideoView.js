@@ -43,6 +43,11 @@ define(["./ComponentView", './Mixers'], function(ComponentView, Mixers) {
         if (scale && scale.width) {
           this.$object.attr(scale);
           this.$embed.attr(scale);
+        } else {
+          this.model.attributes.scale = {
+            width: 425,
+            height: 344
+          };
         }
         this.$el.find('.content').append(this.$object);
         return this.$el;
