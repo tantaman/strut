@@ -5,6 +5,7 @@ define(function() {
 		this.name = "Local Storage";
 		this.id = "localstorage";
 	}
+	var alerted = false;
 
 	LocalStorageProvider.prototype = {
 		ready: function() {
@@ -54,7 +55,14 @@ define(function() {
 		},
 
 		setContents: function(path, data, cb) {
-			this.impl.setItem(prefix + path, JSON.stringify(data));
+			try {
+				this.impl.setItem(prefix + path, JSON.stringify(data));
+			} catch (e) {
+				if (!alerted) {
+					alerted = true;
+					alert("Strut currently uses your browser's LocalStorage to save presentations which is limited to between 2.5 and 5mb.\n\nYou are currently over this limit so your presentation will not be saved.  You may continue editing, however.\n\nTry removing any images you dragged in and link to them instead.\n\nWe're working on improving the storage capacity!  5mb should be good if you link to your images (e.g., file://path/to/image or http://url/of/image).\n\nSorry for the inconvenience that this may cause.  We are working to resolve the issue!");
+				}
+			}
 			if (cb)
 				cb(true);
 			return this;
