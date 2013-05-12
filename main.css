@@ -1,9 +1,12 @@
 body {
+	background: #020000;
 	background: -webkit-radial-gradient(#242222, #020000);
 	background: -moz-radial-gradient(#242222, #020000);
 	background: -ms-radial-gradient(#242222, #020000);
 	background: -o-radial-gradient(#242222, #020000);
 	background: radial-gradient(#242222, #020000);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorStr='#242222', EndColorStr='#020000'); /* IE6,IE7 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#242222', EndColorStr='#020000')"; /* IE8 */
 	width: 100%;
 	height: 100%;
 	color: #bbb;
