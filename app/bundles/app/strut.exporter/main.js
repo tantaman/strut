@@ -18,12 +18,8 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 			}
 
 			var menuItem = new MenuItem({ title: lang.export, modal: exportModal});
-			var divider = {
-				$el: $('<li class="divider"></li>'),
-				render: function() { return this; }
-			};
 
-			return [menuItem, divider];
+			return [menuItem];
 		}
 	};
 

@@ -5,7 +5,7 @@ function(Backbone, Model) {
 	'use strict';
 
 	return Backbone.View.extend({
-		className: 'wellContextMenu dispNone absolute',
+		className: 'wellContextMenu absolute',
 
 		initialize: function() {
 			this.model = new Model(this._editorModel);
@@ -13,27 +13,15 @@ function(Backbone, Model) {
 
 			//this.model.on('')
 			this._currentPos = -1;
-			this._hidden = true;
 		},
 
 		reposition: function(newPos) {
-			if (newPos.y == this._currentPos.y && !this._hidden) return;
+			if (newPos.y == this._currentPos.y) return;
 
 			this.$el.css('top', newPos.y);
 			this.$el.css('left', newPos.x);
 
-			if (this._hidden) {
-				this._hidden = false;
-				this.$el.removeClass('dispNone');
-			}
-
 			this._currentPos = newPos;
-		},
-
-		hide: function() {
-			if (this._hidden) return;
-			this._hidden = true;
-			this.$el.addClass('dispNone');
 		},
 
     	slideIndex: function(i) {

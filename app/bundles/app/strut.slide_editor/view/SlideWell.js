@@ -11,7 +11,6 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 	return Backbone.View.extend({
 		events: {
 			mousemove: '_showContextMenu',
-			mouseleave: '_hideContextMenu',
 			destroyed: 'dispose',
 			mousedown: '_focused'
 		},
@@ -81,13 +80,6 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 			});
 		},
 
-		_hideContextMenu: function(e) {
-			if (e.target == this.$el[0]) {
-				this._throttler.cancel();
-				this._contextMenu.hide();
-			}
-		},
-
 		_doShowContextMenu: function(e) {
 			var offsetY = e.pageY - this.$slides.position().top;
 			// if (offsetY == null)
@@ -129,11 +121,15 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 				this.$slides.append(snapshot.render().$el);
 			}, this);
 			this.$el.append(this._contextMenu.$el);
+
+			var self = this;
+			setTimeout(function() {
+				self._doShowContextMenu({pageY: 100});
+			}, 0);
 			return this;
 		},
 
 		dispose: function() {
-			console.log('DISPOING WELL');
 			this._deck.off(null, null, this);
 			this._contextMenu.dispose();
 			this._sortable.dispose();
