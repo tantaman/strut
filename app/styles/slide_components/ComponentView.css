@@ -10,23 +10,7 @@
 	line-height: 1em;
 }
 
-.component .label.skewx {
-	font-size: 25px;
-}
-
-.component .label.skewy {
-	font-size: 25px;
-}
-
-.component .label.rotate {
-	font-size: 25px;
-}
-
-.component .label.skewx {
-	font-size: 25px;
-}
-
-.component .label.skewy {
+.component .label {
 	font-size: 25px;
 }
 
@@ -74,19 +58,25 @@
 
 .component .topLabel {
 	position: absolute;
-	left: 40%;
-	top: -20px;
+	left: 30%;
+	top: -25px;
+}
+
+.component .topLabel .skewx {
 	cursor: w-resize;
 }
 
 .component .leftLabel {
 	position: absolute;
-	left: -35px;
+	left: -45px;
 	top: 40%;
-	cursor: s-resize;
 	transform: rotate(-90deg);
 	-moz-transform: rotate(-90deg);
 	-webkit-transform: rotate(-90deg);
+}
+
+.component .leftLabel .skewy {
+	cursor: s-resize;
 }
 
 .component .scale {

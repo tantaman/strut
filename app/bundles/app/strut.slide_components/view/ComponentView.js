@@ -29,7 +29,8 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
           "deltadragStop span[data-delta='rotate']": "rotateStop",
           "deltadragStop span[data-delta='skewX']": "skewXStop",
           "deltadragStop span[data-delta='skewY']": "skewYStop",
-          'destroyed': 'remove'
+          'destroyed': 'remove',
+          'click .align': 'center'
         };
       },
       initialize: function() {
@@ -339,7 +340,14 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
       },
 
       constructor: function ComponentView() {
-			Backbone.View.prototype.constructor.apply(this, arguments);
-		}
+        Backbone.View.prototype.constructor.apply(this, arguments);
+      },
+      center: function(e) {
+        var axis = e.target.getAttribute("data-option");
+        getAxis = function ( axis, e ) { return axis == 'x' ? e.width() : e.height() }
+        var slideSize = getAxis( axis, $('.slideContainer') );
+        var textSize = getAxis( axis, $('.selected') );
+        this.model.setInt( axis, ( (slideSize/2) - (textSize/2) ) );
+      }
     });
   });
