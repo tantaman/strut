@@ -306,23 +306,7 @@ body {
 	line-height: 1em;
 }
 
-.component .label.skewx {
-	font-size: 25px;
-}
-
-.component .label.skewy {
-	font-size: 25px;
-}
-
-.component .label.rotate {
-	font-size: 25px;
-}
-
-.component .label.skewx {
-	font-size: 25px;
-}
-
-.component .label.skewy {
+.component .label {
 	font-size: 25px;
 }
 
@@ -370,19 +354,25 @@ body {
 
 .component .topLabel {
 	position: absolute;
-	left: 40%;
-	top: -20px;
+	left: 30%;
+	top: -25px;
+}
+
+.component .topLabel .skewx {
 	cursor: w-resize;
 }
 
 .component .leftLabel {
 	position: absolute;
-	left: -35px;
+	left: -45px;
 	top: 40%;
-	cursor: s-resize;
 	transform: rotate(-90deg);
 	-moz-transform: rotate(-90deg);
 	-webkit-transform: rotate(-90deg);
+}
+
+.component .leftLabel .skewy {
+	cursor: s-resize;
 }
 
 .component .scale {
@@ -547,13 +537,17 @@ body {
 	right: 0px;
 }
 .logo {
-	background-image: url('img/strut-logo-32.png');
 	width: 100px;
 	height: 32px;
-	background-position: 5px;
 	margin-left: 5px;
 	padding: 0px 20px 0px 5px;
-	background-repeat: no-repeat;
+}
+
+.logo-bg {
+	background-image: url('img/strut-logo-32-light.png');
+	display: inline-block;
+	width: 100px;
+	height: 32px;
 }
 
 .logo-holder {
@@ -561,22 +555,16 @@ body {
 	margin-left: -8px;
 }
 
-.btn-group.open .logo {
-	background-image: url('img/strut-logo-32.png');
-}
-
-.logo:active {
-  background-image: url('img/strut-logo-32.png');
-}
-
 .logo:hover {
 	background-position: 5px 0;
 }
 
-.logo .caret {
+.logo-group .logo .caret {
 	position: absolute;
 	right: 6px;
 	top: 5px;
+	border-top-color: #FFF;
+	border-bottom-color: #FFF;
 }
 
 .header .divider-vertical {
