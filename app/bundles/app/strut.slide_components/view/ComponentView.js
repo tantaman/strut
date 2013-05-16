@@ -347,7 +347,15 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         getAxis = function ( axis, e ) { return axis == 'x' ? e.width() : e.height() }
         var slideSize = getAxis( axis, $('.slideContainer') );
         var textSize = getAxis( axis, $('.selected') );
+
+        var origPos = {
+          x: this.model.get('x'),
+          y: this.model.get('y')
+        };
+
         this.model.setInt( axis, ( (slideSize/2) - (textSize/2) ) );
+        var cmd = new ComponentCommands.Move(origPos, this.model);
+        undoHistory.push(cmd);
       }
     });
   });
