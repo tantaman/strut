@@ -63,6 +63,8 @@
       name: "Move"
     };
 
+    
+
     return {
       Add: AddComponent,
       Remove: RemoveComponent,
