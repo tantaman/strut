@@ -3,6 +3,7 @@
 */
 define(['libs/backbone'], function(Backbone) {
   var modalCache = {};
+  var reg = /[a-z]+:/;
 
   var Modal = Backbone.View.extend({
     className: "itemGrabber modal hide",
@@ -60,7 +61,14 @@ define(['libs/backbone'], function(Backbone) {
       }
     },
     loadItem: function() {
-      this.item.src = this.$input.val();
+      var val = this.$input.val();
+
+      var r = reg.exec(val);
+      if (r == null || r.index != 0) {
+        val = 'http://' + val;
+      }
+
+      this.item.src = val;
       return this.src = this.item.src;
     },
     _itemLoadError: function() {
