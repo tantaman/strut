@@ -51,6 +51,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         this.model.on("change:skewY", this._setUpdatedTransform, this);
         this.model.on("change:rotate", this._setUpdatedTransform, this);
         this.model.on("change:scale", this._setUpdatedTransform, this);
+        this.$el.css('z-index', zTracker.next());
         return this._lastDeltas = {
           dx: 0,
           dy: 0
