@@ -6,13 +6,13 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'background');
+			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer');
 		}
 	};
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'surface');
+			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface', 'slideTable');
 		}
 	};
 
@@ -33,7 +33,7 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						'transition-editor': true
+						'transition-editor': true,
 					}
 				}
 			}, surfaceBgProviderFactory);

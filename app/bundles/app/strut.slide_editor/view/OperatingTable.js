@@ -24,6 +24,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
         		this.setModel(model);
       		}, this);
       		this._deck.on('change:background', this._updateBg, this);
+      		this._deck.on('change:surface', this._updateSurface, this);
 			this.setModel(this._deck.get('activeSlide'));
 
 			GlobalEvents.on('cut', this._cut, this);
@@ -38,8 +39,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(this._deck.get('background') || 'defaultbg');
-			this._$slideContainer.data('background', this._deck.get('background') || 'defaultbg');
+			this._$slideContainer.addClass(this._deck.slideBackground());
+			this._$slideContainer.data('background', this._deck.slideBackground());
 
 			var self = this;
 			setTimeout(function() {
@@ -53,8 +54,14 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 
 		_updateBg: function(model, bg) {
 			this._$slideContainer.removeClass();
-			this._$slideContainer.addClass('slideContainer ' + (bg || 'defaultbg'));
-			this._$slideContainer.data('background', (bg || 'defaultbg'));
+			this._$slideContainer.addClass('slideContainer ' + this._deck.slideBackground(bg));
+			this._$slideContainer.data('background', this._deck.slideBackground(bg));
+		},
+
+		_updateSurface: function(model, bg) {
+			var currentBg = this._deck.get('background');
+			if (currentBg == 'defaultbg')
+				this._updateBg(model, bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for

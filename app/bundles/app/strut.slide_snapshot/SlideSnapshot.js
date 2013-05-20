@@ -17,6 +17,7 @@ function(Backbone, SlideDrawer, css) {
 			this.model.on('change:active', this._activated, this);
 			this.model.on('dispose', this.dispose, this);
 			this.options.deck.on('change:background', this._bgChanged, this);
+			this.options.deck.on('change:surface', this._bgChanged, this);
 
 			this._template = JST['strut.slide_snapshot/SlideSnapshot'];
 		},
@@ -62,7 +63,7 @@ function(Backbone, SlideDrawer, css) {
 		},
 
 		_bgChanged: function() {
-			var bg = this.options.deck.get('background') || 'defaultbg';
+			var bg = this.options.deck.slideBackground();
 			this.$el.removeClass();
 			var classStr = 'slideSnapshot ' + bg;
 			if (this.model.get('active'))

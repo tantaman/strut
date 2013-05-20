@@ -55,6 +55,18 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         slides.add(slide, {at: destIndex, silent: true});
       },
 
+      slideBackground: function(bg) {
+        if (bg)
+          return bg || this.get('surface') || 'defaultbg'
+        if (this.get('background') == 'defaultbg')
+          return this.get('surface') || 'defaultbg';
+        return this.get('background') || this.get('surface') || 'defaultbg';
+      },
+
+      slideSurface: function() {
+        return this.get('surface') || 'defaultbg';
+      },
+
       // resortSlides: function(sourceIndex, destIndex) {
       //   var slides = this.get('slides');
         
