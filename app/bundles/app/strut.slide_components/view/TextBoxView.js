@@ -55,13 +55,14 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
       },
       mouseup: function(e) {
         if (this.editing) {
-          etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+          etch.triggerCaret();
+          //etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
         }
       },
       mousedown: function(e) {
         if (this.editing) {
           e.stopPropagation();
-         // etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
+          etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
         } else {
           ComponentView.prototype.mousedown.apply(this, arguments);
         }

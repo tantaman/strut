@@ -177,7 +177,7 @@ define(['libs/backbone'], function(Backbone) {
     changePosition: function() {
       // animate editor-panel to new position
       var pos = this.model.get('position');
-      this.$el.animate({'top': pos.y, 'left': pos.x}, { queue: false });
+      this.$el.animate({'top': pos.y, 'left': pos.x}, { queue: false, duration: 300 });
     },
         
     wrapSelection: function(selectionOrRange, elString, cb) {
@@ -355,6 +355,11 @@ define(['libs/backbone'], function(Backbone) {
     views: views,
     collections: collections,
 
+    triggerCaret: function() {
+      var editorModel = $('.etch-editor-panel').data('model');
+      editorModel.trigger('caretUpdated');
+    },
+
     // This function is to be used as callback to whatever event
     // you use to initialize editing 
     editableInit: function(e, overrideY) {
@@ -438,7 +443,6 @@ define(['libs/backbone'], function(Backbone) {
       });
 
       this.model.trigger('change:size', this.model, this.model.get('size'), {});
-      editorModel.trigger('caretUpdated');
       editorModel.set({position: {x: e.pageX - 15, y: overrideY || (e.pageY - 80)}});
     }
   });
