@@ -66,6 +66,10 @@
 	cursor: w-resize;
 }
 
+.component .topLabel .rotates {
+	cursor: w-resize;
+}
+
 .component .leftLabel {
 	position: absolute;
 	left: -45px;
@@ -76,6 +80,10 @@
 }
 
 .component .leftLabel .skewy {
+	cursor: s-resize;
+}
+
+.component .leftLabel .rotates {
 	cursor: s-resize;
 }
 
