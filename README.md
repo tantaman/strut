@@ -6,19 +6,16 @@ Strut
 #### A GUI / Authoring Tool for ImpressJS ####
 
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
-I hope this project can also serve as an example of a browser based rich client as the project matures.
 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
-And here is a video of the very first version of Strut: http://www.youtube.com/watch?v=zA5s8wwme44
-and a more updated one: http://www.youtube.com/watch?v=TTpiDXEIulg
 
-Strut live preview (Firefox, Chrome and Safari only): http://strut.io
+### Start using Strut! http://strut.io
 
-### Preview ###
+(Firefox, Chrome and Safari only)
 
-A github hosted preview is available at: http://strut.io (Firefox, Chrome and Safari only)
+### Learn a bit about Strut - http://www.youtube.com/watch?v=TTpiDXEIulg ###
 
-The preview currently points to the development version of Strut.
+(previous video: http://www.youtube.com/watch?v=zA5s8wwme44)
 
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
