@@ -1,9 +1,10 @@
 /*
 @author Matt Crinklaw-Vogt
 */
-define(['libs/backbone'], function(Backbone) {
+define(['libs/backbone', 'libs/imgup'], function(Backbone, Imgup) {
   var modalCache = {};
   var reg = /[a-z]+:/;
+  var imgup = new Imgup('847de02274cba30');
 
   var Modal = Backbone.View.extend({
     className: "itemGrabber modal hide",
@@ -32,17 +33,34 @@ define(['libs/backbone'], function(Backbone) {
       var f, reader,
         _this = this;
       f = e.target.files[0];
-      if (!f.type.match('image.*')) {
+      if (!f.type.match('image.*'))
         return;
-      }
-      reader = new FileReader();
-      reader.onload = function(e) {
-        _this.$input.val(e.target.result);
-        return _this.urlChanged({
+
+      this._switchToProgress();
+
+      imgup.upload(f).progress(function(ratio) {
+        _this._updateProgress(ratio);
+      }).then(function(result) {
+        _this._switchToThumbnail();
+        _this.$input.val(result.data.link);
+        _this.urlChanged({
           which: -1
         });
-      };
-      return reader.readAsDataURL(f);
+      }, function() {
+        _this._updateProgress(0);
+        _this._switchToThumbnail();
+        _this.$input.val('Failed to upload image to imgur');
+      });
+
+      
+      // reader = new FileReader();
+      // reader.onload = function(e) {
+      //   _this.$input.val(e.target.result);
+      //   _this.urlChanged({
+      //     which: -1
+      //   });
+      // };
+      // reader.readAsDataURL(f);
     },
     browseClicked: function() {
       return this.$el.find('input[type="file"]').click();
@@ -79,6 +97,18 @@ define(['libs/backbone'], function(Backbone) {
       this.$el.find(".ok").removeClass("disabled");
       return this.$el.find(".alert").addClass("dispNone");
     },
+    // should probably just make a sub component to handle progress
+    _updateProgress: function(ratio) {
+      this.$progressBar.css('width', ratio * 100 + '%');
+    },
+    _switchToProgress: function() {
+      this.$thumbnail.addClass('dispNone');
+      this.$progress.removeClass('dispNone');
+    },
+    _switchToThumbnail: function() {
+      this.$progress.addClass('dispNone');
+      this.$thumbnail.removeClass('dispNone');
+    },
     render: function() {
       var _this = this;
       this.$el.html(JST["tantaman.web.widgets/ItemImportModal"](this.options));
@@ -97,6 +127,9 @@ define(['libs/backbone'], function(Backbone) {
         };
       }
       this.$input = this.$el.find("input[name='itemUrl']");
+      this.$progress = this.$el.find('.progress');
+      this.$progressBar = this.$progress.find('.bar');
+      this.$thumbnail = this.$el.find('.thumbnail');
 
       return this.$el;
     },
