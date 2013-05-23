@@ -9,13 +9,13 @@ This project intends to create an extensible, maintainable, and clean editor for
 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 
-### Start using Strut! http://strut.io
-
-(Firefox, Chrome and Safari only)
-
 ### Learn a bit about Strut - http://www.youtube.com/watch?v=TTpiDXEIulg ###
 
 (previous video: http://www.youtube.com/watch?v=zA5s8wwme44)
+
+### Start using Strut! http://strut.io
+
+(Firefox, Chrome and Safari only)
 
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
