@@ -37,6 +37,7 @@ define(['libs/backbone', 'libs/imgup'], function(Backbone, Imgup) {
         return;
 
       this._switchToProgress();
+      this.item.src = '';
 
       imgup.upload(f).progress(function(ratio) {
         _this._updateProgress(ratio);
