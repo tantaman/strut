@@ -39,6 +39,8 @@ function(Backbone,
 				identifier: 'fileName'
 			});
 
+			this.exportable.adapted = this;
+
 			var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
 			if (savers) {
 				var storageInterface = null;
