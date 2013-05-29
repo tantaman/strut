@@ -31,7 +31,11 @@
 <link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
+<link href="preview_export/css/artothek.css" rel="stylesheet" />
+<script type="text/javascript" src="preview_export/scripts/artothek.js"></script>
 <script type="text/javascript" src="preview_export/scripts/impress.js"></script>
+
+
 
 <link rel="shortcut icon" href="favicon.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -56,6 +60,9 @@
 <div class="fallback-message">
     <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+<div id="artothek-header">
+	This is only a Header
 </div>
 <div class="bg">
 <div id="impress">
@@ -93,6 +100,11 @@ if (interval >= 1000) {
 }
 </script>
 {{/interval}}
+</div>
+<div id="artothek-footer">
+	This is only a Footer
+	<div id="artothek-previous">previous</div>
+	<div id="artothek-next">next</div>
 </div>
 <script>
 if (!window.presStarted) {
