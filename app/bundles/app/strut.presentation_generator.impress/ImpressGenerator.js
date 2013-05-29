@@ -103,6 +103,26 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
       return JST["strut.presentation_generator.impress/ImpressTemplate"](deckAttrs);
     };
 
+    ImpressGenerator.prototype.getStartPreviewFn = function(editorModel, sourceWind, previewStr) {
+      function cb() {
+        if (!sourceWind.previewWind.startPres) {
+          setTimeout(cb, 200);
+        } else {
+          sourceWind.
+            previewWind.document.
+              getElementsByTagName("html")[0].innerHTML = previewStr;
+          if (!sourceWind.previewWind.presStarted) {
+            sourceWind.previewWind.startPres(sourceWind.previewWind.document, sourceWind.previewWind);
+            sourceWind.previewWind.imp = sourceWind.previewWind.pres();
+            sourceWind.previewWind.imp.init();
+            sourceWind.previewWind.imp.goto(editorModel.activeSlideIndex());
+          }
+        }
+      }
+
+      return cb;
+    };
+
     ImpressGenerator.prototype.convertTextBoxData = function(attrs) {
       var copy;
       copy = _.extend({}, attrs);

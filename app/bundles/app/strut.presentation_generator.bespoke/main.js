@@ -7,6 +7,9 @@ function(BespokeGenerator) {
 		id: 'bespoke',
 		generate: function(deckAttrs) {
 			return BespokeGenerator.render(deckAttrs);
+		},
+		getStartPreviewFn: function() {
+			return BespokeGenerator.getStartPreviewFn.apply(BespokeGenerator, arguments);
 		}
 	};
 

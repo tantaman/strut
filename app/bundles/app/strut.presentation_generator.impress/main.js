@@ -7,6 +7,9 @@ function(ImpressGenerator) {
 		id: 'impress',
 		generate: function(deckAttrs) {
 			return ImpressGenerator.render(deckAttrs);
+		},
+		getStartPreviewFn: function() {
+			return ImpressGenerator.getStartPreviewFn.apply(ImpressGenerator, arguments);
 		}
 	};
 

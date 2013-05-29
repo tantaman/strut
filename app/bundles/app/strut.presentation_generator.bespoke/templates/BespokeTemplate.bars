@@ -1,0 +1,32 @@
+<head>
+	<meta name="viewport" content="width=device-width" />
+	<title>Deck Title</title>
+	<link rel="stylesheet" type="text/css" href="preview_export/bespoke/css/demo.css" />
+	<link rel="stylesheet" type="text/css" href="preview_export/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="preview_export/bespoke/css/themes.css" />
+	<link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
+	<link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
+</head>
+<body class="coverflow">
+	<div id="main">
+		<article>
+			{{#slides.models}}
+				{{#attributes}}
+					<section class="{{../../background}}" style="width: 1024px; height: 768px">
+						{{#components}}
+							{{#renderComponent .}}{{/renderComponent}}
+						{{/components}}
+					</section>
+				{{/attributes}}
+			{{/slides.models}}
+		</article>
+	</div>
+
+<script src="preview_export/bespoke/scripts/bespoke.js"></script>
+<script>
+if (!window.presStarted) {
+    startPres(document, window);
+    bespoke.horizontal.from('article');
+}
+</script>
+</body>

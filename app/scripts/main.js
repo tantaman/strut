@@ -69,6 +69,10 @@ require.config({
 
     "../preview_export/scripts/impress": {
       exports: "startImpress"
+    },
+
+    "../preview_export/bespoke/scripts/bespoke": {
+      exports: "startImpress"
     }
   }
 });
@@ -146,11 +150,23 @@ log.notice = function(msg) {
 }
 
 if (window.location.href.indexOf("preview=true") != -1) {
-  require(['../preview_export/scripts/impress', 'jquery'], function(impress, jquery) {
-    window.jQuery = jquery;
-    window.startPres = impress;
-    window.$ = jquery;
-  });
+  if (window.location.href.indexOf("bespoke") != -1) {
+    require(['../preview_export/bespoke/scripts/bespoke', 'jquery'],
+      function(bespoke, jquery) {
+
+      window.jQuery = jquery;
+      window.startPres = bespoke;
+      window.$ = jquery;
+    });
+  } else {
+    require(['../preview_export/scripts/impress', 'jquery'],
+      function(impress, jquery) {
+
+      window.jQuery = jquery;
+      window.startPres = impress;
+      window.$ = jquery;
+    });
+  }
 } else {
   require([
            'lang',
