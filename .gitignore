@@ -9,3 +9,4 @@ compiled-templates.js
 repl-port
 bin/
 ccw.repl.cmdhistory.prefs
+/nbproject/
