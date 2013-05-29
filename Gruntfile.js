@@ -206,12 +206,16 @@ module.exports = function (grunt) {
                     optimize: 'none',
                     // TODO: Figure out how to make sourcemaps work with grunt-usemin
                     // https://github.com/yeoman/grunt-usemin/issues/30
-                    //generateSourceMaps: true,
-                    // required to support SourceMaps
+                    generateSourceMaps: false,
+					// required to support SourceMaps
                     // http://requirejs.org/docs/errors.html#sourcemapcomments
                     preserveLicenseComments: false,
                     useStrict: true,
-                    wrap: true,
+                    //load handlebars first!
+					wrap: {
+						startFile: "app/scripts/libs/Handlebars.js"
+					},
+					skipDirOptimize:false
                     //uglify2: {} // https://github.com/mishoo/UglifyJS2
                 }
             }
@@ -279,8 +283,7 @@ module.exports = function (grunt) {
                     dest: '<%= yeoman.dist %>',
                     src: [
                         '.htaccess',
-                        'preview_export/**',
-                        'zip/**'
+                        'preview_export/**'
                     ]
                 },
                 {
@@ -358,7 +361,7 @@ module.exports = function (grunt) {
         'imagemin',
         'htmlmin',
         'concat',
-        // 'cssmin',
+        'cssmin',
         'uglify',
         'copy',
         'replace',
