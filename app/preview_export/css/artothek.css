@@ -1,0 +1,50 @@
+/* 
+    Document   : rpi
+    Created on : 27.05.2013, 14:49:33
+    Author     : pro-ci
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* ==========================================================================
+   basic styles
+   ========================================================================== */
+
+#artothek-header,
+#artothek-footer
+{
+	position:fixed;
+	height:80px;
+	width:100%;
+	background-color:#444444;
+	color:#fff;
+	pointer-events: auto;
+}
+
+/* ==========================================================================
+   #artothek-header
+   ========================================================================== */
+#artothek-header
+{
+	top:0;
+}
+
+/* ==========================================================================
+   #artothek-footer
+   ========================================================================== */
+#artothek-footer
+{
+	bottom:0;
+}
+#artothek-next,
+#artothek-previous
+{
+	cursor: pointer;
+}
+
+#artothek-next
+{
+	width:100px;
+	height:20px;
+	background-color: green;
+}
