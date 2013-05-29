@@ -11,7 +11,7 @@ function(Backbone, FileUtils, lang) {
 			*/
 			this._dlSupported = 'download' in document.createElement('a')
 
-			this.$el.html('<div class="alert">' + lang.strut_exporter_json.explain + '</div>');
+			this.$el.html('<div class="alert alert-info">' + lang.strut_exporter_json.explain + '</div>');
 			if (this._dlSupported) {
 				this.$el.append('<div class="alert alert-success">' + lang.strut_exporter_json.click_below + '</div>');
 			}

@@ -3,7 +3,11 @@ function(Backbone, Archiver, lang) {
 	return Backbone.View.extend({
 		name: "Zip",
 		initialize: function() {
-			this.$el.html('<div class="alert alert-success">' + lang.strut_exporter_json.click_below + '</div>');
+			this.$el.html(
+				'<div class="alert alert-info">This renders and zips up your final presentation.</div>' +
+				'<div class="alert alert-info"><strong>Note:</strong> The most effective way to archive your rendered presentation (<strong>and include all assets</strong>) is to:<br/>' +
+				'<ol><li>Click <code>Preview</code></li><li>Use your browser\'s <code>Save Page As (Ctrl+S / ⌘+S)</code> functionality<br/>to save the entire presentation to disk.</li></ol>' +
+				'</div><div class="alert alert-success">Click below to continue downloading the generated zip</div>');
 		},
 
 		show: function($container, $modal) {
@@ -40,7 +44,7 @@ function(Backbone, Archiver, lang) {
 		},
 
 		render: function() {
-			this.$el.html('Still in progress.  The best way to do this at the moment is to:<br/>'
+			this.$el.html('Zipping while running Strut from file:// URLs is currently not supported due to browser security restrictions.  The best way zip your presentation in this case is to:<br/>'
 				+ '<ol><li>Click Preview, then</li><li>Use your browser\'s <code>Save Page As</code> functionality<br/>to save the entire presentation to disk.</li></ol>');
 			return this;
 		},
