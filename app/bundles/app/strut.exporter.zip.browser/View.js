@@ -4,18 +4,18 @@ function(Backbone, Archiver, lang) {
 		name: "Zip",
 		initialize: function() {
 			this.$el.html(
-				'<div class="alert alert-info">This renders and zips up your final presentation.</div>' +
-				'<div class="alert alert-info"><strong>Note:</strong> The most effective way to archive your rendered presentation (<strong>and include all assets</strong>) is to:<br/>' +
-				'<ol><li>Click <code>Preview</code></li><li>Use your browser\'s <code>Save Page As (Ctrl+S / ⌘+S)</code> functionality<br/>to save the entire presentation to disk.</li></ol>' +
-				'</div><div class="alert alert-success">Click below to continue downloading the generated zip</div>');
+				'<div class="alert alert-info">The most effective way to archive your rendered presentation is to:<p>' +
+				'<ol><li>Click <code>Preview</code></li><li>Press <code>Ctrl+S</code>(windows) or <code>⌘+S</code>(Mac) to save the entire presentation to disk.</li></ol></p>'
+				//+ '</div><div class="alert alert-success">Click below to continue downloading the generated zip</div>'
+				);
 		},
 
 		show: function($container, $modal) {
 			this._$modal = $modal;
 			var $ok = this._$modal.find('.ok');
-			this._makeDownloadable($ok);
+			//this._makeDownloadable($ok);
 
-			$ok.html('<i class="icon-download-alt icon-white"></i>');
+			$ok.html('');
 			$container.append(this.$el);
 		},
 
