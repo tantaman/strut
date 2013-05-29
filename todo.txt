@@ -89,9 +89,7 @@ path {
 exported_package: bundle-location + exported_package
 }
 
-
-
-
+{}
 Seems like we can just modify requirejs to register anything under "exports" as
 a new path.
 
