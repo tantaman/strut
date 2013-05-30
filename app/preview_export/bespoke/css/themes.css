@@ -95,11 +95,11 @@
 
 /* Coverflow Theme */
 .coverflow {
-	background: rgba(42, 206, 185, 0.2);
+	/*background: rgba(42, 206, 185, 0.2);*/
 }
 .coverflow section,
 .coverflow .arrow:hover {
-	background: rgb(42, 206, 185);
+	/*background: rgb(42, 206, 185);*/
 }
 .coverflow a {
 	color: rgb(42, 206, 185);
@@ -180,11 +180,11 @@
 
 /* Classic Theme */
 .classic {
-	background: rgba(243, 111, 86, 0.2);
+	/*background: rgba(243, 111, 86, 0.2);*/
 }
 .classic section,
 .classic .arrow:hover {
-	background: rgb(243, 111, 86);
+/*	background: rgb(243, 111, 86);*/
 }
 .classic a {
 	color: rgb(243, 111, 86);
@@ -238,11 +238,11 @@
 
 /* Carousel Theme */
 .carousel {
-	background: rgba(121, 255, 0, 0.2);
+	/*background: rgba(121, 255, 0, 0.2);*/
 }
 .carousel section,
 .carousel .arrow:hover {
-	background: rgb(131, 199, 69);
+	/*background: rgb(131, 199, 69);*/
 }
 .carousel a {
 	color: rgb(131, 199, 69);

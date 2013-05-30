@@ -1,13 +1,34 @@
 <head>
 	<meta name="viewport" content="width=device-width" />
 	<title>Deck Title</title>
-	<link rel="stylesheet" type="text/css" href="preview_export/bespoke/css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="preview_export/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="preview_export/bespoke/css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="preview_export/bespoke/css/themes.css" />
 	<link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 	<link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
+
+	<style>
+	.componentContainer {
+	    position: absolute;
+	    line-height: normal;
+	    /*-webkit-transform-origin: 135% 135%;
+	    -moz-transform-origin: 135% 135%;
+	    transform-origin: 135% 135%;*/
+	}
+
+	.transformContainer {
+	    -webkit-transform-origin: 0 0;
+	    -moz-transform-origin: 0 0;
+	    transform-origin: 0 0;
+	}
+
+	.bg {
+	    width: 100%;
+	    height: 100%;
+	}
+	</style>
 </head>
-<body class="coverflow">
+<body class="coverflow {{surface}}">
 	<div id="main">
 		<article>
 			{{#slides.models}}
