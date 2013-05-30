@@ -18,7 +18,9 @@ define(function () {
 	} catch (e) {
 	}
 
-	var sessionMeta = sessionMeta || {};
+	var sessionMeta = sessionMeta || {
+		generator_index: 0
+	};
 
 	window.config = config;
 	window.sessionMeta = sessionMeta;

@@ -13,7 +13,8 @@ function(Backbone, PreviewLauncher) {
 				.getBest('strut.presentation_generator.GeneratorCollection');
 
 			delete this.options.editorModel;
-			this._index = 0;
+			// TODO: we should keep session meta per bundle...
+			this._index = window.sessionMeta.generator_index;
 
 			this._template = JST['strut.presentation_generator/Button'];
 		},
@@ -31,6 +32,7 @@ function(Backbone, PreviewLauncher) {
 					self.$el.find('.check').css('visibility', 'hidden');
 					$btn.find('.check').css('visibility', '');
 					self._index = i;
+					window.sessionMeta.generator_index = i;
 					e.stopPropagation();
 				});
 			});
@@ -39,7 +41,7 @@ function(Backbone, PreviewLauncher) {
 		render: function() {
 			this.$el.html(this._template({generators: this._generators}));
 			this._bind();
-			$(this.$el.find('.check')[0]).css('visibility', '');
+			$(this.$el.find('.check')[this._index]).css('visibility', '');
 			return this;
 		}
 	});
