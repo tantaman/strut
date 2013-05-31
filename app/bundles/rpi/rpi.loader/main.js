@@ -5,9 +5,9 @@ function(EditorView, EditorModel) {
 	var editorStartup = {
 		run: function() {
 			var model = new EditorModel(registry);
-    		//var editor = new EditorView({model: model, registry: registry});
-    		//editor.render();
-			//$('body').append(editor.$el);
+    		var editor = new EditorView({model: model, registry: registry});
+    		editor.render();
+			$('body').append(editor.$el);
 
 			
 			
@@ -53,7 +53,7 @@ function(EditorView, EditorModel) {
 							  "y": 1
 							},
 							"type": "TextBox",
-							"text": "Die dicke  Folie<br>",
+							"text": "Zwei dicke  Folien<br>",
 							"size": 72,
 							"selected": false
 						  }
