@@ -46,7 +46,11 @@ require.config({
     'tantaman/web/storage': '../bundles/common/tantaman.web.storage',
     'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
     'tantaman/web/interactions': '../bundles/common/tantaman.web.interactions',
-    'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets'
+    'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets',
+	
+	'rpi/scripts': '../scripts/common/Rpi',
+	'jqueryui':'../scripts/libs/jqueryui',
+	'raphael':'../scripts/libs/raphael-min'
     // end build - rmap
   },
 
@@ -146,10 +150,11 @@ log.notice = function(msg) {
 }
 
 if (window.location.href.indexOf("preview=true") != -1) {
-  require(['../preview_export/scripts/impress', 'jquery'], function(impress, jquery) {
+  require(['../preview_export/scripts/impress', 'jquery','rpi/scripts','jqueryui','raphael'], function(impress, jquery, rpi) {
     window.jQuery = jquery;
     window.startPres = impress;
     window.$ = jquery;
+	rpi();
   });
 } else {
   require([
@@ -159,7 +164,8 @@ if (window.location.href.indexOf("preview=true") != -1) {
            'strut/config/config',
            'features',
            './StrutLoader',
-           'bootstrap'
+           'bootstrap',
+		   'rpi/scripts'
           ],
   function(lang, empt, empty, config, registry, StrutLoader) {
       'use strict';
