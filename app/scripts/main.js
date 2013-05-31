@@ -149,9 +149,16 @@ log.notice = function(msg) {
     console.log(msg);
 }
 
+// reassigning rquire to r for
+// the "preview" includes so they don't get built into the actual
+// amd app.
+// TODO: move this stuff into index.html
+// so we don't have to include the actual amd-app when
+// we go to present.
+var r = require;
 if (window.location.href.indexOf("preview=true") != -1) {
   if (window.location.href.indexOf("bespoke") != -1) {
-    require(['../preview_export/bespoke/scripts/bespoke', 'jquery'],
+    r(['../preview_export/bespoke/scripts/bespoke', 'jquery'],
       function(bespoke, jquery) {
 
       window.jQuery = jquery;
@@ -159,7 +166,7 @@ if (window.location.href.indexOf("preview=true") != -1) {
       window.$ = jquery;
     });
   } else {
-    require(['../preview_export/scripts/impress', 'jquery'],
+    r(['../preview_export/scripts/impress', 'jquery'],
       function(impress, jquery) {
 
       window.jQuery = jquery;
