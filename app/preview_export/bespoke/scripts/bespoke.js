@@ -11,6 +11,16 @@ function startPres(document, window) {
 		return;
 	window.presStarted = true;
 
+var body = document.querySelector('body');
+var themeSelect = document.querySelector("#themeChooser > select");
+themeSelect.onchange = function(e) {
+	//e.target.value
+	var toRemove = body.classList[body.classList.length - 1];
+	body.classList.remove(toRemove);
+	body.classList.add(e.target.value);
+	themeSelect.blur();
+};
+
 (function(moduleName, window, document) {
 	var from = function(selector, selectedPlugins) {
 			var parent = document.querySelector(selector),

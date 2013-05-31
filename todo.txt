@@ -1,3 +1,19 @@
+-EditorModel will get updated when a new generator is selected
+-EditorModel will check to see if that generator allows modes
+-Set mode to none if not
+-Enable other controls required by generator
+-Other controls will behave similarly to the mode button stuff in the header?
+
+
+
+
+
+
+
+
+
+
+
 -text writer
 -destroy event
 -gradient picker

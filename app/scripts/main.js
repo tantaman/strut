@@ -175,9 +175,10 @@ if (window.location.href.indexOf("preview=true") != -1) {
            'strut/config/config',
            'features',
            './StrutLoader',
-           'bootstrap'
+           'bootstrap',
+           'handlebars'
           ],
-  function(lang, empt, empty, config, registry, StrutLoader) {
+  function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars) {
       'use strict';
       var agent = window.navigator.userAgent;
       if (agent.indexOf('WebKit') >= 0)
@@ -189,6 +190,9 @@ if (window.location.href.indexOf("preview=true") != -1) {
       else
           window.browserPrefix = ""
           
+      Handlebars.registerHelper("either", function(a, b) {
+        return b != null ? b : a;
+      });
 
       $.event.special.destroyed = {
         remove: function(o) {

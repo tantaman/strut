@@ -26,9 +26,31 @@
 	    width: 100%;
 	    height: 100%;
 	}
+
+	#themeChooser {
+		position: absolute;
+		z-index: 1;
+		background-color: #EEE;
+		border-radius: 5px;
+		padding: 10px;
+	}
+
+	body {
+		overflow: hidden;
+	}
 	</style>
 </head>
-<body class="coverflow {{surface}}">
+<body class="{{surface}} {{#either 'coverflow' cannedTransition}}{{/either}}">
+	<div id="themeChooser">
+		<b>Theme:</b>
+		<select>
+			<option value="coverflow">Coverflow</option>
+			<option value="concave">Concave</option>
+			<option value="cube">Cube</option>
+			<option value="classic">Classic</option>
+			<option value="carousel">Carousel</option>
+		</select>
+	</div>
 	<div id="main">
 		<article>
 			{{#slides.models}}
