@@ -13,7 +13,7 @@ Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http:/
 
 (previous video: http://www.youtube.com/watch?v=zA5s8wwme44)
 
-### Start using Strut! http://strut.io
+### Start using Strut! http://strut.io/dist/index.html
 
 (Firefox, Chrome and Safari only)
 
