@@ -30,21 +30,50 @@
 }
 
 /* ==========================================================================
+  #artothek-content-toolbar
+   ========================================================================== */
+#artothek-content-toolbar
+{
+	position:absolute;
+	height:100%;
+	width:100%;
+	pointer-events: auto;
+}
+
+#artothek-content-toolbar
+{
+
+}
+
+#artothek-content-toolbar #artothek-content-toolbar-previous,
+#artothek-content-toolbar #artothek-content-toolbar-next
+{
+	bottom: auto;
+    cursor: pointer;
+    height: 100px;
+    margin: auto;
+    position: relative;
+    top: 50%;
+    vertical-align: text-top;
+    width: 100px;
+}
+
+#artothek-content-toolbar #artothek-content-toolbar-previous
+{
+	background-color: red;
+	float: left;
+}
+
+#artothek-content-toolbar #artothek-content-toolbar-next
+{	
+	background-color: green;
+	float: right;
+}
+
+/* ==========================================================================
    #artothek-footer
    ========================================================================== */
 #artothek-footer
 {
 	bottom:0;
-}
-#artothek-next,
-#artothek-previous
-{
-	cursor: pointer;
-}
-
-#artothek-next
-{
-	width:100px;
-	height:20px;
-	background-color: green;
 }
