@@ -3,8 +3,8 @@ function(Concurrent) {
 	var started = false;
 	return {
 		start: function(registry, stepCb, completeCb) {
-			var taskEntries = registry.get('strut.StartupTask');
-			window.artothek = registry.get('rpi.LoaderTask');
+//			var taskEntries = registry.get('strut.StartupTask');
+			var taskEntries = registry.get('rpi.LoaderTask');
 			var countdown = new Concurrent.countdown(taskEntries.length,
 				stepCb, completeCb);
 			taskEntries.forEach(function(taskEntry) {
