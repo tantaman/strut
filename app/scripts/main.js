@@ -48,6 +48,8 @@ require.config({
     'tantaman/web/interactions': '../bundles/common/tantaman.web.interactions',
     'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets',
 	
+	'rpi/loader': '../bundles/rpi/rpi.loader',
+    
 	'rpi/scripts': '../scripts/common/Rpi',
 	'jqueryui':'../scripts/libs/jqueryui',
 	'raphael':'../scripts/libs/raphael-min'

@@ -16,6 +16,8 @@ define(function() {
 	console.log("Lade Ausstellung: "+getParam('p')+" via Ajax");
 	
 	
+	
+	
 
 	function initializeRaphaelIcons() {
 		/**
