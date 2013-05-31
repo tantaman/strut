@@ -1,6 +1,6 @@
 define(['strut/editor/EditorView',
         'strut/editor/EditorModel'],
-function(EditorView, EditorModel,Iterator) {
+function(EditorView, EditorModel) {
 	var registry = null;
 	var editorStartup = {
 		run: function() {
