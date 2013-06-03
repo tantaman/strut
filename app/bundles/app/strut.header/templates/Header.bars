@@ -1,12 +1,12 @@
 <div class="navbar navbar-inverse span12">
 	<div class="navbar-inner">
-		<ul class="nav">
+		<ul class="nav" style="margin-right: 5%">
 			<li class="logo-holder">
 			</li>
 			<li class="divider-vertical">
 			</li>
 		</ul>
-		<ul class="nav" style="margin-left: 5%">
+		<ul class="nav">
 			<li class="create-comp-buttons">
 				<div class="btn-group iconBtns">
 				</div>

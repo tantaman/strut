@@ -13,6 +13,16 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, empty) {
 			this._previewButton = 
 				new PreviewButton({editorModel: this.model.editorModel()});
 			this._themeProviderView = new ThemeProviderView(this.model.editorModel());
+
+			this.model.editorModel().on('change:activeMode', this._modeChanged, this);
+		},
+
+		_modeChanged: function(model, value) {
+			if (value.id == 'transition-editor') {
+				this.$el.find('.create-comp-buttons').addClass('hidden');
+			} else {
+				this.$el.find('.create-comp-buttons').removeClass('hidden');
+			}
 		},
 
 		// TODO: need to respond to addition/removal of
