@@ -39,6 +39,11 @@ function(Backbone, SlideCollection, SlideCommands, CmdListFactory) {
         this.undoHistory.push(createCmd);
         return slide;
       },
+      pasteSlide: function(slide) {
+        var cmd = new SlideCommands.Paste(this, slide);
+        cmd['do']();
+        this.undoHistory.push(cmd);
+      },
       set: function(key, value) {
         if (key === "activeSlide") {
           this._activeSlideChanging(value);

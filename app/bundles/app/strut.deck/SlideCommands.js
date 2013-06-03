@@ -27,6 +27,22 @@ define(['strut/deck/Slide'], function(Slide) {
       },
       name: "Create Slide"
     };
+
+    var Paste = function(deck, slide) {
+      this.deck = deck;
+      this.slide = slide;
+    };
+
+    Paste.prototype = {
+      "do": function() {
+        this.deck.get('slides').add(this.slide);
+      },
+      undo: function() {
+        this.deck.get('slides').remove(this.slide);
+      },
+      name: 'Paste Slide'
+    };
+
     Remove = function(deck, slide) {
       this.deck = deck;
       this.slide = slide;
@@ -52,6 +68,7 @@ define(['strut/deck/Slide'], function(Slide) {
    
     return {
       Create: Create,
-      Remove: Remove
+      Remove: Remove,
+      Paste: Paste
     };
   });

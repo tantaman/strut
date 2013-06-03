@@ -63,7 +63,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 		_paste: function() {
 			var item = this._clipboard.item;
 			if (item != null && item.type == 'slide')
-				this._deck.addSlide(item.clone());
+				this._deck.pasteSlide(item.clone());
 
 			// TODO: scroll to the new item...
 		},
