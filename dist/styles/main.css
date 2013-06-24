@@ -8208,6 +8208,10 @@ border-bottom-color: #000;
   display: none;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 .nav .dropdown-toggle .whiteCaret {
   border-top-color: white;
   border-bottom-color: white;
