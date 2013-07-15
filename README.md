@@ -21,7 +21,8 @@ News
 ====
 
 * **2013-07-15** I'm currently working on a back end for Strut so you can save and share your presentations online.
-Usage of the back end will be optional and [remotestorage.io](http://remotestorage.io) compatible.
+Usage of the back end will be optional and [remotestorage.io](http://remotestorage.io) compatible.  The back end 
+will be based on [project-ferox](https://github.com/project-ferox) and is contingent upon its completion.
 
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
