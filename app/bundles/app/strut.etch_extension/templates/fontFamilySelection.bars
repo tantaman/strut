@@ -9,6 +9,7 @@
                   <a class="fredoka" href="#" data-value="'Fredoka One', cursive">Fredoka One</a>
                   <a class="gorditas" href="#" data-value="'Gorditas', cursive">Gorditas</a>
                   <a class="pressstart" href="#" data-value="'Press Start 2P', cursive">Press Start 2P</a>
+                  <a class="droidsansmono" href="#" data-value="'Droid Sans Mono', monospace">Droid Sans Mono</a>
 		</li>
 	</ul>
 </div>
