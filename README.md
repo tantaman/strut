@@ -17,6 +17,12 @@ Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http:/
 
 (Firefox, Chrome and Safari only)
 
+News
+====
+
+* **2013-07-15** I'm currently working on a back end for Strut so you can save and share your presentations online.
+Usage of the back end will be optional and [remotestorage.io](http://remotestorage.io) compatible.
+
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
 
