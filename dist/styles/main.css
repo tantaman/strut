@@ -7191,6 +7191,12 @@ a.badge:hover {
   font-weight: 400;
   src: local('Lato Regular'), local('Lato-Regular'), url(Lato-Regular.woff) format('woff');
 }
+@font-face {
+    font-family: 'Droid Sans Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Droid Sans Mono'), local('Droid-Sans-Mono'), url(Droid-Sans-Mono.woff) format('woff');
+}
 /* === Editor === */
 .etch-editor-panel { display: none; padding: 5px; position: absolute; z-index: 10000;
     background: #dadada; border: 1px solid #bdbdbd; color: #535353; text-shadow: 0 1px 0 #fff;
