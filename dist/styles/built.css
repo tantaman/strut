@@ -590,3 +590,8 @@ body {
 .header .navbar {
 	margin-bottom: 0;
 }
+
+.navbar-inner {
+  position: relative;
+  z-index: 2;
+}
