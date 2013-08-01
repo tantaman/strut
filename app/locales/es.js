@@ -18,13 +18,13 @@ define({
 	export: 'Exportar...',
 	import: 'Importar...',
 	cut: 'Cortar',
-	copy: 'Copie',
+	copy: 'Copiar',
 	paste: 'Pegar',
 	undo: 'Deshacer',
 	redo: 'Rehacer',
 	strut_exporter_json: {
-		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
-		click_below: 'Click below to download'
+		explain: 'Esto te permite guardar un archivo en tu ordenador que podrás importar en Strut posteriormente.',
+		click_below: 'Haz click abajo para descargar.'
 	},
 	background: 'Fondo',
 	surface: 'Superficie'
