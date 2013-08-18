@@ -17,14 +17,14 @@ define({
 	present: 'Präsentieren',
 	export: 'Exportieren...',
 	import: 'Importieren...',
-	cut: 'Geschnitten',
+	cut: 'Ausschneiden',
 	copy: 'Kopieren',
-	paste: 'Fügen',
+	paste: 'Einfügen',
 	undo: 'Rückgängig',
-	redo: 'Redo',
+	redo: 'Wiederholen',
 	strut_exporter_json: {
-		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
-		click_below: 'Click below to download'
+		explain: 'Dies erlaubt Ihnen, eine Datei auf Ihrem Computer zu speichern, die Sie später wieder in Strut importieren können.',
+		click_below: 'Klicken sie zum Herunterladen auf das Symbol unten'
 	},
 	background: 'Hintergrund',
 	surface: 'Oberfläche'
