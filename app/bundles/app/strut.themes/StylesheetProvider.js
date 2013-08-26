@@ -1,7 +1,8 @@
 define(['tantaman/web/widgets/CodeEditor',
 		'./Button',
+		'tantaman/web/css_manip/CssManip',
 		'css!styles/strut.themes/stylesheetEditor.css'],
-function(CodeEditor, Button, empty) {
+function(CodeEditor, Button, CssManip, empty) {
 	var cssEditor = new CodeEditor({
 			class: 'stylesheetEditor',
 			title: 'Edit CSS',
@@ -9,6 +10,14 @@ function(CodeEditor, Button, empty) {
 						 "font-weight: bold;\n" +
 						 "}"
 		});
+	var sheetId = 'userStylesheet';
+
+	var userStylesheet = CssManip.getStylesheet({
+		id: sheetId,
+		create: true
+	});
+
+	var sheetInitialized = false;
 
 	$('#modals').append(cssEditor.render().$el);
 
@@ -23,6 +32,11 @@ function(CodeEditor, Button, empty) {
 
 		this._button.$el.addClass('iconBtns btn-grouped');
 		this._cssSaved = this._cssSaved.bind(this);
+
+		// initialize the sheet from the deck attributes.
+		if (!sheetInitialized) {
+			sheetInitialized = true;
+		}
 	}
 
 	StylesheetProvider.prototype = {
@@ -36,6 +50,7 @@ function(CodeEditor, Button, empty) {
 
 		_cssSaved: function(css) {
 			console.log('Callback from code editor');
+			userStylesheet.innerHTML = css;
 			this._cssEditor.hide();
 		},
 

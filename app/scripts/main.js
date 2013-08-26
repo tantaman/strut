@@ -46,7 +46,8 @@ require.config({
     'tantaman/web/storage': '../bundles/common/tantaman.web.storage',
     'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
     'tantaman/web/interactions': '../bundles/common/tantaman.web.interactions',
-    'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets'
+    'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets',
+    'tantaman/web/css_manip': '../bundles/common/tantaman.web.css_manip'
     // end build - rmap
   },
 
