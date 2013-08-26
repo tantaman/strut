@@ -5,7 +5,7 @@
       this.component = component;
     };
     AddComponent.prototype = {
-      do: function() {
+      "do": function() {
         return this.slide.__doAdd(this.component);
       },
       undo: function() {

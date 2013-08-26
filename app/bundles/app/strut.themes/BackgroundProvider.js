@@ -1,7 +1,7 @@
 define(['tantaman/web/widgets/Dropdown'],
 function(View) {
 	function BackgroundProvider(backgrounds, editorModel, selector, attr, classes) {
-		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown']);
+		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'], {class: 'group-dropdown'});
 		this._editorModel = editorModel;
 		this._selector = selector;
 		this._attr = attr;

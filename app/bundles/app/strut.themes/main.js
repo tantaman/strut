@@ -18,7 +18,6 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 
 	return {
 		initialize: function(registry) {
-			console.log('Registering theme providers');
 			registry.register({
 				interfaces: 'strut.ThemeProvider',
 				meta: {

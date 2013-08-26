@@ -1,7 +1,11 @@
 define(['libs/backbone','css!styles/widgets/widgets.css'],
 function(Backbone, empty) {
-	function Dropdown(model, template) {
+	function Dropdown(model, template, options) {
 		this.$el = $('<div class="dropdown btn-group iconBtns">');
+		if (options && options.class) {
+			this.$el.addClass(options.class);
+		}
+
 		this._template = template;
 
 		var self = this;
