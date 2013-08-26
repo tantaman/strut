@@ -1,7 +1,9 @@
 define(['./BackgroundProvider',
 		'./AvailableBackgrounds',
-		'./AvailableSurfaces'],
-function(BackgroundProvider, Backgrounds, Surfaces) {
+		'./AvailableSurfaces',
+		'./StylesheetProvider',
+		'./ClassEditor'],
+function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEditor) {
 	'use strict';
 
 	var slideBgProviderFactory = {
@@ -13,6 +15,18 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
 			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface', 'slideTable');
+		}
+	};
+
+	var stylesheetProviderFactory = {
+		create: function(editorModel) {
+			return new StylesheetProvider(editorModel);
+		}
+	};
+
+	var classEditorFactory = {
+		create: function(editorModel) {
+			return new ClassEditor(editorModel);
 		}
 	};
 
@@ -36,6 +50,26 @@ function(BackgroundProvider, Backgrounds, Surfaces) {
 					}
 				}
 			}, surfaceBgProviderFactory);
+
+			registry.register({
+				interfaces: 'strut.ThemeProvider',
+				meta: {
+					modes: {
+						'transition-editor': true,
+						'slide-editor': true
+					}
+				}
+			}, stylesheetProviderFactory);
+
+			registry.register({
+				interfaces: 'strut.ThemeProvider',
+				meta: {
+					modes: {
+						'transition-editor': true,
+						'slide-editor': true
+					}
+				}
+			}, classEditorFactory);
 
 			/*
 			registry.register({

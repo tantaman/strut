@@ -59,7 +59,15 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
           });
         }
         _.defaults(this.attributes, defaults);
-        return this.on("unrender", this._unrendered, this);
+        this.on("unrender", this._unrendered, this);
+
+        components = this.get('components');
+        components.some(function(comp) {
+          if (comp.get('selected')) {
+            this.selectionChanged(comp, true);
+            return true;
+          }
+        }, this);
       },
       type: 'slide',
       _unrendered: function() {

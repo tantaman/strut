@@ -201,3 +201,9 @@ border-bottom-color: #000;
   -moz-border-radius-bottomright: 6px;
   border-bottom-right-radius: 6px;
 }
+
+.btn-grouped {
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px
+}
