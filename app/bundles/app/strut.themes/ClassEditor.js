@@ -1,5 +1,8 @@
-define(['./Button'],
-function(Button) {
+define(['./Button',
+		'tantaman/web/widgets/PopoverTextbox'],
+function(Button, PopoverTextbox) {
+	var popover = new PopoverTextbox();
+
 	function ClassEditor(editorModel) {
 		this._button = new Button({
 			icon: 'icon-plus',
@@ -11,6 +14,7 @@ function(Button) {
 		this._button.disable();
 
 		this._deck = editorModel.deck();
+		this._popover = popover;
 		// var activeSlide = editorModel.get('activeSlide');
 		// if (activeSlide) {
 		// 	this._activeSlideChanged(this._deck, activeSlide);
