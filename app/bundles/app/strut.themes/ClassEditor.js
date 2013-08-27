@@ -37,8 +37,10 @@ function(Button, PopoverTextbox) {
 			this._activeComponent = component;
 			if (component)
 				this._button.enable();
-			else
+			else 
 				this._button.disable();
+
+			this._popover.hide();
 		},
 
 		_activeSlideChanged: function(deck, slide) {
@@ -59,7 +61,8 @@ function(Button, PopoverTextbox) {
 
 		_launch: function() {
 			if (!this._appended) {
-				$('.slideEditArea').append(popover.$el);
+				var $slideEditArea = $('.slideEditArea');
+				$slideEditArea.append(popover.$el);
 			}
 
 			this._popover.show({
@@ -68,7 +71,8 @@ function(Button, PopoverTextbox) {
 			}, this._classesSaved);
 		},
 
-		_classesSaved: function() {
+		_classesSaved: function(classes) {
+			this._activeComponent.customClasses(classes);
 			this._popover.hide();
 		},
 

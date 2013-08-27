@@ -3,12 +3,15 @@ function(Backbone) {
 	return Backbone.View.extend({
 		events: {
 			'click .ok': '_save',
-			'click .cancel': '_cancel'
+			'click .cancel': '_cancel',
+			'click': '_stopProp'
 		},
 
 		className: 'popover',
 
 		initialize: function() {
+			this.hide = this.hide.bind(this);
+			// $(document).bind('click', this.hide);
 			this.template = JST['tantaman.web.widgets/PopoverTextbox'];
 		},
 
@@ -24,14 +27,19 @@ function(Backbone) {
 			this.$el.css('display', '');
 		},
 
-		_save: function() {
+		_save: function(e) {
+			e.stopPropagation();
 			this._cb(this.$input.val());
 		},
 
-		_cancel: function() {
+		_cancel: function(e) {
 			this.$el.css('display', '');
 			this.$input.val(this._prevVal);
 			this._prevVal = '';
+		},
+
+		_stopProp: function(e) {
+			e.stopPropagation();
 		},
 
 		render: function() {
@@ -39,6 +47,11 @@ function(Backbone) {
 			this.$input = this.$el.find('input');
 
 			return this;
+		},
+
+		remove: function() {
+			Backbone.View.prototype.remove.apply(this, arguments);
+			// $(document).unbind('click', this.hide);
 		},
 
 		constructor: function PopoverTextbox() {
