@@ -51,6 +51,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         this.model.on("change:skewY", this._setUpdatedTransform, this);
         this.model.on("change:rotate", this._setUpdatedTransform, this);
         this.model.on("change:scale", this._setUpdatedTransform, this);
+        this.model.on('change:customClasses', this._updateCustomClasses, this);
         this.$el.css('z-index', zTracker.next());
         return this._lastDeltas = {
           dx: 0,
@@ -243,6 +244,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
           return _this._deltaDrags.push(deltaDrag);
         });
         this.$content = this.$el.find(".content");
+        this.$content.addClass(this.model.customClasses());
         this.$contentScale = this.$el.find(".content-scale");
         this.__selectionChanged(this.model, this.model.get("selected"));
         this.$xInput = this.$el.find("[data-option='x']");
@@ -260,6 +262,9 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         }
         this._setUpdatedTransform();
         return this.$el;
+      },
+      _updateCustomClasses: function(model, classes) {
+        this.$content.attr('class', 'content ' + classes);
       },
       __getTemplate: function() {
         return JST["strut.slide_components/Component"];

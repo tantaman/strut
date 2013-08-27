@@ -68,7 +68,7 @@ function(Button, PopoverTextbox) {
 			this._popover.show({
 				left: this._activeComponent.get('x'),
 				top: this._activeComponent.get('y')
-			}, this._classesSaved);
+			}, this._classesSaved, this._activeComponent.customClasses());
 		},
 
 		_classesSaved: function(classes) {

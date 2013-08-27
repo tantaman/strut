@@ -21,6 +21,14 @@
           return _.defaults(this.attributes.scale, defaultScale);
         }
       },
+
+      customClasses: function(classes) {
+        if (classes == null) {
+          return this.get('customClasses');
+        } else {
+          this.set('customClasses', classes);
+        }
+      },
       
       dispose: function() {
         this.trigger("dispose", this);

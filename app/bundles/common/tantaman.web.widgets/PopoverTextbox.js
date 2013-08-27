@@ -3,7 +3,7 @@ function(Backbone) {
 	return Backbone.View.extend({
 		events: {
 			'click .ok': '_save',
-			'click .cancel': '_cancel',
+			'click .cancel': 'hide',
 			'click': '_stopProp'
 		},
 
@@ -15,27 +15,22 @@ function(Backbone) {
 			this.template = JST['tantaman.web.widgets/PopoverTextbox'];
 		},
 
-		show: function(position, cb) {
+		show: function(position, cb, text) {
 			console.log('Showing popover');
 			this._cb = cb;
 			this.$el.css(position);
 			this.$el.css('display', 'block');
-			this._prevVal = this.$input.val();
+			this.$input.val(text);
 		},
 
 		hide: function() {
 			this.$el.css('display', '');
+			this.$input.val('');
 		},
 
 		_save: function(e) {
 			e.stopPropagation();
 			this._cb(this.$input.val());
-		},
-
-		_cancel: function(e) {
-			this.$el.css('display', '');
-			this.$input.val(this._prevVal);
-			this._prevVal = '';
 		},
 
 		_stopProp: function(e) {

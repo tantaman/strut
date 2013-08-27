@@ -65,6 +65,14 @@ function(Backbone,
 			}
 		},
 
+		customStylesheet: function(css) {
+			if (css == null) {
+				return this._deck.get('customStylesheet');
+			} else {
+				this._deck.set('customStylesheet', css);
+			}
+		},
+
 		dispose: function() {
 			throw "EditorModel can not be disposed yet"
 			this._exitSaver.dispose();
@@ -93,7 +101,8 @@ function(Backbone,
 		exportPresentation: function(filename) {
 			if (filename)
 				this._deck.set('fileName', filename);
-			return this._deck.toJSON(false, true);
+			var obj = this._deck.toJSON(false, true);
+			return obj;
 		},
 
 		fileName: function() {

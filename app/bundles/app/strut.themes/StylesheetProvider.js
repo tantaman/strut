@@ -23,6 +23,11 @@ function(CodeEditor, Button, CssManip, empty) {
 
 	function StylesheetProvider(editorModel) {
 		this._cssEditor = cssEditor;
+		this._editorModel = editorModel;
+		userStylesheet.innerHTML = editorModel.customStylesheet();
+
+		editorModel.deck().on(
+			'change:customStylesheet', this._editorSheetChanged, this);
 
 		this._button = new Button({
 			icon: 'icon-edit',
@@ -45,17 +50,23 @@ function(CodeEditor, Button, CssManip, empty) {
 		},
 
 		_launch: function() {
-			this._cssEditor.show(this._cssSaved);
+			this._cssEditor.show(this._cssSaved, this._editorModel.customStylesheet());
 		},
 
 		_cssSaved: function(css) {
 			console.log('Callback from code editor');
 			userStylesheet.innerHTML = css;
+			this._editorModel.customStylesheet(css);
 			this._cssEditor.hide();
+		},
+
+		_editorSheetChanged: function(deck, sheet) {
+			userStylesheet.innerHTML = sheet;
 		},
 
 		dispose: function() {
 			console.log('Dispose of stylesheet provider?  Was the themebutton disposed too?');
+			this._editorModel.deck().off(null, null, this);
 		}
 	};
 

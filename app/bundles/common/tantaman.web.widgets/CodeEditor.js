@@ -16,14 +16,13 @@ function(Backbone) {
 		},
 
 		saveCode: function() {
-			this._saved = true;
 			var code = this.$input.val();
 			this._saveCb(code);
 		},
 
-		show: function(savecb) {
-			this._saved = false;
-			this._oldCode = this.$input.val();
+		show: function(savecb, code) {
+			if (code)
+				this.$input.val(code);
 			this._saveCb = savecb;
 			this.$el.modal('show');
 		},
@@ -33,9 +32,7 @@ function(Backbone) {
 		},
 
 		_hidden: function() {
-			if (!this._saved)
-				this.$input.val(this._oldCode);
-			this._oldCode = '';
+			this.$input.val('');
 		},
 
 		render: function() {
@@ -45,7 +42,8 @@ function(Backbone) {
 
 			this.$el.modal({
 				backdrop: 'static',
-				keyboard: false
+				keyboard: false,
+				show: false
 			});
 
 			return this;
