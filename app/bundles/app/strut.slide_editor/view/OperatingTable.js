@@ -35,7 +35,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 		},
 
 		render: function() {
-			this._$slideContainer = $('<div class="slideContainer"></div>')
+			this._$slideContainer = $('<div class="slideContainer slideEditArea"></div>')
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
@@ -54,7 +54,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 
 		_updateBg: function(model, bg) {
 			this._$slideContainer.removeClass();
-			this._$slideContainer.addClass('slideContainer ' + this._deck.slideBackground(bg));
+			this._$slideContainer.addClass('slideContainer slideEditArea ' + this._deck.slideBackground(bg));
 			this._$slideContainer.data('background', this._deck.slideBackground(bg));
 		},
 

@@ -1,4 +1,5 @@
+{{title}} <input type="textbox" placeholder="custom1 custom2"></input>
 <div>
-	<input type="textbox"></input>
-	<a href class="btn btn-plast">Ok</a>
+<a class="btn btn-plast ok">Ok</a>
+<a class="btn btn-success cancel">Cancel</a>
 </div>

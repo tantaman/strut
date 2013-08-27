@@ -1,7 +1,8 @@
 define(['./Button',
 		'tantaman/web/widgets/PopoverTextbox'],
 function(Button, PopoverTextbox) {
-	var popover = new PopoverTextbox();
+	var popover = new PopoverTextbox({title: 'Classes: '});
+	popover.render();
 
 	function ClassEditor(editorModel) {
 		this._button = new Button({
@@ -10,17 +11,20 @@ function(Button, PopoverTextbox) {
 			name: 'Class'
 		});
 
+		this._appended = false;
+
 		this._button.$el.addClass('iconBtns btn-grouped');
 		this._button.disable();
 
 		this._deck = editorModel.deck();
 		this._popover = popover;
-		// var activeSlide = editorModel.get('activeSlide');
-		// if (activeSlide) {
-		// 	this._activeSlideChanged(this._deck, activeSlide);
-		// }
+		var activeSlide = this._deck.get('activeSlide');
+		if (activeSlide) {
+			this._activeSlideChanged(this._deck, activeSlide);
+		}
 
 		this._deck.on('change:activeSlide', this._activeSlideChanged, this);
+		this._classesSaved = this._classesSaved.bind(this);
 	}
 
 	ClassEditor.prototype = {
@@ -30,6 +34,7 @@ function(Button, PopoverTextbox) {
 
 		_activeComponentChanged: function(slide, component) {
 			console.log('Active component notification');
+			this._activeComponent = component;
 			if (component)
 				this._button.enable();
 			else
@@ -53,7 +58,18 @@ function(Button, PopoverTextbox) {
 		},
 
 		_launch: function() {
+			if (!this._appended) {
+				$('.slideEditArea').append(popover.$el);
+			}
 
+			this._popover.show({
+				left: this._activeComponent.get('x'),
+				top: this._activeComponent.get('y')
+			}, this._classesSaved);
+		},
+
+		_classesSaved: function() {
+			this._popover.hide();
 		},
 
 		dispose: function() {
@@ -61,6 +77,7 @@ function(Button, PopoverTextbox) {
 			if (this._activeSlide)
 				this._activeSlide.off(null, null, this);
 			this._deck.off(null, null, this);
+			popover.$el.remove();
 		}
 	};
 
