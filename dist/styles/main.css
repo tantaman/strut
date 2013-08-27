@@ -8239,6 +8239,65 @@ border-bottom-color: #000;
   background: -o-radial-gradient(#F0F0F0, #BEBEBE);
   background: radial-gradient(#F0F0F0, #BEBEBE);
 }
+
+
+/*Button Group Dropdown hack*/
+.btn-group.group-dropdown {
+  padding: 0px;
+  margin-left: -1px;
+}
+.btn-group.group-dropdown .dropdown-toggle {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+.btn-group.group-dropdown:first-child {
+  padding: 0px;
+  margin-right: -1px;
+}
+.btn-group.group-dropdown:first-child .dropdown-toggle {
+  -webkit-border-top-left-radius: 4px;
+  -moz-border-radius-topleft: 4px;
+  border-top-left-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  border-bottom-left-radius: 4px;
+}
+.btn-group.group-dropdown:first-child .dropdown-toggle.btn-large {
+  -webkit-border-top-left-radius: 6px;
+  -moz-border-radius-topleft: 6px;
+  border-top-left-radius: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -moz-border-radius-bottomleft: 6px;
+  border-bottom-left-radius: 6px;
+}
+.btn-group.group-dropdown:last-child {
+  padding: 0px;
+  margin-left: -1px;
+}
+.btn-group.group-dropdown:last-child .dropdown-toggle {
+  -webkit-border-top-right-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  border-bottom-right-radius: 4px;
+}
+.btn-group.group-dropdown:last-child .dropdown-toggle.btn-large {
+  -webkit-border-top-right-radius: 6px;
+  -moz-border-radius-topright: 6px;
+  border-top-right-radius: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  -moz-border-radius-bottomright: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.btn-grouped {
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px
+}
+
 �PNG
 
    IHDR         ��a   sBIT|d�   	pHYs  �  �B(�x   tEXtSoftware www.inkscape.org��<  /IDAT8�Փ�JA���A�I. iD�,��>���!>�ؤ|�l}�Bl��Jn�vOs���ئP��)�۝��5��:ˮu�O �������;�@�1�1р����	�&c�'cH����X�Ѣ利 Smr� �\��{�G�1��6!���7�V���g�͉i��-�l�����)y�ی���f��IՑ�����<�qȂ}u	[��]]������L`C,���a��Y�dl�o�U�K_����h�9S�������cW�f]����9�z:9��n�ve��������@�D    IEND�B`�

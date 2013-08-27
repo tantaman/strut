@@ -38,6 +38,21 @@
 	float: left;
 }
 
+.popover {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	border-radius: 6px;
+
+	background-color: #2c2c2c;
+	color: white;
+	width: 216px;
+	padding: 5px 5px 5px 10px;
+}
+
+.popover input {
+	margin-bottom: 5px;
+}
 [class*="solid-bg-"] {
 	border: 1px solid rgba(0, 0, 0, .3);
 	border-radius: 10px;
@@ -187,6 +202,12 @@
 	background: -o-radial-gradient(#6c855d, #597847);
 	background: radial-gradient(#6c855d, #597847);
 }
+.stylesheetEditor .codeInput {
+	width: 100%;
+	margin-left: -8px;
+	height: 300px;
+}
+
 .slideSnapshot {
 	box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, 0.5);
 	position: relative;
