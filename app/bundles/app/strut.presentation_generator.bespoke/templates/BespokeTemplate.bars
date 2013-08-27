@@ -7,7 +7,7 @@
 	<link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 	<link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
 
-	<style>
+	<style type="text/css">
 	.componentContainer {
 	    position: absolute;
 	    line-height: normal;
@@ -38,6 +38,8 @@
 	#main, body {
 		overflow: hidden;
 	}
+
+	{{{customStylesheet}}}
 	</style>
 </head>
 <body class="{{surface}} {{#either 'coverflow' cannedTransition}}{{/either}}">

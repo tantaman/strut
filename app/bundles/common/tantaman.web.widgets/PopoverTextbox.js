@@ -21,6 +21,7 @@ function(Backbone) {
 			this.$el.css(position);
 			this.$el.css('display', 'block');
 			this.$input.val(text);
+			this.$input.focus();
 		},
 
 		hide: function() {
