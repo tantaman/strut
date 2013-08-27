@@ -1,7 +1,7 @@
 Strut
 =======
 
-[![Facelift](https://f.cloud.github.com/assets/1009003/515405/f1003c6a-be74-11e2-84b9-14776c652afb.png)](http://tantaman.com/Strut)
+[![Facelift](https://f.cloud.github.com/assets/1009003/515405/f1003c6a-be74-11e2-84b9-14776c652afb.png)](http://strut.io/Strut)
 
 #### A GUI / Authoring Tool for ImpressJS ####
 
