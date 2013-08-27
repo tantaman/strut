@@ -54,7 +54,6 @@ function(CodeEditor, Button, CssManip, empty) {
 		},
 
 		_cssSaved: function(css) {
-			console.log('Callback from code editor');
 			userStylesheet.innerHTML = css;
 			this._editorModel.customStylesheet(css);
 			this._cssEditor.hide();
@@ -65,7 +64,6 @@ function(CodeEditor, Button, CssManip, empty) {
 		},
 
 		dispose: function() {
-			console.log('Dispose of stylesheet provider?  Was the themebutton disposed too?');
 			this._editorModel.deck().off(null, null, this);
 		}
 	};

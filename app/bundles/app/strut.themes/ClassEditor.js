@@ -33,7 +33,6 @@ function(Button, PopoverTextbox) {
 		},
 
 		_activeComponentChanged: function(slide, component) {
-			console.log('Active component notification');
 			this._activeComponent = component;
 			if (component)
 				this._button.enable();
@@ -44,7 +43,6 @@ function(Button, PopoverTextbox) {
 		},
 
 		_activeSlideChanged: function(deck, slide) {
-			console.log('Active slide notification');
 			if (this._activeSlide) {
 				this._activeSlide.off(null, null, this);
 			}
@@ -77,7 +75,6 @@ function(Button, PopoverTextbox) {
 		},
 
 		dispose: function() {
-			console.log('Disposing class editor');
 			if (this._activeSlide)
 				this._activeSlide.off(null, null, this);
 			this._deck.off(null, null, this);
