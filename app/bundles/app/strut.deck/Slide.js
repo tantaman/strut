@@ -80,6 +80,9 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
         component.on("change:selected", this.selectionChanged, this);
         return component.on("change", this.componentChanged, this);
       },
+      customClasses: function() {
+        return '';
+      },
       getPositionData: function() {
         return {
           x: this.attributes.x,
