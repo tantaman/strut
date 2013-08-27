@@ -19,6 +19,10 @@ define(function() {
 				var identifier = exportable.identifier();
 				this.storageInterface.store(identifier, data);
 			}, this);
+		},
+
+		save: function() {
+			this.__save();
 		}
 	};
 

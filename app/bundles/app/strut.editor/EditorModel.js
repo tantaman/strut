@@ -47,7 +47,7 @@ function(Backbone,
 				var storageInterface = this.registry.getBest('strut.StorageInterface');
 				storageInterface = adaptStorageInterfaceForSavers(storageInterface);
 				this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
-				this._timedSaver = savers.timedSaver(this.exportable, 10000, storageInterface);
+				this._timedSaver = savers.timedSaver(this.exportable, 20000, storageInterface);
 			}
 
 			this.clipboard = new Clipboard();

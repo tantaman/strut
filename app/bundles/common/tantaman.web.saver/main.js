@@ -1,4 +1,4 @@
-define(['./ExitSaver', './TimedSaver'],
+define(['./ExitSaver', './TimedSaver', './Saver'],
 function(ExitSaver, TimedSaver) {
 	/*
 	service will be an auto-saver factory
@@ -14,6 +14,10 @@ function(ExitSaver, TimedSaver) {
 
 		exitSaver: function(exportable, storageInterface) {
 			return new ExitSaver(exportable, storageInterface);
+		},
+
+		manualSaver: function(exportable, storageInterface) {
+			return new Saver(exportable, storageInterface);
 		}
 	};
 
