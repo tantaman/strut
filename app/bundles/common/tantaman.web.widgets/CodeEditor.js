@@ -6,7 +6,9 @@ function(Backbone) {
 	return Backbone.View.extend({
 		className: 'CodeEditor modal hide',
 		events: {
-			'click .ok': 'saveCode'
+			'click .ok': 'saveCode',
+			'click .cancel': 'hide',
+			'hidden': '_hidden'
 		},
 
 		initialize: function() {
@@ -14,11 +16,14 @@ function(Backbone) {
 		},
 
 		saveCode: function() {
+			this._saved = true;
 			var code = this.$input.val();
 			this._saveCb(code);
 		},
 
 		show: function(savecb) {
+			this._saved = false;
+			this._oldCode = this.$input.val();
 			this._saveCb = savecb;
 			this.$el.modal('show');
 		},
@@ -27,10 +32,22 @@ function(Backbone) {
 			this.$el.modal('hide');
 		},
 
+		_hidden: function() {
+			if (!this._saved)
+				this.$input.val(this._oldCode);
+			this._oldCode = '';
+		},
+
 		render: function() {
 			this.$el.html(this.template(this.options));
 			this.$el.addClass(this.options.class);
 			this.$input = this.$el.find('.codeInput');
+
+			this.$el.modal({
+				backdrop: 'static',
+				keyboard: false
+			});
+
 			return this;
 		},
 
