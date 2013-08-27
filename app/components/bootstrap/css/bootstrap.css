@@ -2837,6 +2837,11 @@ table th[class*="span"],
   background-position: -456px -144px;
 }
 
+.icon-html-close {
+  background: url("img/html-close.png");
+  background-repeat: no-repeat;
+}
+
 .dropup,
 .dropdown {
   position: relative;

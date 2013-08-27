@@ -56,6 +56,13 @@ function(Button, ImportingComponentButton,
 				editorModel: editorModel
 			}));
 
+			buttons.push(new Button({
+				componentType: 'HtmlInput',
+				icon: 'icon-html-close',
+				name: 'HTML',
+				editorModel: editorModel
+			}));
+
 			return buttons;
 		}
 	};
