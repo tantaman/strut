@@ -1,8 +1,8 @@
 <a class="btn btn-plast dropdown-toggle" data-toggle="dropdown">
-	<i class="icon-tint icon-white"></i>
+	<i class="icon-star icon-white"></i>
 	{{#lang title}}{{/lang}}</a>
 <ul class="dropdown-menu horizontalDropdown" role="menu" style="min-width: 127px; width: 127px">
 {{#shapes}}
-<li><div class="{{klass}}"></div></li>
+<li class="shape"><div class="{{klass}}"></div></li>
 {{/shapes}}
 </ul>

@@ -27,7 +27,7 @@ define(function() {
 		},
 
 		extractClasses: function(sheet) {
-			var rules = sheet.rules;
+			var rules = sheet.rules || sheet.cssRules;
 
 			var result = {};
 			for (var j = 0; j < rules.length; ++j) {
@@ -35,7 +35,8 @@ define(function() {
 				var matches = rule.selectorText.match(classesReg);
 				if (matches) {
 					for (var i = 0; i < matches.length; ++i) {
-						result[matches[i]] = true;
+						var match = matches[i].substring(1);
+						result[match] = true;
 					}
 				}
 			}

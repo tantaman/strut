@@ -35,7 +35,7 @@ function(CssManip) {
 
 	};
 
-	var classPrefix = '.shape-';
+	var classPrefix = 'shape-';
 	var classPrefixLen = classPrefix.length;
 	function extractShapes(sheet) {
 		var shapes = [];
