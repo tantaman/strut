@@ -1,6 +1,9 @@
 define(function() {
+	// var ident = /-?[_a-zA-Z]+[_a-zA-Z0-9-]*/;
+	var classesReg = /\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g;
+
 	return {
-		createStylesheet: function(options) {
+		createStyleElem: function(options) {
 			var sheet = document.createElement('style');
 			sheet.type = 'text/css';
 			if (options.id)
@@ -9,18 +12,35 @@ define(function() {
 			return sheet;
 		},
 
-		getStylesheet: function(options) {
+		getStyleElem: function(options) {
 			var sheet = document.getElementById(options.id);
 			if (!sheet && options.create) {
-				sheet = this.createStylesheet(options);
-				this.appendStylesheet(sheet);
+				sheet = this.createStyleElem(options);
+				this.appendStyleElem(sheet);
 			}
 
 			return sheet;
 		},
 
-		appendStylesheet: function(sheet) {
-			document.getElementsByTagName('head')[0].appendChild(sheet);
+		appendStyleElem: function(elem) {
+			document.getElementsByTagName('head')[0].appendChild(elem);
+		},
+
+		extractClasses: function(sheet) {
+			var rules = sheet.rules;
+
+			var result = {};
+			for (var j = 0; j < rules.length; ++j) {
+				var rule = rules[j];
+				var matches = rule.selectorText.match(classesReg);
+				if (matches) {
+					for (var i = 0; i < matches.length; ++i) {
+						result[matches[i]] = true;
+					}
+				}
+			}
+
+			return result;
 		}
 	};
 });
