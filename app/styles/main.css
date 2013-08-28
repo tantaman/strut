@@ -32,6 +32,10 @@ a {
   left: 0px;
 }
 
+.btn-group > .btn-group {
+  margin-top: 0px;
+}
+
 .btn-plast {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
