@@ -9,7 +9,7 @@ function(Backbone, FileUtils, lang) {
 			/*
 			TODO: handle browsers that can't do the download attribute.  Safari?
 			*/
-			this._dlSupported = 'download' in document.createElement('a')
+			this._dlSupported = window.dlSupported;
 
 			this.$el.html('<div class="alert alert-info">' + lang.strut_exporter_json.explain + '</div>');
 			if (this._dlSupported) {
@@ -21,12 +21,16 @@ function(Backbone, FileUtils, lang) {
 			this._$modal = $modal;
 			var $ok = this._$modal.find('.ok');
 			if (this._dlSupported) {
+				$ok.html('<i class="icon-download-alt icon-white"></i>');
 				this._makeDownloadable($ok);
 			} else {
-				this._populateTextArea();
+				$ok.html('');
+				if (window.hasFlash)
+					this._populateDownloadify();
+				else
+					this._populateTextArea();
 			}
 
-			$ok.html('<i class="icon-download-alt icon-white"></i>');
 			$container.append(this.$el);
 		},
 
@@ -49,6 +53,41 @@ function(Backbone, FileUtils, lang) {
 			}
 
 			$txt.val(JSON.stringify(this._exportable.export()));
+		},
+
+		_populateDownloadify: function() {
+			var $dlify = this.$el.find('#downloadify');
+			if ($dlify.length == 0) {
+				$dlify = $('<p id="downloadify"></p>');
+				this.$el.append($dlify);
+				console.log('Puplating downloadify');
+				var self = this;
+				setTimeout(function() {
+					Downloadify.create($dlify[0], {
+					    filename: function(){
+					      return self._exportable.identifier() + '.json';
+					    },
+					    data: function(){ 
+					      return JSON.stringify(self._exportable.export(), null, 2);
+					    },
+					    onComplete: function(){ 
+					       
+					    },
+					    onCancel: function(){ 
+					      
+					    },
+					    onError: function(){ 
+					      alert('Error exporting'); 
+					    },
+					    swf: 'preview_export/download_assist/downloadify.swf',
+					    downloadImage: 'preview_export/download_assist/download.png',
+					    width: 100,
+					    height: 30,
+					    transparent: false,
+					    append: false
+					  });
+				}, 0);
+			}
 		},
 
 		hide: function() {
