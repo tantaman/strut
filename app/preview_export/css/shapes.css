@@ -1,102 +1,49 @@
-.shape-square {
-	width: 100px;
-	height: 100px;
-	background: red;
+[class*="shape-"] {
+  border-color: black;
+  background-color: black;
 }
 
-.shape-rectangle {
-	width: 200px;
-	height: 100px;
+[class*="shape-"]:after {
+  border-color:black;
+}
+
+.shape-square {
+	width: 50px;
+	height: 50px;
 	background: red;
 }
 
 .shape-circle {
-	width: 100px;
-	height: 100px;
+	width: 50px;
+	height: 50px;
 	background: red;
-	-moz-border-radius: 50px;
-	-webkit-border-radius: 50px;
-	border-radius: 50px;
-	/* Cleaner, but slightly less support: use "50%" as value */
-}
-
-.shape-oval {
-	width: 200px;
-	height: 100px;
-	background: red;
-	-moz-border-radius: 100px / 50px;
-	-webkit-border-radius: 100px / 50px;
-	border-radius: 100px / 50px;
+	-moz-border-radius: 25px;
+	-webkit-border-radius: 25px;
+	border-radius: 25px;
 	/* Cleaner, but slightly less support: use "50%" as value */
 }
 
 .shape-triangle-up {
 	width: 0;
 	height: 0;
-	border-left: 50px solid transparent;
-	border-right: 50px solid transparent;
-	border-bottom: 100px solid red;
-}
-
-.shape-triangle-down {
-	width: 0;
-	height: 0;
-	border-left: 50px solid transparent;
-	border-right: 50px solid transparent;
-	border-top: 100px solid red;
-}
-
-.shape-triangle-left {
-	width: 0;
-	height: 0;
-	border-top: 50px solid transparent;
-	border-right: 100px solid red;
-	border-bottom: 50px solid transparent;
-}
-
-.shape-triangle-right {
-	width: 0;
-	height: 0;
-	border-top: 50px solid transparent;
-	border-left: 100px solid red;
-	border-bottom: 50px solid transparent;
+	border-left: 25px solid transparent;
+	border-right: 25px solid transparent;
+	border-bottom: 50px solid red;
 }
 
 .shape-triangle-topleft {
 	width: 0;
 	height: 0;
-	border-top: 100px solid red;
-	border-right: 100px solid transparent;
-}
-
-.shape-triangle-topright {
-	width: 0;
-	height: 0;
-	border-top: 100px solid red;
-	border-left: 100px solid transparent;
-
-}
-
-.shape-triangle-bottomleft {
-	width: 0;
-	height: 0;
-	border-bottom: 100px solid red;
-	border-right: 100px solid transparent;
-}
-
-.shape-triangle-bottomright {
-	width: 0;
-	height: 0;
-	border-bottom: 100px solid red;
-	border-left: 100px solid transparent;
+	border-top: 50px solid red;
+	border-right: 50px solid transparent;
 }
 
 .shape-curvedarrow {
   position: relative;
   width: 0;
   height: 0;
-  border-top: 9px solid transparent;
-  border-right: 9px solid red;
+  border-top: 18px solid transparent;
+  border-right: 18px solid red;
   -webkit-transform: rotate(10deg);
   -moz-transform: rotate(10deg);
   -ms-transform: rotate(10deg);
@@ -107,12 +54,12 @@
   content: "";
   position: absolute;
   border: 0 solid transparent;
-  border-top: 3px solid red;
-  border-radius: 20px 0 0 0;
-  top: -12px;
-  left: -9px;
-  width: 12px;
-  height: 12px;
+  border-top: 6px solid red;
+  border-radius: 40px 0 0 0;
+  top: -24px;
+  left: -18px;
+  width: 24px;
+  height: 24px;
   -webkit-transform: rotate(45deg);
   -moz-transform: rotate(45deg);
   -ms-transform: rotate(45deg);

@@ -12,13 +12,13 @@ define(['./view/ComponentButton',
 		'./drawers/ImageDrawer',
 		'./ComponentFactory',
 		'lang',
-		'tantaman/web/widgets/Dropdown',
+		'./view/ShapesDropdown',
 		'./ShapeCollection'],
 function(Button, ImportingComponentButton,
 		Image, TextBox, WebFrame, Video,
 		ImageView, TextBoxView, WebFrameView, VideoView,
 		TextBoxDrawer, ImageDrawer, ComponentFactory, lang,
-		Dropdown, ShapeCollection) {
+		ShapesDropdown, ShapeCollection) {
 	var availableShapes = new ShapeCollection();
 	var service = {
 		createButtons: function(editorModel) {
@@ -60,7 +60,7 @@ function(Button, ImportingComponentButton,
 				editorModel: editorModel
 			}));
 
-			buttons.push(new Dropdown(
+			buttons.push(new ShapesDropdown(
 				availableShapes,
 				JST['strut.slide_components/ShapesDropdown'],
 				{class: 'group-dropdown'}
