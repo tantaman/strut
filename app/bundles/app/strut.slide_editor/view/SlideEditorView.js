@@ -4,7 +4,7 @@ define(['libs/backbone',
 function(Backbone, SlideWell, OperatingTable) {
 	'use stict';
 	return Backbone.View.extend({
-		className: 'slideEditor row-fluid',
+		className: 'slideEditor',
 
 		initialize: function() {
 			//this._template = JST['strut.slide_editor/SlideEditor'];
