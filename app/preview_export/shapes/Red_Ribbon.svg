@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 744 1112"
+		version="1.0" 
+		width ="744"
+		height="1112"
+		preserveAspectRatio="none">
+	<defs>
+		<linearGradient id="ribbonLighting" gradientUnits="userSpaceOnUse" 
+									x1="0" y1="0" x2="100%" y2="100%">
+			<stop	stop-color="#a82326" offset="0" />
+			<stop	stop-color="#f40405" offset="1" />
+		</linearGradient>
+		<filter id="lowDropShadow">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="10" result="lowBlur"/>
+			<feOffset in="lowBlur" dx="5" dy="5" result="lowMovedBlur"/>
+			<feMerge>
+				<feMergeNode in="lowMovedBlur"/>
+				<feMergeNode in="SourceGraphic"/>
+			</feMerge>
+		</filter>
+		<filter id="highDropShadow">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="15" result="highBlur"/>
+			<feOffset in="highBlur" dx="10" dy="10" result="highMovedBlur"/>
+			<feMerge>
+				<feMergeNode in="highMovedBlur"/>
+				<feMergeNode in="SourceGraphic"/>
+			</feMerge>
+		</filter>
+	</defs>
+	<path
+		id="loop"
+		fill="#9e2629"
+		filter ="url(#lowDropShadow)" 
+		d="
+			M 82,213 
+			C 30,89		66,66		105,40 
+			C 164,3		203,20	247,77 
+			C 197,89	172,83	129,105 
+			C 98,121	80,161	82,213 
+			z " />
+	<path
+		id="right"
+		fill="url(#ribbonLighting)"
+		filter ="url(#lowDropShadow)" 
+    d="
+			M 172,21 
+			C 252,135	248,280	236,396 
+			C 218,558	124,804	131,880 
+			C 187,943	255,974	294,1043 
+			C 314,858	343,675	353,489 
+			C 360,371	372,238	348,133 
+			C 341,100	263,34	172,21 
+			z " />
+	<path
+		id="left"
+		fill="url(#ribbonLighting)"
+		filter ="url(#highDropShadow)" 
+		d="
+			M 693,620 
+			C 700,669	676,767	664,825    
+			C 398,693	81,347	61,288    
+			C 45,241	49,153	57,102    
+			C 67,195	606,605	693,620    
+			z " />
+</svg>
