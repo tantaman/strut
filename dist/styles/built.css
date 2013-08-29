@@ -252,7 +252,7 @@
 	height: 100%;
 }
 .wellContextMenu {
-  z-index: 2;
+  /*z-index: 2;*/
 }
 
 .slideWell {
@@ -305,7 +305,6 @@ body {
   top: 56px;
   bottom: 0px;
   right: 0px;
-  overflow: auto;
 }
 
 .operatingTable .slideContainer {
