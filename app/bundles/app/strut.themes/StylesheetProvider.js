@@ -12,7 +12,7 @@ function(CodeEditor, Button, CssManip, empty) {
 		});
 	var sheetId = 'userStylesheet';
 
-	var userStylesheet = CssManip.getStylesheet({
+	var userStylesheet = CssManip.getStyleElem({
 		id: sheetId,
 		create: true
 	});

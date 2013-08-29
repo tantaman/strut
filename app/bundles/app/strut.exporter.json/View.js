@@ -48,7 +48,7 @@ function(Backbone, FileUtils, lang) {
 		_populateTextArea: function() {
 			var $txt = this.$el.find('textarea');
 			if ($txt.length == 0) {
-				$txt = $('<textarea></textarea>');
+				$txt = $('<textarea style="width: 500px; height: 200px;"></textarea>');
 				this.$el.append($txt);
 			}
 

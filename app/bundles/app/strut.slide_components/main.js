@@ -11,11 +11,15 @@ define(['./view/ComponentButton',
 		'./drawers/TextBoxDrawer',
 		'./drawers/ImageDrawer',
 		'./ComponentFactory',
-		'lang'],
+		'lang',
+		'./view/ShapesDropdown',
+		'./ShapeCollection'],
 function(Button, ImportingComponentButton,
 		Image, TextBox, WebFrame, Video,
 		ImageView, TextBoxView, WebFrameView, VideoView,
-		TextBoxDrawer, ImageDrawer, ComponentFactory, lang) {
+		TextBoxDrawer, ImageDrawer, ComponentFactory, lang,
+		ShapesDropdown, ShapeCollection) {
+	var availableShapes = new ShapeCollection();
 	var service = {
 		createButtons: function(editorModel) {
 			var buttons = [];
@@ -55,6 +59,13 @@ function(Button, ImportingComponentButton,
 				title: lang.insert_website,
 				editorModel: editorModel
 			}));
+
+			buttons.push(new ShapesDropdown(
+				availableShapes,
+				JST['strut.slide_components/ShapesDropdown'],
+				{class: 'group-dropdown',
+				editorModel: editorModel}
+			));
 
 			return buttons;
 		}

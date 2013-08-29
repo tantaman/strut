@@ -22,6 +22,7 @@ define({
 	paste: 'Coller',
 	undo: 'Annuler',
 	redo: 'Refaire',
+	shapes: 'Formes',
 	strut_exporter_json: {
 		explain: 'Vous pouvez sauvegarder la présentation dans fichier que vous pourrez réimporter dans Strut plus tard',
 		click_below: 'Cliquer ci-dessous pour télécharger le fichier'

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+polygon {
+
+}
+svg {
+width: 100px;
+fill: lime;
+height: 100px;
+}
+</style>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 190 190">
+  <polygon points="100,10 40,180 190,60 10,60 160,180" style=";stroke-width:5;fill-rule:nonzero;"/>
+</svg>
+
+</body>
+</html>
+
+
+
+^^ scaling and filling the svg.
+
+
+http://www.w3schools.com/svg/svg_examples.asp
+^^ various stock SVG shapes

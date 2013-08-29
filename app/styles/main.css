@@ -2,6 +2,10 @@ html, body {
   height: 100%;
 }
 
+.green {
+  border-color: green;
+}
+
 body {
   background: #222;
   background-image: url('img/linen-lighter.png');
@@ -20,6 +24,18 @@ a {
   cursor: pointer;
 }
 
+.dropdown-menu .shape {
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0;
+}
+
+/*.dropdown-menu [class*="shape-"] {
+  box-sizing: border-box;
+}*/
+
 .absolute {
   position: absolute;
 }
@@ -30,6 +46,10 @@ a {
   position: absolute;
   top: 0px;
   left: 0px;
+}
+
+.btn-group > .btn-group {
+  margin-top: 0px;
 }
 
 .btn-plast {
