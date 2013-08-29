@@ -28,6 +28,8 @@ a {
   width: 42px;
   height: 42px;
   cursor: pointer;
+  display: inline-block;
+  padding: 0;
 }
 
 /*.dropdown-menu [class*="shape-"] {

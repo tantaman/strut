@@ -63,7 +63,8 @@ function(Button, ImportingComponentButton,
 			buttons.push(new ShapesDropdown(
 				availableShapes,
 				JST['strut.slide_components/ShapesDropdown'],
-				{class: 'group-dropdown'}
+				{class: 'group-dropdown',
+				editorModel: editorModel}
 			));
 
 			return buttons;

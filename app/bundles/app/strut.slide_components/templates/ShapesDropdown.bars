@@ -3,6 +3,6 @@
 	{{#lang title}}{{/lang}}</a>
 <ul class="dropdown-menu horizontalDropdown" role="menu" style="min-width: 127px; width: 127px">
 {{#shapes}}
-<li class="shape"><img src="{{src}}" width="100%" height="100%"></img></li>
+<li><a class="shape" data-src="{{src}}"><img src="{{src}}" width="100%" height="100%"></img></a></li>
 {{/shapes}}
 </ul>
