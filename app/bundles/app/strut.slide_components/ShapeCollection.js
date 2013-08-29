@@ -20,7 +20,6 @@ function() {
 			PlatonicShape('star', 'star.svg', 1),
 			PlatonicShape('pacman', 'pacman.svg', 1),
 			PlatonicShape('heart', 'heart.svg', 1),
-			PlatonicShape('ribbon', 'ribbon.svg', 1),
 			PlatonicShape('infinity', 'infinity.svg', 1),
 			PlatonicShape('yin yang', 'yinyang.svg', 1),
 			PlatonicShape('glasses', 'glasses.svg', 1)
