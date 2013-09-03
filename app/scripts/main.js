@@ -17,6 +17,7 @@ require.config({
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
+    'strut/presentation_generator/reveal': '../bundles/app/strut.presentation_generator.reveal',
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
@@ -166,6 +167,12 @@ if (window.location.href.indexOf("preview=true") != -1) {
       window.startPres = bespoke;
       window.$ = jquery;
     });
+  }else if (window.location.href.indexOf("reveal") != -1) {
+    r(['../preview_export/reveal/js/reveal','../preview_export/reveal/lib/js/head.min.js'],
+      function(reveal,head) {
+        window.head = head();
+        window.startPres = reveal;
+      });
   } else {
     r(['../preview_export/scripts/impress', 'jquery'],
       function(impress, jquery) {
