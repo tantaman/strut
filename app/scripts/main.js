@@ -166,6 +166,12 @@ if (window.location.href.indexOf("preview=true") != -1) {
       window.startPres = bespoke;
       window.$ = jquery;
     });
+  }else if (window.location.href.indexOf("reveal") != -1) {
+    r(['../preview_export/reveal/js/reveal','../preview_export/reveal/lib/js/head.min.js'],
+      function(reveal,head) {
+        window.head = head();
+        window.startPres = reveal;
+      });
   } else {
     r(['../preview_export/scripts/impress', 'jquery'],
       function(impress, jquery) {
