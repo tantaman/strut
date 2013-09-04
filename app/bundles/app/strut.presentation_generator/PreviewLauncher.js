@@ -8,14 +8,14 @@ define(function() {
 	PreviewLauncher.prototype = {
 		launch: function(generator) {
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
-			window.previewWind = window.open('index.html?preview=true&generator=' + generator.id);
+			window.previewWind = window.open('');
 			var sourceWind = window;
 
 			$(window.previewWind.document).ready(
 				generator.getStartPreviewFn(
 					this._editorModel,
 					sourceWind,
-					previewStr)
+					previewStr)()
 			);
 		}
 	};

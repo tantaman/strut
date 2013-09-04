@@ -105,19 +105,8 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
 
     ImpressGenerator.prototype.getStartPreviewFn = function(editorModel, sourceWind, previewStr) {
       function cb() {
-        if (!sourceWind.previewWind.startPres) {
-          setTimeout(cb, 200);
-        } else {
           sourceWind.
-            previewWind.document.
-              getElementsByTagName("html")[0].innerHTML = previewStr;
-          if (!sourceWind.previewWind.presStarted) {
-            sourceWind.previewWind.startPres(sourceWind.previewWind.document, sourceWind.previewWind);
-            sourceWind.previewWind.imp = sourceWind.previewWind.pres();
-            sourceWind.previewWind.imp.init();
-            sourceWind.previewWind.imp.goto(editorModel.activeSlideIndex());
-          }
-        }
+            previewWind.document.write(previewStr);
       }
 
       return cb;

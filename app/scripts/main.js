@@ -6,12 +6,8 @@ require.config({
     lodash: "../scripts/libs/lodash",
     backbone: "../scripts/libs/backbone",
     css: "../scripts/libs/css",
-    // text: "../scripts/libs/text",
     bootstrap: "../components/bootstrap/bootstrap",
     colorpicker: "../components/spectrum/spectrum",
-    // gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
-    // downloadify: "../components/downloadify/js/downloadify.min",
-    // swfobject: "../components/downloadify/js/swfobject",
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
 
@@ -157,33 +153,7 @@ log.notice = function(msg) {
 // TODO: move this stuff into index.html
 // so we don't have to include the actual amd-app when
 // we go to present.
-var r = require;
-if (window.location.href.indexOf("preview=true") != -1) {
-  if (window.location.href.indexOf("bespoke") != -1) {
-    r(['../preview_export/bespoke/scripts/bespoke', 'jquery'],
-      function(bespoke, jquery) {
-
-      window.jQuery = jquery;
-      window.startPres = bespoke;
-      window.$ = jquery;
-    });
-  }else if (window.location.href.indexOf("reveal") != -1) {
-    r(['../preview_export/reveal/js/reveal','../preview_export/reveal/lib/js/head.min.js'],
-      function(reveal,head) {
-        window.head = head();
-        window.startPres = reveal;
-      });
-  } else {
-    r(['../preview_export/scripts/impress', 'jquery'],
-      function(impress, jquery) {
-
-      window.jQuery = jquery;
-      window.startPres = impress;
-      window.$ = jquery;
-    });
-  }
-} else {
-  require([
+require([
            'lang',
            'compiled-templates',
            'colorpicker',
@@ -221,5 +191,4 @@ if (window.location.href.indexOf("preview=true") != -1) {
       $(window).unload(function() {
         localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
       });
-  });
-}
+});

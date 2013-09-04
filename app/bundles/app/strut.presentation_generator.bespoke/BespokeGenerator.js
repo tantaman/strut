@@ -10,17 +10,8 @@ define(function() {
 		getStartPreviewFn: function(editorModel, sourceWind, previewStr) {
 			function cb() {
 				var previewWind = sourceWind.previewWind;
-				if (!previewWind.startPres) {
-					setTimeout(cb, 200);
-				} else {
-					// TODO: reconcile this and the impress startup interface
-					previewWind.document
-						.getElementsByTagName("html")[0].innerHTML = previewStr;
-					if (!previewWind.presStarted) {
-						previewWind.startPres(previewWind.document, previewWind);
-						previewWind.bespoke.horizontal.from('article');
-					}
-				}
+				// TODO: reconcile this and the impress startup interface
+				previewWind.document.write(previewStr);
 			}
 
 			return cb;
