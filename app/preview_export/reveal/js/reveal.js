@@ -2040,10 +2040,10 @@ var Reveal = (function(){
           if( indexv > 0 ) url += '/' + indexv;
         }
 
-        window.location.hash = url;
+        if (!window.disableHash)
+          window.location.hash = url;
       }
     }
-
   }
 
   /**

@@ -11,7 +11,9 @@ define(function() {
 			function cb() {
 				var previewWind = sourceWind.previewWind;
 				// TODO: reconcile this and the impress startup interface
+				previewWind.document.open();
 				previewWind.document.write(previewStr);
+				previewWind.document.close();
 			}
 
 			return cb;

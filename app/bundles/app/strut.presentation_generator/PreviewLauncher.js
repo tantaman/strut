@@ -8,6 +8,7 @@ define(function() {
 	PreviewLauncher.prototype = {
 		launch: function(generator) {
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
+			//window.location.hash = '#/1';
 			window.previewWind = window.open('');
 			var sourceWind = window;
 
@@ -15,7 +16,7 @@ define(function() {
 				generator.getStartPreviewFn(
 					this._editorModel,
 					sourceWind,
-					previewStr)()
+					previewStr)
 			);
 		}
 	};

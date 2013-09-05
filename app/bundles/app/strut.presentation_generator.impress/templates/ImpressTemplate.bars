@@ -1,3 +1,4 @@
+<html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=1024" />
@@ -87,6 +88,7 @@ if ("ontouchstart" in document.documentElement) {
 }
 </script>
 
+</div>
 {{#interval}}
 <script>
 var interval = {{.}};
@@ -97,7 +99,6 @@ if (interval >= 1000) {
 }
 </script>
 {{/interval}}
-</div>
 <script>
 if (!window.presStarted) {
     startPres(document, window);
@@ -105,3 +106,4 @@ if (!window.presStarted) {
 }
 </script>
 </body>
+</html>

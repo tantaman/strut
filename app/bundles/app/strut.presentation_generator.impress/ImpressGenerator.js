@@ -105,8 +105,12 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
 
     ImpressGenerator.prototype.getStartPreviewFn = function(editorModel, sourceWind, previewStr) {
       function cb() {
-          sourceWind.
+        window.location.hash = '#/step-' + (editorModel.activeSlideIndex() + 1);
+        sourceWind.previewWind.document.open();
+        sourceWind.
             previewWind.document.write(previewStr);
+        sourceWind.previewWind.document.close();
+        previewWind.disableHash = true;
       }
 
       return cb;
