@@ -28,11 +28,11 @@
     height: 100%;
 }
 </style>
+
 <link href="preview_export/css/main.css" rel="stylesheet" type='text/css' />
 <link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
-<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 
 <link rel="shortcut icon" href="favicon.png" type='image/png' />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" type='image/png' />
@@ -82,6 +82,8 @@
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
+<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
+<script type="text/javascript" src="preview_export/scripts/shims.js"></script>
 <script>
 if ("ontouchstart" in document.documentElement) { 
     document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";

@@ -65,6 +65,7 @@
 
     <script src="preview_export/reveal/lib/js/head.min.js"></script>
     <script src="preview_export/reveal/js/reveal.js"></script>
+    <script type="text/javascript" src="preview_export/scripts/shims.js"></script>
     <script>
     if (!window.presStarted) {
 
