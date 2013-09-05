@@ -1,3 +1,4 @@
+<html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=1024" />
@@ -27,11 +28,11 @@
     height: 100%;
 }
 </style>
+
 <link href="preview_export/css/main.css" rel="stylesheet" type='text/css' />
 <link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
 <link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
-<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 
 <link rel="shortcut icon" href="favicon.png" type='image/png' />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" type='image/png' />
@@ -81,12 +82,13 @@
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
+</div>
+<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
 <script>
 if ("ontouchstart" in document.documentElement) { 
     document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
 }
 </script>
-
 {{#interval}}
 <script>
 var interval = {{.}};
@@ -97,7 +99,6 @@ if (interval >= 1000) {
 }
 </script>
 {{/interval}}
-</div>
 <script>
 if (!window.presStarted) {
     startPres(document, window);
@@ -105,3 +106,4 @@ if (!window.presStarted) {
 }
 </script>
 </body>
+</html>

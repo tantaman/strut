@@ -1,5 +1,6 @@
 define(function() {
 	'use strict';
+	var launch = 0;
 
 	function PreviewLauncher(editorModel) {
 		this._editorModel = editorModel;
@@ -7,11 +8,16 @@ define(function() {
 
 	PreviewLauncher.prototype = {
 		launch: function(generator) {
+			if (window.previewWind)
+				window.previewWind.close();
+
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
-			window.previewWind = window.open('index.html?preview=true&generator=' + generator.id);
+			window.previewWind = window.open(
+				'empty.html' + generator.getSlideHash(this._editorModel),
+				window.location.href);
 			var sourceWind = window;
 
-			$(window.previewWind.document).ready(
+			$(window.previewWind).load(
 				generator.getStartPreviewFn(
 					this._editorModel,
 					sourceWind,

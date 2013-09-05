@@ -1,3 +1,4 @@
+<html>
 <head>
 	<meta name="viewport" content="width=device-width" />
 	<title>Deck Title</title>
@@ -75,3 +76,4 @@ if (!window.presStarted) {
 }
 </script>
 </body>
+</html>

@@ -1,33 +1,3 @@
-/*
-    So you like the style of impress.js demo?
-    Or maybe you are just curious how it was done?
-    
-    You couldn't find a better place to find out!
-    
-    Welcome to the stylesheet impress.js demo presentation.
-    
-    Please remember that it is not meant to be a part of impress.js and is
-    not required by impress.js.
-    I expect that anyone creating a presentation for impress.js would create
-    their own set of styles.
-    
-    But feel free to read through it and learn how to get the most of what
-    impress.js provides.
-    
-    And let me be your guide.
-    
-    Shall we begin?
-*/
-
-
-/* 
-    We start with a good ol' reset.
-    That's the one by Eric Meyer http://meyerweb.com/eric/tools/css/reset/ 
-    
-    You can probably argue if it is needed here, or not, but for sure it
-    doesn't do any harm and gives us a fresh start.
-*/
-
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
