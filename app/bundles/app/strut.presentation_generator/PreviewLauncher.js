@@ -8,7 +8,7 @@ define(function() {
 	PreviewLauncher.prototype = {
 		launch: function(generator) {
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
-			window.previewWind = window.open();
+			window.previewWind = window.open('about:blank');
 			var sourceWind = window;
 
 			$(window.previewWind.document).ready(
