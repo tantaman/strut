@@ -82,15 +82,13 @@
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
+</div>
 <script type="text/javascript" src="preview_export/scripts/impress.js"></script>
-<script type="text/javascript" src="preview_export/scripts/shims.js"></script>
 <script>
 if ("ontouchstart" in document.documentElement) { 
     document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
 }
 </script>
-
-</div>
 {{#interval}}
 <script>
 var interval = {{.}};

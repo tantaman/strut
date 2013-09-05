@@ -17,6 +17,10 @@ define(function() {
 			}
 
 			return cb;
+		},
+
+		getSlideHash: function() {
+			return '';
 		}
 	};
 });

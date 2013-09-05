@@ -10,6 +10,9 @@ function(BespokeGenerator) {
 		},
 		getStartPreviewFn: function() {
 			return BespokeGenerator.getStartPreviewFn.apply(BespokeGenerator, arguments);
+		},
+		getSlideHash: function() {
+			return '';
 		}
 	};
 

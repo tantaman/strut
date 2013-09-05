@@ -8,8 +8,13 @@ function(ImpressGenerator) {
 		generate: function(deckAttrs) {
 			return ImpressGenerator.render(deckAttrs);
 		},
+
 		getStartPreviewFn: function() {
 			return ImpressGenerator.getStartPreviewFn.apply(ImpressGenerator, arguments);
+		},
+
+		getSlideHash: function(editorModel) {
+			return '#/step-' + (editorModel.activeSlideIndex() + 1);
 		}
 	};
 

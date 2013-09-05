@@ -6,12 +6,11 @@ define(function() {
 
 		getStartPreviewFn: function(editorModel, sourceWind, previewStr) {
       function cb() {
-        var previewWind = sourceWind.previewWind;
         window.location.hash = '#/' + editorModel.activeSlideIndex();
+        var previewWind = sourceWind.previewWind;
         previewWind.document.open();
         previewWind.document.write(previewStr);
         previewWind.document.close();
-        previewWind.disableHash = true;
       }
       return cb;
     }

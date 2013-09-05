@@ -69,7 +69,6 @@
 	</div>
 
 <script src="preview_export/bespoke/scripts/bespoke.js"></script>
-<script type="text/javascript" src="preview_export/scripts/shims.js"></script>
 <script>
 if (!window.presStarted) {
     startPres(document, window);
