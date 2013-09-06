@@ -20,6 +20,7 @@ define({
 	cut: 'Ausschneiden',
 	copy: 'Kopieren',
 	paste: 'Einfügen',
+	delete: 'Löschen',
 	undo: 'Rückgängig',
 	redo: 'Wiederholen',
 	shapes: 'Formen',

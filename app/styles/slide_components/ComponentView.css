@@ -130,15 +130,21 @@
 	-webkit-user-select: none;
 }
 
-.component.selected {
-	border: 2px dashed black;
+.component.selected .content {
+  outline: 2px dashed black;
+  outline-offset: 1px;
 }
 
-.component.editable {
+.component.editable .content {
 	cursor: auto;
-	border: 2px solid red;
+  	outline: 0px;
+  	outline: 2px solid red;
 	-moz-user-select: text;
 	-webkit-user-select: text;
+}
+
+.component.dragged:hover {
+  cursor: move;
 }
 
 .component .close-btn-red-20 {

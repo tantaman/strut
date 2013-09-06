@@ -36,6 +36,7 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 			GlobalEvents.on('cut', this._cut, this);
 			GlobalEvents.on('copy', this._copy, this);
 			GlobalEvents.on('paste', this._paste, this);
+			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
 		},
@@ -66,6 +67,14 @@ function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEv
 				this._deck.pasteSlide(item.clone());
 
 			// TODO: scroll to the new item...
+		},
+
+		_delete: function() {
+			if (this._editorModel.get('scope') == 'slideWell') {
+				var slide = this._deck.get('activeSlide');
+				this._deck.removeSlide(slide);
+				slide.dispose();
+			}
 		},
 
 		_sortStopped: function(startIndex, endIndex) {
