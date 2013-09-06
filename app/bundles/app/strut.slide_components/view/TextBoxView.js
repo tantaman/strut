@@ -29,11 +29,16 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           this.model.on("change:" + style, this._styleChanged, this);
         }
         this._lastDx = 0;
-        $(document).bind("keydown", this.keydown.bind(this));
+        this.keydown = this.keydown.bind(this);
+        $(document).bind("keydown", this.keydown);
         return this.model.on("edit", this.edit, this);
       },
       scaleStart: function() {
         this._initialSize = this.model.get('size');
+      },
+      remove: function() {
+        ComponentView.prototype.remove.apply(this, arguments);
+        $(document).unbind("keydown", this.keydown);
       },
       scale: function(e, deltas) {
         var currSize, sign;
