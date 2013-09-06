@@ -20,6 +20,7 @@ define({
 	cut: 'Couper',
 	copy: 'Copier',
 	paste: 'Coller',
+	delete: 'Effacer',
 	undo: 'Annuler',
 	redo: 'Refaire',
 	shapes: 'Formes',

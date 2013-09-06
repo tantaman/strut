@@ -7,6 +7,7 @@ function(GlobalEvents) {
 			GlobalEvents.on('cut', obj.cut, obj);
 			GlobalEvents.on('copy', obj.copy, obj);
 			GlobalEvents.on('paste', obj.paste, obj);
+			GlobalEvents.on('delete', obj.delete, obj);
 		},
 
 		unapply: function(obj) {
