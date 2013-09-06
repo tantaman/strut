@@ -2,7 +2,7 @@ define(function() {
 	'use strict';
 
 	function UndoRedoMenuItem(options) {
-		this.$el = $('<li><a>' + options.title + '<span class="label pull-right dispNone"></span></a>'
+		this.$el = $('<li><a>' + options.title + '<span class="label pull-right">' + options.hotkey + '</span></a>'
 		+ '</li>');
 
 		this.options = options;
