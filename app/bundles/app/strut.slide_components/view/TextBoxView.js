@@ -28,10 +28,16 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           this.model.on("change:" + style, this._styleChanged, this);
         }
         this._lastDx = 0;
+        this.keydown = this.keydown.bind(this);
+        $(document).bind("keydown", this.keydown);
         return this.model.on("edit", this.edit, this);
       },
       scaleStart: function() {
         this._initialSize = this.model.get('size');
+      },
+      remove: function() {
+        ComponentView.prototype.remove.apply(this, arguments);
+        $(document).unbind("keydown", this.keydown);
       },
       scale: function(e, deltas) {
         var currSize, sign;
@@ -49,7 +55,13 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         this.$el.find(".content").attr("contenteditable", true);
         if (e != null) {
           etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
-        }
+
+          // Focus editor and select all text.
+          if (!this.editing) {
+            this.$el.find(".content").get(0).focus();
+            document.execCommand('selectAll', false, null);
+          }
+				}
         this.allowDragging = false;
         return this.editing = true;
       },
@@ -68,6 +80,14 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         }
         return true;
       },
+			keydown: function(e) {
+				// When user starts typing text in selected textbox, open edit mode immediately.
+				if (this.model.get("selected") && !this.editing) {
+					if (!e.ctrlKey && !e.altKey && !e.metaKey && String.fromCharCode(e.which).match(/[\w]/)) {
+					  this.edit();
+					}
+				}
+			},
       editCompleted: function() {
         var text;
         text = this.$textEl.html();
@@ -76,6 +96,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           return this.remove();
         } else {
           this.model.set("text", text);
+					window.getSelection().removeAllRanges();
           this.$el.find(".content").attr("contenteditable", false);
           this.$el.removeClass("editable");
           return this.allowDragging = true;
