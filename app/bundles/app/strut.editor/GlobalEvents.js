@@ -18,6 +18,10 @@ function(mousetrap, Backbone) {
 		result.trigger('paste', e);
 	});
 
+	mousetrap.bind(['del', 'command+backspace'], function(e) {
+		result.trigger('delete', e);
+	});
+
 	mousetrap.bind(['ctrl+z', 'command+z'], function(e) {
 		result.trigger('undo', e);
 	});
