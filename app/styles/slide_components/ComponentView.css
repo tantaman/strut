@@ -141,6 +141,10 @@
 	-webkit-user-select: text;
 }
 
+.component.dragged:hover {
+  cursor: move;
+}
+
 .component .close-btn-red-20 {
 	display: none;
 	position: absolute;
