@@ -49,7 +49,13 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         this.$el.find(".content").attr("contenteditable", true);
         if (e != null) {
           etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
-        }
+
+          // Focus editor and select all text.
+          if (!this.editing) {
+            this.$el.find(".content").get(0).focus();
+            document.execCommand('selectAll', false, null);
+          }
+				}
         this.allowDragging = false;
         return this.editing = true;
       },
