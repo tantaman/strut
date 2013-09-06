@@ -30,6 +30,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			GlobalEvents.on('cut', this._cut, this);
 			GlobalEvents.on('copy', this._copy, this);
 			GlobalEvents.on('paste', this._paste, this);
+			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
 		},
@@ -95,6 +96,16 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 					active: false
 				});
 				this.model.add(comp);
+			}
+		},
+
+		_delete: function() {
+			if (this._editorModel.get('scope') == 'operatingTable') {
+				var comp = this.model.lastSelection;
+				if (comp) {
+					this.model.remove(comp);
+					comp.dispose();
+				}
 			}
 		},
 

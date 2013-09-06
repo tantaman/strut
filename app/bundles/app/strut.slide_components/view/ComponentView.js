@@ -224,6 +224,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
           this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
           this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
           this._dragging = true;
+          this.$el.addClass("dragged");
           this._prevPos = {
             x: this.model.get("x"),
             y: this.model.get("y")
@@ -316,6 +317,7 @@ function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdLi
         var cmd;
         if (this._dragging) {
           this._dragging = false;
+          this.$el.removeClass("dragged");
           if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
             cmd = new ComponentCommands.Move(this.dragStartLoc, this.model);
             undoHistory.push(cmd);
