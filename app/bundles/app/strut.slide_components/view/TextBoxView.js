@@ -16,7 +16,8 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           "dblclick": "dblclicked",
           "editComplete": "editCompleted",
           "mousedown": "mousedown",
-          "mouseup": "mouseup"
+          "mouseup": "mouseup",
+          "keydown": "keydown"
         };
         return _.extend(parentEvents, myEvents);
       },
@@ -28,6 +29,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           this.model.on("change:" + style, this._styleChanged, this);
         }
         this._lastDx = 0;
+        $(document).bind("keydown", this.keydown.bind(this));
         return this.model.on("edit", this.edit, this);
       },
       scaleStart: function() {
@@ -74,6 +76,15 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         }
         return true;
       },
+			keydown: function(e) {
+				// When user starts typing text in selected textbox, open edit mode immediately.
+				if (this.model.get("selected") && !this.editing) {
+					if (!e.ctrlKey && !e.altKey && !e.metaKey && String.fromCharCode(e.which).match(/[\w]/)) {
+					  this.edit();
+						alert(123);
+					}
+				}
+			},
       editCompleted: function() {
         var text;
         text = this.$textEl.html();
