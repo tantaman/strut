@@ -110,6 +110,10 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
       add: function(component) {
         var cmd;
         this._placeComponent(component);
+
+        component.set('selected', true);
+        this.selectionChanged(component, true);
+
         cmd = new ComponentCommands.Add(this, component);
         cmd.do();
         return undoHistory.push(cmd);
