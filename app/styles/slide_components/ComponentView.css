@@ -130,6 +130,10 @@
 	-webkit-user-select: none;
 }
 
+.component .content {
+  outline: 0px;
+}
+
 .component.selected .content {
   outline: 2px dashed black;
   outline-offset: 1px;

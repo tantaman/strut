@@ -93,6 +93,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           return this.remove();
         } else {
           this.model.set("text", text);
+					window.getSelection().removeAllRanges();
           this.$el.find(".content").attr("contenteditable", false);
           this.$el.removeClass("editable");
           return this.allowDragging = true;
