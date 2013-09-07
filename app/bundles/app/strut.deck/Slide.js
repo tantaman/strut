@@ -120,6 +120,8 @@ function(Backbone, SpatialObject, ComponentFactory, Math2, ComponentCommands, Cm
         this.attributes.components.push(component);
         this._registerWithComponent(component);
         this.trigger("contentsChanged");
+				this.unselectComponents();
+				component.set('selected', true);
         return this.trigger("change:components.add", this, component);
       },
       /**
