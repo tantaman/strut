@@ -11,7 +11,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
       tagName: "div",
       events: function() {
         var myEvents, parentEvents;
-        parentEvents = ComponentView.prototype.events.call(this);
+        parentEvents = ComponentView.prototype.events();
         myEvents = {
           "dblclick": "dblclicked",
           "editComplete": "editCompleted",
@@ -126,7 +126,6 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           value = model.get(key);
           if (value) {
             if (key === "decoration" || key === "align") {
-              console.log("DECORATION CHANGE");
               key = "text" + key.substring(0, 1).toUpperCase() + key.substr(1);
             } else if (key !== "color") {
               key = "font" + key.substr(0, 1).toUpperCase() + key.substr(1);
