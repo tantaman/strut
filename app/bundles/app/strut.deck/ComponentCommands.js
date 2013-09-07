@@ -96,6 +96,9 @@ define(function() {
 		},
 		TextScale: function(initial, component) {
 			return new BaseCommand(initial, component, 'size', 'Scale');
+		},
+		Text: function(initial, component) {
+			return new BaseCommand(initial, component, 'text', 'Text');
 		}
 	};
 });
