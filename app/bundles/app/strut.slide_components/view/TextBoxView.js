@@ -27,6 +27,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           style = styles[_i];
           this.model.on("change:" + style, this._styleChanged, this);
         }
+				this.model.on("change:text", this._textChanged, this);
         this._lastDx = 0;
         this.keydown = this.keydown.bind(this);
         $(document).bind("keydown", this.keydown);
@@ -54,6 +55,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         this.$el.addClass("editable");
         this.$el.find(".content").attr("contenteditable", true);
         if (e != null) {
+					this._initialText = this.$textEl.html();
           etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
 
           // Focus editor and select all text.
@@ -95,6 +97,9 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         if (text === "") {
           return this.remove();
         } else {
+					var cmd = ComponentCommands.Text(this._initialText, this.model);
+					undoHistory.push(cmd);
+
           this.model.set("text", text);
 					window.getSelection().removeAllRanges();
           this.$el.find(".content").attr("contenteditable", false);
@@ -135,6 +140,9 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
           }
         }
       },
+			_textChanged: function(model, text) {
+				this.$textEl.html(text);
+			},
       render: function() {
         ComponentView.prototype.render.call(this);
         this.$textEl = this.$el.find(".content");
