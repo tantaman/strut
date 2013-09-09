@@ -22,7 +22,8 @@
     padding:0;
     
     min-width: 120px;
-    max-width: 250px;
+    max-width: 275px;
+    width: 175px;
     display: inline-block;
     position: absolute;
     list-style-type: none;

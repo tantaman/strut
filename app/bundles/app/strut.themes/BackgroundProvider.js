@@ -35,7 +35,11 @@ function(View) {
 		},
 
 		_restoreBackground: function(e) {
-			var bg = this._editorModel.deck()['slide' + this._attr]();
+			// ugh...
+			var bg;
+			if (this._attr == 'Background')
+				bg = this._editorModel.activeSlide().get('background')
+			bg = bg || this._editorModel.deck()['slide' + this._attr]();
 			var $container = $(this._selector);
 			this._swapBg($container, bg);
 		},

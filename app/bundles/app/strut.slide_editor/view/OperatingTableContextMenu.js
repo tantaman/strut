@@ -32,7 +32,7 @@ function(lang, Backbone, AvailableBackgrounds) {
 
 	var menuItems = {
 		background: {
-			name: "Background",
+			name: "Single Slide Background",
 			icon: "tint",
 			items: {}
 		}
@@ -45,6 +45,11 @@ function(lang, Backbone, AvailableBackgrounds) {
 			background: bg.klass
 		};
 	});
+
+	backgroundItems["background:"] = {
+		name: 'clear',
+		background: null
+	};
 
 	$.contextMenu({
 		selector: '.slideContainer', 
