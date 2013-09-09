@@ -29,7 +29,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
         }
         this._lastDx = 0;
         this.keydown = this.keydown.bind(this);
-        $(document).bind("keydown", this.keydown);
+        // $(document).bind("keydown", this.keydown);
         return this.model.on("edit", this.edit, this);
       },
       scaleStart: function() {
@@ -37,7 +37,7 @@ function(ComponentView, etch, ComponentCommands, CmdListFactory) {
       },
       remove: function() {
         ComponentView.prototype.remove.apply(this, arguments);
-        $(document).unbind("keydown", this.keydown);
+        // $(document).unbind("keydown", this.keydown);
       },
       scale: function(e, deltas) {
         var currSize, sign;
