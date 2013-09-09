@@ -32,7 +32,7 @@ function(lang, Backbone, AvailableBackgrounds) {
 
 	var menuItems = {
 		background: {
-			name: "Single Slide Background",
+			name: lang.single_slide_bg,
 			icon: "tint",
 			items: {}
 		}
@@ -47,12 +47,12 @@ function(lang, Backbone, AvailableBackgrounds) {
 	});
 
 	backgroundItems["background:defaultbg"] = {
-		name: 'Invisible',
+		name: lang.invisible,
 		background: 'defaultbg'
 	};
 
 	backgroundItems["background:"] = {
-		name: 'Reset',
+		name: lang.reset,
 		background: undefined
 	};
 

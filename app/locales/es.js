@@ -24,6 +24,9 @@ define({
 	undo: 'Deshacer',
 	redo: 'Rehacer',
 	shapes: 'Formas',
+	single_slide_bg: 'Single Slide Background',
+	invisible: 'Invisible',
+	reset: 'Reajustar',
 	strut_exporter_json: {
 		explain: 'Esto te permite guardar un archivo en tu ordenador que podrás importar en Strut posteriormente.',
 		click_below: 'Haz Copiarlick abajo para descargar.'
