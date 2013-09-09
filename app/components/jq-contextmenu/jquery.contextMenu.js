@@ -1079,6 +1079,10 @@ var // currently active contextMenu trigger
                         $t.prepend('<i class="icon icon-' + item.icon + '"></i>')
                         //$t.addClass("icon icon-" + item.icon);
                     }
+
+                    if (item.background) {
+                        $t.addClass(item.background);
+                    }
                 }
                 
                 // cache contained elements

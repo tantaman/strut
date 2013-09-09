@@ -12,6 +12,11 @@
  *
  */
 
+ .context-menu-list [class*="solid-bg-"] {
+    border-radius: 0px;
+    box-shadow: 0;
+ }
+
 .context-menu-list {
     margin:0; 
     padding:0;
