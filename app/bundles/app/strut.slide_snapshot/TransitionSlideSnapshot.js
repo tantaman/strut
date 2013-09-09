@@ -3,8 +3,9 @@
 */
 define(["strut/slide_components/view/ThreeDRotatableComponentView",
         "./SlideDrawer",
-        "css!styles/transition_editor/TransitionSlideSnapshot.css"],
-function(ThreeDComponentView, SlideDrawer, empty) {
+        "css!styles/transition_editor/TransitionSlideSnapshot.css",
+        "strut/deck/Utils"],
+function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
   var overviewSize = window.config.slide.overviewSize;
   return ThreeDComponentView.extend({
     className: "component transitionSlideSnapshot",
@@ -52,7 +53,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
     },
 
     _backgroundChanged: function(deck, bg) {
-     bg = this.model.get('background') || this.options.deck.slideBackground();
+     bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
      this._$content.removeClass();
      this._$content.addClass('content ' + bg);
     },
@@ -73,7 +74,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       });
 
       // this.$el.class();
-      var bg = this.model.get('background') || this.options.deck.slideBackground();
+      var bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
       this._$content = this.$el.find('.content');
       this._$content.addClass(bg);
 

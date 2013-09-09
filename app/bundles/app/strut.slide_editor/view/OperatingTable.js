@@ -3,8 +3,9 @@ define(['libs/backbone',
 		'strut/slide_components/ComponentFactory',
 		'strut/editor/GlobalEvents',
 		'strut/deck/Component',
-		'./OperatingTableContextMenu'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu) {
+		'./OperatingTableContextMenu',
+		'strut/deck/Utils'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils) {
 	'use strict';
 
 	function MenuModel() {
@@ -13,7 +14,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 
 	MenuModel.prototype = {
 		getBackground: function() {
-			return this.slide.get('background') || this.deck.slideBackground();
+			return DeckUtils.slideBackground(this.slide, this.deck);
 		},
 
 		setBackground: function(bg) {
@@ -60,7 +61,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(this._deck.slideBackground());
+			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
 
 			var self = this;
 			setTimeout(function() {
@@ -75,10 +76,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		_updateBg: function(model, bg) {
 			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			if (this.model)
-				bg = this.model.get('background') || this._deck.slideBackground(bg);
-			else
-				bg = this._deck.slideBackground(bg);
+			bg = DeckUtils.slideBackground(this.model, this._deck);
 
 			this._$slideContainer.addClass('slideContainer slideEditArea ' + bg);
 		},

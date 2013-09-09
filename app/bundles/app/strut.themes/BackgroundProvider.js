@@ -1,5 +1,6 @@
-define(['tantaman/web/widgets/Dropdown'],
-function(View) {
+define(['tantaman/web/widgets/Dropdown',
+		'strut/deck/Utils'],
+function(View, DeckUtils) {
 	function BackgroundProvider(backgrounds, editorModel, selector, attr, classes) {
 		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'],
 			{class: 'iconBtns group-dropdown'});
@@ -38,7 +39,8 @@ function(View) {
 			// ugh...
 			var bg;
 			if (this._attr == 'Background')
-				bg = this._editorModel.activeSlide().get('background')
+				bg = DeckUtils.slideBackground(this._editorModel.activeSlide(),
+					this._editorModel.deck());
 			bg = bg || this._editorModel.deck()['slide' + this._attr]();
 			var $container = $(this._selector);
 			this._swapBg($container, bg);

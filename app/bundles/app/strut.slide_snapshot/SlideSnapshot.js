@@ -1,7 +1,8 @@
 define(['libs/backbone',
 		'./SlideDrawer',
-		'css!styles/slide_snapshot/slideSnapshot.css'],
-function(Backbone, SlideDrawer, css) {
+		'css!styles/slide_snapshot/slideSnapshot.css',
+		'strut/deck/Utils'],
+function(Backbone, SlideDrawer, css, DeckUtils) {
 	'use strict';
 
 	return Backbone.View.extend({
@@ -64,7 +65,7 @@ function(Backbone, SlideDrawer, css) {
 		},
 
 		_bgChanged: function() {
-			var bg = this.model.get('background') || this.options.deck.slideBackground();
+			var bg = DeckUtils.slideBackground(this.model, this.options.deck);
 			this.$el.removeClass();
 			var classStr = 'slideSnapshot ' + bg;
 			if (this.model.get('active'))

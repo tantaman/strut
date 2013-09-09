@@ -53,7 +53,7 @@ function(lang, Backbone, AvailableBackgrounds) {
 
 	backgroundItems["background:"] = {
 		name: 'Reset',
-		background: null
+		background: undefined
 	};
 
 	$.contextMenu({
