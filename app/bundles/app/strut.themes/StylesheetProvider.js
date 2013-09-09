@@ -1,8 +1,9 @@
 define(['tantaman/web/widgets/CodeEditor',
 		'./Button',
 		'tantaman/web/css_manip/CssManip',
-		'css!styles/strut.themes/stylesheetEditor.css'],
-function(CodeEditor, Button, CssManip, empty) {
+		'css!styles/strut.themes/stylesheetEditor.css',
+		'./StylesheetPreProcessor'],
+function(CodeEditor, Button, CssManip, empty, preProcessor) {
 	var cssEditor = new CodeEditor({
 			class: 'stylesheetEditor',
 			title: 'Edit CSS',
@@ -50,10 +51,12 @@ function(CodeEditor, Button, CssManip, empty) {
 		},
 
 		_launch: function() {
-			this._cssEditor.show(this._cssSaved, this._editorModel.customStylesheet());
+			var css = this._editorModel.customStylesheet();
+			this._cssEditor.show(this._cssSaved, preProcessor.beforeEdit(css));
 		},
 
 		_cssSaved: function(css) {
+			css = preProcessor.beforeSave(css);
 			userStylesheet.innerHTML = css;
 			this._editorModel.customStylesheet(css);
 			this._cssEditor.hide();

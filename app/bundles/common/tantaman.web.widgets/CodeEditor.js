@@ -41,8 +41,8 @@ function(Backbone) {
 			this.$input = this.$el.find('.codeInput');
 
 			this.$el.modal({
-				backdrop: 'static',
-				keyboard: false,
+				/*backdrop: 'static',
+				keyboard: false,*/
 				show: false
 			});
 
