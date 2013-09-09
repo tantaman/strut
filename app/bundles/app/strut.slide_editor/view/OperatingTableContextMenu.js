@@ -46,8 +46,13 @@ function(lang, Backbone, AvailableBackgrounds) {
 		};
 	});
 
+	backgroundItems["background:defaultbg"] = {
+		name: 'Invisible',
+		background: 'defaultbg'
+	};
+
 	backgroundItems["background:"] = {
-		name: 'clear',
+		name: 'Reset',
 		background: null
 	};
 
