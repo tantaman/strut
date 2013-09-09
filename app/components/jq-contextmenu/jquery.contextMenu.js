@@ -846,6 +846,10 @@ var // currently active contextMenu trigger
                     }
                 });
             }
+
+            if (opt.events.shown) {
+                opt.events.shown.call($trigger, opt);
+            }
         },
         hide: function(opt, force) {
             var $trigger = $(this);

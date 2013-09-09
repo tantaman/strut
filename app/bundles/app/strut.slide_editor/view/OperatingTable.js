@@ -19,6 +19,10 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 
 		setBackground: function(bg) {
 			this.slide.set('background', bg)
+		},
+
+		canDoMarkdown: function() {
+			return false;
 		}
 	};
 

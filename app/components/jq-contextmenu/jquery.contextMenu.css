@@ -80,7 +80,7 @@
 }
 
 .context-menu-item.disabled {
-    color: #666;
+    opacity: 0.5;
 }
 
 .context-menu-input.hover,

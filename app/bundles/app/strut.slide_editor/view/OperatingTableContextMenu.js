@@ -17,6 +17,14 @@ function(lang, Backbone, AvailableBackgrounds) {
 		this.model.setBackground(bg);
 	};
 
+	ContextMenu.prototype._ensureState = function($menu) {
+		if (this.model.canDoMarkdown()) {
+			$menu.find('li.markdown-menu').removeClass('disabled');
+		} else {
+			$menu.find('li.markdown-menu').addClass('disabled');
+		}
+	};
+
 	ContextMenu.prototype._previewBackground = function(e) {
 		this._preview = e.currentTarget.dataset.background;
 		$slideContainer.removeClass(this.model.getBackground());
@@ -40,6 +48,7 @@ function(lang, Backbone, AvailableBackgrounds) {
 		markdown: {
 			name: "Markdown",
 			icon: "markdown",
+			className: "markdown-menu",
 			items: {
 				"markdown:edit": {
 					icon: "edit",
@@ -79,14 +88,20 @@ function(lang, Backbone, AvailableBackgrounds) {
 			menu.trigger('change:' + parts[0], key, parts[1]);
 		},
 		events: {
-			show: menuShown
+			show: menuShowing,
+			shown: menuShown
 		},
 		items: menuItems
 	});
 
 	var $slideContainer = null;
-	function menuShown() {
+	function menuShowing(opts) {
 		$slideContainer = $('.slideContainer');
+	}
+
+	function menuShown(opts) {
+		var $menu = opts.$menu;
+		menu._ensureState($menu);
 	}
 
 	$('.context-menu-item[class*="solid-bg-"]').hover(
