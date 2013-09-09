@@ -52,6 +52,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
     },
 
     _backgroundChanged: function(deck, bg) {
+     bg = this.model.get('background') || this.options.deck.slideBackground();
      this._$content.removeClass();
      this._$content.addClass('content ' + bg);
     },
@@ -72,7 +73,7 @@ function(ThreeDComponentView, SlideDrawer, empty) {
       });
 
       // this.$el.class();
-      var bg = this.options.deck.get('background') || 'defaultbg';
+      var bg = this.model.get('background') || this.options.deck.slideBackground();
       this._$content = this.$el.find('.content');
       this._$content.addClass(bg);
 

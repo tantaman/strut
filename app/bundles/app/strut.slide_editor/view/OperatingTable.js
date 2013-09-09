@@ -73,6 +73,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		},
 
 		_updateBg: function(model, bg) {
+			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
 			if (this.model)
 				bg = this.model.get('background') || this._deck.slideBackground(bg);
@@ -192,6 +193,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			if (this.model != null) {
 				this.model.on('change:components.add', this._componentAdded, this);
 				this.model.on('change:background', this._updateBg, this);
+				this._updateBg();
 			}
 			this._renderContents(prevModel);
 			this._menuModel.slide = model;

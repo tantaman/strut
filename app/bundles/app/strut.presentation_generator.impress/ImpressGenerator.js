@@ -62,6 +62,11 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
           return "";
         }
       });
+
+      Handlebars.registerHelper("or", function(a, b) {
+        return a || b;
+      });
+
       Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);
       Handlebars.registerPartial("TransformContainer", JST["strut.presentation_generator.impress/TransformContainer"]);
       Handlebars.registerPartial("SVGContainer", JST["strut.presentation_generator.impress/SVGContainer"]);
