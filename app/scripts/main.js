@@ -12,6 +12,7 @@ require.config({
     colorpicker: "../components/spectrum/spectrum",
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
+    lexed: '../components/lexed/lexed',
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',

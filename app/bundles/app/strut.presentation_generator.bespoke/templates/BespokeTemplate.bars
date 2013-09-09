@@ -58,7 +58,7 @@
 		<article>
 			{{#slides.models}}
 				{{#attributes}}
-					<section class="{{#or background ../../background}}{{/or}}" style="width: 1024px; height: 768px">
+					<section class="{{#or background ../../background}}{{/or}} slideContainer" style="width: 1024px; height: 768px">
 						{{#components}}
 							{{#renderComponent .}}{{/renderComponent}}
 						{{/components}}
