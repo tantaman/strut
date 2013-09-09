@@ -6,6 +6,21 @@ define(['libs/backbone',
 		'./OperatingTableContextMenu'],
 function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu) {
 	'use strict';
+
+	function MenuModel() {
+
+	}
+
+	MenuModel.prototype = {
+		getBackground: function() {
+			return this.slide.get('background') || this.deck.slideBackground();
+		},
+
+		setBackground: function(bg) {
+			this.slide.set('background', bg)
+		}
+	};
+
 	return Backbone.View.extend({
 		className: 'operatingTable',
 		events: {
@@ -19,6 +34,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
+			this._menuModel = new MenuModel();
+			this._menuModel.deck = this._deck;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
@@ -34,6 +51,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
+
+			ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {
@@ -55,7 +74,12 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 
 		_updateBg: function(model, bg) {
 			this._$slideContainer.removeClass();
-			this._$slideContainer.addClass('slideContainer slideEditArea ' + this._deck.slideBackground(bg));
+			if (this.model)
+				bg = this.model.get('background') || this._deck.slideBackground(bg);
+			else
+				bg = this._deck.slideBackground(bg);
+
+			this._$slideContainer.addClass('slideContainer slideEditArea ' + bg);
 		},
 
 		_updateSurface: function(model, bg) {
@@ -167,8 +191,10 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this.model = model;
 			if (this.model != null) {
 				this.model.on('change:components.add', this._componentAdded, this);
+				this.model.on('change:background', this._updateBg, this);
 			}
 			this._renderContents(prevModel);
+			this._menuModel.slide = model;
 			return this;
 		},
 

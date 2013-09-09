@@ -1082,6 +1082,7 @@ var // currently active contextMenu trigger
 
                     if (item.background) {
                         $t.addClass(item.background);
+                        $t[0].dataset.background = item.background;
                     }
                 }
                 
