@@ -3,6 +3,8 @@ require.config({
     libs: "../scripts/libs",
 
     jquery: "../scripts/libs/jQuery",
+    position: "../components/jq-contextmenu/jquery.ui.position",
+    jqContextMenu: "../components/jq-contextmenu/jquery.contextMenu",
     lodash: "../scripts/libs/lodash",
     backbone: "../scripts/libs/backbone",
     css: "../scripts/libs/css",
@@ -59,6 +61,14 @@ require.config({
 
     gradientPicker: {
       deps: ["jquery", "colorpicker"]
+    },
+
+    position: {
+      deps: ["jquery"]
+    },
+
+    jqContextMenu: {
+      deps: ["jquery", "position"]
     },
 
     handlebars: {
@@ -161,9 +171,14 @@ require([
            'features',
            './StrutLoader',
            'bootstrap',
-           'handlebars'
+           'handlebars',
+           'jqContextMenu',
+           'css!components/jq-contextmenu/jquery.contextMenu.css'
           ],
-  function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars) {
+  function(lang, empt, empty, config, registry, StrutLoader,
+    bootstrap,
+    Handlebars,
+    ContextMenu) {
       'use strict';
       var agent = window.navigator.userAgent;
       if (agent.indexOf('WebKit') >= 0)

@@ -2,8 +2,9 @@ define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
 		'strut/slide_components/ComponentFactory',
 		'strut/editor/GlobalEvents',
-		'strut/deck/Component'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
+		'strut/deck/Component',
+		'./OperatingTableContextMenu'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu) {
 	'use strict';
 	return Backbone.View.extend({
 		className: 'operatingTable',
