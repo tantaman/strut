@@ -2275,6 +2275,12 @@ table th[class*="span"],
   background-image: url("img/glyphicons-halflings-white.png");
 }
 
+.icon-markdown {
+  background: url("img/markdown.png");
+  background-repeat: no-repeat;
+  width: 24px;
+}
+
 .icon-glass {
   background-position: 0      0;
 }

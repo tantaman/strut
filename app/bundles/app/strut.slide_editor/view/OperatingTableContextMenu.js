@@ -35,6 +35,22 @@ function(lang, Backbone, AvailableBackgrounds) {
 			name: lang.single_slide_bg,
 			icon: "tint",
 			items: {}
+		},
+
+		markdown: {
+			name: "Markdown",
+			icon: "markdown",
+			items: {
+				"markdown:edit": {
+					icon: "edit",
+					name: "Edit"
+				},
+
+				"markdown:preview": {
+					icon: "search",
+					name: "Preview"
+				}
+			}
 		}
 	};
 
