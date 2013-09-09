@@ -60,7 +60,7 @@ function(Lexed) {
 			var l = new Lexed(cssText, null, rules);
 			while((token = l.lex()) != Lexed.EOF) {
 				if (token.text)
-					allText += ".user-gen-scoped " + token.text;
+					allText += ".slideContainer " + token.text;
 				else
 					allText += token;
 			}
@@ -70,7 +70,7 @@ function(Lexed) {
 
 		beforeEdit: function(cssText) {
 			if (cssText)
-				return cssText.replace(".user-gen-scoped", "");
+				return cssText.replace(/.slideContainer /g, "");
 			return '';
 		}
 	};
