@@ -36,7 +36,7 @@
 }
 
 .context-menu-item {
-    padding: 2px 2px 2px 24px;
+    padding: 2px
     background-color: #EEE;
     position: relative;
     display: block;
@@ -45,6 +45,14 @@
        -moz-user-select: -moz-none;
         -ms-user-select: none;
             user-select: none;
+}
+
+.context-menu-item > span {
+    padding-left: 2px;
+}
+
+.context-menu-item > i {
+    margin-left: 4px;
 }
 
 .context-menu-separator {

@@ -14,7 +14,7 @@ function(lang, Backbone) {
             menu.trigger('change:' + key, menu, key, options);
         },
         items: {
-            "background": {name: "Background", icon: "cut"}
+            "background": {name: "Background", icon: "tint"}
         }
     }); 
 

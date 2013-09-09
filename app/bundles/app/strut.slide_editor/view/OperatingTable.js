@@ -49,7 +49,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 				self._rendered = true;
 				self._resize();
 				self._renderContents();
-			});
+			}, 0);
 
 			return this;
 		},
