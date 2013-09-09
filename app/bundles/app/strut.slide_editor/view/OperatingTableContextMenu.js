@@ -33,8 +33,8 @@ function(lang, Backbone, AvailableBackgrounds) {
 		items: menuItems
 	});
 
-	$('.context-menu-item[class*="solid-bg-"]').hover(function() {
-	}, function() {
+	$('.context-menu-item[class*="solid-bg-"]').hover(function(e) {
+	}, function(e) {
 	});
 
 	return menu;

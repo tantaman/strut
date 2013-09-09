@@ -42,7 +42,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(this._deck.slideBackground());
-			this._$slideContainer.data('background', this._deck.slideBackground());
 
 			var self = this;
 			setTimeout(function() {
@@ -57,7 +56,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		_updateBg: function(model, bg) {
 			this._$slideContainer.removeClass();
 			this._$slideContainer.addClass('slideContainer slideEditArea ' + this._deck.slideBackground(bg));
-			this._$slideContainer.data('background', this._deck.slideBackground(bg));
 		},
 
 		_updateSurface: function(model, bg) {
