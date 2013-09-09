@@ -1,0 +1,39 @@
+http://xn--dahlstrm-t4a.net/svg/html/get-embedded-svg-document-script.html
+
+<object class="emb" data="images/svglogo.svg" width="100" height="100" type="image/svg+xml"></object>
+
+//<![CDATA[
+		
+		// wait until all the resources are loaded
+		window.addEventListener("load", findSVGElements, false);
+		
+		// fetches the document for the given embedding_element
+		function getSubDocument(embedding_element)
+		{
+			if (embedding_element.contentDocument) 
+			{
+				return embedding_element.contentDocument;
+			} 
+			else 
+			{
+				var subdoc = null;
+				try {
+					subdoc = embedding_element.getSVGDocument();
+				} catch(e) {}
+				return subdoc;
+			}
+		}
+				
+		function findSVGElements()
+		{
+			var elms = document.querySelectorAll(".emb");
+			for (var i = 0; i < elms.length; i++)
+			{
+				var subdoc = getSubDocument(elms[i])
+				if (subdoc)
+				// we'll just add style="fill: xxx" to the root svg elem for our color changes.
+					subdoc.getElementById("svgbar").setAttribute("fill", "lime");
+			}
+		}
+		//]]>
+		

@@ -5,8 +5,15 @@ function(GlobalEvents, lang) {
 
 	return {
 		initialize: function(registry) {
-			var actions = [['undo', 'Z'], ['redo', 'Y'],
-				['cut', 'X'], ['copy', 'C'], ['paste', 'V']];
+			var actions;
+			if (navigator.appVersion.indexOf("Mac") != -1) {
+				actions = [['undo', '⌘+Z'], ['redo', '⌘+Y'],
+					['cut', '⌘+X'], ['copy', '⌘+C'], ['paste', '⌘+V'], ['delete', '⌘+⌫']];
+			}
+			else {
+				actions = [['undo', 'Ctrl+Z'], ['redo', 'Ctrl+Y'],
+					['cut', 'Ctrl+X'], ['copy', 'Ctrl+C'], ['paste', 'Ctrl+V'], ['delete', 'Del']];
+			}
 
 			actions.forEach(function(action) {
 				registry.register({
@@ -14,8 +21,7 @@ function(GlobalEvents, lang) {
 					meta: {
 						title: lang[action[0]],
 						action: action[0],
-						// TODO: detect OS and present correct ctrl char.
-						hotkey: 'Ctrl+' + action[1]
+						hotkey: action[1]
 					}
 				}, function() {
 					GlobalEvents.trigger(action[0]);

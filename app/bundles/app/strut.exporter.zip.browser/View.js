@@ -40,7 +40,7 @@ function(Backbone, Archiver, lang) {
 
 		hidden: function() {
 			var $ok = this._$modal.find('.ok');
-			window.URL.revokeObjectURL($ok.attr('href'));
+			// window.URL.revokeObjectURL($ok.attr('href'));
 		},
 
 		render: function() {

@@ -62,6 +62,11 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
           return "";
         }
       });
+
+      Handlebars.registerHelper("or", function(a, b) {
+        return a || b;
+      });
+
       Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);
       Handlebars.registerPartial("TransformContainer", JST["strut.presentation_generator.impress/TransformContainer"]);
       Handlebars.registerPartial("SVGContainer", JST["strut.presentation_generator.impress/SVGContainer"]);
@@ -105,19 +110,12 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
 
     ImpressGenerator.prototype.getStartPreviewFn = function(editorModel, sourceWind, previewStr) {
       function cb() {
-        if (!sourceWind.previewWind.startPres) {
-          setTimeout(cb, 200);
-        } else {
-          sourceWind.
-            previewWind.document.
-              getElementsByTagName("html")[0].innerHTML = previewStr;
-          if (!sourceWind.previewWind.presStarted) {
-            sourceWind.previewWind.startPres(sourceWind.previewWind.document, sourceWind.previewWind);
-            sourceWind.previewWind.imp = sourceWind.previewWind.pres();
-            sourceWind.previewWind.imp.init();
-            sourceWind.previewWind.imp.goto(editorModel.activeSlideIndex());
-          }
-        }
+        console.log('Loaded!');
+        window.location.hash = '#/step-' + (editorModel.activeSlideIndex() + 1);
+        sourceWind.previewWind.document.open();
+        sourceWind.
+            previewWind.document.write(previewStr);
+        sourceWind.previewWind.document.close();
       }
 
       return cb;

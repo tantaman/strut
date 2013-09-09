@@ -20,8 +20,13 @@ define({
 	cut: 'Ausschneiden',
 	copy: 'Kopieren',
 	paste: 'Einfügen',
+	delete: 'Löschen',
 	undo: 'Rückgängig',
 	redo: 'Wiederholen',
+	shapes: 'Formen',
+	single_slide_bg: 'Single Slide Background',
+	invisible: 'Unsichtbar',
+	reset: 'Zurücksetzen',
 	strut_exporter_json: {
 		explain: 'Dies erlaubt Ihnen, eine Datei auf Ihrem Computer zu speichern, die Sie später wieder in Strut importieren können.',
 		click_below: 'Klicken sie zum Herunterladen auf das Symbol unten'

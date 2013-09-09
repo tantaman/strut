@@ -2,9 +2,26 @@ define(['libs/backbone',
 		'css!styles/slide_editor/operatingTable.css',
 		'strut/slide_components/ComponentFactory',
 		'strut/editor/GlobalEvents',
-		'strut/deck/Component'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
+		'strut/deck/Component',
+		'./OperatingTableContextMenu',
+		'strut/deck/Utils'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils) {
 	'use strict';
+
+	function MenuModel() {
+
+	}
+
+	MenuModel.prototype = {
+		getBackground: function() {
+			return DeckUtils.slideBackground(this.slide, this.deck);
+		},
+
+		setBackground: function(bg) {
+			this.slide.set('background', bg)
+		}
+	};
+
 	return Backbone.View.extend({
 		className: 'operatingTable',
 		events: {
@@ -18,6 +35,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
+			this._menuModel = new MenuModel();
+			this._menuModel.deck = this._deck;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
@@ -30,8 +49,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			GlobalEvents.on('cut', this._cut, this);
 			GlobalEvents.on('copy', this._copy, this);
 			GlobalEvents.on('paste', this._paste, this);
+			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
+
+			ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {
@@ -39,23 +61,24 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(this._deck.slideBackground());
-			this._$slideContainer.data('background', this._deck.slideBackground());
+			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
 
 			var self = this;
 			setTimeout(function() {
 				self._rendered = true;
 				self._resize();
 				self._renderContents();
-			});
+			}, 0);
 
 			return this;
 		},
 
 		_updateBg: function(model, bg) {
+			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			this._$slideContainer.addClass('slideContainer slideEditArea ' + this._deck.slideBackground(bg));
-			this._$slideContainer.data('background', this._deck.slideBackground(bg));
+			bg = DeckUtils.slideBackground(this.model, this._deck);
+
+			this._$slideContainer.addClass('slideContainer slideEditArea ' + bg);
 		},
 
 		_updateSurface: function(model, bg) {
@@ -95,6 +118,16 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 					active: false
 				});
 				this.model.add(comp);
+			}
+		},
+
+		_delete: function() {
+			if (this._editorModel.get('scope') == 'operatingTable') {
+				var comp = this.model.lastSelection;
+				if (comp) {
+					this.model.remove(comp);
+					comp.dispose();
+				}
 			}
 		},
 
@@ -157,8 +190,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component) {
 			this.model = model;
 			if (this.model != null) {
 				this.model.on('change:components.add', this._componentAdded, this);
+				this.model.on('change:background', this._updateBg, this);
+				this._updateBg();
 			}
 			this._renderContents(prevModel);
+			this._menuModel.slide = model;
 			return this;
 		},
 

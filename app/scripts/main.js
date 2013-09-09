@@ -3,20 +3,19 @@ require.config({
     libs: "../scripts/libs",
 
     jquery: "../scripts/libs/jQuery",
+    position: "../components/jq-contextmenu/jquery.ui.position",
+    jqContextMenu: "../components/jq-contextmenu/jquery.contextMenu",
     lodash: "../scripts/libs/lodash",
     backbone: "../scripts/libs/backbone",
     css: "../scripts/libs/css",
-    // text: "../scripts/libs/text",
     bootstrap: "../components/bootstrap/bootstrap",
     colorpicker: "../components/spectrum/spectrum",
-    // gradientPicker: "../components/gradient_picker/jquery.gradientPicker",
-    // downloadify: "../components/downloadify/js/downloadify.min",
-    // swfobject: "../components/downloadify/js/swfobject",
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
+    'strut/presentation_generator/reveal': '../bundles/app/strut.presentation_generator.reveal',
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
@@ -62,6 +61,14 @@ require.config({
 
     gradientPicker: {
       deps: ["jquery", "colorpicker"]
+    },
+
+    position: {
+      deps: ["jquery"]
+    },
+
+    jqContextMenu: {
+      deps: ["jquery", "position"]
     },
 
     handlebars: {
@@ -156,27 +163,7 @@ log.notice = function(msg) {
 // TODO: move this stuff into index.html
 // so we don't have to include the actual amd-app when
 // we go to present.
-var r = require;
-if (window.location.href.indexOf("preview=true") != -1) {
-  if (window.location.href.indexOf("bespoke") != -1) {
-    r(['../preview_export/bespoke/scripts/bespoke', 'jquery'],
-      function(bespoke, jquery) {
-
-      window.jQuery = jquery;
-      window.startPres = bespoke;
-      window.$ = jquery;
-    });
-  } else {
-    r(['../preview_export/scripts/impress', 'jquery'],
-      function(impress, jquery) {
-
-      window.jQuery = jquery;
-      window.startPres = impress;
-      window.$ = jquery;
-    });
-  }
-} else {
-  require([
+require([
            'lang',
            'compiled-templates',
            'colorpicker',
@@ -184,9 +171,14 @@ if (window.location.href.indexOf("preview=true") != -1) {
            'features',
            './StrutLoader',
            'bootstrap',
-           'handlebars'
+           'handlebars',
+           'jqContextMenu',
+           'css!components/jq-contextmenu/jquery.contextMenu.css'
           ],
-  function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars) {
+  function(lang, empt, empty, config, registry, StrutLoader,
+    bootstrap,
+    Handlebars,
+    ContextMenu) {
       'use strict';
       var agent = window.navigator.userAgent;
       if (agent.indexOf('WebKit') >= 0)
@@ -214,5 +206,4 @@ if (window.location.href.indexOf("preview=true") != -1) {
       $(window).unload(function() {
         localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
       });
-  });
-}
+});

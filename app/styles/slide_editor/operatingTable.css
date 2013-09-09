@@ -9,7 +9,6 @@
   top: 56px;
   bottom: 0px;
   right: 0px;
-  overflow: auto;
 }
 
 .operatingTable .slideContainer {
@@ -22,4 +21,9 @@
 	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+.operatingTable [class*="span"] {
+	float: none;
+	margin-left: 0;
 }
