@@ -12,7 +12,19 @@ define(["./SpatialObject"], function(SpatialObject) {
 		x: 1,
 		y: 1
 	};
+
+	/**
+	 * Base class for all slide elements.
+	 *
+	 * @class Component
+	 * @extends SpatialObject
+	 */
 	return SpatialObject.extend({
+
+		/**
+		 * Initialize component model.
+		 * @returns {Object}
+		 */
 		initialize: function() {
 			_.defaults(this.attributes, defaults);
 			if (this.attributes.scale === undefined) {
@@ -21,6 +33,12 @@ define(["./SpatialObject"], function(SpatialObject) {
 			}
 		},
 
+		/**
+		 * Sets or returns custom classes of the element.
+		 *
+		 * @param {String=} classes If passed, element will take these classes.
+		 * @returns {String}
+		 */
 		customClasses: function(classes) {
 			if (classes == null) {
 				return this.get('customClasses');
@@ -29,10 +47,14 @@ define(["./SpatialObject"], function(SpatialObject) {
 			}
 		},
 		
+		/**
+		 * Dispose the element.
+		 */
 		dispose: function() {
 			this.trigger("dispose", this);
-			return this.off();
+			this.off();
 		},
+
 		constructor: function Component() {
 			SpatialObject.prototype.constructor.apply(this, arguments);
 		}

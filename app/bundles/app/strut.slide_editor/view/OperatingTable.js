@@ -1,10 +1,10 @@
 define(['libs/backbone',
-		'css!styles/slide_editor/operatingTable.css',
-		'strut/slide_components/ComponentFactory',
-		'strut/editor/GlobalEvents',
-		'strut/deck/Component',
-		'./OperatingTableContextMenu',
-		'strut/deck/Utils'],
+	'css!styles/slide_editor/operatingTable.css',
+	'strut/slide_components/ComponentFactory',
+	'strut/editor/GlobalEvents',
+	'strut/deck/Component',
+	'./OperatingTableContextMenu',
+	'strut/deck/Utils'],
 	function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils) {
 		'use strict';
 
@@ -91,42 +91,35 @@ define(['libs/backbone',
 			// slides and slide components so we can mix this code into both?
 			_cut: function() {
 				if (this._editorModel.get('scope') == 'operatingTable') {
-					var comp = this.model.lastSelection;
-					if (comp) {
-						this.model.remove(comp);
-						this._clipboard.item = comp.clone();
-						comp.dispose();
+					var components = this.model.selected;
+					if (components.length) {
+						this._clipboard.setItems(components);
+						this.model.remove(components);
 					}
 				}
 			},
 
 			_copy: function() {
 				if (this._editorModel.get('scope') == 'operatingTable') {
-					var comp = this.model.lastSelection;
-					if (comp) {
-						this._clipboard.item = comp;
+					var components = this.model.selected;
+					if (components.length) {
+						this._clipboard.setItems(components);
 					}
 				}
 			},
 
 			_paste: function() {
-				var item = this._clipboard.item;
-				if (item != null && item instanceof Component) {
-					var comp = item.clone();
-					comp.set({
-						selected: false,
-						active: false
-					});
-					this.model.add(comp);
+				var components = this._clipboard.getItems();
+				if (components != null && components.length && components[0] instanceof Component) {
+					this.model.add(components);
 				}
 			},
 
 			_delete: function() {
 				if (this._editorModel.get('scope') == 'operatingTable') {
-					var comp = this.model.lastSelection;
-					if (comp) {
-						this.model.remove(comp);
-						comp.dispose();
+					var components = this.model.selected;
+					if (components.length) {
+						this.model.remove(components);
 					}
 				}
 			},

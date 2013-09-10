@@ -2,6 +2,12 @@ define(['common/Calcium',
 	'common/Math2'],
 	function(Calcium, Math2) {
 		'use strict';
+
+		// TODO Add docs
+		/**
+		 * @class SpatialObject
+		 * @extends Calcium.Model
+		 */
 		return Calcium.Model.extend({
 			initialize: function() {
 
@@ -35,4 +41,4 @@ define(['common/Calcium',
 				Calcium.Model.prototype.constructor.apply(this, arguments);
 			}
 		});
-});
+	});

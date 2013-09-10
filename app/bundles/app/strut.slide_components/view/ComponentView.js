@@ -92,7 +92,9 @@ define(["libs/backbone",
 
 			removeClicked: function(e) {
 				e.stopPropagation();
-				return this.remove(true);
+				if (this.model.slide) {
+					this.model.slide.remove([this.model]);
+				}
 			},
 
 			skewX: function(e, deltas) {
@@ -226,23 +228,22 @@ define(["libs/backbone",
 			},
 
 			buildTransformString: function() {
-				var transformStr,
-					_this = this;
+				var transformStr;
 				transformStr = "";
 				this.transforms.forEach(function(transformName) {
 					var transformValue;
-					transformValue = _this.model.get(transformName);
+					transformValue = this.model.get(transformName);
 					if (transformValue) {
 						return transformStr += transformName + "(" + transformValue + "rad) ";
 					}
-				});
+				}, this);
 				return transformStr;
 			},
 
 			mousedown: function(e) {
 				if (e.which === 1) {
 					e.preventDefault();
-					this.model.set("selected", true);
+					this.select();
 					this.$el.css("zIndex", zTracker.next());
 					this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
 					this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
@@ -256,6 +257,15 @@ define(["libs/backbone",
 						x: e.pageX,
 						y: e.pageY
 					};
+				}
+			},
+
+			select: function() {
+				if (key.pressed.shift && this.model.get("selected")) {
+					this.model.set("selected", false);
+				}
+				else {
+					this.model.set("selected", true);
 				}
 			},
 
@@ -383,7 +393,9 @@ define(["libs/backbone",
 
 			center: function(e) {
 				var axis = e.target.getAttribute("data-option");
-				getAxis = function(axis, e) { return axis == 'x' ? e.width() : e.height() }
+				getAxis = function(axis, e) {
+					return axis == 'x' ? e.width() : e.height()
+				};
 				var slideSize = getAxis(axis, $('.slideContainer'));
 				var textSize = getAxis(axis, $('.selected'));
 

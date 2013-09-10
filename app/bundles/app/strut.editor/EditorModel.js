@@ -82,7 +82,7 @@ define(['libs/backbone',
 	        		fileName: "presentation-" + num,
 	        		slides: []
 	      		});
-	      		this._deck.newSlide();
+				this._deck.create();
 			},
 
 			importPresentation: function(rawObj) {
@@ -118,7 +118,7 @@ define(['libs/backbone',
 			},
 
 			addSlide: function(index) {
-				this._deck.newSlide(index);
+				this._deck.create(index);
 			},
 
 			activeSlide: function() {

@@ -1,16 +1,13 @@
  define(["common/EventEmitter", "common/collections/LinkedList"], function(EventEmitter, LinkedList) {
-		/**
-			* Maintains a list of commands in an undo history.
-			* Drops commands when they should no longer be reachable
-			* via standard undo/redo semantics.
-			* @class model.common_application.UndoHistory
-			* @constructor
-			* @param {Integer} size Number of commands/actions to remember
-			*
-		*/
 
-	var UndoHistory;
-	return UndoHistory = (function() {
+		/**
+	 * Maintains a list of commands in an undo history. Drops commands when they should no longer be reachable via
+	 * standard undo/redo semantics.
+			*
+	 * @class UndoHistory
+	 * @param {Integer} size Number of commands/actions to remember.
+		*/
+	var UndoHistory = (function() {
 
 		function UndoHistory(size) {
 			this.size = size;
@@ -20,29 +17,30 @@
 			_.extend(this, new EventEmitter());
 		}
 
+		/**
+		 * Clears undo history.
+		 *
+		 * @method clear
+		 */
 		UndoHistory.prototype.clear = function() {
 			this.cursor = null;
 			this.undoCount = null;
-			return this.actions = new LinkedList();
+			this.actions = new LinkedList();
 		};
 
 		/**
-				* Adds a new command to the undo history.
-				* This re-sets the re-do history
-				* @method push
-				* @param {Command} command Command to be added to the history 
+		 * Adds a new command to the undo history. This re-sets the re-do history.
 				*
+		 * @param {Command} command Command to be added to the history
 		*/
-
-
-		UndoHistory.prototype.push = function(action) {
+		UndoHistory.prototype.push = function(command) {
 			var node;
 			if ((this.actions.length - this.undoCount) < this.size) {
 				if (this.undoCount > 0) {
 					node = {
 						prev: null,
 						next: null,
-						value: action
+						value: command
 					};
 					if (!this.cursor) {
 						this.actions.head = node;
@@ -58,31 +56,34 @@
 					this.undoCount = 0;
 					this.cursor = null;
 				} else {
-					this.actions.push(action);
+					this.actions.push(command);
 					this.cursor = null;
 				}
 			} else {
 				this.actions.shift();
-				this.actions.push(action);
+				this.actions.push(command);
 			}
 			this.emit("updated");
 			return this;
 		};
 
-		UndoHistory.prototype.pushdo = function(action) {
-			action["do"]();
-			return this.push(action);
+		/**
+		 * Alias for executing "do" and "push".
+		 *
+		 * @param {Command} command
+		 * @returns {*} Results of "do".
+		 */
+		UndoHistory.prototype.pushdo = function(command) {
+			var result = command.do();
+			this.push(command);
+			return result;
 		};
 
 		/**
-				* This is useful for telling the user what command would be undone
-				* if they pressed undo.
-				* @method undoName
-				* @returns {String} name of the next command to be undone
+		 * This is useful for telling the user what command would be undone if they pressed undo.
 				*
+		 * @returns {String} Name of the next command to be undone.
 		*/
-
-
 		UndoHistory.prototype.undoName = function() {
 			var node;
 			if (this.undoCount < this.actions.length) {
@@ -98,14 +99,10 @@
 		};
 
 		/**
-				* This is useful for telling the user what command would be
-				* redone if they pressed redo
-				* @method redoName
-				* @returns {String} name of the next command to be redone
+		 * This is useful for telling the user what command would be redone if they pressed redo.
 				*
+		 * @returns {String} Name of the next command to be redone.
 		*/
-
-
 		UndoHistory.prototype.redoName = function() {
 			var node;
 			if (this.undoCount > 0) {
@@ -125,13 +122,10 @@
 		};
 
 		/**
-				* Undoes a command
-				* @method undo
-				* @returns {model.common_application.UndoHistory} this
+		 * Undoes a command.
 				*
+		 * @returns UndoHistory this
 		*/
-
-
 		UndoHistory.prototype.undo = function() {
 			if (this.undoCount < this.actions.length) {
 				if (!(this.cursor != null)) {
@@ -146,12 +140,10 @@
 		};
 
 		/**
-		 * Redoes a command
+		 * Redoes a command.
 		 *
-		 * @returns {model.common_application.UndoHistory} this
+		 * @returns UndoHistory this
 		*/
-
-
 		UndoHistory.prototype.redo = function() {
 			if (this.undoCount > 0) {
 				if (!(this.cursor != null)) {
@@ -169,4 +161,6 @@
 		return UndoHistory;
 
 	})();
+
+	return UndoHistory;
 });

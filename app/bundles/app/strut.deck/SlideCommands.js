@@ -1,74 +1,61 @@
+/**
+ * @class SlideCommands
+ */
 define(['strut/deck/Slide'], function(Slide) {
-		var Create, Move, Remove, result;
-		Create = function(deck, index) {
-			this.deck = deck;
-			this.index = index;
-			return this;
-		};
-		Create.prototype = {
-			"do": function() {
-				var slides;
-				slides = this.deck.get("slides");
-				if (this.slide === undefined) {
-					this.slide = new Slide({
-						num: slides.length
-					});
-				}
+	var Add, Remove;
 
-				if (this.index == null)
-					slides.add(this.slide);
-				else
-					slides.add(this.slide, {at: this.index})
-				return this.slide;
-			},
-			undo: function() {
-				this.deck.get("slides").remove(this.slide);
-				return this.slide;
-			},
-			name: "Create Slide"
-		};
+	/**
+	 * @class SlideCommands.Paste
+	 * @param {Deck} deck
+	 * @param {Slide|Slide[]} slides
+	 * @param {int=} index
+	 * @constructor
+	 */
+	Add = function(deck, slides, index) {
+		this.deck = deck;
+		this.selected = this.deck.selected.slice(0);
+		this.activeSlide = this.deck.get('activeSlide');
+		this.slides = slides ? slides.slice(0) : null;
+		this.index = index;
+	};
 
-		var Paste = function(deck, slide) {
-			this.deck = deck;
-			this.slide = slide;
-		};
+	Add.prototype = {
+		name: 'Add Slide',
 
-		Paste.prototype = {
-			"do": function() {
-				this.deck.get('slides').add(this.slide);
-			},
-			undo: function() {
-				this.deck.get('slides').remove(this.slide);
-			},
-			name: 'Paste Slide'
-		};
+		"do": function() {
+			this.slides = this.deck._doAdd(this.slides, {preserveIndexes: false, at: this.index});
+		},
 
-		Remove = function(deck, slide) {
-			this.deck = deck;
-			this.slide = slide;
-			return this;
-		};
-		Remove.prototype = {
-			"do": function() {
-				var slides;
-				slides = this.deck.get("slides");
-				this._idx = slides.indexOf(this.slide);
-				slides.remove(this.slide);
-				this.slide.off();
-				return this.slide;
-			},
-			undo: function() {
-				this.slide.on('unrender', this.slide._unrendered, this.slide);
-				return this.deck.get("slides").add(this.slide, {
-					at: this._idx
-				});
-			},
-			name: "Remove Slide"
-		};
-	 
-		return {
-			Create: Create,
-			Remove: Remove,
-			Paste: Paste
-		};
-	});
+		undo: function() {
+			this.deck._doRemove(this.slides);
+
+			// We should restore recent selection after undo, since it may have been screwed by removal of pasted slides.
+			this.deck.selectSlides(this.selected, this.activeSlide);
+		}
+	};
+
+	/**
+	 * @class SlideCommands.Remove
+	 */
+	Remove = function(deck, slides) {
+		this.deck = deck;
+		this.slides = slides.slice(0);
+	};
+
+	Remove.prototype = {
+		name: "Remove Slide",
+
+		"do": function() {
+			this.deck._doRemove(this.slides);
+		},
+
+		undo: function() {
+			this.deck._doAdd(this.slides, {preserveIndexes: true});
+		}
+	};
+
+	return {
+		Add: Add,
+		Remove: Remove
+	};
+});

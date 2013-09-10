@@ -5,7 +5,7 @@ define(['libs/backbone',
 	'tantaman/web/interactions/Sortable',
 	'strut/editor/GlobalEvents',
 	'css!styles/slide_editor/slideWell.css'],
-	function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, empty) {
+	function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, css) {
 		'use strict';
 
 		return Backbone.View.extend({
@@ -47,33 +47,31 @@ define(['libs/backbone',
 
 			_cut: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
-					var slide = this._deck.get('activeSlide');
-					this._deck.removeSlide(slide);
-					this._clipboard.item = slide.clone();
-					slide.dispose();
+					var slides = this._deck.selected;
+					this._clipboard.setItems(slides);
+					this._deck.remove(slides);
 				}
 			},
 
 			_copy: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
-					var slide = this._deck.get('activeSlide');
-					this._clipboard.item = slide;
+					var slides = this._deck.selected;
+					this._clipboard.setItems(slides);
 				}
 			},
 
 			_paste: function() {
-				var item = this._clipboard.item;
-				if (item != null && item.type == 'slide')
-					this._deck.pasteSlide(item.clone());
-
+				var slides = this._clipboard.getItems();
+				if (slides != null && slides.length && slides[0].type != undefined && slides[0].type == 'slide') {
+					this._deck.add(slides);
+				}
 				// TODO: scroll to the new item...
 			},
 
 			_delete: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
-					var slide = this._deck.get('activeSlide');
-					this._deck.removeSlide(slide);
-					slide.dispose();
+					var slides = this._deck.selected;
+					this._deck.remove(slides);
 				}
 			},
 
@@ -94,7 +92,7 @@ define(['libs/backbone',
 				// if (offsetY == null)
 				// offsetY = e.originalEvent.layerY;
 
-				var newPos = (((offsetY+40) / 112) | 0) * 112 - 5;
+				var newPos = (((offsetY + 40) / 112) | 0) * 112 - 5;
 				this._contextMenu.reposition({x: this.$slides.width() / 2 - this._contextMenu.$el.outerWidth() / 2, y: newPos});
 				this._contextMenu.slideIndex(Math.ceil(newPos / 112));
 			},
