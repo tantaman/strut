@@ -1,6 +1,10 @@
 define(['libs/backbone'],
 function(Backbone) {
 	'use strict';
+
+	/**
+	 * @class Button
+	 */
 	return Backbone.View.extend({
 		className: 'btn btn-plast',
 		tagName: 'a',

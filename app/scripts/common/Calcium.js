@@ -5,6 +5,9 @@ function(Backbone) {
 			obj instanceof Backbone.Collection;
 	}
 
+	/**
+	 * @class Calcium.Model
+	 */
 	var Model = Backbone.Model.extend({
 		// ugh.. hax w/ the inspectArrays param...
 		// TODO: we need to detect object loops!!!!!!
@@ -48,7 +51,7 @@ function(Backbone) {
 				return resArr;
 			}
 		}
-	})
+	});
 
 	function Disposable(obj, fn, args) {
 		this.args = args;
@@ -60,7 +63,7 @@ function(Backbone) {
 		dispose: function() {
 			this.fn.apply(this.obj, this.args);
 		}
-	}
+	};
 
 	return {
 		Model: Model,
