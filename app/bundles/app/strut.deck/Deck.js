@@ -247,13 +247,9 @@ define(["common/Calcium",
 				slides = _.isArray(slides) ? slides : [slides];
 				if (slides.length) {
 					activeSlide = activeSlide || slides[0];
-					slides.forEach(function(slide) {
-						this.get('slides').forEach(function(comp) {
-							if (slide !== comp) {
-								return comp.set("selected", false);
-							}
-						});
-					}, this);
+					this.get('slides').forEach(function(sl) {
+						return sl.set("selected", false);
+					});
 
 					activeSlide.set("active", true, { multiselect: true });
 					slides.forEach(function(slide) {

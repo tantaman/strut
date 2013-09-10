@@ -127,13 +127,9 @@ define(["libs/backbone",
 			selectComponents: function(components) {
 				components = _.isArray(components) ? components : [components];
 				if (components.length) {
-					components.forEach(function(component) {
-						this.get('components').forEach(function(comp) {
-							if (component !== comp) {
-								return comp.set("selected", false);
-							}
-						});
-					}, this);
+					this.get('components').forEach(function(comp) {
+						return comp.set("selected", false);
+					});
 
 					components.forEach(function(component) {
 						component.set("selected", true, { multiselect: true });
@@ -299,7 +295,7 @@ define(["libs/backbone",
 					selected: false
 				});
 				this.trigger("dispose", this);
-				this.off("dispose");
+				this.off();
 			},
 
 			constructor: function Slide() {
