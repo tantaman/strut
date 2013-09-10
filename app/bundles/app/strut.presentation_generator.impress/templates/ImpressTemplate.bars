@@ -1,61 +1,20 @@
-<html>
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=1024" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<title>Deck Title</title>
-
-<meta name="description" content="TODO" />
-<meta name="author" content="TODO" />
-
-<style>
-.componentContainer {
-    position: absolute;
-    line-height: normal;
-    /*-webkit-transform-origin: 135% 135%;
-    -moz-transform-origin: 135% 135%;
-    transform-origin: 135% 135%;*/
-}
-
-.transformContainer {
-    -webkit-transform-origin: 0 0;
-    -moz-transform-origin: 0 0;
-    transform-origin: 0 0;
-}
-
-.bg {
-    width: 100%;
-    height: 100%;
-}
-</style>
-
-<link href="preview_export/css/main.css" rel="stylesheet" type='text/css' />
-<link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css' />
-<link href='styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
-<link href='styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
-
-<link rel="shortcut icon" href="favicon.png" type='image/png' />
-<link rel="apple-touch-icon" href="apple-touch-icon.png" type='image/png' />
 <style type="text/css">
 {{{customStylesheet}}}
 </style>
-</head>
-<body class="impress-not-supported {{surface}}">
-
 <!-- This is a work around / hack to get the user's browser to download the fonts 
  if they decide to save the presentation. -->
 <div style="visibility: hidden; width: 0px; height: 0px">
-<img src="preview_export/css/Lato-Bold.woff" />
-<img src="preview_export/css/HammersmithOne.woff" />
-<img src="preview_export/css/Droid-Sans-Mono.woff" />
-<img src="preview_export/css/Gorditas-Regular.woff" />
-<img src="preview_export/css/FredokaOne-Regular.woff" />
-<img src="preview_export/css/Ubuntu.woff" />
-<img src="preview_export/css/Ubuntu-Bold.woff" />
-<img src="preview_export/css/PressStart2P-Regular.woff" />
-<img src="preview_export/css/Lato-BoldItalic.woff" />
-<img src="preview_export/css/AbrilFatface-Regular.woff" />
-<img src="preview_export/css/Lato-Regular.woff" />
+<img src="css/Lato-Bold.woff" />
+<img src="css/HammersmithOne.woff" />
+<img src="css/Droid-Sans-Mono.woff" />
+<img src="css/Gorditas-Regular.woff" />
+<img src="css/FredokaOne-Regular.woff" />
+<img src="css/Ubuntu.woff" />
+<img src="css/Ubuntu-Bold.woff" />
+<img src="css/PressStart2P-Regular.woff" />
+<img src="css/Lato-BoldItalic.woff" />
+<img src="css/AbrilFatface-Regular.woff" />
+<img src="css/Lato-Regular.woff" />
 </div>
 
 <div class="fallback-message">
@@ -83,27 +42,3 @@
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
 </div>
-<script type="text/javascript" src="preview_export/scripts/impress.js"></script>
-<script>
-if ("ontouchstart" in document.documentElement) { 
-    document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
-}
-</script>
-{{#interval}}
-<script>
-var interval = {{.}};
-if (interval >= 1000) {
-    setInterval(function() {
-        pres().next();
-    }, interval);
-}
-</script>
-{{/interval}}
-<script>
-if (!window.presStarted) {
-    startPres(document, window);
-    pres().init();   
-}
-</script>
-</body>
-</html>
