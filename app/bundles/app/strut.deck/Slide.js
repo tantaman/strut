@@ -161,7 +161,7 @@ define(["libs/backbone",
 			 */
 			_selectionChanged: function(component, selected, options) {
 				options = options || {};
-				var multiselect = options.multiselect || key.pressed.shift;
+				var multiselect = options.multiselect || (key.pressed.ctrl || key.pressed.meta);
 
 				if (selected) {
 					if (!multiselect) {
