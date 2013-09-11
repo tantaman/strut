@@ -9,7 +9,7 @@ function(Backbone) {
 		},
 
 		dispose: function() {
-			console.log("Disposed of");
+			this.off();
 		},
 
 		constructor: function SlideEditorModel(opts) {
