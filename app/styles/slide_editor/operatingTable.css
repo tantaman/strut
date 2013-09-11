@@ -36,3 +36,26 @@
 	float: none;
 	margin-left: 0;
 }
+
+.operatingTable .tablets {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+.tablets > div {
+	border-radius: 0px 2px 2px 0px;
+	background: #DDD;
+	margin-top: 2px;
+	padding: 0px 1px;
+	cursor: pointer;
+}
+
+.tablets > div.active {
+	background: #AAA;
+	cursor: default;
+}
+
+.tablets > div:hover {
+	background: #AAA;
+}

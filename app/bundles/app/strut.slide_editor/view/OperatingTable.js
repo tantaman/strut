@@ -5,8 +5,11 @@ define(['libs/backbone',
 		'strut/deck/Component',
 		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
-		'./Utils'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils, Utils) {
+		'./Utils',
+		'./Tablets'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils,
+	Utils,
+	Tablets) {
 	'use strict';
 
 	function MenuModel() {
@@ -62,6 +65,15 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
+			this._tablets = new Tablets(this._slideEditorModel, [
+					{icon: 'markdown',
+					name: '',
+					key: 'markdown'},
+					{icon: 'search',
+					name: '',
+					active: true,
+					key: 'preview'}
+				]);
 
 			ContextMenu.setModel(this._menuModel);
 		},
@@ -69,6 +81,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		render: function() {
 			this._$slideContainer = $('<div class="slideContainer slideEditArea"></div>')
 			this.$el.html(this._$slideContainer);
+			this.$el.append(this._tablets.render().$el);
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
@@ -207,6 +220,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			if (this.model)
 				this.model.off(null, null, this);
 			GlobalEvents.off(null, null, this);
+			this._tablets.dispose();
 		},
 
 		_renderContents: function(prevModel) {

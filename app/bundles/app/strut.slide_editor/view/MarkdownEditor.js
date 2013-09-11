@@ -13,6 +13,7 @@ function(managedEditors, md, Utils) {
 	function MarkdownEditor(opts) {
 		this._opts = opts;
 		this.$el = $(editor.el);
+		this._resize = this._resize.bind(this);
 	}
 
 	MarkdownEditor.prototype = {
@@ -28,12 +29,13 @@ function(managedEditors, md, Utils) {
 		},
 
 		hide: function() {
-			editor.setValue('');
+			editor.mirror.setValue('');
 			this._unbindResize();
 			this.$el.detach();
 		},
 
 		_bindResize: function() {
+			$(window).on('resize', this._resize);
 		},
 
 		_resize: function() {
@@ -46,7 +48,7 @@ function(managedEditors, md, Utils) {
 		},
 
 		_unbindResize: function() {
-
+			$(window).off('resize', this._resize);
 		}
 	};
 
