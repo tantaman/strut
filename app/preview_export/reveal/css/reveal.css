@@ -489,6 +489,7 @@ body {
 	-ms-touch-action: none;
 }
 
+.reveal.themedArea,
 .reveal .slides {
 	position: absolute;
 	width: 100%;
@@ -521,6 +522,7 @@ body {
 	-ms-perspective: 600px;
 }
 
+.reveal.themedArea,
 .reveal .slides>section,
 .reveal .slides>section>section {
 	display: none;

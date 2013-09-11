@@ -79,3 +79,7 @@
 	left: 0;
 	top: 0;
 }
+
+.operatingTable .reveal.themedArea {
+    display: block;
+}
