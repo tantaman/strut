@@ -1,3 +1,6 @@
+-Before presenting, make sure markdown content is saved.
+
+
 -EditorModel will get updated when a new generator is selected
 -EditorModel will check to see if that generator allows modes
 -Set mode to none if not
