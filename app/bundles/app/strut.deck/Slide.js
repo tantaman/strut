@@ -1,8 +1,7 @@
 /**
-@module model.presentation
-@author Matt Crinklaw-Vogt
-*/
-
+ * @module model.presentation
+ * @author Matt Crinklaw-Vogt
+ */
 define(["libs/backbone",
 	"./SpatialObject",
 	"strut/slide_components/ComponentFactory",
@@ -20,17 +19,20 @@ define(["libs/backbone",
 			rotateY: 0,
 			rotateZ: 0
 		};
-		
+
 		/**
 		 * Represents a slide in the presentation. Slides contain components (text boxes, videos, images, etc.) Slide fires
 		 * a "contentsChanged" event whenever any of their components are updated. Slide fires "change:components.add/remove"
 		 * events when components are added or removed.
-				*
+		 *
 		 * @class Slide
 		 * @extends SpatialObject
-		*/
+		 */
 		return SpatialObject.extend({
 			type: 'slide',
+
+			/** @param {Component[]} */
+			selected: [],
 
 			/**
 			 * Initialize slide model.
@@ -58,15 +60,12 @@ define(["libs/backbone",
 				_.defaults(this.attributes, defaults);
 				this.on("unrender", this._unrendered, this);
 
-				this.selected = [];
 				components = this.get('components');
-				components.some(function(comp) {
+				components.forEach(function(comp) {
 					if (comp.get('selected')) {
 						this._selectionChanged(comp, true, { multiselect: true });
-						return true;
 					}
 				}, this);
-
 			},
 
 			/**
@@ -136,12 +135,12 @@ define(["libs/backbone",
 					});
 				}
 			},
-			
+
 			/**
 			 * Unselect given components. If no components passed, then all selected coponents will be unselected.
-						*
+			 *
 			 * @param {Component|Component[]} components
-			*/
+			 */
 			unselectComponents: function(components) {
 				components = components || this.selected;
 				components = _.isArray(components) ? components : [components];
@@ -223,8 +222,8 @@ define(["libs/backbone",
 			__doAdd: function(components) {
 				components.forEach(function(component) {
 					this.get('components').push(component);
-				this._registerWithComponent(component);
-				this.trigger("contentsChanged");
+					this._registerWithComponent(component);
+					this.trigger("contentsChanged");
 					this.trigger("change:components.add", this, component);
 				}, this);
 				this.selectComponents(components);
@@ -233,10 +232,10 @@ define(["libs/backbone",
 			/**
 			 * A pretty naive implementation but it should do the job just fine. Places a new component in a location that
 			 * doesn't currently contain a component.
-						*
+			 *
 			 * @param {Component} component The component to be placed
 			 * @private
-			*/
+			 */
 			_placeComponent: function(component) {
 				return this.get('components').forEach(function(existingComponent) {
 					var existingX, existingY;
@@ -270,19 +269,19 @@ define(["libs/backbone",
 			 */
 			__doRemove: function(components) {
 				components.forEach(function(component) {
-				var idx;
+					var idx;
 					idx = this.get('components').indexOf(component);
-				if (idx !== -1) {
+					if (idx !== -1) {
 						this.get('components').splice(idx, 1);
-					this.trigger("contentsChanged");
-					this.trigger("change:components.remove", this, component);
+						this.trigger("contentsChanged");
+						this.trigger("change:components.remove", this, component);
 						this._selectionChanged(component, false);
-					component.trigger("unrender");
-					component.off();
-					return component;
-				} else {
-					return undefined;
-				}
+						component.trigger("unrender");
+						component.off();
+						return component;
+					} else {
+						return undefined;
+					}
 				}, this);
 			},
 
@@ -293,7 +292,7 @@ define(["libs/backbone",
 				this.set({
 					active: false,
 					selected: false
-						});
+				});
 				this.trigger("dispose", this);
 				this.off();
 			},
