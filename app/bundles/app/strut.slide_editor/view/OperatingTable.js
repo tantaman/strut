@@ -89,8 +89,9 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
-			this._$markdownArea = $('<div class="markdownArea reveal"></div>');
-			this._$slideContainer.append(this._$markdownArea);
+			var $markdownArea = $('<div class="markdownArea reveal"><div class="slides"><section class="present"></section></div></div>');
+			this._$markdownContent = $markdownArea.find('section');
+			this._$slideContainer.append($markdownArea);
 
 			var self = this;
 			setTimeout(function() {
@@ -250,9 +251,9 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 
 		_renderMarkdown: function() {
 			if (this.model.get('markdown')) {
-				this._$markdownArea.html(marked(this.model.get('markdown')));
+				this._$markdownContent.html(marked(this.model.get('markdown')));
 			} else {
-				this._$markdownArea.html('');
+				this._$markdownContent.html('');
 			}
 		},
 

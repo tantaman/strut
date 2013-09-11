@@ -68,3 +68,14 @@
 .tablets > div:hover {
 	background: #AAA;
 }
+
+.operatingTable .markdownArea .reveal .slides {
+	position: relative;
+	left: 0;
+	top: 0;
+}
+
+.operatingTable .markdownArea .reveal .slides>section {
+	left: 0;
+	top: 0;
+}
