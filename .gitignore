@@ -10,4 +10,6 @@ repl-port
 bin/
 ccw.repl.cmdhistory.prefs
 psd-export/
+.project
+.buildpath
 

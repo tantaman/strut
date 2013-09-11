@@ -21,33 +21,38 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this.slide.set('background', bg)
 		},
 
-		canDoMarkdown: function() {
-			return false;
+		editMarkdown: function() {
+			this.slideEditorModel.set('mode', 'markdown');
+		},
+
+		stopEditingMarkdown: function() {
+			this.slideEditorModel.set('mode', 'preview');
 		}
 	};
 
 	return Backbone.View.extend({
 		className: 'operatingTable',
 		events: {
-        	"click": "_clicked",
-        	"focused": "_focus",
-        	"dragover": "_dragover",
-        	"drop": "_drop",
-        	destroyed: 'dispose'
-      	},
+			"click": "_clicked",
+			"focused": "_focus",
+			"dragover": "_dragover",
+			"drop": "_drop",
+			destroyed: 'dispose'
+		},
 
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
 			this._menuModel = new MenuModel();
 			this._menuModel.deck = this._deck;
+			this._menuModel.slideEditorModel = this._slideEditorModel;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
-        		this.setModel(model);
-      		}, this);
-      		this._deck.on('change:background', this._updateBg, this);
-      		this._deck.on('change:surface', this._updateSurface, this);
+				this.setModel(model);
+			}, this);
+			this._deck.on('change:background', this._updateBg, this);
+			this._deck.on('change:surface', this._updateSurface, this);
 			this.setModel(this._deck.get('activeSlide'));
 
 			GlobalEvents.on('cut', this._cut, this);
@@ -95,42 +100,35 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		// slides and slide components so we can mix this code into both?
 		_cut: function() {
 			if (this._editorModel.get('scope') == 'operatingTable') {
-				var comp = this.model.lastSelection;
-				if (comp) {
-					this.model.remove(comp);
-					this._clipboard.item = comp.clone();
-					comp.dispose();
+				var components = this.model.selected;
+				if (components.length) {
+					this._clipboard.setItems(components);
+					this.model.remove(components);
 				}
 			}
 		},
 
 		_copy: function() {
 			if (this._editorModel.get('scope') == 'operatingTable') {
-				var comp = this.model.lastSelection;
-				if (comp) {
-					this._clipboard.item = comp;
+				var components = this.model.selected;
+				if (components.length) {
+					this._clipboard.setItems(components);
 				}
 			}
 		},
 
 		_paste: function() {
-			var item = this._clipboard.item;
-			if (item != null && item instanceof Component) {
-				var comp = item.clone();
-				comp.set({
-					selected: false,
-					active: false
-				});
-				this.model.add(comp);
+			var components = this._clipboard.getItems();
+			if (components != null && components.length && components[0] instanceof Component) {
+				this.model.add(components);
 			}
 		},
 
 		_delete: function() {
 			if (this._editorModel.get('scope') == 'operatingTable') {
-				var comp = this.model.lastSelection;
-				if (comp) {
-					this.model.remove(comp);
-					comp.dispose();
+				var components = this.model.selected;
+				if (components.length) {
+					this.model.remove(components);
 				}
 			}
 		},
@@ -173,7 +171,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 					ComponentFactory.instance.createModel({
 						type: 'Image',
 						src: e.target.result
-				}));
+					}));
 			};
 
 			reader.readAsDataURL(f)
@@ -254,10 +252,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this._$slideContainer.css(window.browserPrefix + 'transform', 'scale(' + scale + ')')
 		},
 
-		constructor: function OperatingTable(editorModel) {
+		constructor: function OperatingTable(editorModel, slideEditorModel) {
 			this._deck = editorModel.deck();
 			this._registry = editorModel.registry;
 			this._editorModel = editorModel;
+			this._slideEditorModel = slideEditorModel;
 			Backbone.View.prototype.constructor.call(this);
 		}
 	});

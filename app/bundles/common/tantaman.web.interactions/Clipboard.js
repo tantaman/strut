@@ -1,17 +1,30 @@
 define(function() {
+	/**
+	 * Clipboard class.
+	 * @constructor
+	 */
 	function Clipboard() {
-		this.item;
-	}	
+		this.items = [];
+	}
 
-	Clipboard.prototype = {
-		// Not supported on mobile ;*(
-		// set item(val) {
-		// 	this._item = val;
-		// },
+	/**
+	 * Makes a copy of an array of selected objects (components or slides).
+	 *
+	 * @param {Component[]|Slide[]} items Array of items to copy.
+	 */
+	Clipboard.prototype.setItems = function(items) {
+		if (items.length) {
+			this.items = items.slice(0);
+		}
+	};
 
-		// get item() {
-		// 	return this._item;
-		// }
+	/**
+	 * @returns {Component[]|Slide[]} Array of cloned objects (components or slides).
+	 */
+	Clipboard.prototype.getItems = function() {
+		return $.map(this.items, function(item) {
+			return item.clone();
+		});
 	};
 
 	return Clipboard;
