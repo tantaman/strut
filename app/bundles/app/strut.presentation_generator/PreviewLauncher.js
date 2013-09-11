@@ -11,6 +11,8 @@ define(function() {
 			if (window.previewWind)
 				window.previewWind.close();
 
+			this._editorModel.trigger('launch:preview', null);
+
 			var previewStr = generator.generate(this._editorModel.deck().attributes);
 
 			localStorage.setItem('preview-string', previewStr);

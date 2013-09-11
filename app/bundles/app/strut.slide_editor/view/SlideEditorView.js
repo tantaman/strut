@@ -15,8 +15,10 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 				$target: this._opTable.$el
 			});
 
+			this._prevSlide = this.model.activeSlide();
 			this.model.on('change:mode', this._modeChanged, this);
 			this.model.deck().on('change:activeSlide', this._activeSlideChanged, this);
+			this.model.on('saveEdits', this._saveCurrentEdits, this);
 		},
 
 		remove: function() {
@@ -34,6 +36,8 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 		},
 
 		_activeSlideChanged: function(deck, slide) {
+			this._saveCurrentEdits();
+			this._prevSlide = slide;
 			this._markdownEditor.setValue(slide && slide.get('markdown'));
 		},
 
@@ -45,6 +49,12 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 				this._markdownEditor.hide();
 			} else {
 				throw "Illegal mode";
+			}
+		},
+
+		_saveCurrentEdits: function() {
+			if (this._prevSlide && this.model.isMarkdownMode()) {
+				this._prevSlide.set('markdown', this._markdownEditor.getValue());
 			}
 		},
 
