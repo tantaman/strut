@@ -268,7 +268,7 @@ define(["common/Calcium",
 			 */
 			_selectionChanged: function(slide, selected, options) {
 				options = options || {};
-			  var multiselect = options.multiselect || key.pressed.shift;
+			  var multiselect = options.multiselect || (key.pressed.ctrl || key.pressed.meta || key.pressed.shift);
 				if (selected) {
 					if (!multiselect) {
 						this.get('slides').forEach(function(sl) {

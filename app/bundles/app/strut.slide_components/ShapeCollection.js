@@ -1,5 +1,13 @@
 define([],
 function() {
+
+	/**
+	 * @constructor
+	 * @param {String} name
+	 * @param {String} src
+	 * @param {number} aspect
+	 * @returns {PlatonicShape}
+	 */
 	function PlatonicShape(name, src, aspect) {
 		if (!(this instanceof PlatonicShape))
 			return new PlatonicShape(name, src, aspect);
@@ -9,6 +17,11 @@ function() {
 		this.aspect = aspect;
 	}
 
+	/**
+	 * Standard collection of shapes.
+	 *
+	 * @constructor
+	 */
 	function ShapeCollection() {
 		this.title = 'shapes';
 		this.shapes = [
@@ -27,8 +40,7 @@ function() {
 	}
 
 	ShapeCollection.prototype = {
-		on: function() {},
-		
+		on: function() {}
 	};
 
 	return ShapeCollection;
