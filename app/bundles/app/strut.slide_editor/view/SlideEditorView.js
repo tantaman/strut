@@ -10,7 +10,7 @@ function(Backbone, SlideWell, OperatingTable) {
 			//this._template = JST['strut.slide_editor/SlideEditor'];
 			this._well = new SlideWell(this.model._editorModel);
 			this._opTable = new OperatingTable(this.model._editorModel, this.model);
-			this._markdownEditor = new MarkdownEditor();
+//			this._markdownEditor = new MarkdownEditor();
 
 			this.model.on('change:mode', this._modeChanged, this);
 		},

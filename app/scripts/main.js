@@ -13,6 +13,9 @@ require.config({
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
     lexed: '../components/lexed/lexed',
+    codemirror: '../components/codemirror/codemirror',
+    'codemirror/css': '../components/codemirror/modes/css',
+    'codemirror/markdown': '../components/codemirror/markdown',
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
@@ -72,16 +75,20 @@ require.config({
       deps: ["jquery", "position"]
     },
 
+    codemirror: {
+      deps: ["css!../components/codemirror/codemirror.css"]
+    },
+
+    'codemirror/css': {
+      deps: ['codemirror']
+    },
+
+    'codemirror/markdown': {
+      deps: ['codemirror']
+    },
+
     handlebars: {
       exports: "Handlebars"
-    },
-
-    "../preview_export/scripts/impress": {
-      exports: "startImpress"
-    },
-
-    "../preview_export/bespoke/scripts/bespoke": {
-      exports: "startImpress"
     }
   }
 });
