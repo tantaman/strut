@@ -8,6 +8,10 @@ function(Backbone) {
 			return this._editorModel.deck();
 		},
 
+		activeSlide: function() {
+			return this._editorModel.deck().get('activeSlide');
+		},
+
 		dispose: function() {
 			this.off();
 		},

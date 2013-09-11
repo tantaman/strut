@@ -1,6 +1,7 @@
 define(['codemirror/ManagedEditors', 'codemirror/modes/markdown', './Utils'],
 function(managedEditors, md, Utils) {
 
+	var defaultValue = "# Markdown!\n";
 	var extraKeys = {"Enter": "newlineAndIndentContinueMarkdownList"};
 	var editorElem;
 	var editor = managedEditors.getEditor('optableeditor', {
@@ -17,15 +18,27 @@ function(managedEditors, md, Utils) {
 	}
 
 	MarkdownEditor.prototype = {
-		show: function() {
+		show: function(value) {
 			editor.mirror.setOption('mode', 'markdown');
 			editor.mirror.setOption('extraKeys', extraKeys);
 			this._resize();
 			this._bindResize();
 			this._opts.$target.append(this.$el);
 
-			// Look for existing markdown in the slide, if none:
-			editor.mirror.setValue("# Markdown!\n");
+			value = value || defaultValue;
+			editor.mirror.setValue(defaultValue);
+		},
+
+		setValue: function(value) {
+			value = value || defaultValue;
+			editor.mirror.setValue(value);
+		},
+
+		getValue: function() {
+			var value = editor.mirror.getValue();
+			if (value == defaultValue)
+				return '';
+			return value;
 		},
 
 		hide: function() {

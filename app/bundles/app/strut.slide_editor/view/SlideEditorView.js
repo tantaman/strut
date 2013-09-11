@@ -16,12 +16,14 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 			});
 
 			this.model.on('change:mode', this._modeChanged, this);
+			this.model.deck().on('change:activeSlide', this._activeSlideChanged, this);
 		},
 
 		remove: function() {
 			Backbone.View.prototype.remove.call(this);
 			this.model.dispose();
 			this._opTable.dispose();
+			this.model.deck().off(null, null, this);
 		},
 
 		render: function() {
@@ -31,10 +33,15 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 			return this;
 		},
 
+		_activeSlideChanged: function(deck, slide) {
+			this._markdownEditor.setValue(slide && slide.get('markdown'));
+		},
+
 		_modeChanged: function(model, mode) {
 			if (mode == 'markdown') {
-				this._markdownEditor.show();
+				this._markdownEditor.show(this.model.activeSlide().get('markdown'));
 			} else if (mode == 'preview') {
+				this.model.activeSlide().set('markdown', this._markdownEditor.getValue());
 				this._markdownEditor.hide();
 			} else {
 				throw "Illegal mode";
