@@ -4,8 +4,9 @@ define(['libs/backbone',
 		'strut/editor/GlobalEvents',
 		'strut/deck/Component',
 		'./OperatingTableContextMenu',
-		'strut/deck/Utils'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils) {
+		'strut/deck/Utils',
+		'./Utils'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils, Utils) {
 	'use strict';
 
 	function MenuModel() {
@@ -225,31 +226,13 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 		},
 
 		_resize: function() {
-			var width = this.$el.width();
-			var height = this.$el.height();
-
-			var slideSize = config.slide.size;
-
-			var xScale = width / slideSize.width;
-			var yScale = (height - 20) / slideSize.height;
-
-			var newHeight = slideSize.height * xScale;
-			if (newHeight > height) {
-				var scale = yScale;
-			} else {
-				var scale = xScale;
-			}
-
-			var scaledWidth = scale * slideSize.width;
-
-			var remainingWidth = width - scaledWidth;
-
+			var dimensions = Utils.computeSlideDimensions(this.$el);
 			this._$slideContainer.css({
-				'margin-left': remainingWidth / 2,
-				'margin-right': remainingWidth / 2
+				'margin-left': dimensions.remainingWidth / 2,
+				'margin-right': dimensions.remainingWidth / 2
 			});
 
-			this._$slideContainer.css(window.browserPrefix + 'transform', 'scale(' + scale + ')')
+			this._$slideContainer.css(window.browserPrefix + 'transform', 'scale(' + dimensions.scale + ')');
 		},
 
 		constructor: function OperatingTable(editorModel, slideEditorModel) {

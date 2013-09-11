@@ -23,6 +23,15 @@
 	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 }
 
+.operatingTable .CodeMirror {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 1024px;
+	height: 768px;
+	margin: 10px auto;
+}
+
 .operatingTable [class*="span"] {
 	float: none;
 	margin-left: 0;

@@ -14,8 +14,8 @@ require.config({
     handlebars: '../scripts/libs/Handlebars',
     lexed: '../components/lexed/lexed',
     codemirror: '../components/codemirror/codemirror',
-    'codemirror/css': '../components/codemirror/modes/css',
-    'codemirror/markdown': '../components/codemirror/markdown',
+    'codemirror/modes': '../components/codemirror/modes',
+    'codemirror/ManagedEditors': '../components/codemirror/ManagedEditors',
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
@@ -76,14 +76,15 @@ require.config({
     },
 
     codemirror: {
-      deps: ["css!../components/codemirror/codemirror.css"]
+      deps: ["css!../components/codemirror/codemirror.css"],
+      exports: 'CodeMirror'
     },
 
-    'codemirror/css': {
+    'codemirror/modes/css': {
       deps: ['codemirror']
     },
 
-    'codemirror/markdown': {
+    'codemirror/modes/markdown': {
       deps: ['codemirror']
     },
 

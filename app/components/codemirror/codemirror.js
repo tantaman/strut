@@ -1,6 +1,7 @@
 // CodeMirror version 3.16
 //
 // CodeMirror is the only global var we claim
+console.log('Loaded mirror');
 window.CodeMirror = (function() {
   "use strict";
 

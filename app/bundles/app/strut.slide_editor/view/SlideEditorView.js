@@ -1,7 +1,8 @@
 define(['libs/backbone',
 		'./SlideWell',
-		'./OperatingTable'],
-function(Backbone, SlideWell, OperatingTable) {
+		'./OperatingTable',
+		'./MarkdownEditor'],
+function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 	'use stict';
 	return Backbone.View.extend({
 		className: 'slideEditor',
@@ -10,7 +11,9 @@ function(Backbone, SlideWell, OperatingTable) {
 			//this._template = JST['strut.slide_editor/SlideEditor'];
 			this._well = new SlideWell(this.model._editorModel);
 			this._opTable = new OperatingTable(this.model._editorModel, this.model);
-//			this._markdownEditor = new MarkdownEditor();
+			this._markdownEditor = new MarkdownEditor({
+				$target: this._opTable.$el
+			});
 
 			this.model.on('change:mode', this._modeChanged, this);
 		},
@@ -28,11 +31,11 @@ function(Backbone, SlideWell, OperatingTable) {
 			return this;
 		},
 
-		_modeChanged: function(mode) {
+		_modeChanged: function(model, mode) {
 			if (mode == 'markdown') {
-
+				this._markdownEditor.show();
 			} else if (mode == 'preview') {
-
+				this._markdownEditor.hide();
 			} else {
 				throw "Illegal mode";
 			}
