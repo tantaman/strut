@@ -17,7 +17,9 @@
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#or background ../../background}}{{/or}} slideContainer" style="width: 1024px; height: 768px">
+						<div class="reveal themedArea">
               			{{#marked markdown}}{{/marked}}
+              			</div>
 						{{#components}}
 							{{#renderComponent .}}{{/renderComponent}}
 						{{/components}}

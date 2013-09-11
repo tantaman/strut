@@ -2,6 +2,8 @@
 <head>
 	<meta name="viewport" content="width=device-width" />
 	<title>Deck Title</title>
+	<link rel="stylesheet" href="reveal/css/reveal.css">
+	<link rel="stylesheet" href="reveal/css/theme/default.css" id="theme">
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
 	<link rel="stylesheet" type="text/css" href="bespoke/css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="bespoke/css/themes.css" />
@@ -38,6 +40,16 @@
 
 	#main, body {
 		overflow: hidden;
+	}
+
+	.reveal.themedArea {
+	    display: block;
+	    position: absolute;
+	    top: 0px;
+	    left: 0px;
+	    z-index: 0;
+	    width: 100%;
+	    height: 100%;
 	}
 	</style>
 
