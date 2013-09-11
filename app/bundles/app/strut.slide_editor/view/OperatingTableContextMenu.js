@@ -3,6 +3,7 @@ define(['lang', 'libs/backbone',
 function(lang, Backbone, AvailableBackgrounds) {
 	function ContextMenu() {
 		this.on('change:background', this._backgroundChanged);
+		this.on('change:markdown', this._markdownModeChanged);
 		this._previewBackground = this._previewBackground.bind(this);
 		this._restoreBackground = this._restoreBackground.bind(this);
 	}
@@ -17,12 +18,11 @@ function(lang, Backbone, AvailableBackgrounds) {
 		this.model.setBackground(bg);
 	};
 
-	ContextMenu.prototype._ensureState = function($menu) {
-		if (this.model.canDoMarkdown()) {
-			$menu.find('li.markdown-menu').removeClass('disabled');
-		} else {
-			$menu.find('li.markdown-menu').addClass('disabled');
-		}
+	ContextMenu.prototype._markdownModeChanged = function(key, mode) {
+		if (mode == 'edit')
+			this.model.editMarkdown();
+		else
+			this.model.stopEditingMarkdown();
 	};
 
 	ContextMenu.prototype._previewBackground = function(e) {
@@ -101,7 +101,6 @@ function(lang, Backbone, AvailableBackgrounds) {
 
 	function menuShown(opts) {
 		var $menu = opts.$menu;
-		menu._ensureState($menu);
 	}
 
 	$('.context-menu-item[class*="solid-bg-"]').hover(

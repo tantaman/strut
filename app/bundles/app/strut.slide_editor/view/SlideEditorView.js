@@ -9,7 +9,7 @@ function(Backbone, SlideWell, OperatingTable) {
 		initialize: function() {
 			//this._template = JST['strut.slide_editor/SlideEditor'];
 			this._well = new SlideWell(this.model._editorModel);
-			this._opTable = new OperatingTable(this.model._editorModel);
+			this._opTable = new OperatingTable(this.model._editorModel, this.model);
 		},
 
 		remove: function() {

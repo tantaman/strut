@@ -139,7 +139,7 @@ define(["libs/backbone",
 			
 			/**
 			 * Unselect given components. If no components passed, then all selected coponents will be unselected.
-						*
+			 *
 			 * @param {Component|Component[]} components
 			*/
 			unselectComponents: function(components) {
