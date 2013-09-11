@@ -6,10 +6,14 @@ define(['libs/backbone',
 		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
 		'./Utils',
-		'./Tablets'],
-function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu, DeckUtils,
+		'./Tablets',
+		'marked'],
+function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
+	ContextMenu,
+	DeckUtils,
 	Utils,
-	Tablets) {
+	Tablets,
+	marked) {
 	'use strict';
 
 	function MenuModel() {
@@ -85,6 +89,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
+			this._$markdownArea = $('<div class="markdownArea"></div>');
+			this._$slideContainer.append(this._$markdownArea);
 
 			var self = this;
 			setTimeout(function() {
@@ -207,6 +213,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 			if (this.model != null) {
 				this.model.on('change:components.add', this._componentAdded, this);
 				this.model.on('change:background', this._updateBg, this);
+				this.model.on('change:markdown', this._renderMarkdown, this);
 				this._updateBg();
 			}
 			this._renderContents(prevModel);
@@ -236,6 +243,16 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component, ContextMenu
 					var view = ComponentFactory.instance.createView(comp);
 					this._$slideContainer.append(view.render());
 				}, this);
+
+				this._renderMarkdown();
+			}
+		},
+
+		_renderMarkdown: function() {
+			if (this.model.get('markdown')) {
+				this._$markdownArea.html(marked(this.model.get('markdown')));
+			} else {
+				this._$markdownArea.html('');
 			}
 		},
 

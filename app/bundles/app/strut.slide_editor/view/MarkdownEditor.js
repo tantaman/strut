@@ -24,9 +24,7 @@ function(managedEditors, md, Utils) {
 			this._resize();
 			this._bindResize();
 			this._opts.$target.append(this.$el);
-
-			value = value || defaultValue;
-			editor.mirror.setValue(defaultValue);
+			this.setValue(value);
 		},
 
 		setValue: function(value) {
