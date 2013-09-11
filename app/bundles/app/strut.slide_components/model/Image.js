@@ -1,29 +1,34 @@
 define(['strut/deck/Component',
-		'common/FileUtils'],
-function(Component, FileUtils) {
-	'use strict';
-	return Component.extend({
-		initialize: function() {
-			Component.prototype.initialize.apply(this, arguments);
-			this.set('type', 'Image');
+	'common/FileUtils'],
+	function(Component, FileUtils) {
+		'use strict';
 
-			var src = this.get('src');
-			this.set('imageType', FileUtils.imageType(src));
-			this.on('change:src', this._updateCache, this);
-			this._cachedImage = new Image();
-			this._updateCache();
-		},
+		/**
+		 * @class Image
+		 * @extends Component
+		 */
+		return Component.extend({
+			initialize: function() {
+				Component.prototype.initialize.apply(this, arguments);
+				this.set('type', 'Image');
 
-		_updateCache: function() {
-			this._cachedImage.src = this.get('src');
-		},
+				var src = this.get('src');
+				this.set('imageType', FileUtils.imageType(src));
+				this.on('change:src', this._updateCache, this);
+				this._cachedImage = new Image();
+				this._updateCache();
+			},
 
-		toBase64: function() {
+			_updateCache: function() {
+				this._cachedImage.src = this.get('src');
+			},
 
-		},
+			toBase64: function() {
 
-		constructor: function ImageModel() {
-			Component.prototype.constructor.apply(this, arguments);
-		}
+			},
+
+			constructor: function ImageModel() {
+				Component.prototype.constructor.apply(this, arguments);
+			}
+		});
 	});
-});

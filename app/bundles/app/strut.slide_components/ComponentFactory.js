@@ -1,5 +1,10 @@
 define(function() {
 	'use strict';
+
+	/**
+	 * @class ComponentFactory
+	 * @param {ServiceRegistry} registry
+	 */
 	function ComponentFactory(registry) {
 		// Look up strut.Component s
 		// create our view map based on their component types
@@ -26,6 +31,12 @@ define(function() {
 	}
 
 	ComponentFactory.prototype = {
+		/**
+		 * Create view for a given model.
+		 *
+		 * @param {Component} model
+		 * @returns {ComponentView}
+		 */
 		createView: function(model) {
 			var type = model.get('type');
 			var ctor = this._viewCtors[type];
@@ -34,22 +45,36 @@ define(function() {
 			}
 		},
 
+		/**
+		 * Create a model from a given raw object.
+		 *
+		 * @param {Object} rawModel
+		 * @returns {Component}
+		 */
 		createModel: function(rawModel) {
 			// TODO: temporary hack until
 			// everyone migrates to the new serialization format
-			if (rawModel.type == "ImageModel")
+			if (rawModel.type == "ImageModel") {
 				rawModel.type = "Image"
+			}
 
-
-            if (typeof rawModel === 'string')
-                var type = rawModel;
-            else
-			    var type = rawModel.type;
+			if (typeof rawModel === 'string') {
+				var type = rawModel;
+			} else {
+				var type = rawModel.type;
+			}
 			var ctor = this._modelCtors[type];
-			if (ctor)
+			if (ctor) {
 				return new ctor(rawModel);
+			}
 		},
 
+		/**
+		 * Return drawer object for a given component type.
+		 *
+		 * @param {String} type
+		 * @returns {AbstractDrawer|ImageDrawer|TextBoxDrawer}
+		 */
 		getDrawer: function(type) {
 			return this._drawers[type];
 		}
@@ -58,8 +83,9 @@ define(function() {
 	return {
 		initialize: function(registry) {
 			log('Initing');
-			if (!this.instance)
+			if (!this.instance) {
 				this.instance = new ComponentFactory(registry);
+			}
 		}
 	};
 });
