@@ -31,13 +31,26 @@ define(['libs/backbone',
 			},
 
 			select: function() {
-				if (key.pressed.shift) {
-					if (this.model.get("selected") && !this.model.get("active")) {
-						this.model.set('selected', false);
+				if (key.pressed.ctrl || key.pressed.meta || key.pressed.shift) {
+					var affectedSlides;
+
+					// Pick selection.
+					if (key.pressed.ctrl || key.pressed.meta) {
+						affectedSlides = [this.model];
 					}
+					// Range selection.
 					else {
-						this.model.set('selected', true);
+						var activeSlide = this.options.deck.get('activeSlide');
+						var activeSlideIsAboveClicked = this.model.get('index') <= activeSlide.get('index');
+						var begin = activeSlideIsAboveClicked ? this.model.get('index') : activeSlide.get('index');
+						var end = activeSlideIsAboveClicked ? activeSlide.get('index') : this.model.get('index');
+						affectedSlides = this.options.deck.get('slides').slice(begin, end + 1);
 					}
+
+					var select = !this.model.get("selected") || this.model.get("active");
+					affectedSlides.forEach(function(slide){
+						slide.set('selected', select);
+					});
 				} else {
 					// If slide is already selected, we need to reset selection in order to fire change callbacks. This is useful
 					// when multiple slides selected and then you click one slide without shift, expecting that just the clicked

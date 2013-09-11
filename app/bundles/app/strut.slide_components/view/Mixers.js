@@ -11,6 +11,7 @@ define(function() {
           height: height
         });
       },
+
       scaleChangeByResize: function(model, size) {
         if (this.origSize) {
           var factor = size.width / this.origSize.width;
@@ -30,6 +31,7 @@ define(function() {
         };
         return this.model.set("scale", size);
       },
+
       scaleChangeObjectEmbed: function(model, size) {
           this.$object.attr(size);
           this.$embed.attr(size);

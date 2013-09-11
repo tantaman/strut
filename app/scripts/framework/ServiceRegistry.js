@@ -3,6 +3,9 @@ function(EventEmitter, MultiMap) {
 	'use strict';
 	var identifier = 0;
 
+	/**
+	 * @constructor
+	 */
 	function ServiceRegistry() {
 		this._services = new MultiMap();
 	}
