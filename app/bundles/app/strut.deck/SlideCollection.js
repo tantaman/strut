@@ -19,6 +19,7 @@ define(["common/Calcium", "./Slide"],
 
 		/**
 		 * @class SlideCollection
+		 * @extends Backbone.Collection
 		 */
 		return Backbone.Collection.extend({
 			model: Slide,
