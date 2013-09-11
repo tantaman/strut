@@ -16,6 +16,7 @@ require.config({
     codemirror: '../components/codemirror/codemirror',
     'codemirror/modes': '../components/codemirror/modes',
     'codemirror/ManagedEditors': '../components/codemirror/ManagedEditors',
+    'marked': '../components/marked/marked',
 
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
