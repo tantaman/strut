@@ -12,6 +12,10 @@ define(function() {
         });
       },
       scaleChangeByResize: function(model, size) {
+        if (this.origSize) {
+          var factor = size.width / this.origSize.width;
+          size.height = this.origSize.height * factor;
+        }
         this.$el.css(size);
       },
 
