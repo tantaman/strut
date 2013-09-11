@@ -5,7 +5,19 @@ function() {
 			return new PlatonicShape(name, src, aspect);
 
 		this.name = name;
-		this.src = 'preview_export/shapes/' + src;
+		var loc = window.location.href;
+		var hashIdx = loc.indexOf('#');
+		var finalIdx;
+		if (hashIdx != -1) {
+			loc = loc.substring(0, hashIdx);
+		}
+		finalIdx = loc.lastIndexOf('/');
+
+		if (finalIdx != -1)
+			loc = loc.substring(0, finalIdx);
+
+		this.src = loc
+			+ '/preview_export/shapes/' + src;
 		this.aspect = aspect;
 	}
 
