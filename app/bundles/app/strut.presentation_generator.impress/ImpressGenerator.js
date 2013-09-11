@@ -1,4 +1,4 @@
-define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
+define(["handlebars", "common/Math2", "marked"], function(Handlebars, Math2, marked) {
   var ImpressGenerator;
   var slideConfig = window.config.slide;
 
@@ -65,6 +65,12 @@ define(["handlebars", "common/Math2"], function(Handlebars, Math2) {
 
       Handlebars.registerHelper("or", function(a, b) {
         return a || b;
+      });
+
+      Handlebars.registerHelper("marked", function(string) {
+        if (string)
+          return new Handlebars.SafeString(marked(string));
+        return '';
       });
 
       Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);

@@ -17,6 +17,7 @@
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#or background ../../background}}{{/or}} slideContainer" style="width: 1024px; height: 768px">
+              			{{#marked markdown}}{{/marked}}
 						{{#components}}
 							{{#renderComponent .}}{{/renderComponent}}
 						{{/components}}
