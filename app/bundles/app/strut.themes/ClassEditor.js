@@ -86,8 +86,9 @@ define(['./Button',
 			 */
 			_launch: function() {
 				if (!this._appended) {
-					var $slideEditArea = $('.slideEditArea');
+					var $slideEditArea = $('.slideContainer');
 					$slideEditArea.append(popover.$el);
+					this._appended = true;
 				}
 
 				if (this._activeComponents.length) {

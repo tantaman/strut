@@ -83,13 +83,13 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		},
 
 		render: function() {
-			this._$slideContainer = $('<div class="slideContainer slideEditArea"></div>')
+			this._$slideContainer = $('<div class="slideContainer"></div>')
 			this.$el.html(this._$slideContainer);
 			this.$el.append(this._tablets.render().$el);
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
-			this._$markdownArea = $('<div class="markdownArea"></div>');
+			this._$markdownArea = $('<div class="markdownArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownArea);
 
 			var self = this;
@@ -107,7 +107,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this._$slideContainer.removeClass();
 			bg = DeckUtils.slideBackground(this.model, this._deck);
 
-			this._$slideContainer.addClass('slideContainer slideEditArea ' + bg);
+			this._$slideContainer.addClass('slideContainer ' + bg);
 		},
 
 		_updateSurface: function(model, bg) {

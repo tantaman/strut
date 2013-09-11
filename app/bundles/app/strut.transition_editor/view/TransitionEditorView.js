@@ -5,7 +5,7 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 	'use strict';
 
 	return Backbone.View.extend({
-		className: 'slideTable slideEditArea',
+		className: 'slideTable',
 
 		/*
 		TODO: render the slides...
