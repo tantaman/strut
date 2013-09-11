@@ -159,7 +159,7 @@ define(["libs/backbone",
 			 * Make element selected.
 			 */
 			select: function() {
-				if ((key.pressed.ctrl || key.pressed.meta) && this.model.get("selected")) {
+				if ((key.pressed.ctrl || key.pressed.meta || key.pressed.shift) && this.model.get("selected")) {
 					this.model.set("selected", false);
 				}
 				else {
