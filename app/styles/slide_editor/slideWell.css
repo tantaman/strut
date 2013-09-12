@@ -9,7 +9,7 @@
 	background-image: url('img/linen-gray.png');
 }
 
-.slideWell .slideSnapshot {
+.slideWell .slideSnapshot, .slideWell .placeholder {
 	width: 120px;
 	height: 90px;
 	margin: 0 auto;
