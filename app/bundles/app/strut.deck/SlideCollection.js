@@ -48,16 +48,15 @@ define(["common/Calcium", "./Slide"],
 			 *
 			 * @returns {SlideCollection} this
 			 */
-			slidesReorganized: function() {
-				var swapped = {};
-				this.models.forEach(function(model, idx) {
-					var num;
-					num = model.get("index");
-					if (num !== idx && !swapped[num]) {
-						swapped[num] = true;
-						swapped[idx] = true;
-						this._swapTransitionPositions(model, this.models[num]);
-					}
+			slidesReorganized: function(slidesCopy) {
+				var transitions = [];
+				this.models.forEach(function(model, i) {
+					transitions.push(slidesCopy[i].getPositionData());
+				}, this);
+
+				var silent = { silent: true };
+				transitions.forEach(function(transition, i) {
+					this.models[i].set(transition, silent);
 				}, this);
 
 				this.models.forEach(function(model, i) {

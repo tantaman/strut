@@ -59,10 +59,11 @@ define(["common/Calcium",
 			moveSlide: function(sourceIndex, destIndex) {
 				if (sourceIndex == destIndex) return;
 				var slides = this.get('slides');
+				var slidesCopy = slides.slice(0);
 				var slide = slides.at(sourceIndex);
 				slides.remove(slide, {silent: true});
 				slides.add(slide, {at: destIndex, silent: true});
-				slides.slidesReorganized();
+				slides.slidesReorganized(slidesCopy);
 			},
 
 			// TODO add doc
