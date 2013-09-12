@@ -54,7 +54,7 @@ define(["libs/backbone",
 				this.model.on("change:selected", this._selectionChanged, this);
 				this.model.on("change:color", this._colorChanged, this);
 				this.model.on("unrender", this._unrender, this);
-				this._mouseup = this.stopdrag.bind(this);
+				this._mouseup = this.mouseup.bind(this);
 				this._mousemove = this.mousemove.bind(this);
 				$(document).bind("mouseup", this._mouseup);
 				$(document).bind("mousemove", this._mousemove);
@@ -67,6 +67,11 @@ define(["libs/backbone",
 				this.model.on("change:rotate", this._setUpdatedTransform, this);
 				this.model.on("change:scale", this._setUpdatedTransform, this);
 				this.model.on('change:customClasses', this._updateCustomClasses, this);
+
+				this.model.on("dragStart", this.dragStart, this);
+				this.model.on("drag", this.drag, this);
+				this.model.on("dragStop", this.dragStop, this);
+
 				this.$el.css('z-index', zTracker.next());
 				this._lastDeltas = {
 					dx: 0,
@@ -134,7 +139,7 @@ define(["libs/backbone",
 			},
 
 			/**
-			 * Event: mouse button has peen pressed down, drag started.
+			 * Event: mouse button has peen pressed down.
 			 *
 			 * @param {Event} e
 			 */
@@ -143,18 +148,10 @@ define(["libs/backbone",
 					e.preventDefault();
 					this.select();
 					this.$el.css("zIndex", zTracker.next());
-					this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
-					this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
-					this._dragging = true;
-					this.$el.addClass("dragged");
-					this._prevPos = {
-						x: this.model.get("x"),
-						y: this.model.get("y")
-					};
-					this._prevMousePos = {
-						x: e.pageX,
-						y: e.pageY
-					};
+
+					this.model.slide.selected.forEach(function(component) {
+						component.trigger('dragStart', e);
+					})
 				}
 			},
 
@@ -162,7 +159,7 @@ define(["libs/backbone",
 			 * Make element selected.
 			 */
 			select: function() {
-				if ((key.pressed.ctrl || key.pressed.meta) && this.model.get("selected")) {
+				if ((key.pressed.ctrl || key.pressed.meta || key.pressed.shift) && this.model.get("selected")) {
 					this.model.set("selected", false);
 				}
 				else {
@@ -191,6 +188,57 @@ define(["libs/backbone",
 			 * @param {Event} e
 			 */
 			mousemove: function(e) {
+				this.model.slide.selected.forEach(function(component) {
+					component.trigger('drag', e);
+				})
+			},
+
+			/**
+			 * Event: mouse button has been released.
+			 *
+			 * @param {Event} e
+			 */
+			mouseup: function(e) {
+				var commands = [];
+				this.model.slide.selected.forEach(function(component) {
+					component._lastMoveCommand = null;
+					component.trigger('dragStop', e);
+					if (component._lastMoveCommand) {
+					  commands.push(component._lastMoveCommand);
+					}
+				})
+				if (commands.length) {
+					undoHistory.push(new ComponentCommands.CombinedCommand(commands, 'Move'));
+				}
+			},
+
+
+			/**
+			 * Event: drag has been started.
+			 *
+			 * @param {Event} e
+			 */
+			dragStart: function(e) {
+				this.dragScale = this.$el.parent().css(window.browserPrefix + "transform");
+				this.dragScale = parseFloat(this.dragScale.substring(7, this.dragScale.indexOf(","))) || 1;
+				this._dragging = true;
+				this.$el.addClass("dragged");
+				this._prevPos = {
+					x: this.model.get("x"),
+					y: this.model.get("y")
+				};
+				this._prevMousePos = {
+					x: e.pageX,
+					y: e.pageY
+				};
+			},
+
+			/**
+			 * Event: drag is in progress.
+			 *
+			 * @param {Event} e
+			 */
+			drag: function(e) {
 				var dx, dy, gridSize, newX, newY, snapToGrid;
 				if (this._dragging && this.allowDragging) {
 					snapToGrid = key.pressed.shift;
@@ -205,7 +253,7 @@ define(["libs/backbone",
 					}
 					this.model.setInt("x", newX);
 					this.model.setInt("y", newY);
-					if (!(this.dragStartLoc != null)) {
+					if (!this.dragStartLoc) {
 						this.dragStartLoc = {
 							x: newX,
 							y: newY
@@ -215,22 +263,19 @@ define(["libs/backbone",
 			},
 
 			/**
-			 * Event: mouse button has been released, drag stopped.
+			 * Event: drag has been stopped.
 			 *
-			 * @returns {boolean}
+			 * @param {Event} e
 			 */
-			stopdrag: function() {
-				var cmd;
+			dragStop: function(e) {
 				if (this._dragging) {
 					this._dragging = false;
 					this.$el.removeClass("dragged");
 					if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
-						cmd = new ComponentCommands.Move(this.dragStartLoc, this.model);
-						undoHistory.push(cmd);
+						this.model._lastMoveCommand = new ComponentCommands.Move(this.dragStartLoc, this.model);
 					}
-					this.dragStartLoc = void 0;
+					this.dragStartLoc = null;
 				}
-				return true;
 			},
 
 			/**
@@ -408,7 +453,6 @@ define(["libs/backbone",
 				var cmd = new ComponentCommands.Rotate(this._initialRotate, this.model);
 				undoHistory.push(cmd);
 			},
-
 
 			// TODO fix or remove commented code and unused variables
 			/**

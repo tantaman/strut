@@ -40,6 +40,7 @@ define(['libs/backbone',
 					}
 					// Range selection.
 					else {
+						this.options.deck.unselectSlides();
 						var activeSlide = this.options.deck.get('activeSlide');
 						var activeSlideIsAboveClicked = this.model.get('index') <= activeSlide.get('index');
 						var begin = activeSlideIsAboveClicked ? this.model.get('index') : activeSlide.get('index');

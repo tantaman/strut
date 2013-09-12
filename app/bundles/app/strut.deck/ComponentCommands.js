@@ -4,12 +4,11 @@ define(function() {
 	/**
 	 * Base command class for simple attribute changing actions.
 	 *
-	 * @class ComponentCommands.BaseCommand
+	 * @class BaseCommand
 	 * @param {*} initial Initial value of model's attribute.
 	 * @param {Component} model Affected model.
 	 * @param {String} attr Affected model's attribute.
 	 * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
-	 * @constructor
 	 */
 	function BaseCommand(initial, model, attr, name) {
 		this.start = initial;
@@ -34,10 +33,9 @@ define(function() {
 	/**
 	 * Adds component to the slide.
 	 *
-	 * @class ComponentCommands.Add
+	 * @class Add
 	 * @param {Slide} slide Target slide.
 	 * @param {Component} components Affected component.
-	 * @constructor
 	 */
 	Add = function(slide, components) {
 		this.slide = slide;
@@ -57,10 +55,9 @@ define(function() {
 	/**
 	 * Removes component from the slide.
 	 *
-	 * @class ComponentCommands.Remove
+	 * @class Remove
 	 * @param {Slide} slide Target slide.
 	 * @param {Component} components Affected component.
-	 * @constructor
 	 */
 	Remove = function(slide, components) {
 		this.slide = slide;
@@ -81,10 +78,9 @@ define(function() {
 	/**
 	 * Moves component from one location to another.
 	 *
-	 * @class ComponentCommands.Move
+	 * @class Move
 	 * @param startLoc
 	 * @param model
-	 * @constructor
 	 */
 	Move = function(startLoc, model) {
 		this.startLoc = startLoc;
@@ -110,10 +106,9 @@ define(function() {
 	/**
 	 * Special kind of command, which allows to pack several commands into single undo/redo item.
 	 *
-	 * @class ComponentCommands.CombinedCommand
+	 * @class CombinedCommand
 	 * @param {(Add|Remove|Move)[]} command
 	 * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
-	 * @constructor
 	 */
 	CombinedCommand = function(commands, name) {
 		this.commands = commands;
