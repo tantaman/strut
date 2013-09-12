@@ -8,7 +8,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer');
+			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer slideEditArea');
 		}
 	};
 

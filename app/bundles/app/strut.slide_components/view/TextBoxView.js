@@ -141,6 +141,7 @@ define(["./ComponentView", "libs/etch",
 					etch.triggerCaret();
 					//etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
 				}
+				ComponentView.prototype.mouseup.apply(this, arguments);
 			},
 
 			/**

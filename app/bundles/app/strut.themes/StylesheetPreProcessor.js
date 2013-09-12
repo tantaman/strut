@@ -7,11 +7,21 @@ function(Lexed) {
 					return text;
 				},
 
+				'@[A-Za-z\\-]+': function(text, lexed) { 
+					return text; },
+
 				'\\s+': function(text, lexed) {
 					return text;
 				},
 
-				'[^{\\s\\/]+': function(text, lexed) {
+				'{': function(text, lexed) {
+					lexed.state('ruleDefinition');
+					return text;
+				},
+
+				',': function(text, lexed) { return text; },
+
+				'[^{\\s\\/,@]+': function(text, lexed) {
 					lexed.state('ruleName');
 					return {text: text};
 				}
@@ -23,7 +33,12 @@ function(Lexed) {
 					return text;
 				},
 
-				'[^{]+': function(text, lexed) {
+				',': function(text, lexed) {
+					lexed.state('initial');
+					return text;
+				},
+
+				'[^{,]+': function(text, lexed) {
 					return text;
 				}
 			},

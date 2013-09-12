@@ -18,6 +18,9 @@ define(["common/Calcium",
 		 */
 		return Backbone.Model.extend({
 
+			/** @param {Slide[]} */
+			selected: [],
+
 			/**
 			 * Initialize deck model.
 			 */
@@ -30,16 +33,15 @@ define(["common/Calcium",
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
 				this.set('background', 'defaultbg');
-				this.selected = [];
 			},
 
 			/**
 			 * Set an attribute of the Deck.
-						*
+			 *
 			 * @param {String} key
 			 * @param {*} value
 			 * @returns {*}
-			*/
+			 */
 			set: function(key, value) {
 				if (key === "activeSlide") {
 					this._activeSlideChanging(value);
@@ -57,9 +59,11 @@ define(["common/Calcium",
 			moveSlide: function(sourceIndex, destIndex) {
 				if (sourceIndex == destIndex) return;
 				var slides = this.get('slides');
+				var slidesCopy = slides.slice(0);
 				var slide = slides.at(sourceIndex);
 				slides.remove(slide, {silent: true});
 				slides.add(slide, {at: destIndex, silent: true});
+				slides.slidesReorganized(slidesCopy);
 			},
 
 			// TODO add doc
@@ -79,7 +83,7 @@ define(["common/Calcium",
 			// TODO remove or implement
 			// resortSlides: function(sourceIndex, destIndex) {
 			//   var slides = this.get('slides');
-				
+
 			//   for (var i = 0; i < slides.models.length; ++i) {
 			//     if (sourceIndex < destIndex) {
 			//       if (i <= destIndex && i > sourceIndex) {
@@ -104,10 +108,10 @@ define(["common/Calcium",
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.
 			/**
 			 * Method to import an existing presentation into this deck.
-						*
+			 *
 			 * @param {Object} rawObj the "json" representation of a deck
 			 * @returns {*}
-			*/
+			 */
 			"import": function(rawObj) {
 				var activeSlide, slides;
 				slides = this.get("slides");
@@ -216,6 +220,7 @@ define(["common/Calcium",
 					this._registerWithSlide(slide);
 					if (slide.get("active")) {
 						slide.trigger("change:active", slide, true);
+						slide.trigger("change:selected", slide, true);
 						this._selectionChanged(slide, true);
 					} else if (slide.get("selected")) {
 						slide.set("selected", false);
@@ -259,6 +264,21 @@ define(["common/Calcium",
 			},
 
 			/**
+			 * Unselect given slides. If no slides passed, all slides will be unselected. This action does not affect active slide.
+			 *
+			 * @param {Slide|Slide[]} slides Slides to unselect.
+			 */
+			unselectSlides: function(slides) {
+				slides = slides || this.get('slides').models;
+				slides = _.isArray(slides) ? slides : [slides];
+
+				slides.forEach(function(slide) {
+					if (!slide.get('active')) {
+					  slide.set("selected", false);
+					}
+				});
+			},
+			/**
 			 * React on slide selection change.
 			 *
 			 * @param {Slide} slide
@@ -268,7 +288,7 @@ define(["common/Calcium",
 			 */
 			_selectionChanged: function(slide, selected, options) {
 				options = options || {};
-			  var multiselect = options.multiselect || (key.pressed.ctrl || key.pressed.meta || key.pressed.shift);
+				var multiselect = options.multiselect || (key.pressed.ctrl || key.pressed.meta || key.pressed.shift);
 				if (selected) {
 					if (!multiselect) {
 						this.get('slides').forEach(function(sl) {
@@ -290,7 +310,7 @@ define(["common/Calcium",
 				// Assign index for each slide and sort slides by this index, so that if you undo, slides would be inserted in
 				// correct order.
 				this.selected.sort(function(a, b) {
-					return (a.get('index') > b.get('index')) ? 1 : ((b.get('index') > a.get('index')) ? -1 : 0);
+					return a.get('index') - b.get('index');
 				});
 			},
 
@@ -332,11 +352,11 @@ define(["common/Calcium",
 			/**
 			 * Callback for slide addition command.
 			 * @see SlideCommands.Add
-						*
+			 *
 			 * @param {Slide|Slide[]} slides
 			 * @param {Object} options
 			 * @private
-			*/
+			 */
 			_doAdd: function(slides, options) {
 				var allSlides = this.get("slides");
 
@@ -351,7 +371,7 @@ define(["common/Calcium",
 				for (var i = 0; i < slides.length; i++) {
 					var slide = slides[i];
 					slide.on('unrender', slide._unrendered, slide);
-					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i);
+					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
 					allSlides.add(slide, { at: targetIndex });
 				}
 				this.selectSlides(slides);
@@ -402,4 +422,5 @@ define(["common/Calcium",
 				this.undoHistory.redo();
 			}
 		});
-	});
+	})
+;

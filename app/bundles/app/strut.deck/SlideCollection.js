@@ -44,28 +44,31 @@ define(["common/Calcium", "./Slide"],
 			},
 
 			/**
-			 * Sort collection by it's indexes.
+			 * Update transition positions after slides have moved
 			 *
-			 * @param {Object=} opts
 			 * @returns {SlideCollection} this
 			 */
-			sort: function(opts) {
-				opts = opts || {};
-				var swapped = {};
-				this.models.forEach(function(model, idx) {
-					var num;
-					num = model.get("index");
-					if (num !== idx && !swapped[num]) {
-						swapped[num] = true;
-						swapped[idx] = true;
-						this._swapTransitionPositions(model, this.models[num]);
-					}
+			slidesReorganized: function(slidesCopy) {
+				var transitions = [];
+				this.models.forEach(function(model, i) {
+					transitions.push(slidesCopy[i].getPositionData());
 				}, this);
+
+				var silent = { silent: true };
+				transitions.forEach(function(transition, i) {
+					this.models[i].set(transition, silent);
+				}, this);
+
+				this.models.forEach(function(model, i) {
+					model.set('index', i);
+				});
+
 				return this;
 			},
 
 			/**
-			 * Change position of slides in SlideWell if their order is changed in collection.
+			 * Change position of slides in overview
+			 * mode after they have been re-organized.
 			 *
 			 * @param {Slide} l
 			 * @param {Slide} r

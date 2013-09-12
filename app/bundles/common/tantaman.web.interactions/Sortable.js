@@ -133,12 +133,7 @@ function(EventEmitter) {
 				if (this._index == null) {
 					this._$children = this._$container.find(this._selector);
 					this._index = this._buildIndex(this._$children);
-					this._$placeholder = $('<div>').css({
-						width: this._$currentTarget.outerWidth(),
-						height: this._$currentTarget.outerHeight(),
-						margin: 0,
-						padding: 0
-					});
+					this._$placeholder = $('<div class="placeholder"></div>');
 
 					this._$currentTarget.css({
 						position: 'absolute',
