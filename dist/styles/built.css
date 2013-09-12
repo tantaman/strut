@@ -239,12 +239,21 @@
 }
 
 .slideSnapshot {
-	border: 1px solid grey;
+	border: 2px solid grey;
+}
+.slideWell .placeholder {
+    border: 2px dashed grey;
+    border-radius: 10px;
 }
 
-.slideSnapshot.active {
+.slideSnapshot.selected, .slideSnapshot.active {
 	box-shadow:inset 0 0 10px #000000;
-	border: 1px solid #5BB75B;
+}
+.slideSnapshot.selected {
+    border: 2px dotted #5BB75B;
+}
+.slideSnapshot.active {
+    border: 2px solid #5BB75B;
 }
 
 .slideSnapshot canvas {
@@ -266,7 +275,7 @@
 	background-image: url('img/linen-gray.png');
 }
 
-.slideWell .slideSnapshot {
+.slideWell .slideSnapshot, .slideWell .placeholder {
 	width: 120px;
 	height: 90px;
 	margin: 0 auto;
