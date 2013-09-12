@@ -50,3 +50,21 @@
 	width: 100%;
 	height: 100%;
 }
+
+.slideDrawer {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	position: relative;
+}
+
+.slideDrawer .transformContainer {
+-webkit-transform-origin: 0 0;
+-moz-transform-origin: 0 0;
+transform-origin: 0 0;
+}
+
+.slideDrawer .componentContainer {
+position: absolute;
+line-height: normal;
+}

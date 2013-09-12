@@ -76,9 +76,9 @@ function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
       this._$content = this.$el.find('.content');
       this._$content.addClass(bg);
 
-      var $el = this.$el.find('.drawer');
+      var $el = this.$el.find('.slideDrawer');
       this.slideDrawer = new SlideDrawer(this.model, $el);
-      
+
       this._impScaleChanged();
 
       this.slideDrawer.render();

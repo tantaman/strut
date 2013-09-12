@@ -1,5 +1,5 @@
 <div class="content">
-<div class="drawer"></div>
+<div class="slideDrawer"></div>
 </div>
 <div class="topLabel form-inline">
 	<span class="label rotates" data-delta="rotateY">↻Y</span>

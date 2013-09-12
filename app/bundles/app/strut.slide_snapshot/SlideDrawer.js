@@ -14,24 +14,31 @@ define(
 			this.$el = $el;
 			this.model = model;
 
+			this.$el.css(config.slide.size);
+
+			this._template = JST['strut.slide_snapshot/SlideDrawer'];
+
 			this.setSize(size);
+
+			this.render = this.render.bind(this);
+			this.render = _.debounce(this.render, 250);
+
+			this.model.on('contentsChanged', this.render);
 		}
 
 		SlideDrawer.prototype = {
 			render: function() {
-				/*
-				ok... so we need to render each component
-				Each component is slightly different..?
-
-				We can render exactly as they are rendered for the presentation.
-				We just need to do some finagle mangle?
-				*/
+				this.$el.html(this._template(this.model.attributes));
 				return this;
+			},
+
+			rescale: function() {
+				this.$el.css(window.browserPrefix + 'transform',
+					'scale(' + this.scale.x + ',' + this.scale.y + ')');
 			},
 
 			dispose: function() {
 				this.model.off(null, null, this);
-				// TODO: unbind from component events.
 			},
 
 			setSize: function(size) {
@@ -41,6 +48,7 @@ define(
 						x: this.size.width / config.slide.size.width,
 						y: this.size.height / config.slide.size.height
 					};
+					this.rescale();
 				}
 			}
 		};
