@@ -10,55 +10,38 @@ define(
 		 * @param {ServiceRegistry} registry
 		 * @constructor
 		 */
-		function SlideDrawer(model, g2d, registry) {
+		function SlideDrawer(model, $el, size) {
+			this.$el = $el;
 			this.model = model;
-			this.g2d = g2d;
 
-			this.repaint = this.repaint.bind(this);
-			this.repaint = _.debounce(this.repaint, 250);
-
-			this.model.on('contentsChanged', this.repaint, this);
-			this.size = {
-				width: this.g2d.canvas.width,
-				height: this.g2d.canvas.height
-			};
-
-			this.scale = {
-				x: this.size.width / config.slide.size.width,
-				y: this.size.height / config.slide.size.height
-			};
-
-			var drawerEntries = registry.get('strut.ComponentDrawer');
-			this._drawers = {};
-			drawerEntries.forEach(function(entry) {
-				var drawer = entry.service();
-				drawer = this._drawers[entry.meta().type] = new drawer(this.g2d);
-				drawer.scale = this.scale;
-			}, this);
+			this.setSize(size);
 		}
 
 		SlideDrawer.prototype = {
-			repaint: function() {
-				this._paint();
-			},
+			render: function() {
+				/*
+				ok... so we need to render each component
+				Each component is slightly different..?
 
-			_paint: function() {
-				this.g2d.clearRect(0, 0, this.size.width, this.size.height);
-				var components = this.model.get('components');
-
-				components.forEach(function(component) {
-					var type = component.get('type');
-					var drawer = this._drawers[type];
-					if (drawer) {
-						this.g2d.save();
-						drawer.paint(component);
-						this.g2d.restore();
-					}
-				}, this);
+				We can render exactly as they are rendered for the presentation.
+				We just need to do some finagle mangle?
+				*/
+				return this;
 			},
 
 			dispose: function() {
 				this.model.off(null, null, this);
+				// TODO: unbind from component events.
+			},
+
+			setSize: function(size) {
+				if (size) {
+					this.size = size;
+					this.scale = {
+						x: this.size.width / config.slide.size.width,
+						y: this.size.height / config.slide.size.height
+					};
+				}
 			}
 		};
 

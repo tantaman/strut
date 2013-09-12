@@ -46,10 +46,12 @@ function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
       var width = overviewSize.width * scaleFactor;
       var height = overviewSize.height * scaleFactor;
 
-      $content.css({
+      var size = {
         width: width,
         height: height
-      });
+      };
+      $content.css(size);
+      this.slideDrawer.setSize(size);
     },
 
     _backgroundChanged: function(deck, bg) {
@@ -59,15 +61,11 @@ function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
     },
 
     render: function() {
-      var g2d;
       ThreeDComponentView.prototype.render.apply(this, arguments);
       if (this.slideDrawer != null) {
         this.slideDrawer.dispose();
       }
-      var $canvas = this.$el.find('canvas');
-      g2d = $canvas[0].getContext("2d");
-      this.slideDrawer = new SlideDrawer(this.model, g2d, this.options.registry);
-      this.slideDrawer.repaint();
+
       this.$el.css({
         left: this.model.get("x"),
         top: this.model.get("y")
@@ -78,7 +76,12 @@ function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
       this._$content = this.$el.find('.content');
       this._$content.addClass(bg);
 
+      var $el = this.$el.find('.drawer');
+      this.slideDrawer = new SlideDrawer(this.model, $el);
+      
       this._impScaleChanged();
+
+      this.slideDrawer.render();
 
       return this;
     },
