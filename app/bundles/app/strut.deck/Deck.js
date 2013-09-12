@@ -62,6 +62,7 @@ define(["common/Calcium",
 				var slide = slides.at(sourceIndex);
 				slides.remove(slide, {silent: true});
 				slides.add(slide, {at: destIndex, silent: true});
+				slides.slidesReorganized();
 			},
 
 			// TODO add doc

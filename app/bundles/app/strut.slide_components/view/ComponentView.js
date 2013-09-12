@@ -149,9 +149,16 @@ define(["libs/backbone",
 					this.select();
 					this.$el.css("zIndex", zTracker.next());
 
-					this.model.slide.selected.forEach(function(component) {
-						component.trigger('dragStart', e);
-					})
+					// TODO: convert code that depends on
+					// this.model.slide into a method call
+					// so we can get rid of the if (this.model.slide) everywhere
+					if (this.model.slide) {
+						this.model.slide.selected.forEach(function(component) {
+							component.trigger('dragStart', e);
+						});
+					} else {
+						this.dragStart(e);
+					}
 				}
 			},
 
@@ -188,9 +195,13 @@ define(["libs/backbone",
 			 * @param {Event} e
 			 */
 			mousemove: function(e) {
-				this.model.slide.selected.forEach(function(component) {
-					component.trigger('drag', e);
-				})
+				if (this.model.slide) {
+					this.model.slide.selected.forEach(function(component) {
+						component.trigger('drag', e);
+					});
+				} else {
+					this.drag(e);
+				}
 			},
 
 			/**
@@ -200,15 +211,24 @@ define(["libs/backbone",
 			 */
 			mouseup: function(e) {
 				var commands = [];
-				this.model.slide.selected.forEach(function(component) {
-					component._lastMoveCommand = null;
-					component.trigger('dragStop', e);
-					if (component._lastMoveCommand) {
-					  commands.push(component._lastMoveCommand);
+				if (this.model.slide) {
+					this.model.slide.selected.forEach(function(component) {
+						component._lastMoveCommand = null;
+						component.trigger('dragStop', e);
+						if (component._lastMoveCommand) {
+						  commands.push(component._lastMoveCommand);
+						}
+					});
+
+					if (commands.length) {
+						undoHistory.push(new ComponentCommands.CombinedCommand(commands, 'Move'));
 					}
-				})
-				if (commands.length) {
-					undoHistory.push(new ComponentCommands.CombinedCommand(commands, 'Move'));
+				} else {
+					this.model._lastMoveCommand = null;
+					this.dragStop(e);
+					if (this.model._lastMoveCommand) {
+						undoHistory.push(this.model._lastMoveCommand);
+					}
 				}
 			},
 
