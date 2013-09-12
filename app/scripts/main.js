@@ -13,9 +13,7 @@ require.config({
     lang: "../locales/lang",
     handlebars: '../scripts/libs/Handlebars',
     lexed: '../components/lexed/lexed',
-    codemirror: '../components/codemirror/codemirror',
-    'codemirror/modes': '../components/codemirror/modes',
-    'codemirror/ManagedEditors': '../components/codemirror/ManagedEditors',
+    codemirror: '../components/codemirror',
     'marked': '../components/marked/marked',
 
     // build - rmap
@@ -76,7 +74,7 @@ require.config({
       deps: ["jquery", "position"]
     },
 
-    codemirror: {
+    "codemirror/codemirror": {
       deps: ["css!../components/codemirror/codemirror.css"],
       exports: 'CodeMirror'
     },
@@ -86,7 +84,7 @@ require.config({
     },
 
     'codemirror/modes/markdown': {
-      deps: ['codemirror']
+      deps: ['codemirror/codemirror']
     },
 
     handlebars: {
