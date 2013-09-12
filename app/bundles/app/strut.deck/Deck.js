@@ -262,6 +262,21 @@ define(["common/Calcium",
 			},
 
 			/**
+			 * Unselect given slides. If no slides passed, all slides will be unselected. This action does not affect active slide.
+			 *
+			 * @param {Slide|Slide[]} slides Slides to unselect.
+			 */
+			unselectSlides: function(slides) {
+				slides = slides || this.get('slides').models;
+				slides = _.isArray(slides) ? slides : [slides];
+
+				slides.forEach(function(slide) {
+					if (!slide.get('active')) {
+					  slide.set("selected", false);
+					}
+				});
+			},
+			/**
 			 * React on slide selection change.
 			 *
 			 * @param {Slide} slide
