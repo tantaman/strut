@@ -30,5 +30,13 @@ function(mousetrap, Backbone) {
 		result.trigger('redo', e);
 	});
 
+
+	$(window).blur(function() {
+		var keys = Object.keys(result.pressed);
+		keys.forEach(function(key) {
+			delete result.pressed[key];
+		});
+	});
+
 	return result;
 });
