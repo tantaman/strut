@@ -1,3 +1,20 @@
+-Slide size: Allow changing of slide size (for full screen slides and such)
+-Slide background image : allow per slide BG images
+http://superhighfives.github.io/tweetflight-presentation/
+
+-Theme editor: apply styles for h1s, h2s, etc.
+	-Apply them on a per-slide basis as well?
+
+-Text insertion: allow insertion of h1s, h2s, ps, etc.
+	for use in themes
+
+-Allow a "timeline" for inner transitions.
+
+-Change "tablets" to be a sort of pulldown with additional options.
+Pulldown will show itself whenever the mouse is close.
+
+
+
 -Before presenting, make sure markdown content is saved.
 
 

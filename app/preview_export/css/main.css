@@ -33,7 +33,7 @@ footer, header, hgroup, menu, nav, section {
     display: block;
 }
 body, body .fwrk-ignore {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: rgb(51,51,51);
     line-height: normal;
 }
