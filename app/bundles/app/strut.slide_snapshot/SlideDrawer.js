@@ -23,7 +23,7 @@ define(
 			this.render = this.render.bind(this);
 			this.render = _.debounce(this.render, 250);
 
-			this.model.on('contentsChanged', this.render);
+			this.model.on('contentsChanged', this.render, this);
 		}
 
 		SlideDrawer.prototype = {
