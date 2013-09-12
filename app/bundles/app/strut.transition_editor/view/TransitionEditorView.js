@@ -24,6 +24,7 @@ function(Backbone, TransitionSlideSnapshot, empty) {
 			this._snapshots = [];
 
 			this.model.deck().on('change:surface', this._surfaceChanged, this);
+			$(document.body).css('overflow', '');
 		},
 
 		_surfaceChanged: function(model, surf) {
