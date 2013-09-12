@@ -371,7 +371,7 @@ define(["common/Calcium",
 				for (var i = 0; i < slides.length; i++) {
 					var slide = slides[i];
 					slide.on('unrender', slide._unrendered, slide);
-					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i);
+					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
 					allSlides.add(slide, { at: targetIndex });
 				}
 				this.selectSlides(slides);
