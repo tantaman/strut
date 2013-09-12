@@ -1,4 +1,4 @@
-define(['codemirror'],
+define(['codemirror/codemirror'],
 function(CodeMirror) {
 	var editors = {};
 
