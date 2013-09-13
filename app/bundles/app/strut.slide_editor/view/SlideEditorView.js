@@ -19,6 +19,7 @@ function(Backbone, SlideWell, OperatingTable, MarkdownEditor) {
 			this.model.on('change:mode', this._modeChanged, this);
 			this.model.deck().on('change:activeSlide', this._activeSlideChanged, this);
 			this.model.on('saveEdits', this._saveCurrentEdits, this);
+			$(document.body).css('overflow', 'hidden');
 		},
 
 		remove: function() {

@@ -34,6 +34,7 @@ define(['libs/backbone',
 				if (key.pressed.ctrl || key.pressed.meta || key.pressed.shift) {
 					var affectedSlides;
 
+					// TODO: move this selection logic into the deck.
 					// Pick selection.
 					if (key.pressed.ctrl || key.pressed.meta) {
 						affectedSlides = [this.model];
@@ -99,12 +100,10 @@ define(['libs/backbone',
 				}
 
 				this.$el.html(this._template(this.model.attributes));
-				var g2d = this.$el.find('canvas')[0].getContext('2d');
-				this._slideDrawer = new SlideDrawer(this.model, g2d, this.options.registry);
+				var $el = this.$el.find('div');
+				this._slideDrawer = new SlideDrawer(this.model, $el, {width: 120, height: 90});
 				var self = this;
-				setTimeout(function() {
-					self._slideDrawer.repaint();
-				});
+				self._slideDrawer.render();
 
 				if (this.model.get('selected')) {
 					this.$el.addClass('selected');
@@ -113,8 +112,6 @@ define(['libs/backbone',
 				if (this.model.get('active')) {
 					this.$el.addClass('active');
 				}
-
-//			this.$el.data('js')
 
 				this._bgChanged();
 

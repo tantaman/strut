@@ -6,9 +6,14 @@ define(["handlebars", "common/Math2", "marked"], function(Handlebars, Math2, mar
 
     function ImpressGenerator() {
       var _this = this;
-      Handlebars.registerHelper("renderComponent", function(componentModel) {
+      Handlebars.registerHelper("renderComponent", function(componentModel, ignore) {
         var result;
         result = "";
+        if (ignore && typeof ignore == 'string') {
+          ignore = ignore.split(" ");
+          if (ignore.indexOf(componentModel.get("type")) != -1)
+            return result;
+        }
         switch (componentModel.get("type")) {
           case "Image":
             if (componentModel.get("imageType") === "SVG") {
