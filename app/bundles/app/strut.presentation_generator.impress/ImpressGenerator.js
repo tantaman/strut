@@ -9,7 +9,7 @@ define(["handlebars", "common/Math2", "marked"], function(Handlebars, Math2, mar
       Handlebars.registerHelper("renderComponent", function(componentModel, ignore) {
         var result;
         result = "";
-        if (ignore) {
+        if (ignore && typeof ignore == 'string') {
           ignore = ignore.split(" ");
           if (ignore.indexOf(componentModel.get("type")) != -1)
             return result;
