@@ -59,6 +59,7 @@ define(["libs/backbone",
 				}
 				_.defaults(this.attributes, defaults);
 				this.on("unrender", this._unrendered, this);
+				this.on('change:markdown', this._contentsChanged);
 
 				components = this.get('components');
 				components.forEach(function(comp) {
@@ -89,7 +90,7 @@ define(["libs/backbone",
 				component.slide = this;
 				component.on("dispose", this._selectionChanged, this);
 				component.on("change:selected", this._selectionChanged, this);
-				component.on("change", this._componentChanged, this);
+				component.on("change", this._contentsChanged, this);
 			},
 
 			/**
@@ -190,7 +191,7 @@ define(["libs/backbone",
 			 * @param {*} value
 			 * @private
 			 */
-			_componentChanged: function(model, value) {
+			_contentsChanged: function(model, value) {
 				this.trigger("contentsChanged");
 			},
 
