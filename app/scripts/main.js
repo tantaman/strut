@@ -19,6 +19,7 @@ require.config({
     // build - rmap
     'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
     'strut/presentation_generator/reveal': '../bundles/app/strut.presentation_generator.reveal',
+    'strut/presentation_generator/handouts': '../bundles/app/strut.presentation_generator.handouts',
     'strut/deck': '../bundles/app/strut.deck',
     'strut/startup': '../bundles/app/strut.startup',
     'strut/editor': '../bundles/app/strut.editor',
@@ -32,7 +33,6 @@ require.config({
     'strut/presentation_generator/impress': '../bundles/app/strut.presentation_generator.impress',
     'strut/logo_button': '../bundles/app/strut.logo_button',
     'strut/presentation_generator': '../bundles/app/strut.presentation_generator',
-    'strut/reveal_generator': '../bundles/app/strut.reveal_generator',
     'strut/slide_components': '../bundles/app/strut.slide_components',
     'strut/slide_editor': '../bundles/app/strut.slide_editor',
     'strut/slide_snapshot': '../bundles/app/strut.slide_snapshot',

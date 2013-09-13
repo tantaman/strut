@@ -8,10 +8,7 @@ function(RevealGenerator) {
 		generate: function(deckAttrs) {
 			return RevealGenerator.render(deckAttrs);
 		},
-		getStartPreviewFn: function() {
-			return RevealGenerator.getStartPreviewFn.apply(RevealGenerator, arguments);
-		},
-
+		
 		getSlideHash: function(editorModel) {
       		return '#/' + editorModel.activeSlideIndex();
     	}

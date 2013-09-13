@@ -13,6 +13,7 @@ define([
 	'strut/presentation_generator/impress/main',
 	'strut/presentation_generator/bespoke/main',
 	'strut/presentation_generator/reveal/main',
+	'strut/presentation_generator/handouts/main',
 	'strut/presentation_generator/main',
 	'tantaman/web/saver/main',
 	'strut/slide_editor/main',
