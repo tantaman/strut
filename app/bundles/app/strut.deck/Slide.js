@@ -59,7 +59,7 @@ define(["libs/backbone",
 				}
 				_.defaults(this.attributes, defaults);
 				this.on("unrender", this._unrendered, this);
-				this.on('change:markdown', this._contentsChanged);
+				this.on('change:markdown', this._contentsChanged, this);
 
 				components = this.get('components');
 				components.forEach(function(comp) {
