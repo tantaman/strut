@@ -8,13 +8,11 @@ define(['./view/ComponentButton',
 	'./view/TextBoxView',
 	'./view/WebFrameView',
 	'./view/VideoView',
-	'./drawers/TextBoxDrawer',
-	'./drawers/ImageDrawer',
 	'./ComponentFactory',
 	'lang',
 	'./view/ShapesDropdown',
 	'./ShapeCollection'],
-	function(Button, ImportingComponentButton, Image, TextBox, WebFrame, Video, ImageView, TextBoxView, WebFrameView, VideoView, TextBoxDrawer, ImageDrawer, ComponentFactory, lang, ShapesDropdown, ShapeCollection) {
+	function(Button, ImportingComponentButton, Image, TextBox, WebFrame, Video, ImageView, TextBoxView, WebFrameView, VideoView, ComponentFactory, lang, ShapesDropdown, ShapeCollection) {
 		var availableShapes = new ShapeCollection();
 		var service = {
 			createButtons: function(editorModel) {
@@ -132,20 +130,6 @@ define(['./view/ComponentButton',
 						type: 'Video'
 					}
 				}, VideoView);
-
-				registry.register({
-					interfaces: 'strut.ComponentDrawer',
-					meta: {
-						type: 'Image'
-					}
-				}, ImageDrawer);
-
-				registry.register({
-					interfaces: 'strut.ComponentDrawer',
-					meta: {
-						type: 'TextBox'
-					}
-				}, TextBoxDrawer);
 
 				ComponentFactory.initialize(registry);
 			}

@@ -6,6 +6,15 @@ define(['libs/backbone', 'libs/imgup'], function(Backbone, Imgup) {
   var reg = /[a-z]+:/;
   var imgup = new Imgup('847de02274cba30');
 
+  var ignoredVals = {
+    'http:': true,
+    'http://': true,
+    'file:': true,
+    '/': true,
+    'https://': true,
+    'https:': true
+  }; 
+
   var Modal = Backbone.View.extend({
     className: "itemGrabber modal hide",
     events: {
@@ -68,6 +77,7 @@ define(['libs/backbone', 'libs/imgup'], function(Backbone, Imgup) {
     },
     hidden: function() {
       if (this.$input != null) {
+        this.item.src = '';
         return this.$input.val("");
       }
     },
@@ -81,6 +91,9 @@ define(['libs/backbone', 'libs/imgup'], function(Backbone, Imgup) {
     },
     loadItem: function() {
       var val = this.$input.val();
+
+      if (val in ignoredVals)
+        return;
 
       var r = reg.exec(val);
       if (r == null || r.index != 0) {

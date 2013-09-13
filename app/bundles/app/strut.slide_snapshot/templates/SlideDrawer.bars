@@ -1,0 +1,6 @@
+<div class="reveal themedArea">
+{{#marked markdown}}{{/marked}}
+</div>
+{{#components}}
+{{#renderComponent . 'Video WebFrame'}}{{/renderComponent}}
+{{/components}}
