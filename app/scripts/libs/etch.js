@@ -91,7 +91,9 @@ define(['libs/backbone'], function(Backbone) {
       if (face)
         face = face.split(',')[0]
 
-      this.$fontFamilyReadout.text(face);
+      // For some reason this is breaking the font dropdown in chrome...
+      // Although it never used to...
+      //this.$fontFamilyReadout.text(face);
       this.$colorChooser.spectrum('set', color);
     },
         
