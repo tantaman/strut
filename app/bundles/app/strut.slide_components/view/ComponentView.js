@@ -210,28 +210,19 @@ define(["libs/backbone",
 			 * @param {Event} e
 			 */
 			mouseup: function(e) {
-				var commands = [];
+				var _this = this;
 				if (this.model.slide) {
-					this.model.slide.selected.forEach(function(component) {
-						component._lastMoveCommand = null;
-						component.trigger('dragStop', e);
-						if (component._lastMoveCommand) {
-						  commands.push(component._lastMoveCommand);
-						}
-					});
-
-					if (commands.length) {
-						undoHistory.push(new ComponentCommands.CombinedCommand(commands, 'Move'));
-					}
+					undoHistory.record(function(){
+						_this.model.slide.selected.forEach(function(component) {
+							component.trigger('dragStop', e);
+						});
+					}, 'Move Components');
 				} else {
-					this.model._lastMoveCommand = null;
-					this.dragStop(e);
-					if (this.model._lastMoveCommand) {
-						undoHistory.push(this.model._lastMoveCommand);
-					}
+					undoHistory.record(function(){
+						_this.dragStop(e);
+					}, 'Move Slide Transition');
 				}
 			},
-
 
 			/**
 			 * Event: drag has been started.
@@ -292,7 +283,7 @@ define(["libs/backbone",
 					this._dragging = false;
 					this.$el.removeClass("dragged");
 					if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
-						this.model._lastMoveCommand = new ComponentCommands.Move(this.dragStartLoc, this.model);
+						undoHistory.pushdo(new ComponentCommands.Move(this.dragStartLoc, this.model));
 					}
 					this.dragStartLoc = null;
 				}
