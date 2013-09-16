@@ -40,11 +40,12 @@ define(["common/Calcium",
 			 *
 			 * @param {String} key
 			 * @param {*} value
+			 * @param {Object=} options
 			 * @returns {*}
 			 */
-			set: function(key, value) {
+			set: function(key, value, options) {
 				if (key === "activeSlide") {
-					this._activeSlideChanging(value);
+					this._activeSlideChanging(value, options);
 				}
 				return Backbone.Model.prototype.set.apply(this, arguments);
 			},
@@ -135,9 +136,10 @@ define(["common/Calcium",
 			 * React on change of an active slide.
 			 *
 			 * @param {Slide} newActive
+			 * @param {Object=} options
 			 * @private
 			 */
-			_activeSlideChanging: function(newActive) {
+			_activeSlideChanging: function(newActive, options) {
 				var lastActive;
 				lastActive = this.get("activeSlide");
 				if (newActive === lastActive) {
@@ -148,13 +150,13 @@ define(["common/Calcium",
 					lastActive.set({
 						active: false,
 						selected: false
-					});
+					}, options);
 				}
 				if (newActive !== undefined) {
 					return newActive.set({
 						selected: true,
 						active: true
-					});
+					}, options);
 				}
 			},
 
@@ -233,11 +235,12 @@ define(["common/Calcium",
 			 *
 			 * @param {Slide} slide
 			 * @param {Boolean} value
+			 * @param {Object=} options
 			 * @private
 			 */
-			_slideActivated: function(slide, value) {
+			_slideActivated: function(slide, value, options) {
 				if (value) {
-					this.set("activeSlide", slide);
+					this.set("activeSlide", slide, options);
 				}
 			},
 
@@ -266,7 +269,7 @@ define(["common/Calcium",
 			/**
 			 * Unselect given slides. If no slides passed, all slides will be unselected. This action does not affect active slide.
 			 *
-			 * @param {Slide|Slide[]} slides Slides to unselect.
+			 * @param {Slide|Slide[]} [slides] Slides to unselect.
 			 */
 			unselectSlides: function(slides) {
 				slides = slides || this.get('slides').models;
@@ -274,10 +277,11 @@ define(["common/Calcium",
 
 				slides.forEach(function(slide) {
 					if (!slide.get('active')) {
-					  slide.set("selected", false);
+						slide.set("selected", false);
 					}
 				});
 			},
+
 			/**
 			 * React on slide selection change.
 			 *
@@ -334,7 +338,7 @@ define(["common/Calcium",
 			 * @returns {Slide}
 			 */
 			create: function(index) {
-				return this.undoHistory.pushdo(new SlideCommands.Add(this, null, index));
+				this.undoHistory.pushdo(new SlideCommands.Add(this, null, index));
 			},
 
 			/**
@@ -346,7 +350,7 @@ define(["common/Calcium",
 			 * @returns {Slide}
 			 */
 			add: function(slides, index) {
-				return this.undoHistory.pushdo(new SlideCommands.Add(this, slides, index));
+				this.undoHistory.pushdo(new SlideCommands.Add(this, slides, index));
 			},
 
 			/**
@@ -371,8 +375,8 @@ define(["common/Calcium",
 				for (var i = 0; i < slides.length; i++) {
 					var slide = slides[i];
 					slide.on('unrender', slide._unrendered, slide);
-					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
-					allSlides.add(slide, { at: targetIndex });
+					options.at = _.isNumber(options.at) ? (options.at + i) : (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
+					allSlides.add(slide, options);
 				}
 				this.selectSlides(slides);
 				return slides;
@@ -393,16 +397,17 @@ define(["common/Calcium",
 			 * @see SlideCommands.Remove
 			 *
 			 * @param {Slide|Slide[]} slides
+			 * @param {Object} options
 			 * @private
 			 */
-			_doRemove: function(slides) {
+			_doRemove: function(slides, options) {
 				slides = _.isArray(slides) ? slides : [slides];
 				var allSlides = this.get("slides");
 
 				// We need to remove slides in reverse order in order to keep correct indexes.
 				var _slides = slides.slice(0).reverse();
 				_slides.forEach(function(slide) {
-					allSlides.remove(slide);
+					allSlides.remove(slide, options);
 					slide.off();
 					slide.dispose();
 				});
