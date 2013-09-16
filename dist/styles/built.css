@@ -967,6 +967,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 	border-bottom-color: #FFF;
 }
 
+.logo-holder .dropdown-menu .label {
+	position: absolute;
+	right: 5px;
+}
 .header .divider-vertical {
 	height: 54px;
 }
