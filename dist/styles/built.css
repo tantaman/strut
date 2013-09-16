@@ -260,6 +260,13 @@
 	white-space: normal;
 }
 
+.slideSnapshot > .overlay {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	z-index: 1000;
+}
+
 .slideDrawer {
 	transform-origin: 0 0;
 	-webkit-transform-origin: 0 0;
@@ -785,12 +792,28 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 }
 
 .component .content {
-  outline: 0px;
+  outline: none;
 }
 
 .component.selected .content {
   outline: 2px dashed black;
   outline-offset: 1px;
+}
+
+.component.transitionSlideSnapshot > .content {
+	outline: none;
+	outline-offset: 0px;
+}
+
+
+.component.transitionSlideSnapshot .slideDrawer {
+	outline: none;
+	outline-offset: 0px;
+}
+
+.component.transitionSlideSnapshot.selected .slideDrawer {
+	outline: 8px dashed black;
+	outline-offset: 4px;
 }
 
 .component.editable .content {
