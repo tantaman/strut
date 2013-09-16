@@ -6,6 +6,11 @@ define(['libs/backbone',
 	function(Backbone, SlideDrawer, css, DeckUtils, key) {
 		'use strict';
 
+		/**
+		 * This class is responsible for creating little slide previews on the left of the editor.
+		 *
+		 * @class SlideSnapshot
+		 */
 		return Backbone.View.extend({
 			className: 'slideSnapshot',
 			events: {
@@ -15,6 +20,9 @@ define(['libs/backbone',
 				destroyed: 'dispose'
 			},
 
+			/**
+			 * Initialize slide snapshot view.
+			 */
 			initialize: function() {
 				this.model.on('change:selected', this._selected, this);
 				this.model.on('change:active', this._activated, this);
@@ -65,6 +73,13 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on slide model's selection change.
+			 *
+			 * @param {Slide} model
+			 * @param {boolean} value
+			 * @private
+			 */
 			_selected: function(model, value) {
 				if (value) {
 					this.$el.addClass('selected');
@@ -74,6 +89,13 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on slide model's "active" attribute change.
+			 *
+			 * @param {Slide} model
+			 * @param {boolean} value
+			 * @private
+			 */
 			_activated: function(model, value) {
 				if (value) {
 					this.$el.addClass('active');
@@ -83,6 +105,10 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on slide background being changed.
+			 * @private
+			 */
 			_bgChanged: function() {
 				var bg = DeckUtils.slideBackground(this.model, this.options.deck);
 				this.$el.removeClass();
@@ -94,6 +120,11 @@ define(['libs/backbone',
 				// this.$el.css('background-image', bg.styles[1]);
 			},
 
+			/**
+			 * Render slide snapshot.
+			 *
+			 * @returns {*}
+			 */
 			render: function() {
 				if (this._slideDrawer) {
 					this._slideDrawer.dispose();
@@ -117,17 +148,23 @@ define(['libs/backbone',
 
 				return this;
 			},
-			
+
+			/**
+			 * Event: user has pressed X button.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
 			_removeClicked: function(e) {
 				this.remove(true);
 				e.stopPropagation();
 			},
 
-			// TODO Is this method needed at all?
-			_removePressed: function(e) {
-				e.stopPropagation();
-			},
-
+			/**
+			 * Remove slide from the presentation.
+			 *
+			 * @param {boolean} removeModel
+			 */
 			remove: function(removeModel) {
 				this._slideDrawer.dispose();
 				this.off();
@@ -140,7 +177,10 @@ define(['libs/backbone',
 					this.options.deck.remove(this.model);
 				}
 			},
-			
+
+			/**
+			 * Dispose slide snapshot.
+			 */
 			dispose: function() {
 				if (!this.disposed) {
 					this.disposed = true;

@@ -7,8 +7,8 @@ define(function() {
 	 * @class BaseCommand
 	 * @param {*} initial Initial value of component's attribute.
 	 * @param {Component} component Affected component.
-	 * @param {String} attr Affected component's attribute.
-	 * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
+	 * @param {string} attr Affected component's attribute.
+	 * @param {string} name Name of the command (will be shown in undo history and undo/redo hints).
 	 */
 	function BaseCommand(initial, component, attr, name) {
 		this.start = initial;
@@ -89,7 +89,7 @@ define(function() {
 	 * Moves component from one location to another.
 	 *
 	 * @class Move
-	 * @param {Number} startLoc
+	 * @param {number} startLoc
 	 * @param {Component} component
 	 */
 	Move = function(startLoc, component) {

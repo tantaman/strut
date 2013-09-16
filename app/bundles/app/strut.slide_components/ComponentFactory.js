@@ -72,7 +72,7 @@ define(function() {
 		/**
 		 * Return drawer object for a given component type.
 		 *
-		 * @param {String} type
+		 * @param {string} type
 		 * @returns {AbstractDrawer|ImageDrawer|TextBoxDrawer}
 		 */
 		getDrawer: function(type) {

@@ -38,9 +38,9 @@ define(["common/Calcium",
 			/**
 			 * Set an attribute of the Deck.
 			 *
-			 * @param {String} key
+			 * @param {string} key
 			 * @param {*} value
-			 * @param {Object=} options
+			 * @param {Object} [options]
 			 * @returns {*}
 			 */
 			set: function(key, value, options) {
@@ -69,10 +69,12 @@ define(["common/Calcium",
 
 			// TODO add doc
 			slideBackground: function(bg) {
-				if (bg)
-					return bg || this.get('surface') || 'defaultbg'
-				if (this.get('background') == 'defaultbg')
+				if (bg) {
+					return bg || this.get('surface') || 'defaultbg';
+				}
+				if (this.get('background') == 'defaultbg') {
 					return this.get('surface') || 'defaultbg';
+				}
 				return this.get('background') || this.get('surface') || 'defaultbg';
 			},
 
@@ -136,24 +138,23 @@ define(["common/Calcium",
 			 * React on change of an active slide.
 			 *
 			 * @param {Slide} newActive
-			 * @param {Object=} options
+			 * @param {Object} [options]
 			 * @private
 			 */
 			_activeSlideChanging: function(newActive, options) {
-				var lastActive;
-				lastActive = this.get("activeSlide");
+				var lastActive = this.get("activeSlide");
 				if (newActive === lastActive) {
 					return;
 				}
-				if (lastActive !== undefined) {
+				if (lastActive) {
 					lastActive.unselectComponents();
 					lastActive.set({
 						active: false,
 						selected: false
 					}, options);
 				}
-				if (newActive !== undefined) {
-					return newActive.set({
+				if (newActive) {
+					newActive.set({
 						selected: true,
 						active: true
 					}, options);
@@ -165,13 +166,14 @@ define(["common/Calcium",
 			 *
 			 * @param {Slide} slide
 			 * @param {SlideCollection} collection
-			 * @param {Object=} options
+			 * @param {{at: number}} [options]
 			 * @private
 			 */
 			_slideAdded: function(slide, collection, options) {
-				this.set("activeSlide", slide);
-				var idx = (options.at == null) ? collection.length : options.at;
-				this.trigger("slideAdded", slide, idx);
+				options = options || {};
+				options.at = options.at || collection.length;
+				this.set("activeSlide", slide, options);
+				this.trigger("slideAdded", slide, options);
 				this._registerWithSlide(slide);
 			},
 
@@ -190,10 +192,11 @@ define(["common/Calcium",
 			 *
 			 * @param {Slide} slide
 			 * @param {SlideCollection} collection
-			 * @param {Object=} options
+			 * @param {{index: number}} [options]
 			 * @private
 			 */
 			_slideRemoved: function(slide, collection, options) {
+				options = options || {};
 				if (this.get("activeSlide") === slide) {
 					if (options.index < collection.length) {
 						this.set("activeSlide", collection.at(options.index));
@@ -210,12 +213,13 @@ define(["common/Calcium",
 			 * React on slide collection reset.
 			 *
 			 * @param {Slide[]} newSlides
-			 * @param {Object=} options
+			 * @param {{previousModels: Slide[]}} [options]
 			 * @private
 			 */
 			_slidesReset: function(newSlides, options) {
+				options = options || {};
 				options.previousModels.forEach(function(slide) {
-					return slide.dispose();
+					slide.dispose();
 				});
 				this.trigger('slidesReset', newSlides);
 				return newSlides.forEach(function(slide) {
@@ -234,8 +238,8 @@ define(["common/Calcium",
 			 * React on slide being set to active.
 			 *
 			 * @param {Slide} slide
-			 * @param {Boolean} value
-			 * @param {Object=} options
+			 * @param {boolean} value
+			 * @param {Object} [options]
 			 * @private
 			 */
 			_slideActivated: function(slide, value, options) {
@@ -248,7 +252,7 @@ define(["common/Calcium",
 			 * Selects given slides.
 			 *
 			 * @param {Slide|Slide[]} slides Slides to set active.
-			 * @param {Slide=} activeSlide Optional: slide, which will set as active. If not passed, first slide from "slides"
+			 * @param {Slide} [activeSlide] Optional: slide, which will set as active. If not passed, first slide from "slides"
 			 * will be set active.
 			 */
 			selectSlides: function(slides, activeSlide) {
@@ -286,8 +290,8 @@ define(["common/Calcium",
 			 * React on slide selection change.
 			 *
 			 * @param {Slide} slide
-			 * @param {Boolean} selected
-			 * @param {Boolean} options
+			 * @param {boolean} selected
+			 * @param {{multiselect: Boolean}} [options]
 			 * @private
 			 */
 			_selectionChanged: function(slide, selected, options) {
@@ -297,7 +301,7 @@ define(["common/Calcium",
 					if (!multiselect) {
 						this.get('slides').forEach(function(sl) {
 							if (slide !== sl) {
-								return sl.set("selected", false);
+								sl.set("selected", false);
 							}
 						});
 					}
@@ -335,7 +339,6 @@ define(["common/Calcium",
 			 * slide in the deck.
 			 *
 			 * @param index If passed, slide will be added at given index. If not, it will be added as the last slide in the deck.
-			 * @returns {Slide}
 			 */
 			create: function(index) {
 				this.undoHistory.pushdo(new SlideCommands.Add(this, null, index));
@@ -345,9 +348,8 @@ define(["common/Calcium",
 			 * Adds slides to the deck. First of newly created slides is set as the active slide in the deck.
 			 *
 			 * @param {Slide|Slide[]} slides
-			 * @param {int=} index If passed, slides will be added at this index. If not, slides will be inserted after the
+			 * @param {number} [index] If passed, slides will be added at this index. If not, slides will be inserted after the
 			 * last selected slide.
-			 * @returns {Slide}
 			 */
 			add: function(slides, index) {
 				this.undoHistory.pushdo(new SlideCommands.Add(this, slides, index));
@@ -374,12 +376,11 @@ define(["common/Calcium",
 
 				for (var i = 0; i < slides.length; i++) {
 					var slide = slides[i];
-					slide.on('unrender', slide._unrendered, slide);
+					slide.on('unrender', slide.unrendered, slide);
 					options.at = _.isNumber(options.at) ? (options.at + i) : (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
 					allSlides.add(slide, options);
 				}
 				this.selectSlides(slides);
-				return slides;
 			},
 
 			/**

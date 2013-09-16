@@ -9,7 +9,7 @@ define(["./ComponentView", "libs/etch",
 
 		/**
 		 * @class TextBoxView
-		 * @extends ComponentView
+		 * @augments ComponentView
 		 */
 		return ComponentView.extend({
 			className: "component textBox",
@@ -64,7 +64,7 @@ define(["./ComponentView", "libs/etch",
 			 * Event: scale in progress.
 			 *
 			 * @param {Event} e
-			 * @param {{dx: int, dy:int}} deltas
+			 * @param {{dx: number, dy: number}} deltas
 			 */
 			scale: function(e, deltas) {
 				var currSize, sign;
@@ -85,7 +85,7 @@ define(["./ComponentView", "libs/etch",
 			/**
 			 * Remove component view.
 			 *
-			 * @param {Boolean} disposeModel Whether or not to dispose component's model as well.
+			 * @param {boolean} disposeModel Whether or not to dispose component's model as well.
 			 */
 			remove: function(disposeModel) {
 				ComponentView.prototype.remove.apply(this, arguments);
@@ -197,7 +197,7 @@ define(["./ComponentView", "libs/etch",
 			 * React on component is being selected. If component have been unselected, hide it's editor, if in editing mode.
 			 *
 			 * @param {Component} model
-			 * @param {Boolean} selected
+			 * @param {boolean} selected
 			 * @private
 			 */
 			_selectionChanged: function(model, selected) {
@@ -211,7 +211,7 @@ define(["./ComponentView", "libs/etch",
 			 * React on component style change. Update CSS classes of the element.
 			 *
 			 * @param {Component} model
-			 * @param {String} style
+			 * @param {string} style
 			 * @param {Object} opts
 			 * @private
 			 */
@@ -237,7 +237,7 @@ define(["./ComponentView", "libs/etch",
 			 * React on component's text change. Update html contents of the text box.
 			 *
 			 * @param {Component} model
-			 * @param {String} text Updated text (HTML code).
+			 * @param {string} text Updated text (HTML code).
 			 * @private
 			 */
 			_textChanged: function(model, text) {

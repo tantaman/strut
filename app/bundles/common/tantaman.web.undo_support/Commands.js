@@ -5,8 +5,8 @@ define(function() {
    * Special kind of command, which allows to pack several commands into single undo/redo item.
    *
    * @class CombinedCommand
-   * @param {(Add|Remove|Move)[]} command
-   * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
+   * @param {*} command
+   * @param {string} name Name of the command (will be shown in undo history and undo/redo hints).
    */
   CombinedCommand = function(commands, name) {
     this.commands = commands;

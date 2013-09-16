@@ -10,7 +10,7 @@ define(["libs/backbone",
 
 		/**
 		 * @class ComponentView
-		 * @extends Backbone.View
+		 * @augments Backbone.View
 		 */
 		return Backbone.View.extend({
 			transforms: ["skewX", "skewY"],
@@ -83,7 +83,7 @@ define(["libs/backbone",
 			 * React on color change.
 			 *
 			 * @param {Component} model
-			 * @param {String} color
+			 * @param {string} color
 			 * @private
 			 */
 			_colorChanged: function(model, color) {
@@ -118,7 +118,7 @@ define(["libs/backbone",
 			/**
 			 * Remove component view.
 			 *
-			 * @param {Boolean} disposeModel Whether or not to dispose component's model as well.
+			 * @param {boolean} disposeModel Whether or not to dispose component's model as well.
 			 */
 			remove: function(disposeModel) {
 				var $doc, deltaDrag, idx, _ref;
@@ -178,7 +178,7 @@ define(["libs/backbone",
 			 * React on component is being selected. Toggle a selection class on the element.
 			 *
 			 * @param {Component} model
-			 * @param {Boolean} selected
+			 * @param {boolean} selected
 			 * @private
 			 */
 			_selectionChanged: function(model, selected) {
@@ -293,7 +293,7 @@ define(["libs/backbone",
 			 * React on X position change.
 			 *
 			 * @param {Component} model
-			 * @param {Number} value
+			 * @param {number} value
 			 * @private
 			 */
 			_xChanged: function(model, value) {
@@ -305,7 +305,7 @@ define(["libs/backbone",
 			 * React on Y position change.
 			 *
 			 * @param {Component} model
-			 * @param {Number} value
+			 * @param {number} value
 			 * @private
 			 */
 			_yChanged: function(model, value) {
@@ -365,7 +365,7 @@ define(["libs/backbone",
 			 * Event: SkewX transformation is in progress.
 			 *
 			 * @param {Event} e
-			 * @param {{dx: int, dy: int}} deltas
+			 * @param {{dx: number, dy: number}} deltas
 			 */
 			skewX: function(e, deltas) {
 				this.model.setFloat("skewX", this._initialSkewX + Math.atan2(deltas.dx, 22));
@@ -390,7 +390,7 @@ define(["libs/backbone",
 			 * Event: SkewY transformation is in progress.
 			 *
 			 * @param {Event} e
-			 * @param {{dx: int, dy: int}} deltas
+			 * @param {{dx: number, dy: number}} deltas
 			 */
 			skewY: function(e, deltas) {
 				this.model.setFloat("skewY", this._initialSkewY + Math.atan2(deltas.dy, 22));
@@ -409,7 +409,7 @@ define(["libs/backbone",
 			 * Event: rotation started.
 			 *
 			 * @param {Event} e
-			 * @param {{x: int, y:int}} deltas
+			 * @param {{x: number, y: number}} deltas
 			 */
 			rotateStart: function(e, deltas) {
 				this.updateOrigin();
@@ -432,8 +432,8 @@ define(["libs/backbone",
 			/**
 			 * Calculate rotation offset.
 			 *
-			 * @param {{x: int, y:int}} point
-			 * @returns {Number}
+			 * @param {{x: number, y: number}} point
+			 * @returns {number}
 			 * @private
 			 */
 			_calcRot: function(point) {
@@ -444,7 +444,7 @@ define(["libs/backbone",
 			 * Event: rotation is in progress.
 			 *
 			 * @param {Event} e
-			 * @param {{x: int, y: int}} deltas
+			 * @param {{x: number, y: number}} deltas
 			 */
 			rotate: function(e, deltas) {
 				var newRot, rot;
@@ -502,7 +502,7 @@ define(["libs/backbone",
 			 * Event: scale in progress.
 			 *
 			 * @param {Event} e
-			 * @param {{dx: int, dy:int}} deltas
+			 * @param {{dx: number, dy: number}} deltas
 			 */
 			scale: function(e, deltas) {
 				var dx, dy, fixRatioDisabled, scale;
@@ -624,7 +624,7 @@ define(["libs/backbone",
 			 * Update element's custom classes.
 			 *
 			 * @param {Component} model
-			 * @param {String} classes
+			 * @param {string} classes
 			 * @private
 			 */
 			_updateCustomClasses: function(model, classes) {

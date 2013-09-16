@@ -26,7 +26,7 @@ define(["libs/backbone",
 		 * events when components are added or removed.
 		 *
 		 * @class Slide
-		 * @extends SpatialObject
+		 * @augments SpatialObject
 		 */
 		return SpatialObject.extend({
 			type: 'slide',
@@ -58,7 +58,7 @@ define(["libs/backbone",
 					}, this);
 				}
 				_.defaults(this.attributes, defaults);
-				this.on("unrender", this._unrendered, this);
+				this.on("unrender", this.unrendered, this);
 				this.on('change:markdown', this._contentsChanged, this);
 
 				components = this.get('components');
@@ -71,10 +71,8 @@ define(["libs/backbone",
 
 			/**
 			 * React on slide being unrendered.
-			 *
-			 * @private
 			 */
-			_unrendered: function() {
+			unrendered: function() {
 				this.get("components").forEach(function(component) {
 					component.trigger("unrender", true);
 				});
@@ -140,7 +138,7 @@ define(["libs/backbone",
 			/**
 			 * Unselect given components. If no components passed, then all selected coponents will be unselected.
 			 *
-			 * @param {Component|Component[]} components
+			 * @param {Component|Component[]} [components]
 			 */
 			unselectComponents: function(components) {
 				components = components || this.selected;
@@ -155,8 +153,8 @@ define(["libs/backbone",
 			 * React on component selection change.
 			 *
 			 * @param {Component} component
-			 * @param {Boolean} selected
-			 * @param {Object=} options
+			 * @param {boolean} selected
+			 * @param {Object} [options]
 			 * @private
 			 */
 			_selectionChanged: function(component, selected, options) {

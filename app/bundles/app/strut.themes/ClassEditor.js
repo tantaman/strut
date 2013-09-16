@@ -105,7 +105,7 @@ define(['./Button',
 			/**
 			 * Popover save callback.
 			 *
-			 * @param {String} classes Text which contains list of classes.
+			 * @param {string} classes Text which contains list of classes.
 			 * @private
 			 */
 			_classesSaved: function(classes) {

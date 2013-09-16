@@ -19,7 +19,7 @@ define(["common/Calcium", "./Slide"],
 
 		/**
 		 * @class SlideCollection
-		 * @extends Backbone.Collection
+		 * @augments Backbone.Collection
 		 */
 		return Backbone.Collection.extend({
 			model: Slide,
@@ -46,6 +46,7 @@ define(["common/Calcium", "./Slide"],
 			/**
 			 * Update transition positions after slides have moved
 			 *
+			 * @param {Slide[]} slidesCopy
 			 * @returns {SlideCollection} this
 			 */
 			slidesReorganized: function(slidesCopy) {
@@ -67,8 +68,7 @@ define(["common/Calcium", "./Slide"],
 			},
 
 			/**
-			 * Change position of slides in overview
-			 * mode after they have been re-organized.
+			 * Change position of slides in SlideWell if their order is changed in collection.
 			 *
 			 * @param {Slide} l
 			 * @param {Slide} r

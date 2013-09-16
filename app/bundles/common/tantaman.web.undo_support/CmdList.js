@@ -116,7 +116,7 @@ define([
       /**
        * This is useful for telling the user what command would be undone if they pressed undo.
        *
-       * @returns {String} Name of the next command to be undone.
+       * @returns {string} Name of the next command to be undone.
        */
       UndoHistory.prototype.undoName = function () {
         var node;
@@ -135,7 +135,7 @@ define([
       /**
        * This is useful for telling the user what command would be redone if they pressed redo.
        *
-       * @returns {String} Name of the next command to be redone.
+       * @returns {string} Name of the next command to be redone.
        */
       UndoHistory.prototype.redoName = function () {
         var node;

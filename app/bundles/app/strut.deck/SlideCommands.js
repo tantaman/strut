@@ -8,7 +8,7 @@ define(['strut/deck/Slide'], function(Slide) {
 	 * @class SlideCommands.Paste
 	 * @param {Deck} deck
 	 * @param {Slide|Slide[]} slides
-	 * @param {int=} index
+	 * @param {number} [index]
 	 * @constructor
 	 */
 	Add = function(deck, slides, index) {
