@@ -69,34 +69,27 @@ define(['strut/deck/Slide'], function(Slide) {
 	};
 	Move.prototype = {
 		"do": function() {
-			this.initial_slides_order = this.deck.get('slides').models.slice(0);
+			var slides = this.deck.get('slides');
+			this.initial_slides_order = slides.models.slice(0);
 			this.initial_selection = this.deck.selected.slice(0);
 			this.initial_active_slide = this.deck.get("activeSlide");
 
-			this.slides.forEach(function(slide){
-				this.deck.get('slides').remove(slide, {silent: true});
-			}, this);
-			this.slides.forEach(function(slide, i){
-				var target = this.destination + i;
-				this.deck.get('slides').add(slide, {silent: true, at: target});
-				this.deck.get('slides')._updateIndexes();
-			}, this);
-			this.deck.get('slides').slidesReorganized(this.initial_slides_order);
+			slides.remove(this.slides, {silent: true});
+			slides.add(this.slides, {silent: true, at: this.destination});
+			slides.slidesReorganized(this.initial_slides_order);
 
-
-			this.deck.unselectSlides();
-			this.deck.selectSlides(this.selected, this.activeSlide);
+			// this.deck.unselectSlides();
+			// this.deck.selectSlides(this.selected, this.activeSlide);
 
 			this.deck.trigger('slideMoved');
 		},
 		undo: function() {
 			var previous_slides_order = this.deck.get('slides').models.slice(0);
 			this.deck.get('slides').models = this.initial_slides_order;
-			this.deck.get('slides')._updateIndexes();
 			this.deck.get('slides').slidesReorganized(previous_slides_order);
 
-			this.deck.unselectSlides();
-			this.deck.selectSlides(this.initial_selection, this.initial_active_slide);
+			// this.deck.unselectSlides();
+			// this.deck.selectSlides(this.initial_selection, this.initial_active_slide);
 
 			this.deck.trigger('slideMoved');
 		},
