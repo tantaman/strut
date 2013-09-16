@@ -28,3 +28,8 @@
 	border-top-color: #FFF;
 	border-bottom-color: #FFF;
 }
+
+.logo-holder .dropdown-menu .label {
+	position: absolute;
+	right: 5px;
+}
