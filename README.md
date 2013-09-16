@@ -17,6 +17,8 @@ Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http:/
 
 (Firefox, Chrome and Safari only)
 
+### Twitter: [@StrutPresents](https://twitter.com/strutpresents)
+
 News
 ====
 
