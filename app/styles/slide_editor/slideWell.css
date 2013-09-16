@@ -22,6 +22,10 @@
 	content: counter(slideSnapshot);
 }
 
+.slideWell .ui-sortable-helper {
+	left: 13px;
+}
+
 .slideWell {
 	overflow: auto;
 	border-right: 1px solid black;

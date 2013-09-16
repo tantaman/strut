@@ -42,7 +42,8 @@ define(['libs/backbone',
 					items: "div.slideSnapshot",
 					placeholder: "slidePlaceholder",
 					stop: _this._dragStopped.bind(this),
-					click: _this._clicked.bind(this)
+					click: _this._clicked.bind(this),
+					axis: 'y'
 				});
 
 				GlobalEvents.on('cut', this._cut, this);
