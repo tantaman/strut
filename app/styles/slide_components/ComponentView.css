@@ -131,12 +131,28 @@
 }
 
 .component .content {
-  outline: 0px;
+  outline: none;
 }
 
 .component.selected .content {
   outline: 2px dashed black;
   outline-offset: 1px;
+}
+
+.component.transitionSlideSnapshot > .content {
+	outline: none;
+	outline-offset: 0px;
+}
+
+
+.component.transitionSlideSnapshot .slideDrawer {
+	outline: none;
+	outline-offset: 0px;
+}
+
+.component.transitionSlideSnapshot.selected .slideDrawer {
+	outline: 8px dashed black;
+	outline-offset: 4px;
 }
 
 .component.editable .content {

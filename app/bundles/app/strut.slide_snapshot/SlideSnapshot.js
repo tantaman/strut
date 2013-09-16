@@ -100,7 +100,7 @@ define(['libs/backbone',
 				}
 
 				this.$el.html(this._template(this.model.attributes));
-				var $el = this.$el.find('div');
+				var $el = this.$el.find('.slideDrawer');
 				this._slideDrawer = new SlideDrawer(this.model, $el, {width: 120, height: 90});
 				var self = this;
 				self._slideDrawer.render();
