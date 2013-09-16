@@ -117,13 +117,14 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_clicked: function(e, $target_item) {
+				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
+
 				this.$slides.children().each(function() {
 					var $element = $(this);
-					var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
 					$element.trigger('select', {
 							'selected': $element.is('.selected'),
 							'active': !multiselect && $element[0] == $target_item[0],
-						  'multiselect': multiselect
+							'multiselect': multiselect
 						}
 					);
 				});
@@ -137,9 +138,18 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_dragStopped: function(event, ui) {
+				// TODO: this isn't quite right because the multidrag lets you drag
+				// things around that haven't been selected yet.
+				// To prove this:
+				// 1. Select the first slide
+				// 2. Darg the second slide somewhere
+				// 3. refresh the page
+				// 4. Your slides aren't in the order you put them in
 				var destination = this.$slides.children().index(this.$slides.find('.selected')[0]);
 				var slides = this._deck.selected;
+				this._initiatedMove = true;
 				this._deck.moveSlides(slides, destination);
+				this._initiatedMove = false;
 			},
 
 			// TODO Add doc (describe why this one is binded to mousemove)
@@ -174,8 +184,10 @@ define(['libs/backbone',
 			 */
 			_slidesReset: function(newSlides) {
 				var i = 0;
+				var opts = {at: 0};
 				newSlides.forEach(function(slide) {
-					this._slideAdded(slide, i);
+					opts.at = i;
+					this._slideAdded(slide, opts);
 					i += 1;
 				}, this);
 			},
@@ -187,7 +199,8 @@ define(['libs/backbone',
 			 * @param {number} index
 			 * @private
 			 */
-			_slideAdded: function(slide, index) {
+			_slideAdded: function(slide, opts) {
+				var index = opts.at;
 				// Append it in the correct position in the well
 				var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
 				if (index == 0) {
@@ -210,6 +223,8 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_slideMoved: function(slide, destination) {
+				if (this._initiatedMove) return;
+				// How expensive is this for very large decks?
 				this.$slides.empty();
 				this._slidesReset(this._deck.get('slides').models);
 			},

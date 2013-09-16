@@ -285,14 +285,18 @@ define(["common/Calcium",
 					}
 					if (this.selected.indexOf(slide) == -1) {
 						this.selected.push(slide);
+						this._sortSelectedSlides();
 					}
 				} else {
 					var idx = this.selected.indexOf(slide);
 					if (idx !== -1) {
 						this.selected.splice(idx, 1);
+						this._sortSelectedSlides();
 					}
 				}
+			},
 
+			_sortSelectedSlides: function() {
 				// Assign index for each slide and sort slides by this index, so that if you undo, slides would be inserted in
 				// correct order.
 				this.selected.sort(function(a, b) {
