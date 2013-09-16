@@ -50,21 +50,24 @@ define(["common/Calcium",
 				return Backbone.Model.prototype.set.apply(this, arguments);
 			},
 
-			// TODO: this should be a command so we can undo it
 			/**
 			 * Move slide at a given index to a new index.
 			 *
-			 * @param sourceIndex
-			 * @param destIndex
+			 * @param {Slide|Slide[]} slides
+			 * @param {number} destination
 			 */
-			moveSlide: function(sourceIndex, destIndex) {
-				if (sourceIndex == destIndex) return;
-				var slides = this.get('slides');
-				var slidesCopy = slides.slice(0);
-				var slide = slides.at(sourceIndex);
-				slides.remove(slide, {silent: true});
-				slides.add(slide, {at: destIndex, silent: true});
-				slides.slidesReorganized(slidesCopy);
+			moveSlides: function(slides, destination) {
+				slides = _.isArray(slides) ? slides : [slides];
+				var positionChanged = false;
+				slides.forEach(function(slide, i) {
+					if (slides[i].get('index') != destination + i) {
+						positionChanged = true;
+					}
+				}, this);
+
+				if (positionChanged) {
+					this.undoHistory.pushdo(new SlideCommands.Move(this, slides, destination));
+				}
 			},
 
 			// TODO add doc
@@ -82,31 +85,6 @@ define(["common/Calcium",
 			slideSurface: function() {
 				return this.get('surface') || 'defaultbg';
 			},
-
-			// TODO remove or implement
-			// resortSlides: function(sourceIndex, destIndex) {
-			//   var slides = this.get('slides');
-
-			//   for (var i = 0; i < slides.models.length; ++i) {
-			//     if (sourceIndex < destIndex) {
-			//       if (i <= destIndex && i > sourceIndex) {
-			//         slides.models[i].set('num', i-1);
-			//       }
-			//       if (i == sourceIndex) {
-			//         slides.models[i].set('num', destIndex);
-			//       }
-			//     } else if (destIndex < sourceIndex) {
-			//       if (i >= destIndex && i < sourceIndex) {
-			//         slides.models[i].set('num', i + 1);
-			//       }
-			//       if (i == sourceIndex) {
-			//         slides.models[i].set('num', destIndex);
-			//       }
-			//     }
-			//   }
-
-			//   slides.sort();
-			// },
 
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.
 			/**

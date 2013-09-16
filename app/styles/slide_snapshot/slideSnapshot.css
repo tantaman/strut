@@ -31,9 +31,8 @@
 .slideSnapshot {
 	border: 2px solid grey;
 }
-.slideWell .placeholder {
+.slidePlaceholder {
     border: 2px dashed grey;
-    border-radius: 10px;
 }
 
 .slideSnapshot.selected, .slideSnapshot.active {
