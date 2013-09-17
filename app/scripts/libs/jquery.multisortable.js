@@ -68,6 +68,8 @@
 					}
 				}
 			}
+
+			options.mousedown(e, item);
 		}
 
 		function click(e) {
@@ -87,7 +89,7 @@
 				}
 			}
 
-			options.click(e, $(this));
+			options.click(e, item);
 		}
 
 		return this.each(function() {
@@ -105,6 +107,7 @@
 	$.fn.multiselectable.defaults = {
 		click: function(event, elem) {
 		},
+		mousedown: function() {},
 		selectedClass: 'selected',
 		items: 'li'
 	};
@@ -157,7 +160,8 @@
 			list.multiselectable({
 				selectedClass: settings.selectedClass,
 				click: settings.click,
-				items: settings.items
+				items: settings.items,
+				mousedown: settings.mousedown
 			});
 
 			//enable sorting

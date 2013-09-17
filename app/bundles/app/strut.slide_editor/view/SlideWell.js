@@ -28,7 +28,6 @@ define(['libs/backbone',
 			 * Initialize slide well.
 			 */
 			initialize: function() {
-				var _this = this;
 				this._deck.on('slideAdded', this._slideAdded, this);
 				this._deck.on('slideMoved', this._slideMoved, this);
 				this._deck.on('slidesReset', this._slidesReset, this);
@@ -41,8 +40,9 @@ define(['libs/backbone',
 				this.$slides.multisortable({
 					items: "div.slideSnapshot",
 					placeholder: "slidePlaceholder",
-					stop: _this._dragStopped.bind(this),
-					click: _this._clicked.bind(this),
+					stop: this._dragStopped.bind(this),
+					mousedown: this._mousedown.bind(this),
+					click: this._clicked.bind(this),
 					axis: 'y'
 				});
 
@@ -119,14 +119,19 @@ define(['libs/backbone',
 			_clicked: function(e, $target_item) {
 				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
 
-				this.$slides.children().each(function() {
-					var $element = $(this);
-					$element.trigger('select', {
-							'selected': $element.is('.selected'),
-							'active': !multiselect && $element[0] == $target_item[0],
-							'multiselect': multiselect
-						}
-					);
+				$target_item.trigger('select', {
+					'selected': true,
+					'active': !multiselect,
+					'multiselect': multiselect
+				});
+			},
+
+			_mousedown: function(e, $target_item) {
+				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
+
+				this.$slides.find('> .selected').trigger('select', {
+					'selected': true,
+					'multiselect': multiselect
 				});
 			},
 
