@@ -82,6 +82,16 @@ define(['libs/backbone',
 			 * @returns {TransitionEditorView}
 			 */
 			render: function() {
+				this.$el.selectable({
+					filter: ".component",
+					selected: function(event, ui) {
+						$(ui.selected).trigger('select', ui);
+					},
+					unselected: function(event, ui) {
+						$(ui.unselected).trigger('unselect', ui);
+					}
+				});
+
 				this.$el.html('');
 				var deck = this.model.deck();
 				this.$el.addClass(deck.get('surface') || 'defaultbg');

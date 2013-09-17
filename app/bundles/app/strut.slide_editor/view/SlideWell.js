@@ -141,12 +141,12 @@ define(['libs/backbone',
 
 				var activate = false;
 
-				this.$slides.find('> .selected').trigger('select', {
+				this.$slides.find('> .ui-selected').trigger('select', {
 					selected: true,
 					multiselect: multiselect
 				});
 
-				if (!this.$slides.find('.active').is('.selected') && !multiselect) {
+				if (!this.$slides.find('.active').is('.ui-selected') && !multiselect) {
 					$target_item.trigger('select', {
 						selected: true,
 						active: !multiselect,
@@ -163,7 +163,7 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_dragStopped: function(event, ui) {
-				var destination = this.$slides.children().index(this.$slides.find('.selected')[0]);
+				var destination = this.$slides.children().index(this.$slides.find('.ui-selected')[0]);
 				var slides = this._deck.selected;
 				this._initiatedMove = true;
 				this._deck.moveSlides(slides, destination);

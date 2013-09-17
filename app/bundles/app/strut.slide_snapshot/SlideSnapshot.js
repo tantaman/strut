@@ -64,10 +64,10 @@ define(['libs/backbone',
 			 */
 			_selectedChanged: function(model, value) {
 				if (value) {
-					this.$el.addClass('selected');
+					this.$el.addClass('ui-selected');
 				}
 				else {
-					this.$el.removeClass('selected');
+					this.$el.removeClass('ui-selected');
 				}
 			},
 
@@ -101,7 +101,7 @@ define(['libs/backbone',
 					classStr += ' active';
 				}
 				if (this.model.get('selected')) {
-					classStr += ' selected';
+					classStr += ' ui-selected';
 				}
 
 				this.$el.addClass(classStr);
@@ -126,7 +126,7 @@ define(['libs/backbone',
 				self._slideDrawer.render();
 
 				if (this.model.get('selected')) {
-					this.$el.addClass('selected');
+					this.$el.addClass('ui-selected');
 				}
 
 				if (this.model.get('active')) {
