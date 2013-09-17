@@ -111,7 +111,10 @@ define(['libs/backbone',
 			},
 
 			/**
-			 * Event: user has clicked one of the slide snapshots. We need to refresh selection of all slides.
+			 * Event: user has clicked one of the slide snapshots.
+			 * 
+			 * Clicking a slide forces that one to become the active
+			 * slide.
 			 *
 			 * @param {jQuery.Event} e
 			 * @private
@@ -120,19 +123,36 @@ define(['libs/backbone',
 				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
 
 				$target_item.trigger('select', {
-					'selected': true,
-					'active': !multiselect,
-					'multiselect': multiselect
+					selected: true,
+					active: !multiselect,
+					multiselect: multiselect
 				});
 			},
 
+			/**
+			 * Event: user has pressed their mouse on a slide snapshot
+			 *
+			 * The jquery.multisortable plugin is computing the selections
+			 * for us so we need to update our model to reflect
+			 * the computed selections.
+			*/
 			_mousedown: function(e, $target_item) {
 				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
 
+				var activate = false;
+
 				this.$slides.find('> .selected').trigger('select', {
-					'selected': true,
-					'multiselect': multiselect
+					selected: true,
+					multiselect: multiselect
 				});
+
+				if (!this.$slides.find('.active').is('.selected') && !multiselect) {
+					$target_item.trigger('select', {
+						selected: true,
+						active: !multiselect,
+						multiselect: multiselect
+					});
+				}
 			},
 
 			/**
@@ -143,13 +163,6 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_dragStopped: function(event, ui) {
-				// TODO: this isn't quite right because the multidrag lets you drag
-				// things around that haven't been selected yet.
-				// To prove this:
-				// 1. Select the first slide
-				// 2. Darg the second slide somewhere
-				// 3. refresh the page
-				// 4. Your slides aren't in the order you put them in
 				var destination = this.$slides.children().index(this.$slides.find('.selected')[0]);
 				var slides = this._deck.selected;
 				this._initiatedMove = true;
