@@ -151,9 +151,9 @@
 	outline-offset: 0px;
 }
 
-.component.transitionSlideSnapshot.ui-selecting,
-.component.transitionSlideSnapshot.ui-selected {
-	outline: 1px dashed black;
+.component.transitionSlideSnapshot.ui-selected .slideDrawer {
+  outline: 8px dashed black;
+  outline-offset: 4px;
 }
 
 .component.editable .content {
