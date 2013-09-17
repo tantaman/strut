@@ -27,7 +27,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 				var parentEvents;
 				parentEvents = ThreeDComponentView.prototype.events();
 				return _.extend(parentEvents, {
-					"click": "clicked"
+					"mousedown": "mousedown"
 				});
 			},
 
@@ -61,11 +61,16 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 				this.options.deck.off(null, null, this);
 			},
 
-			clicked: function() {
-				ThreeDComponentView.prototype.clicked.apply(this, arguments);
-				this.model.set("active", true);
-
-				this.$el.css('z-index', zTracker.next());
+			/**
+			 * Event: user pressed a mouse button over the component.
+			 * @param {jQuery.Event} e
+			 */
+			mousedown: function(e) {
+				var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
+				if(!multiselect && !this.model.get("selected")) {
+					this.model.set("active", true);
+				}
+				ThreeDComponentView.prototype.mousedown.apply(this, arguments);
 			},
 
 			/**

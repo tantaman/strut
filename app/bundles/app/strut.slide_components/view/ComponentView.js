@@ -157,7 +157,9 @@ define(["libs/backbone",
 							component.trigger('dragStart', e);
 						});
 					} else {
-						this.dragStart(e);
+						this.options.deck.selected.forEach(function(component) {
+							component.trigger('dragStart', e);
+						});
 					}
 				}
 			},
@@ -200,7 +202,9 @@ define(["libs/backbone",
 						component.trigger('drag', e);
 					});
 				} else {
-					this.drag(e);
+					this.options.deck.selected.forEach(function(component) {
+						component.trigger('drag', e);
+					});
 				}
 			},
 
@@ -219,7 +223,9 @@ define(["libs/backbone",
 					}, 'Move Components');
 				} else {
 					undoHistory.record(function(){
-						_this.dragStop(e);
+						_this.options.deck.selected.forEach(function(component) {
+							component.trigger('dragStop', e);
+						});
 					}, 'Move Slide Transition');
 				}
 			},

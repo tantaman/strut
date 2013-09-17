@@ -12,7 +12,10 @@ define(['libs/backbone',
 		 */
 		return Backbone.View.extend({
 			className: 'slideTable',
-
+			events: {
+				"click": "_clicked"
+			},
+			
 			/*
 			 TODO: render the slides...
 			 The button bar will need to be taken care of
@@ -46,6 +49,16 @@ define(['libs/backbone',
 			_surfaceChanged: function(deck, surface) {
 				this.$el.removeClass();
 				this.$el.addClass('slideTable ' + surface);
+			},
+
+			/**
+			 * Event: user clicked editor background.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
+			_clicked: function(e) {
+				this.model.deck().unselectSlides(null, true);
 			},
 
 			/**
