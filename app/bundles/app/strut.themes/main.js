@@ -8,13 +8,13 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer slideEditArea');
+			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer ui-selectable');
 		}
 	};
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface', 'slideTable');
+			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface', 'slideTable ui-selectable');
 		}
 	};
 

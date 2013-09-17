@@ -92,7 +92,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
-			this.$el.selectable({
+			this._$slideContainer.selectable({
 				filter: ".component",
 				selected: function(event, ui) {
 					$(ui.selected).trigger('select', ui);
@@ -117,7 +117,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this._$slideContainer.removeClass();
 			bg = DeckUtils.slideBackground(this.model, this._deck);
 
-			this._$slideContainer.addClass('slideContainer ' + bg);
+			this._$slideContainer.addClass('slideContainer ui-selectable ' + bg);
 		},
 
 		_updateSurface: function(model, bg) {
