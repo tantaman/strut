@@ -1,13 +1,20 @@
 define(['libs/backbone',
+	'jquery.multisortable',
 	'strut/slide_snapshot/SlideSnapshot',
 	'common/Throttler',
 	'./WellContextMenu',
-	'tantaman/web/interactions/Sortable',
 	'strut/editor/GlobalEvents',
-	'css!styles/slide_editor/slideWell.css'],
-	function(Backbone, SlideSnapshot, Throttler, WellContextMenu, Sortable, GlobalEvents, css) {
+	'css!styles/slide_editor/slideWell.css',
+	"tantaman/web/undo_support/CmdListFactory"],
+	function(Backbone, multisortable, SlideSnapshot, Throttler, WellContextMenu, GlobalEvents, css, CmdListFactory) {
 		'use strict';
+		var undoHistory = CmdListFactory.managedInstance('editor');
 
+		/**
+		 * This class is responsible for rendering left sidebar with little slide previews.
+		 *
+		 * @class SlideWell
+		 */
 		return Backbone.View.extend({
 			events: {
 				mousemove: '_showContextMenu',
@@ -17,21 +24,26 @@ define(['libs/backbone',
 
 			className: 'slideWell',
 
+			/**
+			 * Initialize slide well.
+			 */
 			initialize: function() {
+				var _this = this;
 				this._deck.on('slideAdded', this._slideAdded, this);
+				this._deck.on('slideMoved', this._slideMoved, this);
 				this._deck.on('slidesReset', this._slidesReset, this);
 				this._doShowContextMenu = this._doShowContextMenu.bind(this);
 				this._throttler = new Throttler(100);
 				this._contextMenu = new WellContextMenu(this._editorModel);
 				this._contextMenu.render();
-				this.$slides = $('<div>');
-				this._sortable = new Sortable({
-					container: this.$slides,
-					selector: '> .slideSnapshot',
-					scrollParent: this.$el[0]
-				});
 
-				this._sortable.on('sortstop', this._sortStopped, this);
+				this.$slides = $('<div class="' + this.className + 'List">');
+				this.$slides.multisortable({
+					items: "div.slideSnapshot",
+					placeholder: "slidePlaceholder",
+					stop: _this._dragStopped.bind(this),
+					click: _this._clicked.bind(this)
+				});
 
 				GlobalEvents.on('cut', this._cut, this);
 				GlobalEvents.on('copy', this._copy, this);
@@ -41,10 +53,20 @@ define(['libs/backbone',
 				this._clipboard = this._editorModel.clipboard;
 			},
 
-			_focused: function() {
+			/**
+			 * Event: mouse down.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
+			_focused: function(e) {
 				this._editorModel.set('scope', 'slideWell');
 			},
 
+			/**
+			 * React on Cut shortcut.
+			 * @private
+			 */
 			_cut: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
 					var slides = this._deck.selected;
@@ -53,6 +75,10 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on Copy shortcut.
+			 * @private
+			 */
 			_copy: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
 					var slides = this._deck.selected;
@@ -60,6 +86,10 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on Paste shortcut.
+			 * @private
+			 */
 			_paste: function() {
 				var slides = this._clipboard.getItems();
 				if (slides != null && slides.length && slides[0].type != undefined && slides[0].type == 'slide') {
@@ -68,6 +98,10 @@ define(['libs/backbone',
 				// TODO: scroll to the new item...
 			},
 
+			/**
+			 * React on Delete shortcut.
+			 * @private
+			 */
 			_delete: function() {
 				if (this._editorModel.get('scope') == 'slideWell') {
 					var slides = this._deck.selected;
@@ -75,10 +109,39 @@ define(['libs/backbone',
 				}
 			},
 
-			_sortStopped: function(startIndex, endIndex) {
-				this._deck.moveSlide(startIndex, endIndex);
+			/**
+			 * Event: user has clicked one of the slide snapshots. We need to refresh selection of all slides.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
+			_clicked: function(e, $target_item) {
+				this.$slides.children().each(function() {
+					var $element = $(this);
+					var multiselect = e.ctrlKey || e.metaKey || e.shiftKey;
+					$element.trigger('select', {
+							'selected': $element.is('.selected'),
+							'active': !multiselect && $element[0] == $target_item[0],
+						  'multiselect': multiselect
+						}
+					);
+				});
 			},
 
+			/**
+			 * Event: user has finished dragging slide snapshots. We need to re-order slides accordingly.
+			 *
+			 * @param {jQuery.Event} event
+			 * @param ui
+			 * @private
+			 */
+			_dragStopped: function(event, ui) {
+				var destination = this.$slides.children().index(this.$slides.find('.selected')[0]);
+				var slides = this._deck.selected;
+				this._deck.moveSlides(slides, destination);
+			},
+
+			// TODO Add doc (describe why this one is binded to mousemove)
 			_showContextMenu: function(e) {
 				//if (e.target != this.$el[0]) return;
 				this._throttler.submit(this._doShowContextMenu, {
@@ -87,6 +150,12 @@ define(['libs/backbone',
 				});
 			},
 
+			/**
+			 * Shoe the context menu for the slide.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
 			_doShowContextMenu: function(e) {
 				var offsetY = e.pageY - this.$slides.position().top;
 
@@ -96,6 +165,12 @@ define(['libs/backbone',
 				this._contextMenu.slideIndex(Math.ceil(newPos / 114));
 			},
 
+			/**
+			 * Refresh slide snapshots on slides reset.
+			 *
+			 * @param {Slide[]} newSlides
+			 * @private
+			 */
 			_slidesReset: function(newSlides) {
 				var i = 0;
 				newSlides.forEach(function(slide) {
@@ -104,6 +179,13 @@ define(['libs/backbone',
 				}, this);
 			},
 
+			/**
+			 * Create a slide snapshot for the new slide.
+			 *
+			 * @param {Slide} slide
+			 * @param {number} index
+			 * @private
+			 */
 			_slideAdded: function(slide, index) {
 				// Append it in the correct position in the well
 				var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
@@ -119,6 +201,22 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * Move slide snapshot to a new position.
+			 *
+			 * @param {Slide} slide
+			 * @param {number} destination
+			 * @private
+			 */
+			_slideMoved: function(slide, destination) {
+				this.$slides.empty();
+				this._slidesReset(this._deck.get('slides').models);
+			},
+
+			/**
+			 * Render slide well.
+			 * @returns {*}
+			 */
 			render: function() {
 				this.$slides.html('');
 				this.$el.html(this.$slides);
@@ -135,10 +233,12 @@ define(['libs/backbone',
 				return this;
 			},
 
+			/**
+			 * Dispose slide well.
+			 */
 			dispose: function() {
 				this._deck.off(null, null, this);
 				this._contextMenu.dispose();
-				this._sortable.dispose();
 				GlobalEvents.off(null, null, this);
 			},
 

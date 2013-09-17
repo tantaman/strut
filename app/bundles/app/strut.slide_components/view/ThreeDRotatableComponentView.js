@@ -6,7 +6,7 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
 
 	/**
 	 * @class ThreeDRotatableComponentView
-	 * @extends ComponentView
+	 * @augments ComponentView
 	 */
 	return ComponentView.extend({
 		transforms: ["rotateX", "rotateY", "rotateZ", "scale"],

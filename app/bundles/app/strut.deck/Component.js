@@ -17,7 +17,7 @@ define(["./SpatialObject"], function(SpatialObject) {
 	 * Base class for all slide elements.
 	 *
 	 * @class Component
-	 * @extends SpatialObject
+	 * @augments SpatialObject
 	 */
 	return SpatialObject.extend({
 
@@ -36,8 +36,8 @@ define(["./SpatialObject"], function(SpatialObject) {
 		/**
 		 * Sets or returns custom classes of the element.
 		 *
-		 * @param {String=} classes If passed, element will take these classes.
-		 * @returns {String}
+		 * @param {string} [classes] If passed, element will take these classes.
+		 * @returns {string}
 		 */
 		customClasses: function(classes) {
 			if (classes == null) {

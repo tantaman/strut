@@ -6,7 +6,7 @@ define(['tantaman/web/widgets/Dropdown',
 
 		/**
 		 * @class ShapesDropdown
-		 * @extends Dropdown
+		 * @augments Dropdown
 		 * @param {ShapeCollection} shapes
 		 * @param template
 		 * @param {Object} options

@@ -4,7 +4,7 @@ define(['strut/deck/Component'],
 
 		/**
 		 * @class TextBox
-		 * @extends Component
+		 * @augments Component
 		 */
 		return Component.extend({
 			initialize: function() {

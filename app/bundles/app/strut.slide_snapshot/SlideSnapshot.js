@@ -6,18 +6,26 @@ define(['libs/backbone',
 	function(Backbone, SlideDrawer, css, DeckUtils, key) {
 		'use strict';
 
+		/**
+		 * This class is responsible for creating little slide previews on the left of the editor.
+		 *
+		 * @class SlideSnapshot
+		 */
 		return Backbone.View.extend({
 			className: 'slideSnapshot',
 			events: {
-				'click': '_clicked',
+				'select': '_selected',
 				'click .removeBtn': '_removeClicked',
 				'mousedown .removeBtn': '_removePressed',
 				destroyed: 'dispose'
 			},
 
+			/**
+			 * Initialize slide snapshot view.
+			 */
 			initialize: function() {
-				this.model.on('change:selected', this._selected, this);
-				this.model.on('change:active', this._activated, this);
+				this.model.on('change:selected', this._selectedChanged, this);
+				this.model.on('change:active', this._activeChanged, this);
 				this.model.on('dispose', this.dispose, this);
 				this.model.on('change:background', this._bgChanged, this);
 				this.options.deck.on('change:background', this._bgChanged, this);
@@ -26,46 +34,35 @@ define(['libs/backbone',
 				this._template = JST['strut.slide_snapshot/SlideSnapshot'];
 			},
 
-			_clicked: function() {
-				this.select();
-			},
-
-			select: function() {
-				if (key.pressed.ctrl || key.pressed.meta || key.pressed.shift) {
-					var affectedSlides;
-
-					// TODO: move this selection logic into the deck.
-					// Pick selection.
-					if (key.pressed.ctrl || key.pressed.meta) {
-						affectedSlides = [this.model];
+			/**
+			 * Event: element selection is being changed by user.
+			 *
+			 * @param {jQuery.Event} e
+			 * @param {{selected: boolean, active: boolean}} options Whether or not element should be selected and active.
+			 * @private
+			 */
+			_selected: function(e, options) {
+				if (options.selected) {
+					if (options.active) {
+						this.model.set('active', true, options);
 					}
-					// Range selection.
 					else {
-						this.options.deck.unselectSlides();
-						var activeSlide = this.options.deck.get('activeSlide');
-						var activeSlideIsAboveClicked = this.model.get('index') <= activeSlide.get('index');
-						var begin = activeSlideIsAboveClicked ? this.model.get('index') : activeSlide.get('index');
-						var end = activeSlideIsAboveClicked ? activeSlide.get('index') : this.model.get('index');
-						affectedSlides = this.options.deck.get('slides').slice(begin, end + 1);
+						this.model.set('selected', true, options);
 					}
-
-					var select = !this.model.get("selected") || this.model.get("active");
-					affectedSlides.forEach(function(slide){
-						slide.set('selected', select);
-					});
-				} else {
-					// If slide is already selected, we need to reset selection in order to fire change callbacks. This is useful
-					// when multiple slides selected and then you click one slide without shift, expecting that just the clicked
-					// slide will remain selected.
-					if (this.model.get('selected')) {
-						this.model.set('selected', false, {silent: true});
-					}
-					this.model.set('selected', true);
-					this.model.set('active', true);
+				}
+				else {
+					this.model.set('selected', false, options);
 				}
 			},
 
-			_selected: function(model, value) {
+			/**
+			 * React on slide model's selection change.
+			 *
+			 * @param {Slide} model
+			 * @param {boolean} value
+			 * @private
+			 */
+			_selectedChanged: function(model, value) {
 				if (value) {
 					this.$el.addClass('selected');
 				}
@@ -74,7 +71,14 @@ define(['libs/backbone',
 				}
 			},
 
-			_activated: function(model, value) {
+			/**
+			 * React on slide model's "active" attribute change.
+			 *
+			 * @param {Slide} model
+			 * @param {boolean} value
+			 * @private
+			 */
+			_activeChanged: function(model, value) {
 				if (value) {
 					this.$el.addClass('active');
 				}
@@ -83,17 +87,33 @@ define(['libs/backbone',
 				}
 			},
 
+			/**
+			 * React on slide background being changed.
+			 * @private
+			 */
 			_bgChanged: function() {
 				var bg = DeckUtils.slideBackground(this.model, this.options.deck);
 				this.$el.removeClass();
+
+				// TODO There must be a way to do a precise change fo the class instead of rewriting all of them.
 				var classStr = 'slideSnapshot ' + bg;
-				if (this.model.get('active'))
+				if (this.model.get('active')) {
 					classStr += ' active';
+				}
+				if (this.model.get('selected')) {
+					classStr += ' selected';
+				}
+
 				this.$el.addClass(classStr);
 				// this.$el.css('background-image', bg.styles[0]);
 				// this.$el.css('background-image', bg.styles[1]);
 			},
 
+			/**
+			 * Render slide snapshot.
+			 *
+			 * @returns {*}
+			 */
 			render: function() {
 				if (this._slideDrawer) {
 					this._slideDrawer.dispose();
@@ -117,17 +137,23 @@ define(['libs/backbone',
 
 				return this;
 			},
-			
+
+			/**
+			 * Event: user has pressed X button.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
 			_removeClicked: function(e) {
 				this.remove(true);
 				e.stopPropagation();
 			},
 
-			// TODO Is this method needed at all?
-			_removePressed: function(e) {
-				e.stopPropagation();
-			},
-
+			/**
+			 * Remove slide from the presentation.
+			 *
+			 * @param {boolean} removeModel
+			 */
 			remove: function(removeModel) {
 				this._slideDrawer.dispose();
 				this.off();
@@ -140,7 +166,10 @@ define(['libs/backbone',
 					this.options.deck.remove(this.model);
 				}
 			},
-			
+
+			/**
+			 * Dispose slide snapshot.
+			 */
 			dispose: function() {
 				if (!this.disposed) {
 					this.disposed = true;

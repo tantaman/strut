@@ -4,7 +4,7 @@ define(['./ComponentButton', 'tantaman/web/widgets/ItemImportModal'],
 
 		/**
 		 * @class ImportingComponentButton
-		 * @extends ComponentButton
+		 * @augments ComponentButton
 		 */
 		return ComponentButton.extend({
 			/**

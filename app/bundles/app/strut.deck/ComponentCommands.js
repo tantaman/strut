@@ -1,31 +1,37 @@
 define(function() {
-	var Add, Remove, Move, CombinedCommand;
+	var Add, Remove, Move;
 
 	/**
 	 * Base command class for simple attribute changing actions.
 	 *
 	 * @class BaseCommand
-	 * @param {*} initial Initial value of model's attribute.
-	 * @param {Component} model Affected model.
-	 * @param {String} attr Affected model's attribute.
-	 * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
+	 * @param {*} initial Initial value of component's attribute.
+	 * @param {Component} component Affected component.
+	 * @param {string} attr Affected component's attribute.
+	 * @param {string} name Name of the command (will be shown in undo history and undo/redo hints).
 	 */
-	function BaseCommand(initial, model, attr, name) {
+	function BaseCommand(initial, component, attr, name) {
 		this.start = initial;
-		this.end = model.get(attr) || 0;
-		this.model = model;
+		this.end = component.get(attr) || 0;
+		this.component = component;
 		this.name = name;
 		this.attr = attr;
 	}
 
 	BaseCommand.prototype = {
 		"do": function() {
-			this.model.set(this.attr, this.end);
-			this.model.set('selected', true);
+			if (this.component.slide) {
+				this.component.slide.set('active', true);
+			}
+			this.component.set(this.attr, this.end);
+			this.component.set('selected', true);
 		},
 		undo: function() {
-			this.model.set(this.attr, this.start);
-			this.model.set('selected', true);
+			if (this.component.slide) {
+				this.component.slide.set('active', true);
+			}
+			this.component.set(this.attr, this.start);
+			this.component.set('selected', true);
 		}
 	};
 
@@ -44,9 +50,11 @@ define(function() {
 
 	Add.prototype = {
 		"do": function() {
+			this.slide.set('active', true);
 			this.slide.__doAdd(this.components);
 		},
 		undo: function() {
+			this.slide.set('active', true);
 			this.slide.__doRemove(this.components);
 		},
 		name: "Add Comp"
@@ -66,9 +74,11 @@ define(function() {
 
 	Remove.prototype = {
 		"do": function() {
+			this.slide.set('active', true);
 			this.slide.__doRemove(this.components);
 		},
 		undo: function() {
+			this.slide.set('active', true);
 			this.slide.__doAdd(this.components);
 		},
 		name: "Remove Comp"
@@ -79,56 +89,37 @@ define(function() {
 	 * Moves component from one location to another.
 	 *
 	 * @class Move
-	 * @param startLoc
-	 * @param model
+	 * @param {number} startLoc
+	 * @param {Component} component
 	 */
-	Move = function(startLoc, model) {
+	Move = function(startLoc, component) {
 		this.startLoc = startLoc;
-		this.model = model;
+		this.component = component;
 		this.endLoc = {
-			x: this.model.get("x"),
-			y: this.model.get("y")
+			x: this.component.get("x"),
+			y: this.component.get("y")
 		};
 		return this;
 	};
 	Move.prototype = {
 		"do": function() {
-			this.model.set(this.endLoc);
-			this.model.set('selected', true);
+			if (this.component.slide) {
+				this.component.slide.set('active', true);
+			}
+			this.component.set(this.endLoc);
+			this.component.set('selected', true);
 		},
 		undo: function() {
-			this.model.set(this.startLoc);
-			this.model.set('selected', true);
+			if (this.component.slide) {
+				this.component.slide.set('active', true);
+			}
+			this.component.set(this.startLoc);
+			this.component.set('selected', true);
 		},
 		name: "Move"
 	};
 
-	/**
-	 * Special kind of command, which allows to pack several commands into single undo/redo item.
-	 *
-	 * @class CombinedCommand
-	 * @param {(Add|Remove|Move)[]} command
-	 * @param {String} name Name of the command (will be shown in undo history and undo/redo hints).
-	 */
-	CombinedCommand = function(commands, name) {
-		this.commands = commands;
-		this.name = name;
-	};
-	CombinedCommand.prototype = {
-		"do": function() {
-			this.commands.forEach(function(command){
-				command.do();
-			});
-		},
-		undo: function() {
-			this.commands.forEach(function(command){
-				command.undo();
-			});
-		}
-	};
-
 	return {
-		CombinedCommand: CombinedCommand,
 		Add: Add,
 		Remove: Remove,
 		Move: Move,

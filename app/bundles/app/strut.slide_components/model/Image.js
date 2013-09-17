@@ -5,7 +5,7 @@ define(['strut/deck/Component',
 
 		/**
 		 * @class Image
-		 * @extends Component
+		 * @augments Component
 		 */
 		return Component.extend({
 			initialize: function() {
