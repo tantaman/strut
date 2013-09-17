@@ -1,73 +1,100 @@
 define(['libs/backbone',
-		'strut/slide_snapshot/TransitionSlideSnapshot',
-		'css!styles/transition_editor/slideTable.css'],
-function(Backbone, TransitionSlideSnapshot, empty) {
-	'use strict';
+	'strut/slide_snapshot/TransitionSlideSnapshot',
+	'css!styles/transition_editor/slideTable.css'],
+	function(Backbone, TransitionSlideSnapshot, empty) {
+		'use strict';
 
-	return Backbone.View.extend({
-		className: 'slideTable',
+		/**
+		 * Transition editor, also called an "Overview mode", allows to manage slide transitions via drag-drop.
+		 *
+		 * @class TransitionEditorView
+		 * @augments Backbone.View
+		 */
+		return Backbone.View.extend({
+			className: 'slideTable',
 
-		/*
-		TODO: render the slides...
-		The button bar will need to be taken care of
-		through something else...
-		Register button bars with a given mode?
+			/*
+			 TODO: render the slides...
+			 The button bar will need to be taken care of
+			 through something else...
+			 Register button bars with a given mode?
 
-		strut.TransitionButtonProviders??
+			 strut.TransitionButtonProviders??
 
-		My model is a TransitionEditorModel
-		which contains a reference to the editorModel
-		and registry.
-		*/
+			 My model is a TransitionEditorModel
+			 which contains a reference to the editorModel
+			 and registry.
+			 */
 
-		initialize: function() {
-			this._snapshots = [];
+			/**
+			 * Initialize transition editor view.
+			 */
+			initialize: function() {
+				this._snapshots = [];
 
-			this.model.deck().on('change:surface', this._surfaceChanged, this);
-			// $(document.body).css('overflow', '');
-		},
+				this.model.deck().on('change:surface', this._surfaceChanged, this);
+				// $(document.body).css('overflow', '');
+			},
 
-		_surfaceChanged: function(model, surf) {
-			this.$el.removeClass();
-			this.$el.addClass('slideTable ' + surf);
-		},
+			/**
+			 * React on deck surface class change.
+			 *
+			 * @param {Deck} deck
+			 * @param {string} surface
+			 * @private
+			 */
+			_surfaceChanged: function(deck, surface) {
+				this.$el.removeClass();
+				this.$el.addClass('slideTable ' + surface);
+			},
 
-		render: function() {
-			this.$el.html('');
-			var deck = this.model.deck();
-			this.$el.addClass(deck.get('surface') || 'defaultbg');
+			/**
+			 * Remove transition editor view.
+			 */
+			remove: function() {
+				Backbone.View.prototype.remove.call(this);
+				this.dispose();
+			},
 
-			var colCnt = 6;
-			var cnt = 0;
-			deck.get('slides').forEach(function(slide) {
-				var x = slide.get('x');
+			/**
+			 * Dispose transition editor view.
+			 */
+			dispose: function() {
+				this.model.deck().off(null, null, this);
+			},
 
-				if (x == null) {
-					slide.set('x', cnt * 280 + 30);
-					slide.set('y', ((cnt / colCnt) | 0) * 280 + 80);
-				}
-				++cnt;
+			/**
+			 * Render transition editor.
+			 *
+			 * @returns {TransitionEditorView}
+			 */
+			render: function() {
+				this.$el.html('');
+				var deck = this.model.deck();
+				this.$el.addClass(deck.get('surface') || 'defaultbg');
 
-				var snapshot = new TransitionSlideSnapshot({model: slide,
-					registry: this.model.registry, deck: deck});
-				this._snapshots.push(snapshot);
-				this.$el.append(snapshot.render().$el);
-			}, this);
+				var colCnt = 6;
+				var cnt = 0;
+				deck.get('slides').forEach(function(slide) {
+					var x = slide.get('x');
 
-			return this;
-		},
+					if (x == null) {
+						slide.set('x', cnt * 280 + 30);
+						slide.set('y', ((cnt / colCnt) | 0) * 280 + 80);
+					}
+					++cnt;
 
-		remove: function() {
-			Backbone.View.prototype.remove.call(this);
-			this.dispose();
-		},
+					var snapshot = new TransitionSlideSnapshot({model: slide,
+						registry: this.model.registry, deck: deck});
+					this._snapshots.push(snapshot);
+					this.$el.append(snapshot.render().$el);
+				}, this);
 
-		dispose: function() {
-			this.model.deck().off(null, null, this);
-		},
+				return this;
+			},
 
-		constructor: function TransitionEditorView() {
-			Backbone.View.prototype.constructor.apply(this, arguments);
-		}
+			constructor: function TransitionEditorView() {
+				Backbone.View.prototype.constructor.apply(this, arguments);
+			}
+		});
 	});
-});

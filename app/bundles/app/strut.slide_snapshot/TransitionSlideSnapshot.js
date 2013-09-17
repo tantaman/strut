@@ -1,95 +1,142 @@
-/*
-@author Matt Crinklaw-Vogt
-*/
+/**
+ * @author Matt Crinklaw-Vogt
+ */
 define(["strut/slide_components/view/ThreeDRotatableComponentView",
-        "./SlideDrawer",
-        "css!styles/transition_editor/TransitionSlideSnapshot.css",
-        "strut/deck/Utils"],
-function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
-  var overviewSize = window.config.slide.overviewSize;
-  return ThreeDComponentView.extend({
-    className: "component transitionSlideSnapshot",
-    events: function() {
-      var parentEvents;
-      parentEvents = ThreeDComponentView.prototype.events();
-      return _.extend(parentEvents, {
-        "click": "clicked"
-      });
-    },
-    initialize: function() {
-      ThreeDComponentView.prototype.initialize.apply(this, arguments);
-      this.model.on('change:impScale', this._impScaleChanged, this);
-      this.options.deck.on('change:background', this._backgroundChanged, this);
-    },
-    remove: function() {
-      this.dispose();
-      ThreeDComponentView.prototype.remove.call(this, false);
-      this.model.set("selected", false);
-    },
-    dispose: function() {
-      if (this.slideDrawer != null) {
-        this.slideDrawer.dispose();
-      }
-      ThreeDComponentView.prototype.dispose.call(this);
-      this.model.off(null, null, this);
-      this.options.deck.off(null, null, this);
-    },
-    clicked: function() {
-      ThreeDComponentView.prototype.clicked.apply(this, arguments);
-      this.model.set("active", true);
+	"./SlideDrawer",
+	"css!styles/transition_editor/TransitionSlideSnapshot.css",
+	"strut/deck/Utils"],
+	function(ThreeDComponentView, SlideDrawer, empty, DeckUtils) {
+		var overviewSize = window.config.slide.overviewSize;
 
-      this.$el.css('z-index', zTracker.next());
-    },
-    _impScaleChanged: function() {
-      var scaleFactor = this.model.get('impScale') | 0;
-      var $content = this.$el.find('.content');
-      var width = overviewSize.width * scaleFactor;
-      var height = overviewSize.height * scaleFactor;
+		/**
+		 * This is a special kind of component, shown in transition editor (Overview mode). It inherits a lot of component
+		 * UI goodies such as drag-n-drop ability, but looks like a slide snapshot.
+		 *
+		 * @class TransitionSlideSnapshot
+		 * @augments ThreeDRotatableComponentView
+		 */
+		return ThreeDComponentView.extend({
+			className: "component transitionSlideSnapshot",
 
-      var size = {
-        width: width,
-        height: height
-      };
-      $content.css(size);
-      this.slideDrawer.setSize(size);
-    },
+			/**
+			 * Returns list of Backbone events.
+			 *
+			 * @returns {Object}
+			 */
+			events: function() {
+				var parentEvents;
+				parentEvents = ThreeDComponentView.prototype.events();
+				return _.extend(parentEvents, {
+					"click": "clicked"
+				});
+			},
 
-    _backgroundChanged: function(deck, bg) {
-     bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
-     this._$content.removeClass();
-     this._$content.addClass('content ' + bg);
-    },
+			/**
+			 * Initialize transition snapshot.
+			 */
+			initialize: function() {
+				ThreeDComponentView.prototype.initialize.apply(this, arguments);
+				this.model.on('change:impScale', this._impScaleChanged, this);
+				this.options.deck.on('change:background', this._backgroundChanged, this);
+			},
 
-    render: function() {
-      ThreeDComponentView.prototype.render.apply(this, arguments);
-      if (this.slideDrawer != null) {
-        this.slideDrawer.dispose();
-      }
+			/**
+			 * Remove transition snapshot.
+			 */
+			remove: function() {
+				this.dispose();
+				ThreeDComponentView.prototype.remove.call(this, false);
+				this.model.set("selected", false);
+			},
 
-      this.$el.css({
-        left: this.model.get("x"),
-        top: this.model.get("y")
-      });
+			/**
+			 * Dispose transition snapshot.
+			 */
+			dispose: function() {
+				if (this.slideDrawer != null) {
+					this.slideDrawer.dispose();
+				}
+				ThreeDComponentView.prototype.dispose.call(this);
+				this.model.off(null, null, this);
+				this.options.deck.off(null, null, this);
+			},
 
-      // this.$el.class();
-      var bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
-      this._$content = this.$el.find('.content');
-      this._$content.addClass(bg);
+			clicked: function() {
+				ThreeDComponentView.prototype.clicked.apply(this, arguments);
+				this.model.set("active", true);
 
-      var $el = this.$el.find('.slideDrawer');
-      this.slideDrawer = new SlideDrawer(this.model, $el);
+				this.$el.css('z-index', zTracker.next());
+			},
 
-      this._impScaleChanged();
+			/**
+			 * React on slide scale transition change.
+			 */
+			_impScaleChanged: function() {
+				var scaleFactor = this.model.get('impScale') | 0;
+				var $content = this.$el.find('.content');
+				var width = overviewSize.width * scaleFactor;
+				var height = overviewSize.height * scaleFactor;
 
-      this.slideDrawer.render();
+				var size = {
+					width: width,
+					height: height
+				};
+				$content.css(size);
+				this.slideDrawer.setSize(size);
+			},
 
-      return this;
-    },
-    __getTemplate: function() {
-      return JST["strut.slide_snapshot/TransitionSlideSnapshot"];
-    },
-    constructor: function TransitionSlideSnapshot() {
-			ThreeDComponentView.prototype.constructor.apply(this, arguments);
-		}
-  });
-});
+			/**
+			 * React on background change.
+			 */
+			_backgroundChanged: function(deck, bg) {
+				bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
+				this._$content.removeClass();
+				this._$content.addClass('content ' + bg);
+			},
+
+			/**
+			 * Render transition slide snapshot.
+			 *
+			 * @returns {TransitionSlideSnapshot}
+			 */
+			render: function() {
+				ThreeDComponentView.prototype.render.apply(this, arguments);
+				if (this.slideDrawer != null) {
+					this.slideDrawer.dispose();
+				}
+
+				this.$el.css({
+					left: this.model.get("x"),
+					top: this.model.get("y")
+				});
+
+				// this.$el.class();
+				var bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
+				this._$content = this.$el.find('.content');
+				this._$content.addClass(bg);
+
+				var $el = this.$el.find('.slideDrawer');
+				this.slideDrawer = new SlideDrawer(this.model, $el);
+
+				this._impScaleChanged();
+
+				this.slideDrawer.render();
+
+				return this;
+			},
+
+			/**
+			 * Get view template.
+			 *
+			 * @returns {*}
+			 * @private
+			 */
+			__getTemplate: function() {
+				return JST["strut.slide_snapshot/TransitionSlideSnapshot"];
+			},
+
+			constructor: function TransitionSlideSnapshot() {
+				ThreeDComponentView.prototype.constructor.apply(this, arguments);
+			}
+		});
+	});
