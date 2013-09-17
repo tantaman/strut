@@ -149,6 +149,10 @@ define(['libs/backbone',
 				e.stopPropagation();
 			},
 
+			_removePressed: function(e) {
+				e.stopPropagation();
+			},
+
 			/**
 			 * Remove slide from the presentation.
 			 *
