@@ -64,7 +64,7 @@ function(StorageProviders) {
 
 		savePresentation: function(identifier, data, cb) {
 			var idx = identifier.indexOf('.strut');
-			if (idx + '.strut'.length != identifier.length) {
+			if (idx == -1 || (idx + '.strut'.length != identifier.length)) {
 				identifier += '.strut';
 			}
 			window.sessionMeta.lastPresentation = identifier;
