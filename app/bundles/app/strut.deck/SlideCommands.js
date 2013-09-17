@@ -78,8 +78,8 @@ define(['strut/deck/Slide'], function(Slide) {
 			slides.add(this.slides, {silent: true, at: this.destination});
 			slides.slidesReorganized(this.initial_slides_order);
 
-			// this.deck.unselectSlides();
-			// this.deck.selectSlides(this.selected, this.activeSlide);
+			this.deck.unselectSlides();
+			this.deck.selectSlides(this.selected, this.activeSlide);
 
 			this.deck.trigger('slideMoved');
 		},
@@ -88,8 +88,8 @@ define(['strut/deck/Slide'], function(Slide) {
 			this.deck.get('slides').models = this.initial_slides_order;
 			this.deck.get('slides').slidesReorganized(previous_slides_order);
 
-			// this.deck.unselectSlides();
-			// this.deck.selectSlides(this.initial_selection, this.initial_active_slide);
+			this.deck.unselectSlides();
+			this.deck.selectSlides(this.initial_selection, this.initial_active_slide);
 
 			this.deck.trigger('slideMoved');
 		},
