@@ -249,16 +249,17 @@ define(["common/Calcium",
 			},
 
 			/**
-			 * Unselect given slides. If no slides passed, all slides will be unselected. This action does not affect active slide.
+			 * Unselect given slides. If no slides passed, all slides will be unselected.
 			 *
 			 * @param {Slide|Slide[]} [slides] Slides to unselect.
+			 * @param {boolean} [includeActive=false] If true, even active slide will be unselected (but not deactivated).
 			 */
-			unselectSlides: function(slides) {
+			unselectSlides: function(slides, includeActive) {
 				slides = slides || this.get('slides').models;
 				slides = _.isArray(slides) ? slides : [slides];
 
 				slides.forEach(function(slide) {
-					if (!slide.get('active')) {
+					if (includeActive || !slide.get('active')) {
 						slide.set("selected", false);
 					}
 				});
