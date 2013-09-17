@@ -108,7 +108,7 @@
 		click: function(event, elem) {
 		},
 		mousedown: function() {},
-		selectedClass: 'selected',
+		selectedClass: 'ui-selected',
 		items: 'li'
 	};
 
@@ -255,7 +255,7 @@
 		},
 		click: function(event, elem) {
 		},
-		selectedClass: 'selected',
+		selectedClass: 'ui-selected',
 		placeholder: 'placeholder',
 		items: 'li'
 	};
