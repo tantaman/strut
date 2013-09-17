@@ -22,6 +22,7 @@
 	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+	position: relative;
 }
 
 .operatingTable .CodeMirror {
@@ -45,6 +46,7 @@
 	z-index: 0;
 	width: 100%;
 	height: 100%;
+	padding: 0px;
 }
 
 .operatingTable .tablets {
