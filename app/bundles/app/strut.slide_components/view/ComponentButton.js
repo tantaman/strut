@@ -4,7 +4,7 @@ define(['libs/backbone'],
 
 		/**
 		 * @class ComponentButton
-		 * @extends Backbone.View
+		 * @augments Backbone.View
 		 */
 		return Backbone.View.extend({
 			className: 'btn btn-plast',

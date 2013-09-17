@@ -6,7 +6,8 @@ define(['common/Calcium',
 		// TODO Add docs
 		/**
 		 * @class SpatialObject
-		 * @extends Calcium.Model
+		 * @augments Calcium.Model
+		 * @augments Backbone.Model
 		 */
 		return Calcium.Model.extend({
 			initialize: function() {

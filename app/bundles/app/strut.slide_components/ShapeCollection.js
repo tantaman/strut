@@ -3,8 +3,8 @@ function() {
 
 	/**
 	 * @constructor
-	 * @param {String} name
-	 * @param {String} src
+	 * @param {string} name
+	 * @param {string} src
 	 * @param {number} aspect
 	 * @returns {PlatonicShape}
 	 */

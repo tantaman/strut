@@ -4,7 +4,7 @@ define(["./ComponentView", './Mixers'],
 
 		/**
 		 * @class VideoView.Html5
-		 * @extends ComponentView
+		 * @augments ComponentView
 		 */
 		Html5 = ComponentView.extend({
 			className: "component videoView",
@@ -52,7 +52,7 @@ define(["./ComponentView", './Mixers'],
 
 		/**
 		 * @class VideoView.Youtube
-		 * @extends ComponentView
+		 * @augments ComponentView
 		 */
 		Youtube = ComponentView.extend({
 			className: 'component videoView',

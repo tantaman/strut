@@ -3,7 +3,7 @@ define(["./ComponentView"],
 
 		/**
 		 * @class WebFrameView
-		 * @extends ComponentView
+		 * @augments ComponentView
 		 */
 		return ComponentView.extend({
 			className: "component webFrameView",

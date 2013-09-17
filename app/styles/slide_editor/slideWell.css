@@ -9,7 +9,7 @@
 	background-image: url('img/linen-gray.png');
 }
 
-.slideWell .slideSnapshot, .slideWell .placeholder {
+.slideWell .slideSnapshot, .slideWell .slidePlaceholder {
 	width: 120px;
 	height: 90px;
 	margin: 0 auto;
@@ -20,6 +20,10 @@
 .slideWell .slideSnapshot .badge:before {
 	counter-increment: slideSnapshot;
 	content: counter(slideSnapshot);
+}
+
+.slideWell .ui-sortable-helper {
+	left: 13px;
 }
 
 .slideWell {

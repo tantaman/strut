@@ -22,7 +22,7 @@ define(['strut/deck/Component',
 
 		/**
 		 * @class Video
-		 * @extends Component
+		 * @augments Component
 		 */
 		return Component.extend({
 			initialize: function() {

@@ -38,40 +38,46 @@ define(["common/Calcium",
 			/**
 			 * Set an attribute of the Deck.
 			 *
-			 * @param {String} key
+			 * @param {string} key
 			 * @param {*} value
+			 * @param {Object} [options]
 			 * @returns {*}
 			 */
-			set: function(key, value) {
+			set: function(key, value, options) {
 				if (key === "activeSlide") {
-					this._activeSlideChanging(value);
+					this._activeSlideChanging(value, options);
 				}
 				return Backbone.Model.prototype.set.apply(this, arguments);
 			},
 
-			// TODO: this should be a command so we can undo it
 			/**
 			 * Move slide at a given index to a new index.
 			 *
-			 * @param sourceIndex
-			 * @param destIndex
+			 * @param {Slide|Slide[]} slides
+			 * @param {number} destination
 			 */
-			moveSlide: function(sourceIndex, destIndex) {
-				if (sourceIndex == destIndex) return;
-				var slides = this.get('slides');
-				var slidesCopy = slides.slice(0);
-				var slide = slides.at(sourceIndex);
-				slides.remove(slide, {silent: true});
-				slides.add(slide, {at: destIndex, silent: true});
-				slides.slidesReorganized(slidesCopy);
+			moveSlides: function(slides, destination) {
+				slides = _.isArray(slides) ? slides : [slides];
+				var positionChanged = false;
+				slides.forEach(function(slide, i) {
+					if (slides[i].get('index') != destination + i) {
+						positionChanged = true;
+					}
+				}, this);
+
+				if (positionChanged) {
+					this.undoHistory.pushdo(new SlideCommands.Move(this, slides, destination));
+				}
 			},
 
 			// TODO add doc
 			slideBackground: function(bg) {
-				if (bg)
-					return bg || this.get('surface') || 'defaultbg'
-				if (this.get('background') == 'defaultbg')
+				if (bg) {
+					return bg || this.get('surface') || 'defaultbg';
+				}
+				if (this.get('background') == 'defaultbg') {
 					return this.get('surface') || 'defaultbg';
+				}
 				return this.get('background') || this.get('surface') || 'defaultbg';
 			},
 
@@ -79,31 +85,6 @@ define(["common/Calcium",
 			slideSurface: function() {
 				return this.get('surface') || 'defaultbg';
 			},
-
-			// TODO remove or implement
-			// resortSlides: function(sourceIndex, destIndex) {
-			//   var slides = this.get('slides');
-
-			//   for (var i = 0; i < slides.models.length; ++i) {
-			//     if (sourceIndex < destIndex) {
-			//       if (i <= destIndex && i > sourceIndex) {
-			//         slides.models[i].set('num', i-1);
-			//       }
-			//       if (i == sourceIndex) {
-			//         slides.models[i].set('num', destIndex);
-			//       }
-			//     } else if (destIndex < sourceIndex) {
-			//       if (i >= destIndex && i < sourceIndex) {
-			//         slides.models[i].set('num', i + 1);
-			//       }
-			//       if (i == sourceIndex) {
-			//         slides.models[i].set('num', destIndex);
-			//       }
-			//     }
-			//   }
-
-			//   slides.sort();
-			// },
 
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.
 			/**
@@ -135,26 +116,26 @@ define(["common/Calcium",
 			 * React on change of an active slide.
 			 *
 			 * @param {Slide} newActive
+			 * @param {Object} [options]
 			 * @private
 			 */
-			_activeSlideChanging: function(newActive) {
-				var lastActive;
-				lastActive = this.get("activeSlide");
+			_activeSlideChanging: function(newActive, options) {
+				var lastActive = this.get("activeSlide");
 				if (newActive === lastActive) {
 					return;
 				}
-				if (lastActive !== undefined) {
+				if (lastActive) {
 					lastActive.unselectComponents();
 					lastActive.set({
 						active: false,
 						selected: false
-					});
+					}, options);
 				}
-				if (newActive !== undefined) {
-					return newActive.set({
+				if (newActive) {
+					newActive.set({
 						selected: true,
 						active: true
-					});
+					}, options);
 				}
 			},
 
@@ -163,13 +144,14 @@ define(["common/Calcium",
 			 *
 			 * @param {Slide} slide
 			 * @param {SlideCollection} collection
-			 * @param {Object=} options
+			 * @param {{at: number}} [options]
 			 * @private
 			 */
 			_slideAdded: function(slide, collection, options) {
-				this.set("activeSlide", slide);
-				var idx = (options.at == null) ? collection.length : options.at;
-				this.trigger("slideAdded", slide, idx);
+				options = options || {};
+				options.at = _.isNumber(options.at) ? options.at : collection.length;
+				this.set("activeSlide", slide, options);
+				this.trigger("slideAdded", slide, options);
 				this._registerWithSlide(slide);
 			},
 
@@ -188,10 +170,11 @@ define(["common/Calcium",
 			 *
 			 * @param {Slide} slide
 			 * @param {SlideCollection} collection
-			 * @param {Object=} options
+			 * @param {{index: number}} [options]
 			 * @private
 			 */
 			_slideRemoved: function(slide, collection, options) {
+				options = options || {};
 				if (this.get("activeSlide") === slide) {
 					if (options.index < collection.length) {
 						this.set("activeSlide", collection.at(options.index));
@@ -208,12 +191,13 @@ define(["common/Calcium",
 			 * React on slide collection reset.
 			 *
 			 * @param {Slide[]} newSlides
-			 * @param {Object=} options
+			 * @param {{previousModels: Slide[]}} [options]
 			 * @private
 			 */
 			_slidesReset: function(newSlides, options) {
+				options = options || {};
 				options.previousModels.forEach(function(slide) {
-					return slide.dispose();
+					slide.dispose();
 				});
 				this.trigger('slidesReset', newSlides);
 				return newSlides.forEach(function(slide) {
@@ -232,12 +216,13 @@ define(["common/Calcium",
 			 * React on slide being set to active.
 			 *
 			 * @param {Slide} slide
-			 * @param {Boolean} value
+			 * @param {boolean} value
+			 * @param {Object} [options]
 			 * @private
 			 */
-			_slideActivated: function(slide, value) {
+			_slideActivated: function(slide, value, options) {
 				if (value) {
-					this.set("activeSlide", slide);
+					this.set("activeSlide", slide, options);
 				}
 			},
 
@@ -245,7 +230,7 @@ define(["common/Calcium",
 			 * Selects given slides.
 			 *
 			 * @param {Slide|Slide[]} slides Slides to set active.
-			 * @param {Slide=} activeSlide Optional: slide, which will set as active. If not passed, first slide from "slides"
+			 * @param {Slide} [activeSlide] Optional: slide, which will set as active. If not passed, first slide from "slides"
 			 * will be set active.
 			 */
 			selectSlides: function(slides, activeSlide) {
@@ -266,7 +251,7 @@ define(["common/Calcium",
 			/**
 			 * Unselect given slides. If no slides passed, all slides will be unselected. This action does not affect active slide.
 			 *
-			 * @param {Slide|Slide[]} slides Slides to unselect.
+			 * @param {Slide|Slide[]} [slides] Slides to unselect.
 			 */
 			unselectSlides: function(slides) {
 				slides = slides || this.get('slides').models;
@@ -274,16 +259,17 @@ define(["common/Calcium",
 
 				slides.forEach(function(slide) {
 					if (!slide.get('active')) {
-					  slide.set("selected", false);
+						slide.set("selected", false);
 					}
 				});
 			},
+
 			/**
 			 * React on slide selection change.
 			 *
 			 * @param {Slide} slide
-			 * @param {Boolean} selected
-			 * @param {Boolean} options
+			 * @param {boolean} selected
+			 * @param {{multiselect: Boolean}} [options]
 			 * @private
 			 */
 			_selectionChanged: function(slide, selected, options) {
@@ -293,20 +279,24 @@ define(["common/Calcium",
 					if (!multiselect) {
 						this.get('slides').forEach(function(sl) {
 							if (slide !== sl) {
-								return sl.set("selected", false);
+								sl.set("selected", false);
 							}
 						});
 					}
 					if (this.selected.indexOf(slide) == -1) {
 						this.selected.push(slide);
+						this._sortSelectedSlides();
 					}
 				} else {
 					var idx = this.selected.indexOf(slide);
 					if (idx !== -1) {
 						this.selected.splice(idx, 1);
+						this._sortSelectedSlides();
 					}
 				}
+			},
 
+			_sortSelectedSlides: function() {
 				// Assign index for each slide and sort slides by this index, so that if you undo, slides would be inserted in
 				// correct order.
 				this.selected.sort(function(a, b) {
@@ -331,22 +321,20 @@ define(["common/Calcium",
 			 * slide in the deck.
 			 *
 			 * @param index If passed, slide will be added at given index. If not, it will be added as the last slide in the deck.
-			 * @returns {Slide}
 			 */
 			create: function(index) {
-				return this.undoHistory.pushdo(new SlideCommands.Add(this, null, index));
+				this.undoHistory.pushdo(new SlideCommands.Add(this, null, index));
 			},
 
 			/**
 			 * Adds slides to the deck. First of newly created slides is set as the active slide in the deck.
 			 *
 			 * @param {Slide|Slide[]} slides
-			 * @param {int=} index If passed, slides will be added at this index. If not, slides will be inserted after the
+			 * @param {number} [index] If passed, slides will be added at this index. If not, slides will be inserted after the
 			 * last selected slide.
-			 * @returns {Slide}
 			 */
 			add: function(slides, index) {
-				return this.undoHistory.pushdo(new SlideCommands.Add(this, slides, index));
+				this.undoHistory.pushdo(new SlideCommands.Add(this, slides, index));
 			},
 
 			/**
@@ -370,12 +358,11 @@ define(["common/Calcium",
 
 				for (var i = 0; i < slides.length; i++) {
 					var slide = slides[i];
-					slide.on('unrender', slide._unrendered, slide);
-					var targetIndex = options.at || (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
-					allSlides.add(slide, { at: targetIndex });
+					slide.on('unrender', slide.unrendered, slide);
+					options.at = _.isNumber(options.at) ? (options.at + i) : (options.preserveIndexes ? slide.get("index") : lastSelectedSlideIndex + 1 + i) || 0;
+					allSlides.add(slide, options);
 				}
 				this.selectSlides(slides);
-				return slides;
 			},
 
 			/**
@@ -393,16 +380,17 @@ define(["common/Calcium",
 			 * @see SlideCommands.Remove
 			 *
 			 * @param {Slide|Slide[]} slides
+			 * @param {Object} options
 			 * @private
 			 */
-			_doRemove: function(slides) {
+			_doRemove: function(slides, options) {
 				slides = _.isArray(slides) ? slides : [slides];
 				var allSlides = this.get("slides");
 
 				// We need to remove slides in reverse order in order to keep correct indexes.
 				var _slides = slides.slice(0).reverse();
 				_slides.forEach(function(slide) {
-					allSlides.remove(slide);
+					allSlides.remove(slide, options);
 					slide.off();
 					slide.dispose();
 				});
