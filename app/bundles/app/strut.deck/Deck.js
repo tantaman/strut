@@ -149,7 +149,7 @@ define(["common/Calcium",
 			 */
 			_slideAdded: function(slide, collection, options) {
 				options = options || {};
-				options.at = options.at || collection.length;
+				options.at = _.isNumber(options.at) ? options.at : collection.length;
 				this.set("activeSlide", slide, options);
 				this.trigger("slideAdded", slide, options);
 				this._registerWithSlide(slide);
