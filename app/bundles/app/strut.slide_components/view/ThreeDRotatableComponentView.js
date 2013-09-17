@@ -17,10 +17,10 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
 		 * @returns {Object}
 		 */
 		events: function() {
-			return {
-				"mousedown": "mousedown",
+			var parentEvents;
+			parentEvents = ComponentView.prototype.events();
+			return _.extend(parentEvents, {
 				"mousedown .form-inline": "stopProp",
-				"click": "clicked",
 				"deltadragStart span[data-delta='rotateX']": "rotateXStart",
 				"deltadrag span[data-delta='rotateX']": "rotateX",
 				"deltadragStart span[data-delta='rotateZ']": "rotateZStart",
@@ -31,9 +31,8 @@ define(["./ComponentView", "common/Math2"], function(ComponentView, Math2) {
 				"change input[data-option='scale']": "manualMoveScale",
 				"change input[data-option='rotateX']": "manualRotX",
 				"change input[data-option='rotateY']": "manualRotY",
-				"change input[data-option='rotateZ']": "manualRotZ",
-				'destroyed': 'remove'
-			};
+				"change input[data-option='rotateZ']": "manualRotZ"
+			});
 		},
 
 		/**

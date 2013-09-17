@@ -23,6 +23,8 @@ define(["libs/backbone",
 			 */
 			events: function() {
 				return {
+					'select': '_selected',
+					'unselect': '_unselected',
 					"mousedown": "mousedown",
 					"click": "clicked",
 					"click .removeBtn": "removeClicked",
@@ -144,9 +146,12 @@ define(["libs/backbone",
 			 * @param {Event} e
 			 */
 			mousedown: function(e) {
+				// When component is dragged, we shouldn't start selecting anything.
+				this.$el.parents('.ui-selectable').selectable("disable");
+
 				if (e.which === 1) {
 					e.preventDefault();
-					this.select();
+					this._selectComponent(e);
 					this.$el.css("zIndex", zTracker.next());
 
 					// TODO: convert code that depends on
@@ -157,21 +162,46 @@ define(["libs/backbone",
 							component.trigger('dragStart', e);
 						});
 					} else {
-						this.dragStart(e);
+						this.options.deck.selected.forEach(function(component) {
+							component.trigger('dragStart', e);
+						});
 					}
 				}
 			},
 
 			/**
-			 * Make element selected.
+			 * Select or unselect component on mouse down.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
 			 */
-			select: function() {
+			_selectComponent: function(e) {
 				if ((key.pressed.ctrl || key.pressed.meta || key.pressed.shift) && this.model.get("selected")) {
 					this.model.set("selected", false);
 				}
 				else {
 					this.model.set("selected", true);
 				}
+			},
+
+			/**
+			 * Event: element is selected by user.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
+			_selected: function(e) {
+				this.model.set("selected", true, { multiselect: true });
+			},
+
+			/**
+			 * Event: element is unselected by user.
+			 *
+			 * @param {jQuery.Event} e
+			 * @private
+			 */
+			_unselected: function(e) {
+				this.model.set("selected", false);
 			},
 
 			/**
@@ -183,9 +213,9 @@ define(["libs/backbone",
 			 */
 			_selectionChanged: function(model, selected) {
 				if (selected) {
-					this.$el.addClass("selected");
+					this.$el.addClass("ui-selected");
 				} else {
-					this.$el.removeClass("selected");
+					this.$el.removeClass("ui-selected");
 				}
 			},
 
@@ -200,7 +230,9 @@ define(["libs/backbone",
 						component.trigger('drag', e);
 					});
 				} else {
-					this.drag(e);
+					this.options.deck.selected.forEach(function(component) {
+						component.trigger('drag', e);
+					});
 				}
 			},
 
@@ -210,6 +242,9 @@ define(["libs/backbone",
 			 * @param {Event} e
 			 */
 			mouseup: function(e) {
+				// Drag is over, selectable can be turned on again.
+				this.$el.parents('.ui-selectable').selectable("enable");
+
 				var _this = this;
 				if (this.model.slide) {
 					undoHistory.record(function(){
@@ -219,7 +254,9 @@ define(["libs/backbone",
 					}, 'Move Components');
 				} else {
 					undoHistory.record(function(){
-						_this.dragStop(e);
+						_this.options.deck.selected.forEach(function(component) {
+							component.trigger('dragStop', e);
+						});
 					}, 'Move Slide Transition');
 				}
 			},
@@ -342,7 +379,7 @@ define(["libs/backbone",
 					return axis == 'x' ? e.width() : e.height()
 				};
 				var slideSize = getAxis(axis, $('.slideContainer'));
-				var textSize = getAxis(axis, $('.selected'));
+				var textSize = getAxis(axis, $('.ui-selected'));
 
 				var origPos = {
 					x: this.model.get('x'),

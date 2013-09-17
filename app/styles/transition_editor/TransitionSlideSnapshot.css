@@ -1,6 +1,7 @@
 .transitionSlideSnapshot {
 	position: absolute;
-	border: 1px solid black;
+    border: 1px solid rgba(0, 0, 0, .1);
+    padding: 2px 2px 0;
 }
 
 .transitionSlideSnapshot .content.defaultbg {

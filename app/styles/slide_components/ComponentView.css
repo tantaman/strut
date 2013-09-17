@@ -44,7 +44,7 @@
 	display: inline-block;
 }
 
-.component.selected .label {
+.component.ui-selected .label {
 	visibility: visible;
 }
 
@@ -52,7 +52,7 @@
 	z-index: 100;
 }
 
-.component.selected input {
+.component.ui-selected input {
 	visibility: visible;
 }
 
@@ -134,7 +134,8 @@
   outline: none;
 }
 
-.component.selected .content {
+.component.ui-selecting .content,
+.component.ui-selected .content {
   outline: 2px dashed black;
   outline-offset: 1px;
 }
@@ -150,9 +151,9 @@
 	outline-offset: 0px;
 }
 
-.component.transitionSlideSnapshot.selected .slideDrawer {
-	outline: 8px dashed black;
-	outline-offset: 4px;
+.component.transitionSlideSnapshot.ui-selecting,
+.component.transitionSlideSnapshot.ui-selected {
+	outline: 1px dashed black;
 }
 
 .component.editable .content {

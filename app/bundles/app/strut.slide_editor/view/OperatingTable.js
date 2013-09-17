@@ -92,6 +92,16 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
+			this.$el.selectable({
+				filter: ".component",
+				selected: function(event, ui) {
+					$(ui.selected).trigger('select', ui);
+				},
+				unselected: function(event, ui) {
+					$(ui.unselected).trigger('unselect', ui);
+				}
+			});
+
 			var self = this;
 			setTimeout(function() {
 				self._rendered = true;
