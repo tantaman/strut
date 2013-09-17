@@ -12,4 +12,5 @@ ccw.repl.cmdhistory.prefs
 psd-export/
 .project
 .buildpath
+.tern-port
 
