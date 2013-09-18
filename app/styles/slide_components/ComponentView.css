@@ -151,9 +151,15 @@
 	outline-offset: 0px;
 }
 
-.component.transitionSlideSnapshot.ui-selected .slideDrawer {
-  outline: 8px dashed black;
-  outline-offset: 4px;
+/** Firefox outline bug fix */
+.component.transitionSlideSnapshot.ui-selecting:before,
+.component.transitionSlideSnapshot.ui-selected:before {
+    content: '';
+    margin: 0; padding: 0;
+    position: absolute; z-index: -1;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    outline: 1px dashed black;
 }
 
 .component.editable .content {

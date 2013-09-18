@@ -1,6 +1,11 @@
-<div class="content">
-<div class="slideDrawer"></div>
+<div class="content-container">
+	<div class="content">
+		<div class="slideDrawer"></div>
+		<div class="back"></div>
+		<div class="top"></div><div class="bottom"></div><div class="left"></div><div class="right"></div>
+	</div>
 </div>
+
 <div class="topLabel form-inline">
 	<span class="label rotates" data-delta="rotateY">↻Y</span>
 	<input type="text" data-option="rotateY" value="{{rotateY}}"></input>
