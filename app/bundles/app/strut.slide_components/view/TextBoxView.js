@@ -26,7 +26,6 @@ define(["./ComponentView", "libs/etch",
 				myEvents = {
 					"dblclick": "dblclicked",
 					"editComplete": "editCompleted",
-					"mousedown": "mousedown",
 					"mouseup": "mouseup"
 				};
 				return _.extend(parentEvents, myEvents);
