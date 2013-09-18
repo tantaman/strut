@@ -15,6 +15,7 @@ function(Backbone, PreviewLauncher) {
 			delete this.options.editorModel;
 			// TODO: we should keep session meta per bundle...
 			this._index = window.sessionMeta.generator_index || 0;
+			this._generatorChanged();
 
 			this._template = JST['strut.presentation_generator/Button'];
 		},
@@ -33,9 +34,19 @@ function(Backbone, PreviewLauncher) {
 					$btn.find('.check').css('visibility', '');
 					self._index = i;
 					window.sessionMeta.generator_index = i;
+					self._generatorChanged();
+					self.$el.find('.dropdown-toggle').dropdown('toggle');
 					e.stopPropagation();
 				});
 			});
+		},
+
+		/**
+		* Need to inform the world of a generator update.
+		* Some modes are only present for certain generators.
+		*/
+		_generatorChanged: function() {
+			//this._editorModel.set('generator', this._generators[this._index]);
 		},
 
 		render: function() {
