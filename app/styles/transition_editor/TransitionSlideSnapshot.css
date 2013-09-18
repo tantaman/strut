@@ -2,6 +2,9 @@
 	position: absolute;
 	border: 1px solid rgba(0, 0, 0, .1);
     padding: 3px 3px 0;
+}
+
+.transitionSlideSnapshot .content-container {
     -webkit-transform: perspective(500px);
     -webkit-transform-style: preserve-3d;
     -moz-transform: perspective(500px);
@@ -14,6 +17,7 @@
     -webkit-transform-style: preserve-3d;
     -moz-transform: translateZ(0px);
     -moz-transform-style: preserve-3d;
+    pointer-events: none;
 }
 .transitionSlideSnapshot .content .back {
     background: rgba(200,200,200,0.8);
