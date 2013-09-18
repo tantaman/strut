@@ -5,6 +5,9 @@ function(BespokeGenerator) {
 	var service = {
 		displayName: 'Bespoke',
 		id: 'bespoke',
+		capabilities: {
+			cannedTransitions: true
+		},
 		generate: function(deckAttrs) {
 			return BespokeGenerator.render(deckAttrs);
 		},

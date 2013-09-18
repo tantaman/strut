@@ -21,6 +21,10 @@ define(function () {
 		this.editorModel.changeActiveMode(this.modeId);
 	}
 
+	ModeButton.prototype.generatorChanged = function(model, value) {
+		// Filter the modes on a per-generator basis
+	}
+
 	ModeButton.prototype.modeChanged = function(model, value) {
 		if (model.get('modeId') == this.modeId) {
 			this.$el.addClass('dispNone');

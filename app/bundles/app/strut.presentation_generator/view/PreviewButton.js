@@ -46,7 +46,7 @@ function(Backbone, PreviewLauncher) {
 		* Some modes are only present for certain generators.
 		*/
 		_generatorChanged: function() {
-			//this._editorModel.set('generator', this._generators[this._index]);
+			this._editorModel.set('generator', this._generators[this._index]);
 		},
 
 		render: function() {
