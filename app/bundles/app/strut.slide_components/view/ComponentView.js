@@ -4,8 +4,9 @@ define(["libs/backbone",
 	"css!styles/slide_components/ComponentView.css",
 	"strut/editor/GlobalEvents",
 	"strut/deck/ComponentCommands",
-	"tantaman/web/undo_support/CmdListFactory"],
-	function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdListFactory) {
+	"tantaman/web/undo_support/CmdListFactory",
+	"tantaman/web/interactions/TouchBridge"],
+	function(Backbone, DeltaDragControl, Math2, empty, key, ComponentCommands, CmdListFactory, TouchBridge) {
 		var undoHistory = CmdListFactory.managedInstance('editor');
 
 		/**
@@ -25,7 +26,6 @@ define(["libs/backbone",
 				return {
 					'select': '_selected',
 					'unselect': '_unselected',
-					"mousedown": "mousedown",
 					"click": "clicked",
 					"click .removeBtn": "removeClicked",
 					"change input[data-option='x']": "manualMoveX",
@@ -58,8 +58,7 @@ define(["libs/backbone",
 				this.model.on("unrender", this._unrender, this);
 				this._mouseup = this.mouseup.bind(this);
 				this._mousemove = this.mousemove.bind(this);
-				$(document).bind("mouseup", this._mouseup);
-				$(document).bind("mousemove", this._mousemove);
+				this.mousedown = this.mousedown.bind(this);
 				this._deltaDrags = [];
 				this.model.on("rerender", this._setUpdatedTransform, this);
 				this.model.on("change:x", this._xChanged, this);
@@ -79,6 +78,13 @@ define(["libs/backbone",
 					dx: 0,
 					dy: 0
 				};
+
+				this._toDispose = [];
+				var $doc = $(document);
+				this._toDispose.push(TouchBridge.on.mouseup($doc, this._mouseup));
+				this._toDispose.push(TouchBridge.on.mousemove($doc, this._mousemove));
+
+				TouchBridge.on.mousedown(this.$el, this.mousedown);
 			},
 
 			/**
@@ -135,9 +141,9 @@ define(["libs/backbone",
 				}
 
 				this.model.off(null, null, this);
-				$doc = $(document);
-				$doc.unbind("mouseup", this._mouseup);
-				$doc.unbind("mousemove", this._mousemove);
+				this._toDispose.forEach(function(d) {
+					d();
+				});
 			},
 
 			/**

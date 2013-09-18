@@ -4,6 +4,7 @@ require.config({
 
     	jquery: "../scripts/libs/jQuery",
 		jqueryui: "../scripts/libs/jquery-ui",
+		touchpunch: "../scripts/libs/jquery-ui-touch-punch",
 		"jquery.multisortable": "../scripts/libs/jquery.multisortable",
     	position: "../components/jq-contextmenu/jquery.ui.position",
     	jqContextMenu: "../components/jq-contextmenu/jquery.contextMenu",
@@ -61,6 +62,10 @@ require.config({
 		},
 
 		"jquery.multisortable": {
+			deps: ["jquery", "jqueryui"]
+		},
+
+		touchpunch: {
 			deps: ["jquery", "jqueryui"]
 		},
 
@@ -203,9 +208,10 @@ require([
 	'bootstrap',
 	'handlebars',
 	'jqContextMenu',
-	'css!components/jq-contextmenu/jquery.contextMenu.css'
+	'css!components/jq-contextmenu/jquery.contextMenu.css',
+	'touchpunch'
 ],
-	function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars, ContextMenu) {
+	function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars, ContextMenu, css, tp) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)

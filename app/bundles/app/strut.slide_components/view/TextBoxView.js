@@ -1,7 +1,8 @@
 define(["./ComponentView", "libs/etch",
 	"strut/deck/ComponentCommands",
-	"tantaman/web/undo_support/CmdListFactory"],
-	function(ComponentView, etch, ComponentCommands, CmdListFactory) {
+	"tantaman/web/undo_support/CmdListFactory",
+	"tantaman/web/interactions/TouchBridge"],
+	function(ComponentView, etch, ComponentCommands, CmdListFactory, TouchBridge) {
 		'use strict';
 		var undoHistory = CmdListFactory.managedInstance('editor');
 		var styles;
@@ -24,9 +25,7 @@ define(["./ComponentView", "libs/etch",
 				var myEvents, parentEvents;
 				parentEvents = ComponentView.prototype.events();
 				myEvents = {
-					"dblclick": "dblclicked",
 					"editComplete": "editCompleted",
-					"mousedown": "mousedown",
 					"mouseup": "mouseup"
 				};
 				return _.extend(parentEvents, myEvents);
@@ -45,6 +44,9 @@ define(["./ComponentView", "libs/etch",
 				this.model.on("change:text", this._textChanged, this);
 				this._lastDx = 0;
 				this.keydown = this.keydown.bind(this);
+
+				this.dblclicked = this.dblclicked.bind(this);
+				TouchBridge.on.dblclick(this.$el, this.dblclicked);
 
 				// TODO This can be uncommented once modal windows start blocking all slide key events.
 				// https://github.com/tantaman/Strut/pull/183
