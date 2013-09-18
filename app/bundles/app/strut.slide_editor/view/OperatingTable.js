@@ -109,6 +109,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				self._renderContents();
 			}, 0);
 
+			this.$el.addClass((this._deck.get('surface') || 'defaultbg'));
+
 			return this;
 		},
 
@@ -121,6 +123,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		},
 
 		_updateSurface: function(model, bg) {
+			this.$el.removeClass();
+			this.$el.addClass('operatingTable ' + bg);
 			var currentBg = this._deck.get('background');
 			if (currentBg == 'defaultbg')
 				this._updateBg(model, bg);
