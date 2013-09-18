@@ -3,6 +3,9 @@ define({
 		var width = $opTable.width();
 		var height = $opTable.height();
 
+		if (height < 300)
+			height = 300;
+
 		var slideSize = config.slide.size;
 
 		var xScale = width / slideSize.width;

@@ -31,21 +31,30 @@ define(['libs/backbone'], function(Backbone) {
       return value;
   }
 
-  models.Editor = Backbone.Model;
+  models.Editor = Backbone.Model.extend({
+    constructor: function EtchEditorModel() {
+      Backbone.Model.prototype.constructor.apply(this, arguments);
+    }
+  });
 
   views.Editor = Backbone.View.extend({
+    constructor: function EtchEditorView() {
+      Backbone.View.prototype.constructor.apply(this, arguments);
+    },
+
     initialize: function() {
       this.$el = $(this.el);
             
       // Model attribute event listeners:
       _.bindAll(this, 'changeButtons', 'changePosition', 'changeEditable', 'insertImage',
               '_editableModelChanged');
-      this.model.bind('change:buttons', this.changeButtons);
-      this.model.bind('change:position', this.changePosition);
-      this.model.bind('change:editable', this.changeEditable);
+      this.model.bind('change:buttons', this.changeButtons, this);
+      this.model.bind('change:position', this.changePosition, this);
+      this.model.bind('change:editable', this.changeEditable, this);
       this.model.bind('caretUpdated', this._caretUpdated, this);
+      this.model.bind('spectrum:hide', this._hideSpectrum, this);
 
-      this.model.on('change:editableModel', this._editableModelChanged);
+      this.model.on('change:editableModel', this._editableModelChanged, this);
 
       this._editableModelChanged(this.model, this.model.get('editableModel'));
       // Init Routines:
@@ -78,6 +87,10 @@ define(['libs/backbone'], function(Backbone) {
       this._lastEditableModel = newEditable;
       
       newEditable.on('change:size', this._fontSizeChanged, this);
+    },
+
+    _hideSpectrum: function() {
+      this.$colorChooser.spectrum('hide');
     },
 
     _caretUpdated: function() {
@@ -422,12 +435,14 @@ define(['libs/backbone'], function(Backbone) {
 
       // listen for mousedowns that are not coming from the editor
       // and close the editor
+      var _this = this;
       $('body').bind('mousedown.editor', function(e) {
         // check to see if the click was in an etch tool
         var target = e.target || e.srcElement;
-        if ($(target).not('.colorpicker *, .etch-editor-panel, .etch-editor-panel *, .etch-image-tools, .etch-image-tools *').size()) {
+        if ($(target).not('.sp-container *, .colorpicker *, .etch-editor-panel, .etch-editor-panel *, .etch-image-tools, .etch-image-tools *').size()) {
           // remove editor
           $editor.css("display", "none");
+          editorModel.trigger('spectrum:hide', null);
           //$editor.remove();
                     
                     
