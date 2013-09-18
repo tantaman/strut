@@ -31,9 +31,17 @@ define(['libs/backbone'], function(Backbone) {
       return value;
   }
 
-  models.Editor = Backbone.Model;
+  models.Editor = Backbone.Model.extend({
+    constructor: function EtchEditorModel() {
+      Backbone.Model.prototype.constructor.apply(this, arguments);
+    }
+  });
 
   views.Editor = Backbone.View.extend({
+    constructor: function EtchEditorView() {
+      Backbone.View.prototype.constructor.apply(this, arguments);
+    },
+
     initialize: function() {
       this.$el = $(this.el);
             
