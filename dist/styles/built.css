@@ -830,6 +830,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
     outline: 1px dashed black;
 }
 
+.component.transitionSlideSnapshot .content {
+	outline: 0px;
+}
+
 .component.editable .content {
 	cursor: auto;
   	outline: 0px;

@@ -8324,6 +8324,20 @@ border-bottom-color: #000;
   border-radius: 0px
 }
 
+.header .navbar-inner .nav:first-child {
+  margin-right: 5%;
+}
+
+@media only screen
+and (min-device-width : 768px) 
+and (max-device-width : 1024px)  {
+    .header .navbar-inner .nav:first-child {
+    margin-right: 0%;
+  }
+}
+
+
+
 .themedArea div, .themedArea span, .themedArea applet, .themedArea object, .themedArea iframe,
 .themedArea h1, .themedArea h2, .themedArea h3, .themedArea h4, .themedArea h5, .themedArea h6, .themedArea p, .themedArea blockquote, .themedArea pre,
 .themedArea a, .themedArea abbr, .themedArea acronym, .themedArea address, .themedArea big, .themedArea cite, .themedArea code,
