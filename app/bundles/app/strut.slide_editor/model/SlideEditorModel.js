@@ -16,6 +16,14 @@ function(Backbone) {
 
 		isMarkdownMode: function() { return this.get('mode') == 'markdown'; },
 
+		toggleMarkdown: function() {
+			if (this.isMarkdownMode()) {
+				this.set('mode', 'preview');
+			} else {
+				this.set('mode', 'markdown');
+			}
+		},
+
 		dispose: function() {
 			this._editorModel.off(null, null, this);
 			this.off();

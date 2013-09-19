@@ -1,24 +1,29 @@
 define(['libs/backbone', 'framework/ServiceCollection'],
 function(Backbone, ServiceCollection) {
-	function ThemeProviderCollection(editorModel) {
+	function ThemeProviderCollection(editorModel, meta) {
 		this._editorModel = editorModel;
 
 		this._activeProviders = [];
-		this._editorModel.on('change:modeId', this._modeChanged, this);
+		this._editorModel.on('change:activeMode', this._modeChanged, this);
 		this._themeProviders =
 			new ServiceCollection(editorModel.registry,
 				{
-					interfaces: 'strut.ThemeProvider'
+					interfaces: 'strut.ThemeProvider',
+					meta: meta
 				});
 
-		this._modeChanged(null, this._editorModel.get('modeId'));
+		this._modeChanged(null, this._editorModel.get('activeMode'));
+
+		this._themeProviders.on('registered', function(item, entry) {
+			this._addProvider(entry);
+		}, this);
 	}
 	
 	ThemeProviderCollection.prototype = {
 		_modeChanged: function(model, newMode) {
 			this._disposePrevious();
 			this._themeProviders.forEach(function(providerEntry) {
-				if (newMode in providerEntry.meta().modes) {
+				if (newMode.id in providerEntry.meta().modes) {
 					this._addProvider(providerEntry);
 				}
 			}, this);
