@@ -1,5 +1,5 @@
 define(['tantaman/web/widgets/CodeEditor',
-		'./Button',
+		'tantaman/web/widgets/Button',
 		'tantaman/web/css_manip/CssManip',
 		'css!styles/strut.themes/stylesheetEditor.css',
 		'./StylesheetPreProcessor'],
