@@ -43,7 +43,13 @@ function(View, DeckUtils) {
 				obj = this._editorModel.activeSlide();
 			}
 
-			obj.set(attr, e.currentTarget.dataset['class'] || 'defaultbg');
+			var bg = e.currentTarget.dataset['class'];
+			if (bg == '')
+				bg = undefined;
+			else
+				bg = 'defaultbg';
+
+			obj.set(attr, bg);
 		},
 
 		_restoreBackground: function(e) {

@@ -77,7 +77,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 					key: 'preview'}
 				]);
 
-			ContextMenu.setModel(this._menuModel);
+			// ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {

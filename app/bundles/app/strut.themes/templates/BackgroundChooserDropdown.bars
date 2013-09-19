@@ -8,7 +8,8 @@
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 			{{/backgrounds}}
-			<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="transparentPattern thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="nobg thumbnail" data-class=""></a></li>
 		</ul>
 	</li>
 	<li class="dropdown-submenu">
@@ -17,7 +18,8 @@
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 			{{/backgrounds}}
-			<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="transparentPattern thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="nobg thumbnail" data-class=""></a></li>
 		</ul>
 	</li>
 </ul>
