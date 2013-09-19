@@ -37,6 +37,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 			initialize: function() {
 				ThreeDComponentView.prototype.initialize.apply(this, arguments);
 				this.model.on('change:impScale', this._impScaleChanged, this);
+				this.model.on('change:background', this._backgroundChanged, this);
 				this.options.deck.on('change:background', this._backgroundChanged, this);
 			},
 
