@@ -1,9 +1,4 @@
 <div class="tablets-content">
-	{{#.}}
-		<div class="btn btn-plast iconBtns {{key}} {{#if active}}active{{/if}}" data-key="{{key}}">
-			<i class="icon icon-{{icon}}"></i><span>{{name}}</span>
-		</div>
-	{{/.}}
 </div>
 <div class="tablets-toggle btn btn-plast">
 	<span class="caret whiteCaret"></span>

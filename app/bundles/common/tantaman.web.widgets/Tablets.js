@@ -1,17 +1,11 @@
 define(
 function() {
 	function Tablets(opts) {
+		this._currentItems = [];
 		this.$el = $('<div class="tablets hiding">');
 		this.template = opts.template;
-		this.tabs = opts.tabs;
-		this.model = opts.model;
-
-		this.model.on('change:active', this._activeChanged, this);
 
 		var self = this;
-		this.$el.on('click', '.tablets-content > div', function(e) {
-			self._tabClicked(e);
-		});
 
 		this.$el.on('click', '.tablets-toggle', function(e) {
 			self._toggle();
@@ -20,22 +14,34 @@ function() {
 
 	Tablets.prototype = {
 		render: function() {
-			this.$el.html(this.template(this.tabs));
+			this.$el.html(this.template());
+			this.$content = this.$el.find('.tablets-content');
+
+			this._currentItems.forEach(function(item) {
+				this.$content.append(item.render().$el);
+			}, this);
+
 			return this;
 		},
 
+		add: function(items) {
+			if (!Array.isArray(items))
+				items = [items];
+
+			var newItems = [];
+			items.forEach(function(item) {
+				if (this._currentItems.indexOf(item) == -1)
+					newItems.push(item);
+			}, this);
+
+			newItems.forEach(function(item) {
+				this._currentItems.push(item);
+				if (this.$content)
+					this.$content.append(item.render().$el);
+			}, this);
+		},
+
 		dispose: function() {
-			this.model.off(null, null, this);
-		},
-
-		_activeChanged: function(model, tab) {
-			this.$el.find('.active').removeClass('active');
-			var $tab = this.$el.find('.' + mode);
-			$tab.addClass('active');
-		},
-
-		_tabClicked: function(e) {
-			this.model.toggle(e.currentTarget.dataset.key);
 		},
 
 		_toggle: function() {

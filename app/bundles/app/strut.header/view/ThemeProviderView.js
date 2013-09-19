@@ -4,7 +4,7 @@ function(Backbone, ThemeProviderCollection) {
 		className: 'themeProviders',
 
 		initialize: function(editorModel) {
-			this._providerCollection = new ThemeProviderCollection(editorModel);
+			this._providerCollection = new ThemeProviderCollection(editorModel, {overflow: false});
 
 			this._providerCollection.on('change:activeProviders', this.render, this);
 		},

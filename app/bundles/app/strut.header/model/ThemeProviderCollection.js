@@ -1,6 +1,6 @@
 define(['libs/backbone', 'framework/ServiceCollection'],
 function(Backbone, ServiceCollection) {
-	function ThemeProviderCollection(editorModel) {
+	function ThemeProviderCollection(editorModel, meta) {
 		this._editorModel = editorModel;
 
 		this._activeProviders = [];
@@ -9,9 +9,7 @@ function(Backbone, ServiceCollection) {
 			new ServiceCollection(editorModel.registry,
 				{
 					interfaces: 'strut.ThemeProvider',
-					meta: {
-						overflow: false
-					}
+					meta: meta
 				});
 
 		this._modeChanged(null, this._editorModel.get('modeId'));

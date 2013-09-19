@@ -17,7 +17,7 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
 
 			this.model.editorModel().on('change:activeMode', this._modeChanged, this);
 
-			this._tablets = new Tablets();
+			this._tablets = new Tablets(this.model.editorModel());
 		},
 
 		_modeChanged: function(model, value) {

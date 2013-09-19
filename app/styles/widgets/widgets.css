@@ -18,20 +18,13 @@
 	margin-bottom: 5px;
 }
 
-
-.tablets {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-}
-
 .tablets-toggle {
 	border-radius: 0 0 4px 4px;
 	width: 100%;
 	box-sizing: border-box;
 }
 
-.tablets-content > div {
+.tablets-content > * {
 	display: block;
 	border-radius: 0;
 }
