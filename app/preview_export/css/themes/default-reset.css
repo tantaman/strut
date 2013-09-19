@@ -210,3 +210,23 @@
 	line-height: 1.2em;
 	font-weight: normal;
 }
+
+.strut-slide::before, .strut-slide::after, .strut-surface::before, .strut-surface::after {
+  display: block;
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  content: "";
+  -webkit-filter: grayscale(0.3) brightness(0.3);
+  -moz-filter: grayscale(0.3) brightness(0.3);
+  filter: grayscale(0.3) brightness(0.3);
+}
+
+.strut-slide::after, .strut-surface::after {
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
