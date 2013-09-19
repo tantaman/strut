@@ -52,28 +52,23 @@
 .operatingTable .tablets {
 	position: absolute;
 	top: 0px;
-	left: 0px;
+	left: 5px;
 }
 
 .operatingTable .tablets-toggle {
 	border-radius: 0 0 4px 4px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.operatingTable .tablets-content > div {
+	display: block;
+	border-radius: 0;
+}
+
+.operatingTable .tablets .iconBtns {
+	margin-bottom: 0px;
 }
 
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
 
-.tablets-content > div {
-	border-radius: 0px 2px 2px 0px;
-	background: #DDD;
-	margin-top: 2px;
-	padding: 0px 1px;
-	cursor: pointer;
-}
-
-.tablets-content > div.active {
-	background: #AAA;
-	cursor: default;
-}
-
-.tablets > div:hover {
-	background: #AAA;
-}

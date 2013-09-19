@@ -46,6 +46,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
+						'slide-editor': true,
 						'transition-editor': true,
 					}
 				}
@@ -57,7 +58,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'transition-editor': true,
 						'slide-editor': true
-					}
+					},
+					overflow: true
 				}
 			}, stylesheetProviderFactory);
 
@@ -67,7 +69,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'transition-editor': true,
 						'slide-editor': true
-					}
+					},
+					overflow: true
 				}
 			}, classEditorFactory);
 

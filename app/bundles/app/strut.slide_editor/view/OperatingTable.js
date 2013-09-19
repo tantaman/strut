@@ -71,17 +71,24 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
+
+			// TODO: extract this out to a new class
+			// that'll read in certain items from the registry.
 			this._tablets = new Tablets(
 				{ 
 					model: new TabletsModel(),
 					tabs: [
 						{icon: 'markdown',
-						name: '',
+						name: 'Markdown',
 						key: 'markdown'},
-						{icon: 'search',
-						name: '',
-						active: true,
-						key: 'preview'},
+
+						{icon: 'plus',
+						name: 'Class',
+						key: 'class'},
+
+						{icon: 'edit',
+						name: 'CSS',
+						key: 'css'}
 					],
 					template: JST['strut.slide_editor/Tablets']
 				});

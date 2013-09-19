@@ -12,6 +12,10 @@ function() {
 		this.$el.on('click', '.tablets-content > div', function(e) {
 			self._tabClicked(e);
 		});
+
+		this.$el.on('click', '.tablets-toggle', function(e) {
+			self._expand();
+		});
 	}
 
 	Tablets.prototype = {
@@ -32,6 +36,10 @@ function() {
 
 		_tabClicked: function(e) {
 			this.model.toggle(e.currentTarget.dataset.key);
+		},
+
+		_expand: function() {
+			this.$el.addClass('showing');
 		}
 	}
 
