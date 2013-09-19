@@ -22,6 +22,8 @@ function(Tablets, ThemeProviderCollection) {
 			this._providers.activeProviders().forEach(function(provider) {
 				views.push(provider.view());
 			}, this);
+			this._tablets.hide();
+			this._tablets.empty();
 			this._tablets.add(views);
 		},
 

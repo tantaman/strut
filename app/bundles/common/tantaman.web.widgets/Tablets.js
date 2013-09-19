@@ -8,7 +8,7 @@ function() {
 		var self = this;
 
 		this.$el.on('click', '.tablets-toggle', function(e) {
-			self._toggle();
+			self.toggle();
 		});
 	}
 
@@ -41,17 +41,27 @@ function() {
 			}, this);
 		},
 
+		empty: function() {
+			if (this.$content)
+				this.$content.html('');
+			this._currentItems = [];
+		},
+
 		dispose: function() {
 		},
 
-		_toggle: function() {
+		toggle: function() {
 			if (this.$el.is('.hiding')) {
 				this.$el.removeClass('hiding');
 				this.$el.addClass('showing');
 			} else {
-				this.$el.removeClass('showing');
-				this.$el.addClass('hiding');
+				this.hide();
 			}
+		},
+
+		hide: function() {
+			this.$el.removeClass('showing');
+			this.$el.addClass('hiding');
 		}
 	}
 
