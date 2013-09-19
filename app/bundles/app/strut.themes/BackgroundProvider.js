@@ -1,6 +1,8 @@
 define(['tantaman/web/widgets/Dropdown',
-		'strut/deck/Utils'],
-function(View, DeckUtils) {
+		'strut/deck/Utils',
+		'tantaman/web/widgets/ItemImportModal',
+		'lang'],
+function(View, DeckUtils, ItemImportModal, lang) {
 	function BackgroundProvider(backgrounds, editorModel, selector, attr, classes) {
 		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'],
 			{class: 'iconBtns group-dropdown'});
@@ -10,13 +12,24 @@ function(View, DeckUtils) {
 
 		this._previewBackground = this._previewBackground.bind(this);
 		this._restoreBackground = this._restoreBackground.bind(this);
-		this._setBackground = this._setBackground.bind(this);
 		this._view.$el.on('mouseover', '.thumbnail', this._previewBackground);
 		this._view.$el.on('mouseout', '.thumbnail', this._restoreBackground);
 		this._view.$el.on('click', '.thumbnail', this._setBackground);
 
+		this._setBackgroundImage = this._setBackgroundImage.bind(this);
+
 		this._classes = classes;
 	}
+
+	var imageChooserModal = ItemImportModal.get({
+		tag: 'img',
+		name: lang.image,
+		title: lang.insert_image,
+		icon: 'icon-picture',
+		browsable: true
+	});
+	// gradientChooserModal = ...
+	// TODO: update your jQuery gradient chooser.
 
 	BackgroundProvider.prototype = {
 		view: function() {
@@ -27,6 +40,8 @@ function(View, DeckUtils) {
 			var $container = $(this._selector);
 			var klass = e.currentTarget.dataset['class'];
 			if (klass == null) return;
+			if (klass == 'imgbg') return;
+
 			if (klass == 'defaultbg') {
 				if (this._attr == 'Background') {
 					if ($(e.currentTarget).parent().parent().is('.allSlides')) {
@@ -41,13 +56,23 @@ function(View, DeckUtils) {
 
 		_setBackground: function(e) {
 			var bg = e.currentTarget.dataset['class'];
+			var allSlides = $(e.currentTarget).parent().parent().is('.allSlides');
+			if (bg == 'imgbg') {
+				var self = this;
+				imageChooserModal.show(function(src) {
+					self._setBackgroundImage(allSlides, src);
+				});
+				// launch the modal to select an image
+				// set the selected image url as the slide's background
+				return;
+			}
 
 			if (bg == null)
 				return;
 
 			var attr = this._attr.substring(0,1).toLowerCase() + this._attr.substring(1);
 			var obj;
-			if ($(e.currentTarget).parent().parent().is('.allSlides')) {
+			if (allSlides) {
 				obj = this._editorModel.deck();
 			} else {
 				obj = this._editorModel.activeSlide();
@@ -57,6 +82,15 @@ function(View, DeckUtils) {
 				bg = undefined;
 
 			obj.set(attr, bg);
+		},
+
+		_setBackgroundImage: function(allSlides, src) {
+			// TODO: we really have to fix this bastard.
+			if (this._attr == 'Background') {
+
+			} else {
+
+			}
 		},
 
 		_restoreBackground: function(e) {

@@ -10,6 +10,7 @@
 			{{/backgrounds}}
 			<li><a class="transparentPattern thumbnail" data-class="transparentbg"></a></li>
 			<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="imgbg thumbnail" data-class="imgbg"><i class="icon-picture"></i></a></li>
 		</ul>
 	</li>
 	<li class="dropdown-submenu">
