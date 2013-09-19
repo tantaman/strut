@@ -157,6 +157,11 @@ border-bottom-color: #000;
   border-bottom-color: white;
 }
 
+.whiteCaret {
+  border-top-color: white;
+  border-bottom-color: white;
+}
+
 .create-comp-buttons .btn-group > .btn {
   font-size: 13px;
 }

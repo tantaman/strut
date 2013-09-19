@@ -49,27 +49,5 @@
 	padding: 0px;
 }
 
-.operatingTable .tablets {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-}
-
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
 
-.tablets > div {
-	border-radius: 0px 2px 2px 0px;
-	background: #DDD;
-	margin-top: 2px;
-	padding: 0px 1px;
-	cursor: pointer;
-}
-
-.tablets > div.active {
-	background: #AAA;
-	cursor: default;
-}
-
-.tablets > div:hover {
-	background: #AAA;
-}

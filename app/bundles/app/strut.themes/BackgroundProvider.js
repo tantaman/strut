@@ -12,6 +12,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 
 		this._previewBackground = this._previewBackground.bind(this);
 		this._restoreBackground = this._restoreBackground.bind(this);
+		this._setBackground = this._setBackground.bind(this);
 		this._view.$el.on('mouseover', '.thumbnail', this._previewBackground);
 		this._view.$el.on('mouseout', '.thumbnail', this._restoreBackground);
 		this._view.$el.on('click', '.thumbnail', this._setBackground);
