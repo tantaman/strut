@@ -3,7 +3,7 @@
 	{{#lang title}}{{/lang}}</a>
 <ul class="dropdown-menu" role="menu">
 	<li class="dropdown-submenu">
-		<a tabindex="-1" href="#">This Slide</a>
+		<a tabindex="-1" href="#">Selected Slide</a>
 		<ul class="dropdown-menu horizontalDropdown" style="min-width: 127px; width: 127px">
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
@@ -13,7 +13,7 @@
 	</li>
 	<li class="dropdown-submenu">
 		<a tabindex="-1" href="#">All Slides</a>
-		<ul class="dropdown-menu horizontalDropdown" style="min-width: 127px; width: 127px">
+		<ul class="dropdown-menu horizontalDropdown allSlides" style="min-width: 127px; width: 127px">
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 			{{/backgrounds}}

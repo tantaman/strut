@@ -8,9 +8,12 @@ function(View, DeckUtils) {
 		this._selector = selector;
 		this._attr = attr;
 
-		this._view.on('over', this._previewBackground, this);
-		this._view.on('out', this._restoreBackground, this);
-		this._view.on('selected', this._setBackground, this);
+		this._previewBackground = this._previewBackground.bind(this);
+		this._restoreBackground = this._restoreBackground.bind(this);
+		this._setBackground = this._setBackground.bind(this);
+		this._view.$el.on('mouseover', '.thumbnail', this._previewBackground);
+		this._view.$el.on('mouseout', '.thumbnail', this._restoreBackground);
+		this._view.$el.on('click', '.thumbnail', this._setBackground);
 
 		this._classes = classes;
 	}
@@ -32,7 +35,15 @@ function(View, DeckUtils) {
 
 		_setBackground: function(e) {
 			var attr = this._attr.substring(0,1).toLowerCase() + this._attr.substring(1);
-			this._editorModel.deck().set(attr, e.currentTarget.dataset['class'] || 'defaultbg')
+	
+			var obj;
+			if ($(e.currentTarget).parent().parent().is('.allSlides')) {
+				obj = this._editorModel.deck();
+			} else {
+				obj = this._editorModel.activeSlide();
+			}
+
+			obj.set(attr, e.currentTarget.dataset['class'] || 'defaultbg');
 		},
 
 		_restoreBackground: function(e) {
