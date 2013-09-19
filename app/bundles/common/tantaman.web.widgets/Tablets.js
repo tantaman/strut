@@ -1,12 +1,12 @@
-define(['./Utils'],
-function(Utils) {
-	function Tablets(slideEditorModel, tabs) {
+define(
+function() {
+	function Tablets(opts) {
 		this.$el = $('<div class="tablets">');
-		this.template = JST['strut.slide_editor/Tablets'];
-		this.tabs = tabs;
-		this.model = slideEditorModel;
+		this.template = opts.template;
+		this.tabs = opts.tabs;
+		this.model = opts.model;
 
-		this.model.on('change:mode', this._modeChanged, this);
+		this.model.on('change:active', this._activeChanged, this);
 
 		var self = this;
 		this.$el.on('click', '.tablets-content > div', function(e) {
@@ -24,14 +24,14 @@ function(Utils) {
 			this.model.off(null, null, this);
 		},
 
-		_modeChanged: function(model, mode) {
+		_activeChanged: function(model, tab) {
 			this.$el.find('.active').removeClass('active');
 			var $tab = this.$el.find('.' + mode);
 			$tab.addClass('active');
 		},
 
 		_tabClicked: function(e) {
-			this.model.set('mode', e.currentTarget.dataset.key);
+			this.model.toggle(e.currentTarget.dataset.key);
 		}
 	}
 

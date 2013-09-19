@@ -6,13 +6,15 @@ define(['libs/backbone',
 		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
 		'./Utils',
-		'./Tablets',
+		'tantaman/web/widgets/Tablets',
+		'../model/TabletsModel',
 		'marked'],
 function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 	ContextMenu,
 	DeckUtils,
 	Utils,
 	Tablets,
+	TabletsModel,
 	marked) {
 	'use strict';
 
@@ -69,15 +71,20 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
-			this._tablets = new Tablets(this._slideEditorModel, [
-					{icon: 'markdown',
-					name: '',
-					key: 'markdown'},
-					{icon: 'search',
-					name: '',
-					active: true,
-					key: 'preview'}
-				]);
+			this._tablets = new Tablets(
+				{ 
+					model: new TabletsModel(),
+					tabs: [
+						{icon: 'markdown',
+						name: '',
+						key: 'markdown'},
+						{icon: 'search',
+						name: '',
+						active: true,
+						key: 'preview'},
+					],
+					template: JST['strut.slide_editor/Tablets']
+				});
 
 			ContextMenu.setModel(this._menuModel);
 		},
