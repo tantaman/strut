@@ -8,7 +8,10 @@ function(Backbone, ServiceCollection) {
 		this._themeProviders =
 			new ServiceCollection(editorModel.registry,
 				{
-					interfaces: 'strut.ThemeProvider'
+					interfaces: 'strut.ThemeProvider',
+					meta: {
+						overflow: false
+					}
 				});
 
 		this._modeChanged(null, this._editorModel.get('modeId'));

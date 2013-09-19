@@ -38,7 +38,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'slide-editor': true,
 						'transition-editor': true
-					}
+					},
+					overflow: false
 				}
 			}, slideBgProviderFactory);
 
@@ -48,7 +49,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'slide-editor': true,
 						'transition-editor': true,
-					}
+					},
+					overflow: false
 				}
 			}, surfaceBgProviderFactory);
 

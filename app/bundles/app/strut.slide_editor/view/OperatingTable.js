@@ -82,11 +82,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 						name: 'Markdown',
 						key: 'markdown'},
 
-						{icon: 'plus',
+						{icon: 'plus icon-white',
 						name: 'Class',
 						key: 'class'},
 
-						{icon: 'edit',
+						{icon: 'edit icon-white',
 						name: 'CSS',
 						key: 'css'}
 					],
