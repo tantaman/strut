@@ -11,7 +11,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 	ContextMenu,
 	DeckUtils,
 	Utils,
-	Tablets,
 	marked) {
 	'use strict';
 
