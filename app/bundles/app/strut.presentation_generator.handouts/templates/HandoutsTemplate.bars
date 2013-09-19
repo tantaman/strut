@@ -1,3 +1,4 @@
+{{#attributes}}
 <style type="text/css">
 {{{customStylesheet}}}
 </style>
@@ -6,7 +7,7 @@
 {{#slides.models}}
 {{#attributes}}
 <div class="slide-and-notes">
-<div class="slide {{#or background ../../background}}{{/or}} slideContainer">
+<div class="slide {{#determineBG .. ../../..}}{{/determineBG}} slideContainer">
 <div class="reveal themedArea">
 {{#marked markdown}}{{/marked}}
 </div>
@@ -21,3 +22,4 @@
 </div>
 {{/slides.models}}
 </div>
+{{/attributes}}

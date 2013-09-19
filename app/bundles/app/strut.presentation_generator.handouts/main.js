@@ -4,8 +4,8 @@ define(function() {
 	var service = {
 		displayName: 'Handouts',
 		id: 'handouts',
-		generate: function(deckAttrs) {
-			return JST["strut.presentation_generator.handouts/HandoutsTemplate"](deckAttrs);
+		generate: function(deck) {
+			return JST["strut.presentation_generator.handouts/HandoutsTemplate"](deck);
 		},
 
 		getSlideHash: function() {
