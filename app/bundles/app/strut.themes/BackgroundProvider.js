@@ -29,7 +29,11 @@ function(View, DeckUtils) {
 			if (klass == null) return;
 			if (klass == 'defaultbg') {
 				if (this._attr == 'Background') {
-					klass = DeckUtils.slideBackground(null, this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
+					if ($(e.currentTarget).parent().parent().is('.allSlides')) {
+						klass = this._editorModel.deck().slideSurface();
+					} else {
+						klass = DeckUtils.slideBackground(null, this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
+					}
 				}
 			}
 			this._swapBg($container, klass);
