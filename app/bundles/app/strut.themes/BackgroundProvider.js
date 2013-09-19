@@ -26,16 +26,22 @@ function(View, DeckUtils) {
 		_previewBackground: function(e) {
 			var $container = $(this._selector);
 			var klass = e.currentTarget.dataset['class'];
+			if (klass == null) return;
 			if (klass == 'defaultbg') {
-				if (this._attr == 'Background')
-					klass = this._editorModel.deck().slideSurface();
+				if (this._attr == 'Background') {
+					klass = DeckUtils.slideBackground(null, this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
+				}
 			}
 			this._swapBg($container, klass);
 		},
 
 		_setBackground: function(e) {
+			var bg = e.currentTarget.dataset['class'];
+
+			if (bg == null)
+				return;
+
 			var attr = this._attr.substring(0,1).toLowerCase() + this._attr.substring(1);
-	
 			var obj;
 			if ($(e.currentTarget).parent().parent().is('.allSlides')) {
 				obj = this._editorModel.deck();
@@ -43,11 +49,8 @@ function(View, DeckUtils) {
 				obj = this._editorModel.activeSlide();
 			}
 
-			var bg = e.currentTarget.dataset['class'];
 			if (bg == '')
 				bg = undefined;
-			else
-				bg = 'defaultbg';
 
 			obj.set(attr, bg);
 		},
@@ -57,8 +60,10 @@ function(View, DeckUtils) {
 			var bg;
 			if (this._attr == 'Background')
 				bg = DeckUtils.slideBackground(this._editorModel.activeSlide(),
-					this._editorModel.deck());
-			bg = bg || this._editorModel.deck()['slide' + this._attr]();
+					this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
+
+			if (bg == null)
+				bg = this._editorModel.deck()['slide' + this._attr]();
 			var $container = $(this._selector);
 			this._swapBg($container, bg);
 		},

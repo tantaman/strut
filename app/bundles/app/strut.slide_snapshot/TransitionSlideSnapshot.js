@@ -94,7 +94,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 			 * React on background change.
 			 */
 			_backgroundChanged: function(deck, bg) {
-				bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
+				bg = DeckUtils.slideBackground(this.model, this.options.deck);
 				this._$content.removeClass();
 				this._$content.addClass('content ' + bg);
 			},
@@ -116,7 +116,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 				});
 
 				// this.$el.class();
-				var bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
+				var bg = DeckUtils.slideBackground(this.model, this.options.deck);
 				this._$content = this.$el.find('.content');
 				this._$content.addClass(bg);
 

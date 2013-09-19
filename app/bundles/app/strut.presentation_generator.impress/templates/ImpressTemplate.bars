@@ -1,3 +1,4 @@
+{{#attributes}}
 <style type="text/css">
 {{{customStylesheet}}}
 </style>
@@ -27,7 +28,7 @@
 {{#slides.models}}
 {{#attributes}}
 <div class="step" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}} {{#if z}}data-z="{{z}}"{{/if}} {{#if impScale}}data-scale="{{impScale}}"{{/if}}>
-<div class="{{#or background ../../background}}{{/or}} slideContainer" style="width: 1024px; height: 768px">
+<div class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px">
 <div class="reveal themedArea">
 {{#marked markdown}}{{/marked}}
 </div>
@@ -45,3 +46,4 @@
     <p>Use a spacebar or arrow keys to navigate</p>
 </div>
 </div>
+{{/attributes}}

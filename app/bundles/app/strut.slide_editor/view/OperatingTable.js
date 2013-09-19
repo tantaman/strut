@@ -14,28 +14,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 	marked) {
 	'use strict';
 
-	function MenuModel() {
-
-	}
-
-	MenuModel.prototype = {
-		getBackground: function() {
-			return DeckUtils.slideBackground(this.slide, this.deck);
-		},
-
-		setBackground: function(bg) {
-			this.slide.set('background', bg)
-		},
-
-		editMarkdown: function() {
-			this.slideEditorModel.set('mode', 'markdown');
-		},
-
-		stopEditingMarkdown: function() {
-			this.slideEditorModel.set('mode', 'preview');
-		}
-	};
-
 	return Backbone.View.extend({
 		className: 'operatingTable',
 		events: {
@@ -49,9 +27,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
-			this._menuModel = new MenuModel();
-			this._menuModel.deck = this._deck;
-			this._menuModel.slideEditorModel = this._slideEditorModel;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
@@ -86,7 +61,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this.$el.append(this._tablets.render().$el);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
+			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true}));
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
@@ -115,7 +90,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		_updateBg: function(model, bg) {
 			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			bg = DeckUtils.slideBackground(this.model, this._deck);
+			bg = DeckUtils.slideBackground(this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
 
 			this._$slideContainer.addClass('slideContainer ui-selectable ' + bg);
 		},
@@ -229,7 +204,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				this._updateBg();
 			}
 			this._renderContents(prevModel);
-			this._menuModel.slide = model;
 			return this;
 		},
 

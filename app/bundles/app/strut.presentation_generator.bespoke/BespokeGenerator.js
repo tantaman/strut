@@ -3,8 +3,8 @@ define(function() {
 	// right now we're taking advantage of the fact that we just so happen
 	// to know that the impress helpers are available to us.
 	return {
-		render: function(deckAttrs) {
-			return JST["strut.presentation_generator.bespoke/BespokeTemplate"](deckAttrs);
+		render: function(deck) {
+			return JST["strut.presentation_generator.bespoke/BespokeTemplate"](deck);
 		},
 
 		getStartPreviewFn: function(editorModel, sourceWind, previewStr) {
