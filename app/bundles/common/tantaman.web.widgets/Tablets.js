@@ -1,7 +1,7 @@
 define(
 function() {
 	function Tablets(opts) {
-		this.$el = $('<div class="tablets">');
+		this.$el = $('<div class="tablets hiding">');
 		this.template = opts.template;
 		this.tabs = opts.tabs;
 		this.model = opts.model;
@@ -14,7 +14,7 @@ function() {
 		});
 
 		this.$el.on('click', '.tablets-toggle', function(e) {
-			self._expand();
+			self._toggle();
 		});
 	}
 
@@ -38,8 +38,14 @@ function() {
 			this.model.toggle(e.currentTarget.dataset.key);
 		},
 
-		_expand: function() {
-			this.$el.addClass('showing');
+		_toggle: function() {
+			if (this.$el.is('.hiding')) {
+				this.$el.removeClass('hiding');
+				this.$el.addClass('showing');
+			} else {
+				this.$el.removeClass('showing');
+				this.$el.addClass('hiding');
+			}
 		}
 	}
 

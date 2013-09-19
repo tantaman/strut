@@ -66,6 +66,46 @@
 	border-radius: 0;
 }
 
+/*TODO: move tablets css*/
+.tablets.hiding .tablets-content {
+	height: 0px;
+	overflow: hidden;
+}
+
+.tablets.showing .tablets-content {
+	animation-duration: 1s;
+	animation-name: slidedown;
+	-webkit-animation-duration: 1s;
+	-webkit-animation-name: slidedown;
+}
+
+@-webkit-keyframes slidedown {
+	from {
+		height: 0px;
+	}
+
+	to {
+		height: auto;
+	}
+}
+
+@keyframes slidedown {
+	from {
+		height: 0px;
+	}
+
+	to {
+		height: auto;
+	}
+}
+
+.operatingTable .tablets.showing .caret {
+	border-top: 0px;
+	border-bottom: 4px solid;
+  	border-right: 4px solid transparent;
+  	border-left: 4px solid transparent;
+}
+
 .operatingTable .tablets .iconBtns {
 	margin-bottom: 0px;
 }
