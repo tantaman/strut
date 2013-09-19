@@ -14,3 +14,14 @@
   position: relative;
   z-index: 2;
 }
+
+.row-fluid .header {
+	position: relative;
+}
+
+.header .tablets {
+	position: absolute;
+	top: 55px;
+	left: 150px;
+	z-index: 2;
+}

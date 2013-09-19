@@ -6,15 +6,12 @@ define(['libs/backbone',
 		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
 		'./Utils',
-		'tantaman/web/widgets/Tablets',
-		'../model/TabletsModel',
 		'marked'],
 function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 	ContextMenu,
 	DeckUtils,
 	Utils,
 	Tablets,
-	TabletsModel,
 	marked) {
 	'use strict';
 
@@ -72,34 +69,12 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 
 			this._clipboard = this._editorModel.clipboard;
 
-			// TODO: extract this out to a new class
-			// that'll read in certain items from the registry.
-			this._tablets = new Tablets(
-				{ 
-					model: new TabletsModel(),
-					tabs: [
-						{icon: 'markdown',
-						name: 'Markdown',
-						key: 'markdown'},
-
-						{icon: 'plus icon-white',
-						name: 'Class',
-						key: 'class'},
-
-						{icon: 'edit icon-white',
-						name: 'CSS',
-						key: 'css'}
-					],
-					template: JST['strut.slide_editor/Tablets']
-				});
-
 			ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {
 			this._$slideContainer = $('<div class="slideContainer"></div>')
 			this.$el.html(this._$slideContainer);
-			this.$el.append(this._tablets.render().$el);
 			this._$slideContainer.css(config.slide.size);
 
 			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
@@ -255,7 +230,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			if (this.model)
 				this.model.off(null, null, this);
 			GlobalEvents.off(null, null, this);
-			this._tablets.dispose();
 		},
 
 		_renderContents: function(prevModel) {

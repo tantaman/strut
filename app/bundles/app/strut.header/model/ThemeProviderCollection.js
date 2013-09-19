@@ -4,7 +4,7 @@ function(Backbone, ServiceCollection) {
 		this._editorModel = editorModel;
 
 		this._activeProviders = [];
-		this._editorModel.on('change:modeId', this._modeChanged, this);
+		//this._editorModel.on('change:modeId', this._modeChanged, this);
 		this._themeProviders =
 			new ServiceCollection(editorModel.registry,
 				{
