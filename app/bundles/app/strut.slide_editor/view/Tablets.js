@@ -2,25 +2,21 @@ define(['./Utils'],
 function(Utils) {
 	function Tablets(slideEditorModel, tabs) {
 		this.$el = $('<div class="tablets">');
+		this.template = JST['strut.slide_editor/Tablets'];
 		this.tabs = tabs;
 		this.model = slideEditorModel;
 
 		this.model.on('change:mode', this._modeChanged, this);
 
 		var self = this;
-		this.$el.on('click', 'div', function(e) {
+		this.$el.on('click', '.tablets-content > div', function(e) {
 			self._tabClicked(e);
 		});
 	}
 
 	Tablets.prototype = {
 		render: function() {
-			this.tabs.forEach(function(tab) {
-				var $e = $('<div class="'+tab.key+'" data-key="' + tab.key + '"><i class="icon icon-' + tab.icon + '"></i><span>' + tab.name + '</span></div>');
-				if (tab.active)
-					$e.addClass('active');
-				this.$el.append($e);
-			}, this);
+			this.$el.html(this.template(this.tabs));
 			return this;
 		},
 
