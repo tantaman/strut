@@ -46,7 +46,8 @@
 	z-index: 0;
 	width: 100%;
 	height: 100%;
-	padding: 0px;
+	padding: 20px 0px 0px 0px;
+	box-sizing: border-box;
 }
 
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }

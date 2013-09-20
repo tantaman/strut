@@ -1,7 +1,8 @@
 define(['libs/backbone',
 	'strut/slide_snapshot/TransitionSlideSnapshot',
-	'css!styles/transition_editor/slideTable.css'],
-	function(Backbone, TransitionSlideSnapshot, empty) {
+	'css!styles/transition_editor/slideTable.css',
+	'strut/deck/Utils'],
+	function(Backbone, TransitionSlideSnapshot, empty, DeckUtils) {
 		'use strict';
 
 		/**
@@ -11,7 +12,7 @@ define(['libs/backbone',
 		 * @augments Backbone.View
 		 */
 		return Backbone.View.extend({
-			className: 'slideTable',
+			className: 'slideTable strut-surface',
 			events: {
 				"click": "_clicked"
 			},
@@ -47,8 +48,13 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_surfaceChanged: function(deck, surface) {
-				this.$el.removeClass();
-				this.$el.addClass('slideTable ' + surface);
+				if (DeckUtils.isImg(surface)) {
+					this.$el.css('background-image', DeckUtils.getImgUrl(surface));
+				} else {
+					this.$el.css('background-image', '');
+					this.$el.removeClass();
+					this.$el.addClass('slideTable strut-surface ' + surface);
+				}
 			},
 
 			/**
@@ -94,7 +100,8 @@ define(['libs/backbone',
 
 				this.$el.html('');
 				var deck = this.model.deck();
-				this.$el.addClass(deck.get('surface') || 'defaultbg');
+				this._surfaceChanged(deck, deck.get('surface'));
+				// this.$el.addClass(deck.get('surface') || 'defaultbg');
 
 				var colCnt = 6;
 				var cnt = 0;

@@ -3,41 +3,17 @@ define(['libs/backbone',
 		'strut/slide_components/ComponentFactory',
 		'strut/editor/GlobalEvents',
 		'strut/deck/Component',
-		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
 		'./Utils',
 		'marked'],
 function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
-	ContextMenu,
 	DeckUtils,
 	Utils,
 	marked) {
 	'use strict';
 
-	function MenuModel() {
-
-	}
-
-	MenuModel.prototype = {
-		getBackground: function() {
-			return DeckUtils.slideBackground(this.slide, this.deck);
-		},
-
-		setBackground: function(bg) {
-			this.slide.set('background', bg)
-		},
-
-		editMarkdown: function() {
-			this.slideEditorModel.set('mode', 'markdown');
-		},
-
-		stopEditingMarkdown: function() {
-			this.slideEditorModel.set('mode', 'preview');
-		}
-	};
-
 	return Backbone.View.extend({
-		className: 'operatingTable',
+		className: 'operatingTable strut-surface',
 		events: {
 			"click": "_clicked",
 			"focused": "_focus",
@@ -49,9 +25,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
-			this._menuModel = new MenuModel();
-			this._menuModel.deck = this._deck;
-			this._menuModel.slideEditorModel = this._slideEditorModel;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
@@ -68,7 +41,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 
 			this._clipboard = this._editorModel.clipboard;
 
-			ContextMenu.setModel(this._menuModel);
+			// ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {
@@ -76,7 +49,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
@@ -105,17 +78,25 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		_updateBg: function(model, bg) {
 			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			bg = DeckUtils.slideBackground(this.model, this._deck);
-
-			this._$slideContainer.addClass('slideContainer ui-selectable ' + bg);
+			this._$slideContainer.addClass('slideContainer ui-selectable');
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
 		},
 
 		_updateSurface: function(model, bg) {
-			this.$el.removeClass();
-			this.$el.addClass('operatingTable ' + bg);
-			var currentBg = this._deck.get('background');
-			if (currentBg == 'defaultbg')
-				this._updateBg(model, bg);
+			bg = DeckUtils.slideSurface(model, this._deck);
+			if (bg) {
+				if (!DeckUtils.isImg(bg)) {
+					this.$el.css('background-image', '');
+					this.$el.removeClass();
+					// TODO: we can do this more intelligently
+					this.$el.addClass('operatingTable strut-surface ' + bg);
+				} else {
+					this.$el.css('background-image', DeckUtils.getImgUrl(bg));
+				}
+			}
+			// var currentBg = this._deck.get('background');
+			// if (currentBg == 'defaultbg')
+			// 	this._updateBg(model, bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for
@@ -216,10 +197,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				this.model.on('change:components.add', this._componentAdded, this);
 				this.model.on('change:background', this._updateBg, this);
 				this.model.on('change:markdown', this._renderMarkdown, this);
+				this.model.on('change:surface', this._updateSurface, this);
 				this._updateBg();
+				this._updateSurface(this.model, this.model.get('surface'));
 			}
 			this._renderContents(prevModel);
-			this._menuModel.slide = model;
 			return this;
 		},
 
