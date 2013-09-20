@@ -12,6 +12,14 @@ define(function() {
 			return result;
 		},
 
+		isImg: function(bg) {
+			return bg.indexOf('img:') == 0;
+		},
+
+		getImgUrl: function(bg) {
+			return 'url(' + bg.substring(4) + ')';
+		},
+
 		/**
 		 * TODO: simplify me!
 		 *
@@ -52,6 +60,9 @@ define(function() {
 
 			if (result == deck.slideSurface() && opts.transparentForDeckSurface)
 				result = '';
+
+			if (result == 'defaultbg')
+				return '';
 
 			return result;
 		},

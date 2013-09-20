@@ -14,8 +14,8 @@
 			<option value="carousel">Carousel</option>
 		</select>
 	</div>
-	<div id="main">
-		<article class="{{surface}} strut-surface">
+	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
+		<article>
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-{{index}}{{#isBGClass surface}} {{surface}}{{/isBGClass}}">

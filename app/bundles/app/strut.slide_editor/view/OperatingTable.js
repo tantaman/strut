@@ -85,15 +85,13 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		_updateSurface: function(model, bg) {
 			bg = DeckUtils.slideSurface(model, this._deck);
 			if (bg) {
-				// TODO: we should move this into a method
-				// if our string format ever changes we are screwed.
-				if (bg.indexOf('img:') != 0) {
+				if (!DeckUtils.isImg(bg)) {
 					this.$el.css('background-image', '');
 					this.$el.removeClass();
 					// TODO: we can do this more intelligently
 					this.$el.addClass('operatingTable strut-surface ' + bg);
 				} else {
-					this.$el.css('background-image', 'url(' + bg.substring(4) + ')');
+					this.$el.css('background-image', DeckUtils.getImgUrl(bg));
 				}
 			}
 			// var currentBg = this._deck.get('background');

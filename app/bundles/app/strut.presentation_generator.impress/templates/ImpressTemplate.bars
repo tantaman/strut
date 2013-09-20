@@ -24,7 +24,8 @@
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
 </div>
 
-<div class="bg {{surface}} strut-surface">
+<div class="bg {{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
+<div class="bg innerBg">
 <div id="impress">
 	{{#slides.models}}
 		{{#attributes}}
@@ -43,6 +44,7 @@
 	{{/attributes}}
 
 	<div id="overview" class="step" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
+</div>
 </div>
 </div>
 <div class="hint">

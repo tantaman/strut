@@ -3,7 +3,7 @@ if (window.presStarted)
     return;
 window.presStarted = true;
 
-var strutSurface = document.querySelector('.strut-surface');
+var innerBg = document.querySelector('.innerBg');
 
 /**
  * impress.js
@@ -451,7 +451,7 @@ var strutSurface = document.querySelector('.strut-surface');
                 if (typeof state == 'string') {
                     state = state.trim().split(' ');
                     for (var i = 0; i < state.length; ++i) {
-                        strutSurface.classList[operation](state[i]);
+                        innerBg.classList[operation](state[i]);
                     }
                 }
             }
