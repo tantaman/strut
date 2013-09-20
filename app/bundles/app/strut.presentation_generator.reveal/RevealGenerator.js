@@ -1,7 +1,7 @@
 define(function() {
 	return {
-		render: function(deckAttrs) {
-			return JST['strut.presentation_generator.reveal/RevealTemplate'](deckAttrs);
+		render: function(deck) {
+			return JST['strut.presentation_generator.reveal/RevealTemplate'](deck);
 		},
 
 		getStartPreviewFn: function(editorModel, sourceWind, previewStr) {

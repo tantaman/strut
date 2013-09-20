@@ -20,6 +20,10 @@ body {
   padding: 0px;
 }
 
+.transparentPattern {
+  background-image: url('img/checkerboard.png');
+}
+
 a {
   cursor: pointer;
 }

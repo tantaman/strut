@@ -24,13 +24,6 @@ function(Backbone, empty) {
 		this._model = model;
 		if (model.on)
 			model.on('change', this._render, this);
-
-		this._over = this._over.bind(this);
-		this._selected = this._selected.bind(this);
-		this._out = this._out.bind(this);
-		this.$el.on('mouseover', 'li > a', this._over);
-		this.$el.on('click', 'li > a', this._selected);
-		this.$el.on('mouseout', this._out);
 	}
 
 	Dropdown.prototype = {
@@ -44,18 +37,6 @@ function(Backbone, empty) {
 			this.$el.html(this._template(data));
 
 			return this;
-		},
-
-		_over: function(e) {
-			this.trigger('over', e);
-		},
-
-		_out: function(e) {
-			this.trigger('out', e);
-		},
-
-		_selected: function(e) {
-			this.trigger('selected', e);
 		},
 
 		dispose: function() {

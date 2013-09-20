@@ -13,7 +13,7 @@ define(function() {
 
 			this._editorModel.trigger('launch:preview', null);
 
-			var previewStr = generator.generate(this._editorModel.deck().attributes);
+			var previewStr = generator.generate(this._editorModel.deck());
 
 			localStorage.setItem('preview-string', previewStr);
 			localStorage.setItem('preview-config', JSON.stringify({

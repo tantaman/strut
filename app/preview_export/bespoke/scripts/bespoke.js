@@ -1,45 +1,30 @@
 /*!
- * Bespoke.js v0.2.1
+ * Bespoke.js v0.3.1
  *
  * Copyright 2013, Mark Dalgleish
  * This content is released under the MIT license
  * http://mit-license.org/markdalgleish
  */
 
-function startPres(document, window) {
-	if (window.presStarted)
-		return;
-	window.presStarted = true;
-
-var body = document.querySelector('body');
-var themeSelect = document.querySelector("#themeChooser > select");
-themeSelect.onchange = function(e) {
-	//e.target.value
-	var toRemove = body.classList[body.classList.length - 1];
-	body.classList.remove(toRemove);
-	body.classList.add(e.target.value);
-	themeSelect.blur();
-};
-
-(function(moduleName, window, document) {
-	var from = function(selector, selectedPlugins) {
-			var parent = document.querySelector(selector),
+(function(moduleName, window) {
+	var from = function(selectorOrElement, selectedPlugins) {
+			var parent = selectorOrElement.blur ? selectorOrElement : document.querySelector(selectorOrElement),
 				slides = [].slice.call(parent.children, 0),
 				activeSlide = slides[0],
-				deckListeners = {},
+				listeners = {},
 
 				activate = function(index, customData) {
 					if (!slides[index]) {
 						return;
 					}
 
-					fire(deckListeners, 'deactivate', createEventData(activeSlide, customData));
+					fire('deactivate', createEventData(activeSlide, customData));
 
 					activeSlide = slides[index];
 
 					slides.map(deactivate);
 
-					fire(deckListeners, 'activate', createEventData(activeSlide, customData));
+					fire('activate', createEventData(activeSlide, customData));
 
 					addClass(activeSlide, 'active');
 					removeClass(activeSlide, 'inactive');
@@ -49,26 +34,37 @@ themeSelect.onchange = function(e) {
 					var offset = index - slides.indexOf(activeSlide),
 						offsetClass = offset > 0 ? 'after' : 'before';
 
-					['before(-\\d+)?', 'after(-\\d+)?', 'active', 'inactive'].map(removeClass.bind(null, slide));
+					['before(-\\d+)?', 'after(-\\d+)?', 'active', 'inactive'].map(removeClass.bind(0, slide));
 
-					slide !== activeSlide &&
-						['inactive', offsetClass, offsetClass + '-' + Math.abs(offset)].map(addClass.bind(null, slide));
+					slide != activeSlide &&
+						['inactive', offsetClass, offsetClass + '-' + Math.abs(offset)].map(addClass.bind(0, slide));
 				},
 
 				slide = function(index, customData) {
-					fire(deckListeners, 'slide', createEventData(slides[index], customData)) && activate(index, customData);
+					fire('slide', createEventData(slides[index], customData)) && activate(index, customData);
 				},
 
-				next = function(customData) {
-					var nextSlideIndex = slides.indexOf(activeSlide) + 1;
+				step = function(offset, customData) {
+					var slideIndex = slides.indexOf(activeSlide) + offset;
 
-					fire(deckListeners, 'next', createEventData(activeSlide, customData)) && activate(nextSlideIndex, customData);
+					fire(offset > 0 ? 'next' : 'prev', createEventData(activeSlide, customData)) && activate(slideIndex, customData);
 				},
 
-				prev = function(customData) {
-					var prevSlideIndex = slides.indexOf(activeSlide) - 1;
+				on = function(eventName, callback) {
+					(listeners[eventName] || (listeners[eventName] = [])).push(callback);
 
-					fire(deckListeners, 'prev', createEventData(activeSlide, customData)) && activate(prevSlideIndex, customData);
+					return function() {
+						listeners[eventName] = listeners[eventName].filter(function(listener) {
+							return listener != callback;
+						});
+					};
+				},
+
+				fire = function(eventName, eventData) {
+					return (listeners[eventName] || [])
+						.reduce(function(notCancelled, callback) {
+							return notCancelled && callback(eventData) !== false;
+						}, true);
 				},
 
 				createEventData = function(slide, eventData) {
@@ -79,26 +75,24 @@ themeSelect.onchange = function(e) {
 				},
 
 				deck = {
-					on: on.bind(null, deckListeners),
-					off: off.bind(null, deckListeners),
-					fire: fire.bind(null, deckListeners),
+					on: on,
+					fire: fire,
 					slide: slide,
-					next: next,
-					prev: prev,
+					next: step.bind(0, 1),
+					prev: step.bind(0, -1),
 					parent: parent,
 					slides: slides
 				};
 
 			addClass(parent, 'parent');
-			
+
 			slides.map(function(slide) {
 				addClass(slide, 'slide');
 			});
 
-			Object.keys(selectedPlugins || {}).map(function(pluginName) {
-				var config = selectedPlugins[pluginName];
-				config && plugins[pluginName](deck, config === true ? {} : config);
-			});
+			for (var pluginName in selectedPlugins) {
+				plugins[pluginName](deck, selectedPlugins[pluginName]);
+			}
 
 			activate(0);
 
@@ -109,49 +103,29 @@ themeSelect.onchange = function(e) {
 
 		decks = [],
 
-		bespokeListeners = {},
-
-		on = function(listeners, eventName, callback) {
-			(listeners[eventName] || (listeners[eventName] = [])).push(callback);
-		},
-
-		off = function(listeners, eventName, callback) {
-			listeners[eventName] = (listeners[eventName] || []).filter(function(listener) {
-				return listener !== callback;
-			});
-		},
-
-		fire = function(listeners, eventName, eventData) {
-			return (listeners[eventName] || [])
-				.concat((listeners !== bespokeListeners && bespokeListeners[eventName]) || [])
-				.reduce(function(notCancelled, callback) {
-					return notCancelled && callback(eventData) !== false;
-				}, true);
-		},
-
 		addClass = function(el, cls) {
 			el.classList.add(moduleName + '-' + cls);
 		},
 
 		removeClass = function(el, cls) {
 			el.className = el.className
-				.replace(new RegExp(moduleName + '-' + cls +'(\\s|$)', 'g'), ' ')
-				.replace(/^\s+|\s+$/g, '');
+				.replace(RegExp(moduleName + '-' + cls +'(\\s|$)', 'g'), ' ')
+				.trim();
 		},
 
-		callOnAllInstances = function(method) {
+		callOnAllDecks = function(method) {
 			return function(arg) {
 				decks.map(function(deck) {
-					deck[method].call(null, arg);
+					deck[method](arg);
 				});
 			};
 		},
 
 		bindPlugin = function(pluginName) {
 			return {
-				from: function(selector, selectedPlugins) {
+				from: function(selectorOrElement, selectedPlugins) {
 					(selectedPlugins = selectedPlugins || {})[pluginName] = true;
-					return from(selector, selectedPlugins);
+					return from(selectorOrElement, selectedPlugins);
 				}
 			};
 		},
@@ -162,26 +136,28 @@ themeSelect.onchange = function(e) {
 					delta;
 
 				document.addEventListener('keydown', function(e) {
-					var key = e.which;
-
-					if (axis === 'X') {
-						key === 37 && deck.prev();
-						(key === 32 || key === 39) && deck.next();
-					} else {
-						key === 38 && deck.prev();
-						(key === 32 || key === 40) && deck.next();
-					}
+					(
+						e.which == 34 || // PAGE DOWN
+						e.which == 32 || // SPACE
+						axis == 'X' && e.which == 39 || // RIGHT
+						axis == 'Y' && e.which == 40 // BOTTOM
+					) && deck.next();
+					(
+						e.which == 33 || // PAGE UP
+						axis == 'X' && e.which == 37 || // LEFT
+						axis == 'Y' && e.which == 38 // TOP
+					) && deck.prev();
 				});
 
 				deck.parent.addEventListener('touchstart', function(e) {
-					if (e.touches.length) {
+					if (e.touches.length == 1) {
 						startPosition = e.touches[0]['page' + axis];
 						delta = 0;
 					}
 				});
 
 				deck.parent.addEventListener('touchmove', function(e) {
-					if (e.touches.length) {
+					if (e.touches.length == 1) {
 						e.preventDefault();
 						delta = e.touches[0]['page' + axis] - startPosition;
 					}
@@ -200,20 +176,12 @@ themeSelect.onchange = function(e) {
 
 	window[moduleName] = {
 		from: from,
-		slide: callOnAllInstances('slide'),
-		next: callOnAllInstances('next'),
-		prev: callOnAllInstances('prev'),
+		slide: callOnAllDecks('slide'),
+		next: callOnAllDecks('next'),
+		prev: callOnAllDecks('prev'),
 		horizontal: bindPlugin('horizontal'),
 		vertical: bindPlugin('vertical'),
-		on: on.bind(null, bespokeListeners),
-		off: off.bind(null, bespokeListeners),
 		plugins: plugins
 	};
 
-}('bespoke', this, document));
-
-}
-
-if (typeof define === "function" && define.amd ) {
-    define(function () { return startPres; } );
-}
+}('bespoke', window));

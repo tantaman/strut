@@ -61,19 +61,11 @@ module.exports = function (grunt) {
         },
 
         watch: {
-            coffee: {
-                files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee'],
-                tasks: ['coffee:dist']
-            },
             handlebars: {
                 files: [
                     "app/bundles/**/templates/*.bars"
                 ],
                 tasks: ['handlebars', 'livereload']
-            },
-            coffeeTest: {
-                files: ['test/spec/{,*/}*.coffee'],
-                tasks: ['coffee:test']
             },
             livereload: {
                 files: [
@@ -150,27 +142,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-        coffee: {
-            dist: {
-                files: [{
-                    // rather than compiling multiple files here you should
-                    // require them into your main .coffee file
-                    expand: true,
-                    cwd: '<%= yeoman.app %>/scripts',
-                    src: '*.coffee',
-                    dest: '.tmp/scripts',
-                    ext: '.js'
-                }]
-            },
-            test: {
-                files: [{
-                    expand: true,
-                    cwd: '.tmp/spec',
-                    src: '*.coffee',
-                    dest: 'test/spec'
-                }]
-            }
-        },
         // not used since Uglify task does concat,
         // but still available if needed
         /*concat: {
@@ -183,6 +154,7 @@ module.exports = function (grunt) {
                     // `name` and `out` is set by grunt-usemin
                     baseUrl: 'app/scripts',
                     optimize: 'none',
+                    mainConfigFile: 'app/scripts/main.js',
                     // TODO: Figure out how to make sourcemaps work with grunt-usemin
                     // https://github.com/yeoman/grunt-usemin/issues/30
                     //generateSourceMaps: true,
@@ -302,7 +274,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.renameTask('regarde', 'watch');
+    // grunt.renameTask('regarde', 'watch');
 
     grunt.registerTask('server', function (target) {
         if (target === 'dist') {
@@ -311,7 +283,6 @@ module.exports = function (grunt) {
 
         grunt.task.run([
             'clean:server',
-            'coffee:dist',
             'handlebars',
             'livereload-start',
             'connect:livereload',
@@ -321,14 +292,12 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [
         'clean:server',
-        'coffee',
         'connect:test',
         'mocha'
     ]);
 
     grunt.registerTask('build', [
         'clean:dist',
-        'coffee',
         'handlebars',
         'useminPrepare',
         'requirejs',
