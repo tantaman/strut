@@ -23,7 +23,7 @@
     <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
 </div>
 
-<div class="bg {{surface}}">
+<div class="bg {{surface}} strut-surface">
 <div id="impress">
 	{{#slides.models}}
 		{{#attributes}}

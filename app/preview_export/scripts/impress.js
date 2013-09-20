@@ -3,6 +3,8 @@ if (window.presStarted)
     return;
 window.presStarted = true;
 
+var strutSurface = document.querySelector('.strut-surface');
+
 /**
  * impress.js
  *
@@ -446,11 +448,11 @@ window.presStarted = true;
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
-                body.classList.remove("strut-slide-" + activeStep.id.substring(5));
+                strutSurface.classList.remove("strut-slide-" + (activeStep.id.substring(5)-1));
             }
             el.classList.add("active");
             
-            body.classList.add("strut-slide-" + el.id.substring(5));
+            strutSurface.classList.add("strut-slide-" + (el.id.substring(5)-1));
             
             // compute target state of the canvas based on given step
             var target = {

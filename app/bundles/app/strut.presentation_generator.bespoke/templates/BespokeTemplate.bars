@@ -17,7 +17,7 @@
 		<article class="{{surface}} strut-surface">
 			{{#slides.models}}
 				{{#attributes}}
-					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-">
+					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-{{index}}">
 						<div class="reveal themedArea">
               			{{#marked markdown}}{{/marked}}
               			</div>

@@ -5,7 +5,6 @@ define(['../locales/de',
 		'../locales/nl',
 		'handlebars'],
 function(de, en, es, fr, nl, handlebars) {
-	console.log(arguments);
 	var langs = {
 		en: en,
 		de: de,

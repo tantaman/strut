@@ -93,6 +93,15 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				return '';
 			});
 
+			var counters = {};
+			Handlebars.registerHelper("counter_set", function(name, val) {
+				counters[name] = val;
+			});
+
+			Handlebars.registerHelper("counter_incAndGet", function(name) {
+				return (counters[name] = counters[name] + 1);
+			});
+
 			Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);
 			Handlebars.registerPartial("TransformContainer", JST["strut.presentation_generator.impress/TransformContainer"]);
 			Handlebars.registerPartial("SVGContainer", JST["strut.presentation_generator.impress/SVGContainer"]);
