@@ -28,6 +28,7 @@ define(['libs/backbone',
 				this.model.on('change:active', this._activeChanged, this);
 				this.model.on('dispose', this.dispose, this);
 				this.model.on('change:background', this._bgChanged, this);
+				this.model.on('change:surface', this._bgChanged, this);
 				this.options.deck.on('change:background', this._bgChanged, this);
 				this.options.deck.on('change:surface', this._bgChanged, this);
 
@@ -92,7 +93,7 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_bgChanged: function() {
-				this._slideDrawer.applyBackground(this.model, this.options.deck);
+				this._slideDrawer.applyBackground(this.model, this.options.deck, {surfaceForDefault: true});
 				// this.$el.css('background-image', bg.styles[0]);
 				// this.$el.css('background-image', bg.styles[1]);
 			},

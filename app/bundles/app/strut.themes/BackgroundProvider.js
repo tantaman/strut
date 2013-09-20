@@ -104,12 +104,21 @@ function(View, DeckUtils, ItemImportModal, lang) {
 					this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
 
 			if (bg == null)
-				bg = this._editorModel.deck()['slide' + this._attr]();
+				bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
 			var $container = $(this._selector);
 			this._swapBg($container, bg);
 		},
 
 		_swapBg: function($el, newBg) {
+			if (!this._lastBg) {
+				var classList = $el[0].classList;
+				for (var i = 0; i < classList.length; ++i) {
+					if (classList[i].indexOf('-bg-') != -1) {
+						this._lastBg = classList[i];
+						break;
+					}
+				}
+			}
 			if (this._lastBg)
 				$el.removeClass(this._lastBg);
 			this._lastBg = newBg;

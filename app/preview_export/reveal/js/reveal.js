@@ -1471,7 +1471,9 @@ var Reveal = (function(){
 
     // Clean up the remains of the previous state
     while( stateBefore.length ) {
-      document.documentElement.classList.remove( stateBefore.pop() );
+      var sbefore = stateBefore.pop();
+      if (sbefore != '')
+      document.documentElement.classList.remove( sbefore );
     }
 
     // If the overview is active, re-activate it to update positions

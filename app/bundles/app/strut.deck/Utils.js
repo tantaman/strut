@@ -46,10 +46,12 @@ define(function() {
 			if (result == 'defaultbg' && opts.surfaceForDefault)
 				result = surface;
 
-			if (result == deck.slideSurface()) {
-				if (opts.transparentForSurface)
-					result = '';
+			if (result == surface && opts.transparentForSurface) {
+				result = '';
 			}
+
+			if (result == deck.slideSurface() && opts.transparentForDeckSurface)
+				result = '';
 
 			return result;
 		},

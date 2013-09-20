@@ -49,7 +49,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
@@ -83,7 +83,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		},
 
 		_updateSurface: function(model, bg) {
-			bg = (this.model && this.model.get('surface')) || this._deck.get('surface');
+			bg = DeckUtils.slideSurface(model, this._deck);
 			if (bg) {
 				// TODO: we should move this into a method
 				// if our string format ever changes we are screwed.
