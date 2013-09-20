@@ -1,5 +1,11 @@
-define(['../locales/de', '../locales/en', '../locales/es', '../locales/fr', '../locales/nl', 'handlebars'],
+define(['../locales/de',
+		'../locales/en',
+		'../locales/es',
+		'../locales/fr',
+		'../locales/nl',
+		'handlebars'],
 function(de, en, es, fr, nl, handlebars) {
+	console.log(arguments);
 	var langs = {
 		en: en,
 		de: de,
