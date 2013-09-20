@@ -1446,7 +1446,7 @@ var Reveal = (function(){
     // TODO: is there an api to get a callback on slide changes?
     // or a way to add plugins to reveal?  Probably.
     function getStrutClass(h,v) {
-      var strutClass = 'sturt-slide-' + h;
+      var strutClass = 'strut-slide-' + h;
       if (v)
         strutClass += '-' + v;
 

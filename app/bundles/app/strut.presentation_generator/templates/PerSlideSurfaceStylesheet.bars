@@ -1,0 +1,12 @@
+<style>
+{{#slides.models}}
+	{{#attributes}}
+		{{#if surface}}
+		.strut-surface.strut-slide-{{@index}} {
+			/*this only works for bg images or custom bgs*/
+			/*for bg classes we'll have to introduce a data api*/
+		}
+		{{/if}}
+	{{/attributes}}
+{{/slides.models}}
+</style>

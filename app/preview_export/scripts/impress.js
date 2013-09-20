@@ -448,11 +448,23 @@ var strutSurface = document.querySelector('.strut-surface');
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
-                strutSurface.classList.remove("strut-slide-" + (activeStep.id.substring(5)-1));
+                var state = activeStep.dataset.state;
+                if (typeof state == 'string') {
+                    state = state.trim().split(' ');
+                    for (var i = 0; i < state.length; ++i) {
+                        strutSurface.classList.remove(state[i]);
+                    }
+                }
             }
             el.classList.add("active");
             
-            strutSurface.classList.add("strut-slide-" + (el.id.substring(5)-1));
+            var state = el.dataset.state;
+            if (typeof state == 'string') {
+                state = state.trim().split(' ');
+                for (var i = 0; i < state.length; ++i) {
+                    strutSurface.classList.add(state[i]);
+                }
+            }
             
             // compute target state of the canvas based on given step
             var target = {

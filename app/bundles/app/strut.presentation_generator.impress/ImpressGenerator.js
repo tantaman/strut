@@ -105,6 +105,7 @@ function(Handlebars, Math2, marked, DeckUtils) {
 			Handlebars.registerPartial("ComponentContainer", JST["strut.presentation_generator.impress/ComponentContainer"]);
 			Handlebars.registerPartial("TransformContainer", JST["strut.presentation_generator.impress/TransformContainer"]);
 			Handlebars.registerPartial("SVGContainer", JST["strut.presentation_generator.impress/SVGContainer"]);
+			Handlebars.registerPartial("PerSlideSurfaceStylesheet", JST["strut.presentation_generator/PerSlideSurfaceStylesheet"]);
 		}
 
 		ImpressGenerator.prototype.render = function(deck) {
