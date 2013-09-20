@@ -13,7 +13,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 	'use strict';
 
 	return Backbone.View.extend({
-		className: 'operatingTable',
+		className: 'operatingTable strut-surface',
 		events: {
 			"click": "_clicked",
 			"focused": "_focus",
@@ -84,7 +84,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 
 		_updateSurface: function(model, bg) {
 			this.$el.removeClass();
-			this.$el.addClass('operatingTable ' + bg);
+			this.$el.addClass('operatingTable strut-surface ' + bg);
 			var currentBg = this._deck.get('background');
 			if (currentBg == 'defaultbg')
 				this._updateBg(model, bg);

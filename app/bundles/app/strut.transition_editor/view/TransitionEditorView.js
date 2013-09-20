@@ -11,7 +11,7 @@ define(['libs/backbone',
 		 * @augments Backbone.View
 		 */
 		return Backbone.View.extend({
-			className: 'slideTable',
+			className: 'slideTable strut-surface',
 			events: {
 				"click": "_clicked"
 			},
@@ -48,7 +48,7 @@ define(['libs/backbone',
 			 */
 			_surfaceChanged: function(deck, surface) {
 				this.$el.removeClass();
-				this.$el.addClass('slideTable ' + surface);
+				this.$el.addClass('slideTable strut-surface ' + surface);
 			},
 
 			/**

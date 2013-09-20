@@ -14,7 +14,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface');
+			return new BackgroundProvider(Surfaces, editorModel, '.strut-surface', 'Surface');
 		}
 	};
 
