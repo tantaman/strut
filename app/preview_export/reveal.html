@@ -86,6 +86,24 @@ ready(function() {
       // { src: 'preview_export/reveal/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
     ]
   });
+
+  var strutSurface = document.querySelector('.strut-surface');
+  function updateSurface(step, operation) {
+      if (!step) return;
+      var state = step.dataset.state;
+      if (typeof state == 'string') {
+          state = state.trim().split(' ');
+          for (var i = 0; i < state.length; ++i) {
+              strutSurface.classList[operation](state[i]);
+          }
+      }
+  }
+  function slideShown(e) {
+    updateSurface(e.previousSlide, 'remove');
+    updateSurface(e.currentSlide, 'add');
+  }
+  Reveal.addEventListener('slidechanged', slideShown);
+  Reveal.addEventListener('ready', slideShown);
  }
 });
 </script>

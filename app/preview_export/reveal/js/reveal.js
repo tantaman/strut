@@ -1412,7 +1412,6 @@ var Reveal = (function(){
    * @param {int} o Optional origin for use in multimaster environments
    */
   function slide( h, v, f, o ) {
-
     // Remember where we were at before
     previousSlide = currentSlide;
 
@@ -1443,19 +1442,6 @@ var Reveal = (function(){
     var slh = h === undefined ? indexh : h;
     var slv = v === undefined ? indexv : v;
 
-    // TODO: is there an api to get a callback on slide changes?
-    // or a way to add plugins to reveal?  Probably.
-    function getStrutClass(h,v) {
-      var strutClass = 'strut-slide-' + h;
-      if (v)
-        strutClass += '-' + v;
-
-      return strutClass;
-    }
-    
-    dom.wrapper.classList.remove(getStrutClass(indexhBefore, indexvBefore));
-    dom.wrapper.classList.add(getStrutClass(slh, slv));
-
     // Activate and transition to the new slide
     indexh = updateSlides( HORIZONTAL_SLIDES_SELECTOR, slh );
     indexv = updateSlides( VERTICAL_SLIDES_SELECTOR, slv );
@@ -1476,10 +1462,11 @@ var Reveal = (function(){
         }
       }
 
-      document.documentElement.classList.add( state[i] );
-
-      // Dispatch custom event matching the state's name
-      dispatchEvent( state[i] );
+      if (state[i] != '') {
+        document.documentElement.classList.add( state[i] );
+        // Dispatch custom event matching the state's name
+        dispatchEvent( state[i] );
+      }
     }
 
     // Clean up the remains of the previous state
