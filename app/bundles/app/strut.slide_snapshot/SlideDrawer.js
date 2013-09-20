@@ -1,5 +1,5 @@
-define(
-	function() {
+define(['strut/deck/Utils'],
+	function(DeckUtils) {
 		'use strict';
 
 		/**
@@ -35,6 +35,10 @@ define(
 			rescale: function() {
 				this.$el.css(window.browserPrefix + 'transform',
 					'scale(' + this.scale.x + ',' + this.scale.y + ')');
+			},
+
+			applyBackground: function(model, deck, opts) {
+				DeckUtils.applyBackground(this.$el, model, deck, opts);
 			},
 
 			dispose: function() {

@@ -92,19 +92,7 @@ define(['libs/backbone',
 			 * @private
 			 */
 			_bgChanged: function() {
-				var bg = DeckUtils.slideBackground(this.model, this.options.deck);
-				this.$el.removeClass();
-
-				// TODO There must be a way to do a precise change fo the class instead of rewriting all of them.
-				var classStr = 'slideSnapshot ' + bg;
-				if (this.model.get('active')) {
-					classStr += ' active';
-				}
-				if (this.model.get('selected')) {
-					classStr += ' ui-selected';
-				}
-
-				this.$el.addClass(classStr);
+				this._slideDrawer.applyBackground(this.model, this.options.deck);
 				// this.$el.css('background-image', bg.styles[0]);
 				// this.$el.css('background-image', bg.styles[1]);
 			},

@@ -72,12 +72,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 				return;
 
 			var attr = this._attr.substring(0,1).toLowerCase() + this._attr.substring(1);
-			var obj;
-			if (allSlides) {
-				obj = this._editorModel.deck();
-			} else {
-				obj = this._editorModel.activeSlide();
-			}
+			var obj = this._pickObj(allSlides);
 
 			if (bg == '')
 				bg = undefined;
@@ -85,12 +80,21 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			obj.set(attr, bg);
 		},
 
+		_pickObj: function(allSlides) {
+			if (allSlides) {
+				return this._editorModel.deck();
+			} else {
+				return this._editorModel.activeSlide();
+			}
+		},
+
 		_setBackgroundImage: function(allSlides, src) {
+			var obj = this._pickObj(allSlides);
 			// TODO: we really have to fix this bastard.
 			if (this._attr == 'Background') {
-
+				obj.set('background', 'img:' + src);
 			} else {
-
+				obj.set('surface', 'img:' + src);
 			}
 		},
 

@@ -49,7 +49,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			this.$el.html(this._$slideContainer);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true}));
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
@@ -78,9 +78,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		_updateBg: function(model, bg) {
 			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			bg = DeckUtils.slideBackground(this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
-
-			this._$slideContainer.addClass('slideContainer ui-selectable ' + bg);
+			this._$slideContainer.addClass('slideContainer ui-selectable');
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
 		},
 
 		_updateSurface: function(model, bg) {
