@@ -4,6 +4,6 @@ var loadPresentation = function() {
 
 	if (presentation) {
 		document.body.innerHTML = presentation;
-		document.body.className = config.surface + " " + document.body.className;
+	//	document.body.className = config.surface + " " + document.body.className;
 	}
 };
