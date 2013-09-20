@@ -445,26 +445,23 @@ var strutSurface = document.querySelector('.strut-surface');
             window.scrollTo(0, 0);
             
             var step = stepsData["impress-" + el.id];
-            
-            if ( activeStep ) {
-                activeStep.classList.remove("active");
-                var state = activeStep.dataset.state;
+
+            function updateSurface(step, operation) {
+                var state = step.dataset.state;
                 if (typeof state == 'string') {
                     state = state.trim().split(' ');
                     for (var i = 0; i < state.length; ++i) {
-                        strutSurface.classList.remove(state[i]);
+                        strutSurface.classList[operation](state[i]);
                     }
                 }
             }
-            el.classList.add("active");
             
-            var state = el.dataset.state;
-            if (typeof state == 'string') {
-                state = state.trim().split(' ');
-                for (var i = 0; i < state.length; ++i) {
-                    strutSurface.classList.add(state[i]);
-                }
+            if ( activeStep ) {
+                activeStep.classList.remove("active");
+                updateSurface(activeStep, 'remove');
             }
+            el.classList.add("active");
+            updateSurface(el, 'add');
             
             // compute target state of the canvas based on given step
             var target = {
