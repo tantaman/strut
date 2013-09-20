@@ -1,5 +1,17 @@
 define(function() {
 	return {
+
+		slideSurface: function(slide, deck) {
+			var result;
+			if (slide) {
+				result = slide.get('surface');
+				if (result == 'defaultbg' || result == null)
+					result = deck.slideSurface();
+			}
+
+			return result;
+		},
+
 		/**
 		 * TODO: simplify me!
 		 *
@@ -17,25 +29,26 @@ define(function() {
 		slideBackground: function(slide, deck, opts) {
 			opts = opts || {};
 			var result;
+			var surface = this.slideSurface(slide, deck);
 			if (slide) {
 				result = slide.get('background');
 				if (result == 'defaultbg' || result == null) {
 					result = deck.slideBackground();
-				} else if (result == 'transparentbg') {
-					result = deck.slideSurface();
+				}
+
+				if (result == 'transparentbg') {
+					result = surface;
 				}
 			} else {
 				result = deck.slideBackground();
 			}
 
 			if (result == 'defaultbg' && opts.surfaceForDefault)
-				result = deck.slideSurface();
+				result = surface;
 
 			if (result == deck.slideSurface()) {
 				if (opts.transparentForSurface)
 					result = '';
-				else if (opts.defaultForSurface)
-					result = 'defaultbg';
 			}
 
 			return result;

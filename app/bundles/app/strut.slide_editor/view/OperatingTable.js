@@ -83,11 +83,22 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		},
 
 		_updateSurface: function(model, bg) {
-			this.$el.removeClass();
-			this.$el.addClass('operatingTable strut-surface ' + bg);
-			var currentBg = this._deck.get('background');
-			if (currentBg == 'defaultbg')
-				this._updateBg(model, bg);
+			bg = (this.model && this.model.get('surface')) || this._deck.get('surface');
+			if (bg) {
+				// TODO: we should move this into a method
+				// if our string format ever changes we are screwed.
+				if (bg.indexOf('img:') != 0) {
+					this.$el.css('background-image', '');
+					this.$el.removeClass();
+					// TODO: we can do this more intelligently
+					this.$el.addClass('operatingTable strut-surface ' + bg);
+				} else {
+					this.$el.css('background-image', 'url(' + bg.substring(4) + ')');
+				}
+			}
+			// var currentBg = this._deck.get('background');
+			// if (currentBg == 'defaultbg')
+			// 	this._updateBg(model, bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for
@@ -188,7 +199,9 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				this.model.on('change:components.add', this._componentAdded, this);
 				this.model.on('change:background', this._updateBg, this);
 				this.model.on('change:markdown', this._renderMarkdown, this);
+				this.model.on('change:surface', this._updateSurface, this);
 				this._updateBg();
+				this._updateSurface(this.model, this.model.get('surface'));
 			}
 			this._renderContents(prevModel);
 			return this;

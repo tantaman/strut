@@ -71,14 +71,8 @@ define(["common/Calcium",
 			},
 
 			// TODO add doc
-			slideBackground: function(bg) {
-				if (bg) {
-					return bg || this.get('surface') || 'defaultbg';
-				}
-				if (this.get('background') == 'defaultbg') {
-					return this.get('surface') || 'defaultbg';
-				}
-				return this.get('background') || this.get('surface') || 'defaultbg';
+			slideBackground: function() {
+				return this.get('background') || 'transparentbg';
 			},
 
 			// TODO add doc
