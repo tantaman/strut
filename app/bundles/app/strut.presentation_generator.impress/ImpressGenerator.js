@@ -74,7 +74,17 @@ function(Handlebars, Math2, marked, DeckUtils) {
 			});
 
 			Handlebars.registerHelper("determineBG", function(slide, deck) {
-				return DeckUtils.slideBackground(slide, deck, {surfaceForDefault: true, transparentForSurface: true});
+				var bg = DeckUtils.slideBackground(slide, deck, {surfaceForDefault: true, transparentForSurface: true});
+				if (bg && bg.indexOf('img:') == 0)
+					return '';
+				return bg;
+			});
+
+			Handlebars.registerHelper("slideBGImg", function(slide) {
+				var bg = slide.get('background');
+				if (bg && bg.indexOf('img:') == 0)
+					return 'background-image: url(' + bg.substring(4) + ');';
+				return '';
 			});
 
 			Handlebars.registerHelper("marked", function(string) {

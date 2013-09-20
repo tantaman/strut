@@ -7,7 +7,7 @@
 {{#slides.models}}
 {{#attributes}}
 <div class="slide-and-notes">
-<div class="slide {{#determineBG .. ../../..}}{{/determineBG}} slideContainer">
+<div class="slide {{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="{{#slideBGImg ..}}{{/slideBGImg}}">
 <div class="reveal themedArea">
 {{#marked markdown}}{{/marked}}
 </div>

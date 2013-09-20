@@ -23,10 +23,6 @@
 	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
 	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
 	position: relative;
-
-	background-size: cover;
-	background-position: center;
-  	background-repeat: no-repeat;
 }
 
 .operatingTable .CodeMirror {
