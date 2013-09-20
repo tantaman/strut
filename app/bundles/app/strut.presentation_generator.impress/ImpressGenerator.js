@@ -93,6 +93,26 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				return '';
 			});
 
+			Handlebars.registerHelper("isBGImg", function(string, options) {
+				if (string && string.indexOf("img:") == 0) {
+					return options.fn(this);
+				} else {
+					return options.inverse(this);
+				}
+			});
+
+			Handlebars.registerHelper("isBGClass", function(string, options) {
+				if (string && string.indexOf("img:") == 0) {
+					return options.inverse(this);
+				} else {
+					return options.fn(this);
+				}
+			});
+
+			Handlebars.registerHelper("getBGImgStyle", function(string) {
+				return 'background-image: url(' + string.substring(4) + ');';
+			});
+
 			var counters = {};
 			Handlebars.registerHelper("counter_set", function(name, val) {
 				counters[name] = val;

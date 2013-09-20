@@ -1,12 +1,13 @@
 <style>
 {{#slides.models}}
 	{{#attributes}}
-		{{#if surface}}
+		{{#isBGImg surface}}
 		.strut-surface.strut-slide-{{@index}} {
 			/*this only works for bg images or custom bgs*/
 			/*for bg classes we'll have to introduce a data api*/
+			{{#getBGImgStyle surface}}{{/getBGImgStyle}}
 		}
-		{{/if}}
+		{{/isBGImg}}
 	{{/attributes}}
 {{/slides.models}}
 </style>
