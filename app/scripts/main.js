@@ -13,8 +13,8 @@ require.config({
     	css: "../scripts/libs/css",
     	bootstrap: "../components/bootstrap/bootstrap",
     	colorpicker: "../components/spectrum/spectrum",
-    	lang: "../locales/lang",
     	handlebars: '../scripts/libs/Handlebars',
+    	lang: "../locales/lang",
     	lexed: '../components/lexed/lexed',
     	codemirror: '../components/codemirror',
     	'marked': '../components/marked/marked',
@@ -100,10 +100,6 @@ require.config({
 
 		'codemirror/modes/markdown': {
 			deps: ['codemirror/codemirror']
-		},
-
-		handlebars: {
-			exports: "Handlebars"
 		}
   }
 });
@@ -199,6 +195,7 @@ log.notice = function(msg) {
 // so we don't have to include the actual amd-app when
 // we go to present.
 require([
+	'handlebars',
 	'lang',
 	'compiled-templates',
 	'colorpicker',
@@ -206,12 +203,11 @@ require([
 	'features',
 	'./StrutLoader',
 	'bootstrap',
-	'handlebars',
 	'jqContextMenu',
 	'css!components/jq-contextmenu/jquery.contextMenu.css',
 	'touchpunch'
 ],
-	function(lang, empt, empty, config, registry, StrutLoader, bootstrap, Handlebars, ContextMenu, css, tp) {
+	function(Handlebars, lang, empt, empty, config, registry, StrutLoader, bootstrap, ContextMenu, css, tp) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)

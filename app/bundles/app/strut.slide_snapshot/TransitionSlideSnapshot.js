@@ -37,6 +37,7 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 			initialize: function() {
 				ThreeDComponentView.prototype.initialize.apply(this, arguments);
 				this.model.on('change:impScale', this._impScaleChanged, this);
+				this.model.on('change:background', this._backgroundChanged, this);
 				this.options.deck.on('change:background', this._backgroundChanged, this);
 			},
 
@@ -94,9 +95,9 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 			 * React on background change.
 			 */
 			_backgroundChanged: function(deck, bg) {
-				bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
 				this._$content.removeClass();
-				this._$content.addClass('content ' + bg);
+				this._$content.addClass('content');
+				this.slideDrawer.applyBackground(this.model, this.options.deck, {transparentForDeckSurface: true, surfaceForDefault: true});
 			},
 
 			/**
@@ -116,12 +117,11 @@ define(["strut/slide_components/view/ThreeDRotatableComponentView",
 				});
 
 				// this.$el.class();
-				var bg = DeckUtils.slideBackground(this.model, this.options.deck, true);
 				this._$content = this.$el.find('.content');
-				this._$content.addClass(bg);
 
 				var $el = this.$el.find('.slideDrawer');
 				this.slideDrawer = new SlideDrawer(this.model, $el);
+				this.slideDrawer.applyBackground(this.model, this.options.deck, {transparentForDeckSurface: true, surfaceForDefault: true});
 
 				this._impScaleChanged();
 

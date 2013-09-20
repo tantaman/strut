@@ -1,4 +1,4 @@
-define(['./Button',
+define(['tantaman/web/widgets/Button',
 	'tantaman/web/widgets/PopoverTextbox'],
 	function(Button, PopoverTextbox) {
 		var popover = new PopoverTextbox({title: 'Classes: '});

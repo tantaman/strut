@@ -1,6 +1,8 @@
+{{#attributes}}
 	<style>
 	{{{customStylesheet}}}
 	</style>
+	{{> PerSlideSurfaceStylesheet}}
 
 	<div id="themeChooser">
 		<b>Theme:</b>
@@ -12,11 +14,11 @@
 			<option value="carousel">Carousel</option>
 		</select>
 	</div>
-	<div id="main">
+	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
 		<article>
 			{{#slides.models}}
 				{{#attributes}}
-					<section class="{{#or background ../../background}}{{/or}} slideContainer" style="width: 1024px; height: 768px">
+					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-{{index}}{{#isBGClass surface}} {{surface}}{{/isBGClass}}">
 						<div class="reveal themedArea">
               			{{#marked markdown}}{{/marked}}
               			</div>
@@ -28,3 +30,4 @@
 			{{/slides.models}}
 		</article>
 	</div>
+{{/attributes}}

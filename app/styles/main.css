@@ -8,7 +8,7 @@ html, body {
 
 body {
   background: #222;
-  background-image: url('img/linen-lighter.png');
+  /*background-image: url('img/linen-lighter.png');*/
 }
 
 .raise {
@@ -18,6 +18,10 @@ body {
 
 .container-fluid {
   padding: 0px;
+}
+
+.transparentPattern {
+  background-image: url('img/checkerboard.png');
 }
 
 a {
@@ -149,6 +153,11 @@ border-bottom-color: #000;
 }
 
 .nav .dropdown-toggle .whiteCaret {
+  border-top-color: white;
+  border-bottom-color: white;
+}
+
+.whiteCaret {
   border-top-color: white;
   border-bottom-color: white;
 }

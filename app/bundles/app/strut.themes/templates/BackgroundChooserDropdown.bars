@@ -1,9 +1,26 @@
 <a class="btn btn-plast dropdown-toggle" data-toggle="dropdown">
 	<i class="icon-tint icon-white"></i>
 	{{#lang title}}{{/lang}}</a>
-<ul class="dropdown-menu horizontalDropdown" role="menu" style="min-width: 127px; width: 127px">
-{{#backgrounds}}
-<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
-{{/backgrounds}}
-<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+<ul class="dropdown-menu" role="menu">
+	<li class="dropdown-submenu">
+		<a tabindex="-1" href="#">All Slides</a>
+		<ul class="dropdown-menu horizontalDropdown allSlides" style="min-width: 127px; width: 127px">
+			{{#backgrounds}}
+			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
+			{{/backgrounds}}
+			<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="imgbg thumbnail" data-class="imgbg"><i class="icon-picture"></i></a></li>
+		</ul>
+	</li>
+	<li class="dropdown-submenu">
+		<a tabindex="-1" href="#">Selected Slide</a>
+		<ul class="dropdown-menu horizontalDropdown" style="min-width: 127px; width: 127px">
+			{{#backgrounds}}
+			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
+			{{/backgrounds}}
+			<li><a class="transparentPattern thumbnail" data-class="transparentbg"></a></li>
+			<li><a class="nobg thumbnail" data-class="defaultbg"></a></li>
+			<li><a class="imgbg thumbnail" data-class="imgbg"><i class="icon-picture"></i></a></li>
+		</ul>
+	</li>
 </ul>

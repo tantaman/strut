@@ -8,13 +8,13 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background', 'slideContainer ui-selectable');
+			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background');
 		}
 	};
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Surfaces, editorModel, '.slideTable', 'Surface', 'slideTable ui-selectable');
+			return new BackgroundProvider(Surfaces, editorModel, '.strut-surface', 'Surface');
 		}
 	};
 
@@ -38,7 +38,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'slide-editor': true,
 						'transition-editor': true
-					}
+					},
+					overflow: false
 				}
 			}, slideBgProviderFactory);
 
@@ -46,8 +47,10 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
+						'slide-editor': true,
 						'transition-editor': true,
-					}
+					},
+					overflow: false
 				}
 			}, surfaceBgProviderFactory);
 
@@ -57,7 +60,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'transition-editor': true,
 						'slide-editor': true
-					}
+					},
+					overflow: true
 				}
 			}, stylesheetProviderFactory);
 
@@ -67,7 +71,8 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 					modes: {
 						'transition-editor': true,
 						'slide-editor': true
-					}
+					},
+					overflow: true
 				}
 			}, classEditorFactory);
 

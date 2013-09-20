@@ -3,43 +3,17 @@ define(['libs/backbone',
 		'strut/slide_components/ComponentFactory',
 		'strut/editor/GlobalEvents',
 		'strut/deck/Component',
-		'./OperatingTableContextMenu',
 		'strut/deck/Utils',
 		'./Utils',
-		'./Tablets',
 		'marked'],
 function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
-	ContextMenu,
 	DeckUtils,
 	Utils,
-	Tablets,
 	marked) {
 	'use strict';
 
-	function MenuModel() {
-
-	}
-
-	MenuModel.prototype = {
-		getBackground: function() {
-			return DeckUtils.slideBackground(this.slide, this.deck);
-		},
-
-		setBackground: function(bg) {
-			this.slide.set('background', bg)
-		},
-
-		editMarkdown: function() {
-			this.slideEditorModel.set('mode', 'markdown');
-		},
-
-		stopEditingMarkdown: function() {
-			this.slideEditorModel.set('mode', 'preview');
-		}
-	};
-
 	return Backbone.View.extend({
-		className: 'operatingTable',
+		className: 'operatingTable strut-surface',
 		events: {
 			"click": "_clicked",
 			"focused": "_focus",
@@ -51,9 +25,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		initialize: function() {
 			this._resize = this._resize.bind(this);
 			$(window).resize(this._resize);
-			this._menuModel = new MenuModel();
-			this._menuModel.deck = this._deck;
-			this._menuModel.slideEditorModel = this._slideEditorModel;
 
 			// Re-render when active slide changes in the deck
 			this._deck.on('change:activeSlide', function(deck, model) {
@@ -69,26 +40,16 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			GlobalEvents.on('delete', this._delete, this);
 
 			this._clipboard = this._editorModel.clipboard;
-			this._tablets = new Tablets(this._slideEditorModel, [
-					{icon: 'markdown',
-					name: '',
-					key: 'markdown'},
-					{icon: 'search',
-					name: '',
-					active: true,
-					key: 'preview'}
-				]);
 
-			ContextMenu.setModel(this._menuModel);
+			// ContextMenu.setModel(this._menuModel);
 		},
 
 		render: function() {
 			this._$slideContainer = $('<div class="slideContainer"></div>')
 			this.$el.html(this._$slideContainer);
-			this.$el.append(this._tablets.render().$el);
 			this._$slideContainer.css(config.slide.size);
 
-			this._$slideContainer.addClass(DeckUtils.slideBackground(this.model, this._deck));
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
 			this._$markdownContent = $('<div class="markdownArea themedArea reveal"></div>');
 			this._$slideContainer.append(this._$markdownContent);
 
@@ -109,21 +70,33 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				self._renderContents();
 			}, 0);
 
+			this.$el.addClass((this._deck.get('surface') || 'defaultbg'));
+
 			return this;
 		},
 
 		_updateBg: function(model, bg) {
 			if (!this._$slideContainer) return;
 			this._$slideContainer.removeClass();
-			bg = DeckUtils.slideBackground(this.model, this._deck);
-
-			this._$slideContainer.addClass('slideContainer ui-selectable ' + bg);
+			this._$slideContainer.addClass('slideContainer ui-selectable');
+			DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
 		},
 
 		_updateSurface: function(model, bg) {
-			var currentBg = this._deck.get('background');
-			if (currentBg == 'defaultbg')
-				this._updateBg(model, bg);
+			bg = DeckUtils.slideSurface(model, this._deck);
+			if (bg) {
+				if (!DeckUtils.isImg(bg)) {
+					this.$el.css('background-image', '');
+					this.$el.removeClass();
+					// TODO: we can do this more intelligently
+					this.$el.addClass('operatingTable strut-surface ' + bg);
+				} else {
+					this.$el.css('background-image', DeckUtils.getImgUrl(bg));
+				}
+			}
+			// var currentBg = this._deck.get('background');
+			// if (currentBg == 'defaultbg')
+			// 	this._updateBg(model, bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for
@@ -224,10 +197,11 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				this.model.on('change:components.add', this._componentAdded, this);
 				this.model.on('change:background', this._updateBg, this);
 				this.model.on('change:markdown', this._renderMarkdown, this);
+				this.model.on('change:surface', this._updateSurface, this);
 				this._updateBg();
+				this._updateSurface(this.model, this.model.get('surface'));
 			}
 			this._renderContents(prevModel);
-			this._menuModel.slide = model;
 			return this;
 		},
 
@@ -237,7 +211,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 			if (this.model)
 				this.model.off(null, null, this);
 			GlobalEvents.off(null, null, this);
-			this._tablets.dispose();
 		},
 
 		_renderContents: function(prevModel) {

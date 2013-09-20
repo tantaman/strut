@@ -62,6 +62,9 @@
 	-webkit-transform-origin: 0 0;
 	-moz-transform-origin: 0 0;
 	position: relative;
+	background-size: cover;
+	background-position: center;
+  	background-repeat: no-repeat;
 }
 
 .slideDrawer .transformContainer {

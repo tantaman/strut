@@ -37,6 +37,18 @@
     transform-origin: 0 0;
 }
 
+.strut-surface {
+  background-size: cover;
+  background-position: center;
+    background-repeat: no-repeat;
+}
+
+.slideContainer {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .bg {
     width: 100%;
     height: 100%;
@@ -80,6 +92,24 @@ ready(function() {
       // { src: 'preview_export/reveal/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
     ]
   });
+
+  var innerBg = document.querySelector('.innerBg');
+  function updateSurface(step, operation) {
+      if (!step) return;
+      var state = step.dataset.state;
+      if (typeof state == 'string') {
+          state = state.trim().split(' ');
+          for (var i = 0; i < state.length; ++i) {
+              innerBg.classList[operation](state[i]);
+          }
+      }
+  }
+  function slideShown(e) {
+    updateSurface(e.previousSlide, 'remove');
+    updateSurface(e.currentSlide, 'add');
+  }
+  Reveal.addEventListener('slidechanged', slideShown);
+  Reveal.addEventListener('ready', slideShown);
  }
 });
 </script>

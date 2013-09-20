@@ -14,6 +14,8 @@ define(['tantaman/web/widgets/Dropdown',
 		function ShapesDropdown(shapes, template, options) {
 			Dropdown.apply(this, arguments);
 			this._editorModel = options.editorModel;
+
+			this.$el.on('click', '.shape', this._selected.bind(this));
 		}
 
 		/**
