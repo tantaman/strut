@@ -1440,9 +1440,25 @@ var Reveal = (function(){
     var indexhBefore = indexh || 0,
       indexvBefore = indexv || 0;
 
+    var slh = h === undefined ? indexh : h;
+    var slv = v === undefined ? indexv : v;
+
+    // TODO: is there an api to get a callback on slide changes?
+    // or a way to add plugins to reveal?  Probably.
+    function getStrutClass(h,v) {
+      var strutClass = 'sturt-slide-' + h;
+      if (v)
+        strutClass += '-' + v;
+
+      return strutClass;
+    }
+    
+    dom.wrapper.classList.remove(getStrutClass(indexhBefore, indexvBefore));
+    dom.wrapper.classList.add(getStrutClass(slh, slv));
+
     // Activate and transition to the new slide
-    indexh = updateSlides( HORIZONTAL_SLIDES_SELECTOR, h === undefined ? indexh : h );
-    indexv = updateSlides( VERTICAL_SLIDES_SELECTOR, v === undefined ? indexv : v );
+    indexh = updateSlides( HORIZONTAL_SLIDES_SELECTOR, slh );
+    indexv = updateSlides( VERTICAL_SLIDES_SELECTOR, slv );
 
     // Update the visibility of slides now that the indices have changed
     updateSlidesVisibility();
@@ -2592,9 +2608,7 @@ var Reveal = (function(){
    * Handler for the window level 'hashchange' event.
    */
   function onWindowHashChange( event ) {
-
     readURL();
-
   }
 
   /**

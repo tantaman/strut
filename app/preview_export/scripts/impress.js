@@ -446,11 +446,11 @@ window.presStarted = true;
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
-                body.classList.remove("impress-on-" + activeStep.id);
+                body.classList.remove("strut-slide-" + activeStep.id.substring(5));
             }
             el.classList.add("active");
             
-            body.classList.add("impress-on-" + el.id);
+            body.classList.add("strut-slide-" + el.id.substring(5));
             
             // compute target state of the canvas based on given step
             var target = {

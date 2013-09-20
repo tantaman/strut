@@ -2,7 +2,7 @@
   <style type="text/css">
     {{{customStylesheet}}}
   </style>
-    <div class="reveal">
+    <div class="reveal strut-surface">
       <div class="slides">
         {{#slides.models}}
         {{#attributes}}
