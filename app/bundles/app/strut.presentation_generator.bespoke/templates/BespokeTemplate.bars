@@ -15,7 +15,7 @@
 		</select>
 	</div>
 	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
-		<article>
+		<article class="innerBg">
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-{{index}}{{#isBGClass surface}} {{surface}}{{/isBGClass}}">
