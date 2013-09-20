@@ -211,7 +211,7 @@
 	font-weight: normal;
 }
 
-.strut-slide::before, .strut-slide::after, .strut-surface::before, .strut-surface::after {
+.strut-surface::before, .strut-surface::after {
   display: block;
   position: absolute;
   background-size: cover;
@@ -223,7 +223,7 @@
   filter: grayscale(0.3) brightness(0.3);
 }
 
-.strut-slide::after, .strut-surface::after {
+.strut-surface::after {
   z-index: 1;
   top: 0;
   left: 0;

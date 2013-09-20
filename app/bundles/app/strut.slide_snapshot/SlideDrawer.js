@@ -38,6 +38,11 @@ define(['strut/deck/Utils'],
 			},
 
 			applyBackground: function(model, deck, opts) {
+				var classList = this.$el[0].classList;
+				var lastClass = classList[classList.length - 1];
+				if (lastClass != 'slideDrawer') {
+					this.$el.removeClass(lastClass);
+				}
 				DeckUtils.applyBackground(this.$el, model, deck, opts);
 			},
 

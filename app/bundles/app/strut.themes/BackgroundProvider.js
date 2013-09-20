@@ -3,7 +3,7 @@ define(['tantaman/web/widgets/Dropdown',
 		'tantaman/web/widgets/ItemImportModal',
 		'lang'],
 function(View, DeckUtils, ItemImportModal, lang) {
-	function BackgroundProvider(backgrounds, editorModel, selector, attr, classes) {
+	function BackgroundProvider(backgrounds, editorModel, selector, attr) {
 		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'],
 			{class: 'iconBtns group-dropdown'});
 		this._editorModel = editorModel;
@@ -18,8 +18,6 @@ function(View, DeckUtils, ItemImportModal, lang) {
 		this._view.$el.on('click', '.thumbnail', this._setBackground);
 
 		this._setBackgroundImage = this._setBackgroundImage.bind(this);
-
-		this._classes = classes;
 	}
 
 	var imageChooserModal = ItemImportModal.get({
@@ -112,8 +110,10 @@ function(View, DeckUtils, ItemImportModal, lang) {
 		},
 
 		_swapBg: function($el, newBg) {
-			$el.removeClass();
-			$el.addClass(this._classes + ' ' + newBg);
+			if (this._lastBg)
+				$el.removeClass(this._lastBg);
+			this._lastBg = newBg;
+			$el.addClass(newBg);
 		},
 
 		dispose: function() {
