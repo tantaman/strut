@@ -119,8 +119,9 @@ function(View, DeckUtils, ItemImportModal, lang) {
 					}
 				}
 			}
-			if (this._lastBg)
+			if (this._lastBg) {
 				$el.removeClass(this._lastBg);
+			}
 			this._lastBg = newBg;
 			$el.addClass(newBg);
 		},

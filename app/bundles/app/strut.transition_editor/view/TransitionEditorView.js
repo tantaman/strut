@@ -53,7 +53,7 @@ define(['libs/backbone',
 				} else {
 					this.$el.css('background-image', '');
 					this.$el.removeClass();
-					this.$el.addClass('slideTable strut-surface ' + surface);
+					this.$el.addClass('slideTable strut-surface ui-selectable ' + surface);
 				}
 			},
 

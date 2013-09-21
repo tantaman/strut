@@ -244,7 +244,7 @@
 }
 
 .innerBg {
-	-webkit-transition: background 2s ease;
-	-moz-transition: background 2s ease;
-	transition: background 2s ease;
+	-webkit-transition: background-color 2s ease;
+	-moz-transition: background-color 2s ease;
+	transition: background-color 2s ease;
 }
