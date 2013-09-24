@@ -212,10 +212,10 @@ require([
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
 			window.browserPrefix = "-webkit-"
+		else if (agent.indexOf('MSIE') >= 0)
+			window.browserPrefix = "-ms-"
 		else if (agent.indexOf('Mozilla') >= 0)
 			window.browserPrefix = "-moz-"
-		else if (agent.indexOf('Microsoft') >= 0)
-			window.browserPrefix = "-ms-"
 		else
 			window.browserPrefix = ""
 
