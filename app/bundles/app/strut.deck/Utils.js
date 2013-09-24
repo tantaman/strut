@@ -16,7 +16,7 @@ define(function() {
 		},
 
 		isImg: function(bg) {
-			return bg.indexOf('img:') == 0;
+			return bg && bg.indexOf('img:') == 0;
 		},
 
 		getImgUrl: function(bg) {
