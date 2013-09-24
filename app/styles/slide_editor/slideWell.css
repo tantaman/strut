@@ -6,7 +6,9 @@
 	left: 0px;
 	top: 56px;
 	bottom: 0px;
+	padding-bottom: 45px;
 	background-image: url('img/linen-gray.png');
+	z-index:2;
 }
 
 .slideWell .slideSnapshot, .slideWell .slidePlaceholder {
