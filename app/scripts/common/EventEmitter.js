@@ -100,16 +100,7 @@ function() {
 			}
 
 			var self = this;
-// TODO: move out.  Don't use a closure here.
 			return {dispose: function() {
-				// var index = self._indexOfSub(subs, callback, context);
-				// 				if (index >= 0) {
-				// 					console.log('removing emitter listener idx: ' + index);
-				// 					subs.splice(index, 1);
-				// 					console.log(subs);
-				// 					if (self._events[topic].length == 0)
-				// 						delete self._events[topic];
-				// 				}
 				self.removeListener(topic, callback, context);
 			}};
 		},

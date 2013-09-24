@@ -1,4 +1,4 @@
-.surf-grad-bg-black {
+.bg-surf-grad-black {
 	background-image: -webkit-radial-gradient(#333, #111);
 	background-image: -moz-radial-gradient(#333, #111);
 	background-image: -ms-radial-gradient(#333, #111);
@@ -6,7 +6,7 @@
 	background-image: radial-gradient(#333, #111);
 }
 
-.surf-grad-bg-light {
+.bg-surf-grad-light {
 	background-image: -webkit-radial-gradient(#FFF, #DDD);
 	background-image: -moz-radial-gradient(#FFF, #DDD);
 	background-image: -ms-radial-gradient(#FFF, #DDD);
@@ -14,7 +14,7 @@
 	background-image: radial-gradient(#FFF, #DDD);
 }
 
-.surf-grad-bg-smoke {
+.bg-surf-grad-smoke {
 	background-image: -webkit-radial-gradient(#EEE, #CCC);
 	background-image: -moz-radial-gradient(#EEE, #CCC);
 	background-image: -ms-radial-gradient(#EEE, #CCC);
@@ -22,7 +22,7 @@
 	background-image: radial-gradient(#EEE, #CCC);
 }
 
-.surf-grad-bg-orange {
+.bg-surf-grad-orange {
 	background-image: -webkit-radial-gradient(#945353, #774040);
 	background-image: -moz-radial-gradient(#945353, #774040);
 	background-image: -ms-radial-gradient(#945353, #774040);
@@ -30,7 +30,7 @@
 	background-image: radial-gradient(#945353, #774040);
 }
 
-.surf-grad-bg-yellow {
+.bg-surf-grad-yellow {
 	background-image: -webkit-radial-gradient(#cfb98c, #D1B377);
 	background-image: -moz-radial-gradient(#cfb98c, #D1B377);
 	background-image: -ms-radial-gradient(#cfb98c, #D1B377);
@@ -38,7 +38,7 @@
 	background-image: radial-gradient(#cfb98c, #D1B377);
 }
 
-.surf-grad-bg-darkgreen {
+.bg-surf-grad-darkgreen {
 	background-image: -webkit-radial-gradient(#4a939e, #134952);
 	background-image: -moz-radial-gradient(#4a939e, #134952);
 	background-image: -ms-radial-gradient(#4a939e, #134952);
@@ -46,7 +46,7 @@
 	background-image: radial-gradient(#4a939e, #134952);
 }
 
-.surf-grad-bg-sky {
+.bg-surf-grad-sky {
 	background-image: -webkit-radial-gradient(#5e699c, #515E99);
 	background-image: -moz-radial-gradient(#5e699c, #515E99);
 	background-image: -ms-radial-gradient(#5e699c, #515E99);
@@ -54,7 +54,7 @@
 	background-image: radial-gradient(#5e699c, #515E99);
 }
 
-.surf-grad-bg-lavender {
+.bg-surf-grad-lavender {
 	background-image: -webkit-radial-gradient(#554b61, #443C4D);
 	background-image: -moz-radial-gradient(#554b61, #443C4D);
 	background-image: -ms-radial-gradient(#554b61, #443C4D);
@@ -62,7 +62,7 @@
 	background-image: radial-gradient(#554b61, #443C4D);
 }
 
-.surf-grad-bg-purple {
+.bg-surf-grad-purple {
 	background-image: -webkit-radial-gradient(#775796, #6C478F);
 	background-image: -moz-radial-gradient(#775796, #6C478F);
 	background-image: -ms-radial-gradient(#775796, #6C478F);
@@ -70,7 +70,7 @@
 	background-image: radial-gradient(#775796, #6C478F);
 }
 
-.surf-grad-bg-salmon {
+.bg-surf-grad-salmon {
 	background-image: -webkit-radial-gradient(#cfa2a2, #C98D8D);
 	background-image: -moz-radial-gradient(#cfa2a2, #C98D8D);
 	background-image: -ms-radial-gradient(#cfa2a2, #C98D8D);
@@ -78,7 +78,7 @@
 	background-image: radial-gradient(#cfa2a2, #C98D8D);
 }
 
-.surf-grad-bg-grass {
+.bg-surf-grad-grass {
 	background-image: -webkit-radial-gradient(#6c855d, #597847);
 	background-image: -moz-radial-gradient(#6c855d, #597847);
 	background-image: -ms-radial-gradient(#6c855d, #597847);
