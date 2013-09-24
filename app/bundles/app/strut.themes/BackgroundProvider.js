@@ -61,8 +61,6 @@ function(View, DeckUtils, ItemImportModal, lang) {
 				imageChooserModal.show(function(src) {
 					self._setBackgroundImage(allSlides, src);
 				});
-				// launch the modal to select an image
-				// set the selected image url as the slide's background
 				return;
 			}
 
@@ -111,13 +109,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 
 		_swapBg: function($el, newBg) {
 			if (!this._lastBg) {
-				var classList = $el[0].classList;
-				for (var i = 0; i < classList.length; ++i) {
-					if (classList[i].indexOf('-bg-') != -1) {
-						this._lastBg = classList[i];
-						break;
-					}
-				}
+				this._lastBg = $el.attr('class').match(/bg-[^ ]+/);
 			}
 			if (this._lastBg) {
 				$el.removeClass(this._lastBg);
