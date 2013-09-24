@@ -4,6 +4,15 @@
 	text-shadow: 0 2px 2px rgba(0, 0, 0, .3);
 }
 
+
+.bg-default {
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
+}
+
 .bg-solid-orange {
 	background-color: #774040;
 }

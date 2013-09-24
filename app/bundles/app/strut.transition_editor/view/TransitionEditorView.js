@@ -101,7 +101,6 @@ define(['libs/backbone',
 				this.$el.html('');
 				var deck = this.model.deck();
 				this._surfaceChanged(deck, deck.get('surface'));
-				// this.$el.addClass(deck.get('surface') || 'defaultbg');
 
 				var colCnt = 6;
 				var cnt = 0;

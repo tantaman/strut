@@ -32,7 +32,7 @@ define(["common/Calcium",
 				slides.on("add", this._slideAdded, this);
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
-				this.set('background', 'defaultbg');
+				this.set('background', 'bg-default');
 			},
 
 			/**
@@ -77,7 +77,7 @@ define(["common/Calcium",
 
 			// TODO add doc
 			slideSurface: function() {
-				return this.get('surface') || 'defaultbg';
+				return this.get('surface') || 'bg-default';
 			},
 
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.

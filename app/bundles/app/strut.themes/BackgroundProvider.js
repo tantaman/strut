@@ -41,7 +41,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			if (klass == null) return;
 			if (klass == 'imgbg') return;
 
-			if (klass == 'defaultbg') {
+			if (klass == 'bg-default') {
 				if (this._attr == 'Background') {
 					if ($(e.currentTarget).parent().parent().is('.allSlides')) {
 						klass = this._editorModel.deck().slideSurface();
