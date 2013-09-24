@@ -9,6 +9,9 @@ define(function() {
 					result = deck.slideSurface();
 			}
 
+			if (result == null)
+				result = deck.slideSurface();
+
 			return result;
 		},
 
