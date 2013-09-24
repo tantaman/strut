@@ -12,7 +12,7 @@
 
 .navbar-inner {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .row-fluid .header {
