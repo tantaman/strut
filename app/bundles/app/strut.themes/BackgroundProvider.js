@@ -3,8 +3,13 @@ define(['tantaman/web/widgets/Dropdown',
 		'tantaman/web/widgets/ItemImportModal',
 		'lang'],
 function(View, DeckUtils, ItemImportModal, lang) {
-	function BackgroundProvider(backgrounds, editorModel, selector, attr) {
-		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'],
+	function BackgroundProvider(opts) {
+		var backgrounds = opts.backgrounds;
+		var editorModel = opts.editorModel;
+		var selector = opts.selector;
+		var attr = opts.attr;
+
+		this._view = new View(backgrounds, opts.template,
 			{class: 'iconBtns group-dropdown'});
 		this._editorModel = editorModel;
 		this._selector = selector;

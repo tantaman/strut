@@ -8,7 +8,7 @@
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 			{{/backgrounds}}
-			<li><a class="transparentPattern thumbnail" data-class="bg-transparent"></a></li>
+			<li><a class="nobg thumbnail" data-class="bg-default"></a></li>
 			<li><a class="bg-img thumbnail" data-class="bg-img"><i class="icon-picture"></i></a></li>
 		</ul>
 	</li>
@@ -18,7 +18,6 @@
 			{{#backgrounds}}
 			<li><a class="{{klass}} thumbnail" alt="{{description}}" data-class="{{klass}}"></a></li>
 			{{/backgrounds}}
-			<li><a class="transparentPattern thumbnail" data-class="bg-transparent"></a></li>
 			<li><a class="nobg thumbnail" data-class="bg-default"></a></li>
 			<li><a class="bg-img thumbnail" data-class="bg-img"><i class="icon-picture"></i></a></li>
 		</ul>
