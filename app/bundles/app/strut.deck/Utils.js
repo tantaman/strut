@@ -44,7 +44,7 @@ define(function() {
 					result = deck.slideBackground();
 				}
 
-				if (result == 'transparentbg') {
+				if (result == 'bg-transparent') {
 					result = surface;
 				}
 			} else {

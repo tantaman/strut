@@ -72,7 +72,7 @@ define(["common/Calcium",
 
 			// TODO add doc
 			slideBackground: function() {
-				return this.get('background') || 'transparentbg';
+				return this.get('background') || 'bg-transparent';
 			},
 
 			// TODO add doc
