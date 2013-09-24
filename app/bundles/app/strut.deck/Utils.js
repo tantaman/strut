@@ -61,13 +61,32 @@ define(function() {
 			if (result == deck.slideSurface() && opts.transparentForDeckSurface)
 				result = '';
 
-			if (result == 'bg-default')
-				return '';
-
 			return result;
 		},
 
+		getCurrentBackgrounds: function($el) {
+			return $el.attr('class').match(/bg-[^ ]+/g);
+		},
+
+		getCurrentBackground: function($el) {
+			var bg = this.getCurrentBackgrounds($el);
+			if (bg)
+				return bg[0];
+		},
+
+		removeCurrentBackground: function($el) {
+			var bgs = this.getCurrentBackgrounds($el);
+			if (bgs) {
+				bgs.forEach(function(bg) {
+					$el.removeClass(bg);
+				});
+			}
+				
+			return bgs;
+		},
+
 		applyBackground: function($el, slide, deck, opts) {
+			this.removeCurrentBackground($el);
 			var bg = this.slideBackground(slide, deck, opts);
 			if (bg.indexOf('img:') == 0) {
 				$el.css('background-image', 'url(' + bg.substring(4) + ')');

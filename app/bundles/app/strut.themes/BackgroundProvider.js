@@ -109,7 +109,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 
 		_swapBg: function($el, newBg) {
 			if (!this._lastBg) {
-				this._lastBg = $el.attr('class').match(/bg-[^ ]+/);
+				this._lastBg = DeckUtils.getCurrentBackground($el);
 			}
 			if (this._lastBg) {
 				$el.removeClass(this._lastBg);
