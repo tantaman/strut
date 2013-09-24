@@ -39,7 +39,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			var $container = $(this._selector);
 			var klass = e.currentTarget.dataset['class'];
 			if (klass == null) return;
-			if (klass == 'imgbg') return;
+			if (klass == 'bg-img') return;
 
 			if (klass == 'bg-default') {
 				if (this._attr == 'Background') {
@@ -56,7 +56,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 		_setBackground: function(e) {
 			var bg = e.currentTarget.dataset['class'];
 			var allSlides = $(e.currentTarget).parent().parent().is('.allSlides');
-			if (bg == 'imgbg') {
+			if (bg == 'bg-img') {
 				var self = this;
 				imageChooserModal.show(function(src) {
 					self._setBackgroundImage(allSlides, src);
