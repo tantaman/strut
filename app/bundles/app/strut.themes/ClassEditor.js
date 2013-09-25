@@ -1,9 +1,6 @@
 define(['tantaman/web/widgets/Button',
 	'tantaman/web/widgets/PopoverTextbox'],
 	function(Button, PopoverTextbox) {
-		var popover = new PopoverTextbox({title: 'Classes: '});
-		popover.render();
-
 		/**
 		 * Allows to assign custom css classes to elements on slide.
 		 *
@@ -23,7 +20,8 @@ define(['tantaman/web/widgets/Button',
 			this._button.disable();
 
 			this._deck = editorModel.deck();
-			this._popover = popover;
+			this._popover = new PopoverTextbox({title: 'Classes: '});
+			this._popover.render();
 			var activeSlide = this._deck.get('activeSlide');
 			if (activeSlide) {
 				this._activeSlideChanged(this._deck, activeSlide);
@@ -87,12 +85,12 @@ define(['tantaman/web/widgets/Button',
 			_launch: function() {
 				if (!this._appended) {
 					var $slideEditArea = $('.slideContainer');
-					$slideEditArea.append(popover.$el);
+					$slideEditArea.append(this._popover.$el);
 					this._appended = true;
 				}
 
 				if (this._activeComponents.length) {
-				this._popover.show({
+					this._popover.show({
 						left: this._activeComponents[0].get('x'),
 						top: this._activeComponents[0].get('y')
 					}, this._classesSaved, this._activeComponents[0].customClasses());
@@ -122,7 +120,7 @@ define(['tantaman/web/widgets/Button',
 				if (this._activeSlide)
 					this._activeSlide.off(null, null, this);
 				this._deck.off(null, null, this);
-				popover.$el.remove();
+				this._popover.remove();
 			}
 		};
 

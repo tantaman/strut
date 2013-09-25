@@ -109,16 +109,24 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			if (bg == null)
 				bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
 			var $container = $(this._selector);
-			this._swapBg($container, bg);
+			if (DeckUtils.isImg(bg)) {
+				this._removeLastBg($container);
+			} else {
+				this._swapBg($container, bg);
+			}
 		},
 
-		_swapBg: function($el, newBg) {
+		_removeLastBg: function($el) {
 			if (!this._lastBg) {
 				this._lastBg = DeckUtils.getCurrentBackground($el);
 			}
 			if (this._lastBg) {
 				$el.removeClass(this._lastBg);
 			}
+		},
+
+		_swapBg: function($el, newBg) {
+			this._removeLastBg($el);
 			this._lastBg = newBg;
 			$el.addClass(newBg);
 		},
