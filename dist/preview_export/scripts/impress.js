@@ -1,3 +1,10 @@
+function startPres(document, window) {
+if (window.presStarted)
+    return;
+window.presStarted = true;
+
+var innerBg = document.querySelector('.innerBg');
+
 /**
  * impress.js
  *
@@ -19,11 +26,7 @@
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, latedef:true, newcap:true,
          noarg:true, noempty:true, undef:true, strict:true, browser:true */
 
-function startPres(document, window) {
-if (window.presStarted)
-    return;
-window.presStarted = true;
-// You are one of those who like to know how thing work inside?
+// You are one of those who like to know how things work inside?
 // Let me show you the cogs that make impress.js run...
 (function ( document, window ) {
     'use strict';
@@ -178,12 +181,12 @@ window.presStarted = true;
                            
                           // and `classList` and `dataset` APIs
                            ( body.classList ) &&
-                           ( body.dataset ) &&
+                           ( body.dataset );
                            
                           // but some mobile devices need to be blacklisted,
                           // because their CSS 3D support or hardware is not
                           // good enough to run impress.js properly, sorry...
-                           ( ua.search(/(iphone)/) === -1 );
+                          // ( ua.search(/(iphone)|(ipod)|(android)/) === -1 );
     
     if (!impressSupported) {
         // we can't be sure that `classList` is supported
@@ -221,8 +224,8 @@ window.presStarted = true;
     // It's the core `impress` function that returns the impress.js API
     // for a presentation based on the element with given id ('impress'
     // by default).
-    var impress = window.pres = window.impress = function ( rootId ) {
-        var previousInit = body.classList.contains("impress-enabled");
+    var impress = window.impress = function ( rootId ) {
+        
         // If impress.js is not supported by the browser return a dummy API
         // it may not be a perfect solution but we return early and avoid
         // running code that may use features not implemented in the browser.
@@ -262,11 +265,7 @@ window.presStarted = true;
         
         // root presentation elements
         var root = byId( rootId );
-        if (previousInit) {
-            var canvas = root.children[0];
-        } else {
-            var canvas = document.createElement("div");
-        }
+        var canvas = document.createElement("div");
         
         var initialized = false;
         
@@ -363,12 +362,10 @@ window.presStarted = true;
             windowScale = computeWindowScale( config );
             
             // wrap steps with "canvas" element
-            if (!previousInit) {
-                arrayify( root.childNodes ).forEach(function ( el ) {
-                    canvas.appendChild( el );
-                });
-                root.appendChild(canvas);
-            }
+            arrayify( root.childNodes ).forEach(function ( el ) {
+                canvas.appendChild( el );
+            });
+            root.appendChild(canvas);
             
             // set initial styles
             document.documentElement.style.height = "100%";
@@ -448,14 +445,23 @@ window.presStarted = true;
             window.scrollTo(0, 0);
             
             var step = stepsData["impress-" + el.id];
+
+            function updateSurface(step, operation) {
+                var state = step.dataset.state;
+                if (typeof state == 'string') {
+                    state = state.trim().split(' ');
+                    for (var i = 0; i < state.length; ++i) {
+                        innerBg.classList[operation](state[i]);
+                    }
+                }
+            }
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
-                body.classList.remove("impress-on-" + activeStep.id);
+                updateSurface(activeStep, 'remove');
             }
             el.classList.add("active");
-            
-            body.classList.add("impress-on-" + el.id);
+            updateSurface(el, 'add');
             
             // compute target state of the canvas based on given step
             var target = {
@@ -619,8 +625,7 @@ window.presStarted = true;
             // makes transtion laggy.
             // BUG: http://code.google.com/p/chromium/issues/detail?id=62820
             root.addEventListener("impress:stepenter", function (event) {
-                if (!window.disableHash)
-                    window.location.hash = lastHash = "#/" + event.target.id;
+                window.location.hash = lastHash = "#/" + event.target.id;
             }, false);
             
             window.addEventListener("hashchange", function () {
@@ -795,12 +800,20 @@ window.presStarted = true;
         // rescale presentation when window is resized
         window.addEventListener("resize", throttle(function () {
             // force going to active step again, to trigger rescaling
-            api.goto( document.querySelector(".active"), 500 );
+            api.goto( document.querySelector(".step.active"), 500 );
         }, 250), false);
         
     }, false);
         
 })(document, window);
+
+// THAT'S ALL FOLKS!
+//
+// Thanks for reading it all.
+// Or thanks for scrolling down and reading the last part.
+//
+// I've learnt a lot when building impress.js and I hope this code and comments
+// will help somebody learn at least some part of it.
 
 
 document.addEventListener("keydown", function(e) {
@@ -810,14 +823,3 @@ document.addEventListener("keydown", function(e) {
 }, false);
 
 }
-
-if ( typeof define === "function" && define.amd ) {
-    define(function () { return startPres; } );
-}
-// THAT'S ALL FOLKS!
-//
-// Thanks for reading it all.
-// Or thanks for scrolling down and reading the last part.
-//
-// I've learnt a lot when building impress.js and I hope this code and comments
-// will help somebody learn at least some part of it.

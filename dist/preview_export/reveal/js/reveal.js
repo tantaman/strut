@@ -1412,7 +1412,6 @@ var Reveal = (function(){
    * @param {int} o Optional origin for use in multimaster environments
    */
   function slide( h, v, f, o ) {
-
     // Remember where we were at before
     previousSlide = currentSlide;
 
@@ -1440,9 +1439,12 @@ var Reveal = (function(){
     var indexhBefore = indexh || 0,
       indexvBefore = indexv || 0;
 
+    var slh = h === undefined ? indexh : h;
+    var slv = v === undefined ? indexv : v;
+
     // Activate and transition to the new slide
-    indexh = updateSlides( HORIZONTAL_SLIDES_SELECTOR, h === undefined ? indexh : h );
-    indexv = updateSlides( VERTICAL_SLIDES_SELECTOR, v === undefined ? indexv : v );
+    indexh = updateSlides( HORIZONTAL_SLIDES_SELECTOR, slh );
+    indexv = updateSlides( VERTICAL_SLIDES_SELECTOR, slv );
 
     // Update the visibility of slides now that the indices have changed
     updateSlidesVisibility();
@@ -1460,15 +1462,18 @@ var Reveal = (function(){
         }
       }
 
-      document.documentElement.classList.add( state[i] );
-
-      // Dispatch custom event matching the state's name
-      dispatchEvent( state[i] );
+      if (state[i] != '') {
+        document.documentElement.classList.add( state[i] );
+        // Dispatch custom event matching the state's name
+        dispatchEvent( state[i] );
+      }
     }
 
     // Clean up the remains of the previous state
     while( stateBefore.length ) {
-      document.documentElement.classList.remove( stateBefore.pop() );
+      var sbefore = stateBefore.pop();
+      if (sbefore != '')
+      document.documentElement.classList.remove( sbefore );
     }
 
     // If the overview is active, re-activate it to update positions
@@ -2592,9 +2597,7 @@ var Reveal = (function(){
    * Handler for the window level 'hashchange' event.
    */
   function onWindowHashChange( event ) {
-
     readURL();
-
   }
 
   /**

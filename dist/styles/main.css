@@ -2275,8 +2275,8 @@ table th[class*="span"],
   background-image: url("img/glyphicons-halflings-white.png");
 }
 
-.icon-markdown {
-  background: url("img/markdown.png");
+.icon-markdown-white {
+  background: url("img/markdown-white.png");
   background-repeat: no-repeat;
   width: 24px;
 }
@@ -8104,7 +8104,7 @@ html, body {
 
 body {
   background: #222;
-  background-image: url('img/linen-lighter.png');
+  /*background-image: url('img/linen-lighter.png');*/
 }
 
 .raise {
@@ -8114,6 +8114,10 @@ body {
 
 .container-fluid {
   padding: 0px;
+}
+
+.transparentPattern {
+  background-image: url('img/checkerboard.png');
 }
 
 a {
@@ -8249,6 +8253,11 @@ border-bottom-color: #000;
   border-bottom-color: white;
 }
 
+.whiteCaret {
+  border-top-color: white;
+  border-bottom-color: white;
+}
+
 .create-comp-buttons .btn-group > .btn {
   font-size: 13px;
 }
@@ -8256,16 +8265,6 @@ border-bottom-color: #000;
 .theme-buttons .btn-group > .btn {
   font-size: 13px;
 }
-
-
-.defaultbg {
-  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
-  background: radial-gradient(#F0F0F0, #BEBEBE);
-}
-
 
 /*Button Group Dropdown hack*/
 .btn-group.group-dropdown {
@@ -8549,4 +8548,42 @@ and (max-device-width : 1024px)  {
 	padding: 20px 0px 0px;
 	line-height: 1.2em;
 	font-weight: normal;
+}
+
+/*.strut-surface::before, .strut-surface::after {
+  display: block;
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  content: "";
+  -webkit-filter: grayscale(0.3) brightness(0.3);
+  -moz-filter: grayscale(0.3) brightness(0.3);
+  filter: grayscale(0.3) brightness(0.3);
+}
+
+.strut-surface::after {
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}*/
+
+.strut-surface, .innerBg {
+	background-size: cover;
+	background-position: center;
+  	background-repeat: no-repeat;
+}
+
+.slideContainer {
+	background-size: cover;
+	background-position: center;
+  	background-repeat: no-repeat;
+}
+
+.innerBg {
+	-webkit-transition: background-color 2s ease;
+	-moz-transition: background-color 2s ease;
+	transition: background-color 2s ease;
 }
