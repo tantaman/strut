@@ -225,6 +225,7 @@ var innerBg = document.querySelector('.innerBg');
     // for a presentation based on the element with given id ('impress'
     // by default).
     var impress = window.impress = function ( rootId ) {
+        var previousInit = body.classList.contains("impress-enabled");
         
         // If impress.js is not supported by the browser return a dummy API
         // it may not be a perfect solution but we return early and avoid
@@ -265,7 +266,11 @@ var innerBg = document.querySelector('.innerBg');
         
         // root presentation elements
         var root = byId( rootId );
-        var canvas = document.createElement("div");
+        if (previousInit) {
+            var canvas = root.children[0];
+        } else {
+            var canvas = document.createElement("div");
+        }
         
         var initialized = false;
         
@@ -362,10 +367,12 @@ var innerBg = document.querySelector('.innerBg');
             windowScale = computeWindowScale( config );
             
             // wrap steps with "canvas" element
-            arrayify( root.childNodes ).forEach(function ( el ) {
-                canvas.appendChild( el );
-            });
-            root.appendChild(canvas);
+            if (!previousInit) {
+                arrayify( root.childNodes ).forEach(function ( el ) {
+                    canvas.appendChild( el );
+                });
+                root.appendChild(canvas);
+            }
             
             // set initial styles
             document.documentElement.style.height = "100%";
