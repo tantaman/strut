@@ -13,7 +13,8 @@ function(de, en, es, fr, nl, handlebars) {
 		nl: nl
 	};
 
-	var result = langs[window.navigator.language.split('-')[0]] || langs.en;
+	var lang = window.navigator.language || window.navigator.userLanguage;
+	var result = langs[lang.split('-')[0]] || langs.en;
 	handlebars.registerHelper("lang", function(key) {
 		return result[key];
 	});
