@@ -110,7 +110,13 @@ define(["./ComponentView", "libs/etch",
 					// Focus editor and select all text.
 					if (!this.editing) {
 						this.$el.find(".content").get(0).focus();
-						document.execCommand('selectAll', false, null);
+						try {
+							document.execCommand('selectAll', false, null);
+						} catch (e) {
+							// firefox failboats on this command
+							// for some reason.  hence the try/catch
+							// console.log(e);
+						}
 					}
 				}
 				this.allowDragging = false;

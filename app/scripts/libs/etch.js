@@ -413,7 +413,7 @@ define(['libs/backbone'], function(Backbone) {
       catch (err) {
         // expecting to just eat IE8 error, but if different error, rethrow
         if (err.message !== "Invalid argument.") {
-          throw err;
+          // console.log(err);
         }
       }
 
