@@ -71,9 +71,9 @@ function(lang, Backbone, AvailableBackgrounds) {
 		};
 	});
 
-	backgroundItems["background:defaultbg"] = {
+	backgroundItems["background:bg-default"] = {
 		name: lang.invisible,
-		background: 'defaultbg'
+		background: 'bg-default'
 	};
 
 	backgroundItems["background:"] = {

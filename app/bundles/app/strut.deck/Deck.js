@@ -7,8 +7,9 @@ define(["common/Calcium",
 	"./SlideCommands",
 	'tantaman/web/undo_support/CmdListFactory',
 	'strut/deck/Slide',
-	"strut/editor/GlobalEvents"],
-	function(Backbone, SlideCollection, SlideCommands, CmdListFactory, Slide, key) {
+	"strut/editor/GlobalEvents",
+	'./DeckUpgrade'],
+	function(Backbone, SlideCollection, SlideCommands, CmdListFactory, Slide, key, DeckUpgrade) {
 
 		/**
 		 * This represents a slide deck.  It has a title, a currently active slide, a collection of slides, the filename on
@@ -32,7 +33,7 @@ define(["common/Calcium",
 				slides.on("add", this._slideAdded, this);
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
-				this.set('background', 'defaultbg');
+				this.set('background', 'bg-default');
 			},
 
 			/**
@@ -72,12 +73,12 @@ define(["common/Calcium",
 
 			// TODO add doc
 			slideBackground: function() {
-				return this.get('background') || 'transparentbg';
+				return this.get('background') || 'bg-transparent';
 			},
 
 			// TODO add doc
 			slideSurface: function() {
-				return this.get('surface') || 'defaultbg';
+				return this.get('surface') || 'bg-default';
 			},
 
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.
@@ -88,6 +89,7 @@ define(["common/Calcium",
 			 * @returns {*}
 			 */
 			"import": function(rawObj) {
+				DeckUpgrade.to1_0(rawObj);
 				var activeSlide, slides;
 				slides = this.get("slides");
 				activeSlide = this.get("activeSlide");
@@ -99,6 +101,7 @@ define(["common/Calcium",
 				this.set("fileName", rawObj.fileName);
 				this.set('surface', rawObj.surface);
 				this.set('customStylesheet', rawObj.customStylesheet);
+				this.set('deckVersion', rawObj.deckVersion);
 				this.undoHistory.clear();
 
 				// TODO: go through and dispose of all old slides...?

@@ -170,16 +170,6 @@ border-bottom-color: #000;
   font-size: 13px;
 }
 
-
-.defaultbg {
-  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
-  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
-  background: radial-gradient(#F0F0F0, #BEBEBE);
-}
-
-
 /*Button Group Dropdown hack*/
 .btn-group.group-dropdown {
   padding: 0px;

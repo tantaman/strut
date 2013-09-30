@@ -5,6 +5,12 @@
 	}
 {{/isBGImg}}
 
+{{#isBGImg background}}
+	.slideContainer {
+		{{#getBGImgStyle background}}{{/getBGImgStyle}}
+	}
+{{/isBGImg}}
+
 {{#slides.models}}
 	{{#attributes}}
 		{{#isBGImg surface}}
@@ -12,6 +18,12 @@
 			/*this only works for bg images or custom bgs*/
 			/*for bg classes we'll have to introduce a data api*/
 			{{#getBGImgStyle surface}}{{/getBGImgStyle}}
+		}
+		{{/isBGImg}}
+
+		{{#isBGImg background}}
+		.slideContainer.strut-slide-{{@index}} {
+			{{#getBGImgStyle background}}{{/getBGImgStyle}}
 		}
 		{{/isBGImg}}
 	{{/attributes}}

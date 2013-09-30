@@ -3,8 +3,13 @@ define(['tantaman/web/widgets/Dropdown',
 		'tantaman/web/widgets/ItemImportModal',
 		'lang'],
 function(View, DeckUtils, ItemImportModal, lang) {
-	function BackgroundProvider(backgrounds, editorModel, selector, attr) {
-		this._view = new View(backgrounds, JST['strut.themes/BackgroundChooserDropdown'],
+	function BackgroundProvider(opts) {
+		var backgrounds = opts.backgrounds;
+		var editorModel = opts.editorModel;
+		var selector = opts.selector;
+		var attr = opts.attr;
+
+		this._view = new View(backgrounds, opts.template,
 			{class: 'iconBtns group-dropdown'});
 		this._editorModel = editorModel;
 		this._selector = selector;
@@ -39,9 +44,9 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			var $container = $(this._selector);
 			var klass = e.currentTarget.dataset['class'];
 			if (klass == null) return;
-			if (klass == 'imgbg') return;
+			if (klass == 'bg-img') return;
 
-			if (klass == 'defaultbg') {
+			if (klass == 'bg-default') {
 				if (this._attr == 'Background') {
 					if ($(e.currentTarget).parent().parent().is('.allSlides')) {
 						klass = this._editorModel.deck().slideSurface();
@@ -56,13 +61,11 @@ function(View, DeckUtils, ItemImportModal, lang) {
 		_setBackground: function(e) {
 			var bg = e.currentTarget.dataset['class'];
 			var allSlides = $(e.currentTarget).parent().parent().is('.allSlides');
-			if (bg == 'imgbg') {
+			if (bg == 'bg-img') {
 				var self = this;
 				imageChooserModal.show(function(src) {
 					self._setBackgroundImage(allSlides, src);
 				});
-				// launch the modal to select an image
-				// set the selected image url as the slide's background
 				return;
 			}
 
@@ -106,21 +109,24 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			if (bg == null)
 				bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
 			var $container = $(this._selector);
-			this._swapBg($container, bg);
+			if (DeckUtils.isImg(bg)) {
+				this._removeLastBg($container);
+			} else {
+				this._swapBg($container, bg);
+			}
+		},
+
+		_removeLastBg: function($el) {
+			if (!this._lastBg) {
+				this._lastBg = DeckUtils.getCurrentBackground($el);
+			}
+			if (this._lastBg) {
+				$el.removeClass(this._lastBg);
+			}
 		},
 
 		_swapBg: function($el, newBg) {
-			if (!this._lastBg) {
-				var classList = $el[0].classList;
-				for (var i = 0; i < classList.length; ++i) {
-					if (classList[i].indexOf('-bg-') != -1) {
-						this._lastBg = classList[i];
-						break;
-					}
-				}
-			}
-			if (this._lastBg)
-				$el.removeClass(this._lastBg);
+			this._removeLastBg($el);
 			this._lastBg = newBg;
 			$el.addClass(newBg);
 		},

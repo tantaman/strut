@@ -80,6 +80,13 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				return bg;
 			});
 
+			Handlebars.registerHelper("determineSurface", function(slide, deck) {
+				var bg = DeckUtils.slideSurface(slide, deck);
+				if (bg && bg != 'bg-default' && bg.indexOf('img:') == -1)
+					return ' ' + bg + ' ';
+				return '';
+			});
+
 			Handlebars.registerHelper("slideBGImg", function(slide) {
 				var bg = slide.get('background');
 				if (bg && bg.indexOf('img:') == 0)

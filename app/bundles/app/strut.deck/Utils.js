@@ -5,15 +5,18 @@ define(function() {
 			var result;
 			if (slide) {
 				result = slide.get('surface');
-				if (result == 'defaultbg' || result == null)
+				if (result == 'bg-default' || result == null)
 					result = deck.slideSurface();
 			}
+
+			if (result == null)
+				result = deck.slideSurface();
 
 			return result;
 		},
 
 		isImg: function(bg) {
-			return bg.indexOf('img:') == 0;
+			return bg && bg.indexOf('img:') == 0;
 		},
 
 		getImgUrl: function(bg) {
@@ -31,7 +34,7 @@ define(function() {
 		 * Other problems arise from the fact that legacy presentations don't have their
 		 * background attributes set.
 		 *
-		 * also defaultbg refers to the deck background if from a slide
+		 * also bg-default refers to the deck background if from a slide
 		 * and the surface background if from a deck.
 		 */
 		slideBackground: function(slide, deck, opts) {
@@ -40,18 +43,18 @@ define(function() {
 			var surface = this.slideSurface(slide, deck);
 			if (slide) {
 				result = slide.get('background');
-				if (result == 'defaultbg' || result == null) {
+				if (result == 'bg-default' || result == null) {
 					result = deck.slideBackground();
 				}
 
-				if (result == 'transparentbg') {
+				if (result == 'bg-transparent') {
 					result = surface;
 				}
 			} else {
 				result = deck.slideBackground();
 			}
 
-			if (result == 'defaultbg' && opts.surfaceForDefault)
+			if (result == 'bg-default' && opts.surfaceForDefault)
 				result = surface;
 
 			if (result == surface && opts.transparentForSurface) {
@@ -61,13 +64,32 @@ define(function() {
 			if (result == deck.slideSurface() && opts.transparentForDeckSurface)
 				result = '';
 
-			if (result == 'defaultbg')
-				return '';
-
 			return result;
 		},
 
+		getCurrentBackgrounds: function($el) {
+			return $el.attr('class').match(/bg-[^ ]+/g);
+		},
+
+		getCurrentBackground: function($el) {
+			var bg = this.getCurrentBackgrounds($el);
+			if (bg)
+				return bg[0];
+		},
+
+		removeCurrentBackground: function($el) {
+			var bgs = this.getCurrentBackgrounds($el);
+			if (bgs) {
+				bgs.forEach(function(bg) {
+					$el.removeClass(bg);
+				});
+			}
+				
+			return bgs;
+		},
+
 		applyBackground: function($el, slide, deck, opts) {
+			this.removeCurrentBackground($el);
 			var bg = this.slideBackground(slide, deck, opts);
 			if (bg.indexOf('img:') == 0) {
 				$el.css('background-image', 'url(' + bg.substring(4) + ')');

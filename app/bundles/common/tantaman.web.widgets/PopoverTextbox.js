@@ -4,7 +4,8 @@ function(Backbone) {
 		events: {
 			'click .ok': '_save',
 			'click .cancel': 'hide',
-			'click': '_stopProp'
+			'click': '_stopProp',
+			'mousedown': '_stopProp'
 		},
 
 		className: 'popover',

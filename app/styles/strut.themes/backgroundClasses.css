@@ -1,50 +1,70 @@
-[class*="solid-bg-"] {
+[class*="bg-solid"] {
 	border: 1px solid rgba(0, 0, 0, .3);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
 	text-shadow: 0 2px 2px rgba(0, 0, 0, .3);
 }
 
-.solid-bg-orange {
+
+.bg-default {
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
+}
+
+/*
+included for legacy support of old decks with the defaultbg attribute set.
+*/
+.defaultbg {
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
+}
+
+.bg-solid-orange {
 	background-color: #774040;
 }
 
-.solid-bg-black {
+.bg-solid-black {
 	background-color: #222;
 }
 
-.solid-bg-light {
+.bg-solid-light {
 	background-color: white;
 }
 
-.solid-bg-smoke {
+.bg-solid-smoke {
 	background-color: #DDD;
 }
 
-.solid-bg-yellow {
+.bg-solid-yellow {
 	background-color: #D1B377;
 }
 
-.solid-bg-grass {
+.bg-solid-grass {
 	background-color: #597847;
 }
 
-.solid-bg-darkgreen {
+.bg-solid-darkgreen {
 	background-color: #134952;
 }
 
-.solid-bg-sky {
+.bg-solid-sky {
 	background-color: #515E99;
 }
 
-.solid-bg-lavender {
+.bg-solid-lavender {
 	background-color: #443C4D;
 }
 
-.solid-bg-purple {
+.bg-solid-purple {
 	background-color: #6C478F;
 }
 
-.solid-bg-salmon {
+.bg-solid-salmon {
 	background-color: #C98D8D;
 }
 

@@ -15,10 +15,10 @@
 		</select>
 	</div>
 	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
-		<article>
+		<article class="innerBg">
 			{{#slides.models}}
 				{{#attributes}}
-					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer" style="width: 1024px; height: 768px;{{#slideBGImg ..}}{{/slideBGImg}}" data-bespoke-state="strut-slide-{{index}}{{#isBGClass surface}} {{surface}}{{/isBGClass}}">
+					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer strut-slide-{{index}}" style="width: 1024px; height: 768px;" data-bespoke-state="strut-slide-{{index}}{{#determineSurface .. ../../..}}{{/determineSurface}}">
 						<div class="reveal themedArea">
               			{{#marked markdown}}{{/marked}}
               			</div>

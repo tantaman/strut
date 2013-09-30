@@ -8,13 +8,25 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 
 	var slideBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Backgrounds, editorModel, '.slideContainer', 'Background');
+			return new BackgroundProvider({
+				backgrounds: Backgrounds,
+				editorModel: editorModel,
+				selector: '.slideContainer',
+				attr: 'Background',
+				template: JST['strut.themes/BackgroundChooserDropdown']
+			});
 		}
 	};
 
 	var surfaceBgProviderFactory = {
 		create: function(editorModel) {
-			return new BackgroundProvider(Surfaces, editorModel, '.strut-surface', 'Surface');
+			return new BackgroundProvider({
+				backgrounds: Surfaces,
+				editorModel: editorModel,
+				selector: '.strut-surface',
+				attr: 'Surface',
+				template: JST['strut.themes/SurfaceChooserDropdown']
+			});
 		}
 	};
 

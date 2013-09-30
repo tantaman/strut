@@ -53,7 +53,7 @@ define(['libs/backbone',
 				} else {
 					this.$el.css('background-image', '');
 					this.$el.removeClass();
-					this.$el.addClass('slideTable strut-surface ' + surface);
+					this.$el.addClass('slideTable strut-surface ui-selectable ' + surface);
 				}
 			},
 
@@ -101,7 +101,6 @@ define(['libs/backbone',
 				this.$el.html('');
 				var deck = this.model.deck();
 				this._surfaceChanged(deck, deck.get('surface'));
-				// this.$el.addClass(deck.get('surface') || 'defaultbg');
 
 				var colCnt = 6;
 				var cnt = 0;

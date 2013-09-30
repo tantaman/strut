@@ -231,7 +231,7 @@
   height: 100%;
 }*/
 
-.strut-surface {
+.strut-surface, .innerBg {
 	background-size: cover;
 	background-position: center;
   	background-repeat: no-repeat;
@@ -241,4 +241,10 @@
 	background-size: cover;
 	background-position: center;
   	background-repeat: no-repeat;
+}
+
+.innerBg {
+	-webkit-transition: background-color 2s ease;
+	-moz-transition: background-color 2s ease;
+	transition: background-color 2s ease;
 }

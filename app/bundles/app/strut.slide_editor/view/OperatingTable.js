@@ -70,7 +70,7 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 				self._renderContents();
 			}, 0);
 
-			this.$el.addClass((this._deck.get('surface') || 'defaultbg'));
+			this.$el.addClass((this._deck.get('surface') || 'bg-default'));
 
 			return this;
 		},
@@ -94,9 +94,6 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 					this.$el.css('background-image', DeckUtils.getImgUrl(bg));
 				}
 			}
-			// var currentBg = this._deck.get('background');
-			// if (currentBg == 'defaultbg')
-			// 	this._updateBg(model, bg);
 		},
 
 		// TODO: make the cut/copy/paste interfaces identical for
