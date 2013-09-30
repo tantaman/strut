@@ -96,7 +96,16 @@ ready(function() {
   var innerBg = document.querySelector('.innerBg');
   function updateSurface(step, operation) {
       if (!step) return;
-      var state = step.dataset.state;
+      if (step.dataset)
+        var state = step.dataset.state;
+      else {
+        for (var i = 0; i < step.attributes.length; ++i) {
+          if (step.attributes[i].name == 'data-state') {
+            state = step.attributes[i].value;
+            break;
+          }
+        }
+      }
       if (typeof state == 'string') {
           state = state.trim().split(' ');
           for (var i = 0; i < state.length; ++i) {
