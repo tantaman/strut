@@ -1,6 +1,7 @@
 require.config({
 	paths: {
 		libs: "../scripts/libs",
+		preview_export: "../preview_export",
 
     	jquery: "../scripts/libs/jQuery",
 		jqueryui: "../scripts/libs/jquery-ui",
@@ -205,17 +206,18 @@ require([
 	'bootstrap',
 	'jqContextMenu',
 	'css!components/jq-contextmenu/jquery.contextMenu.css',
-	'touchpunch'
+	'touchpunch',
+	'preview_export/scripts/dataset-shim'
 ],
-	function(Handlebars, lang, empt, empty, config, registry, StrutLoader, bootstrap, ContextMenu, css, tp) {
+	function(Handlebars, lang, empt, empty, config, registry, StrutLoader, bootstrap, ContextMenu, css, tp, dss) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
 			window.browserPrefix = "-webkit-"
+		else if (agent.indexOf('MSIE') >= 0)
+			window.browserPrefix = "-ms-"
 		else if (agent.indexOf('Mozilla') >= 0)
 			window.browserPrefix = "-moz-"
-		else if (agent.indexOf('Microsoft') >= 0)
-			window.browserPrefix = "-ms-"
 		else
 			window.browserPrefix = ""
 
