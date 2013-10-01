@@ -6,7 +6,8 @@ define(['libs/backbone'], function(Backbone) {
 	var canned = [
 		{
 			name: 'carousel',
-			img: img
+			img: img,
+			style: 'height: 126px;'
 		},
 		{
 			name: 'classic',
@@ -14,7 +15,8 @@ define(['libs/backbone'], function(Backbone) {
 		},
 		{
 			name: 'concave',
-			img: img
+			img: img,
+			style: 'height: 126px;'
 		},
 		{
 			name: 'coverflow',
