@@ -8392,14 +8392,6 @@ and (max-device-width : 1024px)  {
 	z-index: 1;
 }
 
-/* Ensure certain elements are never larger than the slide itself */
-.themedArea img,
-.themedArea video,
-.themedArea iframe {
-	max-width: 95%;
-	max-height: 95%;
-}
-
 /** Prevents layering issues in certain browser/transition combinations */
 .themedArea a {
 	position: relative;
@@ -8583,7 +8575,8 @@ and (max-device-width : 1024px)  {
 }
 
 .innerBg {
-	-webkit-transition: background-color 2s ease;
-	-moz-transition: background-color 2s ease;
-	transition: background-color 2s ease;
+	-webkit-transition: background-color .8s ease;
+	-moz-transition: background-color .8s ease;
+	-ms-transition: background-color .8s ease;
+	transition: background-color .8s ease;
 }

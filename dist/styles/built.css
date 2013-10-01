@@ -81,11 +81,11 @@
 .tablets .iconBtns {
 	margin-bottom: 0px;
 }
-[class*="bg-solid"] {
+/*[class*="bg-solid"] {
 	border: 1px solid rgba(0, 0, 0, .3);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
 	text-shadow: 0 2px 2px rgba(0, 0, 0, .3);
-}
+}*/
 
 
 .bg-default {
@@ -163,91 +163,102 @@ included for legacy support of old decks with the defaultbg attribute set.
 }
 
 .bg-surf-grad-black {
-	background-image: -webkit-radial-gradient(#333, #111);
+	background-color: #333;
+	/*background-image: -webkit-radial-gradient(#333, #111);
 	background-image: -moz-radial-gradient(#333, #111);
 	background-image: -ms-radial-gradient(#333, #111);
 	background-image: -o-radial-gradient(#333, #111);
-	background-image: radial-gradient(#333, #111);
+	background-image: radial-gradient(#333, #111);*/
 }
 
 .bg-surf-grad-light {
-	background-image: -webkit-radial-gradient(#FFF, #DDD);
+	background-color: #FFF;
+	/*background-image: -webkit-radial-gradient(#FFF, #DDD);
 	background-image: -moz-radial-gradient(#FFF, #DDD);
 	background-image: -ms-radial-gradient(#FFF, #DDD);
 	background-image: -o-radial-gradient(#FFF, #DDD);
-	background-image: radial-gradient(#FFF, #DDD);
+	background-image: radial-gradient(#FFF, #DDD);*/
 }
 
 .bg-surf-grad-smoke {
-	background-image: -webkit-radial-gradient(#EEE, #CCC);
+	background-color: #EEE;
+	/*background-image: -webkit-radial-gradient(#EEE, #CCC);
 	background-image: -moz-radial-gradient(#EEE, #CCC);
 	background-image: -ms-radial-gradient(#EEE, #CCC);
 	background-image: -o-radial-gradient(#EEE, #CCC);
-	background-image: radial-gradient(#EEE, #CCC);
+	background-image: radial-gradient(#EEE, #CCC);*/
 }
 
 .bg-surf-grad-orange {
-	background-image: -webkit-radial-gradient(#945353, #774040);
+	background-color: #945353;
+	/*background-image: -webkit-radial-gradient(#945353, #774040);
 	background-image: -moz-radial-gradient(#945353, #774040);
 	background-image: -ms-radial-gradient(#945353, #774040);
 	background-image: -o-radial-gradient(#945353, #774040);
-	background-image: radial-gradient(#945353, #774040);
+	background-image: radial-gradient(#945353, #774040);*/
 }
 
 .bg-surf-grad-yellow {
-	background-image: -webkit-radial-gradient(#cfb98c, #D1B377);
+	background-color: #cfb98c;
+	/*background-image: -webkit-radial-gradient(#cfb98c, #D1B377);
 	background-image: -moz-radial-gradient(#cfb98c, #D1B377);
 	background-image: -ms-radial-gradient(#cfb98c, #D1B377);
 	background-image: -o-radial-gradient(#cfb98c, #D1B377);
-	background-image: radial-gradient(#cfb98c, #D1B377);
+	background-image: radial-gradient(#cfb98c, #D1B377);*/
 }
 
 .bg-surf-grad-darkgreen {
-	background-image: -webkit-radial-gradient(#4a939e, #134952);
+	background-color: #4a939e;
+	/*background-image: -webkit-radial-gradient(#4a939e, #134952);
 	background-image: -moz-radial-gradient(#4a939e, #134952);
 	background-image: -ms-radial-gradient(#4a939e, #134952);
 	background-image: -o-radial-gradient(#4a939e, #134952);
-	background-image: radial-gradient(#4a939e, #134952);
+	background-image: radial-gradient(#4a939e, #134952);*/
 }
 
 .bg-surf-grad-sky {
-	background-image: -webkit-radial-gradient(#5e699c, #515E99);
+	background-color: #5e699c;
+	/*background-image: -webkit-radial-gradient(#5e699c, #515E99);
 	background-image: -moz-radial-gradient(#5e699c, #515E99);
 	background-image: -ms-radial-gradient(#5e699c, #515E99);
 	background-image: -o-radial-gradient(#5e699c, #515E99);
-	background-image: radial-gradient(#5e699c, #515E99);
+	background-image: radial-gradient(#5e699c, #515E99);*/
 }
 
 .bg-surf-grad-lavender {
-	background-image: -webkit-radial-gradient(#554b61, #443C4D);
+	background-color: #554b61;
+	/*background-image: -webkit-radial-gradient(#554b61, #443C4D);
 	background-image: -moz-radial-gradient(#554b61, #443C4D);
 	background-image: -ms-radial-gradient(#554b61, #443C4D);
 	background-image: -o-radial-gradient(#554b61, #443C4D);
-	background-image: radial-gradient(#554b61, #443C4D);
+	background-image: radial-gradient(#554b61, #443C4D);*/
 }
 
 .bg-surf-grad-purple {
-	background-image: -webkit-radial-gradient(#775796, #6C478F);
+	background-color: #775796;
+	/*background-image: -webkit-radial-gradient(#775796, #6C478F);
 	background-image: -moz-radial-gradient(#775796, #6C478F);
 	background-image: -ms-radial-gradient(#775796, #6C478F);
 	background-image: -o-radial-gradient(#775796, #6C478F);
-	background-image: radial-gradient(#775796, #6C478F);
+	background-image: radial-gradient(#775796, #6C478F);*/
 }
 
 .bg-surf-grad-salmon {
-	background-image: -webkit-radial-gradient(#cfa2a2, #C98D8D);
+	background-color: #cfa2a2;
+	/*background-image: -webkit-radial-gradient(#cfa2a2, #C98D8D);
 	background-image: -moz-radial-gradient(#cfa2a2, #C98D8D);
 	background-image: -ms-radial-gradient(#cfa2a2, #C98D8D);
 	background-image: -o-radial-gradient(#cfa2a2, #C98D8D);
-	background-image: radial-gradient(#cfa2a2, #C98D8D);
+	background-image: radial-gradient(#cfa2a2, #C98D8D);*/
 }
 
 .bg-surf-grad-grass {
-	background-image: -webkit-radial-gradient(#6c855d, #597847);
+	background-color: #6c855d;
+	/*background-image: -webkit-radial-gradient(#6c855d, #597847);
 	background-image: -moz-radial-gradient(#6c855d, #597847);
 	background-image: -ms-radial-gradient(#6c855d, #597847);
 	background-image: -o-radial-gradient(#6c855d, #597847);
-	background-image: radial-gradient(#6c855d, #597847);
+	background-image: radial-gradient(#6c855d, #597847);*/
 }
 .stylesheetEditor .codeInput {
 	width: 100%;
@@ -699,6 +710,36 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   }
 }
 
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
+	overflow: auto;
+}
+
+.cannedTransitionsView {
+	padding: 80px;
+	background: #EEE;
+	background: whitesmoke;
+}
+
+.cannedTransitionsView .thumbnail {
+	border-width: 2px;
+}
+
+.cannedTransitionsView .thumbnail:hover {
+	border-color: #5BB75B;
+}
+
+.cannedTransitionsView .thumbnail.active {
+	border: 2px solid #5BB75B;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+	-moz-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+	box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+}
 .component .label {
 	visibility: hidden;
 	background: none;
@@ -824,8 +865,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 	/*padding: 2px;*/
 	cursor: pointer;
 	margin: 0px;
-	min-width: 120px;
-	min-height: 50px;
+	min-height: 25px;
+	min-width: 25px;
 }
 
 .component {
@@ -1074,16 +1115,6 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 .slideTable {
 	counter-reset: transSlide;
 }
-.slideTable {
-	position: absolute;
-	left: 0px;
-	z-index: 1;
-	top: 56px;
-	bottom: 0px;
-	right: 0px;
-	overflow: auto;
-}
-
 .logo {
 	width: 100px;
 	height: 32px;
