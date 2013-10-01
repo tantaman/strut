@@ -1,42 +1,27 @@
 <ul class="thumbnails">
-	<li class="span3">
+	<li class="span4">
 		<a href="#" class="thumbnail">
-			Coverflow
+			<img src="img/carousel.png"></img>
 		</a>
 	</li>
-	<li class="span3">
+	<li class="span4">
 		<a href="#" class="thumbnail">
-			Cube A
+			<img src="img/classic.png"></img>
 		</a>
 	</li>
-	<li class="span3">
+	<li class="span4">
 		<a href="#" class="thumbnail">
-			Cube B
+			<img src="img/concave.png"></img>
 		</a>
 	</li>
-	<li class="span3">
+	<li class="span4">
 		<a href="#" class="thumbnail">
-			Classic
+			<img src="img/coverflow.png"></img>
 		</a>
 	</li>
-	<li class="span3">
+	<li class="span4">
 		<a href="#" class="thumbnail">
-			Cards
-		</a>
-	</li>
-	<li class="span3">
-		<a href="#" class="thumbnail">
-			Carousel
-		</a>
-	</li>
-	<li class="span3">
-		<a href="#" class="thumbnail">
-			Concave
-		</a>
-	</li>
-	<li class="span3">
-		<a href="#" class="thumbnail">
-			Blend
+			<img src="img/cubea.png"></png>
 		</a>
 	</li>
 </ul>

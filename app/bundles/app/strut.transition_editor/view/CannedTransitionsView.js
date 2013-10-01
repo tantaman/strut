@@ -1,5 +1,6 @@
 define(['libs/backbone'], function(Backbone) {
 	return Backbone.View.extend({
+		className: 'cannedTransitionsView',
 		initialize: function() {
 			// TODO: get the available "canned" transitions
 			// from the generator's metadata?

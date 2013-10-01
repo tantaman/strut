@@ -7,3 +7,9 @@
 	right: 0px;
 	overflow: auto;
 }
+
+.cannedTransitionsView {
+	padding: 80px;
+	background: #EEE;
+	background: whitesmoke;
+}

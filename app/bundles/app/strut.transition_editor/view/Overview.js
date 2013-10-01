@@ -1,5 +1,6 @@
-define(['libs/backbone', 'tantaman/web/Utils'],
-function(Backbone, Utils) {
+define(['libs/backbone', 'tantaman/web/Utils',
+	'css!styles/transition_editor/overview.css',],
+function(Backbone, Utils, css) {
 	/**
 	 * Renders the set of active transition editors
 	 */
