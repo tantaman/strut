@@ -62,16 +62,6 @@
 		if (document.getElementById('launched-placeholder'))
         	loadPresentation();
 		if (!window.presStarted) {
-    		var body = document.querySelector('body');
-			var themeSelect = document.querySelector("#themeChooser > select");
-			themeSelect.onchange = function(e) {
-				//e.target.value
-				var toRemove = body.classList[body.classList.length - 1];
-				body.classList.remove(toRemove);
-				body.classList.add(e.target.value);
-				themeSelect.blur();
-			};
-			
     		bespoke.horizontal.from('article', {
     			hash: true,
     			state: true
@@ -89,7 +79,7 @@
   	ga('send', 'pageview');
 	</script>
 </head>
-<body class="coverflow">
+<body>
 	<div id="launched-placeholder"></div>
 </body>
 </html>

@@ -1,27 +1,9 @@
 <ul class="thumbnails">
+	{{#.}}
 	<li class="span4">
-		<a href="#" class="thumbnail">
-			<img src="img/carousel.png"></img>
+		<a href="#" data-name="{{name}}" class="thumbnail{{#if active}} active{{/if}}">
+			<img src="img/{{name}}.png"></img>
 		</a>
 	</li>
-	<li class="span4">
-		<a href="#" class="thumbnail">
-			<img src="img/classic.png"></img>
-		</a>
-	</li>
-	<li class="span4">
-		<a href="#" class="thumbnail">
-			<img src="img/concave.png"></img>
-		</a>
-	</li>
-	<li class="span4">
-		<a href="#" class="thumbnail">
-			<img src="img/coverflow.png"></img>
-		</a>
-	</li>
-	<li class="span4">
-		<a href="#" class="thumbnail">
-			<img src="img/cubea.png"></png>
-		</a>
-	</li>
+	{{/.}}
 </ul>
