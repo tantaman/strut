@@ -27,7 +27,7 @@ define({
 	single_slide_bg: 'Single Slide Background',
 	invisible: 'Invisible',
 	reset: 'Reset',
-	// TODO: bundles should contain their own translations!
+	go: 'Go',
 	strut_exporter_json: {
 		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
 		click_below: 'Click below to download'

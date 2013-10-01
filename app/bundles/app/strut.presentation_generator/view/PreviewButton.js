@@ -47,11 +47,14 @@ function(Backbone, PreviewLauncher) {
 		*/
 		_generatorChanged: function() {
 			this._editorModel.set('generator', this._generators[this._index]);
+			if (this._$readout)
+				this._$readout.text(this._generators[this._index].displayName);
 		},
 
 		render: function() {
-			this.$el.html(this._template({generators: this._generators}));
+			this.$el.html(this._template({generators: this._generators, chosen: this._generators[this._index]}));
 			this._bind();
+			this._$readout = this.$el.find('.chosen');
 			$(this.$el.find('.check')[this._index]).css('visibility', '');
 			return this;
 		}

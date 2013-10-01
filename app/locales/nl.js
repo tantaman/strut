@@ -27,6 +27,7 @@ define({
 	single_slide_bg: 'Achtergrond per dia',
 	invisible: 'Onzichtbaar',
 	reset: 'Terugzetten',
+	go: 'Gaan',
 	strut_exporter_json: {
 		explain: 'Deze functie maakt het mogelijk om een bestand op te slaan, welke later weer in Strut geïmporteerd kan worden.',
 		click_below: 'Klik hieronder om te downloaden'
