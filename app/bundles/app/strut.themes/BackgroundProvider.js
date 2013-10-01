@@ -109,8 +109,14 @@ function(View, DeckUtils, ItemImportModal, lang) {
 				bg = DeckUtils.slideBackground(this._editorModel.activeSlide(),
 					this._editorModel.deck(), {transparentForSurface: true, surfaceForDefault: true});
 
-			if (bg == null)
-				bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
+			if (bg == null) {
+				// ugh... there should be no visibility into modes from here.
+				if (this._editorModel.get('modeId') != 'slide-editor') {
+					bg = DeckUtils.slideSurface(null, this._editorModel.deck());
+				} else {
+					bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
+				}
+			}
 			var $container = $(this._selector);
 			if ($container.length == 0)
 				return;
