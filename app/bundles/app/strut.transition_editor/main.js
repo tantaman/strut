@@ -1,8 +1,10 @@
 define(['tantaman/web/widgets/ModeButton',
 		'./model/OverviewModel',
 		'./view/Overview',
-		'./view/FreeFormTransitionEditorView'],
-function(ModeButton, OverviewModel, Overview, FreeFormTransitionEditorView) {
+		'./view/FreeFormTransitionEditorView',
+		'./view/CannedTransitionsView'],
+function(ModeButton, OverviewModel, Overview, FreeFormTransitionEditorView,
+	CannedTransitionsView) {
 	var service = {
 		getMode: function(editorModel, registry) {
 			var model = new OverviewModel(editorModel, registry);
@@ -40,6 +42,15 @@ function(ModeButton, OverviewModel, Overview, FreeFormTransitionEditorView) {
 					}
 				}
 			}, FreeFormTransitionEditorView);
+
+			registry.register({
+				interfaces: 'strut.TransitionEditor',
+				meta: {
+					capabilities: {
+						cannedTransitions: true
+					}
+				}
+			}, CannedTransitionsView);
 
 			// TODO: register the canned transitions and xy stepping.
 		}
