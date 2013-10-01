@@ -16,6 +16,8 @@ time, mark, audio, video {
     font-size: 100%;
     font: inherit;
     vertical-align: baseline;
+    font-family: "Lato", sans-serif;
+    color: #333;
 }
 
 /* HTML5 display-role reset for older browsers */
@@ -51,13 +53,7 @@ table {
     transform: translate3d(0,0,0);
 }
 */
-/*
-    Now here is when interesting things start to appear.
-    
-    We set up <body> styles with default font and nice gradient in the background.
-    And yes, there is a lot of repetition there because of -prefixes but we don't
-    want to leave anybody behind.
-*/
+
 body {
     min-height: 740px;
     
