@@ -71,7 +71,6 @@ define(['libs/backbone',
 			 * Remove transition editor view.
 			 */
 			remove: function() {
-				Backbone.View.prototype.remove.call(this);
 				this.dispose();
 			},
 
@@ -79,6 +78,7 @@ define(['libs/backbone',
 			 * Dispose transition editor view.
 			 */
 			dispose: function() {
+				Backbone.View.prototype.remove.call(this);
 				this.model.deck().off(null, null, this);
 			},
 

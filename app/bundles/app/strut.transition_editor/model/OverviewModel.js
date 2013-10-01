@@ -25,10 +25,8 @@ function(Utils, Backbone) {
 				var ctor = entry.service();
 				this.transitionEditors.push(new ctor({model: this._editorModel}));
 			}, this);
-			// extract capabilities
-			// look up transition editors that apply to those capabilities
-			// construct new collection of transition editors
-			// notify the overview view.
+			
+			this.trigger('change:transitionEditors', this, this.transitionEditors);
 		},
 
 		dispose: function() {
