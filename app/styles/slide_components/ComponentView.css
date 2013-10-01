@@ -123,8 +123,8 @@
 	/*padding: 2px;*/
 	cursor: pointer;
 	margin: 0px;
-	min-width: 120px;
-	min-height: 50px;
+	min-height: 25px;
+	min-width: 25px;
 }
 
 .component {
