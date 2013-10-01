@@ -42,6 +42,9 @@ function(View, DeckUtils, ItemImportModal, lang) {
 
 		_previewBackground: function(e) {
 			var $container = $(this._selector);
+			if ($container.length == 0)
+				return;
+			
 			var klass = e.currentTarget.dataset['class'];
 			if (klass == null) return;
 			if (klass == 'bg-img') return;
@@ -109,6 +112,8 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			if (bg == null)
 				bg = DeckUtils.slideSurface(this._editorModel.activeSlide(), this._editorModel.deck());
 			var $container = $(this._selector);
+			if ($container.length == 0)
+				return;
 			if (DeckUtils.isImg(bg)) {
 				this._removeLastBg($container);
 			} else {
