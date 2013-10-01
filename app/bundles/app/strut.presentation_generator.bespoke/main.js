@@ -14,8 +14,8 @@ function(BespokeGenerator) {
 		getStartPreviewFn: function() {
 			return BespokeGenerator.getStartPreviewFn.apply(BespokeGenerator, arguments);
 		},
-		getSlideHash: function() {
-			return '';
+		getSlideHash: function(editorModel) {
+			return '#' + (editorModel.activeSlideIndex()+1);
 		}
 	};
 
