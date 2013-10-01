@@ -49,7 +49,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				meta: {
 					modes: {
 						'slide-editor': true,
-						'transition-editor': true
+						'overview': true
 					},
 					overflow: false
 				}
@@ -60,7 +60,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				meta: {
 					modes: {
 						'slide-editor': true,
-						'transition-editor': true,
+						'overview': true,
 					},
 					overflow: false
 				}
@@ -70,7 +70,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						'transition-editor': true,
+						'overview': true,
 						'slide-editor': true
 					},
 					overflow: true
@@ -81,7 +81,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				interfaces: 'strut.ThemeProvider',
 				meta: {
 					modes: {
-						'transition-editor': true,
+						'overview': true,
 						'slide-editor': true
 					},
 					overflow: true

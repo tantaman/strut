@@ -6,7 +6,7 @@ function(RevealGenerator) {
 		displayName: 'Reveal',
 		id: 'reveal',
 		capabilities: {
-			2dStepping: true,
+			XYstepping: true,
 			cannedTransitions: true
 		},
 		generate: function(deckAttrs) {
