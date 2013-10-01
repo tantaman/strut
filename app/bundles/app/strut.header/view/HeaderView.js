@@ -21,7 +21,7 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
 		},
 
 		_modeChanged: function(model, value) {
-			if (value.id == 'transition-editor') {
+			if (value.id == 'overview') {
 				this.$el.find('.create-comp-buttons').addClass('hidden');
 			} else {
 				this.$el.find('.create-comp-buttons').removeClass('hidden');

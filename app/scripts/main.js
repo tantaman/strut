@@ -46,6 +46,7 @@ require.config({
     	'strut/config': '../bundles/app/strut.config',
     	'strut/transition_editor': '../bundles/app/strut.transition_editor',
 
+    	'tantaman/web': '../bundles/common/tantaman.web',
 		'tantaman/web/local_storage': '../bundles/common/tantaman.web.local_storage',
 		'tantaman/web/remote_storage': '../bundles/common/tantaman.web.remote_storage',
 		'tantaman/web/saver': '../bundles/common/tantaman.web.saver',

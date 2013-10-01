@@ -1,15 +1,18 @@
 define(['tantaman/web/widgets/ModeButton',
-		'strut/transition_editor/model/TransitionEditorModel',
-		'strut/transition_editor/view/TransitionEditorView'],
-function(ModeButton, TransitionEditorModel, TransitionEditorView) {
+		'./model/OverviewModel',
+		'./view/Overview',
+		'./view/FreeFormTransitionEditorView',
+		'./view/CannedTransitionsView'],
+function(ModeButton, OverviewModel, Overview, FreeFormTransitionEditorView,
+	CannedTransitionsView) {
 	var service = {
 		getMode: function(editorModel, registry) {
-			var model = new TransitionEditorModel(editorModel, registry);
+			var model = new OverviewModel(editorModel, registry);
 
 			return {
-				view: new TransitionEditorView({model: model}),
+				view: new Overview({model: model}),
 				model: model,
-				id: 'transition-editor',
+				id: 'overview',
 				close: function() {
 					this.view.remove();
 				}
@@ -17,7 +20,7 @@ function(ModeButton, TransitionEditorModel, TransitionEditorView) {
 		},
 
 		createButton: function(editorModel) {
-			return new ModeButton(editorModel, 'transition-editor',
+			return new ModeButton(editorModel, 'overview',
 					JST['strut.transition_editor/Button']);
 		}
 	};
@@ -27,9 +30,29 @@ function(ModeButton, TransitionEditorModel, TransitionEditorView) {
 			registry.register({
 				interfaces: 'strut.EditMode',
 				meta: {
-					id: 'transition-editor'
+					id: 'overview'
 				}
 			}, service);
+
+			registry.register({
+				interfaces: 'strut.TransitionEditor',
+				meta: {
+					capabilities: {
+						freeformStepping: true
+					}
+				}
+			}, FreeFormTransitionEditorView);
+
+			registry.register({
+				interfaces: 'strut.TransitionEditor',
+				meta: {
+					capabilities: {
+						cannedTransitions: true
+					}
+				}
+			}, CannedTransitionsView);
+
+			// TODO: register the canned transitions and xy stepping.
 		}
 	};
 });

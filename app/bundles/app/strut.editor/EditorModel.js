@@ -113,6 +113,13 @@ define(['libs/backbone',
 				return this._deck;
 			},
 
+			cannedTransition: function(c) {
+				if (c != null)
+					this._deck.set('cannedTransition', c);
+				else
+					return this._deck.get('cannedTransition');
+			},
+
 			slides: function() {
 				return this._deck.get('slides');
 			},

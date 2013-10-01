@@ -5,12 +5,11 @@ function(ImpressGenerator) {
 	var service = {
 		displayName: 'Impress',
 		id: 'impress',
+		capabilities: {
+			freeformStepping: true
+		},
 		generate: function(deckAttrs) {
 			return ImpressGenerator.render(deckAttrs);
-		},
-
-		getStartPreviewFn: function() {
-			return ImpressGenerator.getStartPreviewFn.apply(ImpressGenerator, arguments);
 		},
 
 		getSlideHash: function(editorModel) {

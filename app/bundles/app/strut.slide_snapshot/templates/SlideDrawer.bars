@@ -1,4 +1,4 @@
-<div class="reveal themedArea">
+<div class="themedArea">
 {{#marked markdown}}{{/marked}}
 </div>
 {{#components}}

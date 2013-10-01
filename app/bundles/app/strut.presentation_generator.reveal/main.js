@@ -5,6 +5,10 @@ function(RevealGenerator) {
 	var service = {
 		displayName: 'Reveal',
 		id: 'reveal',
+		capabilities: {
+			XYstepping: true,
+			cannedTransitions: true
+		},
 		generate: function(deckAttrs) {
 			return RevealGenerator.render(deckAttrs);
 		},

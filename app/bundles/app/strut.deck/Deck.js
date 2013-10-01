@@ -102,6 +102,7 @@ define(["common/Calcium",
 				this.set('surface', rawObj.surface);
 				this.set('customStylesheet', rawObj.customStylesheet);
 				this.set('deckVersion', rawObj.deckVersion);
+				this.set('cannedTransition', rawObj.cannedTransition);
 				this.undoHistory.clear();
 
 				// TODO: go through and dispose of all old slides...?
