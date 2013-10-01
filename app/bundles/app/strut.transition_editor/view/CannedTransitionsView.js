@@ -1,22 +1,32 @@
 define(['libs/backbone'], function(Backbone) {
+	function img() {
+		return 'img/' + this.name + '.png';
+	};
+
 	var canned = [
 		{
-			name: 'carousel'
+			name: 'carousel',
+			img: img
 		},
 		{
-			name: 'classic'
+			name: 'classic',
+			img: img
 		},
 		{
-			name: 'concave'
+			name: 'concave',
+			img: img
 		},
 		{
-			name: 'coverflow'
+			name: 'coverflow',
+			img: img
 		},
 		{
-			name: 'cube'
+			name: 'cube',
+			img: img
 		},
 		{
-			name: 'none'
+			name: 'none',
+			img: 'styles/strut.themes/img/nobg.png'
 		}
 	];
 
