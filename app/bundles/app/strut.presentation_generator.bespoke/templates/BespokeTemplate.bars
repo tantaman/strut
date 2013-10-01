@@ -8,7 +8,7 @@
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer strut-slide-{{index}}" style="width: 1024px; height: 768px;" data-bespoke-state="strut-slide-{{index}}{{#determineSurface .. ../../..}}{{/determineSurface}}">
-						<div class="reveal themedArea">
+						<div class="themedArea">
               			{{#marked markdown}}{{/marked}}
               			</div>
 						{{#components}}
