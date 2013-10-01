@@ -724,6 +724,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 	padding: 80px;
 	background: #EEE;
 	background: whitesmoke;
+	box-sizing: border-box;
 }
 
 .cannedTransitionsView .thumbnail {
@@ -739,6 +740,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 	-webkit-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
 	-moz-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
 	box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+}
+
+.bespoke-link {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 5px;
+	background: #ccc;
 }
 .component .label {
 	visibility: hidden;
