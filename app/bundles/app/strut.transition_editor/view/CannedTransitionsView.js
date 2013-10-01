@@ -1,6 +1,6 @@
 define(['libs/backbone'], function(Backbone) {
 	function img() {
-		return 'img/' + this.name + '.png';
+		return 'styles/img/' + this.name + '.png';
 	};
 
 	var canned = [
