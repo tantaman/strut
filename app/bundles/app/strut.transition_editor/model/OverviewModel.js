@@ -1,9 +1,9 @@
-/*
-Responds to the comings and goings of presentation generators.
-When one arrives this'll select the appropriate set of transition
-editors to display and provide them as a collection to the Overview
-view.
-*/
+/**
+ * Responds to the activation / deactivation of presentation generators.
+ * When one is activated OverviewModel will select the appropriate set of transition
+ * editors to display and provide them as a collection to the Overview
+ * view.
+ */
 define(['tantaman/web/Utils', 'libs/backbone'],
 function(Utils, Backbone) {
 	return Backbone.Model.extend({

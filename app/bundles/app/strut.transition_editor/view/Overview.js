@@ -1,11 +1,8 @@
-/*
-Subscribes for updates to the set of transition editors that should be
-made available.
-
-Renders and activates that set whenever it changes.
-*/
 define(['libs/backbone', 'tantaman/web/Utils'],
 function(Backbone, Utils) {
+	/**
+	 * Renders the set of active transition editors
+	 */
 	return Backbone.View.extend({
 		initialize: function() {
 			this.model.on('change:transitionEditors',
