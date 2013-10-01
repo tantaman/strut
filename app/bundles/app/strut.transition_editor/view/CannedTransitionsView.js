@@ -25,6 +25,14 @@ define(['libs/backbone'], function(Backbone) {
 			img: img
 		},
 		{
+			name: 'cubeb',
+			img: img
+		},
+		{
+			name: 'cards',
+			img: img
+		},
+		{
 			name: 'none',
 			img: 'styles/strut.themes/img/nobg.png'
 		}
