@@ -91,7 +91,8 @@ approach allows the user to add and remove plugins from 3rd parties at runtime.
 
 ### Acknowledgements ###
 
-* ImpressJS (of course) https://github.com/bartaz/impress.js/
+* ImpressJS https://github.com/bartaz/impress.js/
+* Bespoke.js https://github.com/markdalgleish/bespoke.js
 * BackboneJS http://documentcloud.github.com/backbone/
 * Spectrum https://github.com/bgrins/spectrum
 * Etch http://etchjs.com/
