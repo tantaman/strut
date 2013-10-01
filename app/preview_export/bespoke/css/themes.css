@@ -297,27 +297,51 @@
 }
 
 .cubeb section.bespoke-slide {
+	-o-transform-origin: 50% 50% -512px;
+	-ms-transform-origin: 50% 50% -512px;
+	-moz-transform-origin: 50% 50% -512px;
 	-webkit-transform-origin: 50% 50% -512px;
+	transform-origin: 50% 50% -512px;
 }
 
 .cubeb section {
+	-o-backface-visibility: hidden;
+	-ms-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
 	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
 }
 
 .cubeb section.bespoke-before {
+	-o-transform: rotateY(-90deg);
+	-ms-transform: rotateY(-90deg);
+	-moz-transform: rotateY(-90deg);
 	-webkit-transform: rotateY(-90deg);
+	transform: rotateY(-90deg);
 }
 
 .cubeb section.bespoke-after {
+	-o-transform: rotateY(90deg);
+	-ms-transform: rotateY(90deg);
+	-moz-transform: rotateY(90deg);
 	-webkit-transform: rotateY(90deg);
+	transform: rotateY(90deg);
 }
 
 .cards section.bespoke-before {
+	-moz-transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
+	-ms-transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
+	-o-transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
 	-webkit-transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
+	transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
 }
 
 .cards section.bespoke-slide {
+	-o-transform-origin: 0 100% 0;
+	-ms-transform-origin: 0 100% 0;
+	-moz-transform-origin: 0 100% 0;
 	-webkit-transform-origin: 0 100% 0;
+	transform-origin: 0 100% 0;
 }
 
 .cards section.bespoke-active {
@@ -329,6 +353,10 @@
 }
 
 .cards section.bespoke-after {
+	-o-transform: translate3d(50px, 0, -100px);
+	-ms-transform: translate3d(50px, 0, -100px);
+	-moz-transform: translate3d(50px, 0, -100px);
 	-webkit-transform: translate3d(50px, 0, -100px);
+	transform: translate3d(50px, 0, -100px);
 }
 
