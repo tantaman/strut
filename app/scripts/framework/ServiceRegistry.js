@@ -168,12 +168,11 @@ function(EventEmitter, MultiMap) {
 			});
 		},
 
-		// TODO: this should be a deep comparison
 		metaMatches: function(meta) {
 			if (meta == null) return true;
 
 			for (var key in meta) {
-				if (meta[key] != this._meta[key])
+				if (!_.isEqual(meta[key], this._meta[key]))
 					return false;
 			}
 

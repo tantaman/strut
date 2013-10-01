@@ -295,3 +295,40 @@
 	transform: translateX(1180px) rotateY(52deg) translateX(1560px);
 	opacity: 0.3;
 }
+
+.cubeb section.bespoke-slide {
+	-webkit-transform-origin: 50% 50% -512px;
+}
+
+.cubeb section {
+	-webkit-backface-visibility: hidden;
+}
+
+.cubeb section.bespoke-before {
+	-webkit-transform: rotateY(-90deg);
+}
+
+.cubeb section.bespoke-after {
+	-webkit-transform: rotateY(90deg);
+}
+
+.cards section.bespoke-before {
+	-webkit-transform: translateZ(40px) rotateY(-60deg) translateX(-400px) rotateZ(120deg);
+}
+
+.cards section.bespoke-slide {
+	-webkit-transform-origin: 0 100% 0;
+}
+
+.cards section.bespoke-active {
+	opacity: 1;
+}
+
+.cards section.bespoke-inactive {
+	opacity: 0;
+}
+
+.cards section.bespoke-after {
+	-webkit-transform: translate3d(50px, 0, -100px);
+}
+

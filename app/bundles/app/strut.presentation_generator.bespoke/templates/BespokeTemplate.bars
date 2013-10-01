@@ -3,23 +3,12 @@
 	{{{customStylesheet}}}
 	</style>
 	{{> PerSlideSurfaceStylesheet}}
-
-	<div id="themeChooser">
-		<b>Theme:</b>
-		<select>
-			<option value="coverflow">Coverflow</option>
-			<option value="concave">Concave</option>
-			<option value="cube">Cube</option>
-			<option value="classic">Classic</option>
-			<option value="carousel">Carousel</option>
-		</select>
-	</div>
-	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
+	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface {{cannedTransition}}">
 		<article class="innerBg">
 			{{#slides.models}}
 				{{#attributes}}
 					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer strut-slide-{{index}}" style="width: 1024px; height: 768px;" data-bespoke-state="strut-slide-{{index}}{{#determineSurface .. ../../..}}{{/determineSurface}}">
-						<div class="reveal themedArea">
+						<div class="themedArea">
               			{{#marked markdown}}{{/marked}}
               			</div>
 						{{#components}}
