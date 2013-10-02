@@ -99,14 +99,12 @@ define(['libs/backbone'], function(Backbone) {
       var face = $container.attr('face');
 
       color = color || $container.parents('font').attr('color') || '#333';
-      face = face || $container.parents('font').attr('face') || 'Helvetica Neue';
+      face = face || $container.parents('font').attr('face') || 'Lato';
 
       if (face)
         face = face.split(',')[0]
 
-      // For some reason this is breaking the font dropdown in chrome...
-      // Although it never used to...
-      //this.$fontFamilyReadout.text(face);
+      this.$fontFamilyReadout.html(face);
       this.$colorChooser.spectrum('set', color);
     },
         
