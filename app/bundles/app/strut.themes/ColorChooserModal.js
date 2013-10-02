@@ -21,6 +21,7 @@ function(Backbone) {
 
 		_apply: function() {
 			var c = typeof this._color == 'string' ? this._color : this._color.toHexString();
+			this._$colorChooser.spectrum('set', this._color);
 			this._cb(c);
 			this.hide();
 		},
