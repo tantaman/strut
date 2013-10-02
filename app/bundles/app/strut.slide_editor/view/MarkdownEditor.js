@@ -1,4 +1,6 @@
-define(['codemirror/ManagedEditors', 'codemirror/modes/markdown', './Utils'],
+define(['codemirror/ManagedEditors',
+		'codemirror/modes/markdown',
+		'./Utils'],
 function(managedEditors, md, Utils) {
 
 	var defaultValue = "# Markdown!\n";

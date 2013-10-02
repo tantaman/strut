@@ -1,5 +1,5 @@
-define(['codemirror/codemirror'],
-function(CodeMirror) {
+define(['codemirror/codemirror', 'codemirror/modes/xml'],
+function(CodeMirror, xml) {
 	var editors = {};
 
 	function createEditor(opts, cb) {
