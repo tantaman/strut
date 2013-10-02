@@ -14,7 +14,7 @@ function(CassManip) {
 		render: function(m, customBgs) {
 			if (!customBgs) return;
 			el.innerHTML = 
-				JST['strut.editor/CustomBgStylesheet'](customBgs.get('bgs'));
+				JST['strut.presentation_generator/CustomBgStylesheet'](customBgs.get('bgs'));
 		},
 
 		dispose: function() {

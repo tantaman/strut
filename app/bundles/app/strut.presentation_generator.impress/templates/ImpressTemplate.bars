@@ -2,6 +2,11 @@
 <style type="text/css">
 {{{customStylesheet}}}
 </style>
+<style>
+{{#customBackgrounds.attributes.bgs}}
+	{{> CustomBgStylesheet}}
+{{/customBackgrounds.attributes.bgs}}
+</style>
 {{> PerSlideSurfaceStylesheet}}
 <!-- This is a work around / hack to get the user's browser to download the fonts 
  if they decide to save the presentation. -->

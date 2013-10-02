@@ -2,6 +2,11 @@
 	<style>
 	{{{customStylesheet}}}
 	</style>
+	<style>
+	{{#customBackgrounds.attributes.bgs}}
+		{{> CustomBgStylesheet}}
+	{{/customBackgrounds.attributes.bgs}}
+	</style>
 	{{> PerSlideSurfaceStylesheet}}
 	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface {{cannedTransition}}">
 		<article class="innerBg">
