@@ -117,12 +117,14 @@ define(["common/Calcium",
 				this.set('cannedTransition', rawObj.cannedTransition);
 				var bgs = new CustomBackgrounds(rawObj.customBackgrounds);
 				this.set('customBackgrounds', bgs);
-				bgs.prune(rawObj.slides, rawObj.background, rawObj.surface);
 				this.undoHistory.clear();
 
 				// TODO: go through and dispose of all old slides...?
 
-				return slides.reset(rawObj.slides);
+				slides.reset(rawObj.slides);
+
+				bgs.deck = this;
+				bgs.prune();
 			},
 
 			/**

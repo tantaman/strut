@@ -12,19 +12,25 @@ function(Calcium) {
 			bgs.forEach(function(bg) {
 				this._bgIndex[bg] = true;
 			}, this);
+
+			this._lastPrune = bgs.length;
 		},
 
-		prune: function(slides, dbg, dsurf) {
+		prune: function(ignoredKlass) {
+			var slides = this.deck.get('slides');
+			var dbg = this.deck.get('background');
+			var dsurf = this.deck.get('surface');
+
 			var usedClasses = {};
 			var bgs = this.get('bgs');
 
 			if (bgs.length == 0) return;
 
 			slides.forEach(function(slide) {
-				var bg = slide.background;
+				var bg = slide.get('background');
 				if (bg)
 					usedClasses[bg] = true;
-				bg = slide.surface;
+				bg = slide.get('surface');
 				if (bg)
 					usedClasses[bg] = true;
 			});
@@ -35,23 +41,31 @@ function(Calcium) {
 				usedClasses[dsurf] = true;
 			
 			for (var i = bgs.length - 1; i > -1; --i) {
-				var bg = bgs[i];
-				if (usedClasses[bg] == null) {
+				var klass = bgs[i].klass;
+				if (usedClasses[klass] == null && klass !== ignoredKlass) {
 					bgs.splice(i, 1);
+					delete this._bgIndex[klass];
 				}
 			}
+
+			this._lastPrune = bgs.length;
 		},
 
-		// TODO: monitor size changes and prune after a given number
-		// of additions since the last prune.
 		add: function(color) {
-			color = color.replace('#', '');
-			var klass = 'bg-custom-' + color;
+			var klass = 'bg-custom-' + color.replace('#', '');
 
 			var exists = this._bgIndex[klass];
 
+			if (this.get('bgs').length - this._lastPrune > 10) {
+				this.prune(klass);
+			}
+
 			if (!exists) {
-				this.get('bgs').push(klass);
+				this.get('bgs').push({
+					klass: klass,
+					style: color
+				});
+				this._bgIndex[klass] = true;
 				return {
 					existed: false,
 					klass: klass
