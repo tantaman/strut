@@ -1,6 +1,6 @@
 // Editor for "code" which can be styled via some arbitrary class
-define(['libs/backbone'],
-function(Backbone) {
+define(['libs/backbone', 'codemirror/codemirror'],
+function(Backbone, CodeMirror) {
 	// TODO: provide a meaningful way to cancel edits (e.g. restore previous state of
 	// the editor, not just ignore changes)
 	return Backbone.View.extend({
@@ -16,15 +16,22 @@ function(Backbone) {
 		},
 
 		saveCode: function() {
-			var code = this.$input.val();
+			var code = this.mirror.getValue();
 			this._saveCb(code);
 		},
 
 		show: function(savecb, code) {
-			if (code)
-				this.$input.val(code);
 			this._saveCb = savecb;
 			this.$el.modal('show');
+
+			if (!this.mirror) {
+				this.mirror = CodeMirror.fromTextArea(this.$input[0], {
+					mode: this.options.mode
+				});
+			}
+			
+			if (code)
+				this.mirror.setValue(code);
 		},
 
 		hide: function() {

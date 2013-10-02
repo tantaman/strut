@@ -3,7 +3,7 @@
 	<h3>{{title}}</h3>
 </div>
 <div class="modal-body" style="overflow: hidden">
-	<textarea class="codeInput" placeholder="{{placeholder}}"></textarea>
+	<textarea class="codeInput">{{placeholder}}</textarea>
 </div>
 <div class="modal-footer">
 	<a href="#" class="btn btn-primary ok btn-inverse">Save</a>

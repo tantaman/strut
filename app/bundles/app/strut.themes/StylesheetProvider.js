@@ -2,14 +2,16 @@ define(['tantaman/web/widgets/CodeEditor',
 		'tantaman/web/widgets/Button',
 		'tantaman/web/css_manip/CssManip',
 		'css!styles/strut.themes/stylesheetEditor.css',
-		'./StylesheetPreProcessor'],
-function(CodeEditor, Button, CssManip, empty, preProcessor) {
+		'./StylesheetPreProcessor',
+		'codemirror/modes/css'],
+function(CodeEditor, Button, CssManip, empty, preProcessor, cssmode) {
 	var cssEditor = new CodeEditor({
 			class: 'stylesheetEditor',
 			title: 'Edit CSS',
-			placeholder: ".customText {\n" +
-						 "font-weight: bold;\n" +
-						 "}"
+			placeholder: "/*.example {\n" +
+						 "\tborder: 4px groove orange;\n" +
+						 "}*/",
+			mode: 'css'
 		});
 	var sheetId = 'userStylesheet';
 

@@ -97,7 +97,7 @@ require.config({
 		},
 
 		'codemirror/modes/css': {
-			deps: ['codemirror']
+			deps: ['codemirror/codemirror']
 		},
 
 		'codemirror/modes/markdown': {
