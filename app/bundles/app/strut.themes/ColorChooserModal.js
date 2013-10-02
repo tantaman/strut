@@ -20,11 +20,15 @@ function(Backbone) {
 		},
 
 		_apply: function() {
-			this._cb(this._color.toHexString());
+			var c = typeof this._color == 'string' ? this._color : this._color.toHexString();
+			this._cb(c);
+			this.hide();
 		},
 
 		render: function() {
+			var self = this;
 			this.$el.html(JST['strut.themes/ColorChooserModal']());
+			this._$body = this.$el.find('.modal-body');
 			this._$colorChooser = this.$el.find('.color-chooser');
 			this._$colorChooser.spectrum({
 				color: this._color,
@@ -35,10 +39,10 @@ function(Backbone) {
           		showInput: true,
           		palette: [],
           		clickoutFiresChange: true,
-          		theme: 'sp-dark',
           		flat: true,
           		move: function(color) {
-          			this._color = color;
+          			self._color = color;
+          			self._$body.css('background', color.toHexString());
           		}
 			});
 			this.$el.modal({

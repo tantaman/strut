@@ -117,7 +117,7 @@ define(["common/Calcium",
 				this.set('cannedTransition', rawObj.cannedTransition);
 				var bgs = new CustomBackgrounds(rawObj.customBackgrounds);
 				this.set('customBackgrounds', bgs);
-				bgs.prune(rawObj.slides);
+				bgs.prune(rawObj.slides, rawObj.background, rawObj.surface);
 				this.undoHistory.clear();
 
 				// TODO: go through and dispose of all old slides...?

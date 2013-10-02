@@ -14,21 +14,25 @@ function(Calcium) {
 			}, this);
 		},
 
-		prune: function(slides) {
+		prune: function(slides, dbg, dsurf) {
 			var usedClasses = {};
 			var bgs = this.get('bgs');
 
 			if (bgs.length == 0) return;
 
 			slides.forEach(function(slide) {
-				var bg = slide.get('background');
+				var bg = slide.background;
 				if (bg)
 					usedClasses[bg] = true;
-				bg = slide.get('surface')
+				bg = slide.surface;
 				if (bg)
 					usedClasses[bg] = true;
 			});
 
+			if (dbg)
+				usedClasses[dbg] = true;
+			if (dsurf)
+				usedClasses[dsurf] = true;
 			
 			for (var i = bgs.length - 1; i > -1; --i) {
 				var bg = bgs[i];
