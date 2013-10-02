@@ -16,8 +16,6 @@ time, mark, audio, video {
     font-size: 100%;
     font: inherit;
     vertical-align: baseline;
-    font-family: "Lato", sans-serif;
-    color: #333;
 }
 
 /* HTML5 display-role reset for older browsers */

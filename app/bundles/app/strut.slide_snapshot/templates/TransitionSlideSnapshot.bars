@@ -1,6 +1,6 @@
 <div class="content-container">
 	<div class="content">
-		<div class="slideDrawer"></div>
+		<div class="slideDrawer slideContainer"></div>
 		<div class="back"></div>
 		<div class="top"></div><div class="bottom"></div><div class="left"></div><div class="right"></div>
 	</div>

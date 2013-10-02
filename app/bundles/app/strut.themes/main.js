@@ -11,7 +11,7 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 			return new BackgroundProvider({
 				backgrounds: Backgrounds,
 				editorModel: editorModel,
-				selector: '.slideContainer',
+				selector: '.operatingTable .slideContainer',
 				attr: 'Background',
 				template: JST['strut.themes/BackgroundChooserDropdown']
 			});

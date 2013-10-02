@@ -4,13 +4,11 @@
 		{{#getBGImgStyle surface}}{{/getBGImgStyle}}
 	}
 {{/isBGImg}}
-
 {{#isBGImg background}}
 	.slideContainer {
 		{{#getBGImgStyle background}}{{/getBGImgStyle}}
 	}
 {{/isBGImg}}
-
 {{#slides.models}}
 	{{#attributes}}
 		{{#isBGImg surface}}
@@ -20,7 +18,6 @@
 			{{#getBGImgStyle surface}}{{/getBGImgStyle}}
 		}
 		{{/isBGImg}}
-
 		{{#isBGImg background}}
 		.slideContainer.strut-slide-{{@index}} {
 			{{#getBGImgStyle background}}{{/getBGImgStyle}}

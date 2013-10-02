@@ -7,8 +7,9 @@ function(Lexed) {
 					return text;
 				},
 
-				'@[A-Za-z\\-]+': function(text, lexed) { 
-					return text; },
+				'@[^\\n{]+': function(text, lexed) {
+					return text;
+				},
 
 				'\\s+': function(text, lexed) {
 					return text;
@@ -58,12 +59,35 @@ function(Lexed) {
 					return text;
 				},
 
+				'{': function(text, lexed) {
+					console.log('inner rule');
+					lexed.state('innerRule');
+					return text;
+				},
+
+				'[^{}]': function(text) {
+					return text;
+				},
+
+				'}': function(text, lexed) {
+					console.log('initial');
+					lexed.state('initial');
+					return text;
+				}
+			},
+
+			innerRule: {
+				'/\\*': function(text, lexed) {
+					lexed.state('comment');
+					return text;
+				},
+
 				'[^}]': function(text) {
 					return text;
 				},
 
 				'}': function(text, lexed) {
-					lexed.state('initial');
+					lexed.state('ruleDefinition');
 					return text;
 				}
 			}
