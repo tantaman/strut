@@ -89,6 +89,14 @@ define(['libs/backbone',
 				this._deck.create();
 			},
 
+			addCustomBgClassFor: function(color) {
+				var result = this._deck.addCustomBgClassFor(color);
+				if (!result.existed) {
+					this.trigger('change:customBgClasses');
+				}
+				return result;
+			},
+
 			importPresentation: function(rawObj) {
 				// deck disposes iteself on import?
 				console.log('New file name: ' + rawObj.fileName);

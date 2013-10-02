@@ -165,10 +165,11 @@ define(['libs/backbone'], function(Backbone) {
           move: function (color) {
             // $colorChooser.find("div").css("backgroundColor", "#" + hex);
             //view.model.get('editableModel').set('color', hex)
-            var hex = color.toHexString();
-            document.execCommand('foreColor', false, hex);
+            document.execCommand('foreColor', false, color.toHexString());
+          },
+          change: function(color) {
             Backbone.trigger('etch:state', {
-              color: hex
+              color: color.toHexString()
             });
           }
         });

@@ -8,9 +8,16 @@ define(["common/Calcium",
 	'tantaman/web/undo_support/CmdListFactory',
 	'strut/deck/Slide',
 	"strut/editor/GlobalEvents",
-	'./DeckUpgrade'],
-	function(Backbone, SlideCollection, SlideCommands, CmdListFactory, Slide, key, DeckUpgrade) {
-
+	'./DeckUpgrade',
+	'./CustomBackgrounds'],
+	function(Backbone, 
+			 SlideCollection, 
+			 SlideCommands, 
+			 CmdListFactory, 
+			 Slide, 
+			 key, 
+			 DeckUpgrade, 
+			 CustomBackgrounds) {
 		/**
 		 * This represents a slide deck.  It has a title, a currently active slide, a collection of slides, the filename on
 		 * "disk" and the overarching presentation background color.
@@ -81,6 +88,11 @@ define(["common/Calcium",
 				return this.get('surface') || 'bg-default';
 			},
 
+			addCustomBgClassFor: function(color) {
+				var customBgs = this.get('customBackgrounds');
+				return customBgs.add(color);
+			},
+
 			// TODO: this method should be a bit less brittle. If new properties are added to a deck, this won't set them.
 			/**
 			 * Method to import an existing presentation into this deck.
@@ -103,6 +115,9 @@ define(["common/Calcium",
 				this.set('customStylesheet', rawObj.customStylesheet);
 				this.set('deckVersion', rawObj.deckVersion);
 				this.set('cannedTransition', rawObj.cannedTransition);
+				var bgs = new CustomBackgrounds(rawObj.customBackgrounds);
+				this.set('customBackgrounds', bgs);
+				bgs.prune(rawObj.slides);
 				this.undoHistory.clear();
 
 				// TODO: go through and dispose of all old slides...?
