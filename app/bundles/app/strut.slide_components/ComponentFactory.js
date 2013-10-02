@@ -49,9 +49,10 @@ define(function() {
 		 * Create a model from a given raw object.
 		 *
 		 * @param {Object} rawModel
+		 * @param {Object} opts - additional options
 		 * @returns {Component}
 		 */
-		createModel: function(rawModel) {
+		createModel: function(rawModel, opts) {
 			// TODO: temporary hack until
 			// everyone migrates to the new serialization format
 			if (rawModel.type == "ImageModel") {
@@ -65,7 +66,7 @@ define(function() {
 			}
 			var ctor = this._modelCtors[type];
 			if (ctor) {
-				return new ctor(rawModel);
+				return new ctor(rawModel, opts);
 			}
 		},
 

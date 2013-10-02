@@ -20,6 +20,7 @@ define(['libs/backbone',
 				// is there a better way to do this?
 				window.uiTestAcc = this;
 
+				this._fontState = window.sessionMeta.fontState || {};
 				this._deck = new Deck();
 				this.addSlide();
 
@@ -49,6 +50,8 @@ define(['libs/backbone',
 				this._cmdList = CmdListFactory.managedInstance('editor');
 				GlobalEvents.on('undo', this._cmdList.undo, this._cmdList);
 				GlobalEvents.on('redo', this._cmdList.redo, this._cmdList);
+
+				Backbone.on('etch:state', this._fontStateChanged, this);
 			},
 
 			changeActiveMode: function(modeId) {
@@ -70,6 +73,7 @@ define(['libs/backbone',
 				throw "EditorModel can not be disposed yet"
 				this._exitSaver.dispose();
 				this._timedSaver.dispose();
+				Backbone.off(null, null, this);
 			},
 
 			newPresentation: function() {
@@ -139,9 +143,16 @@ define(['libs/backbone',
 			addComponent: function(type) {
 				var slide = this._deck.get('activeSlide');
 				if (slide) {
-					var comp = ComponentFactory.instance.createModel(type);
+					var comp = ComponentFactory.instance.createModel(type, {
+						fontStyles: this._fontState
+					});
 					slide.add(comp);
 				}
+			},
+
+			_fontStateChanged: function(state) {
+				_.extend(this._fontState, state);
+				window.sessionMeta.fontState = this._fontState;
 			},
 
 			_createMode: function() {

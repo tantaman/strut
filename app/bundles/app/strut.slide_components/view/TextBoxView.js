@@ -262,15 +262,15 @@ define(["./ComponentView", "libs/etch",
 				this.$textEl = this.$el.find(".content");
 				this.$textEl.html(this.model.get("text"));
 				this.$el.css({
-					fontFamily: this.model.get("family"),
+					// fontFamily: this.model.get("family"),
 					fontSize: this.model.get("size"),
-					fontWeight: this.model.get("weight"),
-					fontStyle: this.model.get("style"),
-					color: "#" + this.model.get("color"),
+					// fontWeight: this.model.get("weight"),
+					// fontStyle: this.model.get("style"),
+					// color: "#" + this.model.get("color"),
 					top: this.model.get("y"),
 					left: this.model.get("x"),
-					textDecoration: this.model.get("decoration"),
-					textAlign: this.model.get("align")
+					// textDecoration: this.model.get("decoration"),
+					// textAlign: this.model.get("align")
 				});
 				return this.$el;
 			},

@@ -13,10 +13,10 @@ function(etch) {
         });
 
     var noText = [
-    'link',
-    'clear-formatting',
-    'ordered-list',
-    'unordered-list'
+        'link',
+        'clear-formatting',
+        'ordered-list',
+        'unordered-list'
     ];
 
     etch.buttonElFactory = function(button) {
@@ -51,6 +51,8 @@ function(etch) {
     };
 
     return {
-        initialize: function() {}
+        initialize: function() {
+            console.log(arguments);
+        }
     }
 });

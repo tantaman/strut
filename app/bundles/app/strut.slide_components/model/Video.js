@@ -41,8 +41,8 @@ define(['strut/deck/Component',
 				}
 				return this;
 			},
-			constructor: function Video() {
-				Component.prototype.constructor.apply(this, arguments);
+			constructor: function Video(attrs) {
+				Component.prototype.constructor.call(this, attrs);
 			}
 		});
 	});

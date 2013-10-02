@@ -165,7 +165,11 @@ define(['libs/backbone'], function(Backbone) {
           move: function (color) {
             // $colorChooser.find("div").css("backgroundColor", "#" + hex);
             //view.model.get('editableModel').set('color', hex)
-            document.execCommand('foreColor', false, color.toHexString());
+            var hex = color.toHexString();
+            document.execCommand('foreColor', false, hex);
+            Backbone.trigger('etch:state', {
+              color: hex
+            });
           }
         });
 
@@ -211,6 +215,9 @@ define(['libs/backbone'], function(Backbone) {
       document.execCommand('fontName', false, value);
       value = value.substr(value.indexOf("'")+1, value.lastIndexOf("'")-1)
       this.$el.find(".fontFamilyBtn .text").text(value);
+      Backbone.trigger('etch:state', {
+        face: value
+      });
     },
 
     setFontSize: function(e) {
@@ -224,6 +231,9 @@ define(['libs/backbone'], function(Backbone) {
       // so that way we have the correct font readouts when someone
       // uses the scale control
       this.$el.find(".fontSizeBtn .text").text(value);
+      Backbone.trigger('etch:state', {
+        size: value
+      });
     },
         
     toggleBold: function(e) {

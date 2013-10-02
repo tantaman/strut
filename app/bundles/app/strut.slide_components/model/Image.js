@@ -27,8 +27,8 @@ define(['strut/deck/Component',
 
 			},
 
-			constructor: function ImageModel() {
-				Component.prototype.constructor.apply(this, arguments);
+			constructor: function ImageModel(attrs) {
+				Component.prototype.constructor.call(this, attrs);
 			}
 		});
 	});

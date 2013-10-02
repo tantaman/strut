@@ -13,8 +13,8 @@ define(['strut/deck/Component',
 				this.set('type', 'WebFrame');
 			},
 
-			constructor: function WebFrame() {
-				Component.prototype.constructor.apply(this, arguments);
+			constructor: function WebFrame(attrs) {
+				Component.prototype.constructor.call(this, attrs);
 			}
 		});
 	});
