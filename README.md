@@ -3,7 +3,7 @@ Strut
 
 [![Facelift](https://f.cloud.github.com/assets/1009003/515405/f1003c6a-be74-11e2-84b9-14776c652afb.png)](http://strut.io/dist/index.html)
 
-#### A GUI / Authoring Tool for ImpressJS ####
+#### A GUI / Authoring Tool for ImpressJS and Bespoke.js ####
 
 This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
 
