@@ -92,6 +92,9 @@ define(['libs/backbone',
 				this._deck.create();
 			},
 
+			/**
+			 * see Deck.addCustomBgClassFor
+			 */
 			addCustomBgClassFor: function(color) {
 				var result = this._deck.addCustomBgClassFor(color);
 				if (!result.existed) {

@@ -1,5 +1,8 @@
 define(['libs/backbone'],
 function(Backbone) {
+	/**
+	* A modal that present a flat color chooser.
+	*/
 	return Backbone.View.extend({
 		className: 'modal hide',
 		events: {
@@ -10,6 +13,11 @@ function(Backbone) {
 			this._color = '#EEE';
 		},
 
+		/**
+		* Show the modal.  cb is the
+		* function that is called when a color is chosen.
+		* @param {function} cb
+		*/
 		show: function(cb) {
 			this._cb = cb;
 			this.$el.modal('show');

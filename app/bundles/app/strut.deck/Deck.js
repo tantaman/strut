@@ -88,6 +88,16 @@ define(["common/Calcium",
 				return this.get('surface') || 'bg-default';
 			},
 
+			/**
+			 * Given a color, this generates a custom background
+			 * class for that color.
+			 * The returned object contains the name of the 
+			 * class for the color and whether or not
+			 * that class existed previously.
+			 * 
+			 * @param {string} color hex string
+			 * @returns {Object}
+			 */
 			addCustomBgClassFor: function(color) {
 				var customBgs = this.get('customBackgrounds');
 				return customBgs.add(color);
