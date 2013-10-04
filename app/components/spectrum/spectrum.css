@@ -235,7 +235,6 @@ License: MIT
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
-    float: right;
 }
 
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue
