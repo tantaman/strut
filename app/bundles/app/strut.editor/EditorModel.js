@@ -22,6 +22,9 @@ define(['libs/backbone',
 
 				this._fontState = window.sessionMeta.fontState || {};
 				this._deck = new Deck();
+				this._deck.on('change:customBackgrounds', function(deck, bgs) {
+					this.trigger('change:customBackgrounds', this, bgs)
+				}, this);
 				this.addSlide();
 
 				this.set('header', new Header(this.registry, this));
@@ -87,6 +90,21 @@ define(['libs/backbone',
 	        		slides: []
 	      		});
 				this._deck.create();
+			},
+
+			/**
+			 * see Deck.addCustomBgClassFor
+			 */
+			addCustomBgClassFor: function(color) {
+				var result = this._deck.addCustomBgClassFor(color);
+				if (!result.existed) {
+					this.trigger('change:customBackgrounds', this, this._deck.get('customBackgrounds'));
+				}
+				return result;
+			},
+
+			customBackgrounds: function() {
+				return this._deck.get('customBackgrounds');
 			},
 
 			importPresentation: function(rawObj) {

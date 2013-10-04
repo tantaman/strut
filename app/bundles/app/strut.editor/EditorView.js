@@ -1,12 +1,15 @@
 define(['libs/backbone',
-		'strut/header/view/HeaderView'],
-function(Backbone, Header) {
+		'strut/header/view/HeaderView',
+		'./CustomBgStylesheet'],
+function(Backbone, Header, CustomBgStylesheet) {
 	return Backbone.View.extend({
 		className: 'container-fluid',
 		initialize: function() {
 			this._header = new Header({model: this.model.get('header')});
 
 			this.model.on('change:activeMode', this._modeChanged, this);
+
+			this._customBgSheet = new CustomBgStylesheet(this.model);
 		},
 
 		render: function() {

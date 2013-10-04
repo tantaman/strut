@@ -10,6 +10,7 @@
 			{{/backgrounds}}
 			<li><a class="nobg thumbnail" data-class="bg-default"></a></li>
 			<li><a class="bg-img thumbnail" data-class="bg-img"><i class="icon-picture"></i></a></li>
+			<li><a class="bg-custom thumbnail" data-class="bg-custom"><i class="icon-pencil"></i></a></li>
 		</ul>
 	</li>
 	<li class="dropdown-submenu">
@@ -20,6 +21,7 @@
 			{{/backgrounds}}
 			<li><a class="nobg thumbnail" data-class="bg-default"></a></li>
 			<li><a class="bg-img thumbnail" data-class="bg-img"><i class="icon-picture"></i></a></li>
+			<li><a class="bg-custom thumbnail" data-class="bg-custom"><i class="icon-pencil"></i></a></li>
 		</ul>
 	</li>
 </ul>
