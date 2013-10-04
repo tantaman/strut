@@ -42,7 +42,7 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				return x * slideConfig.size.width / slideConfig.overviewSize.width;
 			});
 			Handlebars.registerHelper("scaleY", function(y) {
-				return y * slideConfig.size.width / slideConfig.overviewSize.width;
+				return y * slideConfig.size.height / slideConfig.overviewSize.height;
 			});
 			Handlebars.registerHelper("toDeg", function(v) {
 				return v * 180 / Math.PI;
