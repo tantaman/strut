@@ -1,8 +1,9 @@
 define(['tantaman/web/widgets/Dropdown',
 		'strut/deck/Utils',
 		'tantaman/web/widgets/ItemImportModal',
+		'./ColorChooserModal',
 		'lang'],
-function(View, DeckUtils, ItemImportModal, lang) {
+function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 	function BackgroundProvider(opts) {
 		var backgrounds = opts.backgrounds;
 		var editorModel = opts.editorModel;
@@ -32,6 +33,10 @@ function(View, DeckUtils, ItemImportModal, lang) {
 		icon: 'icon-picture',
 		browsable: true
 	});
+	var colorChooserModal = new ColorChooserModal();
+	colorChooserModal.render();
+	$('#modals').append(colorChooserModal.$el);
+
 	// gradientChooserModal = ...
 	// TODO: update your jQuery gradient chooser.
 
@@ -47,7 +52,7 @@ function(View, DeckUtils, ItemImportModal, lang) {
 			
 			var klass = e.currentTarget.dataset['class'];
 			if (klass == null) return;
-			if (klass == 'bg-img') return;
+			if (klass == 'bg-img' || klass == 'bg-custom') return;
 
 			if (klass == 'bg-default') {
 				if (this._attr == 'Background') {
@@ -71,7 +76,23 @@ function(View, DeckUtils, ItemImportModal, lang) {
 				});
 				return;
 			}
+			if (bg == 'bg-custom') {
+				var self = this;
+				colorChooserModal.show(function(color) {
+					self._setCustomBgColor(allSlides, color);
+				});
+				return;
+			}
 
+			this._setBgClass(allSlides, bg);
+		},
+
+		_setCustomBgColor: function(allSlides, color) {
+			var bgClass = this._editorModel.addCustomBgClassFor(color).klass;
+			this._setBgClass(allSlides, bgClass);
+		},
+
+		_setBgClass: function(allSlides, bg) {
 			if (bg == null)
 				return;
 

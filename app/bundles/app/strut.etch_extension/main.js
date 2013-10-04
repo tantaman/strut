@@ -52,7 +52,6 @@ function(etch) {
 
     return {
         initialize: function() {
-            console.log(arguments);
         }
     }
 });
