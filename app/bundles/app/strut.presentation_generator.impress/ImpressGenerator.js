@@ -151,8 +151,8 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				x = slide.get("x");
 				y = slide.get('y');
 				if (!(x != null)) {
-					slide.set("x", cnt * 160 + 30);
-					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80);
+					slide.set("x", cnt * 280 + 180);
+					slide.set("y", ((cnt / colCnt) | 0) * 280 + 180);
 				}
 
 				if (minX == null || x < minX)

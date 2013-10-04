@@ -107,8 +107,8 @@ define(['libs/backbone',
 					var x = slide.get('x');
 
 					if (x == null) {
-						slide.set('x', cnt * 280 + 30);
-						slide.set('y', ((cnt / colCnt) | 0) * 280 + 80);
+						slide.set('x', cnt * 280 + 180);
+						slide.set('y', ((cnt / colCnt) | 0) * 280 + 180);
 					}
 					++cnt;
 
