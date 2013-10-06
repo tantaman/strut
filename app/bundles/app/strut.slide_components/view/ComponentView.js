@@ -384,8 +384,8 @@ define(["libs/backbone",
 				getAxis = function(axis, e) {
 					return axis == 'x' ? e.width() : e.height()
 				};
-				var slideSize = getAxis(axis, $('.slideContainer'));
-				var textSize = getAxis(axis, $('.ui-selected'));
+				var slideSize = getAxis(axis, this.$el.parent('.slideContainer'));
+				var textSize = getAxis(axis, this.$el);
 
 				var origPos = {
 					x: this.model.get('x'),
