@@ -112,6 +112,7 @@ define(["./ComponentView", "libs/etch",
 						this.$el.find(".content").get(0).focus();
 						try {
 							document.execCommand('selectAll', false, null);
+							etch.triggerCaret();
 						} catch (e) {
 							// firefox failboats on this command
 							// for some reason.  hence the try/catch
