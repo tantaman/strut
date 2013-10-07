@@ -9,30 +9,33 @@ function(ComponentView, Mixers) {
 			ComponentView.prototype.initialize.apply(this, arguments);
 			this.scale = Mixers.scaleObjectEmbed;
 			this.model.off('change:scale', this._setUpdatedTransform, this);
-			this.model.on('change:scale', Mixers.scaleChangeObject, this);
+			this.model.on('change:scale', Mixers.scaleChangeInlineSvg, this);
 		},
 
-		// TODO: make VideoView and ShapeView share a common ancestor,
-		// "ObjectView"
+		// TODO: update markup on model so fills get preserved?
+		// Or maintain outer node here?
 		render: function() {
 			ComponentView.prototype.render.call(this);
-			var obj = '<object class="emb" data="' + this.model.get('src')
-			+ '" width="100" height="100" type="image/svg+xml"></object>';
+			var obj = this.model.get('markup')
 			this.$object = $(obj);
 
 			var scale = this.model.get('scale');
-			if (scale && scale.width) {
-				this.$object.attr(scale);
-			} else {
-				this.model.attributes.scale = {
-					width: 100,
-					height: 100
-				};
-			}
 
 			var $content = this.$el.find('.content');
 			$content.append(this.$object);
 			$content.append($('<div class="overlay"></div>'));
+
+			if (scale && scale.width) {
+				this.$object.attr(scale);
+			} else {
+				scale = {
+					width: 100,
+					height: 100
+				};
+				this.model.attributes.scale = scale;
+				this.$object.attr(scale);
+			}
+
 			return this.$el;
 		}
 	});

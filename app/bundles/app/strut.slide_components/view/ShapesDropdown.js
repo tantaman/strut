@@ -15,6 +15,8 @@ define(['tantaman/web/widgets/Dropdown',
 			Dropdown.apply(this, arguments);
 			this._editorModel = options.editorModel;
 
+			this._shapes = shapes.shapes;
+
 			this.$el.on('click', '.shape', this._selected.bind(this));
 		}
 
@@ -26,7 +28,7 @@ define(['tantaman/web/widgets/Dropdown',
 		 */
 		ShapesDropdown.prototype._selected = function(e) {
 			this._editorModel.addComponent({
-				src: e.currentTarget.dataset.src,
+				markup: this._shapes[e.currentTarget.dataset.index].markup,
 				type: 'Shape'
 			});
 		}

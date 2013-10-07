@@ -38,7 +38,7 @@ define(function() {
           this.$el.css(size);
       },
 
-      scaleChangeObject: function(model, size) {
+      scaleChangeInlineSvg: function(model, size) {
         this.$object.attr(size);
         this.$el.css(size);
       }
