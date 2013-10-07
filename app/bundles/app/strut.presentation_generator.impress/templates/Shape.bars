@@ -1,0 +1,4 @@
+{{> ComponentContainer}}
+<object class="emb" data="{{src}}" type="image/svg+xml" width="{{scale.width}}" height="{{scale.height}}"></object>
+</div>
+</div>
