@@ -14,13 +14,9 @@ define(['strut/deck/Component',
 
 				var src = this.get('src');
 				this.set('imageType', FileUtils.imageType(src));
-				this.on('change:src', this._updateCache, this);
-				this._cachedImage = new Image();
-				this._updateCache();
 			},
 
 			_updateCache: function() {
-				this._cachedImage.src = this.get('src');
 			},
 
 			toBase64: function() {

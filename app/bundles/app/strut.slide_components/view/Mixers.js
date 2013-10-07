@@ -36,6 +36,11 @@ define(function() {
           this.$object.attr(size);
           this.$embed.attr(size);
           this.$el.css(size);
+      },
+
+      scaleChangeObject: function(model, size) {
+        this.$object.attr(size);
+        this.$el.css(size);
       }
     };
   });

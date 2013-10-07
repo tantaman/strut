@@ -27,7 +27,7 @@ define(['tantaman/web/widgets/Dropdown',
 		ShapesDropdown.prototype._selected = function(e) {
 			this._editorModel.addComponent({
 				src: e.currentTarget.dataset.src,
-				type: 'Image'
+				type: 'Shape'
 			});
 		}
 
