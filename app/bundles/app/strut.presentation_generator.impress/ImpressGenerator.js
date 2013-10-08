@@ -104,6 +104,16 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				return '';
 			});
 
+			Handlebars.registerHelper("shapeSvg", function() {
+				if (this.fill && this.markup) {
+					var string = '<svg fill="' + this.fill + '" ' + this.markup.substring(4);
+					return new Handlebars.SafeString(string);
+				} else if (this.markup) {
+					return new Handlebars.SafeString(this.markup);
+				} else
+					return '';
+			});
+
 			Handlebars.registerHelper("isBGImg", function(string, options) {
 				if (string && string.indexOf("img:") == 0) {
 					return options.fn(this);

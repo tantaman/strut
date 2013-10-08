@@ -60,6 +60,23 @@ function(ComponentView, Mixers, ManagedColorChooser) {
 			return this.$el;
 		},
 
+		_xChanged: function(model, value) {
+			ComponentView.prototype._xChanged.apply(this, arguments);
+			colorChooser.move({left: value + this.model.get('scale').width});
+		},
+
+		_yChanged: function(model, value) {
+			ComponentView.prototype._yChanged.apply(this, arguments);
+			colorChooser.move({top: value - 5});
+		},
+
+		remove: function() {
+			ComponentView.prototype.remove.apply(this, arguments);
+			colorChooser.hide({
+				move: this._updateFill
+			});
+		},
+
 		_selectionChanged: function(model, value) {
 			if (!value) {
 				colorChooser.hide({

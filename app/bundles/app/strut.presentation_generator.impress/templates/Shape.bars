@@ -1,4 +1,4 @@
 {{> ComponentContainer}}
-{{{markup}}}
+{{#shapeSvg}}{{/shapeSvg}}
 </div>
 </div>

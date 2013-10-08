@@ -60,6 +60,10 @@ function(Backbone, Utils) {
 			}
 		},
 
+		move: function(loc) {
+			this.$el.css(loc);
+		},
+
 		hide: function(opts) {
 			this.$el.addClass('dispNone');
 			this._$colorChooser.spectrum('hide');
