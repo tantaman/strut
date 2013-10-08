@@ -1,6 +1,0 @@
-{{> ComponentContainer}}
-<video controls>
-	<source src="{{src}}" type="{{videoType}}"></source>
-</video>
-</div>
-</div>
