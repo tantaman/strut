@@ -242,7 +242,7 @@ module.exports = function (grunt) {
                     cwd: '<%= yeoman.app %>',
                     dest: '<%= yeoman.dist %>/styles/img',
                     src: [
-                        '**/*.{ico,txt,png,jpg,gif}',
+                        '**/*.{ico,txt,png,jpg,gif,svg}',
                     ]
                 },
                 // TODO: figure out what the deal is with the fonts in dist mode...
