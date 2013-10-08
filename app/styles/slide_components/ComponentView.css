@@ -190,3 +190,15 @@
 .component:hover .close-btn-red-20 {
 	display: inline;
 }
+
+.component .shape-color-picker {
+	background: #000;
+	visibility: hidden;
+	position: absolute;
+	right: -60px;
+	top: 0px;
+}
+
+.component.ui-selected .shape-color-picker {
+	visibility: visible;
+}

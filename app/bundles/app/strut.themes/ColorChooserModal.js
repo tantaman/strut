@@ -42,7 +42,7 @@ function(Backbone) {
 			this._$colorChooser.spectrum({
 				color: this._color,
 				showSelectionPalette: true,
-          		localStorageKey: 'strut.bgColorChooser',
+          		localStorageKey: 'strut.colorChooser',
           		showPalette: true,
           		showInitial: true,
           		showInput: true,

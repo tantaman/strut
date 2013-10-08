@@ -155,7 +155,7 @@ define(['libs/backbone'], function(Backbone) {
         $colorChooser.spectrum({
           color: '#' + hex,
           showSelectionPalette: true,
-          localStorageKey: 'strut.fontColorChooser',
+          localStorageKey: 'strut.colorChooser',
           showPalette: true,
           showInitial: true,
           showInput: true,

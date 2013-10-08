@@ -8,6 +8,10 @@ define(function() {
 					e.dispose();
 				});
 			}
+		},
+
+		stopProp: function(e) {
+			e.stopPropagation();
 		}
 	}
 });
