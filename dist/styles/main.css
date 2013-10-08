@@ -7174,7 +7174,7 @@ a.badge:hover {
   src: local('Ubuntu Bold'), local('Ubuntu-Bold'), url(Ubuntu-Bold.woff) format('woff');
 }
 @font-face {
-  font-family: 'Press Start 2P';
+  font-family: 'PressStart2P';
   font-style: normal;
   font-weight: 400;
   src: local('Press Start 2P'), local('PressStart2P-Regular'), url(PressStart2P-Regular.woff) format('woff');
