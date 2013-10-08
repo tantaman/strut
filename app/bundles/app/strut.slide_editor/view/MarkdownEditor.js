@@ -32,6 +32,7 @@ function(managedEditors, md, Utils) {
 		setValue: function(value) {
 			value = value || defaultValue;
 			editor.mirror.setValue(value);
+			editor.mirror.getDoc().clearHistory();
 		},
 
 		getValue: function() {
