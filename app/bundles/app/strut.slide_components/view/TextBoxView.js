@@ -255,17 +255,18 @@ define(["./ComponentView", "libs/etch",
 
 			_handlePaste: function(elem, e) {
 				e = e.originalEvent;
-				var sel = window.getSelection();
-				var range = sel.getRangeAt(0);
-				var text = document.createTextNode(e.clipboardData.getData('text/plain'));
-				range.deleteContents();
-				range.insertNode(text);
+				document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+				// var sel = window.getSelection();
+				// var range = sel.getRangeAt(0);
+				// var text = document.createTextNode(e.clipboardData.getData('text/plain'));
+				// range.deleteContents();
+				// range.insertNode(text);
 
-				range.setStartAfter(text);
-				range.setEndAfter(text);
+				// range.setStartAfter(text);
+				// range.setEndAfter(text);
 
-				sel.removeAllRanges();
-				sel.addRange(range);
+				// sel.removeAllRanges();
+				// sel.addRange(range);
 
 				e.preventDefault();
 			},
