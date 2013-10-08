@@ -102,14 +102,14 @@ define(["./ComponentView", "libs/etch",
 			 */
 			dblclicked: function(e) {
 				this.$el.addClass("editable");
-				this.$el.find(".content").attr("contenteditable", true);
+				this.$textEl.attr("contenteditable", true);
 				if (e != null) {
 					this._initialText = this.$textEl.html();
 					etch.editableInit.call(this, e, this.model.get("y") * this.dragScale + 35);
 
 					// Focus editor and select all text.
 					if (!this.editing) {
-						this.$el.find(".content").get(0).focus();
+						this.$textEl.get(0).focus();
 						try {
 							document.execCommand('selectAll', false, null);
 							etch.triggerCaret();
@@ -178,7 +178,7 @@ define(["./ComponentView", "libs/etch",
 					pageX: this.model.get("x")
 				});
 				this.dblclicked(e);
-				this.$el.find(".content").selectText();
+				this.$textEl.selectText();
 			},
 
 			/**
@@ -196,7 +196,7 @@ define(["./ComponentView", "libs/etch",
 
 					this.model.set("text", text);
 					window.getSelection().removeAllRanges();
-					this.$el.find(".content").attr("contenteditable", false);
+					this.$textEl.attr("contenteditable", false);
 					this.$el.removeClass("editable");
 					this.allowDragging = true;
 				}
@@ -253,6 +253,23 @@ define(["./ComponentView", "libs/etch",
 				this.$textEl.html(text);
 			},
 
+			_handlePaste: function(elem, e) {
+				e = e.originalEvent;
+				var sel = window.getSelection();
+				var range = sel.getRangeAt(0);
+				var text = document.createTextNode(e.clipboardData.getData('text/plain'));
+				range.deleteContents();
+				range.insertNode(text);
+
+				range.setStartAfter(text);
+				range.setEndAfter(text);
+
+				sel.removeAllRanges();
+				sel.addRange(range);
+
+				e.preventDefault();
+			},
+
 			/**
 			 * Render element based on component model.
 			 *
@@ -261,6 +278,10 @@ define(["./ComponentView", "libs/etch",
 			render: function() {
 				ComponentView.prototype.render.call(this);
 				this.$textEl = this.$el.find(".content");
+				var self = this;
+				this.$textEl.bind('paste', function(e) {
+					self._handlePaste(this, e);
+				});
 				this.$textEl.html(this.model.get("text"));
 				this.$el.css({
 					// fontFamily: this.model.get("family"),
