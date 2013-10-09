@@ -1,0 +1,9 @@
+[submodule "app/bundles/app/strut.presentation_generator"]
+	path = app/bundles/app/strut.presentation_generator
+	url = git@github.com:StrutPresents/strut.presentation_generator.git
+[submodule "app/bundles/app/strut.presentation_generator.bespoke"]
+	path = app/bundles/app/strut.presentation_generator.bespoke
+	url = git@github.com:StrutPresents/strut.presentation_generator.bespoke.git
+[submodule "app/bundles/app/strut.presentation_generator.impress"]
+	path = app/bundles/app/strut.presentation_generator.impress
+	url = git@github.com:StrutPresents/strut.presentation_generator.impress.git
