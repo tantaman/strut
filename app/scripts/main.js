@@ -19,6 +19,9 @@ require.config({
     	lexed: '../components/lexed/lexed',
     	codemirror: '../components/codemirror',
     	'marked': '../components/marked/marked',
+    	EventEmitter: '../scripts/common/EventEmitter',
+    	MultiMap: '../scripts/common/collections/MultiMap',
+    	'ServiceRegistry': 'framework/sr/index',
 
     	// build - rmap
     	'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',

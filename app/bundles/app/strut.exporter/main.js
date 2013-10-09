@@ -1,8 +1,8 @@
 define(['tantaman/web/widgets/MenuItem',
-		'framework/ServiceCollection',
+		'ServiceRegistry',
 		'./ExportImportModal',
 		'lang'],
-function(MenuItem, ServiceCollection, ExportModal, lang) {
+function(MenuItem, SR, ExportModal, lang) {
 	'use strict';
 
 	var $modals = $('#modals');
@@ -25,9 +25,9 @@ function(MenuItem, ServiceCollection, ExportModal, lang) {
 
 	return {
 		initialize: function(registry) {
-			exporterCollection = new ServiceCollection(
+			exporterCollection = new SR.ServiceCollection(
 											registry, 'strut.exporter',
-											ServiceCollection.toServiceConverter
+											SR.ServiceCollection.toServiceConverter
 										);
 
 			registry.register({

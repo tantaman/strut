@@ -6,10 +6,10 @@ function(Backbone) {
 			this._createCreateCompButtons();
 
 			// TODO: update to use ServiceCollection and remove the boilerplate.
-			this.registry.on('registered:strut.ComponentButtonProvider',
-				this._compBtnProviderRegistered, this);
-			this.registry.on('registered:strut.EditMode',
-				this._modeRegistered, this);
+			// this.registry.on('registered:strut.ComponentButtonProvider',
+			// 	this._compBtnProviderRegistered, this);
+			// this.registry.on('registered:strut.EditMode',
+			// 	this._modeRegistered, this);
 		},
 
 		editorModel: function() { return this._editorModel; },

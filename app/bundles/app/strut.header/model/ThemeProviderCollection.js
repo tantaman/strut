@@ -1,12 +1,12 @@
-define(['libs/backbone', 'framework/ServiceCollection'],
-function(Backbone, ServiceCollection) {
+define(['libs/backbone', 'ServiceRegistry'],
+function(Backbone, SR) {
 	function ThemeProviderCollection(editorModel, meta) {
 		this._editorModel = editorModel;
 
 		this._activeProviders = [];
 		this._editorModel.on('change:activeMode', this._modeChanged, this);
 		this._themeProviders =
-			new ServiceCollection(editorModel.registry,
+			new SR.ServiceCollection(editorModel.registry,
 				{
 					interfaces: 'strut.ThemeProvider',
 					meta: meta

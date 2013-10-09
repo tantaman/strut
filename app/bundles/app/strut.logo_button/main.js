@@ -1,7 +1,7 @@
-define(['framework/ServiceCollection', 'tantaman/web/widgets/MenuItem',
+define(['ServiceRegistry', 'tantaman/web/widgets/MenuItem',
 		'tantaman/web/undo_support/CmdListFactory',
 		'tantaman/web/widgets/UndoRedoMenuItem'],
-function(ServiceCollection, MenuItem, CmdListFactory, UndoRedoMenuItem) {
+function(SR, MenuItem, CmdListFactory, UndoRedoMenuItem) {
 	'use strict';
 
 	var cmdList = CmdListFactory.managedInstance('editor');
@@ -51,7 +51,7 @@ function(ServiceCollection, MenuItem, CmdListFactory, UndoRedoMenuItem) {
 
 	return {
 		initialize: function(registry) {
-			actionProviders = new ServiceCollection(
+			actionProviders = new SR.ServiceCollection(
 					registry,
 					'strut.editor.glob.action'
 				);

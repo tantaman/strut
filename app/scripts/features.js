@@ -1,5 +1,5 @@
 define([
-	'framework/ServiceRegistry',
+	'ServiceRegistry',
 	'strut/etch_extension/main',
 	'strut/storage/main',
 	'strut/logo_button/main',
@@ -23,8 +23,8 @@ define([
 	// 'tantaman/web/remote_storage/main',
 	'strut/startup/main'
 	],
-function(ServiceRegistry) {
-	var registry = new ServiceRegistry();
+function(SR) {
+	var registry = new SR.ServiceRegistry();
 
 	var args = Array.prototype.slice.call(arguments, 0);
 
