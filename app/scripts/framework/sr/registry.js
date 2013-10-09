@@ -1,5 +1,5 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
-define(['EventEmitter', 'MultiMap', 'lodash'],
+define(['common/EventEmitter', 'common/collections/MultiMap', 'lodash'],
 function(EventEmitter, MultiMap, _) {
 	'use strict';
 	var identifier = 0;

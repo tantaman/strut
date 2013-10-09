@@ -19,8 +19,6 @@ require.config({
     	lexed: '../components/lexed/lexed',
     	codemirror: '../components/codemirror',
     	'marked': '../components/marked/marked',
-    	EventEmitter: '../scripts/common/EventEmitter',
-    	MultiMap: '../scripts/common/collections/MultiMap',
     	'ServiceRegistry': 'framework/sr/index',
 
     	// build - rmap

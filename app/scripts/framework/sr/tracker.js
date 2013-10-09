@@ -1,5 +1,5 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
-define(['EventEmitter', 'lodash'], 
+define(['common/EventEmitter', 'lodash'], 
 function (EventEmitter, _) {
 	var identity = function(p) {return p;};
 
