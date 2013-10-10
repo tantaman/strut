@@ -6,21 +6,23 @@ function() {
 		},
 
 		open: function(storageInterface, model, filename, cb) {
-			storageInterface.savePresentation(
-				model.fileName(),
-				model.exportPresentation(model.fileName()),
-				function () {
-					storageInterface.load(filename, function(data, err) {
-						if (!err) {
-							model.importPresentation(data);
-						} else {
-							console.log(err);
-							console.log(err.stack);
-						}
+			// When opening a new presentation:
 
-						cb(null, err);
-					});
-				});
+			// 1. save the current presentation
+			storageInterface
+			.savePresentation(model.fileName(),
+							  model.exportPresentation(model.fileName()))
+			// 2. open the requested presentation
+			.then(function () {
+				return storageInterface.load(filename);
+			}).then(function(data) {
+				model.importPresentation(data);
+				cb(null);
+			}).catch(function(err) {
+				cb(err);
+				console.log(err);
+				console.log(err.stack);
+			});
 		},
 
 		new_: function(model) {

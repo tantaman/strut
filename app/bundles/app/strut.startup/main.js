@@ -12,13 +12,11 @@ function(EditorView, EditorModel) {
     		if (sessionMeta.lastPresentation != null) {
     			// Load it up.
     			var storageInterface = registry.getBest('strut.StorageInterface');
-    			storageInterface.load(sessionMeta.lastPresentation, function(pres, err) {
-    				if (!err) {
-    					model.importPresentation(pres);
-    				} else {
-    					console.log(err);
-    					console.log(err.stack);
-    				}
+    			storageInterface.load(sessionMeta.lastPresentation).then(function(pres) {
+    				model.importPresentation(pres);
+    			}).catch(function(err) {
+    				console.log(err);
+    				console.log(err.stack);
     			});
     		}
 		}

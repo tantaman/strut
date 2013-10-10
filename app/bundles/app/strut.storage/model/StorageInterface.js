@@ -37,39 +37,55 @@ function(StorageProviders) {
 			return this._providers.on.apply(this._providers, arguments);
 		},
 
-		store: function(identifier, data, cb) {
-			this.currentProvider().setContents(identifier, data, cb);
-			return this;
+		store: function(identifier, data) {
+			if (data instanceof Blob) {
+				throw "Use storeAttachment for saving blobs";
+			} else {
+				return this.currentProvider().setContents(identifier, data);
+			}
 		},
 
-		load: function(identifier, cb) {
-			this.currentProvider().getContents(identifier, cb);
-			return this;
+		load: function(identifier) {
+			return this.currentProvider().getContents(identifier);
+			// release currently loaded attachments from the AttachmentCache
+			// start loading all attachments for the given identifier?
 		},
 
-		remove: function(identifier, cb) {
-			this.currentProvider().rm(identifier, cb);
-			return this;
+		remove: function(identifier) {
+			return this.currentProvider().rm(identifier);
+			// Tell the AttachmentCache to release its attachments
+			// for the given identifier
 		},
 
-		list: function(path, cb) {
-			this.currentProvider().ls(path, /.*/, cb);
-			return this;
+		storeAttachment: function(identifier, blob) {
+			// stores a blob
 		},
 
-		listPresentations: function(path, cb) {
-			this.currentProvider().ls(path, /.*\.strut$/, cb)
-			return this;
+		loadAttachment: function(identifier) {
+			// return objectURL for the attachment
+			// check the attachment cache
 		},
 
-		savePresentation: function(identifier, data, cb) {
+		removeAttachment: function(identifier) {
+			// remove the attachment...
+		},
+
+		list: function(path) {
+			return this.currentProvider().ls(path, /.*/);
+		},
+
+		listPresentations: function(path) {
+			return this.currentProvider().ls(path, /.*\.strut$/);
+		},
+
+		savePresentation: function(identifier, data) {
 			var idx = identifier.indexOf('.strut');
 			if (idx == -1 || (idx + '.strut'.length != identifier.length)) {
 				identifier += '.strut';
 			}
 			window.sessionMeta.lastPresentation = identifier;
 
-			this.store(identifier, data, cb);
+			return this.store(identifier, data)
 		}
 	};
 

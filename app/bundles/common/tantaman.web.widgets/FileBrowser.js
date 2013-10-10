@@ -56,7 +56,7 @@ function(Backbone, empty) {
 
 		renderListing: function() {
 			var self = this;
-			this.storageInterface.listPresentations("/", function(list, err) {
+			this.storageInterface.listPresentations("/").then(function(list, err) {
 				if (err) {
 					self.$el.find('.browserContent').html(err);
 				} else {
