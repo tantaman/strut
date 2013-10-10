@@ -28,6 +28,8 @@ define({
 	invisible: 'Invisible',
 	reset: 'Reajustar',
 	go: 'Ir',
+	publish: 'Publish',
+	share: 'Share',
 	strut_exporter_json: {
 		explain: 'Esto te permite guardar un archivo en tu ordenador que podrás importar en Strut posteriormente.',
 		click_below: 'Haz Copiarlick abajo para descargar.'

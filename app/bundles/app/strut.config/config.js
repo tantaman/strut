@@ -9,7 +9,8 @@ define(function () {
 				width: 75,
 				height: 50
 			}
-		}
+		},
+		shareType: 'publish'
 	};
 
 	var temp = localStorage.getItem("Strut_sessionMeta");

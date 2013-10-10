@@ -38,6 +38,7 @@ require.config({
     	'strut/presentation_generator/impress': '../bundles/app/strut.presentation_generator.impress',
     	'strut/logo_button': '../bundles/app/strut.logo_button',
     	'strut/presentation_generator': '../bundles/app/strut.presentation_generator',
+    	'strut/share': '../bundles/app/strut.share',
     	'strut/slide_components': '../bundles/app/strut.slide_components',
     	'strut/slide_editor': '../bundles/app/strut.slide_editor',
     	'strut/slide_snapshot': '../bundles/app/strut.slide_snapshot',

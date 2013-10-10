@@ -3,8 +3,9 @@ define(['libs/backbone',
 		'strut/presentation_generator/view/PreviewButton',
 		'./ThemeProviderView',
 		'./Tablets',
+		'strut/share/Share',
 		'css!styles/header/header.css'],
-function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
+function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, Share, empty) {
 	return Backbone.View.extend({
 		className: 'row-fluid header',
 
@@ -50,6 +51,9 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
 
 			var $themeButtons = this.$el.find('.theme-buttons');
 			$themeButtons.append(this._themeProviderView.render().$el);
+
+			var $shareBtn = this.$el.find('.share-button a');
+			Share.wireTo($shareBtn, this.model.editorModel());
 
 			this._tablets.render();
 			this.$el.append(this._tablets.$el);

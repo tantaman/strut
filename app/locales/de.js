@@ -28,6 +28,8 @@ define({
 	invisible: 'Unsichtbar',
 	reset: 'Zurücksetzen',
 	go: 'Gehe',
+	publish: 'Publish',
+	share: 'Share',
 	strut_exporter_json: {
 		explain: 'Dies erlaubt Ihnen, eine Datei auf Ihrem Computer zu speichern, die Sie später wieder in Strut importieren können.',
 		click_below: 'Klicken sie zum Herunterladen auf das Symbol unten'

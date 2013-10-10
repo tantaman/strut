@@ -14,6 +14,13 @@
 		</ul>
 		<ul class="nav theme-buttons">
 		</ul>
+		<ul class="nav share-button">
+			<li>
+				<div class="btn-group iconBtns">
+					<a class="btn btn-plast">{{#shareType}}{{/shareType}}</a>
+				</div>
+			</li>
+		</ul>
 		<ul class="nav pull-right">
 			<li class="divider-vertical">
 			</li>

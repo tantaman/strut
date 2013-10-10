@@ -28,6 +28,8 @@ define({
 	invisible: 'Невидимый',
 	reset: 'Сброс',
 	go: 'Вперёд',
+	publish: 'Publish',
+	share: 'Share',
 	strut_exporter_json: {
 		explain: 'Здесь можно скачать файл, который при необходимости можно будет импортировать в Strut.',
 		click_below: 'Для этого нажмите ниже.'
