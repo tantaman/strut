@@ -27,9 +27,10 @@ function(Backbone, Archiver, lang) {
 			var self = this;
 			archiver.createSimple(function(data) {
 				var a = $ok[0];
-				a.href = window.URL.createObjectURL(data);
+				var url = a.href = window.URL.createObjectURL(data);
 				a.download = self._exportable.identifier() + '.zip';
 				a.dataset.downloadurl = ['application/json', a.download, a.href].join(':');
+				window.URL.revokeObjectURL(url);
 			}, {type: 'blob'});
 		},
 
