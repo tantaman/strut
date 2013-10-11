@@ -1,0 +1,105 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1024" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Deck Title</title>
+
+<meta name="description" content="TODO" />
+<meta name="author" content="TODO" />
+
+<link rel="stylesheet" href="css/themes/default-reset.css"></link>
+<link href="css/main.css" rel="stylesheet" type='text/css' />
+<link rel="stylesheet" href="reveal/css/theme/default.css" id="theme" />
+<link href='css/web-fonts.css' rel='stylesheet' type='text/css' />
+
+<style>
+body {
+	font-size: 18pt;
+	width: 215.9mm;
+	height: 279.4mm;
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	padding-left: 5%;
+	float: none !important;
+	overflow: visible;
+	background: none;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+@page {
+	margin: 0;
+	margin-top: 20px;
+}
+
+.componentContainer {
+    position: absolute;
+    line-height: normal;
+    /*-webkit-transform-origin: 135% 135%;
+    -moz-transform-origin: 135% 135%;
+    transform-origin: 135% 135%;*/
+}
+
+.transformContainer {
+    -webkit-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    transform-origin: 0 0;
+}
+
+.slide-and-notes {
+	position: relative;
+}
+
+.slide {
+	position: relative;
+	width: 1024px;
+	height: 768px;
+	border: 2px solid black;
+}
+
+.notes {
+	position: absolute;
+	left: 1034px;
+	width: 50px;
+	height: 768px;
+	top: 0px;
+}
+
+.notes-handout {
+	transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	transform: scale(0.5);
+	-webkit-transform: scale(0.5);
+	-moz-transform: scale(0.5);
+}
+
+@media print {
+	.slide-and-notes:nth-child(3)	{ page-break-after: always; }
+	.slide-and-notes { page-break-inside: avoid; }
+}
+</style>
+<link href='../styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
+<link href='../styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
+
+<script src="scripts/onready.js"></script>
+<script src="scripts/loadPresentation.js"></script>
+<script>
+ready(function() {
+	if (document.getElementById('launched-placeholder'))
+		loadPresentation();
+
+	document.body.className = "";
+});
+</script>
+</head>
+<body>
+	<div id="launched-placeholder"></div>
+</body>
+</html>

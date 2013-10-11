@@ -1,0 +1,1365 @@
+.etch-editor-panel > div {
+  display: inline-block;
+}
+
+.etch-editor-panel {
+  height: 29px; /* Why isn't the height coming out correctly without this? */
+  /*background-image: -moz-linear-gradient(center bottom, #222 0%, #333 100%);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#333), to(#222));
+    border: 1px solid #333;
+    */
+    box-shadow: inset 1px 0 0 #dfdfdf, inset 0 1px 0 #dfdfdf, inset -1px 0 0 #dfdfdf, inset 0 -1px 0 #dfdfdf, 0 0 5px rgba(0,0,0,.3);
+    opacity: 0.8;
+}
+
+.etch-bold {
+  font-weight: bold;
+}
+
+.etch-italic {
+  font-style: italic;
+}
+.fileBrowser .nav-pills .close {
+	position: relative;
+	top: -4px;
+} 
+
+.fileBrowser {
+	min-height: 100px;
+}
+.storageModal .modal-body {
+	padding: 15px 0px;
+}
+
+.storageModal .tabContent {
+	padding: 0px 15px;
+}
+.horizontalDropdown > li {
+	float: left;
+}
+
+.popover {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	border-radius: 6px;
+
+	background-color: #2c2c2c;
+	color: white;
+	width: 216px;
+	padding: 5px 5px 5px 10px;
+}
+
+.popover input {
+	margin-bottom: 5px;
+}
+
+.tablets-toggle {
+	border-radius: 0 0 4px 4px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.tablets-content > * {
+	display: block;
+	border-radius: 0;
+}
+
+/*TODO: move tablets css*/
+.tablets.hiding .tablets-content {
+	height: 0px;
+	overflow: hidden;
+}
+
+.tablets.showing .caret {
+	border-top: 0px;
+	border-bottom: 4px solid;
+  	border-right: 4px solid transparent;
+  	border-left: 4px solid transparent;
+}
+
+.tablets .iconBtns {
+	margin-bottom: 0px;
+}
+/*[class*="bg-solid"] {
+	border: 1px solid rgba(0, 0, 0, .3);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+	text-shadow: 0 2px 2px rgba(0, 0, 0, .3);
+}*/
+
+
+.bg-default {
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
+}
+
+/*
+included for legacy support of old decks with the defaultbg attribute set.
+*/
+.defaultbg {
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
+}
+
+.bg-solid-orange {
+	background-color: #774040;
+}
+
+.bg-solid-black {
+	background-color: #222;
+}
+
+.bg-solid-light {
+	background-color: white;
+}
+
+.bg-solid-smoke {
+	background-color: #DDD;
+}
+
+.bg-solid-yellow {
+	background-color: #D1B377;
+}
+
+.bg-solid-grass {
+	background-color: #597847;
+}
+
+.bg-solid-darkgreen {
+	background-color: #134952;
+}
+
+.bg-solid-sky {
+	background-color: #515E99;
+}
+
+.bg-solid-lavender {
+	background-color: #443C4D;
+}
+
+.bg-solid-purple {
+	background-color: #6C478F;
+}
+
+.bg-solid-salmon {
+	background-color: #C98D8D;
+}
+
+.nobg {
+	background: url(img/nobg.png);
+	background-size: 40px 40px;
+}
+
+.themeProviders .thumbnail {
+	height: 20px;
+	width: 20px;
+	padding: 10px;
+}
+
+.bg-surf-grad-black {
+	background-color: #333;
+	/*background-image: -webkit-radial-gradient(#333, #111);
+	background-image: -moz-radial-gradient(#333, #111);
+	background-image: -ms-radial-gradient(#333, #111);
+	background-image: -o-radial-gradient(#333, #111);
+	background-image: radial-gradient(#333, #111);*/
+}
+
+.bg-surf-grad-light {
+	background-color: #FFF;
+	/*background-image: -webkit-radial-gradient(#FFF, #DDD);
+	background-image: -moz-radial-gradient(#FFF, #DDD);
+	background-image: -ms-radial-gradient(#FFF, #DDD);
+	background-image: -o-radial-gradient(#FFF, #DDD);
+	background-image: radial-gradient(#FFF, #DDD);*/
+}
+
+.bg-surf-grad-smoke {
+	background-color: #EEE;
+	/*background-image: -webkit-radial-gradient(#EEE, #CCC);
+	background-image: -moz-radial-gradient(#EEE, #CCC);
+	background-image: -ms-radial-gradient(#EEE, #CCC);
+	background-image: -o-radial-gradient(#EEE, #CCC);
+	background-image: radial-gradient(#EEE, #CCC);*/
+}
+
+.bg-surf-grad-orange {
+	background-color: #945353;
+	/*background-image: -webkit-radial-gradient(#945353, #774040);
+	background-image: -moz-radial-gradient(#945353, #774040);
+	background-image: -ms-radial-gradient(#945353, #774040);
+	background-image: -o-radial-gradient(#945353, #774040);
+	background-image: radial-gradient(#945353, #774040);*/
+}
+
+.bg-surf-grad-yellow {
+	background-color: #cfb98c;
+	/*background-image: -webkit-radial-gradient(#cfb98c, #D1B377);
+	background-image: -moz-radial-gradient(#cfb98c, #D1B377);
+	background-image: -ms-radial-gradient(#cfb98c, #D1B377);
+	background-image: -o-radial-gradient(#cfb98c, #D1B377);
+	background-image: radial-gradient(#cfb98c, #D1B377);*/
+}
+
+.bg-surf-grad-darkgreen {
+	background-color: #4a939e;
+	/*background-image: -webkit-radial-gradient(#4a939e, #134952);
+	background-image: -moz-radial-gradient(#4a939e, #134952);
+	background-image: -ms-radial-gradient(#4a939e, #134952);
+	background-image: -o-radial-gradient(#4a939e, #134952);
+	background-image: radial-gradient(#4a939e, #134952);*/
+}
+
+.bg-surf-grad-sky {
+	background-color: #5e699c;
+	/*background-image: -webkit-radial-gradient(#5e699c, #515E99);
+	background-image: -moz-radial-gradient(#5e699c, #515E99);
+	background-image: -ms-radial-gradient(#5e699c, #515E99);
+	background-image: -o-radial-gradient(#5e699c, #515E99);
+	background-image: radial-gradient(#5e699c, #515E99);*/
+}
+
+.bg-surf-grad-lavender {
+	background-color: #554b61;
+	/*background-image: -webkit-radial-gradient(#554b61, #443C4D);
+	background-image: -moz-radial-gradient(#554b61, #443C4D);
+	background-image: -ms-radial-gradient(#554b61, #443C4D);
+	background-image: -o-radial-gradient(#554b61, #443C4D);
+	background-image: radial-gradient(#554b61, #443C4D);*/
+}
+
+.bg-surf-grad-purple {
+	background-color: #775796;
+	/*background-image: -webkit-radial-gradient(#775796, #6C478F);
+	background-image: -moz-radial-gradient(#775796, #6C478F);
+	background-image: -ms-radial-gradient(#775796, #6C478F);
+	background-image: -o-radial-gradient(#775796, #6C478F);
+	background-image: radial-gradient(#775796, #6C478F);*/
+}
+
+.bg-surf-grad-salmon {
+	background-color: #cfa2a2;
+	/*background-image: -webkit-radial-gradient(#cfa2a2, #C98D8D);
+	background-image: -moz-radial-gradient(#cfa2a2, #C98D8D);
+	background-image: -ms-radial-gradient(#cfa2a2, #C98D8D);
+	background-image: -o-radial-gradient(#cfa2a2, #C98D8D);
+	background-image: radial-gradient(#cfa2a2, #C98D8D);*/
+}
+
+.bg-surf-grad-grass {
+	background-color: #6c855d;
+	/*background-image: -webkit-radial-gradient(#6c855d, #597847);
+	background-image: -moz-radial-gradient(#6c855d, #597847);
+	background-image: -ms-radial-gradient(#6c855d, #597847);
+	background-image: -o-radial-gradient(#6c855d, #597847);
+	background-image: radial-gradient(#6c855d, #597847);*/
+}
+/* BASICS */
+
+.CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  font-family: monospace;
+  height: 300px;
+}
+.CodeMirror-scroll {
+  /* Set scrolling behaviour here */
+  overflow: auto;
+}
+
+/* PADDING */
+
+.CodeMirror-lines {
+  padding: 4px 0; /* Vertical padding around content */
+}
+.CodeMirror pre {
+  padding: 0 4px; /* Horizontal padding of content */
+}
+
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+  background-color: white; /* The little square between H and V scrollbars */
+}
+
+/* GUTTER */
+
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  background-color: #f7f7f7;
+  white-space: nowrap;
+}
+.CodeMirror-linenumbers {}
+.CodeMirror-linenumber {
+  padding: 0 3px 0 5px;
+  min-width: 20px;
+  text-align: right;
+  color: #999;
+}
+
+/* CURSOR */
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left: 1px solid black;
+  z-index: 3;
+}
+/* Shown when moving in bi-directional text */
+.CodeMirror div.CodeMirror-secondarycursor {
+  border-left: 1px solid silver;
+}
+.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
+  width: auto;
+  border: 0;
+  background: #7e7;
+  z-index: 1;
+}
+/* Can style cursor different in overwrite (non-insert) mode */
+.CodeMirror div.CodeMirror-cursor.CodeMirror-overwrite {}
+
+.cm-tab { display: inline-block; }
+
+/* DEFAULT THEME */
+
+.cm-s-default .cm-keyword {color: #708;}
+.cm-s-default .cm-atom {color: #219;}
+.cm-s-default .cm-number {color: #164;}
+.cm-s-default .cm-def {color: #00f;}
+.cm-s-default .cm-variable {color: black;}
+.cm-s-default .cm-variable-2 {color: #05a;}
+.cm-s-default .cm-variable-3 {color: #085;}
+.cm-s-default .cm-property {color: black;}
+.cm-s-default .cm-operator {color: black;}
+.cm-s-default .cm-comment {color: #a50;}
+.cm-s-default .cm-string {color: #a11;}
+.cm-s-default .cm-string-2 {color: #f50;}
+.cm-s-default .cm-meta {color: #555;}
+.cm-s-default .cm-error {color: #f00;}
+.cm-s-default .cm-qualifier {color: #555;}
+.cm-s-default .cm-builtin {color: #30a;}
+.cm-s-default .cm-bracket {color: #997;}
+.cm-s-default .cm-tag {color: #170;}
+.cm-s-default .cm-attribute {color: #00c;}
+.cm-s-default .cm-header {color: blue;}
+.cm-s-default .cm-quote {color: #090;}
+.cm-s-default .cm-hr {color: #999;}
+.cm-s-default .cm-link {color: #00c;}
+
+.cm-negative {color: #d44;}
+.cm-positive {color: #292;}
+.cm-header, .cm-strong {font-weight: bold;}
+.cm-em {font-style: italic;}
+.cm-link {text-decoration: underline;}
+
+.cm-invalidchar {color: #f00;}
+
+div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+.CodeMirror-activeline-background {background: #e8f2ff;}
+
+/* STOP */
+
+/* The rest of this file contains styles related to the mechanics of
+   the editor. You probably shouldn't touch them. */
+
+.CodeMirror {
+  line-height: 1;
+  position: relative;
+  overflow: hidden;
+  background: white;
+  color: black;
+}
+
+.CodeMirror-scroll {
+  /* 30px is the magic margin used to hide the element's real scrollbars */
+  /* See overflow: hidden in .CodeMirror */
+  margin-bottom: -30px; margin-right: -30px;
+  padding-bottom: 30px; padding-right: 30px;
+  height: 100%;
+  outline: none; /* Prevent dragging from highlighting the element */
+  position: relative;
+}
+.CodeMirror-sizer {
+  position: relative;
+}
+
+/* The fake, visible scrollbars. Used to force redraw during scrolling
+   before actuall scrolling happens, thus preventing shaking and
+   flickering artifacts. */
+.CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+  position: absolute;
+  z-index: 6;
+  display: none;
+}
+.CodeMirror-vscrollbar {
+  right: 0; top: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.CodeMirror-hscrollbar {
+  bottom: 0; left: 0;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+.CodeMirror-scrollbar-filler {
+  right: 0; bottom: 0;
+}
+.CodeMirror-gutter-filler {
+  left: 0; bottom: 0;
+}
+
+.CodeMirror-gutters {
+  position: absolute; left: 0; top: 0;
+  padding-bottom: 30px;
+  z-index: 3;
+}
+.CodeMirror-gutter {
+  white-space: normal;
+  height: 100%;
+  padding-bottom: 30px;
+  margin-bottom: -32px;
+  display: inline-block;
+  /* Hack to make IE7 behave */
+  *zoom:1;
+  *display:inline;
+}
+.CodeMirror-gutter-elt {
+  position: absolute;
+  cursor: default;
+  z-index: 4;
+}
+
+.CodeMirror-lines {
+  cursor: text;
+}
+.CodeMirror pre {
+  /* Reset some styles that the rest of the page might have set */
+  -moz-border-radius: 0; -webkit-border-radius: 0; border-radius: 0;
+  border-width: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0;
+  white-space: pre;
+  word-wrap: normal;
+  line-height: inherit;
+  color: inherit;
+  z-index: 2;
+  position: relative;
+  overflow: visible;
+}
+.CodeMirror-wrap pre {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+.CodeMirror-code pre {
+  border-right: 30px solid transparent;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.CodeMirror-wrap .CodeMirror-code pre {
+  border-right: none;
+  width: auto;
+}
+.CodeMirror-linebackground {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 0;
+}
+
+.CodeMirror-linewidget {
+  position: relative;
+  z-index: 2;
+  overflow: auto;
+}
+
+.CodeMirror-widget {
+}
+
+.CodeMirror-wrap .CodeMirror-scroll {
+  overflow-x: hidden;
+}
+
+.CodeMirror-measure {
+  position: absolute;
+  width: 100%; height: 0px;
+  overflow: hidden;
+  visibility: hidden;
+}
+.CodeMirror-measure pre { position: static; }
+
+.CodeMirror div.CodeMirror-cursor {
+  position: absolute;
+  visibility: hidden;
+  border-right: none;
+  width: 0;
+}
+.CodeMirror-focused div.CodeMirror-cursor {
+  visibility: visible;
+}
+
+.CodeMirror-selected { background: #d9d9d9; }
+.CodeMirror-focused .CodeMirror-selected { background: #d7d4f0; }
+
+.cm-searching {
+  background: #ffa;
+  background: rgba(255, 255, 0, .4);
+}
+
+/* IE7 hack to prevent it from returning funny offsetTops on the spans */
+.CodeMirror span { *vertical-align: text-bottom; }
+
+@media print {
+  /* Hide the cursor when printing */
+  .CodeMirror div.CodeMirror-cursor {
+    visibility: hidden;
+  }
+}
+
+.stylesheetEditor .codeInput {
+	width: 100%;
+	margin-left: -8px;
+	height: 300px;
+}
+
+.slideSnapshot {
+	box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, 0.5);
+	position: relative;
+}
+
+.slideSnapshot:hover {
+	box-shadow:inset 0 0 10px #000000;
+}
+
+.slideSnapshot .close-btn-red-20 {
+	display: none;
+	position: absolute;
+	top: -5px;
+	left: -5px;
+	z-index: 2;
+}
+
+.slideSnapshot:hover .close-btn-red-20 {
+	display: inline;
+}
+
+.slideSnapshot .badge {
+	/*-webkit-transform-origin: 50% 50%;
+	-moz-transform-origin: 50% 50%;
+	-webkit-transform: scale(0.5);
+	-moz-transform: scale(0.5);*/
+	position: absolute;
+	bottom: -7px;
+	left: -7px;
+}
+
+.slideSnapshot {
+	border: 2px solid grey;
+}
+.slidePlaceholder {
+    border: 2px dashed grey;
+}
+
+.slideSnapshot.ui-selected, .slideSnapshot.active {
+	box-shadow:inset 0 0 10px #000000;
+}
+.slideSnapshot.ui-selected {
+    border: 2px dotted #5BB75B;
+}
+.slideSnapshot.active {
+    border: 2px solid #5BB75B;
+}
+
+.slideDrawer {
+	white-space: normal;
+}
+
+.slideSnapshot > .overlay {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	z-index: 1;
+}
+
+.slideDrawer {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	position: relative;
+	background-size: cover;
+	background-position: center;
+  	background-repeat: no-repeat;
+}
+
+.slideDrawer .transformContainer {
+-webkit-transform-origin: 0 0;
+-moz-transform-origin: 0 0;
+transform-origin: 0 0;
+}
+
+.slideDrawer .componentContainer {
+position: absolute;
+line-height: normal;
+}
+.wellContextMenu {
+  /*z-index: 2;*/
+}
+
+.slideWell {
+	width: 149px;
+	/*background: white;*/
+	/*border-right: 2px groove #333;*/
+	position: absolute;
+	left: 0px;
+	top: 56px;
+	bottom: 0px;
+	padding-bottom: 45px;
+	background-image: url('img/linen-gray.png');
+	z-index:2;
+}
+
+.slideWell .slideSnapshot, .slideWell .slidePlaceholder {
+	width: 120px;
+	height: 90px;
+	margin: 0 auto;
+	margin-top: 20px;
+	cursor: pointer;
+}
+
+.slideWell .slideSnapshot .badge:before {
+	counter-increment: slideSnapshot;
+	content: counter(slideSnapshot);
+}
+
+.slideWell .ui-sortable-helper {
+	left: 13px;
+}
+
+.slideWell {
+	overflow: auto;
+	border-right: 1px solid black;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	overflow-x: hidden;
+}
+
+body {
+	counter-reset: slideSnapshot;
+}
+
+.operatingTable {
+  webkit-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: -2px 0px 15px rgba(0, 0, 0, 0.4);
+
+  font-family: "Lato", sans-serif;
+  position: absolute;
+  left: 150px;
+  z-index: 1;
+  top: 56px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.operatingTable .slideContainer {
+	-webkit-transform-origin: 0 0;
+	transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	
+	margin: 10px auto;
+	-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
+	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
+	-moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
+	position: relative;
+}
+
+.operatingTable .CodeMirror {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 1024px;
+	height: 768px;
+	margin: 10px auto;
+}
+
+.operatingTable [class*="span"] {
+	float: none;
+	margin-left: 0;
+}
+
+.operatingTable .markdownArea {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+	padding: 20px 0px 0px 0px;
+	box-sizing: border-box;
+}
+
+.ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
+
+
+.slideTable {
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	top: 56px;
+	bottom: 0px;
+	right: 0px;
+}
+
+.cannedTransitionsView {
+	padding: 80px;
+	background: #EEE;
+	background: whitesmoke;
+	box-sizing: border-box;
+}
+
+.cannedTransitionsView .thumbnail {
+	border-width: 2px;
+}
+
+.cannedTransitionsView .thumbnail:hover {
+	border-color: #5BB75B;
+}
+
+.cannedTransitionsView .thumbnail.active {
+	border: 2px solid #5BB75B;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+	-moz-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+	box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
+}
+
+.bespoke-link {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 5px;
+	background: #ccc;
+}
+.component .label {
+	visibility: hidden;
+	background: none;
+	font-size: 100px;
+	color: rgba(255, 255, 255, .7);
+	text-shadow: 0 0 .2em rgba(50, 50, 50, .7) !important;
+}
+
+.component.textBox li {
+	line-height: 1em;
+}
+
+.component .label {
+	font-size: 25px;
+}
+
+.component .positioningCtrls .label {
+	font-size: 30px;
+	margin-right: -10px;
+}
+
+.component input {
+	visibility: hidden;
+}
+
+.component .content-scale {
+	transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+}
+
+.component .content {
+	-webkit-transform-origin: 50% 50%;
+	-moz-transform-origin: 50% 50%;
+	transform-origin: 50% 50%;
+	white-space: nowrap;
+}
+
+.component .content-scale:not(.svg) {
+	display: inline-block;
+}
+
+.component .content:not(.svg) {
+	display: inline-block;
+}
+
+.component.ui-selected .label {
+	visibility: visible;
+}
+
+.component .removeBtn {
+	z-index: 100;
+}
+
+.component.ui-selected input {
+	visibility: visible;
+}
+
+.component .topLabel {
+	position: absolute;
+	left: 30%;
+	top: -25px;
+}
+
+.component .topLabel .skewx {
+	cursor: w-resize;
+}
+
+.component .topLabel .rotates {
+	cursor: w-resize;
+}
+
+.component .leftLabel {
+	position: absolute;
+	left: -45px;
+	top: 40%;
+	transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-webkit-transform: rotate(-90deg);
+}
+
+.component .leftLabel .skewy {
+	cursor: s-resize;
+}
+
+.component .leftLabel .rotates {
+	cursor: s-resize;
+}
+
+.component .scale {
+	position: absolute;
+	right: -35px;
+	bottom: -25px;
+	cursor: se-resize;
+	font-size: 40px;
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+}
+
+.component .rightLabel {
+	position: absolute;
+	right: -45px;
+	top: 50%;
+	cursor: n-resize;
+}
+
+.component .positioningCtrls {
+	position: absolute;
+	bottom: -35px;
+	font-size: 18px;
+}
+
+.component input {
+	width: 25px;
+	height: 12px;
+	line-height: 12px;
+}
+
+.component {
+	position: absolute;
+	line-height: normal;
+	/*padding: 2px;*/
+	cursor: pointer;
+	margin: 0px;
+	min-height: 25px;
+	min-width: 25px;
+}
+
+.component {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+.component .content {
+  outline: none;
+}
+
+.component.ui-selecting .content,
+.component.ui-selected .content {
+  outline: 2px dashed black;
+  outline-offset: 1px;
+}
+
+.component.transitionSlideSnapshot > .content {
+	outline: none;
+	outline-offset: 0px;
+}
+
+
+.component.transitionSlideSnapshot .slideDrawer {
+	outline: none;
+	outline-offset: 0px;
+}
+
+/** Firefox outline bug fix */
+.component.transitionSlideSnapshot.ui-selecting:before,
+.component.transitionSlideSnapshot.ui-selected:before {
+    content: '';
+    margin: 0; padding: 0;
+    position: absolute; z-index: -1;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    outline: 1px dashed black;
+}
+
+.component.transitionSlideSnapshot .content {
+	outline: 0px;
+}
+
+.component.editable .content {
+	cursor: auto;
+  	outline: 0px;
+  	outline: 2px solid red;
+	-moz-user-select: text;
+	-webkit-user-select: text;
+}
+
+.component.dragged:hover {
+  cursor: move;
+}
+
+.component .close-btn-red-20 {
+	display: none;
+	position: absolute;
+	top: 0px;
+	left: -7px;
+}
+
+.component:hover .close-btn-red-20 {
+	display: inline;
+}
+
+.component .shape-color-picker {
+	background: #000;
+	visibility: hidden;
+	position: absolute;
+	right: -60px;
+	top: 0px;
+}
+
+.component.ui-selected .shape-color-picker {
+	visibility: visible;
+}
+
+.transitionSlideSnapshot {
+	position: absolute;
+	border: 1px solid rgba(0, 0, 0, .1);
+    padding: 3px 3px 0;
+
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.transitionSlideSnapshot .content-container {
+    -webkit-transform: perspective(500px);
+    -webkit-transform-style: preserve-3d;
+    -moz-transform: perspective(500px);
+    -moz-transform-style: preserve-3d;
+}
+
+.transitionSlideSnapshot .content {
+    border: none;
+    -webkit-transform: translateZ(0px);
+    -webkit-transform-style: preserve-3d;
+    -moz-transform: translateZ(0px);
+    -moz-transform-style: preserve-3d;
+    pointer-events: none;
+}
+.transitionSlideSnapshot .content .back {
+    background: rgba(200,200,200,0.8);
+
+    text-align: center;
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+    -webkit-transform: rotateY(180deg) translateZ(2px);
+    -moz-transform: rotateY(180deg) translateZ(2px);
+
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility:    hidden;
+    -ms-backface-visibility:     hidden;
+
+    display:-ms-flexbox;
+    -ms-flex-pack:center;
+    -ms-flex-align:center;
+    display:-moz-box;
+    -moz-box-pack:center;
+    -moz-box-align:center;
+    display:-webkit-box;
+    -webkit-box-pack:center;
+    -webkit-box-align:center;
+
+    display:box;
+    box-pack:center;
+    box-align:center;
+}
+.transitionSlideSnapshot .content .top,
+.transitionSlideSnapshot .content .bottom,
+.transitionSlideSnapshot .content .right,
+.transitionSlideSnapshot .content .left {
+    background: rgba(255,255,255,0.8);
+    position: absolute;
+}
+.transitionSlideSnapshot .content .right,
+.transitionSlideSnapshot .content .left {
+    -webkit-transform: rotateY(-90deg);
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform: rotateY(-90deg);
+    -moz-transform-origin: 50% 50%;
+}
+.transitionSlideSnapshot .content .top,
+.transitionSlideSnapshot .content .bottom {
+    -webkit-transform: rotateX(-90deg);
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform: rotateX(-90deg);
+    -moz-transform-origin: 50% 50%;
+}
+.transitionSlideSnapshot .content .left {
+    top: -1px;
+    bottom: -1px;
+    left: -3px;
+    width: 5px;
+}
+.transitionSlideSnapshot .content .right {
+    top: -1px;
+    bottom: -1px;
+    right: -3px;
+    width: 5px;
+    -webkit-transform: rotateY(90deg);
+    -moz-transform: rotateY(90deg);
+}
+.transitionSlideSnapshot .content .top {
+    top: -3px;
+    height: 5px;
+    left: -1px;
+    right: -1px;
+    -webkit-transform: rotateX(90deg);
+    -moz-transform: rotateX(90deg);
+}
+.transitionSlideSnapshot .content .bottom {
+    bottom: -3px;
+    height: 5px;
+    left: -1px;
+    right: -1px;
+}
+
+.transitionSlideSnapshot .content.bg-default {
+	background-image: none;
+}
+
+.transitionSlideSnapshot .content {
+	width: 75px;
+	height: 50px;
+}
+
+.transitionSlideSnapshot canvas {
+	width: 100%;
+	height: 100%;
+}
+
+.transitionSlideSnapshot .badge {
+	position: absolute;
+	bottom: -7px;
+	left: -7px;
+}
+
+.transitionSlideSnapshot .spinners {
+	position: absolute;
+	bottom: -40px;
+}
+
+.transitionSlideSnapshot .spinners .smartspinner {
+	text-align: left;
+	color: #848484;
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .positioningCtrls {
+	bottom: -30px;
+	width: 150px;
+	left: -25px;
+}
+
+.component.transitionSlideSnapshot .topLabel {
+	left: 20%;
+	top: -25px;
+	width: 100px;
+}
+
+.component.transitionSlideSnapshot .leftLabel {
+	left: -60px;
+}
+
+.component.transitionSlideSnapshot .rightLabel {
+	transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	right: -60px;
+	top: 20%;
+}
+
+.component.transitionSlideSnapshot .rotates,
+.component.transitionSlideSnapshot .label.layer {
+	font-size: 20px;
+}
+.component.transitionSlideSnapshot .label.layer+input {
+	margin-left: 10px;
+}
+
+.component.transitionSlideSnapshot .label.scales {
+	transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	position: absolute;
+}
+.component.transitionSlideSnapshot .label.scales+input {
+	margin-left: 30px;
+}
+
+.slideTable .transitionSlideSnapshot .badge:before {
+	counter-increment: transSlide;
+	content: counter(transSlide);
+}
+
+.slideTable {
+	counter-reset: transSlide;
+}
+.logo {
+	width: 100px;
+	height: 32px;
+	margin-left: 5px;
+	padding: 0px 20px 0px 5px;
+}
+
+.logo-bg {
+	background-image: url('img/strut-logo-32-light.png');
+	display: inline-block;
+	width: 100px;
+	height: 32px;
+}
+
+.logo-holder {
+	margin-top: 5px;
+	margin-left: -8px;
+}
+
+.logo:hover {
+	background-position: 5px 0;
+}
+
+.logo-group .logo .caret {
+	position: absolute;
+	right: 6px;
+	top: 5px;
+	border-top-color: #FFF;
+	border-bottom-color: #FFF;
+}
+
+.logo-holder .dropdown-menu .label {
+	position: absolute;
+	right: 5px;
+}
+.header .divider-vertical {
+	height: 54px;
+}
+
+.header .navbar-inner {
+	border-radius: 0;
+}
+
+.header .navbar {
+	margin-bottom: 0;
+}
+
+.navbar-inner {
+  position: relative;
+  z-index: 3;
+}
+
+.row-fluid .header {
+	position: relative;
+}
+
+.header .tablets {
+	position: absolute;
+	top: 55px;
+	left: 150px;
+	z-index: 2;
+}
+
+/*!
+ * jQuery contextMenu - Plugin for simple contextMenu handling
+ *
+ * Version: git-master
+ *
+ * Authors: Rodney Rehm, Addy Osmani (patches for FF)
+ * Web: http://medialize.github.com/jQuery-contextMenu/
+ *
+ * Licensed under
+ *   MIT License http://www.opensource.org/licenses/mit-license
+ *   GPL v3 http://opensource.org/licenses/GPL-3.0
+ *
+ */
+
+ .context-menu-list [class*="solid-bg-"] {
+    border-radius: 0px;
+    box-shadow: 0;
+ }
+
+.context-menu-list {
+    margin:0; 
+    padding:0;
+    
+    min-width: 120px;
+    max-width: 275px;
+    width: 175px;
+    display: inline-block;
+    position: absolute;
+    list-style-type: none;
+    
+    border: 1px solid #DDD;
+    background: #EEE;
+    
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+       -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+         -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 11px;
+}
+
+.context-menu-item {
+    padding: 2px
+    background-color: #EEE;
+    position: relative;
+    display: block;
+    width: auto;
+    -webkit-user-select: none;
+       -moz-user-select: -moz-none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+.context-menu-item > span {
+    padding-left: 2px;
+}
+
+.context-menu-item > i {
+    margin-left: 4px;
+}
+
+.context-menu-separator {
+    padding-bottom:0;
+    border-bottom: 1px solid #DDD;
+}
+
+.context-menu-item > label > input,
+.context-menu-item > label > textarea {
+    -webkit-user-select: text;
+       -moz-user-select: text;
+        -ms-user-select: text;
+            user-select: text;
+}
+
+.context-menu-item.hover {
+    cursor: pointer;
+    background-color: #39F;
+}
+
+.context-menu-item.disabled {
+    opacity: 0.5;
+}
+
+.context-menu-input.hover,
+.context-menu-item.disabled.hover {
+    cursor: default;
+    background-color: #EEE;
+}
+
+.context-menu-submenu:after {
+    content: ">";
+    color: #666;
+    position: absolute;
+    top: 0;
+    right: 3px;
+    z-index: 1;
+}
+
+/* icons
+    #protip:
+    In case you want to use sprites for icons (which I would suggest you do) have a look at
+    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement 
+    .context-menu-item.icon:before {}
+ */
+.context-menu-item.icon { min-height: 18px; background-repeat: no-repeat; background-position: 4px 2px; }
+.context-menu-item.icon-edit { background-image: url(images/page_white_edit.png); }
+.context-menu-item.icon-cut { background-image: url(images/cut.png); }
+.context-menu-item.icon-copy { background-image: url(images/page_white_copy.png); }
+.context-menu-item.icon-paste { background-image: url(images/page_white_paste.png); }
+.context-menu-item.icon-delete { background-image: url(images/page_white_delete.png); }
+.context-menu-item.icon-add { background-image: url(images/page_white_add.png); }
+.context-menu-item.icon-quit { background-image: url(images/door.png); }
+
+/* vertically align inside labels */
+.context-menu-input > label > * { vertical-align: top; }
+
+/* position checkboxes and radios as icons */
+.context-menu-input > label > input[type="checkbox"],
+.context-menu-input > label > input[type="radio"] {
+    margin-left: -17px;
+}
+.context-menu-input > label > span {
+    margin-left: 5px;
+}
+
+.context-menu-input > label,
+.context-menu-input > label > input[type="text"],
+.context-menu-input > label > textarea,
+.context-menu-input > label > select {
+    display: block;
+    width: 100%;
+    
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+         -o-box-sizing: border-box;
+            box-sizing: border-box;
+}
+
+.context-menu-input > label > textarea {
+    height: 100px;
+}
+.context-menu-item > .context-menu-list {
+    display: none;
+    /* re-positioned by js */
+    right: -5px;
+    top: 5px;
+}
+
+.context-menu-item.hover > .context-menu-list {
+    display: block;
+}
+
+.context-menu-accesskey {
+    text-decoration: underline;
+}
+
