@@ -1,0 +1,27 @@
+{{#attributes}}
+	<style>
+	{{{customStylesheet}}}
+	</style>
+	<style>
+	{{#customBackgrounds.attributes.bgs}}
+		{{> CustomBgStylesheet}}
+	{{/customBackgrounds.attributes.bgs}}
+	</style>
+	{{> PerSlideSurfaceStylesheet}}
+	<div id="main" class="{{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface {{cannedTransition}}">
+		<article class="innerBg">
+			{{#slides.models}}
+				{{#attributes}}
+					<section class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer strut-slide-{{index}}" style="width: 1024px; height: 768px;" data-bespoke-state="strut-slide-{{index}}{{#determineSurface .. ../../..}}{{/determineSurface}}">
+						<div class="themedArea">
+              			{{#marked markdown}}{{/marked}}
+              			</div>
+						{{#components}}
+							{{#renderComponent .}}{{/renderComponent}}
+						{{/components}}
+					</section>
+				{{/attributes}}
+			{{/slides.models}}
+		</article>
+	</div>
+{{/attributes}}

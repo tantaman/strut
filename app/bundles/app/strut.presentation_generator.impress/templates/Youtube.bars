@@ -1,0 +1,4 @@
+{{> SVGContainer}}
+<object width="{{scale.width}}" height="{{scale.height}}"><param name="movie" value="http://www.youtube.com/v/{{shortSrc}}&hl=en&fs=1"><param name="allowFullScreen" value="true"><embed src="http://www.youtube.com/v/{{shortSrc}}&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="{{scale.width}}" height="{{scale.height}}"></object>
+</div>
+</div>

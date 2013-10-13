@@ -1,0 +1,3 @@
+<div class="transformContainer" style="-webkit-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+-moz-transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}};
+transform: {{#if scale}}scale({{#round scale.x}}{{/round}}, {{#round scale.y}}{{/round}}){{/if}}">

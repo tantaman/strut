@@ -1,6 +1,5 @@
-if (typeof define !== 'function') { var define = require('amdefine')(module) }
-define(['common/EventEmitter', 'common/collections/MultiMap', 'lodash'],
-function(EventEmitter, MultiMap, _) {
+define(['common/EventEmitter', 'common/collections/MultiMap'],
+function(EventEmitter, MultiMap) {
 	'use strict';
 	var identifier = 0;
 
@@ -46,29 +45,12 @@ function(EventEmitter, MultiMap, _) {
 		return this;
 	};
 
-	proto.on = function(topic, callback, context) {
-		var result = EventEmitter.prototype.on.apply(this, arguments);
-		var parts = topic.split(':');
-		if (parts[0] == 'registered') {
-			if (parts.length == 1) {
-				// console.log('immediate callback for naked registered not implemented.');
-			} else {
-				this._services.get(parts[1])
-				.forEach(function(entry) {
-					this.emit('registered:' + parts[1], entry);
-				}, this);
-			}
-		}
-
-		return result;
-	};
-
 	proto._deregister = function(opts) {
 		var removed = [];
 		opts.interfaces.forEach(function(iface) {
 			var entries = this._services.get(iface);
 			entries.forEach(function (entry, idx) {
-				if (entry.matches(opts)) {
+				if (entry._matches(opts)) {
 					this._services.remove(iface, entry);
 					removed.push(entry);
 				}

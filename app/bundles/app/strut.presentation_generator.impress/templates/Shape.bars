@@ -1,0 +1,4 @@
+{{> ComponentContainer}}
+{{#shapeSvg}}{{/shapeSvg}}
+</div>
+</div>

@@ -1,0 +1,56 @@
+{{#attributes}}
+<style type="text/css">
+{{{customStylesheet}}}
+</style>
+<style>
+{{#customBackgrounds.attributes.bgs}}
+	{{> CustomBgStylesheet}}
+{{/customBackgrounds.attributes.bgs}}
+</style>
+{{> PerSlideSurfaceStylesheet}}
+<!-- This is a work around / hack to get the user's browser to download the fonts 
+ if they decide to save the presentation. -->
+<div style="visibility: hidden; width: 0px; height: 0px">
+<img src="css/Lato-Bold.woff" />
+<img src="css/HammersmithOne.woff" />
+<img src="css/Droid-Sans-Mono.woff" />
+<img src="css/Gorditas-Regular.woff" />
+<img src="css/FredokaOne-Regular.woff" />
+<img src="css/Ubuntu.woff" />
+<img src="css/Ubuntu-Bold.woff" />
+<img src="css/PressStart2P-Regular.woff" />
+<img src="css/Lato-BoldItalic.woff" />
+<img src="css/AbrilFatface-Regular.woff" />
+<img src="css/Lato-Regular.woff" />
+</div>
+
+<div class="fallback-message">
+    <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+    <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+
+<div class="bg {{#isBGClass surface}}{{surface}} {{/isBGClass}}strut-surface">
+<div class="bg innerBg">
+<div id="impress">
+	{{#slides.models}}
+		{{#attributes}}
+			<div class="step" data-state="strut-slide-{{index}}{{#determineSurface .. ../../..}}{{/determineSurface}}" data-x="{{#scaleX x}}{{/scaleX}}" data-y="{{#scaleY y}}{{/scaleY}}" {{#if rotateX}}data-rotate-x="{{#toDeg rotateX}}{{/toDeg}}"{{/if}}  {{#if rotateY}}data-rotate-y="{{#toDeg rotateY}}{{/toDeg}}"{{/if}} {{#if rotateZ}}data-rotate-z="{{#toDeg rotateZ}}{{/toDeg}}"{{/if}} {{#if z}}data-z="{{z}}"{{/if}} {{#if impScale}}data-scale="{{impScale}}"{{/if}}>
+			<div class="{{#determineBG .. ../../..}}{{/determineBG}} slideContainer strut-slide-{{index}}" style="width: 1024px; height: 768px;">
+			<div class="themedArea">
+			{{#marked markdown}}{{/marked}}
+			</div>
+			{{#components}}
+			{{#renderComponent .}}{{/renderComponent}}
+			{{/components}}
+			</div>
+		{{/attributes}}
+		</div>
+	{{/slides.models}}
+	<div id="overview" class="step" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
+	{{/attributes}}
+</div>
+</div>
+</div>
+<div class="hint">
+    <p>Use a spacebar or arrow keys to navigate</p>
+</div>

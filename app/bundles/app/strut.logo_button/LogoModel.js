@@ -1,9 +1,9 @@
 define(['libs/backbone',
-		'ServiceRegistry'],
-function(Backbone, SR) {
+		'framework/ServiceCollection'],
+function(Backbone, ServiceCollection) {
 	return Backbone.Model.extend({
 		initialize: function() {
-			this.items = new SR.ServiceCollection(
+			this.items = new ServiceCollection(
 				this._editorModel.registry,
 				'strut.LogoMenuItemProvider',
 				this._convertServiceEntry.bind(this)

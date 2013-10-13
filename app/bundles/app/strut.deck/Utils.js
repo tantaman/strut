@@ -1,29 +1,16 @@
 define(function() {
-	function makeRawish(obj) {
-		if (obj && obj.constructor.name != 'Object' && 'attributes' in obj)
-			return obj.attributes;
-		return obj;
-	}
-
 	return {
+
 		slideSurface: function(slide, deck) {
-			slide = makeRawish(slide);
-			deck = makeRawish(deck);
-			return this.slideSurfaceRaw(slide, deck);
-		},
-
-		slideSurfaceRaw: function(slide, deck) {
-			var decksurface = deck.surface || 'bg-default';
-
 			var result;
 			if (slide) {
-				result = slide.surface;
+				result = slide.get('surface');
 				if (result == 'bg-default' || result == null)
-					result = decksurface;
+					result = deck.slideSurface();
 			}
 
 			if (result == null)
-				result = decksurface;
+				result = deck.slideSurface();
 
 			return result;
 		},
@@ -51,30 +38,20 @@ define(function() {
 		 * and the surface background if from a deck.
 		 */
 		slideBackground: function(slide, deck, opts) {
-			slide = makeRawish(slide);
-			deck = makeRawish(deck);
-
-			return this.slideBackgroundRaw(slide, deck, opts);
-		},
-
-		slideBackgroundRaw: function(slide, deck, opts) {
-			var deckbackground = deck.background || 'bg-transparent';
-			var decksurface = deck.surface || 'bg-default';
-
 			opts = opts || {};
 			var result;
 			var surface = this.slideSurface(slide, deck);
 			if (slide) {
-				result = slide.background;
+				result = slide.get('background');
 				if (result == 'bg-default' || result == null) {
-					result = deckbackground;
+					result = deck.slideBackground();
 				}
 
 				if (result == 'bg-transparent') {
 					result = surface;
 				}
 			} else {
-				result = deckbackground;
+				result = deck.slideBackground();
 			}
 
 			if (result == 'bg-default' && opts.surfaceForDefault)
@@ -84,7 +61,7 @@ define(function() {
 				result = '';
 			}
 
-			if (result == decksurface && opts.transparentForDeckSurface)
+			if (result == deck.slideSurface() && opts.transparentForDeckSurface)
 				result = '';
 
 			return result;

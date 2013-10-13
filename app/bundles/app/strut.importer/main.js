@@ -1,9 +1,9 @@
 define(['tantaman/web/widgets/MenuItem',
-		'ServiceRegistry',
+		'framework/ServiceCollection',
 		'tantaman/web/widgets/HiddenOpen',
 		'framework/Iterator',
 		'lang'],
-function(MenuItem, SR, HiddenOpen, Iterator, lang) {
+function(MenuItem, ServiceCollection, HiddenOpen, Iterator, lang) {
 	'use strict';
 
 	// Very boiler-platey.  Need to get
@@ -41,9 +41,9 @@ function(MenuItem, SR, HiddenOpen, Iterator, lang) {
 
 	return {
 		initialize: function(registry) {
-			importerCollection = new SR.ServiceCollection(
+			importerCollection = new ServiceCollection(
 					registry, 'strut.importer',
-					SR.ServiceCollection.toServiceConverter
+					ServiceCollection.toServiceConverter
 				);
 
 			registry.register({

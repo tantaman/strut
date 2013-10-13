@@ -15,12 +15,12 @@ function(Backbone) {
 
 		// TODO: good opportunity to start using Mixers.js...
 		_createButtons: function() {
-			// var buttonEntries = this._registry.get('strut.WellContextButtonProvider');
+			var buttonEntries = this._registry.get('strut.WellContextButtonProvider');
 			var contextButtons = [];
-			// buttonEntries.forEach(function(buttonEntry) {
-			// 	contextButtons = 
-			// 		contextButtons.concat(buttonEntry.service().createButtons(this.editorModel, this));
-			// }, this);
+			buttonEntries.forEach(function(buttonEntry) {
+				contextButtons = 
+					contextButtons.concat(buttonEntry.service().createButtons(this.editorModel, this));
+			}, this);
 
 			this.set('contextButtons', contextButtons);
 		},

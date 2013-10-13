@@ -1,14 +1,11 @@
-if (typeof define !== 'function') { var define = require('amdefine')(module) }
-define(['common/EventEmitter', 'lodash'], 
+define(['common/EventEmitter', 'lodash'],
 function (EventEmitter, _) {
+	'use strict';
+
 	var identity = function(p) {return p;};
 
 	function ServiceCollection(registry, lookup, converter) {
-		var t = new EventEmitter();
-		for (var i in t) {
-			this[i] = t[i];
-		}
-		
+		_.extend(this, new EventEmitter());
 		this._idToItem = {};
 		this._lookup = registry.normalize(lookup);
 		this._converter = converter || identity;
@@ -31,17 +28,17 @@ function (EventEmitter, _) {
 
 	proto._serviceDeregistered = function(entry) {
 		if (entry.matches(this._lookup)) {
-			this._handleRemoval(entry);
+			this._handleRemoval(item, entry);
 		}
 	};
 
-	proto._handleRemoval = function(entry) {
-		var item = this._idToItem[entry.serviceIdentifier()];
+	proto._handleRemoval = function(item, entry) {
+		var item = this._idToItem(entry.serviceIdentifier());
 
 		if (!Array.isArray(item))
 			item = [item];
 
-		item.forEach(function(item) {
+		item.forEach(function(i) {
 			var i = this.indexOf(item);
 			this.splice(i, 1);
 			this.emit('deregistered', item, entry, i);
