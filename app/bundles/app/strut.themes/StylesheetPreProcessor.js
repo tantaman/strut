@@ -99,7 +99,7 @@ function(Lexed) {
 			var l = new Lexed(cssText, null, rules);
 			while((token = l.lex()) != Lexed.EOF) {
 				if (token.text)
-					allText += ".slideContainer " + token.text;
+					allText += ".strut-surface " + token.text;
 				else
 					allText += token;
 			}
@@ -109,7 +109,7 @@ function(Lexed) {
 
 		beforeEdit: function(cssText) {
 			if (cssText)
-				return cssText.replace(/.slideContainer /g, "");
+				return cssText.replace(/.strut-surface /g, "");
 			return '';
 		}
 	};
