@@ -210,7 +210,8 @@ require([
 	'jqContextMenu',
 	'css!components/jq-contextmenu/jquery.contextMenu.css',
 	'touchpunch',
-	'preview_export/scripts/dataset-shim'
+	'preview_export/scripts/dataset-shim',
+	'lls'
 ],
 	function(Handlebars, lang, empt,
 			empty, config, registry, StrutLoader,
@@ -245,13 +246,15 @@ require([
 		Register LLS as the storage provider
 		Profit!
 		*/
-		// var storage = new lls({config: 75 * 1024 * 1024, name: 'strut'});
+		var storage = new lls({config: 75 * 1024 * 1024, name: 'strut'});
 
-		// storage.initialized.then(function(capacity) {
-		// 	// Register LLS with the registry?
-		// }, function(err) {
-		// 	// Just continue with LocalStorage?
-		// });
+		storage.initialized.then(function(capacity) {
+			// Register LLS with the registry?
+			storage.name = "Local";
+			storage.id = "largelocalstorage";
+		}, function(err) {
+			// Just continue with LocalStorage?
+		});
 
 		StrutLoader.start(registry, function() {
 		}, function() {

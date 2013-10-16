@@ -1,3 +1,8 @@
+The service registry updates...  is it causing excessive re-renders?
+-WellContextMenu
+-Header -> component buttons
+-Header -> mode buttons
+
 Note:
 The slide well is re-building itself more than once causing extra application of the
 bg to the slide drawers.  This only happens on initial load out it seems.
