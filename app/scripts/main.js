@@ -18,7 +18,9 @@ require.config({
     	lang: "../locales/lang",
     	lexed: '../components/lexed/lexed',
     	codemirror: '../components/codemirror',
-    	'marked': '../components/marked/marked',
+    	marked: '../components/marked/marked',
+    	lls: '../components/lls/dist/LargeLocalStorage',
+    	Q: '../components/q/q',
 
     	// build - rmap
     	'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
@@ -210,7 +212,10 @@ require([
 	'touchpunch',
 	'preview_export/scripts/dataset-shim'
 ],
-	function(Handlebars, lang, empt, empty, config, registry, StrutLoader, bootstrap, ContextMenu, css, tp, dss) {
+	function(Handlebars, lang, empt,
+			empty, config, registry, StrutLoader,
+			bootstrap, ContextMenu, css, tp, dss,
+			lls) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
@@ -232,6 +237,21 @@ require([
 					o.handler();
 			}
 		};
+
+		/*
+		Load LLS
+		Copy old presentations (if they exist)
+		Remove old presentations
+		Register LLS as the storage provider
+		Profit!
+		*/
+		// var storage = new lls({config: 75 * 1024 * 1024, name: 'strut'});
+
+		// storage.initialized.then(function(capacity) {
+		// 	// Register LLS with the registry?
+		// }, function(err) {
+		// 	// Just continue with LocalStorage?
+		// });
 
 		StrutLoader.start(registry, function() {
 		}, function() {
