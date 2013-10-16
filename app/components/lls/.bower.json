@@ -1,0 +1,30 @@
+{
+  "name": "lls",
+  "version": "0.1.1",
+  "main": "dist/LargeLocalStorage.js",
+  "ignore": [
+    "examples",
+    "src",
+    "test",
+    "Gruntfile.js",
+    "todo.txt",
+    "package.json"
+  ],
+  "dependencies": {
+    "q": "~0.9.7"
+  },
+  "devDependencies": {
+    "jquery": "~2.0.3",
+    "bootstrap": "~3.0.0"
+  },
+  "homepage": "https://github.com/tantaman/LargeLocalStorage",
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.1",
+    "commit": "5b36d362d0ba67ed7bfecc5efa922de75e0a8b93"
+  },
+  "_source": "git://github.com/tantaman/LargeLocalStorage.git",
+  "_target": "~0.1.1",
+  "_originalSource": "lls"
+}

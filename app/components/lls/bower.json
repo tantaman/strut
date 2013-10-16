@@ -1,0 +1,22 @@
+{
+	"name": "lls",
+	"version": "0.1.1",
+	"main": "dist/LargeLocalStorage.js",
+	"ignore": [
+		"examples",
+		"src",
+		"test",
+		"Gruntfile.js",
+		"todo.txt",
+		"package.json"
+	],
+
+	"dependencies": {
+		"q": "~0.9.7"
+	},
+
+	"devDependencies": {
+		"jquery": "~2.0.3",
+		"bootstrap": "~3.0.0"
+	}
+}

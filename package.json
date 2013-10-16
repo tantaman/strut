@@ -1,6 +1,6 @@
 {
   "name": "Strut",
-  "version": "0.4.0",
+  "version": "0.6.3",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-handlebars": "~0.5.10",
