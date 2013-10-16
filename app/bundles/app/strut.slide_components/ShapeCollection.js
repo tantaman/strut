@@ -1,5 +1,5 @@
-define([],
-function() {
+define(["require"],
+function(require) {
 
 	/**
 	 * @constructor
@@ -13,7 +13,7 @@ function() {
 			return new PlatonicShape(name, src, markup, aspect);
 
 		this.name = name;
-		this.src = 'styles/img/' + src;
+		this.src = require.toUrl('styles/img/' + src);
 		this.markup = markup;
 		this.aspect = aspect;
 	}

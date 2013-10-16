@@ -2,6 +2,7 @@ require.config({
 	paths: {
 		libs: "../scripts/libs",
 		preview_export: "../preview_export",
+		styles: "../styles",
 
     	jquery: "../scripts/libs/jQuery",
 		jqueryui: "../scripts/libs/jquery-ui",
