@@ -43,7 +43,7 @@ define(['libs/backbone',
 					var storageInterface = null;
 					var storageInterface = this.registry.getBest('strut.StorageInterface');
 					storageInterface = adaptStorageInterfaceForSavers(storageInterface);
-					this._exitSaver = savers.exitSaver(this.exportable, storageInterface);
+					this._exitSaver = savers.exitSaver(this.exportable, {identifier: 'strut-exitsave'});
 					this._timedSaver = savers.timedSaver(this.exportable, 20000, storageInterface);
 				}
 
@@ -116,6 +116,14 @@ define(['libs/backbone',
 			exportPresentation: function(filename) {
 				if (filename)
 					this._deck.set('fileName', filename);
+				var genid = this._deck.get('__genid');
+
+				if (genid == null) genid = 0;
+				else genid += 1;
+
+				// Set the generation id for the deck.
+				// A higher genid means its a newer version of the presentation.
+				this._deck.set('__genid', genid);
 				var obj = this._deck.toJSON(false, true);
 				return obj;
 			},

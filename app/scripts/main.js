@@ -210,13 +210,11 @@ require([
 	'jqContextMenu',
 	'css!components/jq-contextmenu/jquery.contextMenu.css',
 	'touchpunch',
-	'preview_export/scripts/dataset-shim',
-	'lls'
+	'preview_export/scripts/dataset-shim'
 ],
 	function(Handlebars, lang, empt,
 			empty, config, registry, StrutLoader,
-			bootstrap, ContextMenu, css, tp, dss,
-			lls) {
+			bootstrap, ContextMenu, css, tp, dss) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
@@ -239,40 +237,8 @@ require([
 			}
 		};
 
-		// TODO: should we force our provider
-		// to whatever the user used last?
-		var storage = new lls({size: 75 * 1024 * 1024, name: 'strut'});
-
-		storage.initialized.then(function(capacity) {
-			// Register LLS with the registry?
-			storage.name = "Local";
-			storage.id = "largelocalstorage";
-			storage.ready = function() { return true; };
-			storage.bg = function() {};
-
-			registry.register({
-				interfaces: 'tantaman.web.StorageProvider'
-			}, storage);
-
-			if (window.__requiresStorageConversion) {
-				// convert and delete past presentations
-				console.log('Requires conversion');
-			}
-
-			// TODO: beforeunload sucks...
-			// we can write to localstorage on unload
-			// and then restore it later...
-			window.onbeforeunload = function() {
-				return "You have not saved your changes!  Do you want to leave without saving?";
-			};
-
-			StrutLoader.start(registry, function() {
-			}, function() {
-			});
-		}, function(err) {
-			// Just continue with LocalStorage?
-			// fail?
-			console.error(err);
+		StrutLoader.start(registry, function() {
+		}, function() {
 		});
 
 		$(window).unload(function() {

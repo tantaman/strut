@@ -79,10 +79,10 @@ function(StorageProviders) {
 		},
 
 		savePresentation: function(identifier, data) {
-			var idx = identifier.indexOf('.strut');
-			if (idx == -1 || (idx + '.strut'.length != identifier.length)) {
-				identifier += '.strut';
-			}
+			// var idx = identifier.indexOf('.strut');
+			// if (idx == -1 || (idx + '.strut'.length != identifier.length)) {
+			// 	identifier += '.strut';
+			// }
 			window.sessionMeta.lastPresentation = identifier;
 
 			return this.store(identifier, data)
