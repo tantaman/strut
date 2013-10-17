@@ -41,12 +41,12 @@ function(StorageProviders) {
 			if (data instanceof Blob) {
 				throw "Use storeAttachment for saving blobs";
 			} else {
-				return this.currentProvider().setContents(identifier, data);
+				return this.currentProvider().setContents(identifier, data, {json: true});
 			}
 		},
 
 		load: function(identifier) {
-			return this.currentProvider().getContents(identifier);
+			return this.currentProvider().getContents(identifier, {json: true});
 			// release currently loaded attachments from the AttachmentCache
 			// start loading all attachments for the given identifier?
 		},

@@ -239,25 +239,40 @@ require([
 			}
 		};
 
-		/*
-		Load LLS
-		Copy old presentations (if they exist)
-		Remove old presentations
-		Register LLS as the storage provider
-		Profit!
-		*/
-		var storage = new lls({config: 75 * 1024 * 1024, name: 'strut'});
+		// TODO: should we force our provider
+		// to whatever the user used last?
+		var storage = new lls({size: 75 * 1024 * 1024, name: 'strut'});
 
 		storage.initialized.then(function(capacity) {
 			// Register LLS with the registry?
 			storage.name = "Local";
 			storage.id = "largelocalstorage";
+			storage.ready = function() { return true; };
+			storage.bg = function() {};
+
+			registry.register({
+				interfaces: 'tantaman.web.StorageProvider'
+			}, storage);
+
+			if (window.__requiresStorageConversion) {
+				// convert and delete past presentations
+				console.log('Requires conversion');
+			}
+
+			// TODO: beforeunload sucks...
+			// we can write to localstorage on unload
+			// and then restore it later...
+			window.onbeforeunload = function() {
+				return "You have not saved your changes!  Do you want to leave without saving?";
+			};
+
+			StrutLoader.start(registry, function() {
+			}, function() {
+			});
 		}, function(err) {
 			// Just continue with LocalStorage?
-		});
-
-		StrutLoader.start(registry, function() {
-		}, function() {
+			// fail?
+			console.error(err);
 		});
 
 		$(window).unload(function() {

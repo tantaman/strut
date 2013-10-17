@@ -47,7 +47,7 @@ function(Backbone) {
 		},
 
 		_compBtnProviderRegistered: function(entry) {
-			var newButtons = entry.service().createButtons();
+			var newButtons = entry.service().createButtons(this._editorModel);
 			this.set('createCompButtons', this.get('createCompButtons').concat(newButtons));
 			this.trigger('change:createCompButtons.concat',
 				this.get('createCompButtons'), newButtons);
