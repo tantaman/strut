@@ -41,9 +41,15 @@ define(['libs/backbone',
 				var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
 				if (savers) {
 					var storageInterface = null;
+					var self = this;
 					var storageInterface = this.registry.getBest('strut.StorageInterface');
 					storageInterface = adaptStorageInterfaceForSavers(storageInterface);
-					this._exitSaver = savers.exitSaver(this.exportable, {identifier: 'strut-exitsave'});
+					this._exitSaver = savers.exitSaver(this.exportable, {
+						identifier: 'strut-exitsave', 
+						cb: function() {
+							window.sessionMeta.lastPresentation = self.exportable.identifier()
+						}
+					});
 					this._timedSaver = savers.timedSaver(this.exportable, 20000, storageInterface);
 				}
 

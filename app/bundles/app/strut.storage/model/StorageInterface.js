@@ -37,11 +37,13 @@ function(StorageProviders) {
 			return this._providers.on.apply(this._providers, arguments);
 		},
 
-		store: function(identifier, data) {
+		store: function(identifier, data, options) {
 			if (data instanceof Blob) {
 				throw "Use storeAttachment for saving blobs";
 			} else {
-				return this.currentProvider().setContents(identifier, data, {json: true});
+				if (!options || options.json == null)
+					options = {json: true};
+				return this.currentProvider().setContents(identifier, data, options);
 			}
 		},
 
@@ -71,11 +73,11 @@ function(StorageProviders) {
 		},
 
 		list: function(path) {
-			return this.currentProvider().ls(path, /.*/);
+			return this.currentProvider().ls(path);
 		},
 
 		listPresentations: function(path) {
-			return this.currentProvider().ls(path, /.*\.strut$/);
+			return this.currentProvider().ls();
 		},
 
 		savePresentation: function(identifier, data) {
@@ -84,7 +86,6 @@ function(StorageProviders) {
 			// 	identifier += '.strut';
 			// }
 			window.sessionMeta.lastPresentation = identifier;
-
 			return this.store(identifier, data)
 		}
 	};

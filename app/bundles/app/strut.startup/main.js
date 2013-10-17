@@ -6,29 +6,43 @@ function(EditorView, EditorModel, lls) {
 
 
 	function restoreLastPresentation(model) {
-		// var exitsaveData = localStorage.getItem('strut-exitsave');
-		// if (exitsaveData) {
-		// 	var lastPres = JSON.parse(exitsaveData);
-		// 	restoreExitSave(lastPres);
-		// }
+		var storageInterface = registry.getBest('strut.StorageInterface');
+		var exitsaveData = localStorage.getItem('strut-exitsave');
+		var restorePromise;
+		if (exitsaveData && exitsaveData !== '') {
+			var exitSavedPres = JSON.parse(exitsaveData);
+			restorePromise = restoreExitSave(exitSavedPres, exitsaveData, storageInterface);
+		}
 
+		if (restorePromise) {
+			restorePromise.then(function() {
+				importPresentation(exitSavedPres);
+			}, function(err) {
+				loadPresentation();
+			}).done();
+		} else {
+			loadPresentation();
+		}
 
-		if (sessionMeta.lastPresentation != null) {
-			// Load it up.
-			var storageInterface = registry.getBest('strut.StorageInterface');
-			storageInterface.load(sessionMeta.lastPresentation).then(function(pres) {
-				model.importPresentation(pres);
-			}).catch(function(err) {
-				console.log(err);
-				console.log(err.stack);
-			});
+		function loadPresentation() {
+			if (sessionMeta.lastPresentation != null) {
+				storageInterface.load(sessionMeta.lastPresentation).then(importPresentation)
+				.catch(function(err) {
+					console.log(err);
+					console.log(err.stack);
+				});
+			}
+		}
+
+		function importPresentation(pres) {
+			model.importPresentation(pres);
 		}
 	}
 
-	function restoreExitSave(exitSavedPres) {
-		// if (window.sessionMeta.lastPresentation == lastPres.identifier) {
-
-		// }
+	function restoreExitSave(exitSavedPres, exitsaveData, storage) {
+		var promise = storage.store(exitSavedPres.fileName, exitsaveData, {json: false});
+		localStorage.setItem('strut-exitsave', '');
+		return promise;
 	}
 
 	function initializeStorage() {
@@ -39,9 +53,7 @@ function(EditorView, EditorModel, lls) {
 		// TODO: some sort of spinner or loading indication
 		// while we get the storage interface ready.
 
-		// TODO: move this into strut.startup
 		storage.initialized.then(function(capacity) {
-			// Register LLS with the registry?
 			storage.name = "Local";
 			storage.id = "largelocalstorage";
 			storage.ready = function() { return true; };
@@ -75,6 +87,9 @@ function(EditorView, EditorModel, lls) {
     		initializeStorage().then(function() {
     			var model = loadEditor();
     			restoreLastPresentation(model);
+				$(window).unload(function() {
+					localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
+				});
     		}, function(err) {
 				// Just continue with LocalStorage?
 				// fail?
