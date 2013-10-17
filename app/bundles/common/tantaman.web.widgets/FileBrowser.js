@@ -20,7 +20,11 @@ function(Backbone, empty) {
 		},
 
 		render: function() {
+			if (!this.storageInterface.ready())
+				return this;
+
 			this.$el.html('<div class="browserContent">');
+
 			if (this.storageInterface.providerReady(this.$el)) {
 				this.renderListing();
 			} else {
@@ -56,14 +60,13 @@ function(Backbone, empty) {
 
 		renderListing: function() {
 			var self = this;
-			this.storageInterface.listPresentations("/").then(function(list, err) {
+			this.storageInterface.listPresentations().then(function(list) {
+				self.$el.find('.browserContent').html(self.template({files: list}));
+				self.$fileName = self.$el.find('.fileName');
+			}, function(err) {
 				if (err) {
 					self.$el.find('.browserContent').html(err);
-				} else {
-					self.$el.find('.browserContent').html(self.template({files: list}));
 				}
-
-				self.$fileName = self.$el.find('.fileName');
 			});
 		},
 

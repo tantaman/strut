@@ -36,21 +36,21 @@ function(Backbone, FileBrowser) {
 
 			// Don't load the data for a provider until its tab is selected...
 			var providerNames = this.storageInterface.providerNames();
+			this.fileBrowser.$el.detach();
 			this.$el.html(this.template({
 				title: this.__title(),
 				tabs: providerNames
 			}));
 
 			this._providerChanged();
-
-			this.$el.find('.tabContent').append(this.fileBrowser.render().$el);
+			this.$el.find('.tabContent').append(this.fileBrowser.$el);
 		},
 
 		show: function(actionHandler, title) {
 			this.actionHandler = actionHandler;
 			this.title(title);
-			this.$el.modal('show');
 			this.fileBrowser.render();
+			this.$el.modal('show');
 		},
 
 		_providerChanged: function() {

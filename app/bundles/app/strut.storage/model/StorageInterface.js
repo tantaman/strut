@@ -9,6 +9,10 @@ function(StorageProviders) {
 	}
 
 	StorageInterface.prototype = {
+		ready: function() {
+			return this.currentProvider() != null;
+		},
+
 		providerNames: function() {
 			return this._providers.providerNames();
 		},

@@ -11,7 +11,8 @@ define(['libs/backbone',
 
 		function adaptStorageInterfaceForSavers(storageInterface) {
 			return new Adapter(storageInterface, {
-				store: 'savePresentation'
+				store: 'savePresentation',
+				ready: 'ready'
 			});
 		}
 

@@ -46,6 +46,7 @@ function(EditorView, EditorModel, lls) {
 	}
 
 	function initializeStorage() {
+		console.log('Initializing storage');
 		// TODO: should we force our provider
 		// to whatever the user used last?
 		var storage = new lls({size: 75 * 1024 * 1024, name: 'strut'});
@@ -84,8 +85,8 @@ function(EditorView, EditorModel, lls) {
 		run: function() {
 			// TODO: refactor so we can load the editor
 			// while we load the storage interface
+			var model;
     		initializeStorage().then(function() {
-    			var model = loadEditor();
     			restoreLastPresentation(model);
 				$(window).unload(function() {
 					localStorage.setItem('Strut_sessionMeta', JSON.stringify(window.sessionMeta));
@@ -94,7 +95,9 @@ function(EditorView, EditorModel, lls) {
 				// Just continue with LocalStorage?
 				// fail?
 				console.error(err);
-			});
+			}).done();
+
+			model = loadEditor();
 		}
 	};
 
