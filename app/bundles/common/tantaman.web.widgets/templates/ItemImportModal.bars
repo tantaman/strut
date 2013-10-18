@@ -7,14 +7,14 @@
   		<button class="close" data-dismiss="alert">×</button>
   		The image URL you entered appears to be incorrect
 	</div>
-	<h4>URL:</h4><div class="form-inline"><input type="text" name="itemUrl"></input>&nbsp;{{#browsable}}<div data-option="browse" class="btn">Browse</div>
-	<p><em>*Local images are currently uploaded to imgur.<br/>We're working on changing this.</em></p>{{/browsable}}</div>
+	<h4>URL/File:</h4><div class="form-inline"><input type="text" name="itemUrl"></input>&nbsp;{{#browsable}}<div data-option="browse" class="btn">Browse</div>{{/browsable}}</div>
 	<input type="file" style="display:none"></input>
 	<h4>Preview:</h4>
 	<ul class="thumbnails">
 		<li class="span4">
-			<div class="thumbnail">
-				<{{tag}} class="preview" width="360" height"268"></{{tag}}>
+			<div class="thumbnail" style="width: 368px; height: 276px; position: relative">
+				{{#browsable}}<div class="droparea">Drag & Drop</div>{{/browsable}}
+				<{{tag}} class="preview" width="360" height="268" style="margin: 0 auto; position: relative; z-index: 1;" src=""></{{tag}}>
 			</div>
 			<div class="progress active progress-striped dispNone">
   				<div class="bar"></div>

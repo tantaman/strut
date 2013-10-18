@@ -20,6 +20,7 @@ define(['libs/backbone',
 			initialize: function() {
 				// is there a better way to do this?
 				window.uiTestAcc = this;
+				this.hasStorage = this.hasStorage.bind(this);
 
 				this._fontState = window.sessionMeta.fontState || {};
 				this._deck = new Deck();
@@ -122,9 +123,15 @@ define(['libs/backbone',
 			},
 
 			importPresentation: function(rawObj) {
+				this.storageInterface.revokeAllAttachmentURLs();
 				// deck disposes iteself on import?
+				// TODO: purge URL cache
 				console.log('New file name: ' + rawObj.fileName);
 				this._deck.import(rawObj);
+			},
+
+			hasStorage: function() {
+				return this.storageInterface.ready();
 			},
 
 			exportPresentation: function(filename) {
@@ -180,14 +187,32 @@ define(['libs/backbone',
 				return this._deck.get('slides').indexOf(this._deck.get('activeSlide'));
 			},
 
-			addComponent: function(type) {
-				var slide = this._deck.get('activeSlide');
+			addComponent: function(data, slide) {
+				slide = slide || this._deck.get('activeSlide');
 				if (slide) {
-					var comp = ComponentFactory.instance.createModel(type, {
-						fontStyles: this._fontState
-					});
-					slide.add(comp);
+					if (typeof data.src == 'object') {
+						this._addEmbeddedComponent(data, slide);
+					} else {
+						var comp = ComponentFactory.instance.createModel(data, {
+							fontStyles: this._fontState
+						});
+						slide.add(comp);
+					}
 				}
+			},
+
+			_addEmbeddedComponent: function(data, slide) {
+				var embedData = data.src;
+				var docKey = this.fileName();
+				var attachKey = embedData.file.name;
+				this.storageInterface.storeAttachment(docKey,
+				attachKey, embedData.file).then(function() {
+					data.src = 'lls://' + docKey + '/' + attachKey;
+					this.addComponent(data, slide);
+				}, function(error) {
+					console.error(error);
+					// TODO: report an error to our error reporting module...
+				}).done();
 			},
 
 			_fontStateChanged: function(state) {

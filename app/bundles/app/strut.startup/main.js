@@ -87,8 +87,6 @@ function(EditorView, EditorModel, lls) {
 
 	var editorStartup = {
 		run: function() {
-			// TODO: refactor so we can load the editor
-			// while we load the storage interface
 			var model;
     		initializeStorage().then(function() {
     			restoreLastPresentation(model);

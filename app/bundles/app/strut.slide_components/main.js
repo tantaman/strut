@@ -49,6 +49,7 @@ define(['./view/ComponentButton',
 					tag: 'img',
 					title: lang.insert_image,
 					editorModel: editorModel,
+					hasStorage: editorModel.hasStorage,
 					browsable: true
 				}));
 

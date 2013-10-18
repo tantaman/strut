@@ -70,17 +70,25 @@ function(StorageProviders) {
 			// for the given identifier
 		},
 
-		storeAttachment: function(identifier, blob) {
+		storeAttachment: function(docKey, attachKey, blob) {
 			// stores a blob
 		},
 
-		loadAttachment: function(identifier) {
+		loadAttachment: function(docKey, attachKey) {
 			// return objectURL for the attachment
 			// check the attachment cache
 		},
 
-		removeAttachment: function(identifier) {
+		removeAttachment: function(docKey, attachKey) {
 			// remove the attachment...
+		},
+
+		revokeAllAttachmentURLs: function() {
+			console.error("TODO: revoke urls");
+		},
+
+		revokeAttachmentURL: function(llsUrl) {
+
 		},
 
 		list: function(path) {

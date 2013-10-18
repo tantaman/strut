@@ -24,15 +24,20 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		this._view.$el.on('click', '.thumbnail', this._setBackground);
 
 		this._setBackgroundImage = this._setBackgroundImage.bind(this);
+
+		if (!imageChooserModal) {
+			imageChooserModal = ItemImportModal.get({
+				tag: 'img',
+				name: lang.image,
+				title: lang.insert_image,
+				icon: 'icon-picture',
+				browsable: true,
+				hasStorage: editorModel.hasStorage
+			});
+		}
 	}
 
-	var imageChooserModal = ItemImportModal.get({
-		tag: 'img',
-		name: lang.image,
-		title: lang.insert_image,
-		icon: 'icon-picture',
-		browsable: true
-	});
+	var imageChooserModal = null;
 	var colorChooserModal = new ColorChooserModal();
 	colorChooserModal.render();
 	$('#modals').append(colorChooserModal.$el);

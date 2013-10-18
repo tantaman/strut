@@ -192,6 +192,8 @@ log.notice = function(msg) {
 		console.log(msg);
 }
 
+window.URL = window.URL || window.webkitURL;
+
 // reassigning rquire to r for
 // the "preview" includes so they don't get built into the actual
 // amd app.
