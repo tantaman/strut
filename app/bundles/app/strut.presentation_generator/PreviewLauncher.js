@@ -1,4 +1,5 @@
-define(function() {
+define(["require"],
+function(require) {
 	'use strict';
 	var launch = 0;
 
@@ -21,7 +22,7 @@ define(function() {
 			}));
 
 			window.previewWind = window.open(
-				'preview_export/' + generator.id + '.html' + generator.getSlideHash(this._editorModel),
+				require.toUrl('preview_export/' + generator.id + '.html') + generator.getSlideHash(this._editorModel),
 				window.location.href);
 			var sourceWind = window;
 		}
