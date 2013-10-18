@@ -39,6 +39,12 @@ body {
   left: 1%;
 }
 
+.droparea.active {
+  border-color: #666;
+  color: #666;
+  font-weight: bold;
+}
+
 img[src=""] {
   display: none;
 }

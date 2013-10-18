@@ -33,7 +33,6 @@ define(['strut/deck/Component',
 					this.url = src;
 					this.set('imageType', FileUtils.imageType(src));
 				}
-				// this.url = this.src;
 			},
 
 			dispose: function() {

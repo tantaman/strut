@@ -24,7 +24,10 @@ function(Backbone, Imgup) {
 			"change input[type='file']": "fileChosen",
 			"keyup input[name='itemUrl']": "urlChanged",
 			"paste input[name='itemUrl']": "urlChanged",
-			"hidden": "hidden"
+			"hidden": "hidden",
+			"dragover": "_dragover",
+			"drop": "_drop",
+			"dragleave": "_dragleave"
 		},
 		initialize: function() {
 			this.loadItem = _.debounce(this.loadItem.bind(this), 200);
@@ -46,10 +49,37 @@ function(Backbone, Imgup) {
 				return this.$el.modal('hide');
 			}
 		},
+
+		_dragover: function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			e.originalEvent.dataTransfer.dropEffect = 'copy';
+
+			this.$droparea.addClass('active');
+		},
+
+		_dragleave: function(e) {
+			this.$droparea.removeClass('active');
+		},
+
+		_drop: function(e) {
+			this.$droparea.removeClass('active');
+			e.stopPropagation();
+			e.preventDefault();
+			var f = e.originalEvent.dataTransfer.files[0];
+
+			this._fileChosen(f);
+		},
+
 		fileChosen: function(e) {
 			var f, reader,
 				_this = this;
 			f = e.target.files[0];
+
+			this._fileChosen(f);
+		},
+
+		_fileChosen: function(f) {
 			if (!f.type.match('image.*'))
 				return;
 
@@ -79,6 +109,7 @@ function(Backbone, Imgup) {
 				});
 			}
 		},
+
 		browseClicked: function() {
 			return this.$el.find('input[type="file"]').click();
 		},
@@ -154,6 +185,7 @@ function(Backbone, Imgup) {
 			this.$progress = this.$el.find('.progress');
 			this.$progressBar = this.$progress.find('.bar');
 			this.$thumbnail = this.$el.find('.thumbnail');
+			this.$droparea = this.$el.find('.droparea');
 
 			return this.$el;
 		},
