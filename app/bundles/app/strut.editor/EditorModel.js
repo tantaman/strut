@@ -190,7 +190,7 @@ define(['libs/backbone',
 			addComponent: function(data, slide) {
 				slide = slide || this._deck.get('activeSlide');
 				if (slide) {
-					if (typeof data.src == 'object') {
+					if (typeof data.src == 'object' && data.src.file != null) {
 						this._addEmbeddedComponent(data, slide);
 					} else {
 						var comp = ComponentFactory.instance.createModel(data, {
@@ -205,10 +205,14 @@ define(['libs/backbone',
 				var embedData = data.src;
 				var docKey = this.fileName();
 				var attachKey = embedData.file.name;
+				var self = this;
 				this.storageInterface.storeAttachment(docKey,
 				attachKey, embedData.file).then(function() {
-					data.src = 'lls://' + docKey + '/' + attachKey;
-					this.addComponent(data, slide);
+					data.src = {
+						docKey: docKey,
+						attachKey: attachKey
+					};
+					self.addComponent(data, slide);
 				}, function(error) {
 					console.error(error);
 					// TODO: report an error to our error reporting module...

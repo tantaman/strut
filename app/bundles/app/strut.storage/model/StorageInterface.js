@@ -2,6 +2,11 @@ define(['tantaman/web/storage/StorageProvidersWrapper'],
 function(StorageProviders) {
 	'use strict';
 
+	function splitDocKey(docKey) {
+		return docKey.substring(docKey.indexOf(':')+1)
+					.split('/');
+	}
+
 	// TODO: update to use ServiceCollection
 	// remove presentation specific garbage
 	function StorageInterface(registry) {
@@ -72,23 +77,23 @@ function(StorageProviders) {
 
 		storeAttachment: function(docKey, attachKey, blob) {
 			// stores a blob
-		},
-
-		loadAttachment: function(docKey, attachKey) {
-			// return objectURL for the attachment
-			// check the attachment cache
+			return this.currentProvider().setAttachment(docKey, attachKey, blob);
 		},
 
 		removeAttachment: function(docKey, attachKey) {
-			// remove the attachment...
+			return this.currentProvider().rmAttachment(docKey, attachKey);
+		},
+
+		getAttachmentURL: function(docKey, attachKey) {
+			return this.currentProvider().getAttachmentURL(docKey, attachKey);
 		},
 
 		revokeAllAttachmentURLs: function() {
 			console.error("TODO: revoke urls");
 		},
 
-		revokeAttachmentURL: function(llsUrl) {
-
+		revokeAttachmentURL: function(docKey, attachKey) {
+			return this.currentProvider().revokeAttachmentURL(docKey, attachKey);
 		},
 
 		list: function(path) {
