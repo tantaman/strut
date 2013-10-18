@@ -89,7 +89,7 @@ function(StorageProviders) {
 		},
 
 		revokeAllAttachmentURLs: function() {
-			console.error("TODO: revoke urls");
+			this.currentProvider().urlCache.revokeAllCachedURLs();
 		},
 
 		revokeAttachmentURL: function(docKey, attachKey) {

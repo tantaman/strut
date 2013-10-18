@@ -19,7 +19,7 @@ require.config({
     	lexed: '../components/lexed/lexed',
     	codemirror: '../components/codemirror',
     	marked: '../components/marked/marked',
-    	lls: '../components/lls/dist/LargeLocalStorage',
+    	lls: '../components/lls/dist',
     	Q: '../components/q/q',
 
     	// build - rmap
@@ -239,6 +239,7 @@ require([
 			}
 		};
 
+		window.serviceRegistry = registry;
 		StrutLoader.start(registry, function() {
 		}, function() {
 		});

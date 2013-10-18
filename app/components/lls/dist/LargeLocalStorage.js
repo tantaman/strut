@@ -48,7 +48,7 @@ function indexOfHandler(handlers, len, target) {
 }
 
 function forward(ctx) {
-	return ctx.next.apply(ctx, Array.prototype.slice.call(arguments, 1));
+	return this.__pipectx.next.apply(this.__pipectx, arguments);
 }
 
 function coerce(methodNames, handler) {

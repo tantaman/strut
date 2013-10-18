@@ -1,4 +1,5 @@
-LargeLocalStorage.contrib.URLCache = (function() {
+(function() {
+ function definition() {
 	var defaultOptions = {
 		manageRevocation: true
 	};
@@ -152,4 +153,15 @@ LargeLocalStorage.contrib.URLCache = (function() {
 			return lls;
 		}
 	}
+}
+
+if (typeof define == 'function' && define.amd) {
+	define(['lls/LargeLocalStorage'], function(lls) {
+		lls.contrib.URLCache = definition();
+		return lls.contrib.URLCache;
+	});
+} else {
+	LargeLocalStorage.contrib.URLCache = definition();
+}
+
 })();

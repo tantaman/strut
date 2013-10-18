@@ -22,8 +22,6 @@ define(function() {
 		viewEntries.forEach(function(entry) {
 			this._viewCtors[entry.meta().type] = entry.service();
 		}, this);
-
-		this.registry = registry;
 	}
 
 	ComponentFactory.prototype = {
@@ -62,8 +60,6 @@ define(function() {
 			}
 			var ctor = this._modelCtors[type];
 			if (ctor) {
-				opts = opts || {};
-				opts.registry = this.registry;
 				return new ctor(rawModel, opts);
 			}
 		},
