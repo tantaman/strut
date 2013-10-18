@@ -9,6 +9,13 @@ function(StorageProviders) {
 	}
 
 	StorageInterface.prototype = {
+		validKey: function(key) {
+			return key != '' && 
+				key.indexOf('\u0000') == -1 &&
+				key.indexOf('/') == -1 &&
+				key.indexOf('\\') == -1;
+		},
+
 		ready: function() {
 			return this.currentProvider() != null;
 		},

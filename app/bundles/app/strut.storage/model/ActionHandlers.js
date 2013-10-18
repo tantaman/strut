@@ -1,5 +1,12 @@
 define(
 function() {
+
+	function saveCurrentPresentation(storageInterface, model) {
+		return storageInterface
+			.savePresentation(model.fileName(),
+							  model.exportPresentation(model.fileName()));
+	}
+
 	return {
 		save: function(storageInterface, model, filename, cb) {
 			if (storageInterface.ready())
@@ -10,9 +17,7 @@ function() {
 			// When opening a new presentation:
 
 			// 1. save the current presentation
-			storageInterface
-			.savePresentation(model.fileName(),
-							  model.exportPresentation(model.fileName()))
+			saveCurrentPresentation(storageInterface, model)
 			// 2. open the requested presentation
 			.then(function () {
 				return storageInterface.load(filename);
@@ -26,8 +31,20 @@ function() {
 			});
 		},
 
-		new_: function(model) {
-			model.newPresentation();
+		new_: function(options) {
+			// TODO: prompt for user input
+			// of the new filename / presentation name.
+
+
+			// TODO: don't do the saving of the current
+			// prezzer here.
+			saveCurrentPresentation(options.storageInterface, options.model)
+			.then(function() {
+				options.model.newPresentation();
+			}, function(error) {
+				// Error saving old presentation...
+				console.log(error);
+			}).done();
 		}
 	};
 });

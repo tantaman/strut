@@ -40,10 +40,10 @@ define(['libs/backbone',
 				this.exportable.adapted = this;
 
 				var savers = this.registry.getBest('tantaman.web.saver.AutoSavers');
+				var storageInterface = this.registry.getBest('strut.StorageInterface');
+				this.storageInterface = storageInterface;
 				if (savers) {
-					var storageInterface = null;
 					var self = this;
-					var storageInterface = this.registry.getBest('strut.StorageInterface');
 					storageInterface = adaptStorageInterfaceForSavers(storageInterface);
 					this._exitSaver = savers.exitSaver(this.exportable, {
 						identifier: 'strut-exitsave', 
@@ -86,14 +86,21 @@ define(['libs/backbone',
 				Backbone.off(null, null, this);
 			},
 
+			validKey: function(name) {
+				return this.storageInterface.validKey(name);
+			},
+
 			newPresentation: function() {
 				var num = window.sessionMeta.num || 0;
+				this.trigger('newPresentationDesired', num+1);
+			},
 
+			createPresentation: function(name) {
+				var num = window.sessionMeta.num || 0;
 				num += 1;
 				window.sessionMeta.num = num;
-
 				this.importPresentation({
-	        		fileName: "presentation-" + num,
+	        		fileName: name,
 	        		slides: []
 	      		});
 				this._deck.create();

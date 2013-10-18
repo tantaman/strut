@@ -10,8 +10,12 @@ function(EditorView, EditorModel, lls) {
 		var exitsaveData = localStorage.getItem('strut-exitsave');
 		var restorePromise;
 		if (exitsaveData && exitsaveData !== '') {
-			var exitSavedPres = JSON.parse(exitsaveData);
-			restorePromise = restoreExitSave(exitSavedPres, exitsaveData, storageInterface);
+			try {
+				var exitSavedPres = JSON.parse(exitsaveData);
+				restorePromise = restoreExitSave(exitSavedPres, exitsaveData, storageInterface);
+			} catch(e) {
+				console.error(e);
+			}
 		}
 
 		if (restorePromise) {
@@ -29,13 +33,13 @@ function(EditorView, EditorModel, lls) {
 				storageInterface.load(sessionMeta.lastPresentation).then(importPresentation)
 				.catch(function(err) {
 					console.log(err);
-					console.log(err.stack);
 				});
 			}
 		}
 
 		function importPresentation(pres) {
-			model.importPresentation(pres);
+			if (pres)
+				model.importPresentation(pres);
 		}
 	}
 
