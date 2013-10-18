@@ -31,11 +31,11 @@ define(function() {
 	    load: function (name, req, onLoad, config) {
 	    	if (path && !fname) {
 	    		//fname = path.dirname(config.out) + "/built.css";
-          if (!fs.existsSync("dist"))
-            fs.mkdirSync("dist");
-          if (!fs.existsSync("dist/styles"))
-  	    		fs.mkdirSync("dist/styles");
-	    		fname = "dist/styles/built.css";
+          		if (!fs.existsSync(".tmp"))
+            		fs.mkdirSync(".tmp");
+          		// if (!fs.existsSync(".tmp/styles"))
+  	    			// fs.mkdirSync(".tmp/styles");
+	    		fname = ".tmp/built.css";
 	    	}
 	    	loadCss(name);
 	        onLoad(null);
