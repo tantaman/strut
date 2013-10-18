@@ -18,26 +18,26 @@ function(Handlebars, Math2, marked, DeckUtils) {
 				switch (componentModel.get("type")) {
 					case "Image":
 						if (componentModel.get("imageType") === "SVG") {
-							result = JST["strut.presentation_generator.impress/SVGImage"](componentModel.attributes);
+							result = JST["strut.presentation_generator.impress/SVGImage"](componentModel);
 						} else {
-							result = JST["strut.presentation_generator.impress/Image"](componentModel.attributes);
+							result = JST["strut.presentation_generator.impress/Image"](componentModel);
 						}
 						break;
 					case "TextBox":
-						result = JST["strut.presentation_generator.impress/TextBox"](_this.convertTextBoxData(componentModel.attributes));
+						result = JST["strut.presentation_generator.impress/TextBox"](_this.convertTextBoxData(componentModel));
 						break;
 					case "Video":
 						if (componentModel.get("videoType") === "html5") {
-							result = JST["strut.presentation_generator.impress/Video"](componentModel.attributes);
+							result = JST["strut.presentation_generator.impress/Video"](componentModel);
 						} else {
-							result = JST["strut.presentation_generator.impress/Youtube"](componentModel.attributes);
+							result = JST["strut.presentation_generator.impress/Youtube"](componentModel);
 						}
 						break;
 					case "WebFrame":
-						result = JST["strut.presentation_generator.impress/WebFrame"](componentModel.attributes);
+						result = JST["strut.presentation_generator.impress/WebFrame"](componentModel);
 						break;
 					case "Shape":
-						result = JST["strut.presentation_generator.impress/Shape"](componentModel.attributes);
+						result = JST["strut.presentation_generator.impress/Shape"](componentModel);
 						break;
 				}
 				return new Handlebars.SafeString(result);

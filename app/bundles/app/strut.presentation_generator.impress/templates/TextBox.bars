@@ -1,6 +1,8 @@
+{{#attributes}}
 {{> ComponentContainer}}
 <div style="font-size: {{size}}px;" class="antialias">
-{{text}}
+{{{text}}}
 </div>
 </div>
 </div>
+{{/attributes}}

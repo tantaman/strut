@@ -1,4 +1,6 @@
+{{#attributes}}
 {{> ComponentContainer}}
 <iframe width="960" height="768" src="{{src}}"></iframe>
 </div>
 </div>
+{{/attributes}}

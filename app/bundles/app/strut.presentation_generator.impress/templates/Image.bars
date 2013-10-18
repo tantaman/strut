@@ -1,4 +1,6 @@
+{{#attributes}}
 {{> ComponentContainer}}
-<img src="{{src}}"></img>
+<img src="{{../url}}"></img>
 </div>
 </div>
+{{/attributes}}

@@ -15,6 +15,7 @@ define(['strut/deck/Component',
 				this.set('type', 'Image');
 
 				var src = this.get('src');
+				this.url = src;
 
 				var self = this;
 				if (typeof src === 'object') {
@@ -24,6 +25,7 @@ define(['strut/deck/Component',
 					.then(function(url) {
 						self.url = url;
 						self.trigger('change:url', self, url);
+						self.trigger('change', self);
 					}, function(err) {
 						console.error(err);
 					}).done();

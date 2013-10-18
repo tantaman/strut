@@ -1,6 +1,8 @@
+{{#attributes}}
 {{> ComponentContainer}}
 <video controls>
 	<source src="{{src}}" type="{{srcType}}" preload="metadata"></source>
 </video>
 </div>
 </div>
+{{/attributes}}
