@@ -5,37 +5,19 @@ Strut
 
 #### A GUI / Authoring Tool for ImpressJS and Bespoke.js ####
 
-This project intends to create an extensible, maintainable, and clean editor for authoring ImpressJS presentations.
-
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 
-### Learn a bit about Strut - http://www.youtube.com/watch?v=TTpiDXEIulg ###
+### Strut Website: http://strut.io ###
 
-(previous video: http://www.youtube.com/watch?v=zA5s8wwme44)
-
-### Start using Strut! http://strut.io/dist/index.html
+### Strut Editor: http://strut.io/editor ###
 
 (Firefox, Chrome and Safari only)
 
 ### Twitter: [@StrutPresents](https://twitter.com/strutpresents)
 
-News
-====
-
 
 ### Mailing List ###
 strut-presentation-editor@googlegroups.com
-
-### Pre-Built versions of Strut ###
-
-You can get pre-built versions of strut here: http://code.google.com/p/strut/downloads/list
-
-
-### Running ###
-
-The pre-built versions of Strut can be run entirely from your local filesystem.  
-Just point your browser to `file:///path/to/Strut/dist/index.html` to view Strut.
-
 
 ### Development/Building ###
 To build your own version of Strut you'll need Grunt v0.4.0 or later.
@@ -48,18 +30,12 @@ To build your own version of Strut you'll need Grunt v0.4.0 or later.
 5. Run Strut: `grunt server` (the server runs at localhost:9000)
 
 To make a production build of Strut run `grunt build`.
-The resulting build will be location in `Strut/dist`.  
+The resulting build will be located in `Strut/dist`.  
 
 ### RELEASE NOTES ###
 
 v0.5.3 - Positioning and transformations of components in edit mode
 now exactly match the positioning and transformations of components in the final presentation.
-
-v0.5.2 - Fixed a bug in 0.5.1 where presentation generation did not work
-
-v0.5.1 - Fixed slide sorting problems
-
-v0.5.0 - New UI and service oriented back-end
 
 ### Contributing ###
 
