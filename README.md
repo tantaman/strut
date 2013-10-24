@@ -7,11 +7,17 @@ Strut
 
 Don't know what ImpressJS is?  Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 
-### Strut Website: http://strut.io ###
+### Start using Strut! http://strut.io/editor/
+(works in Firefox, Chrome and Safari with basic support for IE10)
 
-### Strut Editor: http://strut.io/editor ###
+### Official Website: http://strut.io ###
 
-(Firefox, Chrome and Safari only)
+#### Learn a bit about Strut
+* http://www.youtube.com/watch?v=TTpiDXEIulg
+* previous video: http://www.youtube.com/watch?v=zA5s8wwme44
+
+
+
 
 ### Twitter: [@StrutPresents](https://twitter.com/strutpresents)
 
