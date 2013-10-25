@@ -1,5 +1,47 @@
 define(['libs/backbone'],
 function(Backbone) {
+
+	/**
+	///////////////////////
+	* So at first glance this must look really strange.
+	* A model that is holding and creating views?  WTF?
+	*
+	* Well think about the role of a model for a bit.
+	* Expand your mind.
+	*
+	* First, this is holding views as data.  It doesn't
+	* reference any DOM, or jQuery stuff.  That makes it
+	* slight less sinful.
+	*
+	* Second, what is the role of a model?
+	* A model is supposed to encapsulate business logic
+	* or its problem domain.
+	*
+	* What is the problem domain of a generic header?
+	* A header just holds stuff and what a header holds is widgets.
+	* So the problem domain of a header is the problem of managing its contents.
+	* A problem domain of managing views.
+	* 
+	* Ok, so why the f* did you not just put all those "views" that
+	* are being "managed" into your markup?  That is what markup is for, right?
+	*
+	* Markup is too rigid and static.  The issue is that our
+	* header is really dynamic.  If someone loads in a 3rd
+	* party extension, the header updates.
+	*
+	* If someone removes some bundles from features.js, the header changes.
+	* It would also be really stupid if extensions had 
+	* to call our header and add themselves to it.  It'd be adding a 
+	* dependency on our header API to our extensions.
+	*
+	* So this header model manages the "views" provided by different
+	* extension in a magical way.  Extensions don't know the header
+	* exists, the header doesn't know any specific extension exists.
+	* This model asks the service registry what various services exist
+	* that it believes should have a representation in the header
+	* and then generates views from those services.
+	*
+	*/
 	return Backbone.Model.extend({
 		initialize: function() {
 			this._createModeButtons();
