@@ -1,14 +1,17 @@
-define(['./ImpressGenerator'],
+define(['strut/presentation_generator/impress/ImpressGenerator'],
 function(ImpressGenerator) {
 	'use strict';
 
 	var service = {
-		displayName: 'Impress',
-		id: 'impress',
+		displayName: 'Impress (mobile)',
+		shortname: 'Impress(m)',
+		file: 'impress',
+		id: 'impressm',
 		capabilities: {
 			freeformStepping: true
 		},
 		generate: function(deck) {
+			deck = {attributes: deck.attributes, mobileVersion: false};
 			return ImpressGenerator.render(deck);
 		},
 

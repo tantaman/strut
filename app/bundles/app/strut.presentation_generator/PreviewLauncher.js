@@ -21,7 +21,7 @@ define(function() {
 			}));
 
 			window.previewWind = window.open(
-				'preview_export/' + generator.id + '.html' + generator.getSlideHash(this._editorModel),
+				'preview_export/' + (generator.file || generator.id) + '.html' + generator.getSlideHash(this._editorModel),
 				window.location.href);
 			var sourceWind = window;
 		}

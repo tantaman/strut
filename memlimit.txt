@@ -1,0 +1,40 @@
+https://gist.github.com/KZeni/6735287
+
+<script>
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera
+Mini/i.test(navigator.userAgent)){ // Detect mobile browsers & use
+memory optimized styling if on mobile (hide all but the previous & next
+slides). Can prevent crashes when presentation contains many images
+and/or 3d elements.
+  var root = document.documentElement;
+root.className += ' mobile';
+}else{
+var root = document.documentElement;
+root.className += ' desktop';
+}
+function getPreviousSibling(element){
+var p = elementt;
+do p = p.previousSibling;
+while (p && p.nodeType != 1);
+return p;while
+}
+document.addEventListener('impress:stepleave',function(event){
+previousSibling = document.getElementsByClassName('prev')[0];
+if(typeof prev != 'undefined')
+prev.classList.remove('prev'); // Remove prev class from old    prev
+slide
+current = document.getElementsByClassName('active')[0]; //  Get current
+slide
+prev = getPreviousSibling(current); // Get prev slidee
+prev.className += ' prev'; // Mark prev slide with class
+});
+</scriptt>
+<style>
+.step { display:none; } /* Start by not showing slides to prevent mobile
+Crash at the start */
+.desktop .step { display:block; } /* Desktops should be able to handle
+all slides */
+.step.active,.step.present,.step.active + .step,.step.prev {
+display:block; } /* Limit mobile to only show the current slide, the
+next slide, and the previous slide */
+</style>
