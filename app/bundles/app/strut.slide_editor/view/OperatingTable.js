@@ -17,8 +17,8 @@ function(Backbone, empty, ComponentFactory, GlobalEvents, Component,
 		events: {
 			"click": "_clicked",
 			"focused": "_focus",
-			"dragover": "_dragover",
-			"drop": "_drop",
+			// "dragover": "_dragover",
+			// "drop": "_drop",
 			destroyed: 'dispose'
 		},
 
