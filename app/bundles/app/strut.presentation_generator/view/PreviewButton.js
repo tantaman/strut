@@ -48,7 +48,7 @@ function(Backbone, PreviewLauncher) {
 		_generatorChanged: function() {
 			this._editorModel.set('generator', this._generators[this._index]);
 			if (this._$readout)
-				this._$readout.text(this._generators[this._index].displayName);
+				this._$readout.text(this._generators[this._index].shortname || this._generators[this._index].displayName);
 		},
 
 		render: function() {
