@@ -117,6 +117,10 @@ body {
     box-sizing:         border-box;
 }
 
+.impress-enabled .strut-slide-overview .step {
+    opacity: 1;
+}
+
 /*
     ... and we enhance the styles for impress.js.
     
@@ -272,7 +276,7 @@ body {
 /*
     ... and we will show it when the first step (with id 'bored') is active.
 */
-.impress-on-bored .hint {
+.strut-slide-0 .hint {
     /*
         We remove the transparency and position the hint in its default fixed
         position.
@@ -293,11 +297,11 @@ body {
         into its correct position and after that we fade it in with opacity 
         transition.
     */
-    -webkit-transition: opacity 1s 5s, -webkit-transform 0.5s 4.5s;
-    -moz-transition:    opacity 1s 5s,    -moz-transform 0.5s 4.5s;
-    -ms-transition:     opacity 1s 5s,     -ms-transform 0.5s 4.5s;
-    -o-transition:      opacity 1s 5s,      -o-transform 0.5s 4.5s;
-    transition:         opacity 1s 5s,         transform 0.5s 4.5s;
+    -webkit-transition: opacity 1s 5s, -webkit-transform 0.5s 2.5s;
+    -moz-transition:    opacity 1s 5s,    -moz-transform 0.5s 2.5s;
+    -ms-transition:     opacity 1s 5s,     -ms-transform 0.5s 2.5s;
+    -o-transition:      opacity 1s 5s,      -o-transform 0.5s 2.5s;
+    transition:         opacity 1s 5s,         transform 0.5s 2.5s;
 }
 
 /*

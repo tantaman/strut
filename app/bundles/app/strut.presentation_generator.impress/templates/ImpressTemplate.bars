@@ -80,11 +80,11 @@
 		{{/attributes}}
 		</div>
 	{{/slides.models}}
-	<div id="overview" class="step" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
+	<div id="overview" class="step" data-state="strut-slide-overview" data-x="{{#scaleX overviewX}}{{/scaleX}}" data-y="{{#scaleY overviewY}}{{/scaleY}}" data-scale="9"></div>
 	{{/attributes}}
-</div>
-</div>
 </div>
 <div class="hint">
     <p>Use a spacebar or arrow keys to navigate</p>
+</div>
+</div>
 </div>
