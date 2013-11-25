@@ -117,6 +117,10 @@ body {
     box-sizing:         border-box;
 }
 
+.impress-enabled .strut-slide-overview .step {
+    opacity: 1;
+}
+
 /*
     ... and we enhance the styles for impress.js.
     
