@@ -21,6 +21,7 @@ require.config({
     	marked: '../components/marked/marked',
     	lls: '../components/lls/dist',
     	Q: '../components/q/q',
+    	tracekit: '../scripts/libs/tracekit',
 
     	// build - rmap
     	'strut/presentation_generator/bespoke': '../bundles/app/strut.presentation_generator.bespoke',
@@ -213,11 +214,12 @@ require([
 	'jqContextMenu',
 	'css!components/jq-contextmenu/jquery.contextMenu.css',
 	'touchpunch',
-	'preview_export/scripts/dataset-shim'
+	'preview_export/scripts/dataset-shim',
+	'tracekit'
 ],
 	function(Handlebars, lang, empt,
 			empty, config, registry, StrutLoader,
-			bootstrap, ContextMenu, css, tp, dss) {
+			bootstrap, ContextMenu, css, tp, dss, tracekit) {
 		'use strict';
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
@@ -228,6 +230,11 @@ require([
 			window.browserPrefix = "-moz-"
 		else
 			window.browserPrefix = ""
+
+		tracekit.report.subscribe(function(errReport) {
+			console.log('Received a tracekit report');
+			console.log(errReport);
+		});
 
 		Handlebars.registerHelper("either", function(a, b) {
 			return b != null ? b : a;
