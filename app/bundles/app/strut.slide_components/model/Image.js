@@ -22,15 +22,15 @@ define(['strut/deck/Component',
 					this.storageInterface = this.registry.getBest('strut.StorageInterface');
 					this.set('imageType', ''); // TODO
 					this.storageInterface.getAttachmentURL(src.docKey, src.attachKey)
-					.then(function(url) {
-						self.url = url;
-						self.trigger('change:url', self, url);
+					.then(function(uri) {
+						self.uri = uri;
+						self.trigger('change:uri', self, uri);
 						self.trigger('change', self);
 					}, function(err) {
 						console.error(err);
 					}).done();
 				} else {
-					this.url = src;
+					this.uri = src;
 					this.set('imageType', FileUtils.imageType(src));
 				}
 			},
@@ -39,14 +39,14 @@ define(['strut/deck/Component',
 				Component.prototype.dispose.apply(this, arguments);
 				var src = this.get('src');
 				if (typeof src === 'object') {
-					console.log('Revoking image url');
+					console.log('Revoking image uri');
 					this.storageInterface
 					.revokeAttachmentURL(src.docKey, src.attachKey);
 				}
 			},
 
 			getURL: function() {
-				return this.url;
+				return this.uri;
 			},
 
 			// TODO: need to implement clone to correctly handle

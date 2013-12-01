@@ -19,7 +19,7 @@ define(["./ComponentView", './Mixers'],
 					this.model.off("change:scale", this._setUpdatedTransform, this);
 					this.model.on("change:scale", Mixers.scaleChangeByResize, this);
 				}
-				this.model.on('change:url', this._urlChanged, this);
+				this.model.on('change:uri', this._urlChanged, this);
 			},
 
 			/**

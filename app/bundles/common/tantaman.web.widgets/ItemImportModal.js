@@ -84,6 +84,7 @@ function(Backbone, Imgup) {
 				return;
 
 			this.item.src = '';
+			var _this = this;
 
 			if (this.options.hasStorage()) {
 				var url = URL.createObjectURL(f);

@@ -219,6 +219,8 @@ require([
 			empty, config, registry, StrutLoader,
 			bootstrap, ContextMenu, css, tp, dss) {
 		'use strict';
+		window._gaq = window._gaq || [];
+		
 		var agent = window.navigator.userAgent;
 		if (agent.indexOf('WebKit') >= 0)
 			window.browserPrefix = "-webkit-"
