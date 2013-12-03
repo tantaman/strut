@@ -2,15 +2,11 @@ node_modules
 *.gz
 temp/
 dist/
-deprecated/
 .DS_STORE
 .tmp/
-compiled-templates.js
 repl-port
-bin/
-ccw.repl.cmdhistory.prefs
-psd-export/
 .project
 .buildpath
 .tern-port
+bower_components/
 
