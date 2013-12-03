@@ -1,0 +1,20 @@
+<polymer-element name="model-init"  attributes="type">
+  <template>
+  </template>
+  <script>
+  function() {
+    var model = null
+    
+    Polymer('model-init', {
+      publish {
+        model: function() {
+          return model;
+        }
+      },
+      ready: function() {
+        // instantiate the model based on the type.
+      }
+    });
+  }
+  </script>
+</polymer-element>
