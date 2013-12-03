@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "dependencies": {
     "modernizr": "~2.6.2",
-    "polymer": "latest"
+    "polymer": "latest",
+    "requirejs": "~2.1.8",
+    "bacon": "~0.6.21",
+    "bootstrap": "~3.0.0"
   },
   "devDependencies": {}
 }
