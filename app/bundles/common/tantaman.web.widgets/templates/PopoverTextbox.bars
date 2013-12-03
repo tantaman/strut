@@ -1,5 +1,0 @@
-{{title}} <input type="textbox" placeholder="custom1 custom2"></input>
-<div>
-<a class="btn btn-plast ok">Ok</a>
-<a class="btn btn-danger cancel">Cancel</a>
-</div>

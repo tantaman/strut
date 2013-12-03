@@ -1,5 +1,0 @@
-{{#.}}
-	.{{klass}} {
-		background: {{style}};
-	}
-{{/.}}

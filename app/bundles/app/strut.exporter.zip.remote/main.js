@@ -1,4 +1,0 @@
-/*
-Provides service that allows us to send JSON and images
-and get back the zip...
-*/
