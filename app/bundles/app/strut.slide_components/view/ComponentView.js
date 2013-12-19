@@ -350,8 +350,8 @@ define(["libs/backbone",
 			 */
 			dragStop: function(e) {
 				if (this._dragging) {
-					var newX = this.$el.position().left;
-					var newY = this.$el.position().top;
+					var newX = this.$el.position().left / this.dragScale;
+					var newY = this.$el.position().top / this.dragScale;
 					if (newX) {
 						this.model.setInt("x", newX);
 					}
