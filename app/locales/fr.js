@@ -32,6 +32,6 @@ define({
 		explain: 'Vous pouvez sauvegarder la présentation dans un fichier que vous pourrez réimporter dans Strut plus tard',
 		click_below: 'Cliquer ci-dessous pour télécharger le fichier'
 	},
-	background: 'Fond de l\'écran',
-	surface: 'Surface de la diapo'
+	background: 'Fond de la diapo',
+	surface: 'Surface'
 });
