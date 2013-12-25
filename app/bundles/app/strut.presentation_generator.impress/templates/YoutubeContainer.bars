@@ -1,2 +1,2 @@
-<div class="componentContainer" style="top: {{y}}px; left: {{x}}px;">
+<div class="componentContainer" style="{{#isStatic position}}position: static;{{else}}top: {{y}}px; left: {{x}}px;{{/isStatic}}">
 {{> TransformContainer}}

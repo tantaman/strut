@@ -306,6 +306,33 @@ define(["libs/backbone",
 						newY = Math.floor(newY / gridSize) * gridSize;
 					}
 					this.model.setInt("x", newX);
+					if (-20 < newX && newX < 0) {
+						var exclude = this.$el[0];
+						var above, aboveTop;
+						this.$el.parent().children('.component').each(function(){
+							if (this != exclude) {
+								var position = $(this).position().top;
+								if (position < newY && (!above || aboveTop <= position)) {
+									above = this;
+									aboveTop = position;
+								}
+							}
+						});
+						if (above) {
+							this.$el.insertAfter(above);
+						} else {
+							this.$el.insertBefore(this.$el.parent().children('.component').first());
+						}
+						if ("static" != this.model.get("position")) {
+							this.model.set("position", "static");
+							this.$el.css("position", "static");
+							this.$el.find("div").css("display", "block");
+						}
+					} else if ("static" == this.model.get("position")) {
+						this.model.set("position", "absolute");
+						this.$el.css("position", "absolute");
+						this.$el.find("div").css("display", null);
+					}
 					this.model.setInt("y", newY);
 					if (!this.dragStartLoc) {
 						this.dragStartLoc = {
@@ -323,6 +350,17 @@ define(["libs/backbone",
 			 */
 			dragStop: function(e) {
 				if (this._dragging) {
+					var newX = this.$el.position().left / this.dragScale;
+					var newY = this.$el.position().top / this.dragScale;
+					if (newX) {
+						this.model.setInt("x", newX);
+					}
+					if (newY) {
+						this.model.setInt("y", newY);
+					}
+					this.model.slide.get("components").sort(function(a, b) {
+						return a.get("y") - b.get("y");
+					});
 					this._dragging = false;
 					this.$el.removeClass("dragged");
 					if ((this.dragStartLoc != null) && this.dragStartLoc.x !== this.model.get("x") && this.dragStartLoc.y !== this.model.get("y")) {
@@ -602,10 +640,15 @@ define(["libs/backbone",
 				this._selectionChanged(this.model, this.model.get("selected"));
 				this.$xInput = this.$el.find("[data-option='x']");
 				this.$yInput = this.$el.find("[data-option='y']");
-				this.$el.css({
-					top: this.model.get("y"),
-					left: this.model.get("x")
-				});
+				if ("static" == this.model.get("position")) {
+					this.$el.css("position", "static");
+					this.$el.find("div").css("display", "block");
+				} else {
+					this.$el.css({
+						top: this.model.get("y"),
+						left: this.model.get("x")
+					});
+				}
 				size = {
 					width: this.$el.width(),
 					height: this.$el.height()
