@@ -5,7 +5,7 @@ define({
 	add_slide: 'Ajouter une diapo',
 	remove_slide: 'Supprimer la diapo',
 	slides: 'Diapos',
-	overview: 'Panorama',
+	overview: 'Vue d\'ensemble',
 	open: 'Ouvrir',
 	save: 'Enregistrer',
 	save_as: 'Enregistrer sous...',
@@ -24,14 +24,14 @@ define({
 	undo: 'Annuler',
 	redo: 'Refaire',
 	shapes: 'Formes',
-	single_slide_bg: 'Single Slide Background',
+	single_slide_bg: 'Fond de la diapo actuelle',
 	invisible: 'Invisible',
 	reset: 'Réinitialiser',
 	go: 'Aller',
 	strut_exporter_json: {
-		explain: 'Vous pouvez sauvegarder la présentation dans fichier que vous pourrez réimporter dans Strut plus tard',
+		explain: 'Vous pouvez sauvegarder la présentation dans un fichier que vous pourrez réimporter dans Strut plus tard',
 		click_below: 'Cliquer ci-dessous pour télécharger le fichier'
 	},
-	background: 'Fond',
+	background: 'Fond de la diapo',
 	surface: 'Surface'
 });
