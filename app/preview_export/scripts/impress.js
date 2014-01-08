@@ -465,10 +465,12 @@ var innerBg = document.querySelector('.innerBg');
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
+                body.classList.remove("impress-on-" + activeStep.id);
                 updateSurface(activeStep, 'remove');
             }
             el.classList.add("active");
             updateSurface(el, 'add');
+            body.classList.add("impress-on-" + el.id);
             
             // compute target state of the canvas based on given step
             var target = {
@@ -822,7 +824,7 @@ var innerBg = document.querySelector('.innerBg');
 // I've learnt a lot when building impress.js and I hope this code and comments
 // will help somebody learn at least some part of it.
 
-
+// Use escape key to switch to overview
 document.addEventListener("keydown", function(e) {
     if (e.keyCode == 27) {
         impress().goto('overview');
@@ -830,3 +832,16 @@ document.addEventListener("keydown", function(e) {
 }, false);
 
 }
+
+// Compatibility with regular impress.js behavior:
+// impress().init() initializes the presentation.
+(function ( document, window ) {
+    window.impress = function ( rootId ) {
+    	return {
+    		init: function() {
+    			startPres(document, window);
+    			window.impress().init();
+    		}
+    	};
+    };
+})(document, window);
