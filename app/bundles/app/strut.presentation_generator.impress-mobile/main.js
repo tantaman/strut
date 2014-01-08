@@ -11,7 +11,7 @@ function(ImpressGenerator) {
 			freeformStepping: true
 		},
 		generate: function(deck) {
-			deck = {attributes: deck.attributes, mobileVersion: false};
+			deck = {attributes: deck.attributes, mobileVersion: true};
 			return ImpressGenerator.render(deck);
 		},
 
