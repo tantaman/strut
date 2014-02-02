@@ -129,13 +129,6 @@ function(Handlebars, Math2, marked, DeckUtils) {
 					return options.fn(this);
 				}
 			});
-			Handlebars.registerHelper("isStatic", function(string, options) {
-				if (string && string == "static") {
-					return options.fn(this);
-				} else {
-					return options.inverse(this);
-				}
-			});
 
 			Handlebars.registerHelper("getBGImgStyle", function(string) {
 				return 'background-image: url(' + string.substring(4) + ');';
