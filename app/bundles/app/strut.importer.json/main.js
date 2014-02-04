@@ -4,8 +4,12 @@ function(FileUtils) {
 	
 	var importer = {
 		import: function(file, editorModel, next) {
-			// TODO: why do the files have no mime type???
-			if (file.type == 'text/json' || file.type == '' || file.type == 'application/json') {
+			// TODO: Since browsers seem to pick any type they want
+			// Should we just ignore the mime type?
+			// Need to do some research on this subject.
+			if (file.type == 'text/json' || file.type == ''
+			 || file.type == 'application/json'
+			 || file.type == 'application/xrd+json') {
 				FileUtils.toText(file, function(json) {
 					editorModel.importPresentation(JSON.parse(json));
 				});
