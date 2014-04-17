@@ -115,6 +115,7 @@ function(Backbone, Imgup) {
 			return this.$el.find('input[type="file"]').click();
 		},
 		hidden: function() {
+			this.$el.find('input[type="file"]').val('');
 			if (this.$input != null) {
 				this.item.src = '';
 				this.file = null;
