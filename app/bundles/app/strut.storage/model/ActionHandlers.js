@@ -9,8 +9,9 @@ function() {
 
 	return {
 		save: function(storageInterface, model, filename, cb) {
-			if (storageInterface.ready())
-				storageInterface.savePresentation(filename, model.exportPresentation(filename), cb);
+			storageInterface.savePresentation(filename, model.exportPresentation(filename)).done(function(){
+					cb && cb();
+				});
 		},
 
 		open: function(storageInterface, model, filename, cb) {
