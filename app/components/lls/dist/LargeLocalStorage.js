@@ -664,13 +664,15 @@ var IndexedDBProvider = (function(Q) {
 
 	// TODO: normalize returns and errors.
 	IDB.prototype = {
-		getContents: function(docKey) {
+		getContents: function(docKey, options) {
 			var deferred = Q.defer();
 			var transaction = this._db.transaction(['files'], 'readonly');
 
 			var get = transaction.objectStore('files').get(docKey);
 			get.onsuccess = function(e) {
-				deferred.resolve(e.target.result);
+				var data = e.target.result;
+				if(options && options.json) data = JSON.parse(data);
+				deferred.resolve(data);
 			};
 
 			get.onerror = function(e) {
@@ -680,10 +682,11 @@ var IndexedDBProvider = (function(Q) {
 			return deferred.promise;
 		},
 
-		setContents: function(docKey, data) {
+		setContents: function(docKey, data, options) {
 			var deferred = Q.defer();
 			var transaction = this._db.transaction(['files'], 'readwrite');
-
+			
+			if (options && options.json) data = JSON.stringify(data);
 			var put = transaction.objectStore('files').put(data, docKey);
 			put.onsuccess = function(e) {
 				deferred.resolve(e);
