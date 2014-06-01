@@ -5,8 +5,9 @@ define(['../locales/de',
 		'../locales/nl',
 		'../locales/ru',
 		'../locales/zh',
+		'../locales/pl',
 		'handlebars'],
-function(de, en, es, fr, nl, ru, zh, handlebars) {
+function(de, en, es, fr, nl, ru, zh, pl, handlebars) {
 	var langs = {
 		en: en,
 		de: de,
@@ -14,11 +15,13 @@ function(de, en, es, fr, nl, ru, zh, handlebars) {
 		fr: fr,
 		nl: nl,
 		ru: ru,
-		zh: zh
+		zh: zh,
+		pl: pl
 	};
 
 	var lang = window.navigator.language || window.navigator.userLanguage;
 	var result = langs[lang.split('-')[0]] || langs.en;
+
 	handlebars.registerHelper("lang", function(key) {
 		return result[key];
 	});
