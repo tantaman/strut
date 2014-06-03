@@ -57,7 +57,9 @@ require.config({
 		'tantaman/web/undo_support': '../bundles/common/tantaman.web.undo_support',
 		'tantaman/web/interactions': '../bundles/common/tantaman.web.interactions',
 		'tantaman/web/widgets': '../bundles/common/tantaman.web.widgets',
-		'tantaman/web/css_manip': '../bundles/common/tantaman.web.css_manip'
+		'tantaman/web/css_manip': '../bundles/common/tantaman.web.css_manip',
+
+		'dncolomer/grid': '../bundles/common/dncolomer.grid'
 		// end build - rmap
 	},
 

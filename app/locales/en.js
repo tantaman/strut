@@ -37,5 +37,6 @@ define({
 	invalid_filename: 'Invalid Filename',
 	new_presentation: 'New Presentation',
 	name: 'Name',
-	create_presentation: 'Create Presentation'
+	create_presentation: 'Create Presentation',
+	show_hide_grid: 'Show/Hide Grid'
 });

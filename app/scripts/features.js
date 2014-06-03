@@ -22,7 +22,8 @@ define([
 	'strut/well_context_buttons/main',
 	// 'tantaman/web/local_storage/main', // LLS is being set up in main.
 	// 'tantaman/web/remote_storage/main',
-	'strut/startup/main'
+	'strut/startup/main',
+	'dncolomer/grid/main'
 	],
 function(ServiceRegistry) {
 	var registry = new ServiceRegistry();
