@@ -1,5 +1,9 @@
 **Note:** I've been working on Strut2.0 in a private repo until it's ready for an initial launch hence the lack of progress here.  I'm aiming to launch October 1st and I think everyone will be pleasantly surprised.
 
+Another note: master has been reset to production.  All commits from the
+previous master branch are in `old-master.`  Sorry for the
+inconvenience.
+
 Strut
 =======
 
