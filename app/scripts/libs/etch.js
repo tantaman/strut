@@ -294,6 +294,9 @@ define(['libs/backbone'], function(Backbone) {
         // promt for url and create link
         this.urlPrompt(function(url) {
           document.execCommand('createLink', false, url);
+          // sets the link to new tab / window
+          // needs to get the range from fresh since the tree changed
+          window.getSelection().getRangeAt(0).startContainer.parentNode.setAttribute('target','_blank');
         });
       }
     },
