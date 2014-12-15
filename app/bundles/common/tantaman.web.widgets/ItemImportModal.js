@@ -6,6 +6,7 @@ function(Backbone, Imgup) {
 	var modalCache = {};
 	var reg = /[a-z]+:/;
 	var imgup = new Imgup('847de02274cba30');
+	var usedImgup = false;
 
 	var ignoredVals = {
 		'http:': true,
@@ -20,7 +21,8 @@ function(Backbone, Imgup) {
 		className: "itemGrabber modal hide",
 		events: {
 			"click .ok": "okClicked",
-			"click div[data-option='browse']": "browseClicked",
+			"click a[data-option='browse']": "browseClicked",
+			"click div[data-option='browse2']": "browseClicked2",
 			"change input[type='file']": "fileChosen",
 			"keyup input[name='itemUrl']": "urlChanged",
 			"paste input[name='itemUrl']": "urlChanged",
@@ -48,32 +50,39 @@ function(Backbone, Imgup) {
 
 			this._switchToProgress();
 			this.item.src = '';
-
-			imgup.upload(f).progress(function(ratio) {
-				_this._updateProgress(ratio);
-			}).then(function(result) {
-				_this._switchToThumbnail();
-				_this.$input.val(result.data.link);
-				_this.urlChanged({
-					which: -1
-				});
-			}, function() {
-				_this._updateProgress(0);
-				_this._switchToThumbnail();
-				_this.$input.val('Failed to upload image to imgur');
-			});
-
+            if (usedImgup) {
+                imgup.upload(f).progress(function(ratio) {
+                    _this._updateProgress(ratio);
+                }).then(function(result) {
+                    _this._switchToThumbnail();
+                    _this.$input.val(result.data.link);
+                    _this.urlChanged({
+                        which: -1
+                    });
+                }, function() {
+                    _this._updateProgress(0);
+                    _this._switchToThumbnail();
+                    _this.$input.val('Failed to upload image to imgur');
+                });
+            }
+            else {
 			
-			// reader = new FileReader();
-			// reader.onload = function(e) {
-			//   _this.$input.val(e.target.result);
-			//   _this.urlChanged({
-			//     which: -1
-			//   });
-			// };
-			// reader.readAsDataURL(f);
+                reader = new FileReader();
+                reader.onload = function(e) {
+                 _this.$input.val(e.target.result);
+                 _this.urlChanged({
+                   which: -1
+                 });
+                };
+                reader.readAsDataURL(f);
+            }
 		},
 		browseClicked: function() {
+            usedImgup=true;
+			return this.$el.find('input[type="file"]').click();
+		},
+		browseClicked2: function() {
+            usedImgup=false;
 			return this.$el.find('input[type="file"]').click();
 		},
 		hidden: function() {
