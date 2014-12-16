@@ -166,6 +166,7 @@
 
 .component.transitionSlideSnapshot .content {
 	outline: 0px;
+	overflow: hidden;
 }
 
 .component.editable .content {
