@@ -46,10 +46,6 @@
     border: 2px solid #5BB75B;
 }
 
-.slideDrawer {
-	white-space: normal;
-}
-
 .slideSnapshot > .overlay {
 	transform-origin: 0 0;
 	-webkit-transform-origin: 0 0;
@@ -58,13 +54,15 @@
 }
 
 .slideDrawer {
+	white-space: normal;
 	transform-origin: 0 0;
 	-webkit-transform-origin: 0 0;
 	-moz-transform-origin: 0 0;
 	position: relative;
 	background-size: cover;
 	background-position: center;
-  	background-repeat: no-repeat;
+	background-repeat: no-repeat;
+	overflow: hidden;
 }
 
 .slideDrawer .transformContainer {
