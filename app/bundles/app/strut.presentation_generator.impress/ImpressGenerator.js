@@ -105,13 +105,19 @@ function(Handlebars, Math2, marked, DeckUtils) {
 			});
 
 			Handlebars.registerHelper("shapeSvg", function() {
-				if (this.fill && this.markup) {
-					var string = '<svg fill="' + this.fill + '" ' + this.markup.substring(4);
-					return new Handlebars.SafeString(string);
-				} else if (this.markup) {
-					return new Handlebars.SafeString(this.markup);
-				} else
-					return '';
+				var attr_insert = '';
+				var retval = '';
+				if (this.markup) {
+					if (this.fill) {
+						attr_insert += ' fill="' + this.fill + '" ';
+					}
+					if (this.scale) {
+						attr_insert += ' height="' + this.scale.height + '" ';
+						attr_insert += ' width="'  + this.scale.width  + '" ';
+					}
+					retval = new Handlebars.SafeString(this.markup.replace('<svg ', '<svg ' + attr_insert));
+				}
+				return retval;
 			});
 
 			Handlebars.registerHelper("isBGImg", function(string, options) {
