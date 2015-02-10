@@ -52,6 +52,7 @@ table {
 }
 */
 
+
 body {
     min-height: 740px;
     
@@ -76,6 +77,10 @@ body {
     
     And then we hide the message, when support is detected in the browser.
 */
+
+.notes {
+  display: none;
+}
 
 .fallback-message {
     font-family: sans-serif;

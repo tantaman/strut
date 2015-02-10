@@ -53,6 +53,7 @@
 
 <script type="text/javascript" src="scripts/dataset-shim.js"></script>
 <script type="text/javascript" src="scripts/impress.js"></script>
+<script type="text/javascript" src="scripts/impressConsole.js"></script>
 
 <script src="scripts/onready.js"></script>
 <script src="scripts/loadPresentation.js"></script>
@@ -64,6 +65,7 @@ ready(function() {
     if (!window.presStarted) {
         startPres(document, window);
         impress().init();   
+        impressConsole().init();
     }
 
     if ("ontouchstart" in document.documentElement) { 

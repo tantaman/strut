@@ -81,6 +81,8 @@
         var _this = this;
         return $.get('preview_export/scripts/impress.js', function(impress) {
           _this.scriptsDir.file('impress.js', impress);
+        }) && $.get('preview_export/scripts/impressConsole.js', function(impressConsole) {
+           _this.scriptsDir.file('impressConsole.js', impressConsole);
           return cb();
         });
       };
@@ -91,6 +93,8 @@
         var _this = this;
         return $.get('zip/main.css', function(css) {
           _this.cssDir.file('main.css', css);
+        }) && $.get('zip/impressConsole.css', function(css) {
+          _this.cssDir.file('impressConsole.css', css);
           return cb();
         });
       };

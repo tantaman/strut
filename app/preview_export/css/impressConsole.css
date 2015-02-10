@@ -1,0 +1,85 @@
+html {
+    height: 100%
+}
+
+body {
+    padding: 0;
+    margin: 20px;
+    font-family: verdana, arial, sans-serif;
+    font-size: 26px;
+    height: 92%;
+}
+
+div#console {
+    margin: 0;
+    height: 94%;
+}
+
+div#views {
+    float: left;
+    width: 16em;
+    margin-right: 1em;
+}
+
+div#blocker {
+    width: 17em;
+    height: 20em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: blocker;
+}
+
+div#notes {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 95%;
+}
+
+div#notes p {
+    margin-top: 0;
+}
+
+iframe#slideView {
+    width: 16em;
+    height: 12em;
+}
+
+iframe#preView {
+    width: 8em;
+    height: 6em;
+}
+
+div#controls {
+    margin: 0;
+    height: 6%;
+}
+
+div#prev {
+    float: left;
+}
+
+div#next {
+    float: right;
+}
+
+div#status {
+    margin-left: 2em;
+    margin-right: 2em;
+    text-align: center;
+    float: right;
+}
+
+div#clock {
+    margin-left: 2em;
+    margin-right: 2em;
+    text-align: center;
+    float: left;
+}
+
+div#timer {
+    margin-left: 2em;
+    margin-right: 2em;
+    text-align: center;
+    float: left;
+}
