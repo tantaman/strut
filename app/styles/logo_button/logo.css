@@ -6,10 +6,11 @@
 }
 
 .logo-bg {
-	background-image: url('img/strut-logo-32-light.png');
+	background-image: url('img/menu.png');
 	display: inline-block;
-	width: 100px;
-	height: 32px;
+	width: 35px;
+	height: 35px;
+        background-repeat: no-repeat;
 }
 
 .logo-holder {

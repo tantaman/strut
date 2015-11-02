@@ -2,35 +2,38 @@ define(['./view/ComponentButton',
 	'./view/ImportingComponentButton',
 	'./model/Image',
 	'./model/TextBox',
-	'./model/WebFrame',
+	//'./model/WebFrame',
 	'./model/Video',
 	'./view/ImageView',
 	'./view/TextBoxView',
-	'./view/WebFrameView',
+	//'./view/WebFrameView',
 	'./view/VideoView',
 	'./ComponentFactory',
 	'lang',
-	'./view/ShapesDropdown',
-	'./ShapeCollection',
-	'./view/ShapeView',
-	'./model/Shape'],
+	//'./view/ShapesDropdown',
+	//'./ShapeCollection',
+	//'./view/ShapeView',
+	//'./model/Shape'
+    ],
 	function(Button,
 			 ImportingComponentButton,
 			 Image,
 			 TextBox,
-			 WebFrame,
+			 //WebFrame,
 			 Video,
 			 ImageView,
 			 TextBoxView,
-			 WebFrameView,
+			 //WebFrameView,
 			 VideoView,
 			 ComponentFactory,
-			 lang,
-			 ShapesDropdown,
-			 ShapeCollection,
-			 ShapeView,
-			 Shape) {
-		var availableShapes = new ShapeCollection();
+			 lang
+			 //ShapesDropdown,
+			 //ShapeCollection,
+			 //ShapeView,
+			 //Shape
+                                 ) 
+                         {
+		//var availableShapes = new ShapeCollection();
 		var service = {
 			createButtons: function(editorModel) {
 				var buttons = [];
@@ -62,21 +65,21 @@ define(['./view/ComponentButton',
 					ignoreErrors: true
 				}));
 
-				buttons.push(new ImportingComponentButton({
-					componentType: 'WebFrame',
-					icon: 'icon-globe',
-					name: lang.website,
-					tag: 'iframe',
-					title: lang.insert_website,
-					editorModel: editorModel
-				}));
+//				buttons.push(new ImportingComponentButton({
+//					componentType: 'WebFrame',
+//					icon: 'icon-globe',
+//					name: lang.website,
+//					tag: 'iframe',
+//					title: lang.insert_website,
+//					editorModel: editorModel
+//				}));
 
-				buttons.push(new ShapesDropdown(
-					availableShapes,
-					JST['strut.slide_components/ShapesDropdown'],
-					{class: 'group-dropdown',
-						editorModel: editorModel}
-				));
+//				buttons.push(new ShapesDropdown(
+//					availableShapes,
+//					JST['strut.slide_components/ShapesDropdown'],
+//					{class: 'group-dropdown',
+//						editorModel: editorModel}
+//				));
 
 				return buttons;
 			}
@@ -106,12 +109,12 @@ define(['./view/ComponentButton',
 					}
 				}, TextBox);
 
-				registry.register({
-					interfaces: 'strut.ComponentModel',
-					meta: {
-						type: 'WebFrame'
-					}
-				}, WebFrame);
+//				registry.register({
+//					interfaces: 'strut.ComponentModel',
+//					meta: {
+//						type: 'WebFrame'
+//					}
+//				}, WebFrame);
 
 				registry.register({
 					interfaces: 'strut.ComponentModel',
@@ -120,12 +123,12 @@ define(['./view/ComponentButton',
 					}
 				}, Video);
 
-				registry.register({
-					interfaces: 'strut.ComponentModel',
-					meta: {
-						type: 'Shape'
-					}
-				}, Shape);
+//				registry.register({
+//					interfaces: 'strut.ComponentModel',
+//					meta: {
+//						type: 'Shape'
+//					}
+//				}, Shape);
 
 				registry.register({
 					interfaces: 'strut.ComponentView',
@@ -141,12 +144,12 @@ define(['./view/ComponentButton',
 					}
 				}, TextBoxView);
 
-				registry.register({
-					interfaces: 'strut.ComponentView',
-					meta: {
-						type: 'WebFrame'
-					}
-				}, WebFrameView);
+//				registry.register({
+//					interfaces: 'strut.ComponentView',
+//					meta: {
+//						type: 'WebFrame'
+//					}
+//				}, WebFrameView);
 
 				registry.register({
 					interfaces: 'strut.ComponentView',
@@ -155,12 +158,12 @@ define(['./view/ComponentButton',
 					}
 				}, VideoView);
 
-				registry.register({
-					interfaces: 'strut.ComponentView',
-					meta: {
-						type: 'Shape'
-					}
-				}, ShapeView);
+//				registry.register({
+//					interfaces: 'strut.ComponentView',
+//					meta: {
+//						type: 'Shape'
+//					}
+//				}, ShapeView);
 
 				ComponentFactory.initialize(registry);
 			}
