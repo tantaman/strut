@@ -330,7 +330,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', [
         // 'jshint',
-        'jasmine'
+        'jasmine',
 //        'test',
         'build'
     ]);
