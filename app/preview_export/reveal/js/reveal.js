@@ -4500,7 +4500,9 @@
 		// Programatically triggers a keyboard event
 		triggerKey: function( keyCode ) {
 			onDocumentKeyDown( { keyCode: keyCode } );
-		}
+		},
+                
+                fullScreen: enterFullscreen
 	};
 
 	return Reveal;
