@@ -20,7 +20,7 @@ body {
 	border: 0;
 	padding: 0;
 	float: none !important;
-	overflow: visible;
+	overflow: visible !important;
 }
 
 html {
@@ -75,14 +75,14 @@ ul, ol, div, p {
 .reveal {
 	width: auto !important;
 	height: auto !important;
-	overflow: hidden !important;
+	overflow: visible !important;
 }
 .reveal .slides {
 	position: static;
 	width: 100%;
 	height: auto;
 
-	left: auto;
+	//left: auto;
 	top: auto;
 	margin: 0 !important;
 	padding: 0 !important;
@@ -102,12 +102,12 @@ ul, ol, div, p {
 }
 .reveal .slides section {
 	page-break-after: always !important;
-
+        left: 0 !important;
 	visibility: visible !important;
 	position: relative !important;
 	display: block !important;
 	position: relative !important;
-
+        width: auto !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	box-sizing: border-box !important;
@@ -143,15 +143,31 @@ ul, ol, div, p {
 /* Slide backgrounds are placed inside of their slide when exporting to PDF */
 .reveal section .slide-background {
 	display: block !important;
-	position: absolute;
+	position: absolute !important;
 	top: 0;
-	left: 0;
+	left: 0 !important;
 	width: 100%;
 	z-index: -1;
 }
 /* All elements should be above the slide-background */
 .reveal section>* {
-	position: relative;
+        display: block !important;
+	position: relative !important;
 	z-index: 1;
 }
 
+#botton-container {
+    display: none !important;
+    
+}
+
+.componentContainer {
+    left: 0 !important;
+    
+}
+
+section .slideContainer{
+    //data-state:none !important;
+    //display: none !important; 
+    
+}

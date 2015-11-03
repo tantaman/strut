@@ -54,7 +54,12 @@
     });
 
     $("#download").click(function () {
-       window.print();
+       
+        var newURL = "?print-pdf#/";
+        var win = window.open(newURL, '_blank');
+        win.focus();
+        win.print();
+
     });
 
 }());
