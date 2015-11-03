@@ -9,8 +9,8 @@ require.config({
         jasmine: '../../jtest/lib/jasmine-2.3.4/jasmine',
         jasmine_html: '../../jtest/lib/jasmine-2.3.4/jasmine-html',
         jasmine_boot: '../../jtest/lib/jasmine-2.3.4/boot',
-        multiMap : '../../jtest/spec/MultiMapTest',
-        serviceRegistry : '../../jtest/spec/ServiceRegistryTest'        
+        multiMap : '../../jtest/spec/MultiMapSpec',
+        serviceRegistry : '../../jtest/spec/ServiceRegistrySpec'        
     },
     shim: {
         backbone :{
