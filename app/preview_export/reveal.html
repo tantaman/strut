@@ -136,6 +136,7 @@ ready(function() {
     ga('send', 'pageview');
   </script>
   <!-- Printing and PDF exports -->
+<!--  Added by Maninder for the use of pdf generator-->
   <script>
           var link = document.createElement( 'link' );
           link.rel = 'stylesheet';
@@ -144,6 +145,7 @@ ready(function() {
           link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal/css/print/pdf.css' : 'reveal/css/print/paper.css';
           document.getElementsByTagName( 'head' )[0].appendChild( link );
   </script>
+    <!--<script type="text/javascript" src="scripts/jspdf.js"></script>-->
 
 </head>
 <body>

@@ -20,7 +20,9 @@ body {
 	border: 0;
 	padding: 0;
 	float: none !important;
-	overflow: visible !important;
+        width: 210mm !important;
+        height: 297mm !important;
+	overflow: visible !important; //Added by Maninder
 }
 
 html {
@@ -82,7 +84,7 @@ ul, ol, div, p {
 	width: 100%;
 	height: auto;
 
-	//left: auto;
+	//left: auto; //Removed by Maninder
 	top: auto;
 	margin: 0 !important;
 	padding: 0 !important;
@@ -102,12 +104,12 @@ ul, ol, div, p {
 }
 .reveal .slides section {
 	page-break-after: always !important;
-        left: 0 !important;
+        left: 0 !important; //Added by Maninder
 	visibility: visible !important;
 	position: relative !important;
 	display: block !important;
 	position: relative !important;
-        width: auto !important;
+        width: auto !important; //Added by maninder
 	margin: 0 !important;
 	padding: 0 !important;
 	box-sizing: border-box !important;
@@ -151,23 +153,24 @@ ul, ol, div, p {
 }
 /* All elements should be above the slide-background */
 .reveal section>* {
-        display: block !important;
+        display: block !important; 
 	position: relative !important;
 	z-index: 1;
 }
 
-#botton-container {
+/*Added by Maninder to remove side buttons when print*/
+#botton-container, #hintDiv {
     display: none !important;
     
 }
-
+/*Added by Maninder*/
 .componentContainer {
     left: 0 !important;
     
 }
 
-section .slideContainer{
-    //data-state:none !important;
-    //display: none !important; 
+div.backgrounds div.slide-background{
+    display: none !important;
+    
     
 }
