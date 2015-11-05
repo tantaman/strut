@@ -1,7 +1,7 @@
 define(['libs/backbone'],
 function(Backbone) {
 	return Backbone.View.extend({
-		className: 'addBtn btn btn-success',
+		className: 'addBtn btn btn-plast',
 		events: {
 			click: "_addSlide"
 		},
@@ -11,7 +11,7 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html('<center><i class="icon-plus icon-white"></i></center>');
+			this.$el.html('<i class="icon-plus icon-white"></i>Slide');
 			return this;
 		},
 

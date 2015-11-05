@@ -37,7 +37,14 @@ define(['./view/ComponentButton',
 		var service = {
 			createButtons: function(editorModel) {
 				var buttons = [];
-
+                                
+                                buttons.push(new Button({
+					componentType: 'iframe',
+					icon: 'icon-signal',
+					name: lang.insert_chart,
+					editorModel: editorModel
+				}));
+                                
 				buttons.push(new Button({
 					componentType: 'TextBox',
 					icon: 'icon-text-width',

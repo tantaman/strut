@@ -1,4 +1,5 @@
 define({
+        insert_chart: 'Chart',
 	insert_image: 'Insert Image',
 	insert_video: 'Insert Video',
 	insert_website: 'Insert Website',

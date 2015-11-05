@@ -58,7 +58,8 @@ a {
 
 .btn-plast {
   color: #ffffff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.99) !important;
+/*  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #363636;
   *background-color: #222222;
   background-image: -moz-linear-gradient(top, #666670, #46464d);
@@ -70,7 +71,7 @@ a {
   border-color: #222222 #222222 #000000;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff444444', endColorstr='#ff222222', GradientType=0);
-  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);*/
 }
 
 .btn {
@@ -80,6 +81,12 @@ a {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  
+  border-radius : 0px !important;
+  border : 0px !important;
+  background-color: rgba(0, 0, 0, 0.99) !important;
+  background-image: linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
+  background-image: -webkit-linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
 }
 
 .btn-plast:hover,
@@ -88,8 +95,8 @@ a {
 .btn-plast.disabled,
 .btn-plast[disabled] {
   color: #ffffff;
-  background-color: #46464d;
-  *background-color: #151515;
+/*  background-color: #46464d;
+  *background-color: #151515;*/
 }
 
 .btn-plast:active,

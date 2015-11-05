@@ -5,7 +5,7 @@ function(Backbone, Model) {
 	'use strict';
 
 	return Backbone.View.extend({
-		className: 'wellContextMenu',
+		className: 'wellContextMenu  btn-group iconBtns',
 
 		initialize: function() {
 			this.model = new Model(this._editorModel);

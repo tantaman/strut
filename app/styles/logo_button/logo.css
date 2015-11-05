@@ -1,16 +1,15 @@
 .logo {
-	width: 100px;
-	height: 32px;
-	margin-left: 5px;
-	padding: 0px 20px 0px 5px;
+    padding: 6px 8px 4px 8px;
 }
-
 .logo-bg {
-	background-image: url('img/menu.png');
-	display: inline-block;
-	width: 35px;
-	height: 35px;
-        background-repeat: no-repeat;
+    background-image: url('img/menu.png');
+    display: inline-block;
+    width: 32px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin: 4px;
 }
 
 .logo-holder {
@@ -21,7 +20,9 @@
 .logo:hover {
 	background-position: 5px 0;
 }
-
+.logo-group{
+    margin-top: 0px !important;
+}
 .logo-group .logo .caret {
 	position: absolute;
 	right: 6px;
