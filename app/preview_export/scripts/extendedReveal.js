@@ -93,18 +93,21 @@
                 });
     
     if(Reveal.isFirstSlide()){
-        $("#hintDiv").css("display","block");
+        $("#hintDiv").fadeIn(500);
+                //.css("display","block");
     }
     
     Reveal.addEventListener('slidechanged', function (event) {
         if (Reveal.isFirstSlide()) {
-            $("#hintDiv").css("display","block");
+            $("#hintDiv").fadeIn(500);
         }
         
         else{
-            $("#hintDiv").css("display","none");
+            $("#hintDiv").fadeOut();
         }
 
     });
 
+    Reveal.configure({ slideNumber: true });
+    $(".slide-number").css({"text-align": "center"});
 }());
