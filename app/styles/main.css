@@ -57,8 +57,8 @@ a {
 }
 
 .btn-plast {
-  color: #ffffff;
-  background-color: rgba(0, 0, 0, 0.99) !important;
+  /*color: #ffffff;*/
+  /*background-color: rgba(0, 0, 0, 0.99) !important;*/
 /*  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #363636;
   *background-color: #222222;
@@ -84,9 +84,10 @@ a {
   
   border-radius : 0px !important;
   border : 0px !important;
-  background-color: rgba(0, 0, 0, 0.99) !important;
+  background: transparent;
+/*  background-color: rgba(0, 0, 0, 0.99) !important;
   background-image: linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
-  background-image: -webkit-linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
+  background-image: -webkit-linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));*/
 }
 
 .btn-plast:hover,
@@ -94,7 +95,8 @@ a {
 .btn-plast.active,
 .btn-plast.disabled,
 .btn-plast[disabled] {
-  color: #ffffff;
+  color: black;
+  //font-weight: bold;
 /*  background-color: #46464d;
   *background-color: #151515;*/
 }
@@ -246,4 +248,8 @@ and (max-device-width : 1024px)  {
   }
 }
 
-
+i.fa{
+    color: black !important;
+    font-size: 14px !important;
+    
+}

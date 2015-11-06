@@ -56,5 +56,5 @@
     $("#download").click(function () {
        window.print();
     });
-
+    
 }());

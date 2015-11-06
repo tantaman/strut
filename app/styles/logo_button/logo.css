@@ -13,25 +13,41 @@
 }
 
 .logo-holder {
-	margin-top: 5px;
-	margin-left: -8px;
+    margin-top: 5px;
+    margin-left: -8px;
 }
 
 .logo:hover {
-	background-position: 5px 0;
+    background-position: 5px 0;
 }
 .logo-group{
     margin-top: 0px !important;
 }
 .logo-group .logo .caret {
-	position: absolute;
-	right: 6px;
-	top: 5px;
-	border-top-color: #FFF;
-	border-bottom-color: #FFF;
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    border-top-color: #FFF;
+    border-bottom-color: #FFF;
 }
 
 .logo-holder .dropdown-menu .label {
-	position: absolute;
-	right: 5px;
+    position: absolute;
+    right: 5px;
+}
+
+.logo-group ul.dropdown-menu {
+    position: absolute;
+    left: -14px;
+    width: 150px;
+    height:605px;
+    background-color: rgba(165, 165, 165, 0.9);
+    border-radius : 0;
+    padding-top: 50px;
+    top: -10px;
+}  
+
+.logo-group .dropdown-menu li > a{
+    color: white;
+
 }

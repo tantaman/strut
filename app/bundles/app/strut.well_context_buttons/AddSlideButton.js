@@ -11,7 +11,7 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html('<i class="icon-plus icon-white"></i>Slide');
+			this.$el.html('<i class="fa fa-plus"></i>Slide');
 			return this;
 		},
 

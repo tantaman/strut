@@ -19,7 +19,7 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
                          
 			this.model.editorModel().on('change:activeMode', this._modeChanged, this);
                          
-			this._tablets = new Tablets(this.model.editorModel());
+			//this._tablets = new Tablets(this.model.editorModel());
 		},
 
 		_modeChanged: function(model, value) {
@@ -53,8 +53,8 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
 			var $themeButtons = this.$el.find('.theme-buttons');
 			$themeButtons.append(this._themeProviderView.render().$el);
 
-			this._tablets.render();
-			this.$el.append(this._tablets.$el);
+			//this._tablets.render();
+			//this.$el.append(this._tablets.$el);
 
 			return this;
 		},

@@ -1,6 +1,6 @@
 <div class="btn-group iconBtns">
 	<a class="btn btn-plast">
-		<i class="icon-th-large icon-white"></i>
-		{{#lang 'overview'}}{{/lang}}
+		<i class="fa fa-share-square-o"></i>
+		Share
 	</a>
 </div>
