@@ -11,7 +11,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		var attr = opts.attr;
 
 		this._view = new View(backgrounds, opts.template,
-			{class: 'iconBtns group-dropdown'});
+			{class: ''});
 		this._editorModel = editorModel;
 		this._selector = selector;
 		this._attr = attr;

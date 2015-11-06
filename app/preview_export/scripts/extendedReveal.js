@@ -110,4 +110,5 @@
 
     Reveal.configure({ slideNumber: true });
     $(".slide-number").css({"text-align": "center"});
+
 }());

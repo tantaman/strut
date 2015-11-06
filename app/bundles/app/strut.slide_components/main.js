@@ -37,17 +37,24 @@ define(['./view/ComponentButton',
 		var service = {
 			createButtons: function(editorModel) {
 				var buttons = [];
-
+                                
+                                buttons.push(new Button({
+					componentType: 'iframe',
+					icon: 'fa fa-signal',
+					name: lang.insert_chart,
+					editorModel: editorModel
+				}));
+                                
 				buttons.push(new Button({
 					componentType: 'TextBox',
-					icon: 'icon-text-width',
+					icon: 'fa fa-text-width',
 					name: lang.text,
 					editorModel: editorModel
 				}));
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Image',
-					icon: 'icon-picture',
+					icon: 'fa fa-picture-o',
 					name: lang.image,
 					tag: 'img',
 					title: lang.insert_image,
@@ -57,7 +64,7 @@ define(['./view/ComponentButton',
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Video',
-					icon: 'icon-film',
+					icon: 'fa fa-video-camera',
 					name: lang.video,
 					tag: 'video',
 					title: lang.insert_video,

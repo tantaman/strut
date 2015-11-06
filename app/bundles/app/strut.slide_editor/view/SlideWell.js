@@ -2,11 +2,10 @@ define(['libs/backbone',
 	'jquery.multisortable',
 	'strut/slide_snapshot/SlideSnapshot',
 	'common/Throttler',
-	'./WellContextMenu',
 	'strut/editor/GlobalEvents',
 	'css!styles/slide_editor/slideWell.css',
 	"tantaman/web/undo_support/CmdListFactory"],
-	function(Backbone, multisortable, SlideSnapshot, Throttler, WellContextMenu, GlobalEvents, css, CmdListFactory) {
+	function(Backbone, multisortable, SlideSnapshot, Throttler, GlobalEvents, css, CmdListFactory) {
 		'use strict';
 		var undoHistory = CmdListFactory.managedInstance('editor');
 
@@ -17,7 +16,7 @@ define(['libs/backbone',
 		 */
 		return Backbone.View.extend({
 			events: {
-				mousemove: '_showContextMenu',
+//				mousemove: '_showContextMenu',
 				destroyed: 'dispose',
 				mousedown: '_focused'
 			},
@@ -31,10 +30,10 @@ define(['libs/backbone',
 				this._deck.on('slideAdded', this._slideAdded, this);
 				this._deck.on('slideMoved', this._slideMoved, this);
 				this._deck.on('slidesReset', this._slidesReset, this);
-				this._doShowContextMenu = this._doShowContextMenu.bind(this);
+//				this._doShowContextMenu = this._doShowContextMenu.bind(this);
 				this._throttler = new Throttler(100);
-				this._contextMenu = new WellContextMenu(this._editorModel);
-				this._contextMenu.render();
+//				this._contextMenu = new WellContextMenu(this._editorModel);
+//				this._contextMenu.render();
 
 				this.$slides = $('<div class="' + this.className + 'List">');
 				this.$slides.multisortable({
@@ -258,12 +257,12 @@ define(['libs/backbone',
 					var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
 					this.$slides.append(snapshot.render().$el);
 				}, this);
-				this.$el.append(this._contextMenu.$el);
-
-				var self = this;
-				setTimeout(function() {
-					self._doShowContextMenu({pageY: 100});
-				}, 0);
+//				this.$el.append(this._contextMenu.$el);
+//
+//				var self = this;
+//				setTimeout(function() {
+//					self._doShowContextMenu({pageY: 100});
+//				}, 0);
 				return this;
 			},
 
