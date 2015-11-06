@@ -21,7 +21,7 @@
                 "cursor": "pointer",
                 "line-height": "30px",
             });
-            
+
     $("#botton-container").hover(
             function () {
                 $("#botton-container li")
@@ -46,7 +46,7 @@
 //    });
 
     $("#fullscreen").click(function () {
-       Reveal.fullScreen();
+        Reveal.fullScreen();
     });
 
     $("#allSlide").click(function () {
@@ -54,7 +54,60 @@
     });
 
     $("#download").click(function () {
-       window.print();
+
+        var newURL = "?print-pdf#/";
+        var win = window.open(newURL, '_blank');
+        win.focus();
+        win.print();
+//        win.onload = function () {
+//            var specialElementHandlers =
+//                    function (element, renderer) {
+//                        return true;
+//                    }
+//            var doc = new jsPDF("landscape", "cm", "a4");
+//            $('div.slides > section').each(function () {
+//                doc.fromHTML($(this).html(), 15, 15, {
+//                    'width': 170,
+//                    'elementHandlers': specialElementHandlers
+//                });
+//                doc.addPage();
+//            });
+//
+//            doc.save('chartBook.pdf');
+//        };
     });
 
+        $("body").append("<div id='hintDiv'>Use spacebar or arrow keys to navigate. </br> Hit esc for a slide overview.</div>");
+        $("#hintDiv").css({
+                    "width": "100%",
+                    "height": "10%",
+                    "text-align": "center",
+                    "background-color": "rgb(128, 128, 128)",
+                    "color": "white",
+                    "position": "absolute",
+                    "bottom": "25%",
+                    "font-size": "2em",
+                    "z-index":1000,
+                    "display": "none"
+
+                });
+    
+    if(Reveal.isFirstSlide()){
+        $("#hintDiv").fadeIn(500);
+                //.css("display","block");
+    }
+    
+    Reveal.addEventListener('slidechanged', function (event) {
+        if (Reveal.isFirstSlide()) {
+            $("#hintDiv").fadeIn(500);
+        }
+        
+        else{
+            $("#hintDiv").fadeOut();
+        }
+
+    });
+
+    Reveal.configure({ slideNumber: true });
+    $(".slide-number").css({"text-align": "center"});
 }());
