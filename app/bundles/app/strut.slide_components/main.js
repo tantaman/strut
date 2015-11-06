@@ -40,7 +40,7 @@ define(['./view/ComponentButton',
                                 
                                 buttons.push(new Button({
 					componentType: 'iframe',
-					icon: 'fa fa-bar-chart',
+					icon: 'fa fa-signal',
 					name: lang.insert_chart,
 					editorModel: editorModel
 				}));
@@ -64,7 +64,7 @@ define(['./view/ComponentButton',
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Video',
-					icon: 'fa fa-film',
+					icon: 'fa fa-video-camera',
 					name: lang.video,
 					tag: 'video',
 					title: lang.insert_video,

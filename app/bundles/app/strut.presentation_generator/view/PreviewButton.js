@@ -1,7 +1,7 @@
 define(['libs/backbone', '../PreviewLauncher'],
 function(Backbone, PreviewLauncher) {
 	return Backbone.View.extend({
-		className: 'btn-group iconBtns',
+		className: 'button',
 		events: {
 			'click .act': '_launch'
 		},

@@ -1,5 +1,5 @@
-<a class="btn btn-plast dropdown-toggle" data-toggle="dropdown">
-	<i class="fa fa-tint"></i>
+<a class="dropdown-toggle" data-toggle="dropdown">
+	<i class="fa fa-tint"></i></br>
 	{{#lang title}}{{/lang}}</a>
 <ul class="dropdown-menu" role="menu">
 	<li class="dropdown-submenu">

@@ -46,7 +46,7 @@ define(['libs/backbone',
                     this._$slideContainer = $('<div class="slideContainer"></div>')
                     this.$el.html(this._$slideContainer);
                     //this._$slideContainer.css(config.slide.size);
-                    this._$slideContainer.css({"width": "100%", "height": "586px", padding: ""});
+                    this._$slideContainer.css({"width": "100%", "height": "571px", padding: ""});
 
                     DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
                     this._$markdownContent = $('<div class="markdownArea themedArea"></div>');
