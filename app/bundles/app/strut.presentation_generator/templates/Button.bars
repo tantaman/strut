@@ -14,9 +14,9 @@
 
 {{!-- <button class="btn btn-success act"><i class="fa fa-play"></i>Preview</button> --}}
 
-<div class="btn-group iconBtns">
+<div class="btn-group iconBtns act">
 	<a class="btn btn-plast">
 		<i class="fa fa-play"></i>
-		Share
+		Preview
 	</a>
 </div>
