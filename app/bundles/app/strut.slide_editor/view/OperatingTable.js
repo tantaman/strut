@@ -19,7 +19,8 @@ define(['libs/backbone',
                     "focused": "_focus",
                     // "dragover": "_dragover",
                     // "drop": "_drop",
-                    destroyed: 'dispose'
+                    destroyed: 'dispose',
+                    "click .logoContainer": "_logoClick"
                 },
                 initialize: function () {
                     this._resize = this._resize.bind(this);
@@ -27,7 +28,7 @@ define(['libs/backbone',
 
                     // Re-render when active slide changes in the deck
                     this._deck.on('change:activeSlide', function (deck, model) {
-                        
+
                         this.setModel(model);
                     }, this);
                     this._deck.on('change:background', this._updateBg, this);
@@ -52,17 +53,18 @@ define(['libs/backbone',
                     DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
                     this._$markdownContent = $('<div class="markdownArea themedArea"></div>');
                     this._$slideContainer.append(this._$markdownContent);
-                    var logo = this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
+                    this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
                     this._$slideContainer.append("<a href='#' class = 'titleContainer'>Title</a>");
-                    //sthis._$slideContainer
+                   
+//sthis._$slideContainer
                     //console.log(this._$slideContainer.find(".logoContainer"));
-                    this._$slideContainer.find(".logoContainer").on("click", function () {
-//                    $(document).on('click', '.logoContainer' , function(){
-                        $("a[data-comptype='Image'] i").trigger("click");
-                        alert('hi');
-                        $(this).hide();
-
-                    });
+//                    this._$slideContainer.find(".logoContainer").on("click", function () {
+////                    $(document).on('click', '.logoContainer' , function(){
+//                        $("a[data-comptype='Image'] i").trigger("click");
+//                        alert('hi');
+//                        $(this).hide();
+//
+//                    });
                     this._$slideContainer.selectable({
                         filter: ".component",
                         selected: function (event, ui) {
@@ -84,11 +86,20 @@ define(['libs/backbone',
 
                     return this;
                 },
+                
+                _logoClick: function () {
+                    
+                    $("a[data-comptype='Image'] i").trigger("click");
+                        $(this).hide();
+
+                    
+                },
                 _updateBg: function (model, bg) {
                     if (!this._$slideContainer)
                         return;
                     this._$slideContainer.removeClass();
                     this._$slideContainer.addClass('slideContainer ui-selectable');
+                    this._$slideContainer.addClass('bg-solid-black');
                     DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true});
                 },
                 _updateSurface: function (model, bg) {

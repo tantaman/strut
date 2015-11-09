@@ -1,7 +1,5 @@
 <a class="logo dropdown-toggle" data-toggle="dropdown">
-        <img src="img/UI_icons/menu.png" alt="menu"></br>
-		Preview
-	</a>
+        <img src="img/UI_icons/menu.png" alt="menu"></a>
 
 
 <ul class="dropdown-menu">
