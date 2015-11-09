@@ -27,6 +27,7 @@ define(['libs/backbone',
 
                     // Re-render when active slide changes in the deck
                     this._deck.on('change:activeSlide', function (deck, model) {
+                        
                         this.setModel(model);
                     }, this);
                     this._deck.on('change:background', this._updateBg, this);
@@ -51,7 +52,17 @@ define(['libs/backbone',
                     DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
                     this._$markdownContent = $('<div class="markdownArea themedArea"></div>');
                     this._$slideContainer.append(this._$markdownContent);
+                    var logo = this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
+                    this._$slideContainer.append("<a href='#' class = 'titleContainer'>Title</a>");
+                    //sthis._$slideContainer
+                    //console.log(this._$slideContainer.find(".logoContainer"));
+                    this._$slideContainer.find(".logoContainer").on("click", function () {
+//                    $(document).on('click', '.logoContainer' , function(){
+                        $("a[data-comptype='Image'] i").trigger("click");
+                        alert('hi');
+                        $(this).hide();
 
+                    });
                     this._$slideContainer.selectable({
                         filter: ".component",
                         selected: function (event, ui) {

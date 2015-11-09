@@ -40,8 +40,8 @@ define(['libs/backbone'],
 			 * @returns {*}
 			 */
 			render: function() {
-				this.$el.html('<i class="' + this.options.icon + '"></i></br>' + this.options.name);
-				return this;
+				this.$el.html('<img alt="' + this.options.icon + '" src="img/UI_icons/' + this.options.icon + '.png"></br>' + this.options.name);
+                                return this;
 			},
 
 			constructor: function ComponentButton() {

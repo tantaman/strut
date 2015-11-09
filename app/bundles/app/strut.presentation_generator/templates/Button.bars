@@ -12,9 +12,7 @@
 </ul>
 --}}
 
-{{!-- <button class="btn btn-success act"><i class="fa fa-play"></i>Preview</button> --}}
-
-	<a class="act">
-		<i class="fa fa-play"></i></br>
+<a class="act">
+        <img src="img/UI_icons/preview.png" alt="share"></br>
 		Preview
 	</a>

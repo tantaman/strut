@@ -221,13 +221,13 @@ define(['libs/backbone',
 				// Append it in the correct position in the well
 				var snapshot = new SlideSnapshot({model: slide, deck: this._deck, registry: this._registry});
 				if (index == 0) {
-					this.$slides.prepend(snapshot.render().$el);
+					this.$slides.append(snapshot.render().$el);
 				} else {
 					var $slides = $('.slideSnapshot');
 					if (index >= $slides.length) {
 						this.$slides.append(snapshot.render().$el);
 					} else {
-						$($slides[index]).before(snapshot.render().$el);
+						$($slides[index]).after(snapshot.render().$el);
 					}
 				}
 			},

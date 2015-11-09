@@ -21,7 +21,7 @@
                 "cursor": "pointer",
                 "line-height": "30px",
             });
-            
+
     $("#botton-container").hover(
             function () {
                 $("#botton-container li")
@@ -46,7 +46,7 @@
 //    });
 
     $("#fullscreen").click(function () {
-       Reveal.fullScreen();
+        Reveal.fullScreen();
     });
 
     $("#allSlide").click(function () {
@@ -54,7 +54,24 @@
     });
 
     $("#download").click(function () {
-       window.print();
+        window.print();
     });
-    
+
 }());
+
+var header = function () {
+    function renderLogo() {
+        $(".slideContainer")
+                .append('<div class="header"><img src="smiley.gif" alt="Smiley face" height="42" width="42"></div>')
+                .css({"position": "absolute", 'top': "10px", "left": "10px"});
+    }
+
+    function renderTitle(title) {
+        $(".slideContainer .header")
+                .append('<h3>'+ title + '</h3>')
+                .css({"position": "absolute", 'top': "10px", "left": "10px"});
+    }
+    
+    return {renderLogo:renderLogo, renderTitle:renderTitle};
+
+};

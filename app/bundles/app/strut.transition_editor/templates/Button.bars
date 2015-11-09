@@ -1,6 +1,6 @@
 <div class="button">
 	<a class="">
-		<i class="fa fa-share-square-o"></i></br>
+        <img src="img/UI_icons/share.png" alt="share"></br>
 		Share
 	</a>
 </div>

@@ -11,7 +11,8 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html('<a><i class="fa fa-plus"></i></br>Slide</a>');
+			//this.$el.html('<a><i class="fa fa-plus"></i></br>Slide</a>');
+			this.$el.html('<a><img src="img/UI_icons/add.png" alt="Add Slide"></br>Slide</a>');
 			return this;
 		},
 

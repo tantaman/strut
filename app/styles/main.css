@@ -56,6 +56,10 @@ a {
   margin-top: 0px;
 }
 
+.dropdown-menu li > a:hover {
+    background: transparent;
+    background-color:#969696 !important;
+}
 .btn-plast {
   /*color: #ffffff;*/
   /*background-color: rgba(0, 0, 0, 0.99) !important;*/
@@ -251,5 +255,31 @@ and (max-device-width : 1024px)  {
 i.fa{
     color: #969696;
     font-size: 18px !important;
+    
+}
+
+.logoContainer, .titleContainer{
+    display: inline-block;
+    text-align: center;
+    font-size: 2em;
+    height: 10%;
+    border: 1px dotted black;
+    cursor: pointer !important;
+}
+
+.logoContainer{
+    width: 20%;
+    
+}  
+.titleContainer{
+    width: 79%;
+    
+    
+    
+}
+
+img {
+    height: 25px;
+    width: 25px;
     
 }
