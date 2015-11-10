@@ -54,24 +54,43 @@
     });
 
     $("#download").click(function () {
-        window.print();
+        var newURL = "?print-pdf#/";
+        var win = window.open(newURL, '_blank');
+        win.focus();
+        win.print();
     });
 
-}());
+        $("body").append("<div id='hintDiv'>Use spacebar or arrow keys to navigate. </br> Hit esc for a slide overview.</div>");
+        $("#hintDiv").css({
+                    "width": "100%",
+                    "height": "10%",
+                    "text-align": "center",
+                    "background-color": "rgb(128, 128, 128)",
+                    "color": "white",
+                    "position": "absolute",
+                    "bottom": "25%",
+                    "font-size": "2em",
+                    "z-index":1000,
+                    "display": "none"
 
-var header = function () {
-    function renderLogo() {
-        $(".slideContainer")
-                .append('<div class="header"><img src="smiley.gif" alt="Smiley face" height="42" width="42"></div>')
-                .css({"position": "absolute", 'top': "10px", "left": "10px"});
-    }
-
-    function renderTitle(title) {
-        $(".slideContainer .header")
-                .append('<h3>'+ title + '</h3>')
-                .css({"position": "absolute", 'top': "10px", "left": "10px"});
+                });
+    
+    if(Reveal.isFirstSlide()){
+        $("#hintDiv").fadeIn(500);
     }
     
-    return {renderLogo:renderLogo, renderTitle:renderTitle};
+    Reveal.addEventListener('slidechanged', function (event) {
+        if (Reveal.isFirstSlide()) {
+            $("#hintDiv").fadeIn(500);
+        }
+        
+        else{
+            $("#hintDiv").fadeOut();
+        }
 
-};
+    });
+
+    Reveal.configure({ slideNumber: true });
+    $(".slide-number").css({"text-align": "center"});
+
+}());
