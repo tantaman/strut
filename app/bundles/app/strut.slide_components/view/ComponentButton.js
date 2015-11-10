@@ -7,7 +7,7 @@ define(['libs/backbone'],
 		 * @augments Backbone.View
 		 */
 		return Backbone.View.extend({
-			className: 'btn btn-plast',
+			className: '',
 			tagName: 'a',
 
 			/**
@@ -40,7 +40,7 @@ define(['libs/backbone'],
 			 * @returns {*}
 			 */
 			render: function() {
-				this.$el.html('<i class="' + this.options.icon + ' icon-white"></i>' + this.options.name);
+				this.$el.html('<i class="' + this.options.icon + '"></i></br>' + this.options.name);
 				return this;
 			},
 

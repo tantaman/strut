@@ -2,36 +2,83 @@
     padding: 6px 8px 4px 8px;
 }
 .logo-bg {
-    background-image: url('img/menu.png');
+    /*background-image: url('img/menu.png');*/
     display: inline-block;
-    width: 32px;
-    height: 20px;
+    /*width: 100%;*/
+    /*height: 100%;*/
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
     margin: 4px;
+    text-align: center;
+    line-height: 48px;
+}
+.button{
+    height: 100%;
+    width: auto;
+    text-align: center;
+    display: inline-block;
+    /*margin-left: 2%;*/
+    color: gray !important;
+    /*vertical-align: middle;*/
+    /*padding-top: 5%;*/
+
+}
+.button a{
+    display: inline-block;
+    margin-left: 40px;
+    text-decoration: none;
+    color: gray;
+    /*font-weight: bold;*/
+}
+
+i.fa.fa-bars{
+    font-size: 20px !important;
+
+}
+
+.mode-buttons {
+    margin-right: 35px;
 }
 
 .logo-holder {
-	margin-top: 5px;
-	margin-left: -8px;
+    /*margin-top: 5px;*/
+    /*margin-left: -8px;*/
+    /*height: auto;*/
+    /*line-height: 57px;*/
 }
 
 .logo:hover {
-	background-position: 5px 0;
+    background-position: 5px 0;
 }
 .logo-group{
     margin-top: 0px !important;
 }
 .logo-group .logo .caret {
-	position: absolute;
-	right: 6px;
-	top: 5px;
-	border-top-color: #FFF;
-	border-bottom-color: #FFF;
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    border-top-color: #FFF;
+    border-bottom-color: #FFF;
 }
 
 .logo-holder .dropdown-menu .label {
-	position: absolute;
-	right: 5px;
+    position: absolute;
+    right: 5px;
+}
+
+.logo-group ul.dropdown-menu {
+    position: absolute;
+    left: -20px;
+    width: 150px;
+    height:620px;
+    background-color: rgba(165, 165, 165, 0.9);
+    border-radius : 0;
+    padding-top: 50px;
+    top: -16px;
+}  
+
+.logo-group .dropdown-menu li > a{
+    color: white;
+
 }
