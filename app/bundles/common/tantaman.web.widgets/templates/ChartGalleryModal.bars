@@ -1,0 +1,13 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>{{title}}</h3>
+</div>
+<div class="modal-body" style="overflow: hidden">
+	<div id="chart-gallery-body"></div>
+
+</div>
+<div class="modal-footer">
+	<a href="#" class="btn btn-primary prev pull-left">Prev</a>
+        <a href="#" class="btn btn-primary next pull-left">Next</a>
+        <a href="#" class="btn btn-primary ok btn-inverse">Insert</a>
+</div>
