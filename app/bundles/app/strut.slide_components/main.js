@@ -1,9 +1,12 @@
 define(['./view/ComponentButton',
 	'./view/ImportingComponentButton',
-	'./model/Image',
+        './view/GalleryComponentButton', 
+  	'./model/Chart',
+        './model/Image',
 	'./model/TextBox',
 	//'./model/WebFrame',
 	'./model/Video',
+        './view/ChartView',
 	'./view/ImageView',
 	'./view/TextBoxView',
 	//'./view/WebFrameView',
@@ -17,10 +20,13 @@ define(['./view/ComponentButton',
     ],
 	function(Button,
 			 ImportingComponentButton,
+                         GalleryComponentButton,
+                         Chart,
 			 Image,
 			 TextBox,
 			 //WebFrame,
 			 Video,
+                         ChartView,
 			 ImageView,
 			 TextBoxView,
 			 //WebFrameView,
@@ -38,10 +44,12 @@ define(['./view/ComponentButton',
 			createButtons: function(editorModel) {
 				var buttons = [];
                                 
-                                buttons.push(new Button({
-					componentType: 'iframe',
+                                buttons.push(new GalleryComponentButton({
+					componentType: 'Chart',
 					icon: 'icon-signal',
-					name: lang.insert_chart,
+					name: lang.chart,
+					tag: 'iframe',
+					title: lang.insert_chart,
 					editorModel: editorModel
 				}));
                                 
@@ -108,6 +116,13 @@ define(['./view/ComponentButton',
 						type: 'Image'
 					}
 				}, Image);
+                                
+                                registry.register({
+					interfaces: 'strut.ComponentModel',
+					meta: {
+						type: 'Chart'
+					}
+				}, Chart);
 
 				registry.register({
 					interfaces: 'strut.ComponentModel',
@@ -143,7 +158,14 @@ define(['./view/ComponentButton',
 						type: 'Image'
 					}
 				}, ImageView);
-
+                                
+                                registry.register({
+					interfaces: 'strut.ComponentView',
+					meta: {
+						type: 'Chart'
+					}
+				}, ChartView);
+                                
 				registry.register({
 					interfaces: 'strut.ComponentView',
 					meta: {

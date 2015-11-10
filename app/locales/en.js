@@ -1,5 +1,5 @@
 define({
-        insert_chart: 'Chart',
+        insert_chart: 'Chart Gallery',
 	insert_image: 'Insert Image',
 	insert_video: 'Insert Video',
 	insert_website: 'Insert Website',
@@ -12,6 +12,7 @@ define({
 	save_as: 'Save as...',
 	new_: 'New',
 	text: 'Text',
+        chart: 'Chart',
 	image: 'Image',
 	video: 'Video',
 	website: 'Website',
