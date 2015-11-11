@@ -54,27 +54,10 @@
     });
 
     $("#download").click(function () {
-
         var newURL = "?print-pdf#/";
         var win = window.open(newURL, '_blank');
         win.focus();
         win.print();
-//        win.onload = function () {
-//            var specialElementHandlers =
-//                    function (element, renderer) {
-//                        return true;
-//                    }
-//            var doc = new jsPDF("landscape", "cm", "a4");
-//            $('div.slides > section').each(function () {
-//                doc.fromHTML($(this).html(), 15, 15, {
-//                    'width': 170,
-//                    'elementHandlers': specialElementHandlers
-//                });
-//                doc.addPage();
-//            });
-//
-//            doc.save('chartBook.pdf');
-//        };
     });
 
         $("body").append("<div id='hintDiv'>Use spacebar or arrow keys to navigate. </br> Hit esc for a slide overview.</div>");
@@ -94,7 +77,6 @@
     
     if(Reveal.isFirstSlide()){
         $("#hintDiv").fadeIn(500);
-                //.css("display","block");
     }
     
     Reveal.addEventListener('slidechanged', function (event) {
