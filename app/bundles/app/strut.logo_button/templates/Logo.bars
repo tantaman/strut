@@ -1,5 +1,6 @@
 <a class="logo dropdown-toggle" data-toggle="dropdown">
-	<span class="logo-bg"><i class="fa fa-bars"></i></span>
-</a>
+        <img src="img/UI_icons/menu.png" alt="menu"></a>
+
+
 <ul class="dropdown-menu">
 </ul>

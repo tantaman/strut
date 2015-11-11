@@ -46,7 +46,7 @@ define(['./view/ComponentButton',
                                 
                                 buttons.push(new GalleryComponentButton({
 					componentType: 'Chart',
-					icon: 'fa fa-signal',
+					icon: 'charts',
 					name: lang.chart,
 					tag: 'iframe',
 					title: lang.insert_chart,
@@ -55,14 +55,14 @@ define(['./view/ComponentButton',
                                 
 				buttons.push(new Button({
 					componentType: 'TextBox',
-					icon: 'fa fa-text-width',
+					icon: 'text',
 					name: lang.text,
 					editorModel: editorModel
 				}));
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Image',
-					icon: 'fa fa-picture-o',
+					icon: 'image',
 					name: lang.image,
 					tag: 'img',
 					title: lang.insert_image,
@@ -72,7 +72,7 @@ define(['./view/ComponentButton',
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Video',
-					icon: 'fa fa-video-camera',
+					icon: 'video',
 					name: lang.video,
 					tag: 'video',
 					title: lang.insert_video,
