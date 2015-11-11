@@ -7,7 +7,7 @@
 
 </div>
 <div class="modal-footer">
-	<a href="#" class="btn btn-primary prev pull-left">Prev</a>
-        <a href="#" class="btn btn-primary next pull-left">Next</a>
+	<a href="#" class="btn btn-primary btn-inverse prev pull-left">Prev</a>
+        <a href="#" class="btn btn-primary btn-inverse next pull-left">Next</a>
         <a href="#" class="btn btn-primary ok btn-inverse">Insert</a>
 </div>

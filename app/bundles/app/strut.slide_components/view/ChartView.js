@@ -13,8 +13,8 @@ define(["./ComponentView", './Mixers', , 'css!styles/chart/chartView.css'],
 			 * Initialize Chart component view.
 			 */
 			initialize: function() {
-				ComponentView.prototype.initialize.apply(this, arguments);
-			},
+		            return ComponentView.prototype.initialize.apply(this, arguments);
+                        },
 
 			/**
 			 * Render element based on component model.
@@ -22,42 +22,20 @@ define(["./ComponentView", './Mixers', , 'css!styles/chart/chartView.css'],
 			 * @returns {*}
 			 */
 			render: function() {
-				var _this = this;
+                                var $frame, scale;
+                                var src = this.model.get('src'), h = this.model.get('height'), w = this.model.get('width');
 				ComponentView.prototype.render.call(this);
-                                var chart = this.model.get('src');
-                                var $iframe
-                                $iframe = $('<iframe src="' + chart.url + '"></iframe>');
-                                $iframe.data('chart', chart);
-                                this.$content.append($iframe);
-                                this.$content.find("iframe").load(function () {
-                                    return _this._finishRender($(this));
-                                });
-                                $iframe.error(function () {
-                                    return _this.remove();
-                                });
-				return this.$el;
-			},
-
-			/**
-			 * Do the actual rendering once Chart is loaded.
-			 *
-			 * @param {jQuery} $img
-			 * @returns {*}
-			 * @private
-			 */
-			_finishRender: function($iframe) {
-                                this.origSize = {
-						width: $iframe.data("chart").width,
-						height: $iframe.data("chart").height
-				};
-			        $iframe[0].width = $iframe.data("chart").width;
-                                $iframe[0].height = $iframe.data("chart").height;
-                                this._setUpdatedTransform();
+				$frame = $("<iframe width='"+w+"' height='"+h+"' src='"+src+"'></iframe>");
+				this.$el.find(".content").append($frame);
+				this.$el.append('<div class="overlay"></div>');
 				
-				$iframe.bind("dragstart", function(e) {
-					e.preventDefault();
-					return false;
+                                var scale = {x: 1, y: 1, width: w, height: h};
+				this.model.set("scale", scale);
+                                this.$el.css({
+					width: w ,
+					height: h
 				});
+				return this.$el;
 			}
 		});
 	});

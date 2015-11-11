@@ -1,6 +1,5 @@
-define(['strut/deck/Component',
-	'common/FileUtils'],
-	function(Component, FileUtils) {
+define(['strut/deck/Component'],
+	function(Component) {
 		'use strict';
 
 		/**
@@ -13,14 +12,7 @@ define(['strut/deck/Component',
 				this.set('type', 'Chart');
 			},
 
-			_updateCache: function() {
-			},
-
-			toBase64: function() {
-
-			},
-
-			constructor: function ChartModel(attrs) {
+			constructor: function Chart(attrs) {
 				Component.prototype.constructor.call(this, attrs);
 			}
 		});

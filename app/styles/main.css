@@ -57,9 +57,9 @@ a {
 }
 
 .btn-plast {
-  /*color: #ffffff;*/
-  /*background-color: rgba(0, 0, 0, 0.99) !important;*/
-/*  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  /* color: #ffffff; */
+  /* background-color: rgba(0, 0, 0, 0.99) !important; */
+  /*  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #363636;
   *background-color: #222222;
   background-image: -moz-linear-gradient(top, #666670, #46464d);
@@ -81,13 +81,13 @@ a {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  
   border-radius : 0px !important;
   border : 0px !important;
-  background: transparent;
-/*  background-color: rgba(0, 0, 0, 0.99) !important;
+  background: rgba(0, 0, 0, 0.6);
+  /* background-color: rgba(0, 0, 0, 0.99) !important; 
   background-image: linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
-  background-image: -webkit-linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));*/
+  background-image: 
+  -webkit-linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48)); */
 }
 
 .btn-plast:hover,

@@ -31,9 +31,11 @@ define(['./ComponentButton', 'tantaman/web/widgets/ChartGalleryModal', 'css!styl
                  * Add importent component to the slide.
                  * @private
                  */
-                _itemImported: function (src) { 
+                _itemImported: function (data) { 
                     this.options.editorModel.addComponent({
-                        src: src,
+                        src: data.url,
+                        height : data.height,
+                        width : data.width,
                         type: this.options.componentType
                     });
                 },
