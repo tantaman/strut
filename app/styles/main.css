@@ -28,6 +28,12 @@ a {
   cursor: pointer;
 }
 
+.dropdown-menu, .dropdown-submenu > .dropdown-menu{
+  border-radius: 0px;
+  -webkit-border-radius: 0px;
+    
+}
+
 .dropdown-menu .shape {
   width: 42px;
   height: 42px;
@@ -58,7 +64,12 @@ a {
 
 .dropdown-menu li > a:hover {
     background: transparent;
-    background-color:#969696 !important;
+    background-color:#969696;
+}
+
+.theme-buttons .dropdown-submenu li > a:hover{
+    background: transparent;
+    
 }
 .btn-plast {
   /* color: #ffffff; */

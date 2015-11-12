@@ -12,7 +12,7 @@
 
     $("#botton-container li")
             .css({
-                "position": "absolute",
+//                "position": "absolute",
                 "width": "30px",
                 "height": "30px",
                 "font-size": "15px",
@@ -60,35 +60,35 @@
         win.print();
     });
 
-        $("body").append("<div id='hintDiv'>Use spacebar or arrow keys to navigate. </br> Hit esc for a slide overview.</div>");
-        $("#hintDiv").css({
-                    "width": "100%",
-                    "height": "10%",
-                    "text-align": "center",
-                    "background-color": "rgb(128, 128, 128)",
-                    "color": "white",
-                    "position": "absolute",
-                    "bottom": "25%",
-                    "font-size": "2em",
-                    "z-index":1000,
-                    "display": "none"
-
-                });
+//        $("body").append("<div id='hintDiv'>Use spacebar or arrow keys to navigate. </br> Hit esc for a slide overview.</div>");
+//        $("#hintDiv").css({
+//                    "width": "100%",
+//                    "height": "10%",
+//                    "text-align": "center",
+//                    "background-color": "rgb(128, 128, 128)",
+//                    "color": "white",
+//                    "position": "absolute",
+//                    "bottom": "25%",
+//                    "font-size": "2em",
+//                    "z-index":1000,
+//                    "display": "none"
+//
+//                });
     
-    if(Reveal.isFirstSlide()){
-        $("#hintDiv").fadeIn(500);
-    }
-    
-    Reveal.addEventListener('slidechanged', function (event) {
-        if (Reveal.isFirstSlide()) {
-            $("#hintDiv").fadeIn(500);
-        }
-        
-        else{
-            $("#hintDiv").fadeOut();
-        }
-
-    });
+//    if(Reveal.isFirstSlide()){
+//        $("#hintDiv").fadeIn(500);
+//    }
+//    
+//    Reveal.addEventListener('slidechanged', function (event) {
+//        if (Reveal.isFirstSlide()) {
+//            $("#hintDiv").fadeIn(500);
+//        }
+//        
+//        else{
+//            $("#hintDiv").fadeOut();
+//        }
+//
+//    });
 
     Reveal.configure({ slideNumber: true });
     $(".slide-number").css({"text-align": "center"});

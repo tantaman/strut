@@ -53,8 +53,8 @@ define(['libs/backbone',
                     DeckUtils.applyBackground(this._$slideContainer, this.model, this._deck, {transparentForSurface: true, surfaceForDefault: true, transparentForDeckSurface: true});
                     this._$markdownContent = $('<div class="markdownArea themedArea"></div>');
                     this._$slideContainer.append(this._$markdownContent);
-                    this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
-                    this._$slideContainer.append("<a href='#' class = 'titleContainer'>Title</a>");
+//                    this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
+//                    this._$slideContainer.append("<a href='#' class = 'titleContainer'>Title</a>");
                    
 //sthis._$slideContainer
                     //console.log(this._$slideContainer.find(".logoContainer"));
