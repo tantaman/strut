@@ -9,4 +9,6 @@ and open the template in the editor.
 */
 .chartView iframe{
     display: block;
+    border: none;
+    overflow: hidden; 
 }

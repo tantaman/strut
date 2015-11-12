@@ -52,104 +52,104 @@ define(['libs/backbone'],
                             {
                                 chartId: "MHvWzixC",
                                 chartType: "COLUMN_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
                                 chartId: "MHjRzCJB",
                                 chartType: "PIE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
                                 chartId: "M3PbySJG",
                                 chartType: "LINE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Title ..",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             },
                             {
                                 chartId: "MHrbyilF",
                                 chartType: "COLUMN_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
                             },
                             {
                                 chartId: "M3nawitG5",
                                 chartType: "BAR_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "bigqueryforsalesforce",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
                             },
                             {
                                 chartId: "MHvWzixC2",
                                 chartType: "COLUMN_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
                                 chartId: "MHjRzCJB2",
                                 chartType: "PIE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
                                 chartId: "M3PbySJG2",
                                 chartType: "LINE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Title ..",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             },
                             {
                                 chartId: "MHrbyilF2",
                                 chartType: "COLUMN_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
                             },
                             {
                                 chartId: "M3nawitG52",
                                 chartType: "BAR_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "bigqueryforsalesforce",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
                             },
                             {
                                 chartId: "MHvWzixC3",
                                 chartType: "COLUMN_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
                                 chartId: "MHjRzCJB3",
                                 chartType: "PIE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
                                 chartId: "M3PbySJG3",
                                 chartType: "LINE_CHART",
-                                height: "400",
-                                width: "560",
+                                height: "500",
+                                width: "640",
                                 name: "Title ..",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             }
