@@ -28,6 +28,12 @@ a {
   cursor: pointer;
 }
 
+.dropdown-menu, .dropdown-submenu > .dropdown-menu{
+  border-radius: 0px;
+  -webkit-border-radius: 0px;
+    
+}
+
 .dropdown-menu .shape {
   width: 42px;
   height: 42px;
@@ -56,10 +62,11 @@ a {
   margin-top: 0px;
 }
 
-.dropdown-menu li > a:hover {
+.dropdown-menu > li.dropdown-submenu:hover > a {
     background: transparent;
-    background-color:#969696 !important;
+    background-color:#969696;
 }
+
 .btn-plast {
   /* color: #ffffff; */
   /* background-color: rgba(0, 0, 0, 0.99) !important; */
