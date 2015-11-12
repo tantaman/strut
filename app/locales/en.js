@@ -17,8 +17,8 @@ define({
 	video: 'Video',
 	website: 'Website',
 	present: 'Present',
-	export: 'Export...',
-	import: 'Import...',
+	export: 'Save',
+	import: 'Load',
 	cut: 'Cut',
 	copy: 'Copy',
 	paste: 'Paste',
@@ -31,7 +31,7 @@ define({
 	reset: 'Reset',
 	go: 'Go',
 	strut_exporter_json: {
-		explain: 'This allows you to save a file on your computer that you can import back into Strut later.',
+		explain: 'This allows you to save a file on your computer that you can load back later.',
 		click_below: 'Click below to download'
 	},
 	background: 'Background',

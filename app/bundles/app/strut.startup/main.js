@@ -9,18 +9,18 @@ function(EditorView, EditorModel) {
     		editor.render();
     		$('body').append(editor.$el);
 
-    		if (sessionMeta.lastPresentation != null) {
-    			// Load it up.
-    			var storageInterface = registry.getBest('strut.StorageInterface');
-    			storageInterface.load(sessionMeta.lastPresentation, function(pres, err) {
-    				if (!err) {
-    					model.importPresentation(pres);
-    				} else {
-    					console.log(err);
-    					console.log(err.stack);
-    				}
-    			});
-    		}
+//    		if (sessionMeta.lastPresentation != null) {
+//    			// Load it up.
+//    			var storageInterface = registry.getBest('strut.StorageInterface');
+//    			storageInterface.load(sessionMeta.lastPresentation, function(pres, err) {
+//    				if (!err) {
+//    					model.importPresentation(pres);
+//    				} else {
+//    					console.log(err);
+//    					console.log(err.stack);
+//    				}
+//    			});
+//    		}
 		}
 	};
 
