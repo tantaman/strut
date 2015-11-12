@@ -50,106 +50,119 @@ define(['libs/backbone'],
                         perPage: 10,
                         results: [
                             {
-                                chartId: "MHvWzixC",
+                                chartId: "MH7Szi9N",
                                 chartType: "COLUMN_CHART",
-                                height: "500",
-                                width: "640",
-                                name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
+                                subType: '100%25',
+                                height: "589",
+                                width: "435",
+                                name: "Segment Performance by Market",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
-                                chartId: "MHjRzCJB",
-                                chartType: "PIE_CHART",
-                                height: "500",
-                                width: "640",
-                                name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
+                                chartId: "MH7SzixF",
+                                chartType: "COLUMN_CHART",
+                                subType: '100%25',
+                                height: "591",
+                                width: "437",
+                                name: "Dynamic Market Brand Composition",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
-                                chartId: "M3PbySJG",
-                                chartType: "LINE_CHART",
-                                height: "500",
-                                width: "640",
-                                name: "Title ..",
+                                chartId: "MH7Szi9B",
+                                chartType: "COLUMN_CHART",
+                                subType: 'stacked',
+                                height: "623",
+                                width: "469",
+                                name: "Container Meterials Sold by Trademark",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             },
                             {
                                 chartId: "MHrbyilF",
                                 chartType: "COLUMN_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
                             },
                             {
                                 chartId: "M3nawitG5",
                                 chartType: "BAR_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "bigqueryforsalesforce",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
                             },
                             {
                                 chartId: "MHvWzixC2",
                                 chartType: "COLUMN_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
                                 chartId: "MHjRzCJB2",
                                 chartType: "PIE_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
                                 chartId: "M3PbySJG2",
                                 chartType: "LINE_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Title ..",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             },
                             {
                                 chartId: "MHrbyilF2",
                                 chartType: "COLUMN_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
                             },
                             {
                                 chartId: "M3nawitG52",
                                 chartType: "BAR_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "bigqueryforsalesforce",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
                             },
                             {
                                 chartId: "MHvWzixC3",
                                 chartType: "COLUMN_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
                             },
                             {
                                 chartId: "MHjRzCJB3",
                                 chartType: "PIE_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
                             },
                             {
                                 chartId: "M3PbySJG3",
                                 chartType: "LINE_CHART",
-                                height: "500",
-                                width: "640",
+                                subType: '',
+                                height: "400",
+                                width: "560",
                                 name: "Title ..",
                                 imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
                             }
@@ -193,9 +206,9 @@ define(['libs/backbone'],
                         "margin": this._thumbnailProperties.margin + "px",
                         "background-image": 'url(\"' + chartData.imageUrl + '\")'
                     });
-                    var location = "htmlcharts.icharts.net";
+                    var location = "htmlcharts2.icharts.net";
 
-                    chartData.url = "https://" + location + "/?chartid=" + chartData.chartId + "&charttype=" + chartData.chartType;
+                    chartData.url = "https://" + location + "/?chartid=" + chartData.chartId + "&charttype=" + chartData.chartType + "&subtype=" + chartData.subType + "&authentication={}";
 
                     chartThumbnail.data("chart", chartData);
                 },
