@@ -62,15 +62,11 @@ a {
   margin-top: 0px;
 }
 
-.dropdown-menu li > a:hover {
+.dropdown-menu > li.dropdown-submenu:hover > a {
     background: transparent;
     background-color:#969696;
 }
 
-.theme-buttons .dropdown-submenu li > a:hover{
-    background: transparent;
-    
-}
 .btn-plast {
   /* color: #ffffff; */
   /* background-color: rgba(0, 0, 0, 0.99) !important; */

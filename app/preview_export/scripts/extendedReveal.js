@@ -8,11 +8,11 @@
             + "<li id='download'><i class='fa fa-download'></i></li>";
 
 
-    $("body").append("<div style='position:absolute; top:0; right:0;width:30px' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style='position:absolute; z-index:1; top:0; right:0;width:30px' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
 
     $("#botton-container li")
             .css({
-//                "position": "absolute",
+                "position": "absolute",
                 "width": "30px",
                 "height": "30px",
                 "font-size": "15px",
