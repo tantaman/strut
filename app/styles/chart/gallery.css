@@ -11,6 +11,7 @@
     background-size: contain;
     border: 4px solid rgba(0,0,0,0.1);
     border-bottom-width: 2px;
+    cursor : pointer;
 }
 
 #chart-gallery-body .thumbnail.selected{
