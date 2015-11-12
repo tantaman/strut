@@ -1,4 +1,4 @@
-define(["./ComponentView", './Mixers', , 'css!styles/chart/chartView.css'],
+define(["./ComponentView", './Mixers', 'css!styles/chart/chartView.css'],
 	function(ComponentView, Mixers) {
 
 		/**
