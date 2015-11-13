@@ -1,0 +1,60 @@
+{
+  "slides": [
+    {
+      "components": [
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF2&charttype=COLUMN_CHART&subtype=&authentication={}",
+          "height": "400",
+          "width": "560",
+          "type": "Chart",
+          "x": 207,
+          "y": 55,
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "width": "560",
+            "height": "400"
+          },
+          "selected": false
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 0,
+      "selected": true,
+      "active": true
+    }
+  ],
+  "background": "bg-default",
+  "activeSlide": {
+    "components": [
+      {
+        "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF2&charttype=COLUMN_CHART&subtype=&authentication={}",
+        "height": "400",
+        "width": "560",
+        "type": "Chart",
+        "x": 207,
+        "y": 55,
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "width": "560",
+          "height": "400"
+        },
+        "selected": false
+      }
+    ],
+    "z": 0,
+    "impScale": 3,
+    "rotateX": 0,
+    "rotateY": 0,
+    "rotateZ": 0,
+    "index": 0,
+    "selected": true,
+    "active": true
+  },
+  "fileName": "chart2"
+}
