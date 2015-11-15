@@ -60,6 +60,7 @@
 <script src="reveal/lib/js/head.min.js"></script>
 <script src="reveal/js/reveal.js"></script>
 <script src="scripts/onready.js"></script>
+<script src="../scripts/libs/jQuery.js"></script>
 <script src="scripts/loadPresentation.js"></script>
 <script>
 ready(function() {
@@ -84,10 +85,10 @@ ready(function() {
 
     // Optional libraries used to extend on reveal.js
     dependencies: [
-      { src: 'reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
-      { src: 'reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-      { src: 'reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-      { src: 'reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+//      { src: 'reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+//      { src: 'reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+//      { src: 'reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+//      { src: 'reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
       { src: '../scripts/libs/jQuery.js', async: true},
       { src: 'scripts/extendedReveal.js', async: true},
       { src: 'reveal/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },

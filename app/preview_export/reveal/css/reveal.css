@@ -286,7 +286,7 @@ body {
   display: none;
   position: absolute;
   width: 100%;
-  padding: 20px 0px;
+  /*padding: 20px 0px;*/
   z-index: 10;
   -webkit-transform-style: preserve-3d;
           transform-style: preserve-3d;

@@ -1,0 +1,90 @@
+{
+  "slides": [
+    {
+      "components": [
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+          "height": "589",
+          "width": "435",
+          "type": "Chart",
+          "x": 124,
+          "y": 56,
+          "scale": {
+            "x": 0.6252873563218391,
+            "y": 0.6252873563218391,
+            "width": 272,
+            "height": 368.2942528735632
+          },
+          "selected": false
+        },
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF2&charttype=COLUMN_CHART&subtype=&authentication={}",
+          "height": "400",
+          "width": "560",
+          "type": "Chart",
+          "x": 446,
+          "y": 52,
+          "scale": {
+            "x": 0.7946428571428571,
+            "y": 0.7946428571428571,
+            "width": 445,
+            "height": 317.85714285714283
+          },
+          "selected": false
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 0,
+      "selected": true,
+      "active": true
+    }
+  ],
+  "background": "bg-default",
+  "activeSlide": {
+    "components": [
+      {
+        "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+        "height": "589",
+        "width": "435",
+        "type": "Chart",
+        "x": 124,
+        "y": 56,
+        "scale": {
+          "x": 0.6252873563218391,
+          "y": 0.6252873563218391,
+          "width": 272,
+          "height": 368.2942528735632
+        },
+        "selected": false
+      },
+      {
+        "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF2&charttype=COLUMN_CHART&subtype=&authentication={}",
+        "height": "400",
+        "width": "560",
+        "type": "Chart",
+        "x": 446,
+        "y": 52,
+        "scale": {
+          "x": 0.7946428571428571,
+          "y": 0.7946428571428571,
+          "width": 445,
+          "height": 317.85714285714283
+        },
+        "selected": false
+      }
+    ],
+    "z": 0,
+    "impScale": 3,
+    "rotateX": 0,
+    "rotateY": 0,
+    "rotateZ": 0,
+    "index": 0,
+    "selected": true,
+    "active": true
+  },
+  "fileName": "chartbook3"
+}
