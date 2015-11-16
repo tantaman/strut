@@ -1563,7 +1563,8 @@
 						slide.style.top = 0;
 					}
 					else {
-						slide.style.top = Math.max( ( ( size.height - getAbsoluteHeight( slide ) ) / 2 ) - slidePadding, 0 ) + 'px';
+//                                           slide.style.top = Math.max( ( ( size.height - getAbsoluteHeight( slide ) ) / 2 ) - slidePadding, 0 ) + 'px';
+                                                slide.style.top = 0;
 					}
 				}
 				else {

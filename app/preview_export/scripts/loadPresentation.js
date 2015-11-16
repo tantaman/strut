@@ -1,12 +1,11 @@
 var loadPresentation = function () {
     var presentation = localStorage.getItem('preview-string');
-//    console.log(presentation);
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
 
 
     var params = parseQueryString();
-    console.log(params);
+
 
     if (typeof params.id !== "undefined" && params.id !== "") {
         $.ajax({
@@ -15,7 +14,8 @@ var loadPresentation = function () {
             async: false,
         })
                 .success(function (dataStr) {
-                    var slideData = jQuery.parseJSON(dataStr);
+//                    var slideData = jQuery.parseJSON(dataStr);
+                    var slideData = dataStr;
                     presentation = '<div class="reveal"><div class="slides">';
                     slideData.slides.forEach(function (val, i) {
 
@@ -36,25 +36,19 @@ var loadPresentation = function () {
                     });
 
                     presentation += '</div></div>';
-//                    console.log(slideSection);
-//                    $("body").html(slideSection);
-//      $("iframe").each(function(i, el){
-//          $(el).attr("src", slideData.slides[i].components[0].src);
-//          
-//      });
 
 
                 });
-                
-                    console.log(presentation);
-                if (presentation) {
-        //	document.body.className = config.surface + " " + document.body.className;
+
+        if (presentation) {
+            //	document.body.className = config.surface + " " + document.body.className;
+        }
+
     }
+    ;
+    document.body.innerHTML = presentation;
 
-    };
-        document.body.innerHTML = presentation;
 
-    
 }
 
 
