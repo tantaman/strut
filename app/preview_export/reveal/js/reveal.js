@@ -2183,7 +2183,7 @@
 		cueAutoSlide();
 
 		// Re-create the slide backgrounds
-		createBackgrounds();
+		//createBackgrounds();
 
 		// Write the current hash to the URL
 		writeURL();

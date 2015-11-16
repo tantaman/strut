@@ -224,7 +224,7 @@ body {
 /*********************************************
  * NAVIGATION CONTROLS
  *********************************************/
-.reveal .controls div.navigate-left, .reveal .controls div.navigate-left.enabled {
+/*.reveal .controls div.navigate-left, .reveal .controls div.navigate-left.enabled {
   border-right-color: #00008B; }
 
 .reveal .controls div.navigate-right, .reveal .controls div.navigate-right.enabled {
@@ -246,7 +246,7 @@ body {
   border-bottom-color: #0000f1; }
 
 .reveal .controls div.navigate-down.enabled:hover {
-  border-top-color: #0000f1; }
+  border-top-color: #0000f1; }*/
 
 /*********************************************
  * PROGRESS BAR
