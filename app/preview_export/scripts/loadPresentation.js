@@ -3,58 +3,29 @@ var loadPresentation = function () {
 //    console.log(presentation);
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
-
-
     var params = parseQueryString();
-    console.log(params);
 
     if (typeof params.id !== "undefined" && params.id !== "") {
+        presentation = '';
         $.ajax({
             method: "POST",
             url: (params.id + ".json"),
             async: false,
-        })
-                .success(function (dataStr) {
-                    var slideData = jQuery.parseJSON(dataStr);
-                    presentation = '<div class="reveal"><div class="slides">';
-                    slideData.slides.forEach(function (val, i) {
-
-                        var slide = "<section>";
-                        val.components.forEach(function (val, i) {
-                            slide += '<div class="componentContainer " style="top: ' + val.y + '; left:' + val.x + '; -webkit-transform:   ; -moz-transform:   ; transform:   ; width:' + val.width + '; height:' + val.height + '">' +
-                                    '<div class="transformContainer" style="-webkit-transform: scale(' + val.scale.x + ',' + val.scale.y + '); -moz-transform: scale(' + val.scale.x + ',' + val.scale.y + '); transform: scale(' + val.scale.x + ',' + val.scale.y + ')">' +
-                                    '<iframe width="' + val.scale.width + '" height="' + val.scale.height + '" src="' + val.src + '"></iframe>' +
-                                    '</div></div>';
-
-                        });
-
-                        slide += "</section>";
-
-                        presentation += slide;
-
-
-                    });
-
-                    presentation += '</div></div>';
-//                    console.log(slideSection);
-//                    $("body").html(slideSection);
-//      $("iframe").each(function(i, el){
-//          $(el).attr("src", slideData.slides[i].components[0].src);
-//          
-//      });
-
-
-                });
-                
-                    console.log(presentation);
-                if (presentation) {
-        //	document.body.className = config.surface + " " + document.body.className;
-    }
+            success: function (data) {
+                presentation = data.preview;
+            }
+            
+        });
+       
+        document.body.innerHTML = presentation;
+        if (presentation) {
+            //	document.body.className = config.surface + " " + document.body.className;
+        }
 
     };
-        document.body.innerHTML = presentation;
+    document.body.innerHTML = presentation;
 
-    
+
 }
 
 

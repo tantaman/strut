@@ -1,0 +1,98 @@
+{
+  "slides": [
+    {
+      "components": [
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7SzixF&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+          "height": "591",
+          "width": "437",
+          "type": "Chart",
+          "x": 49,
+          "y": 62,
+          "scale": {
+            "x": 0.8306636155606407,
+            "y": 0.8306636155606407,
+            "width": 363,
+            "height": 490.92219679633865
+          },
+          "selected": false
+        },
+        {
+          "src": "http://i.imgur.com/OjQVpRu.jpg",
+          "type": "Image",
+          "x": 460,
+          "y": 76,
+          "scale": {
+            "x": 1,
+            "y": 1
+          },
+          "imageType": "JPG",
+          "selected": false,
+          "skewY": 0,
+          "skewX": -0.14
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 0,
+      "selected": false,
+      "active": false
+    },
+    {
+      "components": [
+        {
+          "TextBox": {},
+          "x": 228,
+          "y": 203,
+          "scale": {
+            "x": 1,
+            "y": 1
+          },
+          "type": "TextBox",
+          "text": "Chartbook Sample<br>",
+          "size": 72,
+          "selected": false
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 1,
+      "selected": true,
+      "active": true
+    }
+  ],
+  "background": "bg-default",
+  "activeSlide": {
+    "components": [
+      {
+        "TextBox": {},
+        "x": 228,
+        "y": 203,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "type": "TextBox",
+        "text": "Chartbook Sample<br>",
+        "size": 72,
+        "selected": false
+      }
+    ],
+    "z": 0,
+    "impScale": 3,
+    "rotateX": 0,
+    "rotateY": 0,
+    "rotateZ": 0,
+    "index": 1,
+    "selected": true,
+    "active": true
+  },
+  "fileName": "chartbook_sample",
+  "preview": "\r\n  <style type=\"text/css\">\r\n    \r\n  </style>\r\n  <style>\r\n\r\n\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n</style>\r\n  \r\n    <div class=\" reveal strut-surface\">\r\n      <div class=\"bg innerBg\">\r\n      <div class=\"slides\">\r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-0\" style=\"width: 1024px; height: 768px;\" data-state=\"strut-slide-0\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 62px; left: 49px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: 363px; height: 490.92px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(0.83, 0.83);\r\n-moz-transform: scale(0.83, 0.83);\r\ntransform: scale(0.83, 0.83)\">\r\n<iframe width=\"437\" height=\"591\" src=\"https://htmlcharts2.icharts.net/?chartid=MH7SzixF&amp;charttype=COLUMN_CHART&amp;subtype=100%25&amp;authentication={}\"></iframe>\r\n</div>\r\n</div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 76px; left: 460px; -webkit-transform:  skewX(-0.14rad) ; -moz-transform:  skewX(-0.14rad) ; transform:  skewX(-0.14rad) ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<img src=\"http://i.imgur.com/OjQVpRu.jpg\"></img>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-1\" style=\"width: 1024px; height: 768px;\" data-state=\"strut-slide-1\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 203px; left: 228px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\nChartbook Sample<br>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n      </div>\r\n      </div>\r\n    </div>\r\n\r\n"
+}
