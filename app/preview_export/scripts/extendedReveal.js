@@ -100,7 +100,7 @@
         var l = $("section.slideContainer").offset().left;
         
         $(".left-control").css("left", l - 40);
-        $(".right-control").css("left", l + w);
+        $(".right-control").css("left", l + w + 40);
          
     });
 

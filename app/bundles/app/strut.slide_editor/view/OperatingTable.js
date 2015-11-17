@@ -45,6 +45,29 @@ define(['libs/backbone',
                     // ContextMenu.setModel(this._menuModel);
                 },
                 render: function () {
+                    $(document).ready(function () {
+                        var operatingTableHeight = $(".operatingTable").height();
+                        var operatingTableWidth = $(".operatingTable").width();
+                        var actualAvailableHeightforSlideContainer = operatingTableHeight;
+                        var actualAvailableWidthforSlideContainer = operatingTableWidth; // 80px as the area for two side buttons
+
+                        if (actualAvailableWidthforSlideContainer < (actualAvailableHeightforSlideContainer * (16 / 9))) {
+                            actualAvailableHeightforSlideContainer = actualAvailableWidthforSlideContainer * (9 / 16);
+
+                        }
+
+                        else {
+                            actualAvailableWidthforSlideContainer = actualAvailableHeightforSlideContainer * (16 / 9);
+                        }
+
+
+                        
+                        console.log($("div.slideContainer.ui-selectable").height(actualAvailableHeightforSlideContainer).width(actualAvailableWidthforSlideContainer).css("margin", "0 auto"));
+                        console.log(actualAvailableWidthforSlideContainer);
+                        console.log(actualAvailableHeightforSlideContainer);
+                        console.log(actualAvailableWidthforSlideContainer/actualAvailableHeightforSlideContainer);
+                    });
+
                     this._$slideContainer = $('<div class="slideContainer"></div>')
                     this.$el.html(this._$slideContainer);
                     //this._$slideContainer.css(config.slide.size);
@@ -55,7 +78,7 @@ define(['libs/backbone',
                     this._$slideContainer.append(this._$markdownContent);
 //                    this._$slideContainer.append("<a href='#' class = 'logoContainer'>logo</a>");
 //                    this._$slideContainer.append("<a href='#' class = 'titleContainer'>Title</a>");
-                   
+
 //sthis._$slideContainer
                     //console.log(this._$slideContainer.find(".logoContainer"));
 //                    this._$slideContainer.find(".logoContainer").on("click", function () {
@@ -86,13 +109,12 @@ define(['libs/backbone',
 
                     return this;
                 },
-                
                 _logoClick: function () {
-                    
-                    $("a[data-comptype='Image'] i").trigger("click");
-                        $(this).hide();
 
-                    
+                    $("a[data-comptype='Image'] i").trigger("click");
+                    $(this).hide();
+
+
                 },
                 _updateBg: function (model, bg) {
                     if (!this._$slideContainer)
@@ -261,4 +283,7 @@ define(['libs/backbone',
                     Backbone.View.prototype.constructor.call(this);
                 }
             });
+
+
+
         });

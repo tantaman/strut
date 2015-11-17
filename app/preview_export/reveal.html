@@ -73,13 +73,13 @@ ready(function() {
         var actualAvailableHeightforSlide = bodyHeight;
         var actualAvailableWidthforSlide = bodyWidth - 80; // 80px as the area for two side buttons
 
-        if (actualAvailableWidthforSlide < (actualAvailableHeightforSlide * (4 / 3))) {
-            actualAvailableHeightforSlide = actualAvailableWidthforSlide * (3 / 4);
+        if (actualAvailableWidthforSlide < (actualAvailableHeightforSlide * (16 / 9))) {
+            actualAvailableHeightforSlide = actualAvailableWidthforSlide * (9 / 16);
             
         }
         
         else {
-            actualAvailableWidthforSlide = actualAvailableHeightforSlide * (4 / 3);
+            actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
         }
         //$("section.slideContainer").height(actualAvailableHeightforSlide).width(actualAvailableWidthforSlide).css("margin","0 " + (bodyWidth - actualAvailableWidthforSlide)/2 + "px");
 

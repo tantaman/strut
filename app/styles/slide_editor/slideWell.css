@@ -4,9 +4,9 @@
     /*border-right: 2px groove #333;*/
     position: absolute;
     left: 0px;
-    top: 81px;
+    top: 80px;
     bottom: 0px;
-    padding-bottom: 45px;
+    padding-bottom: 20px;
     //background-image: url('img/linen-gray.png');
     z-index:2;
 }
