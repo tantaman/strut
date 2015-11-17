@@ -143,10 +143,15 @@ body {
   -moz-box-sizing: border-box;
        box-sizing: border-box; }
 
+.revel section.slideContainer {
+    top: 0 !important;
+    
+}
+
 /*********************************************
  * CONTROLS
  *********************************************/
-.reveal .controls {
+/*.reveal .controls {
   display: none;
   position: fixed;
   width: 110px;
@@ -208,7 +213,7 @@ body {
   border-top-color: #000; }
 
 .reveal .controls div.navigate-down.fragmented {
-  opacity: 0.3; }
+  opacity: 0.3; }*/
 
 /*********************************************
  * PROGRESS BAR
@@ -270,7 +275,7 @@ body {
   right: 0;
   bottom: 0;
   left: 0;
-  margin: auto;
+  margin: 0 auto;
   overflow: visible;
   z-index: 1;
   text-align: center;
@@ -286,7 +291,7 @@ body {
   display: none;
   position: absolute;
   width: 100%;
-  padding: 20px 0px;
+  /*padding: 20px 0px;*/
   z-index: 10;
   -webkit-transform-style: preserve-3d;
           transform-style: preserve-3d;
@@ -714,10 +719,11 @@ body {
  *********************************************/
 .reveal .backgrounds {
   position: absolute;
-  width: 100%;
+  width: 80%;
   height: 100%;
-  top: 0;
-  left: 0;
+  margin: 0 10%;
+/*  top: 0;
+  left: 0;*/
   -webkit-perspective: 600px;
           perspective: 600px; }
 
