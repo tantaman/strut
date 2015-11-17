@@ -9,7 +9,15 @@ function(Backbone, FileUtils, lang) {
                 },
                 
 		initialize: function() {
-			this.name = 'JSON';
+                        this._generators = this._editorModel.registry
+				.getBest('strut.presentation_generator.GeneratorCollection');
+
+			// TODO: we should keep session meta per bundle...
+			this._index = Math.min(window.sessionMeta.generator_index || 0, this._generators.length - 1);
+			this._generatorChanged();
+                        this.generator = this._generators[this._index];
+                        
+                        this.name = 'JSON';
 			this._rendered = false;
 			/*
 			TODO: handle browsers that can't do the download attribute.  Safari?
@@ -48,6 +56,7 @@ function(Backbone, FileUtils, lang) {
                         var name = this.$el.find("#export-json-file-name").val() || this._exportable.identifier();
 			var data = this._exportable.export();
                         data.fileName = name || data.fileName;
+                        data.preview = this.generator.generate(this._editorModel.deck());
                         var attrs = FileUtils.createDownloadAttrs('application\/json',
 				JSON.stringify(data, null, 2),
 				name + '.json');
@@ -57,7 +66,11 @@ function(Backbone, FileUtils, lang) {
 			a.href = attrs.href
 			a.dataset.downloadurl = attrs.downloadurl
 		},
-
+                _generatorChanged: function() {
+			this._editorModel.set('generator', this._generators[this._index]);
+			if (this._$readout)
+				this._$readout.text(this._generators[this._index].displayName);
+		}, 
 		_populateTextArea: function() {
 			var $txt = this.$el.find('textarea');
 			if ($txt.length == 0) {
@@ -122,9 +135,10 @@ function(Backbone, FileUtils, lang) {
 			// anything really to render?
 		},
 
-		constructor: function JsonExportView(exportable) {
-			this._exportable = exportable;
-			Backbone.View.prototype.constructor.call(this);
+		constructor: function JsonExportView(editorModel) {
+			this._exportable = editorModel.exportable;
+			this._editorModel = editorModel;
+                        Backbone.View.prototype.constructor.call(this);
 		}
 	});
 });
