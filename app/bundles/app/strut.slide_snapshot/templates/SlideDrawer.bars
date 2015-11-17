@@ -2,5 +2,5 @@
 {{#marked markdown}}{{/marked}}
 </div>
 {{#components}}
-{{#renderComponent . 'Video WebFrame'}}{{/renderComponent}}
+{{#renderComponent . 'Video WebFrame Chart'}}{{/renderComponent}}
 {{/components}}
