@@ -23,7 +23,9 @@ define(["./ComponentView", './Mixers', 'css!styles/chart/chartView.css'],
 			 */
 			render: function() {
                                 var $frame, scale;
-                                var src = this.model.get('src'), h = this.model.get('height'), w = this.model.get('width');
+                                var src = this.model.get('src'), 
+                                        h = this.model.get('height'), 
+                                        w = this.model.get('width');
 				ComponentView.prototype.render.call(this);
 				$frame = $("<iframe width='"+w+"' height='"+h+"' src='"+src+"'></iframe>");
 				this.$el.find(".content").append($frame);
