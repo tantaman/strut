@@ -8,7 +8,7 @@
             + "<li id='fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
 
 
-    $("body").append("<div style='position:absolute; z-index:1; bottom:70px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: #959699' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style='position:absolute; z-index:1; bottom:70px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
 
     $("#botton-container li")
             .css({
@@ -48,7 +48,7 @@
 
     $("#fullscreen").click(function () {
         Reveal.fullScreen();
-       
+
     });
 
     $("#gallery").click(function () {
@@ -76,7 +76,7 @@
 //                    "display": "none"
 //
 //                });
-    
+
 //    if(Reveal.isFirstSlide()){
 //        $("#hintDiv").fadeIn(500);
 //    }
@@ -92,8 +92,37 @@
 //
 //    });
 
-    Reveal.configure({ slideNumber: true });
+    Reveal.configure({slideNumber: true});
     $(".slide-number").css({"text-align": "center"});
+
+    $(document).ready(function () {
+        var w = $("section.slideContainer").width();
+        var l = $("section.slideContainer").offset().left;
+        
+        $(".left-control").css("left", l - 40);
+        $(".right-control").css("left", l + w);
+         
+    });
+
+//    $(document).ready(function () {
+//        var bodyHeight = $("body").height();
+//        var bodyWidth = $("body").width();
+//        var actualAvailableHeightforSlide = bodyHeight;
+//        var actualAvailableWidthforSlide = bodyWidth - 80; // 80px as the area for two side buttons
+//
+//        if (actualAvailableWidthforSlide < actualAvailableHeightforSlide * (4 / 3)) {
+//            actualAvailableHeightforSlide = actualAvailableWidthforSlide * (3 / 4);
+//            console.log(actualAvailableHeightforSlide);
+//            console.log(actualAvailableWidthforSlide);
+//        }
+//        
+//        else {
+//            actualAvailableWidthforSlide = actualAvailableHeightforSlide * (4 / 3);
+//        }
+//            console.log(actualAvailableWidthforSlide/actualAvailableHeightforSlide);
+//        
+//        $("section.slideContainer").height(actualAvailableHeightforSlide).width(actualAvailableWidthforSlide).css("margin","0 " + (bodyWidth - actualAvailableWidthforSlide)/2 + "px");
+//    });
 
 }());
 
@@ -148,5 +177,5 @@
 ////      });
 //      
 //  });
-  
+
 //  }

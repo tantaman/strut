@@ -1,6 +1,5 @@
 var loadPresentation = function () {
     var presentation = localStorage.getItem('preview-string');
-//    console.log(presentation);
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
     var params = parseQueryString();
@@ -14,15 +13,16 @@ var loadPresentation = function () {
             success: function (data) {
                 presentation = data.preview;
             }
-            
+
         });
-       
+
         document.body.innerHTML = presentation;
         if (presentation) {
             //	document.body.className = config.surface + " " + document.body.className;
         }
 
-    };
+    }
+    ;
     document.body.innerHTML = presentation;
 
 

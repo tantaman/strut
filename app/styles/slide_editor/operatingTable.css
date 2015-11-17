@@ -7,7 +7,7 @@
     position: absolute;
     left: 200px;
     z-index: 1;
-    top: 71px;
+    top:81px;
     bottom: 20px;
     right: 30px;
     border: 1px solid transparent;
@@ -19,7 +19,7 @@
     -o-transform-origin: 0 0;
     -moz-transform-origin: 0 0;
 
-    margin: 20px auto ;
+    margin: 10px auto 0;
     -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
     box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
     -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.8);
