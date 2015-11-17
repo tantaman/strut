@@ -60,12 +60,6 @@ define(['libs/backbone',
                             actualAvailableWidthforSlideContainer = actualAvailableHeightforSlideContainer * (16 / 9);
                         }
 
-
-                        
-                        console.log($("div.slideContainer.ui-selectable").height(actualAvailableHeightforSlideContainer).width(actualAvailableWidthforSlideContainer).css("margin", "0 auto"));
-                        console.log(actualAvailableWidthforSlideContainer);
-                        console.log(actualAvailableHeightforSlideContainer);
-                        console.log(actualAvailableWidthforSlideContainer/actualAvailableHeightforSlideContainer);
                     });
 
                     this._$slideContainer = $('<div class="slideContainer"></div>')
