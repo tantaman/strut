@@ -3,18 +3,16 @@
     {
       "components": [
         {
-          "src": "https://htmlcharts2.icharts.net/?chartid=MHvWzixC2&charttype=COLUMN_CHART&subtype=&authentication={}",
-          "height": "400",
-          "width": "560",
-          "type": "Chart",
-          "x": 89,
-          "y": 41,
+          "TextBox": {},
+          "x": 474,
+          "y": 26,
           "scale": {
             "x": 1,
-            "y": 1,
-            "width": "560",
-            "height": "400"
+            "y": 1
           },
+          "type": "TextBox",
+          "text": "<font>4</font>",
+          "size": 72,
           "selected": false
         }
       ],
@@ -24,21 +22,36 @@
       "rotateY": 0,
       "rotateZ": 0,
       "index": 0,
-      "selected": false,
-      "active": false
+      "selected": true,
+      "active": true
     },
     {
       "components": [
         {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9B&charttype=COLUMN_CHART&subtype=stacked&authentication={}",
+          "height": 499,
+          "width": 673,
+          "type": "Chart",
+          "x": 359,
+          "y": 136,
+          "scale": {
+            "x": 0.6508172362555721,
+            "y": 0.6508172362555721,
+            "width": 438,
+            "height": 324.75780089153045
+          },
+          "selected": false
+        },
+        {
           "TextBox": {},
-          "x": 62,
-          "y": 117,
+          "x": 530,
+          "y": 12,
           "scale": {
             "x": 1,
             "y": 1
           },
           "type": "TextBox",
-          "text": "Chartbook Sample<br>",
+          "text": "<font>3</font>",
           "size": 72,
           "selected": false
         }
@@ -49,8 +62,88 @@
       "rotateY": 0,
       "rotateZ": 0,
       "index": 1,
-      "selected": true,
-      "active": true
+      "selected": false,
+      "active": false
+    },
+    {
+      "components": [
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7SzixF&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+          "height": 467,
+          "width": 781,
+          "type": "Chart",
+          "x": 337,
+          "y": 170,
+          "scale": {
+            "x": 0.5147247119078106,
+            "y": 0.5147247119078106,
+            "width": 402.00000000000006,
+            "height": 240.37644046094752
+          },
+          "selected": false
+        },
+        {
+          "TextBox": {},
+          "x": 508,
+          "y": 37,
+          "scale": {
+            "x": 1,
+            "y": 1
+          },
+          "type": "TextBox",
+          "text": "<font>2</font>",
+          "size": 72,
+          "selected": false
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 2,
+      "selected": false,
+      "active": false
+    },
+    {
+      "components": [
+        {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+          "height": 523,
+          "width": 905,
+          "type": "Chart",
+          "x": 356,
+          "y": 131,
+          "scale": {
+            "x": 0.46187845303867403,
+            "y": 0.46187845303867403,
+            "width": 418,
+            "height": 241.56243093922652
+          },
+          "selected": false
+        },
+        {
+          "TextBox": {},
+          "x": 515,
+          "y": 21,
+          "scale": {
+            "x": 1,
+            "y": 1
+          },
+          "type": "TextBox",
+          "text": "<font>1</font>",
+          "size": 72,
+          "selected": false
+        }
+      ],
+      "z": 0,
+      "impScale": 3,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "index": 3,
+      "selected": false,
+      "active": false
     }
   ],
   "background": "bg-default",
@@ -58,14 +151,14 @@
     "components": [
       {
         "TextBox": {},
-        "x": 62,
-        "y": 117,
+        "x": 474,
+        "y": 26,
         "scale": {
           "x": 1,
           "y": 1
         },
         "type": "TextBox",
-        "text": "Chartbook Sample<br>",
+        "text": "<font>4</font>",
         "size": 72,
         "selected": false
       }
@@ -75,10 +168,10 @@
     "rotateX": 0,
     "rotateY": 0,
     "rotateZ": 0,
-    "index": 1,
+    "index": 0,
     "selected": true,
     "active": true
   },
   "fileName": "chartbook_sample",
-  "preview": "\r\n  <style type=\"text/css\">\r\n    \r\n  </style>\r\n  <style>\r\n\r\n\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n</style>\r\n  \r\n    <div class=\" reveal strut-surface\">\r\n      <div class=\"bg innerBg\">\r\n      <div class=\"slides\">\r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-0\" style=\"width: 100%; height: 100%;\" data-state=\"strut-slide-0\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 41px; left: 89px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: 560px; height: 400px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<iframe width=\"560\" height=\"400\" src=\"https://htmlcharts2.icharts.net/?chartid=MHvWzixC2&amp;charttype=COLUMN_CHART&amp;subtype=&amp;authentication={}\"></iframe>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-1\" style=\"width: 100%; height: 100%;\" data-state=\"strut-slide-1\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 117px; left: 62px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\nChartbook Sample<br>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n      </div>\r\n      </div>\r\n    </div>\r\n\r\n"
+  "preview": "\r\n  <style type=\"text/css\">\r\n    \r\n  </style>\r\n  <style>\r\n\r\n\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n\t\r\n\t\t\r\n\t\t\r\n\t\r\n\r\n</style>\r\n  \r\n    <div class=\" reveal strut-surface\">\r\n      <div class=\"bg innerBg\">\r\n      <div class='controls left-control' style='position:fixed; height:100%; width:40px; background-color:rgb(97, 98, 101); z-index:100'><img class = \"navigate-left\" src='Preview-Icons/big-left-arrow.png' alt='Left-Navigation' style=\"padding:10px; position:relative; top:50%; translate:transform(0,-25px)\"></div>\r\n      <div class=\"slides\">\r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-0\" style=\"width: 100%; height: 100%\" data-state=\"strut-slide-0\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 26px; left: 474px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\n<font>4</font>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-1\" style=\"width: 100%; height: 100%\" data-state=\"strut-slide-1\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 136px; left: 359px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: 438px; height: 324.76px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(0.65, 0.65);\r\n-moz-transform: scale(0.65, 0.65);\r\ntransform: scale(0.65, 0.65)\">\r\n<iframe class= \"Chart\" width=\"673\" height=\"499\" src=\"https://htmlcharts2.icharts.net/?chartid=MH7Szi9B&amp;charttype=COLUMN_CHART&amp;subtype=stacked&amp;authentication={}\"></iframe>\r\n</div>\r\n</div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 12px; left: 530px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\n<font>3</font>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-2\" style=\"width: 100%; height: 100%\" data-state=\"strut-slide-2\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 170px; left: 337px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: 402px; height: 240.38px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(0.51, 0.51);\r\n-moz-transform: scale(0.51, 0.51);\r\ntransform: scale(0.51, 0.51)\">\r\n<iframe class= \"Chart\" width=\"781\" height=\"467\" src=\"https://htmlcharts2.icharts.net/?chartid=MH7SzixF&amp;charttype=COLUMN_CHART&amp;subtype=100%25&amp;authentication={}\"></iframe>\r\n</div>\r\n</div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 37px; left: 508px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\n<font>2</font>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n        \r\n          <section class=\" slideContainer strut-slide-3\" style=\"width: 100%; height: 100%\" data-state=\"strut-slide-3\">\r\n            <div class=\"themedArea\">\r\n            \r\n            </div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 131px; left: 356px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: 418px; height: 241.56px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(0.46, 0.46);\r\n-moz-transform: scale(0.46, 0.46);\r\ntransform: scale(0.46, 0.46)\">\r\n<iframe class= \"Chart\" width=\"905\" height=\"523\" src=\"https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&amp;charttype=COLUMN_CHART&amp;subtype=100%25&amp;authentication={}\"></iframe>\r\n</div>\r\n</div>\r\n            \r\n              <div class=\"componentContainer \" style=\"top: 21px; left: 515px; -webkit-transform:   ; -moz-transform:   ; transform:   ; width: px; height: px;\">\r\n<div class=\"transformContainer\" style=\"-webkit-transform: scale(1, 1);\r\n-moz-transform: scale(1, 1);\r\ntransform: scale(1, 1)\">\r\n<div style=\"font-size: 72px;\" class=\"antialias\">\r\n<font>1</font>\r\n</div>\r\n</div>\r\n</div>\r\n            \r\n          </section>\r\n        \r\n        \r\n      </div>\r\n\r\n      <div class='controls right-control' style='position:fixed; height:100%; width:40px; left: 100%; background-color:rgb(97, 98, 101); transform: translate(-40px,0); z-index:100'><img class = \"navigate-right\" src='Preview-Icons/big-right-arrow.png' alt='Right-Navigation' style=\"padding:10px; position:relative; top:50%; translate:transform(0,-25px)\"></div>\r\n      </div>\r\n    </div>\r\n\r\n"
 }

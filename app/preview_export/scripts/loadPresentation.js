@@ -3,35 +3,26 @@ var loadPresentation = function () {
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
     var params = parseQueryString();
-
     if (typeof params.id !== "undefined" && params.id !== "") {
-        presentation = '';
+        presentation = undefined; 
         $.ajax({
             method: "POST",
             url: (params.id + ".json"),
             async: false,
             success: function (data) {
-                presentation = data.preview;
+                makePresentation(data);
             }
-
         });
-
-        document.body.innerHTML = presentation;
-        if (presentation) {
-            //	document.body.className = config.surface + " " + document.body.className;
-        }
-
     }
-    ;
-    document.body.innerHTML = presentation;
-
-
+    if (presentation) {
+//        	document.body.className = config.surface + " " + document.body.className;
+            document.body.innerHTML = presentation;
+    } 
 }
 
+var parseQueryString = function (url) {
 
-var parseQueryString = function () {
-
-    var str = window.location.search;
+    var str = url ? url : window.location.search;
     var objURL = {};
 
     str.replace(
@@ -42,3 +33,74 @@ var parseQueryString = function () {
     );
     return objURL;
 };
+
+function makePresentation(data) {
+    var html = '<style type="text/css"></style>' +
+            '<div class=" reveal strut-surface">' +
+            '<div class="bg innerBg">' +
+            '<div class="controls left-control" style="position:fixed; height:100%; width:40px; background-color:rgb(97, 98, 101); z-index:100">' +
+            '<img class = "navigate-left" src="Preview-Icons/big-left-arrow.png" alt="Left-Navigation" style="padding:10px; position:relative; top:50%; translate:transform(0,-25px)">' +
+            '</div>' +
+            '<div class="slides">' +
+            '</div>' +
+            '<div class="controls right-control" style="position:fixed; height:100%; width:40px; left: 100%; background-color:rgb(97, 98, 101); transform: translate(-40px,0); z-index:100">' +
+            '<img class = "navigate-right" src="Preview-Icons/big-right-arrow.png" alt="Right-Navigation" style="padding:10px; position:relative; top:50%; translate:transform(0,-25px)">' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    $("body").html(html);
+    
+    $.each(data.slides, function (i, slide) {
+        $(".slides").append(makeSlide(slide));
+    });
+}
+
+function makeSlide(slide) {
+    var html = '<section class="' + (slide.background ? slide.background : "") + ' slideContainer strut-slide-0" style="width: 100%; height: 100%"'+
+            ' data-state="strut-slide-0">' +
+            '<div class="themedArea"></div>';
+    $.each(slide.components, function (i, component) {
+//        if (!(slideNum != 0 && component.type == "Chart"))
+        html += addComponent(component);
+    });
+    html += '</section>';
+    return html;
+}
+
+function addComponent(component) {
+
+    var html = '<div class="componentContainer "' +
+            'style="top: ' + component.y + 'px; left: ' + component.x + 'px; -webkit-transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad);' +
+            '-moz-transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad);' +
+            'transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad); width: ' + (component.width ? component.width : "") + 'px; height:' + (component.height ? component.height : "") + 'px;">' +
+            '<div class="transformContainer" style="-webkit-transform: scale(' + component.scale.x + ', ' + component.scale.y + ');' +
+            '-moz-transform: scale(' + component.scale.x + ', ' + component.scale.y + ');transform: scale(' + component.scale.x + ', ' + component.scale.y + ')">';
+
+    switch (component.type) {
+        case "TextBox":
+            html += '<div style="font-size: ' + component.size + ';" class="antialias">' +
+                    component.text +
+                    '</div>'
+            break;
+        case "Image":
+            html += '<img src="' + component.src + '" height="' + component.scale.height + '" width="' + component.scale.width + '"></img>';
+            break;
+        case "Chart":
+            html += '<iframe src = "" class= "Chart" width="' + component.width + '" height="523" data-src="' + component.src + '"></iframe>';
+            break;
+        case "Video":
+            if (component.videoType == "youtube") {
+                var url = parseQueryString(component.src);
+                url = "http://www.youtube.com/v/" + url.v + "&amp;hl=en&amp;fs=1"
+                html += '<object width="' + component.scale.width + '" height="' + component.scale.height + '"><param name="movie" value="' + url + '"><param name="allowFullScreen" value="true"><embed src="' + url + '" type="application/x-shockwave-flash" allowfullscreen="true" width="' + component.scale.width + '" height="' + component.scale.height + '"></object>';
+            }
+            else if (component.videoType == "html5") {
+                html += '<video controls><source src="' + component.src + '" type="video/webm" preload="metadata"></source></video>';
+            }
+            break;
+    }
+    html += '</div>' +
+            '</div>';
+
+    return html;
+}
