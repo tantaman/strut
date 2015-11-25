@@ -2272,7 +2272,7 @@
 		// an array
 		var slides = toArray( dom.wrapper.querySelectorAll( selector ) ),
 			slidesLength = slides.length;
-
+                
 		var printMode = isPrintingPDF();
 
 		if( slidesLength ) {
@@ -2280,10 +2280,13 @@
 			// Should the index loop?
 			if( config.loop ) {
 				index %= slidesLength;
-
+                                
 				if( index < 0 ) {
 					index = slidesLength + index;
 				}
+                                if(index == 0){
+                                    addCharts(index, $("body").find(".reveal").data("charts"));
+                                }
 			}
 
 			// Enforce max and minimum index bounds

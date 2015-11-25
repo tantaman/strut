@@ -3,15 +3,30 @@
     {
       "components": [
         {
+          "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF&charttype=COLUMN_CHART&subtype=&authentication={}",
+          "height": 460,
+          "width": 660,
+          "type": "Chart",
+          "x": 40,
+          "y": 10,
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "width": 660,
+            "height": 460
+          },
+          "selected": false
+        },
+        {
           "TextBox": {},
-          "x": 474,
-          "y": 26,
+          "x": 755,
+          "y": 133,
           "scale": {
             "x": 1,
             "y": 1
           },
           "type": "TextBox",
-          "text": "<font>4</font>",
+          "text": "NWEA<br>",
           "size": 72,
           "selected": false
         }
@@ -28,30 +43,30 @@
     {
       "components": [
         {
-          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9B&charttype=COLUMN_CHART&subtype=stacked&authentication={}",
-          "height": 499,
-          "width": 673,
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
+          "height": 523,
+          "width": 905,
           "type": "Chart",
-          "x": 359,
-          "y": 136,
+          "x": 103,
+          "y": 29,
           "scale": {
-            "x": 0.6508172362555721,
-            "y": 0.6508172362555721,
-            "width": 438,
-            "height": 324.75780089153045
+            "x": 1,
+            "y": 1,
+            "width": 905,
+            "height": 523
           },
           "selected": false
         },
         {
           "TextBox": {},
-          "x": 530,
-          "y": 12,
+          "x": 854,
+          "y": 139,
           "scale": {
             "x": 1,
             "y": 1
           },
           "type": "TextBox",
-          "text": "<font>3</font>",
+          "text": "<font>sample</font>",
           "size": 72,
           "selected": false
         }
@@ -68,30 +83,30 @@
     {
       "components": [
         {
-          "src": "https://htmlcharts2.icharts.net/?chartid=MH7SzixF&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
-          "height": 467,
-          "width": 781,
+          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9B&charttype=COLUMN_CHART&subtype=stacked&authentication={}",
+          "height": 499,
+          "width": 673,
           "type": "Chart",
-          "x": 337,
-          "y": 170,
+          "x": 92,
+          "y": 24,
           "scale": {
-            "x": 0.5147247119078106,
-            "y": 0.5147247119078106,
-            "width": 402.00000000000006,
-            "height": 240.37644046094752
+            "x": 0.7072808320950966,
+            "y": 0.7072808320950966,
+            "width": 476,
+            "height": 352.9331352154532
           },
           "selected": false
         },
         {
           "TextBox": {},
-          "x": 508,
-          "y": 37,
+          "x": 581,
+          "y": 140,
           "scale": {
             "x": 1,
             "y": 1
           },
           "type": "TextBox",
-          "text": "<font>2</font>",
+          "text": "<font>Trademarks vol</font>",
           "size": 72,
           "selected": false
         }
@@ -104,61 +119,36 @@
       "index": 2,
       "selected": false,
       "active": false
-    },
-    {
-      "components": [
-        {
-          "src": "https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}",
-          "height": 523,
-          "width": 905,
-          "type": "Chart",
-          "x": 356,
-          "y": 131,
-          "scale": {
-            "x": 0.46187845303867403,
-            "y": 0.46187845303867403,
-            "width": 418,
-            "height": 241.56243093922652
-          },
-          "selected": false
-        },
-        {
-          "TextBox": {},
-          "x": 515,
-          "y": 21,
-          "scale": {
-            "x": 1,
-            "y": 1
-          },
-          "type": "TextBox",
-          "text": "<font>1</font>",
-          "size": 72,
-          "selected": false
-        }
-      ],
-      "z": 0,
-      "impScale": 3,
-      "rotateX": 0,
-      "rotateY": 0,
-      "rotateZ": 0,
-      "index": 3,
-      "selected": false,
-      "active": false
     }
   ],
   "background": "bg-default",
   "activeSlide": {
     "components": [
       {
+        "src": "https://htmlcharts2.icharts.net/?chartid=MHrbyilF&charttype=COLUMN_CHART&subtype=&authentication={}",
+        "height": 460,
+        "width": 660,
+        "type": "Chart",
+        "x": 40,
+        "y": 10,
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "width": 660,
+          "height": 460
+        },
+        "selected": false
+      },
+      {
         "TextBox": {},
-        "x": 474,
-        "y": 26,
+        "x": 755,
+        "y": 133,
         "scale": {
           "x": 1,
           "y": 1
         },
         "type": "TextBox",
-        "text": "<font>4</font>",
+        "text": "NWEA<br>",
         "size": 72,
         "selected": false
       }
@@ -172,5 +162,5 @@
     "selected": true,
     "active": true
   },
-  "fileName": "chartbook_sample"  
+  "fileName": "chartbook_sample"
 }

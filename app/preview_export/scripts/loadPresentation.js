@@ -4,20 +4,37 @@ var loadPresentation = function () {
 
     var params = parseQueryString();
     if (typeof params.id !== "undefined" && params.id !== "") {
-        presentation = undefined; 
+        presentation = undefined;
         $.ajax({
             method: "POST",
             url: (params.id + ".json"),
             async: false,
             success: function (data) {
                 makePresentation(data);
+                $("body").find(".reveal").data("charts", charts);
+                addCharts(0);
             }
         });
     }
     if (presentation) {
 //        	document.body.className = config.surface + " " + document.body.className;
-            document.body.innerHTML = presentation;
-    } 
+        document.body.innerHTML = presentation;
+    }
+}
+
+var charts = [];
+var addCharts = function(i, chrts) {
+    charts = charts || chrts ;
+    var chart = charts[i];
+    var iframe = document.getElementById("slide-"+chart.slide+"-component-"+chart.component);
+    iframe.src = iframe.dataset.url;
+    iframe.onload = function () {
+        i++;
+        if(charts.length > i){
+            $("body").find(".reveal").data("charts", charts);
+            addCharts(i);   
+        }
+    }
 }
 
 var parseQueryString = function (url) {
@@ -49,27 +66,26 @@ function makePresentation(data) {
             '</div>' +
             '</div>';
     $("body").html(html);
-    
-    $.each(data.slides, function (i, slide) {
-        $(".slides").append(makeSlide(slide));
+
+    $.each(data.slides, function (slideNum, slide) {
+        $(".slides").append(makeSlide(slide, slideNum));
     });
 }
 
-function makeSlide(slide) {
-    var html = '<section class="' + (slide.background ? slide.background : "") + ' slideContainer strut-slide-0" style="width: 100%; height: 100%"'+
-            ' data-state="strut-slide-0">' +
+function makeSlide(slide, slideNum) {
+    var html = '<section class="' + (slide.background ? slide.background : "") + ' slideContainer strut-slide-' + slideNum + '" style="width: 100%; height: 100%"' +
+            ' data-state="strut-slide-' + slideNum + '">' +
             '<div class="themedArea"></div>';
-    $.each(slide.components, function (i, component) {
-//        if (!(slideNum != 0 && component.type == "Chart"))
-        html += addComponent(component);
+    $.each(slide.components, function (componentNum, component) {
+        html += addComponent(component, componentNum, slideNum);
     });
     html += '</section>';
     return html;
 }
 
-function addComponent(component) {
+function addComponent(component, componentNum, slideNum) {
 
-    var html = '<div class="componentContainer "' +
+    var html = '<div class="componentContainer component-' + componentNum + '"' +
             'style="top: ' + component.y + 'px; left: ' + component.x + 'px; -webkit-transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad);' +
             '-moz-transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad);' +
             'transform: rotate(' + component.rotate + 'rad) skewX(' + component.skewX + 'rad) skewY(' + component.skewY + 'rad); width: ' + (component.width ? component.width : "") + 'px; height:' + (component.height ? component.height : "") + 'px;">' +
@@ -86,7 +102,8 @@ function addComponent(component) {
             html += '<img src="' + component.src + '" height="' + component.scale.height + '" width="' + component.scale.width + '"></img>';
             break;
         case "Chart":
-            html += '<iframe src = "" class= "Chart" width="' + component.width + '" height="523" data-src="' + component.src + '"></iframe>';
+            charts.push({"slide": slideNum, "component": componentNum});
+            html += '<iframe id="slide-'+slideNum+'-component-'+componentNum+'" src = "" data-url="' + component.src + '" class= "Chart" width="' + component.width + '" height="523"></iframe>';
             break;
         case "Video":
             if (component.videoType == "youtube") {
