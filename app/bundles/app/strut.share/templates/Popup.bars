@@ -1,0 +1,42 @@
+<div class="modal-header">
+	<button class="close" data-dismiss="modal">×</button>
+	<h3>{{title}}</h3>
+</div>
+<div class="modal-body" style="overflow: hidden">
+        <div id="share-menu">
+           <a class="active" for="share-email-section"><i class="icon-picture icon-white"></i> EMAIL</a>
+           <a class="" for="share-url-section"><i class="icon-picture icon-white"></i> URL</a>
+           <a class="" for="share-download-section"><i class="icon-picture icon-white"></i> DOWNLOAD</a>
+        </div>
+	<div id="share-body">
+            <h3>2015 Sales Report: Data Set 2541</h3>
+            <div id="share-email-section">
+                <p>Send chart to coworker5, coworker6 & 4 others</p>
+                <div id="share-email-list">
+                   <input id="e1" type="checkbox" name="share-email" value="">
+                   <label for="e1"><span></span> All</label>
+                   <input id="e2" type="checkbox" name="share-email" value="">
+                   <label for="e2"><span></span> coworker5@icharts.net</label>
+                   <input id="e3" type="checkbox" name="share-email" value="">
+                   <label for="e3"><span></span> coworker6@icharts.net</label>
+                   <input id="e4" type="checkbox" name="share-email" value="">
+                   <label for="e4"><span></span> coworker7@icharts.net</label>
+                   <input id="e5" type="checkbox" name="share-email" value="">
+                   <label for="e5"><span></span> coworker8@icharts.net</label>
+                   <input id="e6" type="checkbox" name="share-email" value="">
+                   <label for="e6"><span></span> coworker9@icharts.net</label> 
+                   <input id="e7" type="checkbox" name="share-email" value="">
+                   <label for="e7"><span></span> coworker10@icharts.net</label>
+                   <input id="e8" type="checkbox" name="share-email" value="">
+                   <label for="e8"><span></span> coworker11@icharts.net</label>
+                </div>
+                <a id="share-add-others"><i class="icon-picture icon-white"></i> Add others to the chart share manager</a>
+            </div>
+            <div id="share-url-section"></div>
+            <div id="share-download-section"></div>
+        </div>
+        <div id="share-btns">
+            <button class="btn btn-share">Share Chart</button>
+            <button class="btn btn-cancel">Cancel</button>
+        </div>  
+</div>

@@ -1,10 +1,11 @@
 define(['libs/backbone',
 		'strut/logo_button/LogoView',
 		'strut/presentation_generator/view/PreviewButton',
+                'strut/share/view/ShareButton',
 		'./ThemeProviderView',
 		'./Tablets',
 		'css!styles/header/header.css', './WellContextMenu'],
-function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, WellContextMenu) {
+function(Backbone, LogoView, PreviewButton, ShareButton, ThemeProviderView, Tablets, empty, WellContextMenu) {
 	return Backbone.View.extend({
 		className: 'row-fluid header',
 
@@ -15,6 +16,8 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
                         this._contextMenu.render();
 			this._previewButton = 
 				new PreviewButton({editorModel: this.model.editorModel()});
+                        this._shareButton = 
+				new ShareButton({editorModel: this.model.editorModel()});
 			this._themeProviderView = new ThemeProviderView(this.model.editorModel());
                          
 			this.model.editorModel().on('change:activeMode', this._modeChanged, this);
@@ -48,7 +51,8 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
 			}, this);
 
 			//var $generatorButton = this.$el.find('.preview-generator-button');
-			$modeButtons.append(this._previewButton.render().$el);
+			$modeButtons.append(this._shareButton.render().$el);
+                        $modeButtons.append(this._previewButton.render().$el);
 
 			var $themeButtons = this.$el.find('.theme-buttons');
 			$themeButtons.append(this._themeProviderView.render().$el);
