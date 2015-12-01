@@ -10,6 +10,7 @@ define(['libs/backbone'],
                     "click .ok": "okClicked",
                     "click .prev": "prevPage",
                     "click .next": "nextPage",
+                    "click .chart-gallery-pagenum": "_goToPage",
                     "click .thumbnail": "_selectChart",
                     "hidden": "hidden"
                 },
@@ -183,14 +184,23 @@ define(['libs/backbone'],
                             return false;
                         this._showChartThumbnail(v);
                     }.bind(this));
+                    if(!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
+                        this._showPagination(galleryData);
 
+                },
+                _showPagination: function (galleryData){
+                    var no_of_pages = galleryData.total/galleryData.perPage ;
+                    for(var i=0 ; i < no_of_pages; i++){
+                        $("#chart-gallery-pages").append("<a href='#' class='chart-gallery-pagenum "+(i==0?"active":"")+"'>"+(i+1)+"</a>");
+                    }
                 },
                 _getThumbnailProperties: function (perPage) {
                     var totalWidth = this.galleryElement.width();
-                    var perRow = 4;
-                    var margin = 16;
-                    var width = (totalWidth - (perRow * margin * 2)) / perRow;
-                    return {"width": width, "margin": margin};
+                    var perRow = 3, height = 120;
+                    var margin = 16, border = 1, padding = 6, extra_width_for_vslider = 20;
+                    var width = Math.floor((totalWidth - (perRow * (margin + border + padding) * 2) - extra_width_for_vslider) / perRow);
+                    var bg_size = width+"px "+(height-10)+"px";
+                    return {"width": width, "height":height,"margin": margin, "bgsize": bg_size};
                 },
                 _showChartThumbnail: function (chartData) {
                     var gallery = this.galleryElement;
@@ -200,9 +210,11 @@ define(['libs/backbone'],
                             '</div>';
                     gallery.append(buffer);
                     var chartThumbnail = $("#chart-gallery-" + chartData.chartId);
-
+                    
                     chartThumbnail.css({
                         "width": this._thumbnailProperties.width,
+                        "height": this._thumbnailProperties.height,
+                        "background-size": this._thumbnailProperties.bgsize,
                         "margin": this._thumbnailProperties.margin + "px",
                         "background-image": 'url(\"' + chartData.imageUrl + '\")'
                     });
@@ -219,6 +231,12 @@ define(['libs/backbone'],
                 nextPage: function () {
                     var galleryData = $("#chart-gallery-body").data("gallery");
                     this._showGallery(galleryData.next);
+                },
+                _goToPage: function(e) {
+                    var $this = $(e.currentTarget);
+                    var page_num = $this.index();
+                    $this.addClass("active").siblings().removeClass("active");
+                    this._showGallery("https://api.icharts.net/v1/charts/?sortBy=createdDate&offset="+page_num);
                 },
                 _selectChart: function (e) {
                     var $this = $(e.currentTarget);

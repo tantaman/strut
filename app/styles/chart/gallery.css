@@ -3,19 +3,17 @@
     
 }
 #chart-gallery-body .thumbnail{
-    height: 120px;
-    max-width: 20%;
     position: relative;
+    padding: 6px !important;
     display: inline-block;
     background-repeat: no-repeat;
-    background-size: contain;
-    border: 4px solid rgba(0,0,0,0.1);
-    border-bottom-width: 2px;
-    cursor : pointer;
+    background-position: 5px 5px;
+    border: 1px solid #E1E3E6;
+    cursor: pointer;
 }
 
 #chart-gallery-body .thumbnail.selected{
-    background-color: #5bb75b;
+    background-color: #B1B5C1;
 }
 
 #chart-gallery-body .title{
@@ -29,11 +27,39 @@
 #chart-gallery-body .title p{
     text-align: center;
     padding: 4px;
+    font-size: large;
+    font-family: sans-serif;
     margin: 0px !important;
+    line-height: 24px;
 }
-    
+.chartGallery .ok img{
+    height:36px;
+    width:36px;
+    margin-right: 32px;
+}    
 .chartGallery{
-    width : 80% !important;
-    left: 10%;
+    width : 60% !important;
+    left: 20%;
     margin-left: 0px !important;
+}
+.chartGallery .modal-footer{
+    background: white !important;
+}
+.chartGallery .modal-header{
+    text-align: center;
+    color: #B1B5C1;
+    padding: 8px;
+}
+.chartGallery .modal-header h2{
+    margin-bottom: 0px;
+}
+.chartGallery .chart-gallery-pagenum{
+    text-decoration: none;
+    font-size: 24px;
+    margin: 8px;
+    color: #E1E3E6;
+}   
+.chartGallery .chart-gallery-pagenum.active{
+    color: #B1B5C1;
+    font-size: 26px;
 }
