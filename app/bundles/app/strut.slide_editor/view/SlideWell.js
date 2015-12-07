@@ -2,10 +2,11 @@ define(['libs/backbone',
 	'jquery.multisortable',
 	'strut/slide_snapshot/SlideSnapshot',
 	'common/Throttler',
+        './WellContextMenu',
 	'strut/editor/GlobalEvents',
 	'css!styles/slide_editor/slideWell.css',
 	"tantaman/web/undo_support/CmdListFactory"],
-	function(Backbone, multisortable, SlideSnapshot, Throttler, GlobalEvents, css, CmdListFactory) {
+	function(Backbone, multisortable, SlideSnapshot, Throttler, WellContextMenu, GlobalEvents, css, CmdListFactory) {
 		'use strict';
 		var undoHistory = CmdListFactory.managedInstance('editor');
 
@@ -30,10 +31,10 @@ define(['libs/backbone',
 				this._deck.on('slideAdded', this._slideAdded, this);
 				this._deck.on('slideMoved', this._slideMoved, this);
 				this._deck.on('slidesReset', this._slidesReset, this);
-//				this._doShowContextMenu = this._doShowContextMenu.bind(this);
+				this._doShowContextMenu = this._doShowContextMenu.bind(this);
 				this._throttler = new Throttler(100);
-//				this._contextMenu = new WellContextMenu(this._editorModel);
-//				this._contextMenu.render();
+				this._contextMenu = new WellContextMenu(this._editorModel);
+				this._contextMenu.render();
 
 				this.$slides = $('<div class="' + this.className + 'List">');
 				this.$slides.multisortable({

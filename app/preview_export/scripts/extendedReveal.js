@@ -39,6 +39,7 @@
 //            });
 
     $("#autoplay").click(function () {
+//       Reveal.toggleAutoSlide();
         Reveal.configure({autoSlide: (autoSLideStatus = autoSLideStatus ? 0 : 2000), loop: true});
     });
 //
@@ -96,11 +97,15 @@
     $(".slide-number").css({"text-align": "center"});
 
     $(document).ready(function () {
-        var w = $("section.slideContainer").width();
-        var l = $("section.slideContainer").offset().left;
+        var w = $(".slides").width();
+        var l = $(".slides").offset().left;
         
         $(".left-control").css("left", l - 40);
         $(".right-control").css("left", l + w + 40);
+        
+        $("section.slideContainer").on("mouseenter", function(){$("#botton-container").show();});
+        $("#botton-container").on("mouseenter", function(){$(this).show();});
+        $("section.slideContainer").on("mouseout", function(){$("#botton-container").hide();});
          
     });
 

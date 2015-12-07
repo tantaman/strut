@@ -22,7 +22,7 @@ define(["./ComponentView", './Mixers', 'css!styles/chart/chartView.css'],
 			 * @returns {*}
 			 */
 			render: function() {
-                                var $frame, scale;
+                                var $frame;
                                 var src = this.model.get('src'), 
                                         h = this.model.get('height'), 
                                         w = this.model.get('width');
@@ -31,8 +31,6 @@ define(["./ComponentView", './Mixers', 'css!styles/chart/chartView.css'],
 				this.$el.find(".content").append($frame);
 				this.$el.append('<div class="overlay"></div>');
 				
-                                var scale = {x: 1, y: 1, width: w, height: h};
-				this.model.set("scale", scale);
                                 this.$el.css({
 					width: w ,
 					height: h

@@ -1537,11 +1537,13 @@
 				}
 				// Apply scale transform as a fallback
 				else {
-					dom.slides.style.left = '50%';
-					dom.slides.style.top = '50%';
-					dom.slides.style.bottom = 'auto';
-					dom.slides.style.right = 'auto';
-					transformSlides( { layout: 'translate(-50%, -50%) scale('+ scale +')' } );
+                                        dom.slides.style.zoom = scale;
+					transformSlides( { layout: '' } );
+//                                        dom.slides.style.left = '50%';
+//					dom.slides.style.top = '50%';
+//					dom.slides.style.bottom = 'auto';
+//					dom.slides.style.right = 'auto';
+//					transformSlides( { layout: 'translate(-50%, -50%) scale('+ scale +')' } );
 				}
 			}
 
