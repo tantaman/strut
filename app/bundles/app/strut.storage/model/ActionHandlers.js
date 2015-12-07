@@ -25,6 +25,10 @@ function() {
 
 		new_: function(model) {
 			model.newPresentation();
-		}
+		},
+                
+                delete: function(storageInterface, model, filename, cb){
+                    storageInterface.deletePresentation(filename, model.exportPresentation(filename), cb);
+                }
 	};
 });

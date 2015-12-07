@@ -51,7 +51,11 @@ function(StorageProviders) {
 			this.currentProvider().rm(identifier, cb);
 			return this;
 		},
-
+                
+                deletePresentation: function(identifier, cb) {
+                    console.log(identifier);
+                },
+                
 		list: function(path, cb) {
 			this.currentProvider().ls(path, /.*/, cb);
 			return this;

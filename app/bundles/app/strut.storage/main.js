@@ -34,7 +34,8 @@ function(StorageModal,
 
 			menuItems.push(new SaveMenuItem(storageModal, editorModel, storageInterface));
 			menuItems.push(new MenuItem({title: lang.save_as, modal: storageModal, handler: ActionHandlers.save }));
-
+                        menuItems.push(new MenuItem({title: lang.delete_cb, modal: storageModal, handler: ActionHandlers.delete }));
+                    
 			menuItems.push({
 				$el: $('<li class="divider"></li>'),
 				render: function() { return this; }
