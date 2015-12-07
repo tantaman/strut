@@ -9,7 +9,6 @@
 
 
     $("body").append("<div style='position:absolute; z-index:1; bottom:150px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
-
     $("#botton-container li")
             .css({
 //                "position": "absolute",
@@ -39,6 +38,7 @@
 //            });
 
     $("#autoplay").click(function () {
+//       Reveal.toggleAutoSlide();
         Reveal.configure({autoSlide: (autoSLideStatus = autoSLideStatus ? 0 : 2000), loop: true});
     });
 //
@@ -96,11 +96,15 @@
     $(".slide-number").css({"text-align": "center"});
 
     $(document).ready(function () {
-        var w = $("section.slideContainer").width();
-        var l = $("section.slideContainer").offset().left;
+        var w = $(".slides").width();
+        var l = $(".slides").offset().left;
         
         $(".left-control").css("left", l - 40);
         $(".right-control").css("left", l + w + 40);
+        
+        $("section.slideContainer").on("mouseenter", function(){$("#botton-container").show();});
+        $("#botton-container").on("mouseenter", function(){$(this).show();});
+        $("section.slideContainer").on("mouseout", function(){$("#botton-container").hide();});
          
     });
 
