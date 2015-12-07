@@ -39,7 +39,8 @@ define(['libs/backbone',
                     GlobalEvents.on('copy', this._copy, this);
                     GlobalEvents.on('paste', this._paste, this);
                     GlobalEvents.on('delete', this._delete, this);
-
+                    GlobalEvents.on('align', this._align, this);
+                    
                     this._clipboard = this._editorModel.clipboard;
 
                     // ContextMenu.setModel(this._menuModel);
@@ -166,6 +167,32 @@ define(['libs/backbone',
                             this.model.remove(components);
                         }
                     }
+                },
+                _align: function () {
+                    
+                    var components = this.$el.find(".component");
+                    var startPos = this.$el.width();
+                    var endPos = 0;
+                     
+                    components.each(function(){
+                        if(startPos > parseInt($(this).css('left')))
+                            startPos = parseInt($(this).css('left'));
+                        if(endPos < (parseInt($(this).css('left')) + $(this).width()))
+                            endPos = parseInt($(this).css('left')) + $(this).width();
+                    });
+                    var totalWidth = this.$el.width();
+                    var contentWidth = endPos - startPos;
+                    var newStartPos = (totalWidth - contentWidth)/2 ;
+                    
+                    var moveLeft = startPos - newStartPos ;
+                    components.each(function(){
+                       $(this).css('left', parseInt($(this).css('left')) - moveLeft + 'px'); 
+                       $(this).find(".position").val(parseInt($(this).css('left')));
+                    });
+                    
+                    this.model.get('components').forEach(function (comp, i) {
+                        comp.set("x", parseInt($(components[i]).css("left")));
+                    });
                 },
                 _clicked: function () {
                     this._focus();
