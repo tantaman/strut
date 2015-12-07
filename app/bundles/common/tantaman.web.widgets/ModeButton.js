@@ -18,7 +18,12 @@ define(function () {
 	}
 
 	ModeButton.prototype.clicked = function() {
-		this.editorModel.changeActiveMode(this.modeId);
+            
+                    $("#sharemodelcontainer").show();
+                    $("#sharemodel").css("top", ($("body").height() / 2 - $("#sharemodel").height() / 2));
+
+                
+		//this.editorModel.changeActiveMode(this.modeId);
 	}
 
 	ModeButton.prototype.generatorChanged = function(model, value) {
@@ -27,9 +32,9 @@ define(function () {
 
 	ModeButton.prototype.modeChanged = function(model, value) {
 		if (model.get('modeId') == this.modeId) {
-			this.$el.addClass('dispNone');
+			//this.$el.addClass('dispNone');
 		} else {
-			this.$el.removeClass('dispNone');
+			//this.$el.removeClass('dispNone');
 		}
 	}
 

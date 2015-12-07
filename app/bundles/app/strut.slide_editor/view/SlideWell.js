@@ -32,7 +32,6 @@ define(['libs/backbone',
                     this._throttler = new Throttler(100);
 //				this._contextMenu = new WellContextMenu(this._editorModel);
 //				this._contextMenu.render();
-
                     this.$slides = $('<div class="' + this.className + 'List">');
                     this.$slides.multisortable({
                         items: "div.slideSnapshot",
