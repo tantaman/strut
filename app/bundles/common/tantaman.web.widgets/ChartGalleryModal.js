@@ -30,144 +30,28 @@ define(['libs/backbone'],
                     return this.$el.modal('show');
                 },
                 _showGallery: function (page) {
+                    var perPage = 10;
                     this.galleryElement = this.$el.find("#chart-gallery-body");
+                    
+                    //to prevent loading same gallery again if popup closed and opened. 
                     if (this.galleryElement.find(".thumbnail").length != 0 && (page == undefined || page.trim() == ""))
                         return;
+                    page = page ? page : 0;
                     this.galleryElement.empty();
-//                    $.ajax({  
-//                       url : page ? page : "https://api.icharts.net/v1/charts/?sortBy=createdDate",
-//                       type : "get",
-//                       success : function(resp){
-//
-//                       }
+//                    $.ajax({
+//                        url: page ? page : "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/charts",
+//                        beforeSend: function (xhr) {
+//                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+//                        },
+//                        data: {
+//                          "perPage": perPage, "offset": perPage*page,
+//                        },
+//                        success: function (resp) {
+//                            console.log(resp);
+//                        }
 //                    });
                     // building dummy response to work until we get api ready
-                    var resp = {
-                        previous: "",
-                        next: "https://api.icharts.net/v1/charts/?sortBy=createdDate&offset=0",
-                        offset: 0, //<index of the first object returned in this query>
-                        total: 20, //<total number of objects>
-                        perPage: 10,
-                        results: [
-                            {
-                                chartId: "MH7Szi9N",
-                                chartType: "COLUMN_CHART",
-                                subType: '100%25',
-                                height: "493",
-                                width: "855",
-                                name: "Segment Performance by Market",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MH7SzixF",
-                                chartType: "COLUMN_CHART",
-                                subType: '100%25',
-                                height: "437",
-                                width: "731",
-                                name: "Dynamic Market Brand Composition",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "MH7Szi9B",
-                                chartType: "COLUMN_CHART",
-                                subType: 'stacked',
-                                height: "469",
-                                width: "623",
-                                name: "Container Meterials Sold by Trademark",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHrbyilF",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3nawitG5",
-                                chartType: "BAR_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "bigqueryforsalesforce",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHvWzixC2",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHjRzCJB2",
-                                chartType: "PIE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3PbySJG2",
-                                chartType: "LINE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Title ..",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHrbyilF2",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3nawitG52",
-                                chartType: "BAR_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "bigqueryforsalesforce",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHvWzixC3",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHjRzCJB3",
-                                chartType: "PIE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3PbySJG3",
-                                chartType: "LINE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Title ..",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            }
-                        ]
-                    }
+                    var resp = {"total": 338, "next": "/v1/charts?offset=0&perPage=0", "perPage": 10, "offset": 0, "prev": "/v1/charts?offset=0&perPage=0", "results": [{"chartId": "MXzSwyM=", "chartType": "BAR_CHART", "height": 600, "subType": "100%", "width": 520, "chartName": "Standard Account Sample: Facebook Penetration", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzSwyM="}, {"chartId": "MXzSwis=", "chartType": "BAR_CHART", "height": 400, "subType": "clustered", "width": 560, "chartName": "Free Account Sample: The Social Media Landscape", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzSwis="}, {"chartId": "MXzQwiM=", "chartType": "BAR_CHART", "height": 400, "subType": "clustered", "width": 560, "chartName": "Facebook Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzQwiM="}, {"chartId": "MXzRyS0=", "chartType": "AREA_CHART", "height": 400, "subType": null, "width": 560, "chartName": "User Population", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRyS0="}, {"chartId": "MXzRzi8=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 560, "chartName": "Total", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRzi8="}, {"chartId": "MXzRzCM=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 450, "chartName": "Facebook Penetration", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRzCM="}, {"chartId": "MXzWyis=", "chartType": "BAR_CHART", "height": 400, "subType": "stacked", "width": 450, "chartName": "Users and Non-Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyis="}, {"chartId": "MXzWyik=", "chartType": "AREA_CHART", "height": 400, "subType": null, "width": 450, "chartName": "Social Media Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyik="}, {"chartId": "MXzWyiM=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 450, "chartName": "Social Media Users Across Platforms", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyiM="}, {"chartId": "MXzWySM=", "chartType": "COLUMN_CHART", "height": 450, "subType": "clustered", "width": 560, "chartName": "iPad Ownership", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWySM="}]};
                     var galleryData = {
                         previous: resp.previous,
                         next: resp.next,
@@ -181,7 +65,7 @@ define(['libs/backbone'],
                     $.each(chartList, function (i, v) {
                         if (i >= resp.perPage)
                             return false;
-                        this._showChartThumbnail(v);
+                        this._showChartThumbnail(v, resp.offset+i);
                     }.bind(this));
 
                 },
@@ -192,21 +76,22 @@ define(['libs/backbone'],
                     var width = (totalWidth - (perRow * margin * 2)) / perRow;
                     return {"width": width, "margin": margin};
                 },
-                _showChartThumbnail: function (chartData) {
+                _showChartThumbnail: function (chartData, chartNumber) {
                     var gallery = this.galleryElement;
                     var buffer = '';
-                    buffer += '<div id="chart-gallery-' + chartData.chartId + '" class="thumbnail">' +
-                            '<div class="title"><p>' + chartData.name + '</p></div>' +
+                    console.log(chartData);
+                    buffer += '<div id="chart-gallery-' + chartNumber + '" data-chartid ="'+chartData.chartId+'" class="thumbnail">' +
+                            '<div class="title"><p>' + chartData.chartName + '</p></div>' +
                             '</div>';
                     gallery.append(buffer);
-                    var chartThumbnail = $("#chart-gallery-" + chartData.chartId);
+                    var chartThumbnail = $("#chart-gallery-" + chartNumber);
 
                     chartThumbnail.css({
                         "width": this._thumbnailProperties.width,
                         "margin": this._thumbnailProperties.margin + "px",
-                        "background-image": 'url(\"' + chartData.imageUrl + '\")'
+                        "background-image": 'url(\"' + "https://"+ chartData.imageURL + '\")'
                     });
-                    var location = "htmlcharts2.icharts.net";
+                    var location = "stageaccounts2.icharts.net";
 
                     chartData.url = "https://" + location + "/?chartid=" + chartData.chartId + "&charttype=" + chartData.chartType + "&subtype=" + chartData.subType + "&authentication={}";
 
@@ -222,13 +107,13 @@ define(['libs/backbone'],
                 },
                 _selectChart: function (e) {
                     var $this = $(e.currentTarget);
-                    if($this.hasClass("selected")){
+                    if ($this.hasClass("selected")) {
                         $this.removeClass("selected");
-                        delete this.selectedCharts[$this.data("chart").chartId];   
+                        delete this.selectedCharts[$this.data("chart").chartId];
                     }
-                    else{
+                    else {
                         $this.addClass("selected");
-                        
+
                         this.selectedCharts[$this.data("chart").chartId] = $this.data("chart");
                     }
                 },
