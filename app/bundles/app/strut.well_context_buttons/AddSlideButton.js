@@ -7,7 +7,8 @@ function(Backbone) {
 		},
 
 		_addSlide: function() {
-			this._editorModel.addSlide(this._wellMenuModel.slideIndex());
+//			this._editorModel.addSlide(this._wellMenuModel.slideIndex());
+ this._editorModel.addSlide(this._editorModel.activeSlide().collection.length);
 		},
 
 		render: function() {
