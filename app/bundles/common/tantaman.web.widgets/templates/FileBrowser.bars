@@ -1,6 +1,9 @@
-<span>ChartBook ID : <span><input type="text" class="fileName"></input>
+<input type="text" class="chartBookName" placeholder="ChartBook ID"></input>
 <ul class="nav nav-pills nav-stacked">
 	{{#files}}
-	<li data-fileName="{{chartBookId}}"><a>{{chartBookName}} <button class="close pull-right">×</button></a></li>
+	<li data-chartBookName="{{chartBookId}}"><a>{{chartBookName}} 
+         <!-- <button class="close pull-right">×</button> -->
+        </a>
+        </li>
 	{{/files}}
 </ul>

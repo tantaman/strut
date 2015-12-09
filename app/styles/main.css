@@ -295,3 +295,7 @@ i.fa{
     background-color: #9E1927;
     /*color: white;*/
 }
+.warning{
+    color: #D8000C;
+    margin: 16px;
+}

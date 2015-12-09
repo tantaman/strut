@@ -5,7 +5,8 @@ function(Backbone, FileBrowser) {
 		events: {
 			'click a[data-provider]': '_providerSelected',
 			'click .ok': '_okClicked',
-			'destroyed': 'dispose'
+			'destroyed': 'dispose',
+                        'click .close': 'clear'
 		},
 
 		initialize: function() {
@@ -13,18 +14,27 @@ function(Backbone, FileBrowser) {
 			this.editorModel = this.options.editorModel;
 			delete this.options.storageInterface;
 			delete this.options.editorModel;
-
+                        
 			this.template = JST['strut.storage/StorageModal'];
 
 			this.storageInterface.on('change:providers', this.render, this);
 			this.storageInterface.on('change:currentProvider', this._providerChanged, this);
-			this.fileBrowser = new FileBrowser(this.storageInterface, this.editorModel);
+			
+                        this.fileBrowser = new FileBrowser(this.storageInterface, this.editorModel);
 		},
 
 		title: function(title) {
 			this.$el.find('.title').html(title);
 		},
-
+                
+                clear: function(){
+                    this.$el.find(".warning").html("");
+                },
+                
+                action: function(action) {
+			this.$el.find('.ok').html(action);
+		},
+                
 		dispose: function() {
 			this.storageInterface.off(null, null, this);
 		},
@@ -37,20 +47,21 @@ function(Backbone, FileBrowser) {
 			// Don't load the data for a provider until its tab is selected...
 			var providerNames = this.storageInterface.providerNames();
 			this.$el.html(this.template({
-				title: this.__title(),
-				tabs: providerNames
+				title: this.__title()
+                                
 			}));
 
 			this._providerChanged();
-
+                        
 			this.$el.find('.tabContent').append(this.fileBrowser.render().$el);
 		},
 
-		show: function(actionHandler, title) {
+		show: function(actionHandler, title, action) {
 			this.actionHandler = actionHandler;
 			this.title(title);
+                        this.action(action);
 			this.$el.modal('show');
-			this.fileBrowser.render();
+			this.fileBrowser.render(action);
 		},
 
 		_providerChanged: function() {
@@ -68,15 +79,22 @@ function(Backbone, FileBrowser) {
 		__title: function() { return 'none'; },
 
 		_okClicked: function() {
-			if (this.actionHandler) {
-				if (this.fileBrowser.fileName() == "") {
-					// Present some message..
-					return;
+                        this.$el.find(".warning").html("");
+			var cb_name = this.$el.find(".chartBookName");
+                        if (this.actionHandler) {
+				if (cb_name.val().trim() == "" || cb_name.val() == undefined) {
+                                       if(cb_name.data("action") == "save"){
+                                           this.$el.find(".warning").html("Enter ChartName ...");
+                                       }
+                                       else{
+                                           this.$el.find(".warning").html("Enter ChartBook ID / Select a ChartBook");
+                                       }
+                                       return;
 				}
 
 				var self = this;
 				this.actionHandler(this.storageInterface, this.editorModel,
-				this.fileBrowser.fileName(),
+				this.fileBrowser.chartBookName(),
 				function(result, err) {
 					if (!err) {
 						self.$el.modal('hide');

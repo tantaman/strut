@@ -53,7 +53,7 @@ function(StorageProviders) {
 		},
                 
                 deletePresentation: function(identifier, cb) {
-                    console.log(identifier);
+                    this.currentProvider().deleteChartBook(identifier, cb);
                 },
                 
 		list: function(path, cb) {
@@ -62,7 +62,7 @@ function(StorageProviders) {
 		},
 
 		listPresentations: function(path, cb) {
-			this.currentProvider().ls(path, /.*\.strut$/, cb)
+			this.currentProvider().ls(path, /.*\.strut$/, cb);
 			return this;
 		},
 

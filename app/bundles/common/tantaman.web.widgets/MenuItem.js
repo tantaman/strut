@@ -5,7 +5,7 @@ define(function() {
 		+ '</a></li>');
 		this.$el.click(function() {
 			if (options.modal)
-				options.modal.show(options.handler, options.title);
+				options.modal.show(options.handler, options.heading, options.action);
 			else
 				options.handler(options.model);
 		});

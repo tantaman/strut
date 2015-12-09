@@ -187,7 +187,7 @@ Handlebars.registerHelper('log', function(context, options) {
 ;
 // lib/handlebars/utils.js
 
-var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
+var errorProps = ['description', 'chartBookName', 'lineNumber', 'message', 'name', 'number', 'stack'];
 
 Handlebars.Exception = function(message) {
   var tmp = Error.prototype.constructor.apply(this, arguments);

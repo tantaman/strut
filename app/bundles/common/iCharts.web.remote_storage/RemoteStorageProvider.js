@@ -1,5 +1,4 @@
 define(function () {
-    var prefix = "strut-";
     function RemoteStorageProvider() {
         this.name = "Remote Storage";
         this.id = "remotestorage";
@@ -44,28 +43,42 @@ define(function () {
 //                cb(true);
 //            return this;
         },
+        deleteChartBook: function (chartBookId, cb) {
+            $.ajax({
+                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/" + chartBookId,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                },
+                data: {
+                    chartBookId: chartBookId
+                },
+                type: "DELETE",
+                success: function (resp) {
+                    console.log(resp);
+                }
+            });
+        },
         getContents: function (chartBookId, cb) {
 //			get the content from server with ID 
 
-            console.log(chartBookId);
 //            $.ajax({
-//                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/{"+chartBookId+"}",
+//                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/"+chartBookId,
 //                beforeSend: function (xhr) {
 //                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
 //                },
 //                data : {
 //                    chartBookId : chartBookId 
-//                }
+//                },
 //                success: function (resp) {
 //                    console.log(resp);
 //                }
 //            });    
 
-            var resp = '{"slides":[{"components":[{"TextBox":{},"x":337,"y":205,"scale":{"x":1,"y":1},"type":"TextBox","text":"<font>Sample</font>","size":72,"selected":false}],"z":0,"impScale":3,"rotateX":0,"rotateY":0,"rotateZ":0,"index":0,"selected":true,"active":true}],"background":"bg-default","activeSlide":{"components":[{"TextBox":{},"x":337,"y":205,"scale":{"x":1,"y":1},"type":"TextBox","text":"<font>Sample</font>","size":72,"selected":false}],"z":0,"impScale":3,"rotateX":0,"rotateY":0,"rotateZ":0,"index":0,"selected":true,"active":true},"chartBookName":"sample2"}';
-
+            var resp = {"results": [{"chartBookCreator": "livedemo@icharts.net", "chartBookId": "Nn7Sww==", "chartBookCreated": "2015-12-07T09:42:20.000+0000", "chartBookMetaData": "{   \"slides\": [     {       \"components\": [         {           \"src\": \"https://htmlcharts2.icharts.net/?chartid=MHrbyilF&charttype=COLUMN_CHART&subtype=&authentication={}\",           \"height\": 460,           \"width\": 660,           \"type\": \"Chart\",           \"x\": 40,           \"y\": 10,           \"scale\": {             \"x\": 1,             \"y\": 1,             \"width\": 660,             \"height\": 460           },           \"selected\": false         },         {           \"TextBox\": {},           \"x\": 755,           \"y\": 133,           \"scale\": {             \"x\": 1,             \"y\": 1           },           \"type\": \"TextBox\",           \"text\": \"NWEA<br>\",           \"size\": 72,           \"selected\": false         }       ],       \"z\": 0,       \"impScale\": 3,       \"rotateX\": 0,       \"rotateY\": 0,       \"rotateZ\": 0,       \"index\": 0,       \"selected\": true,       \"active\": true     },     {       \"components\": [         {           \"src\": \"https://htmlcharts2.icharts.net/?chartid=MH7Szi9N&charttype=COLUMN_CHART&subtype=100%25&authentication={}\",           \"height\": 523,           \"width\": 905,           \"type\": \"Chart\",           \"x\": 103,           \"y\": 29,           \"scale\": {             \"x\": 1,             \"y\": 1,             \"width\": 905,             \"height\": 523           },           \"selected\": false         },         {           \"TextBox\": {},           \"x\": 854,           \"y\": 139,           \"scale\": {             \"x\": 1,             \"y\": 1           },           \"type\": \"TextBox\",           \"text\": \"<font>sample</font>\",           \"size\": 72,           \"selected\": false         }       ],       \"z\": 0,       \"impScale\": 3,       \"rotateX\": 0,       \"rotateY\": 0,       \"rotateZ\": 0,       \"index\": 1,       \"selected\": false,       \"active\": false     },     {       \"components\": [         {           \"src\": \"https://htmlcharts2.icharts.net/?chartid=MH7Szi9B&charttype=COLUMN_CHART&subtype=stacked&authentication={}\",           \"height\": 499,           \"width\": 673,           \"type\": \"Chart\",           \"x\": 92,           \"y\": 24,           \"scale\": {             \"x\": 0.7072808320950966,             \"y\": 0.7072808320950966,             \"width\": 476,             \"height\": 352.9331352154532           },           \"selected\": false         },         {           \"TextBox\": {},           \"x\": 581,           \"y\": 140,           \"scale\": {             \"x\": 1,             \"y\": 1           },           \"type\": \"TextBox\",           \"text\": \"<font>Trademarks vol</font>\",           \"size\": 72,           \"selected\": false         }       ],       \"z\": 0,       \"impScale\": 3,       \"rotateX\": 0,       \"rotateY\": 0,       \"rotateZ\": 0,       \"index\": 2,       \"selected\": false,       \"active\": false     }   ],   \"background\": \"bg-default\",   \"activeSlide\": {     \"components\": [       {         \"src\": \"https://htmlcharts2.icharts.net/?chartid=MHrbyilF&charttype=COLUMN_CHART&subtype=&authentication={}\",         \"height\": 460,         \"width\": 660,         \"type\": \"Chart\",         \"x\": 40,         \"y\": 10,         \"scale\": {           \"x\": 1,           \"y\": 1,           \"width\": 660,           \"height\": 460         },         \"selected\": false       },       {         \"TextBox\": {},         \"x\": 755,         \"y\": 133,         \"scale\": {           \"x\": 1,           \"y\": 1         },         \"type\": \"TextBox\",         \"text\": \"NWEA<br>\",         \"size\": 72,         \"selected\": false       }     ],     \"z\": 0,     \"impScale\": 3,     \"rotateX\": 0,     \"rotateY\": 0,     \"rotateZ\": 0,     \"index\": 0,     \"selected\": true,     \"active\": true   },   \"chartBookName\": \"test_cb_v1\" }", "chartBookName": "Test CB", "chartBookPreviewURL": "", "chartBookModified": "2015-12-07T09:42:20.000+0000"}]};
+            var presentation = resp.results[0];
             if (resp != null) {
                 try {
-                    var data = JSON.parse(resp);
+                    var data = JSON.parse(presentation);
                     cb(data);
                 } catch (e) {
                     cb(null, e);
@@ -75,32 +88,37 @@ define(function () {
             return this;
         },
         setContents: function (path, data, cb) {
-            data.chartBookName = data.fileName;
-            delete data.fileName;
-            try {
-//				this.impl.setItem(prefix + path, JSON.stringify(data));
-                // api call to store chartbook  presentation.  
-//                console.log("Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
-                console.log(JSON.stringify(data));
-                $.ajax({
-                    url: "http://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/createChartBook",
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
-                    },
-                    data: {
-                        chartBookJson: JSON.stringify(data),
-                        chartBookName: data.chartBookName
-                    },
-                    type: "POST",
-                    success: function (resp) {
-                        console.log(resp);
-                    }
-                });
 
-            } catch (e) {
-                if (!alerted) {
-                    alerted = true;
-                    alert("Sorry for the inconvenience that this may cause.  We are working to resolve the issue!");
+            if (!(data["slides"].length == 0 || (data["slides"].length == 1 && data["slides"][0]["components"].length == 0))) {
+                var url = "";
+                try {
+                    // this.impl.setItem(prefix + path, JSON.stringify(data));
+                    // api call to store chartbook  presentation.  
+                    if(data.chartBookId){
+                        url = "http://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/updateChartBook/"+data.chartBookId;
+                    }
+                    else{
+                        url = "http://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/createChartBook";
+                    }
+                    $.ajax({
+                        url: url,
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                        },
+                        data: {
+                            chartBookJson: JSON.stringify(data)
+                        },
+                        type: "POST",
+                        success: function (resp) {
+                            console.log(resp);
+                        }
+                    });
+
+                } catch (e) {
+                    if (!alerted) {
+                        alerted = true;
+                        alert("Sorry for the inconvenience that this may cause.  We are working to resolve the issue!");
+                    }
                 }
             }
             if (cb)
