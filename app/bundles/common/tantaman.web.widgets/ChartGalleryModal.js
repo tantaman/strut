@@ -10,6 +10,8 @@ define(['libs/backbone'],
                     "click .ok": "okClicked",
                     "click .prev": "prevPage",
                     "click .next": "nextPage",
+                    "click .chart-gallery-pagenum": "_goToPage",
+                    "click #chart-gallery-pages .more": "_navigatePages",
                     "click .thumbnail": "_selectChart",
                     "hidden": "hidden"
                 },
@@ -34,7 +36,7 @@ define(['libs/backbone'],
                     this.galleryElement = this.$el.find("#chart-gallery-body");
                     
                     //to prevent loading same gallery again if popup closed and opened. 
-                    if (this.galleryElement.find(".thumbnail").length != 0 && (page == undefined || page.trim() == ""))
+                    if (this.galleryElement.find(".thumbnail").length != 0 && (page == undefined))
                         return;
                     page = page ? page : 0;
                     this.galleryElement.empty();
@@ -67,19 +69,37 @@ define(['libs/backbone'],
                             return false;
                         this._showChartThumbnail(v, resp.offset+i);
                     }.bind(this));
+                    if(!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
+                        this._showPagination(galleryData);
 
+                },
+                _showPagination: function (galleryData){
+                    var no_of_pages = Math.ceil(galleryData.total/galleryData.perPage) ;
+                    var hide;
+                    $("#chart-gallery-pages").append("<a class='more prevPages hide'><<</a>");
+                    for(var i=0 ; i < no_of_pages; i++){
+                        hide = false;
+                        
+                        if(i > 4 && no_of_pages > 5){
+                            hide = true;
+                        }
+                        $("#chart-gallery-pages").append("<a href='#' data-page = '"+i+"' class='chart-gallery-pagenum"+(i==0?" active":" ")+""+(hide?" hide":" ")+"'>"+(i+1)+"</a>");
+                        if(i == no_of_pages-1){
+                            $("#chart-gallery-pages").append("<a class='more nextPages'>>></a>");
+                        }
+                    }
                 },
                 _getThumbnailProperties: function (perPage) {
                     var totalWidth = this.galleryElement.width();
-                    var perRow = 4;
-                    var margin = 16;
-                    var width = (totalWidth - (perRow * margin * 2)) / perRow;
-                    return {"width": width, "margin": margin};
+                    var perRow = 3, height = 120;
+                    var margin = 16, border = 1, padding = 6, extra_width_for_vslider = 20;
+                    var width = Math.floor((totalWidth - (perRow * (margin + border + padding) * 2) - extra_width_for_vslider) / perRow);
+                    var bg_size = width+"px "+(height-10)+"px";
+                    return {"width": width, "height":height,"margin": margin, "bgsize": bg_size};
                 },
                 _showChartThumbnail: function (chartData, chartNumber) {
                     var gallery = this.galleryElement;
                     var buffer = '';
-                    console.log(chartData);
                     buffer += '<div id="chart-gallery-' + chartNumber + '" data-chartid ="'+chartData.chartId+'" class="thumbnail">' +
                             '<div class="title"><p>' + chartData.chartName + '</p></div>' +
                             '</div>';
@@ -88,6 +108,8 @@ define(['libs/backbone'],
 
                     chartThumbnail.css({
                         "width": this._thumbnailProperties.width,
+                        "height": this._thumbnailProperties.height,
+                        "background-size": this._thumbnailProperties.bgsize,
                         "margin": this._thumbnailProperties.margin + "px",
                         "background-image": 'url(\"' + "https://"+ chartData.imageURL + '\")'
                     });
@@ -104,6 +126,46 @@ define(['libs/backbone'],
                 nextPage: function () {
                     var galleryData = $("#chart-gallery-body").data("gallery");
                     this._showGallery(galleryData.next);
+                },
+                _goToPage: function(e) {
+                    var $this = $(e.currentTarget);
+                    var page_num = $this.data("page");
+                    $this.addClass("active").siblings().removeClass("active");
+                    this._showGallery(page_num);
+                },
+                _navigatePages: function(e) {
+                    var $this = $(e.currentTarget);
+                    var pageNums = $("#chart-gallery-pages").find(".chart-gallery-pagenum");
+                    var no_of_pages = pageNums.length;
+                    
+                    if ($this.hasClass("prevPages")) {
+                        var target = $("#chart-gallery-pages").find(".chart-gallery-pagenum:not(.hide)").first();
+                        var page_num = target.data("page");
+                        $this.siblings(".nextPages").removeClass("hide");
+                        target.prevAll().each(function(i){
+                            if(i==4)
+                                return false;
+                            $(this).removeClass("hide");
+                            pageNums.eq(page_num+4-i).addClass("hide");   
+                            if(page_num+i == 0)
+                                $this.addClass("hide");
+                        });
+                    }
+                    else if ($this.hasClass("nextPages")) {
+                        var target = $("#chart-gallery-pages").find(".chart-gallery-pagenum:not(.hide)").last();
+                        var page_num = target.data("page");
+                        $this.siblings(".prevPages").removeClass("hide");
+                        target.nextAll().each(function(i){
+                            if(i==4)
+                                return false;
+                            $(this).removeClass("hide");
+                            pageNums.eq(page_num-4+i).addClass("hide");   
+                            if(page_num+i == no_of_pages-1)
+                                $this.addClass("hide");
+                        });
+                        
+                    }
+                    
                 },
                 _selectChart: function (e) {
                     var $this = $(e.currentTarget);
