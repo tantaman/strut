@@ -34,6 +34,7 @@ define(['./ComponentButton', 'tantaman/web/widgets/ChartGalleryModal', 'css!styl
                 _itemImported: function (data) { 
                     this.options.editorModel.addComponent({
                         src: data.url,
+                        chartId: data.chartId,
                         height : Number(data.height) + 30, //+30 for extra buffer space
                         width : Number(data.width) + 50, //+50 for extra buffer space
                         type: this.options.componentType
