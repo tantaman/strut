@@ -452,3 +452,7 @@ i.fa{
             margin: 0px;
             padding: 20px;
         }
+        
+        .etch-editor-panel button{
+            margin-top: 0px;
+        }
