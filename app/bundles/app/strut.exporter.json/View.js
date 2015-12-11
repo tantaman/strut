@@ -56,7 +56,6 @@ function(Backbone, FileUtils, lang) {
                         var name = this.$el.find("#export-json-file-name").val() || this._exportable.identifier();
 			var data = this._exportable.export();
                         data.fileName = name || data.fileName;
-                        data.preview = this.generator.generate(this._editorModel.deck());
                         var attrs = FileUtils.createDownloadAttrs('application\/json',
 				JSON.stringify(data, null, 2),
 				name + '.json');

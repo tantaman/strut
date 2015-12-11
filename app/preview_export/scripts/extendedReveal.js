@@ -8,7 +8,7 @@
             + "<li id='fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
 
 
-    $("body").append("<div style= ' display: none; position:absolute; z-index:1; bottom:100px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style='position:absolute; z-index:1; bottom:150px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
 
     $("#botton-container li")
             .css({
@@ -39,7 +39,7 @@
 //            });
 
     $("#autoplay").click(function () {
-       Reveal.toggleAutoSlide();
+//       Reveal.toggleAutoSlide();
         Reveal.configure({autoSlide: (autoSLideStatus = autoSLideStatus ? 0 : 2000), loop: true});
     });
 //
