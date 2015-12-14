@@ -30,6 +30,7 @@ define({
 	invisible: 'Invisible',
 	reset: 'Reset',
 	go: 'Go',
+        align:'Align',
 	strut_exporter_json: {
 		explain: 'This allows you to save a file on your computer that you can load back later.',
 		click_below: 'Click below to download'
