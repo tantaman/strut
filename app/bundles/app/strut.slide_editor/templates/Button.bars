@@ -1,5 +1,5 @@
-<div class="btn-group iconBtns">
-	<a class="btn btn-plast">
+<div class="button iconBtns">
+	<a class="slides">
 		<i class="icon-th-list icon-white"></i>
 		{{#lang 'slides'}}{{/lang}}
 	</a>

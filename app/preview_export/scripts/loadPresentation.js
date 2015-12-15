@@ -4,23 +4,29 @@ var loadPresentation = function () {
 
     var params = parseQueryString();
     if (typeof params.id !== "undefined" && params.id !== "") {
-        presentation = undefined;
+        presentation = undefined;        
         $.ajax({
-            method: "POST",
-            url: (params.id + ".json"),
-            async: false,
-            success: function (data) {
-                makePresentation(data);
+            url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/" + params.id,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+            },
+            data: {
+                chartBookId: params.id
+            },
+            success: function (resp) {
+
+                var presentation = resp.results[0];
+                makePresentation(presentation);
                 $("body").find(".reveal").data("charts", charts);
                 addCharts(0);
             }
         });
     }
-    if (presentation) {
-//        	document.body.className = config.surface + " " + document.body.className;
-        document.body.innerHTML = presentation;
+    if (presentation) {        
+        document.body.className = config.surface + " " + document.body.className;
+        document.body.innerHTML = presentation;        
     }
-}
+};
 
 var charts = [];
 var addCharts = function(i, chrts) {
@@ -34,8 +40,8 @@ var addCharts = function(i, chrts) {
             $("body").find(".reveal").data("charts", charts);
             addCharts(i);   
         }
-    }
-}
+    };
+};
 
 var parseQueryString = function (url) {
 
@@ -52,8 +58,8 @@ var parseQueryString = function (url) {
 };
 
 function makePresentation(data) {
-    var html = '<style type="text/css"></style>' +
-            '<div class=" reveal strut-surface">' +
+    var html = 
+            '<div class="reveal strut-surface" data-transition="'+data.cannedTransition+'" >' +
             '<div class="bg innerBg">' +
             '<div class="controls left-control" style="position:fixed; height:100%; width:40px; background-color:rgb(97, 98, 101); z-index:100">' +
             '<img class = "navigate-left" src="Preview-Icons/big-left-arrow.png" alt="Left-Navigation" style="padding:10px; position:relative; top:50%; translate:transform(0,-25px)">' +

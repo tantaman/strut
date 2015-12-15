@@ -1,6 +1,6 @@
 <div class="button">
-	<a class="">
-        <img src="img/UI_icons/share.png" alt="overview"></br>
+	<a class="overview">
+        <i class="icon-th-large icon-white"></i></br>
 		Overview
 	</a>
 </div>
