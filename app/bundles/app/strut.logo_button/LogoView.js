@@ -15,7 +15,8 @@ function(Backbone, LogoModel) {
 		render: function() {
 			this.$el.html(this._template());
 
-			var $dropdown = this.$el.find('.dropdown-menu');
+			var $dropdown = this.$el.find('.dropdown-menu').height($( window ).height()-40);
+                    //.on("mouseout", function(){$(this).css("display", "none")});
 			this.model.items.forEach(function(item) {
 				$dropdown.append(item.render().$el);
 			}, this);

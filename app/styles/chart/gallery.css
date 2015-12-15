@@ -1,0 +1,39 @@
+
+#chart-gallery-body{
+    
+}
+#chart-gallery-body .thumbnail{
+    height: 120px;
+    max-width: 20%;
+    position: relative;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-bottom-width: 2px;
+    cursor : pointer;
+}
+
+#chart-gallery-body .thumbnail.selected{
+    background-color: #5bb75b;
+}
+
+#chart-gallery-body .title{
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+}
+#chart-gallery-body .title p{
+    text-align: center;
+    padding: 4px;
+    margin: 0px !important;
+}
+    
+.chartGallery{
+    width : 80% !important;
+    left: 10%;
+    margin-left: 0px !important;
+}
