@@ -33,6 +33,7 @@ define(['libs/backbone'],
                 },
                 _showGallery: function (page) {
                     var perPage = 10;
+                    var that = this;
                     this.galleryElement = this.$el.find("#chart-gallery-body");
                     
                     //to prevent loading same gallery again if popup closed and opened. 
@@ -40,38 +41,34 @@ define(['libs/backbone'],
                         return;
                     page = page ? page : 0;
                     this.galleryElement.empty();
-//                    $.ajax({
-//                        url: page ? page : "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/charts",
-//                        beforeSend: function (xhr) {
-//                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
-//                        },
-//                        data: {
-//                          "perPage": perPage, "offset": perPage*page,
-//                        },
-//                        success: function (resp) {
-//                            console.log(resp);
-//                        }
-//                    });
-                    // building dummy response to work until we get api ready
-                    var resp = {"total": 338, "next": "/v1/charts?offset=0&perPage=0", "perPage": 10, "offset": 0, "prev": "/v1/charts?offset=0&perPage=0", "results": [{"chartId": "MXzSwyM=", "chartType": "BAR_CHART", "height": 600, "subType": "100%", "width": 520, "chartName": "Standard Account Sample: Facebook Penetration", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzSwyM="}, {"chartId": "MXzSwis=", "chartType": "BAR_CHART", "height": 400, "subType": "clustered", "width": 560, "chartName": "Free Account Sample: The Social Media Landscape", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzSwis="}, {"chartId": "MXzQwiM=", "chartType": "BAR_CHART", "height": 400, "subType": "clustered", "width": 560, "chartName": "Facebook Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzQwiM="}, {"chartId": "MXzRyS0=", "chartType": "AREA_CHART", "height": 400, "subType": null, "width": 560, "chartName": "User Population", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRyS0="}, {"chartId": "MXzRzi8=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 560, "chartName": "Total", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRzi8="}, {"chartId": "MXzRzCM=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 450, "chartName": "Facebook Penetration", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzRzCM="}, {"chartId": "MXzWyis=", "chartType": "BAR_CHART", "height": 400, "subType": "stacked", "width": 450, "chartName": "Users and Non-Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyis="}, {"chartId": "MXzWyik=", "chartType": "AREA_CHART", "height": 400, "subType": null, "width": 450, "chartName": "Social Media Users", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyik="}, {"chartId": "MXzWyiM=", "chartType": "LINE_CHART", "height": 400, "subType": "", "width": 450, "chartName": "Social Media Users Across Platforms", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWyiM="}, {"chartId": "MXzWySM=", "chartType": "COLUMN_CHART", "height": 450, "subType": "clustered", "width": 560, "chartName": "iPad Ownership", "imageURL": "stageaccounts2.icharts.net/icharts/chartImage.jsp?id=MXzWySM="}]};
-                    var galleryData = {
-                        previous: resp.previous,
-                        next: resp.next,
-                        offset: resp.offset, //<index of the first object returned in this query>
-                        total: resp.total, //<total number of objects>
-                        perPage: resp.perPage
-                    };
-                    this.galleryElement.data("gallery", galleryData);
-                    this._thumbnailProperties = this._getThumbnailProperties(resp.perPage);
-                    var chartList = resp.results;
-                    $.each(chartList, function (i, v) {
-                        if (i >= resp.perPage)
-                            return false;
-                        this._showChartThumbnail(v, resp.offset+i);
-                    }.bind(this));
-                    if(!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
-                        this._showPagination(galleryData);
-
+                    $.ajax({
+                        url: page ? page : "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/charts",
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                        },
+                        data: {
+                          "perPage": perPage, "offset": perPage*page,
+                        },
+                        success: function (resp) {
+                            var galleryData = {
+                                previous: resp.previous,
+                                next: resp.next,
+                                offset: resp.offset, //<index of the first object returned in this query>
+                                total: resp.total, //<total number of objects>
+                                perPage: resp.perPage
+                            };
+                            that.galleryElement.data("gallery", galleryData);
+                            that._thumbnailProperties = that._getThumbnailProperties(resp.perPage);
+                            var chartList = resp.results;
+                            $.each(chartList, function (i, v) {
+                                if (i >= resp.perPage)
+                                    return false;
+                                this._showChartThumbnail(v, resp.offset + i);
+                            }.bind(that));
+                            if (!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
+                                that._showPagination(galleryData);
+                        }
+                    });                   
                 },
                 _showPagination: function (galleryData){
                     var no_of_pages = Math.ceil(galleryData.total/galleryData.perPage) ;
