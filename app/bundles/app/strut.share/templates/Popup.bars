@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<button class="close" data-dismiss="modal">×</button>
+	<!-- <button class="close" data-dismiss="modal">×</button> -->
 	<h3>{{title}}</h3>
 </div>
 <div class="modal-body" style="overflow: hidden">
