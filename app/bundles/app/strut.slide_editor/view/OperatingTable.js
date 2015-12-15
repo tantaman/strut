@@ -59,7 +59,8 @@ define(['libs/backbone',
                         else {
                             actualAvailableWidthforSlideContainer = actualAvailableHeightforSlideContainer * (16 / 9);
                         }
-
+                        $(".operatingTable").height(actualAvailableHeightforSlideContainer);		
+-                       $(".operatingTable").width(actualAvailableWidthforSlideContainer);
                     });
 
                     this._$slideContainer = $('<div class="slideContainer"></div>')
