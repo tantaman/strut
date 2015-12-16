@@ -167,7 +167,7 @@
         $("#botton-container").on("mouseenter", function () {
             $(this).show();
         });
-        $("section.slideContainer").on("mouseout", function () {
+        $("section.slideContainer").on("mouseleave", function () {
             $("#botton-container").hide();
         });
 
