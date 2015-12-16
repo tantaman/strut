@@ -22,6 +22,20 @@
                 "cursor": "pointer",
                 "line-height": "30px",
             });
+            
+            //Calculating for fullscreen
+            var bodyHeight = screen.height;
+                var bodyWidth = screen.width;
+                var actualAvailableHeightforSlide = bodyHeight;
+                var actualAvailableWidthforSlide = bodyWidth - 80; // 80px as the area for two side buttons
+
+                if (actualAvailableWidthforSlide < actualAvailableHeightforSlide * (16 / 9)) {
+                    actualAvailableHeightforSlide = actualAvailableWidthforSlide * (9 / 16);
+                }
+
+                else {
+                    actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
+                }
 
 //    $("#botton-container").hover(
 //            function () {
@@ -49,8 +63,52 @@
 
     $("#fullscreen").click(function () {
         Reveal.fullScreen();
-
+        
+        //TODO: Remove setTimeout
+        setTimeout(function(){
+                    $(".slides").css({"top" : (bodyHeight - actualAvailableHeightforSlide) / 2 + "px", height:actualAvailableHeightforSlide + "px", width:actualAvailableWidthforSlide+"px"});
+                    $(".controls.right-control").css({"right": 0, "left":""});
+                    $(".controls.left-control").css("left", 0);
+        }, 100);
+        
+        
+        
+//        if (window.Promise) {
+//            console.log('Promise found');
+//
+//            var promise = new Promise(function (resolve, reject) {
+//                var bodyHeight = screen.height;
+//                console.log(screen.height);
+//                var bodyWidth = screen.width;
+//                var actualAvailableHeightforSlide = bodyHeight;
+//                var actualAvailableWidthforSlide = bodyWidth - 80; // 80px as the area for two side buttons
+//
+//                if (actualAvailableWidthforSlide < actualAvailableHeightforSlide * (16 / 9)) {
+//                    actualAvailableHeightforSlide = actualAvailableWidthforSlide * (9 / 16);
+//                    console.log(actualAvailableHeightforSlide);
+//                    console.log(actualAvailableWidthforSlide);
+//                }
+//
+//                else {
+//                    actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
+//                }
+//                resolve({width: actualAvailableWidthforSlide, height: actualAvailableHeightforSlide});
+//
+//            });
+//
+//            promise.then(function (dimensions) {
+//                console.log($(".slides"));
+//                $(".slides").height(dimensions.height).width(dimensions.width).css("margin", "0 " + ($("body").width() - dimensions.width) / 2 + "px");
+//                Reveal.fullScreen();
+//                
+//                console.log($(".slides"));
+//                
+//            }, function () {
+//            });
+//
+//        }
     });
+
 
     $("#gallery").click(function () {
         Reveal.toggleOverview();
@@ -101,12 +159,18 @@
         var l = $(".slides").offset().left;
         
         $(".left-control").css("left", l - 40);
-        $(".right-control").css("left", l + w + 40);
-        
-        $("section.slideContainer").on("mouseenter", function(){$("#botton-container").show();});
-        $("#botton-container").on("mouseenter", function(){$(this).show();});
-        $("section.slideContainer").on("mouseout", function(){$("#botton-container").hide();});
-         
+        $(".right-control").css("left", l + w);
+
+        $("section.slideContainer").on("mouseenter", function () {
+            $("#botton-container").show();
+        });
+        $("#botton-container").on("mouseenter", function () {
+            $(this).show();
+        });
+        $("section.slideContainer").on("mouseout", function () {
+            $("#botton-container").hide();
+        });
+
     });
 
 //    $(document).ready(function () {
