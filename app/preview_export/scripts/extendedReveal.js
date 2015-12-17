@@ -1,18 +1,19 @@
 (function () {
     var autoSLideStatus = 0;
-    var bottonList = "<li id='autoplay'><img alt='Play' src='Preview-Icons/play.png'></li>"
-            + "<li id='gallery'><img src='Preview-Icons/chart-gallery.png' alt='Gallery'></li>"
-            + "<li id='edit'><img src='Preview-Icons/edit.png' alt='Edit'></li>"
-            + "<li id='refresh'><img src='Preview-Icons/refresh.png' alt='Refresh'></li>"
-            + "<li id='download'><img src='Preview-Icons/download.png' alt='Download'></li>"
-            + "<li id='fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
+    var bottonList = "<li id='autoplay' class='hastip' data-title='Autoplay'><img alt='Play' src='Preview-Icons/play.png'></li>"
+            + "<li id='gallery' class='hastip' data-title='Gallery'><img src='Preview-Icons/chart-gallery.png' alt='Gallery'></li>"
+            + "<li id='edit' class='hastip' data-title='Edit'><img src='Preview-Icons/edit.png' alt='Edit'></li>"
+            + "<li id='refresh' class='hastip' data-title='Refresh'><img src='Preview-Icons/refresh.png' alt='Refresh'></li>"
+            + "<li id='download' class='hastip' data-title='Download'><img src='Preview-Icons/download.png' alt='Download'></li>"
+            + "<li id='fullscreen' class='hastip' data-title='Fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
 
 
-    $("body").append("<div style='position:absolute; z-index:1; bottom:10px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style='position:absolute; z-index:1; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("#botton-container").css("bottom", ($("body").height() - slideDimention.height) / 2 + 10);
 
     $("#botton-container li")
             .css({
-//                "position": "absolute",
+                "position": "relative",
                 "display": "inline-block",
                 "width": "50px",
                 "height": "50px",
@@ -21,7 +22,14 @@
                 "text-align": "center",
                 "cursor": "pointer",
                 "line-height": "30px",
-            });
+                })
+            .append(function(){return "<div class='toolTip'><div>" + $(this).attr("data-title") + "</div></div>"})
+            .hover(function(){$(this).find("div.toolTip").show()}, function(){$(this).find("div.toolTip").hide()});
+//            <div class='pointer'></div>
+//            $(".pointer").css("transform", function(){
+//                console.log("translateX(" + $(this).closest("li").innerWidth()/2 + ")");
+//                return "translateX(" + $(this).closest("li").innerWidth()/2 + "px)";
+//            })
             
             //Calculating for fullscreen
             var bodyHeight = screen.height;
@@ -71,8 +79,15 @@
                     $(".controls.left-control").css("left", 0);
         }, 100);
         
+//Call Back eqivalant of above issue for remove setTimeout but not working.        
+//        (function(fullScreenFunc){
+//                    $(".slides").css({"top" : (bodyHeight - actualAvailableHeightforSlide) / 2 + "px", height:actualAvailableHeightforSlide + "px", width:actualAvailableWidthforSlide+"px"});
+//                    $(".controls.right-control").css({"right": 0, "left":""});
+//                    $(".controls.left-control").css("left", 0);
+//                    fullScreenFunc();
+//        })(Reveal.fullScreen);
         
-        
+//Added promises to the above function      
 //        if (window.Promise) {
 //            console.log('Promise found');
 //
