@@ -1,7 +1,8 @@
-<input type="text" class="chartBookName" placeholder="ChartBook ID"></input>
+<p class="warning"></p> 
+<input type="text" class="cb-ip-field" placeholder="ChartBook ID"></input>
 <ul class="nav nav-pills nav-stacked">
 	{{#files}}
-	<li data-chartBookName="{{id}}"><a>{{name}} 
+	<li data-chartBookId="{{id}}"><a>{{name}} 
          <!-- <button class="close pull-right">×</button> -->
         </a>
         </li>

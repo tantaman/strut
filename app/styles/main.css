@@ -297,5 +297,23 @@ i.fa{
 }
 .warning{
     color: #D8000C;
-    margin: 16px;
+}
+.success{
+   color: #78AB46;
+   margin: 16px;
+}
+.response{
+   margin: 16px;
+   font-style: italic;
+}
+
+.page-section .pagenum, .page-section .more{
+    text-decoration: none;
+    font-size: 24px;
+    margin: 8px;
+    color: #E1E3E6;
+}   
+.page-section .pagenum.active{
+    color: #B1B5C1;
+    font-size: 26px;
 }

@@ -37,8 +37,8 @@ function(StorageProviders) {
 			return this._providers.on.apply(this._providers, arguments);
 		},
 
-		store: function(identifier, data, cb) {
-			this.currentProvider().setContents(identifier, data, cb);
+		store: function(identifier, data, cb, model) {
+			this.currentProvider().setContents(identifier, data, cb, model);
 			return this;
 		},
 
@@ -52,8 +52,8 @@ function(StorageProviders) {
 			return this;
 		},
                 
-                deletePresentation: function(identifier, cb) {
-                    this.currentProvider().deleteChartBook(identifier, cb);
+                deletePresentation: function(identifier) {
+                    this.currentProvider().deleteChartBook(identifier);
                 },
                 
 		list: function(path, cb) {
@@ -61,19 +61,19 @@ function(StorageProviders) {
 			return this;
 		},
 
-		listPresentations: function(path, cb) {
-			this.currentProvider().ls(path, /.*\.strut$/, cb);
+		listPresentations: function(path, cb, page_num) {
+			this.currentProvider().ls(path, /.*\.strut$/, cb, page_num);
 			return this;
 		},
 
-		savePresentation: function(identifier, data, cb) {
+		savePresentation: function(identifier, data, cb, model) {
 			var idx = identifier.indexOf('.strut');
 			if (idx == -1 || (idx + '.strut'.length != identifier.length)) {
 				identifier += '.strut';
 			}
 			window.sessionMeta.lastPresentation = identifier;
 
-			this.store(identifier, data, cb);
+			this.store(identifier, data, cb, model);
 		}
 	};
 

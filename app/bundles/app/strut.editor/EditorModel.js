@@ -86,7 +86,7 @@ define(['libs/backbone',
 				window.sessionMeta.num = num;
 
 				this.importPresentation({
-	        		chartBookName: "presentation-" + num,
+	        		chartBookName: "chartBook-" + num,
 	        		slides: []
 	      		});
 				this._deck.create();
@@ -124,7 +124,7 @@ define(['libs/backbone',
 				var fname = this._deck.get('chartBookName');
 				if (fname == null) {
 					// TODO...
-					fname = 'presentation-unnamed';
+					fname = 'ChartBook-unnamed';
 					this._deck.set('chartBookName', fname);
 				}
 

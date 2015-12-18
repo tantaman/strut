@@ -121,6 +121,7 @@ define(["common/Calcium",
 				this.set("activeSlide", undefined);
 				this.set("background", rawObj.background);
 				this.set("chartBookName", rawObj.chartBookName);
+                                this.set("id", rawObj.id);
 				this.set('surface', rawObj.surface);
 				this.set('customStylesheet', rawObj.customStylesheet);
 				this.set('deckVersion', rawObj.deckVersion);
