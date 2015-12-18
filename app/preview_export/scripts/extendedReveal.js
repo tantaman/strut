@@ -162,15 +162,12 @@
 //
 //    });
 
-    Reveal.configure({slideNumber: true});
-    $(".slide-number").css({"text-align": "center"});
-
     $(document).ready(function () {
-        var w = $(".slides").width();
-        var l = $(".slides").offset().left;
-        
-        $(".left-control").css("left", l - 40);
-        $(".right-control").css("left", l + w);
+//        var w = $(".slides").width();
+//        var l = $(".slides").offset().left;
+//        
+//        $(".left-control").css("left", 0);
+//        $(".right-control").css("right", -40);
 
         $("section.slideContainer").on("mouseenter", function () {
             $("#botton-container").show();

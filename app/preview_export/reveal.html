@@ -59,13 +59,13 @@
                 font-weight: bold;
                 color: #9E1927;
             }
-            
+
             .toolTip div:first-child{ 
                 padding: 2px 5px;
                 border: 2px solid rgb(97, 98, 101);
                 border-radius: 5px;
             }
-            
+
             .pointer{
                 width: 0;
                 height: 0;
@@ -73,14 +73,14 @@
                 border-right: 5px solid transparent;
                 border-top: 10px solid red;
                 margin: auto;
-               
+
             }
-            
+
             #botton-container img{
                 height: 100%;
                 width: 100%;
             }
-            
+
             @media (min-width : 992px) { 
                 #botton-container li {
                     height: 50px;
@@ -109,7 +109,7 @@
                     margin: 10px;
                 }
             }
-                @media (max-width : 599px) { 
+            @media (max-width : 599px) { 
                 #botton-container li {
                     height: 22px;
                     width: 22px;
@@ -124,13 +124,7 @@
         <script src="scripts/jQuery.js"></script>
         <script src="scripts/loadPresentation.js"></script>
         <script>
-
-            ready(function () {
-                if (document.getElementById('launched-placeholder'))
-                    loadPresentation();
-                if (!window.presStarted) {
-
-                    function resizeWindow() {
+            function resizeWindow() {
                         var bodyHeight = $(window).height();
                         var bodyWidth = $(window).width();
                         var actualAvailableHeightforSlide = bodyHeight;
@@ -146,12 +140,20 @@
                         }
                         //$("section.slideContainer").height(actualAvailableHeightforSlide).width(actualAvailableWidthforSlide).css("margin","0 " + (bodyWidth - actualAvailableWidthforSlide)/2 + "px");
 
-                        $(".slides").css("margin", (bodyHeight - actualAvailableHeightforSlide) / 2 + " auto");
+//                        $(".slides").css("margin", (bodyHeight - 540) / 2 + " auto");
 
                         slideDimention = {height: actualAvailableHeightforSlide, width: actualAvailableWidthforSlide};
                     }
                     
+            ready(function () {
+                    resizeWindow();
+                if (document.getElementById('launched-placeholder'))
+                    loadPresentation();
+                if (!window.presStarted) {
+                    
                     $(document).ready(function () {
+                        console.log($(".slides").height());
+
 
                         $(window).resize(function () {
                             resizeWindow();
@@ -160,7 +162,6 @@
                             z = $(".slides").css("height");
                         });
                     });
-                    resizeWindow();
                     // Full list of configuration options available here:
                     // https://github.com/hakimel/reveal.js#configuration
 
@@ -169,8 +170,8 @@
                         progress: true,
                         history: true,
                         center: true,
-                        width: slideDimention.width,
-                        height: slideDimention.height,
+                        width: 955,
+                        height: 540,
                         theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
                         transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
 
@@ -220,6 +221,11 @@
                     }
                     Reveal.addEventListener('slidechanged', slideShown);
                     Reveal.addEventListener('ready', slideShown);
+
+                    window.onload = function () {
+                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / 955 + ", " + slideDimention.height / 540 + ")");
+                        
+                    };
                 }
             });
         </script>
