@@ -224,7 +224,10 @@
 
                     window.onload = function () {
                         $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / 955 + ", " + slideDimention.height / 540 + ")");
-                        
+                        Reveal.addEventListener( 'slidechanged', function( event ) {
+                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / 955 + ", " + slideDimention.height / 540 + ")");
+                            
+                        });                        
                     };
                 }
             });
