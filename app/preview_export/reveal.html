@@ -54,7 +54,7 @@
             .toolTip {
                 text-align: center;
                 position: absolute;
-                top:-40px;
+                top:-50px;
                 display: none;
                 font-weight: bold;
                 color: #9E1927;
@@ -62,7 +62,7 @@
             
             .toolTip div:first-child{ 
                 padding: 2px 5px;
-                border: 1px solid black;
+                border: 2px solid rgb(97, 98, 101);
                 border-radius: 5px;
             }
             
@@ -74,6 +74,47 @@
                 border-top: 10px solid red;
                 margin: auto;
                
+            }
+            
+            #botton-container img{
+                height: 100%;
+                width: 100%;
+            }
+            
+            @media (min-width : 992px) { 
+                #botton-container li {
+                    height: 50px;
+                    width: 50px;
+                    margin: 10px 15px;
+                }
+            }
+            @media (min-width: 768px) and (max-width : 991px) { 
+                #botton-container li {
+                    height: 40px;
+                    width: 40px;
+                    margin: 10px 12px;
+                }
+            }
+            @media (min-width: 660px) and (max-width : 767px) { 
+                #botton-container li {
+                    height: 35px;
+                    width: 35px;
+                    margin: 10px;
+                }
+            }
+            @media (min-width: 600px) and (max-width : 659px) { 
+                #botton-container li {
+                    height: 30px;
+                    width: 30px;
+                    margin: 10px;
+                }
+            }
+                @media (max-width : 599px) { 
+                #botton-container li {
+                    height: 22px;
+                    width: 22px;
+                    margin: 5px;
+                }
             }
         </style>
 
@@ -109,17 +150,14 @@
 
                         slideDimention = {height: actualAvailableHeightforSlide, width: actualAvailableWidthforSlide};
                     }
-
+                    
                     $(document).ready(function () {
 
                         $(window).resize(function () {
-                            console.log($(".slides").css("height"));
-                            resizeWindow(2);
+                            resizeWindow();
                             $(".slides").css("height", slideDimention.height);
                             $(".slides").css("width", slideDimention.width);
                             z = $(".slides").css("height");
-                            console.log(z);
-
                         });
                     });
                     resizeWindow();
