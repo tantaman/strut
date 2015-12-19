@@ -223,9 +223,12 @@
                     Reveal.addEventListener('ready', slideShown);
 
                     window.onload = function () {
-                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / 955 + ", " + slideDimention.height / 540 + ")");
+                        //ToDO: Give the editor window dimention from the API
+//                        var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention")) || API.getDimention(); ;
+                        var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention"));
+                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
                         Reveal.addEventListener( 'slidechanged', function( event ) {
-                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / 955 + ", " + slideDimention.height / 540 + ")");
+                        $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
                             
                         });                        
                     };

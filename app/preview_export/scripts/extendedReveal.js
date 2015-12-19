@@ -40,6 +40,8 @@
                 else {
                     actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
                 }
+            
+    var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention"));
 
 //    $("#botton-container").hover(
 //            function () {
@@ -70,9 +72,11 @@
         
         //TODO: Remove setTimeout
         setTimeout(function(){
-                    $(".slides").css({"top" : (bodyHeight - actualAvailableHeightforSlide) / 2 + "px", height:actualAvailableHeightforSlide + "px", width:actualAvailableWidthforSlide+"px"});
-                    $(".controls.right-control").css({"right": 0, "left":""});
-                    $(".controls.left-control").css("left", 0);
+                $(".slides").css("transform", "translate(-50%, -50%) scale(" + actualAvailableWidthforSlide / editorPanelDimention.width + ", " + actualAvailableHeightforSlide / editorPanelDimention.height + ")");
+
+//                $(".slides").css({"top" : (bodyHeight - actualAvailableHeightforSlide) / 2 + "px", height:actualAvailableHeightforSlide + "px", width:actualAvailableWidthforSlide+"px"});
+////                    $(".controls.right-control").css({"right": 0, "left":""});
+////                    $(".controls.left-control").css("left", 0);
         }, 100);
         
 //Call Back eqivalant of above issue for remove setTimeout but not working.        
