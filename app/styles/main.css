@@ -280,9 +280,7 @@ i.fa{
 }  
 .titleContainer{
     width: 79%;
-    
-    
-    
+ 
 }
 
 .navbar-inner img {
@@ -295,3 +293,33 @@ i.fa{
     background-color: #9E1927;
     /*color: white;*/
 }
+/*media query styles*/
+@media (min-width: 320px) and (max-width : 767px) {
+    body {
+    padding-left: 0;
+    padding-right: 0;
+}
+    .navbar-inner img{
+    height: 20px;
+    width: 20px;
+    }
+}
+@media (min-width: 320px) and (max-width : 480px) {
+    body {
+    padding-left: 0;
+    padding-right: 0;
+}
+    .navbar-inner img{
+    height: 18px;
+    width: 18px;
+    }
+}
+
+
+
+/*===============================================================================*/
+@media (min-width: 1200px) { }
+@media (min-width: 992px) and (max-width : 1199px) { }
+
+@media (min-width: 320px) and (max-width : 767px) { }
+@media (min-width: 320px) and (max-width : 480px) { }
