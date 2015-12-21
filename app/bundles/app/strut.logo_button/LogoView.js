@@ -21,7 +21,7 @@ function(Backbone, LogoModel) {
                 },
                 
                 setAutoPlayTimer: function(e){
-                   console.log("Hi..");
+                   
                    var timer = $("#autoPlayTimer").val();
                    window.localStorage.setItem("autoPlayTimer", timer * 1000);
                 },

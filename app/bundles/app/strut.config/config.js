@@ -1,13 +1,27 @@
-define(function () {
+define(['jquery'],function ($) {
+        var bodyHeight = $("body").height();
+        var bodyWidth = $("body").width();
+        var actualAvailableHeightforSlide = bodyHeight - 120;
+        var actualAvailableWidthforSlide = bodyWidth - 230;
+
+        if (actualAvailableWidthforSlide < (actualAvailableHeightforSlide * (16 / 9))) {
+            actualAvailableHeightforSlide = actualAvailableWidthforSlide * (9 / 16);
+            
+        }
+        
+        else {
+            actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
+        }
+    
 	var config = {
 		slide: {
 			size: {
-				width: 1024,
-				height: 768
+				width: actualAvailableWidthforSlide,
+				height: actualAvailableHeightforSlide
 			},
 			overviewSize: {
-				width: 75,
-				height: 50
+				width: 140,
+				height: 90
 			}
 		}
 	};
@@ -24,6 +38,7 @@ define(function () {
 
 	window.config = config;
 	window.sessionMeta = sessionMeta;
+        localStorage.setItem("editorPanelDimention", JSON.stringify({height: parseInt(actualAvailableHeightforSlide), width: parseInt(actualAvailableWidthforSlide)}));
 
 	return config;
 });
