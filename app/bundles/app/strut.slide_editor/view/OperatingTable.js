@@ -45,24 +45,18 @@ define(['libs/backbone',
                     // ContextMenu.setModel(this._menuModel);
                 },
                 render: function () {
+
                     $(document).ready(function () {
-                        var operatingTableHeight = $(".operatingTable").height();
-                        var operatingTableWidth = $(".operatingTable").width();
-                        var actualAvailableHeightforSlideContainer = operatingTableHeight;
-                        var actualAvailableWidthforSlideContainer = operatingTableWidth; // 80px as the area for two side buttons
+                        var operatingTableDimension = aspectRatio();
+                        $(".operatingTable").height(operatingTableDimension.height);
+                        $(".operatingTable").width(operatingTableDimension.width);
+                        $(window).resize(function () {
+                            var operatingTableDimension = aspectRatio();
+                            $(".operatingTable").height(operatingTableDimension.height);
+                            $(".operatingTable").width(operatingTableDimension.width);
 
-                        if (actualAvailableWidthforSlideContainer < (actualAvailableHeightforSlideContainer * (16 / 9))) {
-                            actualAvailableHeightforSlideContainer = actualAvailableWidthforSlideContainer * (9 / 16);
-
-                        }
-
-                        else {
-                            actualAvailableWidthforSlideContainer = actualAvailableHeightforSlideContainer * (16 / 9);
-                        }
-                        $(".operatingTable").height(actualAvailableHeightforSlideContainer);		
--                       $(".operatingTable").width(actualAvailableWidthforSlideContainer);
+                        })
                     });
-
                     this._$slideContainer = $('<div class="slideContainer"></div>')
                     this.$el.html(this._$slideContainer);
                     //this._$slideContainer.css(config.slide.size);

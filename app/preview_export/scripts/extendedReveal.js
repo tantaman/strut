@@ -8,7 +8,7 @@
             + "<li id='fullscreen' class='hastip' data-title='Fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
 
 
-    $("body").append("<div style= ' display: none; position:absolute; z-index:1; bottom:10px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style= ' display: none; position:absolute; z-index:1; bottom:10px; transform:translate(-50%, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
     $("#botton-container").css("bottom", ($("body").height() - slideDimention.height) / 2 + 20);
 
     $("#botton-container li")
