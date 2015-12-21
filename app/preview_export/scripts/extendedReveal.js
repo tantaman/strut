@@ -8,7 +8,7 @@
             + "<li id='fullscreen' class='hastip' data-title='Fullscreen'><img src='Preview-Icons/fullscreen.png' alt='Fullscreen'></li>";
 
 
-    $("body").append("<div style= ' display: none; position:absolute; z-index:1; bottom:10px; transform:translate(-270px, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
+    $("body").append("<div style= ' display: none; position:absolute; z-index:1; bottom:10px; transform:translate(-50%, 0px); left:50%; border-radius: 10px; background-color: rgba(149, 150, 153, 0.5)' id='botton-container'><ul style = 'list-style: none'>" + bottonList + "</ul></div>");
     $("#botton-container").css("bottom", ($("body").height() - slideDimention.height) / 2 + 20);
 
     $("#botton-container li")
@@ -58,9 +58,14 @@
 //                        .css({position: "absolute"});
 //            });
 
+     var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention"));
     $("#autoplay").click(function () {
+        //If autoplay timer is not defined the default'll be 3sec
+       var autoPlayTimer = parseInt(window.localStorage.getItem("autoPlayTimer")) || 3000;
        Reveal.toggleAutoSlide();
-       Reveal.configure({autoSlide: +(autoSLideStatus = autoSLideStatus ? 0 : window.localStorage.getItem("autoPlayTimer")), loop: true});
+       Reveal.configure({autoSlide: autoPlayTimer, loop: true});
+       $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
+                        
     });
 //
 //    $("#refresh").click(function () {
@@ -124,9 +129,18 @@
 //        }
     });
 
-
+    var isOnGallery = false;
     $("#gallery").click(function () {
         Reveal.toggleOverview();
+        
+        if (isOnGallery) {
+        ($(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")"));
+        isOnGallery = false;
+        }
+        
+        else
+        isOnGallery = true; 
+            
     });
 
     $("#download").click(function () {
