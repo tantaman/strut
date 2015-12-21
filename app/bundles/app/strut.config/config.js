@@ -38,6 +38,7 @@ define(['jquery'],function ($) {
 
 	window.config = config;
 	window.sessionMeta = sessionMeta;
+        localStorage.setItem("editorPanelDimention", JSON.stringify({height: parseInt(actualAvailableHeightforSlide), width: parseInt(actualAvailableWidthforSlide)}));
 
 	return config;
 });
