@@ -94,7 +94,8 @@ a {
   user-select: none;
   border-radius : 0px !important;
   border : 0px !important;
-  background: rgba(0, 0, 0, 0.6);
+  /*background: rgba(0, 0, 0, 0.6);*/
+  margin-left: 4px;
   /* background-color: rgba(0, 0, 0, 0.99) !important; 
   background-image: linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
   background-image: 
@@ -317,3 +318,10 @@ i.fa{
     color: #B1B5C1;
     font-size: 26px;
 }
+.promptPopup.modal{
+    top: 25%;
+    width: 30%;
+    margin-left: 0;
+    left: 35%;
+}
+    

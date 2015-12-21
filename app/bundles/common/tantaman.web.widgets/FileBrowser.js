@@ -48,7 +48,7 @@ define(['libs/backbone', 'css!styles/widgets/fileBrowser.css'],
                     this.storageInterface.off(null, null, this);
                 },
                 _fileClicked: function (e) {
-                    $(".PromptPopup").addClass("hide");
+                    $(".promptPopup").addClass("hide");
                     this.$cb_ip_field.val(e.currentTarget.dataset.chartbookid);
                     this.$el.find('.active').removeClass('active');
                     $(e.currentTarget).addClass('active');

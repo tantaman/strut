@@ -65,7 +65,11 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                 type: "DELETE",
                 success: function (resp) {
                     $(".storageModal").find('.browserContent li.active').remove();
-                    handler(resp);
+                    console.log(resp);
+                    if(resp.results == 1)
+                        handler("Chartbook deleted successfully");
+                    else
+                        handler("Unable to process your request. Refresh the page and try again.");
                 }
             });
         },

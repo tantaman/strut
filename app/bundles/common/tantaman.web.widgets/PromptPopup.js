@@ -1,7 +1,7 @@
 define(['libs/backbone'],
         function (Backbone) {
             return Backbone.View.extend({
-                className: "PromptPopup modal hide",
+                className: "promptPopup modal hide",
                 events: {
                     'click .ok': '_okClicked',
                     'click .close': 'clear'
@@ -24,9 +24,9 @@ define(['libs/backbone'],
                     this.handler(this.id, this._response);
                 },
                 _response: function(resp){
-                    $(".PromptPopup").find(".modal-body").html(resp);
+                    $(".promptPopup").find(".modal-body").html(resp);
                     setTimeout(function(){ 
-                        $(".PromptPopup").addClass("hide");
+                        $(".promptPopup").addClass("hide");
                     }, 3000);
                 }
             });
