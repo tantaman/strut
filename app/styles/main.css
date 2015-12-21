@@ -324,4 +324,10 @@ i.fa{
     margin-left: 0;
     left: 35%;
 }
-    
+.ok.inactive{
+    pointer-events : none;
+    background : rgba(0, 0, 0, 0.3);
+}    
+.hideThis{
+    display : none !important;
+}

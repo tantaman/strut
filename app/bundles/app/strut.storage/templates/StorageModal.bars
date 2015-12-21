@@ -8,9 +8,11 @@
 			<li class="providerTab"><a data-provider="{{id}}">{{name}}</a></li>
 		{{/tabs}}
 	</ul> -->
+        <img src="img/loader.gif" class="hideThis loading"  style="height: 72px; width:72px; margin-left: auto;
+        margin-right: auto; display: block;" /> 
 	<div class="tabContent">
 	</div>
 </div>
 <div class="modal-footer">
-	<a href="#" class="btn btn-primary ok btn-inverse" data-action="{{action}}">{{action}}</a>
+	<a href="#" class="btn btn-primary ok btn-inverse">{{action}}</a>
 </div>

@@ -11,6 +11,7 @@ define(['libs/backbone'],
                 },
                 clear: function () {
                     this.$el.addClass("hide");
+                    $(".storageModal").find(".ok").removeClass("inactive");
                 },
                 render: function (action, handler, id) {
                     this.action = action;
@@ -22,11 +23,21 @@ define(['libs/backbone'],
                 },
                 _okClicked: function () {
                     this.handler(this.id, this._response);
+                    this.$el.find(".ok").addClass("inactive");
                 },
-                _response: function(resp){
-                    $(".promptPopup").find(".modal-body").html(resp);
+                _response: function(resp, err){
+                    $(".promptPopup").find("h4").addClass("hide");
+                    
+                    if(err){
+                        $(".promptPopup").find(".warning").removeClass("hide").html(resp);
+                    }
+                    else{
+                        $(".promptPopup").find(".success").removeClass("hide").html(resp);
+                    }    
                     setTimeout(function(){ 
                         $(".promptPopup").addClass("hide");
+                        $(".promptPopup").find(".ok").removeClass("inactive");
+                        $(".storageModal").find(".ok").removeClass("inactive");
                     }, 3000);
                 }
             });

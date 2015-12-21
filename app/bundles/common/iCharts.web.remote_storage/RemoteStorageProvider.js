@@ -23,9 +23,10 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
             var fnames = [];
             var perPage = 10;
             $.ajax({
-                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks",
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks",
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    $(".storageModal").find(".loading").removeClass("hideThis");
                 },
                 data: {
                     showPublic: true,
@@ -35,11 +36,15 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                 },
                 success: function (resp) {
 //                    console.log(resp);
+                    $(".storageModal").find(".loading").addClass("hideThis");
                     var no_of_pages = Math.ceil(Number(resp.total) / perPage);
                     for (var i = 0; i < resp.results.length; i++) {
                         fnames.push(resp.results[i]);
                     }
                     cb(fnames, false, no_of_pages, $(".storageModal").find(".page-section").length);
+                },
+                error: function(){
+                    $(".storageModal").find(".loading").addClass("hideThis");
                 }
             });
 
@@ -58,40 +63,53 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
         },
         deleteChartBookOk: function (id, handler) {
             $.ajax({
-                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    $("body").css("cursor","progress");
                 },
                 type: "DELETE",
                 success: function (resp) {
-                    $(".storageModal").find('.browserContent li.active').remove();
-                    console.log(resp);
+                    $(".storageModal").find('.browserContent li[data-chartbookid="'+id+'"]').remove();
+                    $("body").css("cursor","default");
+                    resp = JSON.parse(resp);
                     if(resp.results == 1)
                         handler("Chartbook deleted successfully");
+                    else if(resp.results == 2)
+                        handler("Chartbook has been already deleted. Please refresh the page.");
                     else
                         handler("Unable to process your request. Refresh the page and try again.");
+                },
+                error: function(err){
+                    $("body").css("cursor","default");
+                    handler("Unable to process your request. Refresh the page and try again.");
                 }
+                
             });
         },
         getContents: function (id, cb) {
 //			get the content from server with ID 
             var that = this;
             $.ajax({
-                url: "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                     $("body").css("cursor","progress");
                 },
                 success: function (resp) {
-                    console.log(resp);
-
+                    $("body").css("cursor","default");
                     var presentation = resp.results;
-                    if (resp != null) {
-                        var data = presentation;
-                        cb(data);
+                    console.log(cb);
+                    if (presentation) {
+                        cb(presentation);
                     }
-
+                    
                     return that;
+                },
+                error: function(err){
+                    $("body").css("cursor","default");
                 }
+                
             });
 
         },
@@ -104,39 +122,58 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                     // this.impl.setItem(prefix + path, JSON.stringify(data));
                     // api call to store chartbook  presentation.  
                     if (data.id) {
-                        url = "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks/" + data.id;
+                        url = "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + data.id;
                         type = "PUT";
                     }
                     else {
-                        url = "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/chartbooks";
+                        url = "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks";
                         type = "POST";
                     }
-                    console.log(data);
                     $.ajax({
                         url: url,
                         beforeSend: function (xhr) {
                             xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                             $("body").css("cursor","progress");
                         },
                         data: JSON.stringify(data),
                         contentType: "application/json",
                         type: type,
                         success: function (resp, status, xhr) {
+                            resp = JSON.parse(resp);
+                            var err= false;
+                            console.log(resp);
+                            $("body").css("cursor","auto");
+                            var msg = resp.results;
                             if (type == "POST") {
                                 var url = xhr.getResponseHeader('Location');
-                                var id = url.split("/")[url.split("/").length - 1];
-                                if (url) {
-                                    data.id = id;
-                                    model._deck.set('id', data.id);
-                                    if (cb)
-                                        cb({"msg": "ChartBook Saved Successfully.",
-                                            "result": url});
+                                if(url)
+                                    var id = url.split("/")[url.split("/").length - 1];
+                                msg = msg.replace(/IC|_/g," ");
+                                data.id = id;
+                                model._deck.set('id', data.id);
+                                if (cb){
+                                    cb({"msg": msg,"result": url || ""});
                                 }
                             }
                             else {
+                                if(msg == "1"){
+                                    msg = "Successfully Saved";
+                                }
+                                else if(msg == "2"){
+                                    msg = "Chartbook name already exists. Change the name and save again.";
+                                    err = true;
+                                }
+                                else{
+                                    msg = "Unable to process your request. Refresh the page and try again.";
+                                    err = true;
+                                }
                                 if (cb)
-                                    cb({"msg": "ChartBook Saved Successfully.",
-                                        "result": url});
+                                    cb({"msg": msg,
+                                        "result": url}, err);
                             }
+                        },
+                        error: function(){
+                             $("body").css("cursor","auto");
                         }
                     });
 
@@ -149,7 +186,7 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
             }
             else {
                 if (cb)
-                    cb({"msg": "Empty Content",
+                    cb({"msg": "Atleast add one component before you save.",
                         "result": url}, true);
             }
             return this;

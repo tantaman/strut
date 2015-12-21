@@ -4,6 +4,7 @@ define(['libs/backbone', 'css!styles/widgets/fileBrowser.css'],
                 events: {
                     destroyed: 'dispose',
                     'click li[data-chartbookid]': '_fileClicked',
+                    'keyup .cb-ip-field': '_unselectChartBook',
                     'click button.close': '_deleteClicked',
                     "click .pagenum": "_goToPage",
                     'dblclick li[data-chartbookid]': '_fileChosen'
@@ -22,7 +23,9 @@ define(['libs/backbone', 'css!styles/widgets/fileBrowser.css'],
                 render: function (action) {
                     this.$el.html('<div class="browserContent">');
                     var cbName = this.editorModel.chartBookName();
+                    console.log(action);
                     if (action == "Save") {
+                        console.log("1");
                         this.$el.find('.browserContent').html(this.saveTemplate({
                             name: cbName == "ChartBook-unnamed" ? "" : cbName
                         }));
@@ -37,6 +40,9 @@ define(['libs/backbone', 'css!styles/widgets/fileBrowser.css'],
 
 
                     return this;
+                },
+                _unselectChartBook: function() {
+                    this.$el.find("li.active").removeClass("active");
                 },
                 _goToPage: function(e) {
                     var $this = $(e.currentTarget);

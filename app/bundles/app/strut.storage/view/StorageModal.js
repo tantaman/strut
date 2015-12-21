@@ -1,6 +1,6 @@
 define(['libs/backbone', 'tantaman/web/widgets/FileBrowser', 'css!styles/storage/storageModal.css'],
         function (Backbone, FileBrowser, PromptPopup) {
-            
+
             return Backbone.View.extend({
                 className: "storageModal modal hide",
                 events: {
@@ -29,8 +29,8 @@ define(['libs/backbone', 'tantaman/web/widgets/FileBrowser', 'css!styles/storage
                     this.$el.find(".warning").html("");
                 },
                 action: function (action) {
-                    this.$el.find('.ok').html(action).data("action", action);
-
+                    this.$el.find('.ok').html(action)
+                            .data("action", action);
                 },
                 dispose: function () {
                     this.storageInterface.off(null, null, this);
@@ -73,12 +73,14 @@ define(['libs/backbone', 'tantaman/web/widgets/FileBrowser', 'css!styles/storage
                     return 'none';
                 },
                 _okClicked: function () {
+                    this.$el.find(".ok").addClass("inactive");
                     this.$el.find(".warning").html("");
                     var cb = this.$el.find(".cb-ip-field");
                     var action = this.$el.find(".ok").data("action");
                     if (this.actionHandler) {
                         if (cb.val().trim() == "" || cb.val() == undefined) {
-                            if (action == "save") {
+                            self.$el.find(".ok").removeClass("inactive");
+                            if (action == "Save") {
                                 this.$el.find(".warning").html("Enter ChartBook Name ...");
                             }
                             else {
@@ -96,15 +98,24 @@ define(['libs/backbone', 'tantaman/web/widgets/FileBrowser', 'css!styles/storage
                                                 self.$el.find(".success").html(resp.msg);
                                                 self.$el.find(".response").html(resp.result).attr("href", resp.result);
                                             }
-                                            else
+                                            if (action == "Save" || action == "Delete") {
+                                                setTimeout(function () {
+                                                    self.$el.find(".ok").removeClass("inactive");
+                                                    self.$el.modal('hide');
+                                                }, 4000);
+                                            }
+                                            else{
+                                                self.$el.find(".ok").removeClass("inactive");
                                                 self.$el.modal('hide');
+                                            }
                                         } else {
+                                            self.$el.find(".ok").removeClass("inactive");
                                             if (resp)
                                                 self.$el.find(".warning").html(resp.msg);
                                             else
                                                 self.$el.find(".warning").html(err);
-                                            // display the err
                                         }
+
                                     });
                         }
 

@@ -20,7 +20,7 @@ function() {
 
 						cb(null, err);
 					});
-				});
+				}, model);
 		},
 
 		new_: function(model) {

@@ -4,6 +4,8 @@
 </div>
 <div class="modal-body">
 	<h4 style="text-align: -webkit-center;">Are you sure want to {{title}}?</h4>
+        <p class="hide warning"></p>
+        <p class="hide success"></p>
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-inverse close">Cancel</a>

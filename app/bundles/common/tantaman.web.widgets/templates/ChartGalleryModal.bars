@@ -3,7 +3,10 @@
 	<h2>{{title}}</h2>
 </div>
 <div class="modal-body">
-	<div id="chart-gallery-body"></div>
+        <img src="img/loader.gif" class="hideThis loading"  style="height: 72px; width:72px; margin-left: auto;
+             margin-right: auto; display: block;" />
+	<div id="chart-gallery-body">
+        </div>
 
 </div>
 <div class="modal-footer">

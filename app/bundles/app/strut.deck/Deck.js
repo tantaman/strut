@@ -41,6 +41,12 @@ define(["common/Calcium",
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
 				this.set('background', 'bg-solid-light');
+                                this.set("editorPanelDimention", 
+                                        { 
+                                          "height": parseInt(operatinTableDimension.height), 
+                                          "width": parseInt(operatinTableDimension.width)
+                                        } 
+                                );
 			},
 
 			/**
