@@ -3,7 +3,7 @@
 }
 #share-popup .modal-header h3{
     color: rgba(0,0,0,0.4);
-    font-weight: 100;
+    font-weight: 600;
     margin: 8px 0;
     font-family: sans-serif;
 }
@@ -39,7 +39,8 @@
     height: 120px;
     overflow-y: auto;
     text-align: left;
-    margin: 16px 0;
+    margin: 16px 20%;
+    width: 60%;
 }
 #share-email-section{
     text-align: center;
@@ -84,4 +85,14 @@
 #share-btns{
     margin : 20px 0;
     text-align: center;
+}
+#share-btns button{
+    padding: 8px 32px;
+}
+#share-popup{
+    width: 50%;
+    left: 25%;
+    margin-left: 0px;
+    top: 15%;
+    border: 0px !important;
 }
