@@ -1,0 +1,3 @@
+<p class="warning"></p> 
+<input type="text" data-action = "save" placeholder="ChartBook Name" class="cb-ip-field" value="{{name}}"></input>
+<p class="success"></p><a class = "response" href="#"></a>

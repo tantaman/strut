@@ -180,6 +180,22 @@ Handlebars.registerHelper('with', function(context, options) {
   if (!Handlebars.Utils.isEmpty(context)) return options.fn(context);
 });
 
+Handlebars.registerHelper('times', function(n, block) {
+    var accum = '';
+    var hide = true;
+    for (var i = 0; i < n; i++) {
+        hide = false;
+        if (i > 4 && n > 5) {
+            hide = true;
+        }
+        accum += "<a href='#' data-page = '" + i + "' class='pagenum" + (i === 0 ? " active" : " ") + "" + (hide ? " hide" : " ") + "'>" + (i + 1) + "</a>";
+        if (i === n - 1 && n > 5) {
+            accum += "<a class='more nextPages'>>></a>";
+        }
+    }
+    return accum;
+});
+
 Handlebars.registerHelper('log', function(context, options) {
   var level = options.data && options.data.level != null ? parseInt(options.data.level, 10) : 1;
   Handlebars.log(level, context);
@@ -187,7 +203,7 @@ Handlebars.registerHelper('log', function(context, options) {
 ;
 // lib/handlebars/utils.js
 
-var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
+var errorProps = ['description', 'chartBookName', 'lineNumber', 'message', 'name', 'number', 'stack'];
 
 Handlebars.Exception = function(message) {
   var tmp = Error.prototype.constructor.apply(this, arguments);

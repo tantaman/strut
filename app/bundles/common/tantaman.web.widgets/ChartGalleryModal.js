@@ -42,14 +42,16 @@ define(['libs/backbone'],
                     page = page ? page : 0;
                     this.galleryElement.empty();
                     $.ajax({
-                        url: page ? page : "https://stageaccounts2.icharts.net/gallery2.0/rest/v1/charts",
+                        url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/charts",
                         beforeSend: function (xhr) {
                             xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                            that.galleryElement.siblings(".loading").removeClass("hideThis");
                         },
                         data: {
-                          "perPage": perPage, "offset": perPage*page,
+                          "perPage": perPage, "offset": perPage*page
                         },
                         success: function (resp) {
+                            that.galleryElement.siblings(".loading").addClass("hideThis");
                             var galleryData = {
                                 previous: resp.previous,
                                 next: resp.next,
@@ -67,6 +69,9 @@ define(['libs/backbone'],
                             }.bind(that));
                             if (!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
                                 that._showPagination(galleryData);
+                        },
+                        error: function(){
+                            that.galleryElement.siblings(".loading").addClass("hideThis");
                         }
                     });                   
                 },

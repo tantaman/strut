@@ -40,6 +40,7 @@
 .chartGallery{
     width : 60% !important;
     left: 20%;
+    top: 6%;
     margin-left: 0px !important;
 }
 .chartGallery .modal-footer{

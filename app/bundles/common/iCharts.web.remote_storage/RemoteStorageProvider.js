@@ -1,85 +1,197 @@
-define(function() {
-	var prefix = "strut-";
-	function RemoteStorageProvider() {
-		this.name = "Remote Storage";
-		this.id = "remotestorage";
-	}
-	var alerted = false;
+define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
+    function RemoteStorageProvider() {
+        this.name = "Remote Storage";
+        this.id = "remotestorage";
+    }
+    var alerted = false;
 
-	RemoteStorageProvider.prototype = {
-		ready: function() {
-			return true;
-		},
+    var $modals = $("#modals");
+    PromptPopup = new PromptPopup();
+    this.promptPopupTemplate = JST['strut.storage/PromptPopup'];
 
-		bg: function() {
+    RemoteStorageProvider.prototype = {
+        ready: function () {
+            return true;
+        },
+        bg: function () {
 
-		},
+        },
+        ls: function (path, regex, cb, page_num) {
+            // Paths are currently ignored
+            //load the files already saved in the folder
+            page_num = page_num || 0;
+            var fnames = [];
+            var perPage = 10;
+            $.ajax({
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    $(".storageModal").find(".loading").removeClass("hideThis");
+                },
+                data: {
+                    showPublic: true,
+                    sortBy: "created",
+                    offset: perPage * page_num,
+                    perPage: perPage
+                },
+                success: function (resp) {
+//                    console.log(resp);
+                    $(".storageModal").find(".loading").addClass("hideThis");
+                    var no_of_pages = Math.ceil(Number(resp.total) / perPage);
+                    for (var i = 0; i < resp.results.length; i++) {
+                        fnames.push(resp.results[i]);
+                    }
+                    cb(fnames, false, no_of_pages, $(".storageModal").find(".page-section").length);
+                },
+                error: function(){
+                    $(".storageModal").find(".loading").addClass("hideThis");
+                }
+            });
 
-		ls: function(path, regex, cb) {
-			// Paths are currently ignored
-			//load the files already saved in the folder
-                     
-                        var numFiles = 0;
-			var fnames = [];
-			for (var i = 0; i < numFiles; ++i) {
-				var fname = this.impl.key(i);
-				if (fname.indexOf(prefix) == 0 &&
-					(regex == null || regex.exec(fname) != null)) {
-					fnames.push(fname.substring(prefix.length));
-				}
-			}
-
-			cb(fnames);
-
-			return this;
-		},
-
-		rm: function(path, cb) {
-			this.impl.removeItem(prefix + path);
-			if (cb)
-				cb(true);
-			return this;
-		},
-
-		getContents: function(path, cb) {
+            return this;
+        },
+        rm: function (path, cb) {
+//            this.impl.removeItem(prefix + path);
+//            if (cb)
+//                cb(true);
+//            return this;
+        },
+        deleteChartBook: function (id) {
+            PromptPopup.render("Delete", this.deleteChartBookOk, id);
+            $modals.append(PromptPopup.$el);
+            PromptPopup.$el.removeClass("hide");
+        },
+        deleteChartBookOk: function (id, handler) {
+            $.ajax({
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    $("body").css("cursor","progress");
+                },
+                type: "DELETE",
+                success: function (resp) {
+                    $(".storageModal").find('.browserContent li[data-chartbookid="'+id+'"]').remove();
+                    $("body").css("cursor","default");
+                    resp = JSON.parse(resp);
+                    if(resp.results == 1)
+                        handler("Chartbook deleted successfully");
+                    else if(resp.results == 2)
+                        handler("Chartbook has been already deleted. Please refresh the page.");
+                    else
+                        handler("Unable to process your request. Refresh the page and try again.");
+                },
+                error: function(err){
+                    $("body").css("cursor","default");
+                    handler("Unable to process your request. Refresh the page and try again.");
+                }
+                
+            });
+        },
+        getContents: function (id, cb) {
 //			get the content from server with ID 
-                        var item;
-                        if (item != null) {
-				try {
-					var data = JSON.parse(item);
-					cb(data);
-				} catch (e) {
-					cb(null, e);
-				}
-			}
+            var that = this;
+            $.ajax({
+                url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                     $("body").css("cursor","progress");
+                },
+                success: function (resp) {
+                    $("body").css("cursor","default");
+                    var presentation = resp.results;
+                    console.log(cb);
+                    if (presentation) {
+                        cb(presentation);
+                    }
+                    
+                    return that;
+                },
+                error: function(err){
+                    $("body").css("cursor","default");
+                }
+                
+            });
 
-			return this;
-		},
+        },
+        setContents: function (path, data, cb, model) {
+            if (!(data["slides"].length == 0 || (data["slides"].length == 1 && data["slides"][0]["components"].length == 0))) {
+                data.chartBookName = $(".storageModal").find(".cb-ip-field").val() || data.chartBookName;
+                model._deck.set('chartBookName', data.chartBookName);
+                var url, type;
+                try {
+                    // this.impl.setItem(prefix + path, JSON.stringify(data));
+                    // api call to store chartbook  presentation.  
+                    if (data.id) {
+                        url = "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + data.id;
+                        type = "PUT";
+                    }
+                    else {
+                        url = "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks";
+                        type = "POST";
+                    }
+                    $.ajax({
+                        url: url,
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                             $("body").css("cursor","progress");
+                        },
+                        data: JSON.stringify(data),
+                        contentType: "application/json",
+                        type: type,
+                        success: function (resp, status, xhr) {
+                            resp = JSON.parse(resp);
+                            var err= false;
+                            console.log(resp);
+                            $("body").css("cursor","auto");
+                            var msg = resp.results;
+                            if (type == "POST") {
+                                var url = xhr.getResponseHeader('Location');
+                                if(url)
+                                    var id = url.split("/")[url.split("/").length - 1];
+                                msg = msg.replace(/IC|_/g," ");
+                                data.id = id;
+                                model._deck.set('id', data.id);
+                                if (cb){
+                                    cb({"msg": msg,"result": url || ""});
+                                }
+                            }
+                            else {
+                                if(msg == "1"){
+                                    msg = "Successfully Saved";
+                                }
+                                else if(msg == "2"){
+                                    msg = "Chartbook name already exists. Change the name and save again.";
+                                    err = true;
+                                }
+                                else{
+                                    msg = "Unable to process your request. Refresh the page and try again.";
+                                    err = true;
+                                }
+                                if (cb)
+                                    cb({"msg": msg,
+                                        "result": url}, err);
+                            }
+                        },
+                        error: function(){
+                             $("body").css("cursor","auto");
+                        }
+                    });
 
-		setContents: function(path, data, cb) {
-			try {
-//				this.impl.setItem(prefix + path, JSON.stringify(data));
-                                // api call to store chartbook  presentation.  
-                            $.ajax({
-                               url : "",
-                               data : data,
-                               type : "post",
-                               success : function(resp){
-                                   
-                               }
-                            });    
-                                
-			} catch (e) {
-				if (!alerted) {
-					alerted = true;
-					alert("Chartbook currently uses filstorage to save presentations which is limited to between 2.5 and 5mb.\n\nYou are currently over this limit so your presentation will not be saved.  You may continue editing, however.\n\nTry removing any images you dragged in and link to them instead.\n\nWe're working on improving the storage capacity!  5mb should be good if you link to your images (e.g., file://path/to/image or http://url/of/image).\n\nSorry for the inconvenience that this may cause.  We are working to resolve the issue!");
-				}
-			}
-			if (cb)
-				cb(true);
-			return this;
-		}
-	};
+                } catch (e) {
+                    if (!alerted) {
+                        alerted = true;
+                        alert("Sorry for the inconvenience that this may cause.  We are working to resolve the issue!");
+                    }
+                }
+            }
+            else {
+                if (cb)
+                    cb({"msg": "Atleast add one component before you save.",
+                        "result": url}, true);
+            }
+            return this;
+        }
+    };
 
-	return RemoteStorageProvider;
+    return RemoteStorageProvider;
 });

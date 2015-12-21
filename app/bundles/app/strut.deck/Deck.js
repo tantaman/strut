@@ -41,6 +41,12 @@ define(["common/Calcium",
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
 				this.set('background', 'bg-solid-light');
+                                this.set("editorPanelDimention", 
+                                        { 
+                                          "height": parseInt(operatinTableDimension.height), 
+                                          "width": parseInt(operatinTableDimension.width)
+                                        } 
+                                );
 			},
 
 			/**
@@ -120,7 +126,8 @@ define(["common/Calcium",
 				}
 				this.set("activeSlide", undefined);
 				this.set("background", rawObj.background);
-				this.set("fileName", rawObj.fileName);
+				this.set("chartBookName", rawObj.chartBookName);
+                                this.set("id", rawObj.id);
 				this.set('surface', rawObj.surface);
 				this.set('customStylesheet', rawObj.customStylesheet);
 				this.set('deckVersion', rawObj.deckVersion);
