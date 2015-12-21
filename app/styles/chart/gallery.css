@@ -1,0 +1,65 @@
+
+#chart-gallery-body{
+    
+}
+#chart-gallery-body .thumbnail{
+    position: relative;
+    padding: 6px !important;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: 5px 5px;
+    border: 1px solid #E1E3E6;
+    cursor: pointer;
+}
+
+#chart-gallery-body .thumbnail.selected{
+    background-color: #B1B5C1;
+}
+
+#chart-gallery-body .title{
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+}
+#chart-gallery-body .title p{
+    text-align: center;
+    padding: 4px;
+    font-size: large;
+    font-family: sans-serif;
+    margin: 0px !important;
+    line-height: 24px;
+}
+.chartGallery .ok img{
+    height:36px;
+    width:36px;
+    margin-right: 32px;
+}    
+.chartGallery{
+    width : 60% !important;
+    left: 20%;
+    margin-left: 0px !important;
+}
+.chartGallery .modal-footer{
+    background: white !important;
+}
+.chartGallery .modal-header{
+    text-align: center;
+    color: #B1B5C1;
+    padding: 8px;
+}
+.chartGallery .modal-header h2{
+    margin-bottom: 0px;
+}
+.chartGallery .chart-gallery-pagenum, .chartGallery .more{
+    text-decoration: none;
+    font-size: 24px;
+    margin: 8px;
+    color: #E1E3E6;
+}   
+.chartGallery .chart-gallery-pagenum.active{
+    color: #B1B5C1;
+    font-size: 26px;
+}

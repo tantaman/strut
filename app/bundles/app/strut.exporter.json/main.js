@@ -4,7 +4,7 @@ function(View) {
 
 	var service = {
 		createView: function(editorModel) {
-			return new View(editorModel.exportable);
+			return new View(editorModel);
 		}
 	};
 

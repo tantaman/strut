@@ -18,17 +18,17 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 		}
 	};
 
-	var surfaceBgProviderFactory = {
-		create: function(editorModel) {
-			return new BackgroundProvider({
-				backgrounds: Surfaces,
-				editorModel: editorModel,
-				selector: '.strut-surface',
-				attr: 'Surface',
-				template: JST['strut.themes/SurfaceChooserDropdown']
-			});
-		}
-	};
+//	var surfaceBgProviderFactory = {
+//		create: function(editorModel) {
+//			return new BackgroundProvider({
+//				backgrounds: Surfaces,
+//				editorModel: editorModel,
+//				selector: '.strut-surface',
+//				attr: 'Surface',
+//				template: JST['strut.themes/SurfaceChooserDropdown']
+//			});
+//		}
+//	};
 
 	var stylesheetProviderFactory = {
 		create: function(editorModel) {
@@ -55,16 +55,16 @@ function(BackgroundProvider, Backgrounds, Surfaces, StylesheetProvider, ClassEdi
 				}
 			}, slideBgProviderFactory);
 
-			registry.register({
-				interfaces: 'strut.ThemeProvider',
-				meta: {
-					modes: {
-						'slide-editor': true,
-						'overview': true,
-					},
-					overflow: false
-				}
-			}, surfaceBgProviderFactory);
+//			registry.register({
+//				interfaces: 'strut.ThemeProvider',
+//				meta: {
+//					modes: {
+//						'slide-editor': true,
+//						'overview': true,
+//					},
+//					overflow: false
+//				}
+//			}, surfaceBgProviderFactory);
 
 			registry.register({
 				interfaces: 'strut.ThemeProvider',
