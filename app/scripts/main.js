@@ -1,4 +1,5 @@
 require.config({
+        waitSeconds: 0,
 	paths: {
 		libs: "../scripts/libs",
 		preview_export: "../preview_export",
@@ -45,6 +46,7 @@ require.config({
     	'strut/well_context_buttons': '../bundles/app/strut.well_context_buttons',
     	'strut/config': '../bundles/app/strut.config',
     	'strut/transition_editor': '../bundles/app/strut.transition_editor',
+        'strut/share': '../bundles/app/strut.share',
 
     	'tantaman/web': '../bundles/common/tantaman.web',
 		'tantaman/web/local_storage': '../bundles/common/tantaman.web.local_storage',

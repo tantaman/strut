@@ -2,6 +2,7 @@ define(['libs/backbone',
 	'jquery.multisortable',
 	'strut/slide_snapshot/SlideSnapshot',
 	'common/Throttler',
+        
 	'strut/editor/GlobalEvents',
 	'css!styles/slide_editor/slideWell.css',
 	"tantaman/web/undo_support/CmdListFactory"],
@@ -271,7 +272,7 @@ define(['libs/backbone',
 			 */
 			dispose: function() {
 				this._deck.off(null, null, this);
-				this._contextMenu.dispose();
+//				this._contextMenu.dispose();
 				GlobalEvents.off(null, null, this);
 			},
 

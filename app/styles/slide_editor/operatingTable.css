@@ -11,6 +11,7 @@
     bottom: 20px;
     right: 30px;
     border: 1px solid transparent;
+    margin: auto;
 }
 
 .operatingTable .slideContainer {
@@ -50,7 +51,6 @@
     padding: 0 !important;
     /*padding: 20px 0px 0px 0px;*/
     box-sizing: border-box;
-    margin-right: 30px;
 }
 
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
