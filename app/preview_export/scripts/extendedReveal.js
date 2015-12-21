@@ -58,9 +58,14 @@
 //                        .css({position: "absolute"});
 //            });
 
+     var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention"));
     $("#autoplay").click(function () {
+        //If autoplay timer is not defined the default'll be 3sec
+       var autoPlayTimer = parseInt(window.localStorage.getItem("autoPlayTimer")) || 3000;
        Reveal.toggleAutoSlide();
-       Reveal.configure({autoSlide: +(autoSLideStatus = autoSLideStatus ? 0 : window.localStorage.getItem("autoPlayTimer")), loop: true});
+       Reveal.configure({autoSlide: autoPlayTimer, loop: true});
+       $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
+                        
     });
 //
 //    $("#refresh").click(function () {
@@ -124,9 +129,18 @@
 //        }
     });
 
-
+    var isOnGallery = false;
     $("#gallery").click(function () {
         Reveal.toggleOverview();
+        
+        if (isOnGallery) {
+        ($(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")"));
+        isOnGallery = false;
+        }
+        
+        else
+        isOnGallery = true; 
+            
     });
 
     $("#download").click(function () {

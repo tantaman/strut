@@ -42,6 +42,7 @@ define(['jquery'], function ($) {
         generator_index: 0
     };
 
+    localStorage.setItem("editorPanelDimention", JSON.stringify({height: parseInt(operatinTableDimension.height), width: parseInt(operatinTableDimension.width)}));
     window.config = config;
     window.sessionMeta = sessionMeta;
     window.aspectRatio = aspectRatio;
