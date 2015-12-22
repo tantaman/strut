@@ -28,7 +28,6 @@ define(['jquery'], function ($) {
                 width: 140,
                 height: 90
             }
-
         }
     };
 
