@@ -88,7 +88,6 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
             });
         },
         getContents: function (id, cb) {
-//			get the content from server with ID 
             var that = this;
             $.ajax({
                 url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
@@ -99,7 +98,6 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                 success: function (resp) {
                     $("body").css("cursor","default");
                     var presentation = resp.results;
-                    console.log(cb);
                     if (presentation) {
                         cb(presentation);
                     }
@@ -141,7 +139,6 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                         success: function (resp, status, xhr) {
                             resp = JSON.parse(resp);
                             var err= false;
-                            console.log(resp);
                             $("body").css("cursor","auto");
                             var msg = resp.results;
                             if (type == "POST") {
