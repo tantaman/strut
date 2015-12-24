@@ -3,16 +3,21 @@ var loadPresentation = function () {
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
     var params = parseQueryString();
-    if (typeof params.id !== "undefined" && params.id !== "") {
+    if (typeof params.code !== "undefined" && params.code !== "") {
         presentation = undefined;
         $.ajax({
-            method: "POST",
-            url: (params.id + ".json"),
-            async: false,
-            success: function (data) {
-                makePresentation(data);
+            url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + params.code,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
+            },
+            success: function (resp) {
+                var presentation = resp.results;
+                makePresentation(presentation);
                 $("body").find(".reveal").data("charts", charts);
                 addCharts(0);
+            },
+            error: function (err) {
+
             }
         });
     }
@@ -23,16 +28,16 @@ var loadPresentation = function () {
 }
 
 var charts = [];
-var addCharts = function(i, chrts) {
-    charts = charts || chrts ;
+var addCharts = function (i, chrts) {
+    charts = charts || chrts;
     var chart = charts[i];
-    var iframe = document.getElementById("slide-"+chart.slide+"-component-"+chart.component);
+    var iframe = document.getElementById("slide-" + chart.slide + "-component-" + chart.component);
     iframe.src = iframe.dataset.url;
     iframe.onload = function () {
         i++;
-        if(charts.length > i){
+        if (charts.length > i) {
             $("body").find(".reveal").data("charts", charts);
-            addCharts(i);   
+            addCharts(i);
         }
     }
 }
@@ -103,7 +108,7 @@ function addComponent(component, componentNum, slideNum) {
             break;
         case "Chart":
             charts.push({"slide": slideNum, "component": componentNum});
-            html += '<iframe id="slide-'+slideNum+'-component-'+componentNum+'" src = "" data-url="' + component.src + '" class= "Chart" width="' + component.width + '" height="523"></iframe>';
+            html += '<iframe id="slide-' + slideNum + '-component-' + componentNum + '" src = "" data-url="' + component.src + '" class= "Chart" width="' + component.width + '" height="523"></iframe>';
             break;
         case "Video":
             if (component.videoType == "youtube") {

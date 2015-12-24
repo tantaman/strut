@@ -19,13 +19,14 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
         ls: function (path, regex, cb, page_num) {
             // Paths are currently ignored
             //load the files already saved in the folder
+            var access = this.access();
             page_num = page_num || 0;
             var fnames = [];
             var perPage = 10;
             $.ajax({
                 url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks",
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
                     $(".storageModal").find(".loading").removeClass("hideThis");
                 },
                 data: {
@@ -57,15 +58,17 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
 //            return this;
         },
         deleteChartBook: function (id) {
-            PromptPopup.render("Delete", this.deleteChartBookOk, id);
+            PromptPopup.render("Delete", this.deleteChartBookOk, id, this);
             $modals.append(PromptPopup.$el);
             PromptPopup.$el.removeClass("hide");
         },
-        deleteChartBookOk: function (id, handler) {
+        deleteChartBookOk: function (id, handler, that) {
+        
+            var access = that.access();
             $.ajax({
                 url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
                     $("body").css("cursor","progress");
                 },
                 type: "DELETE",
@@ -89,10 +92,11 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
         },
         getContents: function (id, cb) {
             var that = this;
+            var access = this.access();
             $.ajax({
                 url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                    xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
                      $("body").css("cursor","progress");
                 },
                 success: function (resp) {
@@ -112,6 +116,7 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
 
         },
         setContents: function (path, data, cb, model) {
+            var access = this.access();
             if (!(data["slides"].length == 0 || (data["slides"].length == 1 && data["slides"][0]["components"].length == 0))) {
                 data.chartBookName = $(".storageModal").find(".cb-ip-field").val() || data.chartBookName;
                 model._deck.set('chartBookName', data.chartBookName);
@@ -130,7 +135,7 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                     $.ajax({
                         url: url,
                         beforeSend: function (xhr) {
-                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                            xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
                              $("body").css("cursor","progress");
                         },
                         data: JSON.stringify(data),
@@ -187,8 +192,29 @@ define(['tantaman/web/widgets/PromptPopup'], function (PromptPopup) {
                         "result": url}, true);
             }
             return this;
+        },
+        
+        access : function(){
+            if(this.accessDetails)
+                return this.accessDetails;
+            else{
+                var access_token = getURLParameter("access_token");
+                access_token = "?"+atob(decodeURI(access_token));
+                this.accessDetails = {
+                  "id": getURLParameter("client_id", access_token),
+                  "secret" : getURLParameter("client_secret", access_token),
+                  "action" : getURLParameter("action", access_token)
+                };
+                localStorage.setItem("chartbookaccess", JSON.stringify(this.accessDetails));
+                return this.accessDetails;
+            }
         }
     };
+    
+    function getURLParameter(name, loc) {
+        loc = loc || location.search;
+        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(loc) || [, ""])[1].replace(/\+/g, '%20')) || null
+    }
 
     return RemoteStorageProvider;
 });

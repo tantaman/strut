@@ -14,12 +14,15 @@ define(function() {
 			this._editorModel.trigger('launch:preview', null);
 
 			var previewStr = generator.generate(this._editorModel.deck());
-
-			localStorage.setItem('preview-string', previewStr);
+                        
+                        localStorage.setItem('preview-string', previewStr);
 			localStorage.setItem('preview-config', JSON.stringify({
 				surface: this._editorModel.deck().get('surface')
 			}));
-
+                        
+//                        var id = this._editorModel.deck().attributes.id || "";
+//                        id = id ? "?code=" + id : "";
+                        
 			window.previewWind = window.open(
 				'preview_export/' + generator.id + '.html' + generator.getSlideHash(this._editorModel),
 				window.location.href);
