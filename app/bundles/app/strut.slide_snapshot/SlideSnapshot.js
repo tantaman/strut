@@ -127,6 +127,8 @@ define(['libs/backbone',
                  * @private
                  */
                 _removeClicked: function (e) {
+                    mixpanel.people.increment('Number Of Slides', -1);
+
                     this.remove(true);
                     e.stopPropagation();
                 },

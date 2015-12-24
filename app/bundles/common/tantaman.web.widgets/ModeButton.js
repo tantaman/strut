@@ -18,7 +18,8 @@ define(function () {
 	}
 
 	ModeButton.prototype.clicked = function() {
-		this.editorModel.changeActiveMode(this.modeId);
+            mixpanel.track("Button Clicked", {"Name": this.modeId});
+            this.editorModel.changeActiveMode(this.modeId);
 	}
 
 	ModeButton.prototype.generatorChanged = function(model, value) {
