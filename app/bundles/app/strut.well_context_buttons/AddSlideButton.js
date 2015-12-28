@@ -8,7 +8,7 @@ define(['libs/backbone'],
                 _addSlide: function () {
 //                  this._editorModel.addSlide(this._wellMenuModel.slideIndex());
                     this._editorModel.addSlide(this._editorModel.activeSlide().collection.length);
-                    mixpanel.track("Button Clicked", {"Name": "Chart"});
+                    mixpanel.track("ChartBook Button Clicked", {"Name": "Chart"});
                     mixpanel.people.increment('Number Of Slides', 1);
 
                 },

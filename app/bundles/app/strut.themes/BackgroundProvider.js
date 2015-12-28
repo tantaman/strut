@@ -85,7 +85,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 			}
 
 			this._setBgClass(allSlides, bg);
-                        mixpanel.track("Button Clicked", {"Name": "Background"});
+                        mixpanel.track("ChartBook Button Clicked", {"Name": "Background"});
 		},
 
 		_setCustomBgColor: function(allSlides, color) {

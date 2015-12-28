@@ -20,6 +20,8 @@ function(Backbone, ActionHandlers, ErrorModal, lang) {
 			} else {
 				ActionHandlers.save(this.storageInterface, this.model, chartBookName, ErrorModal.show);
 			}
+                        mixpanel.track("ChartBook Button Clicked", "Save");
+
 		},
 
 		render: function() {

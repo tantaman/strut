@@ -17,7 +17,7 @@ function(Backbone, SharePopupView) {
 
 		_showSharePopup: function() {
                     $("body").find("#share-popup").removeClass("hide");
-                    mixpanel.track("Button Clicked", {"Name": "Share"});
+                    mixpanel.track("ChartBook Button Clicked", {"Name": "Share"});
 
 		},
                 

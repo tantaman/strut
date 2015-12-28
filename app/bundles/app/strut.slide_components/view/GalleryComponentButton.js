@@ -26,7 +26,7 @@ define(['./ComponentButton', 'tantaman/web/widgets/ChartGalleryModal', 'css!styl
                     this._modal.show(this._itemImported);
                     this._modal._showGallery();
 //                    this._showGallery(galleryModel);
-                    mixpanel.track("Button Clicked", {"Name": "Chart"});
+                    mixpanel.track("ChartBook Button Clicked", {"Name": "Chart"});
                 },
                 /**
                  * Add importent component to the slide.

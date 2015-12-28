@@ -18,7 +18,7 @@ define(function () {
 	}
 
 	ModeButton.prototype.clicked = function() {
-            mixpanel.track("Button Clicked", {"Name": this.modeId});
+            mixpanel.track("ChartBook Button Clicked", {"Name": this.modeId});
             this.editorModel.changeActiveMode(this.modeId);
 	}
 

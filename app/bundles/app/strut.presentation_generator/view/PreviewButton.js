@@ -22,7 +22,7 @@ function(Backbone, PreviewLauncher) {
 
 		_launch: function() {
 			this._previewLauncher.launch(this._generators[this._index]);
-                        mixpanel.track("Button Clicked", {"Name": "Preview"});
+                        mixpanel.track("ChartBook Button Clicked", {"Name": "Preview"});
 
 		},
 

@@ -28,7 +28,7 @@ define(['libs/backbone'],
                  * @private
                  */
                 _clicked: function () {
-                    mixpanel.track("Button Clicked", {"Name": this.options.icon});
+                    mixpanel.track("ChartBook Button Clicked", {"Name": this.options.icon});
                     this.options.editorModel.addComponent(this.options.componentType);
                 },
                 /**
