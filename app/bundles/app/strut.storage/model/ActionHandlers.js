@@ -1,16 +1,16 @@
 define(
 function() {
 	return {
-		save: function(storageInterface, model, filename, cb) {
-			storageInterface.savePresentation(filename, model.exportPresentation(filename), cb);
+		save: function(storageInterface, model, chartBookName, cb) {
+			storageInterface.savePresentation(chartBookName, model.exportPresentation(chartBookName), cb, model);
 		},
 
-		open: function(storageInterface, model, filename, cb) {
+		open: function(storageInterface, model, chartBookName, cb) {
 			storageInterface.savePresentation(
-				model.fileName(),
-				model.exportPresentation(model.fileName()),
+				model.chartBookName(),
+				model.exportPresentation(model.chartBookName()),
 				function () {
-					storageInterface.load(filename, function(data, err) {
+					storageInterface.load(chartBookName, function(data, err) {
 						if (!err) {
 							model.importPresentation(data);
 						} else {
@@ -20,11 +20,15 @@ function() {
 
 						cb(null, err);
 					});
-				});
+				}, model);
 		},
 
 		new_: function(model) {
 			model.newPresentation();
-		}
+		},
+                
+                delete: function(storageInterface, model, chartBookName, cb){
+                    storageInterface.deletePresentation(chartBookName, model.exportPresentation(chartBookName), cb);
+                }
 	};
 });

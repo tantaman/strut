@@ -14,3 +14,5 @@ psd-export/
 .buildpath
 .tern-port
 
+/nbproject/
+/nbproject/private/

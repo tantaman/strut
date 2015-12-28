@@ -29,12 +29,13 @@ function(StorageModal,
 				$modals.append(storageModal.$el);
 			}
 
-			menuItems.push(new MenuItem({ title: lang.new_, handler: ActionHandlers.new_, model: editorModel }));
-			menuItems.push(new MenuItem({ title: lang.open, modal: storageModal, handler: ActionHandlers.open }));
+			menuItems.push(new MenuItem({ title: lang.new_, handler: ActionHandlers.new_, model: editorModel, action: "New", heading: lang.new_}));
+			menuItems.push(new MenuItem({ title: lang.open, modal: storageModal, handler: ActionHandlers.open, action: "Load", heading: "Load ChartBook"  }));
 
 			menuItems.push(new SaveMenuItem(storageModal, editorModel, storageInterface));
-			menuItems.push(new MenuItem({title: lang.save_as, modal: storageModal, handler: ActionHandlers.save }));
-
+			menuItems.push(new MenuItem({title: lang.save_as, modal: storageModal, handler: ActionHandlers.save, action: "Save", heading: "Save ChartBook" }));
+                        menuItems.push(new MenuItem({title: lang.delete_cb, modal: storageModal, handler: ActionHandlers.delete, action: "Delete", heading: "Delete ChartBook"  }));
+                    
 			menuItems.push({
 				$el: $('<li class="divider"></li>'),
 				render: function() { return this; }

@@ -1,6 +1,10 @@
-<input type="text" class="fileName"></input>
+<p class="warning"></p> 
+<input type="text" class="cb-ip-field" placeholder="ChartBook ID"></input>
 <ul class="nav nav-pills nav-stacked">
 	{{#files}}
-	<li data-fileName="{{.}}"><a>{{.}} <button class="close pull-right">×</button></a></li>
+	<li data-chartBookId="{{id}}"><a>{{name}} 
+         <!-- <button class="close pull-right">×</button> -->
+        </a>
+        </li>
 	{{/files}}
 </ul>

@@ -33,7 +33,7 @@ define(['libs/backbone',
 
 				this.exportable = new Adapter(this, {
 					export: 'exportPresentation',
-					identifier: 'fileName'
+					identifier: 'chartBookName'
 				});
 
 				this.exportable.adapted = this;
@@ -86,7 +86,7 @@ define(['libs/backbone',
 				window.sessionMeta.num = num;
 
 				this.importPresentation({
-	        		fileName: "presentation-" + num,
+	        		chartBookName: "chartBook-" + num,
 	        		slides: []
 	      		});
 				this._deck.create();
@@ -109,23 +109,23 @@ define(['libs/backbone',
 
 			importPresentation: function(rawObj) {
 				// deck disposes iteself on import?
-				console.log('New file name: ' + rawObj.fileName);
+				console.log('New file name: ' + rawObj.chartBookName);
 				this._deck.import(rawObj);
 			},
 
-			exportPresentation: function(filename) {
-				if (filename)
-					this._deck.set('fileName', filename);
+			exportPresentation: function(chartBookName) {
+				if (chartBookName)
+					this._deck.set('chartBookName', chartBookName);
 				var obj = this._deck.toJSON(false, true);
 				return obj;
 			},
 
-			fileName: function() {
-				var fname = this._deck.get('fileName');
+			chartBookName: function() {
+				var fname = this._deck.get('chartBookName');
 				if (fname == null) {
 					// TODO...
-					fname = 'presentation-unnamed';
-					this._deck.set('fileName', fname);
+					fname = 'ChartBook-unnamed';
+					this._deck.set('chartBookName', fname);
 				}
 
 				return fname;
