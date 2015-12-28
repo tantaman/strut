@@ -22,6 +22,8 @@ function(Backbone, PreviewLauncher) {
 
 		_launch: function() {
 			this._previewLauncher.launch(this._generators[this._index]);
+                        mixpanel.track("ChartBook Button Clicked", {"Name": "Preview"});
+
 		},
 
 		_bind: function() {
