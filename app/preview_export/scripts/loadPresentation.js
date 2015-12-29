@@ -7,15 +7,18 @@ var loadPresentation = function () {
         presentation = undefined;
         var access = accessDetails(getURLParameter("access_token"));
         $.ajax({
-            url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + .code,
+            url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + id,
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("Authorization", "Basic " + btoa(access.client_id + ":" + access.client_secret));
             },
             success: function (resp) {
                 var presentation = resp.results;
                 makePresentation(presentation);
-                $("body").find(".reveal").data("charts", charts);
-                addCharts(0);
+                if (charts.length) {
+                    $("body").find(".reveal").data("charts", charts);
+                    addCharts(0);
+                }
+                revealPresentation();
             },
             error: function (err) {
 
@@ -63,7 +66,6 @@ var parseQueryString = function (url) {
 };
 
 function accessDetails(access_token) {
-    console.log(decodeURI(access_token));
     access_token = "?" + atob(decodeURI(access_token));
     return parseQueryString(access_token);
 }
@@ -139,3 +141,89 @@ function addComponent(component, componentNum, slideNum) {
 
     return html;
 }
+
+function revealPresentation() {
+    if (!window.presStarted) {
+
+        $(document).ready(function () {
+            $(window).resize(function () {
+                resizeWindow();
+                $(".slides").css("height", slideDimention.height);
+                $(".slides").css("width", slideDimention.width);
+                z = $(".slides").css("height");
+            });
+        });
+        // Full list of configuration options available here:
+        // https://github.com/hakimel/reveal.js#configuration
+
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+            width: 955,
+            height: 540,
+            theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+            transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                //      { src: 'reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                //      { src: 'reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                //      { src: 'reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                //      { src: 'reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                {src: 'scripts/jQuery.js', async: true},
+                {src: 'scripts/extendedReveal.js', async: true},
+                {src: 'reveal/plugin/zoom-js/zoom.js', async: true, condition: function () {
+                        return !!document.body.classList;
+                    }},
+                {src: 'reveal/plugin/notes/notes.js', async: true, condition: function () {
+                        return !!document.body.classList;
+                    }}
+                // { src: 'preview_export/reveal/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+                // { src: 'preview_export/reveal/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+            ]
+        });
+
+        var innerBg = document.querySelector('.innerBg');
+        function updateSurface(step, operation) {
+            if (!step)
+                return;
+            if (step.dataset)
+                var state = step.dataset.state;
+            else {
+                for (var i = 0; i < step.attributes.length; ++i) {
+                    if (step.attributes[i].name == 'data-state') {
+                        state = step.attributes[i].value;
+                        break;
+                    }
+                }
+            }
+            if (typeof state == 'string') {
+                state = state.trim().split(' ');
+                for (var i = 0; i < state.length; ++i) {
+                    innerBg.classList[operation](state[i]);
+                }
+            }
+        }
+        function slideShown(e) {
+            updateSurface(e.previousSlide, 'remove');
+            updateSurface(e.currentSlide, 'add');
+        }
+        Reveal.addEventListener('slidechanged', slideShown);
+        Reveal.addEventListener('ready', slideShown);
+
+        window.onload = function () {
+            //ToDO: Give the editor window dimention from the API
+//                        var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention")) || API.getDimention(); ;
+            var editorPanelDimention = JSON.parse(localStorage.getItem("editorPanelDimention"));
+            $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
+            Reveal.addEventListener('slidechanged', function (event) {
+                $(".slides").css("transform", "translate(-50%, -50%) scale(" + slideDimention.width / editorPanelDimention.width + ", " + slideDimention.height / editorPanelDimention.height + ")");
+
+            });
+        };
+    }
+
+}
+
