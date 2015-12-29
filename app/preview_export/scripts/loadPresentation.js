@@ -25,9 +25,9 @@ var loadPresentation = function () {
             }
         });
     }
-    if (presentation) {
-//        	document.body.className = config.surface + " " + document.body.className;
-        document.body.innerHTML = presentation;
+    if (presentation) {        
+        document.body.className = config.surface + " " + document.body.className;
+        document.body.innerHTML = presentation;        
     }
 };
 
@@ -72,8 +72,8 @@ function accessDetails(access_token) {
 
 
 function makePresentation(data) {
-    var html = '<style type="text/css"></style>' +
-            '<div class=" reveal strut-surface">' +
+    var html = 
+            '<div class="reveal strut-surface" data-transition="'+data.cannedTransition+'" >' +
             '<div class="bg innerBg">' +
             '<div class="controls left-control" style="position:fixed; height:100%; width:40px; background-color:rgb(97, 98, 101); z-index:100">' +
             '<img class = "navigate-left" src="Preview-Icons/big-left-arrow.png" alt="Left-Navigation" style="padding:10px; position:relative; top:50%; transform:translate(0,-25px)">' +

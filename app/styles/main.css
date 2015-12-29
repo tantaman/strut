@@ -166,7 +166,7 @@ border-bottom-color: #000;
 }
 
 .dispNone {
-  display: none;
+  display: none !important;
 }
 
 .hidden {
