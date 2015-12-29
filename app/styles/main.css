@@ -94,7 +94,8 @@ a {
   user-select: none;
   border-radius : 0px !important;
   border : 0px !important;
-  background: rgba(0, 0, 0, 0.6);
+  /*background: rgba(0, 0, 0, 0.6);*/
+  margin-left: 4px;
   /* background-color: rgba(0, 0, 0, 0.99) !important; 
   background-image: linear-gradient(top, rgb(73, 72, 82), rgb(42, 42, 48));
   background-image: 
@@ -280,9 +281,6 @@ i.fa{
 }  
 .titleContainer{
     width: 79%;
-    
-    
-    
 }
 
 .navbar-inner img {
@@ -295,3 +293,71 @@ i.fa{
     background-color: #9E1927;
     /*color: white;*/
 }
+
+.warning{
+    color: #D8000C;
+}
+.success{
+   color: #78AB46;
+   margin: 16px;
+}
+.response{
+   margin: 16px;
+   font-style: italic;
+}
+
+.page-section .pagenum, .page-section .more{
+    text-decoration: none;
+    font-size: 24px;
+    margin: 8px;
+    color: #E1E3E6;
+}   
+.page-section .pagenum.active{
+    color: #B1B5C1;
+    font-size: 26px;
+}
+.promptPopup.modal{
+    top: 25%;
+    width: 30%;
+    margin-left: 0;
+    left: 35%;
+}
+.ok.inactive{
+    pointer-events : none;
+    background : rgba(0, 0, 0, 0.3);
+}    
+.hideThis{
+    display : none !important;
+}
+
+/*media query styles*/
+@media (min-width: 320px) and (max-width : 767px) {
+    body {
+    padding-left: 0;
+    padding-right: 0;
+}
+    .navbar-inner img{
+    height: 20px;
+    width: 20px;
+    }
+}
+@media (min-width: 320px) and (max-width : 480px) {
+    body {
+    padding-left: 0;
+    padding-right: 0;
+}
+    .navbar-inner img{
+    height: 18px;
+    width: 18px;
+    }
+}
+
+
+
+/*===============================================================================*/
+@media (min-width: 1200px) { }
+@media (min-width: 992px) and (max-width : 1199px) { }
+
+@media (min-width: 320px) and (max-width : 767px) { }
+@media (min-width: 320px) and (max-width : 480px) { }
+

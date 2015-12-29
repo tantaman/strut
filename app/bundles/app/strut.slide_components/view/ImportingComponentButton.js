@@ -22,7 +22,8 @@ define(['./ComponentButton', 'tantaman/web/widgets/ItemImportModal'],
 			 * @private
 			 */
 			_clicked: function() {
-				this._modal.show(this._itemImported);
+                            mixpanel.track("ChartBook Button Clicked", {"Name": this._modal.options.name});
+                            this._modal.show(this._itemImported);
 			},
 
 			/**

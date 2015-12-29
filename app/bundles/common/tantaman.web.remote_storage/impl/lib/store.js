@@ -393,7 +393,7 @@ define([
     return iter('/');
   }
 
-  function getFileName(path) {
+  function getchartBookName(path) {
     var parts = path.split('/');
     if(util.isDir(path)) {
       return parts[parts.length-2]+'/';

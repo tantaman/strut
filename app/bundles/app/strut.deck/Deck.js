@@ -9,7 +9,8 @@ define(["common/Calcium",
 	'strut/deck/Slide',
 	"strut/editor/GlobalEvents",
 	'./DeckUpgrade',
-	'./CustomBackgrounds'],
+	'./CustomBackgrounds',
+        'strut/config/config'],
 	function(Backbone, 
 			 SlideCollection, 
 			 SlideCommands, 
@@ -17,7 +18,8 @@ define(["common/Calcium",
 			 Slide, 
 			 key, 
 			 DeckUpgrade, 
-			 CustomBackgrounds) {
+			 CustomBackgrounds,
+                         EditorConfig) {
 		/**
 		 * This represents a slide deck.  It has a title, a currently active slide, a collection of slides, the filename on
 		 * "disk" and the overarching presentation background color.
@@ -41,6 +43,7 @@ define(["common/Calcium",
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
 				this.set('background', 'bg-solid-light');
+                                this.set("editorConfig", EditorConfig);
 			},
 
 			/**
@@ -120,7 +123,8 @@ define(["common/Calcium",
 				}
 				this.set("activeSlide", undefined);
 				this.set("background", rawObj.background);
-				this.set("fileName", rawObj.fileName);
+				this.set("chartBookName", rawObj.chartBookName);
+                                this.set("id", rawObj.id);
 				this.set('surface', rawObj.surface);
 				this.set('customStylesheet', rawObj.customStylesheet);
 				this.set('deckVersion', rawObj.deckVersion);

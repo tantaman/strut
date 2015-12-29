@@ -1,4 +1,5 @@
 require.config({
+        waitSeconds: 0,
 	paths: {
 		libs: "../scripts/libs",
 		preview_export: "../preview_export",

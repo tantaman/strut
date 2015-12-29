@@ -10,6 +10,8 @@ define(['libs/backbone'],
                     "click .ok": "okClicked",
                     "click .prev": "prevPage",
                     "click .next": "nextPage",
+                    "click .chart-gallery-pagenum": "_goToPage",
+                    "click #chart-gallery-pages .more": "_navigatePages",
                     "click .thumbnail": "_selectChart",
                     "hidden": "hidden"
                 },
@@ -30,183 +32,90 @@ define(['libs/backbone'],
                     return this.$el.modal('show');
                 },
                 _showGallery: function (page) {
+                    var perPage = 10;
+                    var that = this;
                     this.galleryElement = this.$el.find("#chart-gallery-body");
-                    if (this.galleryElement.find(".thumbnail").length != 0 && (page == undefined || page.trim() == ""))
+                    
+                    //to prevent loading same gallery again if popup closed and opened. 
+                    if (this.galleryElement.find(".thumbnail").length != 0 && (page == undefined))
                         return;
+                    page = page ? page : 0;
                     this.galleryElement.empty();
-//                    $.ajax({  
-//                       url : page ? page : "https://api.icharts.net/v1/charts/?sortBy=createdDate",
-//                       type : "get",
-//                       success : function(resp){
-//
-//                       }
-//                    });
-                    // building dummy response to work until we get api ready
-                    var resp = {
-                        previous: "",
-                        next: "https://api.icharts.net/v1/charts/?sortBy=createdDate&offset=0",
-                        offset: 0, //<index of the first object returned in this query>
-                        total: 20, //<total number of objects>
-                        perPage: 10,
-                        results: [
-                            {
-                                chartId: "MH7Szi9N",
-                                chartType: "COLUMN_CHART",
-                                subType: '100%25',
-                                height: "493",
-                                width: "855",
-                                name: "Segment Performance by Market",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MH7SzixF",
-                                chartType: "COLUMN_CHART",
-                                subType: '100%25',
-                                height: "437",
-                                width: "731",
-                                name: "Dynamic Market Brand Composition",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "MH7Szi9B",
-                                chartType: "COLUMN_CHART",
-                                subType: 'stacked',
-                                height: "469",
-                                width: "623",
-                                name: "Container Meterials Sold by Trademark",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHrbyilF",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3nawitG5",
-                                chartType: "BAR_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "bigqueryforsalesforce",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHvWzixC2",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHjRzCJB2",
-                                chartType: "PIE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3PbySJG2",
-                                chartType: "LINE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Title ..",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHrbyilF2",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "NWEA Map Reading Growth Fall 2013 - Spring 2014",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/467f1a0db47753cc630e/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3nawitG52",
-                                chartType: "BAR_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "bigqueryforsalesforce",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/9e7296f5c3f02c8b77f7/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHvWzixC3",
-                                chartType: "COLUMN_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Zusammensetzungen der Erdgaspreise für Haushalte in Prozent",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/946ddf8a32b3b660ffd8/thumbnail.png"
-                            },
-                            {
-                                chartId: "MHjRzCJB3",
-                                chartType: "PIE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Endenergieverbrauch der Haushalte 2012 nach Anwendungsarten",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/7115f7a0393de96f2fdc/thumbnail.png"
-                            },
-                            {
-                                chartId: "M3PbySJG3",
-                                chartType: "LINE_CHART",
-                                subType: '',
-                                height: "430",
-                                width: "610",
-                                name: "Title ..",
-                                imageUrl: "http://bl.ocks.org/mbostock/raw/248bac3b8e354a9103c4/thumbnail.png"
-                            }
-                        ]
+                    $.ajax({
+                        url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/charts",
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Basic " + btoa("livedemo@icharts.net" + ":" + "livedemo10"));
+                            that.galleryElement.siblings(".loading").removeClass("hideThis");
+                        },
+                        data: {
+                          "perPage": perPage, "offset": perPage*page
+                        },
+                        success: function (resp) {
+                            that.galleryElement.siblings(".loading").addClass("hideThis");
+                            var galleryData = {
+                                previous: resp.previous,
+                                next: resp.next,
+                                offset: resp.offset, //<index of the first object returned in this query>
+                                total: resp.total, //<total number of objects>
+                                perPage: resp.perPage
+                            };
+                            that.galleryElement.data("gallery", galleryData);
+                            that._thumbnailProperties = that._getThumbnailProperties(resp.perPage);
+                            var chartList = resp.results;
+                            $.each(chartList, function (i, v) {
+                                if (i >= resp.perPage)
+                                    return false;
+                                this._showChartThumbnail(v, resp.offset + i);
+                            }.bind(that));
+                            if (!$("#chart-gallery-pages").find(".chart-gallery-pagenum").length)
+                                that._showPagination(galleryData);
+                        },
+                        error: function(){
+                            that.galleryElement.siblings(".loading").addClass("hideThis");
+                        }
+                    });                   
+                },
+                _showPagination: function (galleryData){
+                    var no_of_pages = Math.ceil(galleryData.total/galleryData.perPage) ;
+                    var hide;
+                    $("#chart-gallery-pages").append("<a class='more prevPages hide'><<</a>");
+                    for(var i=0 ; i < no_of_pages; i++){
+                        hide = false;
+                        
+                        if(i > 4 && no_of_pages > 5){
+                            hide = true;
+                        }
+                        $("#chart-gallery-pages").append("<a href='#' data-page = '"+i+"' class='chart-gallery-pagenum"+(i==0?" active":" ")+""+(hide?" hide":" ")+"'>"+(i+1)+"</a>");
+                        if(i == no_of_pages-1){
+                            $("#chart-gallery-pages").append("<a class='more nextPages'>>></a>");
+                        }
                     }
-                    var galleryData = {
-                        previous: resp.previous,
-                        next: resp.next,
-                        offset: resp.offset, //<index of the first object returned in this query>
-                        total: resp.total, //<total number of objects>
-                        perPage: resp.perPage
-                    };
-                    this.galleryElement.data("gallery", galleryData);
-                    this._thumbnailProperties = this._getThumbnailProperties(resp.perPage);
-                    var chartList = resp.results;
-                    $.each(chartList, function (i, v) {
-                        if (i >= resp.perPage)
-                            return false;
-                        this._showChartThumbnail(v);
-                    }.bind(this));
-
                 },
                 _getThumbnailProperties: function (perPage) {
                     var totalWidth = this.galleryElement.width();
-                    var perRow = 4;
-                    var margin = 16;
-                    var width = (totalWidth - (perRow * margin * 2)) / perRow;
-                    return {"width": width, "margin": margin};
+                    var perRow = 3, height = 120;
+                    var margin = 16, border = 1, padding = 6, extra_width_for_vslider = 20;
+                    var width = Math.floor((totalWidth - (perRow * (margin + border + padding) * 2) - extra_width_for_vslider) / perRow);
+                    var bg_size = width+"px "+(height-10)+"px";
+                    return {"width": width, "height":height,"margin": margin, "bgsize": bg_size};
                 },
-                _showChartThumbnail: function (chartData) {
+                _showChartThumbnail: function (chartData, chartNumber) {
                     var gallery = this.galleryElement;
                     var buffer = '';
-                    buffer += '<div id="chart-gallery-' + chartData.chartId + '" class="thumbnail">' +
-                            '<div class="title"><p>' + chartData.name + '</p></div>' +
+                    buffer += '<div id="chart-gallery-' + chartNumber + '" data-chartid ="'+chartData.chartId+'" class="thumbnail">' +
+                            '<div class="title"><p>' + chartData.chartName + '</p></div>' +
                             '</div>';
                     gallery.append(buffer);
-                    var chartThumbnail = $("#chart-gallery-" + chartData.chartId);
+                    var chartThumbnail = $("#chart-gallery-" + chartNumber);
 
                     chartThumbnail.css({
                         "width": this._thumbnailProperties.width,
+                        "height": this._thumbnailProperties.height,
+                        "background-size": this._thumbnailProperties.bgsize,
                         "margin": this._thumbnailProperties.margin + "px",
-                        "background-image": 'url(\"' + chartData.imageUrl + '\")'
+                        "background-image": 'url(\"' + "https://"+ chartData.imageURL + '\")'
                     });
-                    var location = "htmlcharts2.icharts.net";
+                    var location = "stageaccounts2.icharts.net";
 
                     chartData.url = "https://" + location + "/?chartid=" + chartData.chartId + "&charttype=" + chartData.chartType + "&subtype=" + chartData.subType + "&authentication={}";
 
@@ -220,15 +129,55 @@ define(['libs/backbone'],
                     var galleryData = $("#chart-gallery-body").data("gallery");
                     this._showGallery(galleryData.next);
                 },
+                _goToPage: function(e) {
+                    var $this = $(e.currentTarget);
+                    var page_num = $this.data("page");
+                    $this.addClass("active").siblings().removeClass("active");
+                    this._showGallery(page_num);
+                },
+                _navigatePages: function(e) {
+                    var $this = $(e.currentTarget);
+                    var pageNums = $("#chart-gallery-pages").find(".chart-gallery-pagenum");
+                    var no_of_pages = pageNums.length;
+                    
+                    if ($this.hasClass("prevPages")) {
+                        var target = $("#chart-gallery-pages").find(".chart-gallery-pagenum:not(.hide)").first();
+                        var page_num = target.data("page");
+                        $this.siblings(".nextPages").removeClass("hide");
+                        target.prevAll().each(function(i){
+                            if(i==4)
+                                return false;
+                            $(this).removeClass("hide");
+                            pageNums.eq(page_num+4-i).addClass("hide");   
+                            if(page_num+i == 0)
+                                $this.addClass("hide");
+                        });
+                    }
+                    else if ($this.hasClass("nextPages")) {
+                        var target = $("#chart-gallery-pages").find(".chart-gallery-pagenum:not(.hide)").last();
+                        var page_num = target.data("page");
+                        $this.siblings(".prevPages").removeClass("hide");
+                        target.nextAll().each(function(i){
+                            if(i==4)
+                                return false;
+                            $(this).removeClass("hide");
+                            pageNums.eq(page_num-4+i).addClass("hide");   
+                            if(page_num+i == no_of_pages-1)
+                                $this.addClass("hide");
+                        });
+                        
+                    }
+                    
+                },
                 _selectChart: function (e) {
                     var $this = $(e.currentTarget);
-                    if($this.hasClass("selected")){
+                    if ($this.hasClass("selected")) {
                         $this.removeClass("selected");
-                        delete this.selectedCharts[$this.data("chart").chartId];   
+                        delete this.selectedCharts[$this.data("chart").chartId];
                     }
-                    else{
+                    else {
                         $this.addClass("selected");
-                        
+
                         this.selectedCharts[$this.data("chart").chartId] = $this.data("chart");
                     }
                 },

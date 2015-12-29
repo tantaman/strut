@@ -92,3 +92,31 @@ i.fa.fa-bars{
     color: white;
 
 }
+/*media query styles*/
+@media (min-width: 768px) and (max-width : 991px) { 
+       .button a{
+        padding: 15px 10px ;    
+    }
+        
+}
+@media (min-width: 480px) and (max-width : 767px) {
+    .button a{
+        padding: 15px 5px ;  
+        font-size:10px ;
+    }
+    .logo-holder a{
+        padding: 25px 10px;
+    }
+}
+@media (min-width: 320px) and (max-width : 480px) {
+    .button a{
+        padding: 10px 5px ;  
+        font-size:10px ;
+    }
+    .logo-holder a{
+        padding: 20px 10px;
+    }
+    .mode-buttons{
+        margin-right: 10px;
+    }
+}

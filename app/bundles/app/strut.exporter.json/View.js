@@ -55,7 +55,7 @@ function(Backbone, FileUtils, lang) {
                         var $ok = this._$modal.find('.ok');
                         var name = this.$el.find("#export-json-file-name").val() || this._exportable.identifier();
 			var data = this._exportable.export();
-                        data.fileName = name || data.fileName;
+                        data.chartBookName = name || data.chartBookName;
                         var attrs = FileUtils.createDownloadAttrs('application\/json',
 				JSON.stringify(data, null, 2),
 				name + '.json');
@@ -89,7 +89,7 @@ function(Backbone, FileUtils, lang) {
 				var self = this;
 				setTimeout(function() {
 					Downloadify.create($dlify[0], {
-					    filename: function(){
+					    chartBookName: function(){
 					      return self._exportable.identifier() + '.json';
 					    },
 					    data: function(){ 

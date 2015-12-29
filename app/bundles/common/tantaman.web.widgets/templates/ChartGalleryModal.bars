@@ -1,13 +1,18 @@
 <div class="modal-header">
 	<button class="close" data-dismiss="modal">×</button>
-	<h3>{{title}}</h3>
+	<h2>{{title}}</h2>
 </div>
-<div class="modal-body" style="overflow: hidden">
-	<div id="chart-gallery-body"></div>
+<div class="modal-body">
+        <img src="img/loader.gif" class="hideThis loading"  style="height: 72px; width:72px; margin-left: auto;
+             margin-right: auto; display: block;" />
+	<div id="chart-gallery-body">
+        </div>
 
 </div>
 <div class="modal-footer">
-	<a href="#" class="btn btn-primary btn-inverse prev pull-left">Prev</a>
-        <a href="#" class="btn btn-primary btn-inverse next pull-left">Next</a>
-        <a href="#" class="btn btn-primary ok btn-inverse">Insert</a>
+	<a href="#" class="btn btn-primary btn-inverse prev pull-left hide">Prev</a>
+        <a href="#" class="btn btn-primary btn-inverse next pull-left hide">Next</a>
+        <div id="chart-gallery-pages" class="pull-left" style="padding-top: 8px;">
+        </div>
+        <a href="#" class="ok pull-right" title="Add Chart"><img alt="charts" src="img/UI_icons/charts.png"></a>
 </div>
