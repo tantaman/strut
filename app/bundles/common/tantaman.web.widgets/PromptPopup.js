@@ -13,16 +13,17 @@ define(['libs/backbone'],
                     this.$el.addClass("hide");
                     $(".storageModal").find(".ok").removeClass("inactive");
                 },
-                render: function (action, handler, id) {
+                render: function (action, handler, id, storageProvider) {
                     this.action = action;
                     this.handler = handler;
                     this.id = id;
+                    this.storageProvider = storageProvider;
                     this.$el.html(this.template({
                         title: this.action
                     }));
                 },
                 _okClicked: function () {
-                    this.handler(this.id, this._response);
+                    this.handler(this.id, this._response, this.storageProvider);
                     this.$el.find(".ok").addClass("inactive");
                 },
                 _response: function(resp, err){
