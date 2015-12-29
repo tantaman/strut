@@ -2,13 +2,14 @@ var loadPresentation = function () {
     var presentation = localStorage.getItem('preview-string');
     var config = JSON.parse(localStorage.getItem('preview-config'));
 
-    var params = parseQueryString();
-    if (typeof params.code !== "undefined" && params.code !== "") {
+    var id = getURLParameter("code");
+    if (id) {
         presentation = undefined;
+        var access = accessDetails(getURLParameter("access_token"));
         $.ajax({
-            url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + params.code,
+            url: "https://devaccounts.icharts.net/gallery2.0/rest/v1/chartbooks/" + .code,
             beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + btoa(access.id + ":" + access.secret));
+                xhr.setRequestHeader("Authorization", "Basic " + btoa(access.client_id + ":" + access.client_secret));
             },
             success: function (resp) {
                 var presentation = resp.results;
@@ -25,7 +26,7 @@ var loadPresentation = function () {
 //        	document.body.className = config.surface + " " + document.body.className;
         document.body.innerHTML = presentation;
     }
-}
+};
 
 var charts = [];
 var addCharts = function (i, chrts) {
@@ -39,7 +40,12 @@ var addCharts = function (i, chrts) {
             $("body").find(".reveal").data("charts", charts);
             addCharts(i);
         }
-    }
+    };
+};
+
+function getURLParameter(name, loc) {
+    loc = loc || location.search;
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(loc) || [, ""])[1].replace(/\+/g, '%20')) || null
 }
 
 var parseQueryString = function (url) {
@@ -55,6 +61,13 @@ var parseQueryString = function (url) {
     );
     return objURL;
 };
+
+function accessDetails(access_token) {
+    console.log(decodeURI(access_token));
+    access_token = "?" + atob(decodeURI(access_token));
+    return parseQueryString(access_token);
+}
+
 
 function makePresentation(data) {
     var html = '<style type="text/css"></style>' +
