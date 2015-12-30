@@ -67,6 +67,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		},
 
 		_setBackground: function(e) {
+                        mixpanel.track("ChartBook Button Clicked", {"Name": "Background"});
 			var bg = e.currentTarget.dataset['class'];
 			var allSlides = $(e.currentTarget).parent().parent().is('.allSlides');
 			if (bg == 'bg-img') {
@@ -85,7 +86,6 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 			}
 
 			this._setBgClass(allSlides, bg);
-                        mixpanel.track("ChartBook Button Clicked", {"Name": "Background"});
 		},
 
 		_setCustomBgColor: function(allSlides, color) {

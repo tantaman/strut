@@ -24,6 +24,7 @@ function(Backbone, LogoModel) {
                    
                    var timer = $("#autoPlayTimer").val();
                    window.localStorage.setItem("autoPlayTimer", timer * 1000);
+                   mixpanel.track("ChartBook Button Clicked", {"Name": "Autoplay-Timer"});
                 },
                 
 		initialize: function() {
