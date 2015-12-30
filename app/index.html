@@ -7,8 +7,9 @@
 		<META http-equiv="expires" content="0">
 		<META HTTP-EQUIV="Expires" CONTENT="Tue, 01 Jan 1980 1:00:00 GMT">
 		<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-		<title>Strut - Beta</title>
+		<title>ChartBook - Editor</title>
 		<!-- build:css styles/main.css -->
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="components/bootstrap/css/bootstrap.css"></link>
 		<link rel="stylesheet" href="components/bootstrap/css/bootstrap-responsive.css"></link>
 		<link href='preview_export/css/web-fonts.css' rel='stylesheet' type='text/css'></link>
@@ -20,7 +21,7 @@
 		<!-- endbuild -->
 
 		<!-- can't build this in due to font imports -->
-		<link rel="stylesheet" href="preview_export/reveal/css/theme/default.css"></link>
+		<link rel="stylesheet" href="preview_export/reveal/css/theme/simple.css"></link>
 
 		<link rel="shortcut icon" href="img/strut-icon.png">
 		<link rel="apple-touch-icon-precomposed" href="img/strut-touch.png">
@@ -31,11 +32,23 @@
   	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
   	ga('create', 'UA-42322531-1', 'strut.io');
   	ga('send', 'pageview');
 	</script>
-	</head>
+        
+        <!-- start Mixpanel --><script type="text/javascript">(function(e,b){if(!b.__SV){var a,f,i,g;window.mixpanel=b;b._i=[];b.init=function(a,e,d){function f(b,h){var a=h.split(".");2==a.length&&(b=b[a[0]],h=a[1]);b[h]=function(){b.push([h].concat(Array.prototype.slice.call(arguments,0)))}}var c=b;"undefined"!==typeof d?c=b[d]=[]:d="mixpanel";c.people=c.people||[];c.toString=function(b){var a="mixpanel";"mixpanel"!==d&&(a+="."+d);b||(a+=" (stub)");return a};c.people.toString=function(){return c.toString(1)+".people (stub)"};i="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+for(g=0;g<i.length;g++)f(c,i[g]);b._i.push([a,e,d])};b.__SV=1.2;a=e.createElement("script");a.type="text/javascript";a.async=!0;a.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";f=e.getElementsByTagName("script")[0];f.parentNode.insertBefore(a,f)}})(document,window.mixpanel||[]);
+mixpanel.init("8bb6d71905affbdda4fb27c1eb52afcf");</script><!-- end Mixpanel -->
+	
+        <script>
+            window.onload = function(){
+                mixpanel.identify("12345");
+                mixpanel.people.set({"$Last Visited": new Date(), '$Number Of Slides': 1});
+                mixpanel.track("ChartBook Visited");
+            };
+            
+        </script>
+        </head>
 	<body class="bg-default">
 		<!--[IF IE]>
 			<div class="container">
@@ -59,7 +72,6 @@
 		      // closest thing possible to the ECMAScript 5 internal IsCallable function
 		      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
 		    }
-
 		    var aArgs = Array.prototype.slice.call(arguments, 1), 
 		        fToBind = this, 
 		        fNOP = function () {},
@@ -69,40 +81,32 @@
 		                                 : oThis,
 		                               aArgs.concat(Array.prototype.slice.call(arguments)));
 		        };
-
 		    fNOP.prototype = this.prototype;
 		    fBound.prototype = new fNOP();
-
 		    return fBound;
 		  };
 		}
-
 		if (!Array.prototype.some) {
 		  Array.prototype.some = function(fun /*, thisp */) {
 		    'use strict';
-
 		    if (this == null) {
 		      throw new TypeError();
 		    }
-
 		    var thisp, i,
 		        t = Object(this),
 		        len = t.length >>> 0;
 		    if (typeof fun !== 'function') {
 		      throw new TypeError();
 		    }
-
 		    thisp = arguments[1];
 		    for (i = 0; i < len; i++) {
 		      if (i in t && fun.call(thisp, t[i], i, t)) {
 		        return true;
 		      }
 		    }
-
 		    return false;
 		  };
 		}
-
 		if (!Array.prototype.forEach) {
 		    Array.prototype.forEach = function (fn, scope) {
 		        'use strict';
@@ -114,7 +118,6 @@
 		        }
 		    };
 		}
-
 		var head = document.getElementsByTagName('head')[0];
 		function appendScript(src) {
 			var s = document.createElement("script");
@@ -122,7 +125,6 @@
     		s.src = src;
     		head.appendChild(s);
 		}
-
 		if (window.location.href.indexOf("preview=true") == -1) {
 			window.dlSupported = 'download' in document.createElement('a');
 			window.hasFlash = swfobject.hasFlashPlayerVersion(9);
@@ -136,5 +138,7 @@
 		<!-- endbuild -->
 		<div id="modals">
 		</div>
+                
+                
 	</body>
 </html>

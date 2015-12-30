@@ -11,7 +11,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		var attr = opts.attr;
 
 		this._view = new View(backgrounds, opts.template,
-			{class: 'iconBtns group-dropdown'});
+			{class: ''});
 		this._editorModel = editorModel;
 		this._selector = selector;
 		this._attr = attr;
@@ -67,6 +67,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		},
 
 		_setBackground: function(e) {
+                        mixpanel.track("ChartBook Button Clicked", {"Name": "Background"});
 			var bg = e.currentTarget.dataset['class'];
 			var allSlides = $(e.currentTarget).parent().parent().is('.allSlides');
 			if (bg == 'bg-img') {

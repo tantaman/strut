@@ -4,8 +4,9 @@ define(function() {
 			((options.hotkey) ? '<span class="label pull-right">' + options.hotkey + '</span>' : '')
 		+ '</a></li>');
 		this.$el.click(function() {
+                         mixpanel.track("ChartBook Button Clicked", {Name: options.title});
 			if (options.modal)
-				options.modal.show(options.handler, options.title);
+				options.modal.show(options.handler, options.heading, options.action);
 			else
 				options.handler(options.model);
 		});

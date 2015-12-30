@@ -34,6 +34,8 @@ define(function() {
 
 		_perform: function(e) {
 			this.options.handler();
+                        mixpanel.track("ChartBook Button Clicked", { "Name": this.options.title});
+
 		}
 	}
 

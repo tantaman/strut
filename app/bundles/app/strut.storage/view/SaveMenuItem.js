@@ -14,12 +14,14 @@ function(Backbone, ActionHandlers, ErrorModal, lang) {
 		},
 
 		save: function() {
-			fileName = this.model.fileName();
-			if (fileName == null) {
+			chartBookName = this.model.chartBookName();
+			if (chartBookName == null) {
 				this.saveAsModal.show(ActionHandlers.save, lang.save_as);
 			} else {
-				ActionHandlers.save(this.storageInterface, this.model, fileName, ErrorModal.show);
+				ActionHandlers.save(this.storageInterface, this.model, chartBookName, ErrorModal.show);
 			}
+                        mixpanel.track("ChartBook Button Clicked", "Save");
+
 		},
 
 		render: function() {

@@ -96,18 +96,18 @@
       };
 
       Archiver.prototype._archiveImage = function(component) {
-        var fileName, img;
+        var chartBookName, img;
         if (!this._archivedImages[component.get("src")]) {
           this._archivedImages[component.get("src")] = true;
           img = component.cachedImage;
           this.canvas.width = img.naturalWidth;
           this.canvas.height = img.naturalHeight;
           this.canvas.getContext("2d").drawImage(img, 0, 0);
-          fileName = this._imageIdx + FileUtils.baseName(component.get("src"));
-          this.imagesDir.file(fileName, this.canvas.toDataURL().replace(/^data:image\/(png|jpg);base64,/, ""), {
+          chartBookName = this._imageIdx + FileUtils.baseName(component.get("src"));
+          this.imagesDir.file(chartBookName, this.canvas.toDataURL().replace(/^data:image\/(png|jpg);base64,/, ""), {
             base64: true
           });
-          return component.set("src", "preview_export/images/" + fileName);
+          return component.set("src", "preview_export/images/" + chartBookName);
         }
       };
 

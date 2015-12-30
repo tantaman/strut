@@ -1,0 +1,41 @@
+define(["./ComponentView", './Mixers', 'css!styles/chart/chartView.css'],
+	function(ComponentView, Mixers) {
+
+		/**
+		 * @class ChartView
+		 * @augments ComponentView
+		 */
+		return ComponentView.extend({
+			className: "component chartView",
+			tagName: "div",
+
+			/**
+			 * Initialize Chart component view.
+			 */
+			initialize: function() {
+		            return ComponentView.prototype.initialize.apply(this, arguments);
+                        },
+
+			/**
+			 * Render element based on component model.
+			 *
+			 * @returns {*}
+			 */
+			render: function() {
+                                var $frame;
+                                var src = this.model.get('src'), 
+                                        h = this.model.get('height'), 
+                                        w = this.model.get('width');
+				ComponentView.prototype.render.call(this);
+				$frame = $("<iframe width='"+w+"' height='"+h+"' src='"+src+"'></iframe>");
+				this.$el.find(".content").append($frame);
+				this.$el.append('<div class="overlay"></div>');
+				
+                                this.$el.css({
+					width: w ,
+					height: h
+				});
+				return this.$el;
+			}
+		});
+	});

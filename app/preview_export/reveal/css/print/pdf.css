@@ -16,13 +16,13 @@
 }
 
 body {
-	font-size: 18pt;
-	width: auto;
-	height: auto;
+	margin: 0 auto !important;
 	border: 0;
 	padding: 0;
 	float: none !important;
-	overflow: visible;
+        width: 210mm !important;
+        height: 297mm !important;
+	overflow: visible !important; //Added by Maninder
 }
 
 html {
@@ -31,16 +31,13 @@ html {
 	overflow: visible;
 }
 
-@page {
-	size: letter landscape;
-	margin: 0;
-}
-
 /* SECTION 2: Remove any elements not needed in print.
    This would include navigation, ads, sidebars, etc. */
 .nestedarrow,
-.controls,
+.reveal .controls,
 .reveal .progress,
+.reveal .slide-number,
+.reveal .playback,
 .reveal.overview,
 .fork-reveal,
 .share-reveal,
@@ -51,27 +48,23 @@ html {
 /* SECTION 3: Set body font face, size, and color.
    Consider using a serif font for readability. */
 body, p, td, li, div {
-	font-size: 18pt;
+
 }
 
 /* SECTION 4: Set heading font face, sizes, and color.
-   Diffrentiate your headings from your body text.
+   Differentiate your headings from your body text.
    Perhaps use a large sans-serif for distinction. */
 h1,h2,h3,h4,h5,h6 {
 	text-shadow: 0 0 0 #000 !important;
 }
 
-/* SECTION 5: Make hyperlinks more usable.
-   Ensure links are underlined, and consider appending
-   the URL to the end of the link for usability. */
-a:link,
-a:visited {
-	font-weight: bold;
-	text-decoration: underline;
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
 }
 
 
-/* SECTION 6: more reveal.js specific additions by @skypanther */
+/* SECTION 5: more reveal.js specific additions by @skypanther */
 ul, ol, div, p {
 	visibility: visible;
 	position: static;
@@ -81,22 +74,23 @@ ul, ol, div, p {
 	overflow: visible;
 	margin: auto;
 }
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: visible !important;
+}
 .reveal .slides {
 	position: static;
 	width: 100%;
 	height: auto;
 
-	left: auto;
+	//left: auto; //Removed by Maninder
 	top: auto;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: auto;
-	padding: auto;
+	margin: 0 !important;
+	padding: 0 !important;
 
 	overflow: visible;
 	display: block;
-
-	text-align: center;
 
 	-webkit-perspective: none;
 	   -moz-perspective: none;
@@ -109,22 +103,17 @@ ul, ol, div, p {
 	        perspective-origin: 50% 50%;
 }
 .reveal .slides section {
-
 	page-break-after: always !important;
-
+        left: 0 !important; //Added by Maninder
 	visibility: visible !important;
-	position: static !important;
-	width: 100% !important;
-	height: auto !important;
-	min-height: initial !important;
+	position: relative !important;
 	display: block !important;
-	overflow: visible !important;
-
-	left: 0 !important;
-	top: 0 !important;
-	margin-left: 0px !important;
-	margin-top: 50px !important;
-	padding: 20px 0px !important;
+	position: relative !important;
+        width: auto !important; //Added by maninder
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
 
 	opacity: 1 !important;
 
@@ -139,18 +128,11 @@ ul, ol, div, p {
 	        transform: none !important;
 }
 .reveal section.stack {
-	margin: 0px !important;
-	padding: 0px !important;
+	margin: 0 !important;
+	padding: 0 !important;
 	page-break-after: avoid !important;
-}
-.reveal section .fragment {
-	opacity: 1 !important;
-	visibility: visible !important;
-
-	-webkit-transform: none !important;
-	   -moz-transform: none !important;
-	    -ms-transform: none !important;
-	        transform: none !important;
+	height: auto !important;
+	min-height: auto !important;
 }
 .reveal img {
 	box-shadow: none;
@@ -159,6 +141,36 @@ ul, ol, div, p {
 	overflow: visible;
 	line-height: 1em;
 }
-.reveal small a {
-	font-size: 16pt !important;
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute !important;
+	top: 0;
+	left: 0 !important;
+	width: 100%;
+	z-index: -1;
+}
+/* All elements should be above the slide-background */
+.reveal section>* {
+        display: block !important; 
+	position: relative !important;
+	z-index: 1;
+}
+
+/*Added by Maninder to remove side buttons when print*/
+#botton-container, #hintDiv {
+    display: none !important;
+    
+}
+/*Added by Maninder*/
+.componentContainer {
+    left: 0 !important;
+    
+}
+
+div.backgrounds div.slide-background{
+    display: none !important;
+    
+    
 }

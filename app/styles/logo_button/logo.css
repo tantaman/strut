@@ -1,35 +1,122 @@
-.logo {
-	width: 100px;
-	height: 32px;
-	margin-left: 5px;
-	padding: 0px 20px 0px 5px;
-}
-
 .logo-bg {
-	background-image: url('img/strut-logo-32-light.png');
-	display: inline-block;
-	width: 100px;
-	height: 32px;
+    /*background-image: url('img/menu.png');*/
+    display: inline-block;
+    /*width: 100%;*/
+    /*height: 100%;*/
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin: 4px;
+    text-align: center;
+    line-height: 48px;
+}
+.button{
+    width: auto;
+    text-align: center;
+    display: inline-block;
+    /*margin-left: 2%;*/
+    color: gray !important;
+    /*vertical-align: middle;*/
+    /*padding-top: 5%;*/
+
+}
+.button a{
+    
+    display: inline-block;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: gray;
+    /*font-weight: bold;*/
 }
 
-.logo-holder {
-	margin-top: 5px;
-	margin-left: -8px;
+.logo-holder a{
+    display: inline-block;
+    padding: 25px 20px;
+    text-decoration: none;
+    color: gray;
+    
 }
 
-.logo:hover {
-	background-position: 5px 0;
+.navbar .btn-group{
+    
+    margin: 0px !important;
+}
+
+i.fa.fa-bars{
+    font-size: 20px !important;
+
+}
+
+.mode-buttons {
+    margin-right: 35px;
+}
+
+.logo-holder a {
+    display: inline-block;
+    
+    /*margin-top: 5px;*/
+    /*margin-left: -8px;*/
+    /*height: auto;*/
+    /*line-height: 57px;*/
+}
+
+.logo-group:hover {
+    background-color: #9E1927;
+    /*//background-position: 5px 0;*/
 }
 
 .logo-group .logo .caret {
-	position: absolute;
-	right: 6px;
-	top: 5px;
-	border-top-color: #FFF;
-	border-bottom-color: #FFF;
+    position: absolute;
+    right: 6px;
+    top: 5px;
+    border-top-color: #FFF;
+    border-bottom-color: #FFF;
 }
 
 .logo-holder .dropdown-menu .label {
-	position: absolute;
-	right: 5px;
+    position: absolute;
+    right: 5px;
+}
+
+.logo-group ul.dropdown-menu {
+    position: absolute;
+    left: -20px;
+    width: 150px;
+    background-color: rgba(165, 165, 165, 0.9);
+    border-radius : 0;
+    padding-top: 50px;
+    top: -20px;
+}  
+
+.logo-group .dropdown-menu li > a{
+    color: white;
+
+}
+/*media query styles*/
+@media (min-width: 768px) and (max-width : 991px) { 
+       .button a{
+        padding: 15px 10px ;    
+    }
+        
+}
+@media (min-width: 480px) and (max-width : 767px) {
+    .button a{
+        padding: 15px 5px ;  
+        font-size:10px ;
+    }
+    .logo-holder a{
+        padding: 25px 10px;
+    }
+}
+@media (min-width: 320px) and (max-width : 480px) {
+    .button a{
+        padding: 10px 5px ;  
+        font-size:10px ;
+    }
+    .logo-holder a{
+        padding: 20px 10px;
+    }
+    .mode-buttons{
+        margin-right: 10px;
+    }
 }

@@ -1,6 +1,6 @@
-<div class="btn-group iconBtns">
-	<a class="btn btn-plast">
-		<i class="icon-th-large icon-white"></i>
-		{{#lang 'overview'}}{{/lang}}
+<div class="button">
+	<a class="overview">
+        <i class="icon-th-large icon-white"></i></br>
+		Overview
 	</a>
 </div>

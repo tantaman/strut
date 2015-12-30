@@ -15,15 +15,20 @@ define(function() {
 
 			var previewStr = generator.generate(this._editorModel.deck());
 
-			localStorage.setItem('preview-string', previewStr);
+                        localStorage.setItem('preview-string', previewStr);
 			localStorage.setItem('preview-config', JSON.stringify({
-				surface: this._editorModel.deck().get('surface')
+				surface: this._editorModel.deck().get('surface'),
+                                transition: this._editorModel.deck().get('cannedTransition')
+                                
 			}));
-
+                        
+//                        var id = this._editorModel.deck().attributes.id || "";
+//                        id = id ? "?code=" + id : "";
+                        
 			window.previewWind = window.open(
 				'preview_export/' + generator.id + '.html' + generator.getSlideHash(this._editorModel),
 				window.location.href);
-			var sourceWind = window;
+                        var sourceWind = window;
 		}
 	};
 

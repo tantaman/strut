@@ -1,0 +1,98 @@
+#share-popup .modal-header{
+    text-align: center;    
+}
+#share-popup .modal-header h3{
+    color: rgba(0,0,0,0.4);
+    font-weight: 600;
+    margin: 8px 0;
+    font-family: sans-serif;
+}
+#share-menu{
+    text-align: center;
+    background: #E7E7E7;
+}
+#share-body{
+    margin: 20px 0;
+    text-align: center;
+    color: #6E82A4;
+}
+
+#share-popup .modal-body{
+    margin: 0px!important; 
+    padding: 0px!important;
+}
+#share-menu span{
+    
+}
+#share-menu a{
+    font-size: 16px;
+    text-decoration: none;
+    padding: 16px;
+    color: #6E82A4;
+    display: inline-block;
+    font-family: sans-serif;
+}
+#share-menu a.active{
+    border-bottom: 4px solid #6E82A4;
+}
+#share-email-list{
+    height: 120px;
+    overflow-y: auto;
+    text-align: left;
+    margin: 16px 20%;
+    width: 60%;
+}
+#share-email-section{
+    text-align: center;
+    margin: 0 20%;
+    color: #777;
+}
+#share-email-section p{
+    font-size: 16px;
+    color: rgba(0,0,0,0.5);
+}
+#share-email-list input[type="checkbox"] {
+    display:none;
+}
+#share-email-list input[type="checkbox"] + label span {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: -1px 4px 0 0;
+    vertical-align: middle;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+#share-email-list input[type="checkbox"]:checked + label span {
+    background: url(../../img/UI_icons/bluetick.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+#share-add-others{
+    text-decoration: none;
+    color: rgba(0,0,0,0.5);
+    font-weight: 600;
+}
+#share-popup .btn-share{
+    background: #6E82A4 !important;
+    color: white;
+}
+#share-popup .btn-cancel{
+    background: white !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+}
+#share-btns{
+    margin : 20px 0;
+    text-align: center;
+}
+#share-btns button{
+    padding: 8px 32px;
+}
+#share-popup{
+    width: 50%;
+    left: 25%;
+    margin-left: 0px;
+    top: 15%;
+    border: 0px !important;
+}
