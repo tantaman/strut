@@ -5,7 +5,7 @@ function(Backbone, Model) {
 	'use strict';
 
 	return Backbone.View.extend({
-		className: 'wellContextMenu',
+		className: 'wellContextMenu absolute',
 
 		initialize: function() {
 			this.model = new Model(this._editorModel);
@@ -24,13 +24,13 @@ function(Backbone, Model) {
 			this._currentPos = newPos;
 		},
 
-                slideIndex: function(i) {
-                        this.model.slideIndex(i);
-                },
+    	slideIndex: function(i) {
+      		this.model.slideIndex(i);
+    	},
 
-                dispose: function() {
-                        this.model.dispose();
-                },
+    	dispose: function() {
+    		this.model.dispose();
+    	},
 
 		render: function() {
 			// this.$el.html(this._template(this.model.get('contextButtons')));

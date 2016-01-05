@@ -3,14 +3,12 @@
 		<ul class="nav">
 			<li class="logo-holder">
 			</li>
-                        <li class="add-slide">
-			</li>  
 			<li class="divider-vertical">
 			</li>
 		</ul>
 		<ul class="nav">
 			<li class="create-comp-buttons">
-				<div class="button">
+				<div class="btn-group iconBtns">
 				</div>
 			</li>
 		</ul>

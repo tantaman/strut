@@ -6,13 +6,11 @@
 
 
 .bg-default {
-    background-color: #EEEEEE;
-    /*
-  background: -webkit-radial-gradient(#F0F0F0, #EEEEEE);
-  background: -moz-radial-gradient(#F0F0F0, #EEEEEE);
-  background: -ms-radial-gradient(#F0F0F0, #EEEEEE);
-  background: -o-radial-gradient(#F0F0F0, #EEEEEE);
-  background: radial-gradient(#F0F0F0, #EEEEEE);*/
+  background: -webkit-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -moz-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -ms-radial-gradient(#F0F0F0, #BEBEBE);
+  background: -o-radial-gradient(#F0F0F0, #BEBEBE);
+  background: radial-gradient(#F0F0F0, #BEBEBE);
 }
 
 /*
@@ -26,70 +24,48 @@ included for legacy support of old decks with the defaultbg attribute set.
   background: radial-gradient(#F0F0F0, #BEBEBE);
 }
 
-.bg-solid-orange:hover, 
 .bg-solid-orange {
-	background-color: #774040 !important;
-        background-image: none !important;
+	background-color: #774040;
 }
 
-.bg-solid-black:hover, 
 .bg-solid-black {
-	background-color: #222 !important;
-        background-image: none !important;
+	background-color: #222;
 }
 
-.bg-solid-light:hover,
 .bg-solid-light {
-	background-color: white !important;
-        background-image: none !important;
+	background-color: white;
 }
 
-.bg-solid-smoke:hover,
 .bg-solid-smoke {
-	background-color: #DDD !important;
-        background-image: none !important;
+	background-color: #DDD;
 }
 
-.bg-solid-yellow:hover,
 .bg-solid-yellow {
-	background-color: #D1B377 !important;
-        background-image: none !important;
+	background-color: #D1B377;
 }
 
-.bg-solid-grass:hover,
 .bg-solid-grass {
-	background-color: #597847 !important;
-        background-image: none !important;
+	background-color: #597847;
 }
 
-.bg-solid-darkgreen:hover,
 .bg-solid-darkgreen {
-	background-color: #134952 !important;
-        background-image: none !important;
+	background-color: #134952;
 }
 
-.bg-solid-sky:hover,
 .bg-solid-sky {
-	background-color: #515E99 !important;
-        background-image: none !important;
+	background-color: #515E99;
 }
 
-.bg-solid-lavender:hover,
 .bg-solid-lavender {
-	background-color: #443C4D !important;
-        background-image: none !important;
+	background-color: #443C4D;
 }
 
-.bg-solid-purple:hover,
 .bg-solid-purple {
-	background-color: #6C478F !important;
-        background-image: none !important;
+	background-color: #6C478F;
 }
 
-.bg-solid-salmon:hover,
 .bg-solid-salmon {
-	background-color: #C98D8D !important;
-        background-image: none !important;
+	background-color: #C98D8D;
 }
 
 .nobg {

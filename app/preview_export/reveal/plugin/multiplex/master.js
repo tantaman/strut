@@ -1,7 +1,6 @@
 (function() {
-	// Don't emit events from inside of notes windows
+	// don't emit events from inside the previews themselves
 	if ( window.location.search.match( /receiver/gi ) ) { return; }
-
 	var multiplex = Reveal.getConfig().multiplex;
 
 	var socket = io.connect(multiplex.url);

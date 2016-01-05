@@ -42,7 +42,7 @@ function(ServiceCollection, MenuItem, CmdListFactory, UndoRedoMenuItem) {
 				}
 			});
 			menuItems.push({
-				//$el: $('<li class="divider"></li>'),
+				$el: $('<li class="divider"></li>'),
 				render: function() { return this; }
 			});
 			return menuItems;

@@ -1,4 +1,0 @@
-{{> ComponentContainer}}
-<iframe class= "{{type}}" width="{{width}}" height="{{height}}" src="{{src}}"></iframe>
-</div>
-</div>

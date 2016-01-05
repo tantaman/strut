@@ -75,17 +75,12 @@ define(["./ComponentView", './Mixers'],
 						});
 					}
 				} else {
-                                        width = Math.min(naturalWidth, 0.95 * this.$el.parents(".slideContainer").width());
-					height = Math.min(naturalHeight, 0.95 * this.$el.parents(".slideContainer").height());
 					this.origSize = {
-						width: width,
-						height: height
+						width: naturalWidth,
+						height: naturalHeight
 					};
-					$img[0].width = width;
-					$img[0].height = height;
-                                        this.model.set('height', height);
-                                        this.model.set('width', width);
-                                        
+					$img[0].width = naturalWidth;
+					$img[0].height = naturalHeight;
 					this._setUpdatedTransform();
 				}
 				$img.bind("dragstart", function(e) {

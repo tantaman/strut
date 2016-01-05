@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 
-    <title>ChartBook</title>
+    <title>Deck Title</title>
 
     <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
     <meta name="author" content="Hakim El Hattab">
@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="stylesheet" href="reveal/css/reveal.css">
-    <link rel="stylesheet" href="reveal/css/theme/simple.css" id="theme">
+    <link rel="stylesheet" href="reveal/css/theme/default.css" id="theme">
     <!-- For syntax highlighting -->
     <link rel="stylesheet" href="reveal/lib/css/zenburn.css">
 
@@ -22,8 +22,6 @@
     <link href='css/web-fonts.css' rel='stylesheet' type='text/css' />
     <link href='../styles/strut.themes/backgroundClasses.css' rel='stylesheet' type='text/css' />
     <link href='../styles/strut.themes/surfaceClasses.css' rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    
     <style>
 .componentContainer {
     position: absolute;
@@ -52,37 +50,20 @@
 }
 
 .bg {
-    /*width: 100%;*/
-    /*height: 100%;*/
+    width: 100%;
+    height: 100%;
 }
 </style>
 
 <script src="reveal/lib/js/head.min.js"></script>
 <script src="reveal/js/reveal.js"></script>
 <script src="scripts/onready.js"></script>
-<script src="scripts/jQuery.js"></script>
 <script src="scripts/loadPresentation.js"></script>
 <script>
 ready(function() {
     if (document.getElementById('launched-placeholder'))
         loadPresentation();
     if (!window.presStarted) {
-        
-        var bodyHeight = $(window).height();
-        var bodyWidth = $(window).width();
-        var actualAvailableHeightforSlide = bodyHeight;
-        var actualAvailableWidthforSlide = bodyWidth - 80; // 80px as the area for two side buttons
-
-        if (actualAvailableWidthforSlide < (actualAvailableHeightforSlide * (16 / 9))) {
-            actualAvailableHeightforSlide = actualAvailableWidthforSlide * (9 / 16);
-            
-        }
-        
-        else {
-            actualAvailableWidthforSlide = actualAvailableHeightforSlide * (16 / 9);
-        }
-        //$("section.slideContainer").height(actualAvailableHeightforSlide).width(actualAvailableWidthforSlide).css("margin","0 " + (bodyWidth - actualAvailableWidthforSlide)/2 + "px");
-
 
 
   // Full list of configuration options available here:
@@ -93,20 +74,18 @@ ready(function() {
     progress: true,
     history: true,
     center: true,
-    width: actualAvailableWidthforSlide,
-    height: actualAvailableHeightforSlide,
+    width: 1024,
+    height: 768,
 
     theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
     transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
 
     // Optional libraries used to extend on reveal.js
     dependencies: [
-//      { src: 'reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
-//      { src: 'reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-//      { src: 'reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-//      { src: 'reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-      { src: 'scripts/jQuery.js', async: true},
-      { src: 'scripts/extendedReveal.js', async: true},
+      { src: 'reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
       { src: 'reveal/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
       { src: 'reveal/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
       // { src: 'preview_export/reveal/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
@@ -152,18 +131,6 @@ ready(function() {
     ga('create', 'UA-42322531-1', 'strut.io');
     ga('send', 'pageview');
   </script>
-  <!-- Printing and PDF exports -->
-<!--  Added by Maninder for the use of pdf generator-->
-  <script>
-          var link = document.createElement( 'link' );
-          link.rel = 'stylesheet';
-          link.type = 'text/css';
-          //link.media = "print";
-          link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal/css/print/pdf.css' : 'reveal/css/print/paper.css';
-          document.getElementsByTagName( 'head' )[0].appendChild( link );
-  </script>
-    <!--<script type="text/javascript" src="scripts/jspdf.js"></script>-->
-
 </head>
 <body>
     <div id="launched-placeholder"></div>
