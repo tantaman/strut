@@ -1,6 +1,6 @@
-<div class="button">
-	<a class="Share">
-        <img src="img/UI_icons/share.png" alt="share"></br>
-		Share
+<div class="btn-group iconBtns">
+	<a class="btn btn-plast">
+		<i class="icon-th-large icon-white"></i>
+		{{#lang 'overview'}}{{/lang}}
 	</a>
 </div>

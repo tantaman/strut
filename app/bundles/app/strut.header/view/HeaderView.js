@@ -3,23 +3,21 @@ define(['libs/backbone',
 		'strut/presentation_generator/view/PreviewButton',
 		'./ThemeProviderView',
 		'./Tablets',
-		'css!styles/header/header.css', './WellContextMenu'],
-function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, WellContextMenu) {
+		'css!styles/header/header.css'],
+function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
 	return Backbone.View.extend({
 		className: 'row-fluid header',
 
 		initialize: function() {
 			this._template = JST['strut.header/Header'];
 			this._logoButton = new LogoView({editorModel: this.model.editorModel()});
-                        this._contextMenu = new WellContextMenu(this.model.editorModel());
-                        this._contextMenu.render();
 			this._previewButton = 
 				new PreviewButton({editorModel: this.model.editorModel()});
 			this._themeProviderView = new ThemeProviderView(this.model.editorModel());
-                         
+
 			this.model.editorModel().on('change:activeMode', this._modeChanged, this);
-                         
-			//this._tablets = new Tablets(this.model.editorModel());
+
+			this._tablets = new Tablets(this.model.editorModel());
 		},
 
 		_modeChanged: function(model, value) {
@@ -36,7 +34,7 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
 			this.$el.html(this._template());
 
 			this.$el.find('.logo-holder').append(this._logoButton.render().$el);
-                        this.$el.find('.add-slide').append(this._contextMenu.$el);
+
 			var $modeButtons = this.$el.find('.mode-buttons');
 			this.model.get('modeButtons').forEach(function(button) {
 				$modeButtons.append(button.render().el);
@@ -53,8 +51,8 @@ function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty, W
 			var $themeButtons = this.$el.find('.theme-buttons');
 			$themeButtons.append(this._themeProviderView.render().$el);
 
-			//this._tablets.render();
-			//this.$el.append(this._tablets.$el);
+			this._tablets.render();
+			this.$el.append(this._tablets.$el);
 
 			return this;
 		},

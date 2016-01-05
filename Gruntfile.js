@@ -72,7 +72,7 @@ module.exports = function (grunt) {
                     '<%= yeoman.app %>/*.html',
                     '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
-                    '<%= yeoman.app %>/img/UI_icons/{,*/}*.{png,jpg,jpeg,webp}'
+                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}'
                 ],
                 tasks: ['livereload']
             }
@@ -184,10 +184,9 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    cwd: '<%= yeoman.app %>/img/UI_icons/',
-
+                    cwd: '<%= yeoman.app %>/images',
                     src: '{,*/}*.{png,jpg,jpeg}',
-                    dest: '<%= yeoman.dist %>/img/UI_icons/'
+                    dest: '<%= yeoman.dist %>/images'
                 }]
             }
         },
@@ -272,23 +271,6 @@ module.exports = function (grunt) {
             all: {
                 rjsConfig: '<%= yeoman.app %>/scripts/main.js'
             }
-        },
-        jasmine : {
-            src: ['common/collections/MultiMap.js', 'framework/ServiceRegistry.js'],
-            options: {
-              specs : 'jtest/spec/*.js',
-              vendors : ['libs/jQuery.js', 'libs/lodash.js', 'libs/backbone.js'],
-              template: require('grunt-template-jasmine-requirejs'),
-              templateOptions: {
-                requireConfig: {
-                        baseUrl: 'app/scripts/',
-                        path : {
-                           jquery : 'libs/jQuery',
-                           lodash : 'libs/lodash'
-                        }
-                }
-              }
-            }
         }
     });
 
@@ -331,8 +313,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', [
         // 'jshint',
-        'jasmine',
-//        'test',
+        'test',
         'build'
     ]);
 };

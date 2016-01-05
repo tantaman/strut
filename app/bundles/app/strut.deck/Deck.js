@@ -40,7 +40,7 @@ define(["common/Calcium",
 				slides.on("add", this._slideAdded, this);
 				slides.on("remove", this._slideRemoved, this);
 				slides.on("reset", this._slidesReset, this);
-				this.set('background', 'bg-solid-light');
+				this.set('background', 'bg-default');
 			},
 
 			/**

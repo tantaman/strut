@@ -39,10 +39,7 @@ function(Handlebars, Math2, marked, DeckUtils) {
 					case "Shape":
 						result = JST["strut.presentation_generator.impress/Shape"](componentModel.attributes);
 						break;
-				        case "Chart":
-						result = JST["strut.presentation_generator.impress/Chart"](componentModel.attributes);
-						break;
-                            }
+				}
 				return new Handlebars.SafeString(result);
 			});
 			Handlebars.registerHelper("scaleX", function(x) {

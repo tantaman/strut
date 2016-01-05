@@ -12,7 +12,7 @@ function(GlobalEvents, lang) {
 			}
 			else {
 				actions = [['undo', 'Ctrl+Z'], ['redo', 'Ctrl+Y'],
-					['cut', 'Ctrl+X'], ['copy', 'Ctrl+C'], ['paste', 'Ctrl+V'], ['delete', 'Del'],['align','Align']];
+					['cut', 'Ctrl+X'], ['copy', 'Ctrl+C'], ['paste', 'Ctrl+V'], ['delete', 'Del']];
 			}
 
 			actions.forEach(function(action) {

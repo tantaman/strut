@@ -1,6 +1,5 @@
 .header .divider-vertical {
-	/*height: 54px;*/
-        display: none;
+	height: 54px;
 }
 
 .header .navbar-inner {
@@ -25,12 +24,4 @@
 	top: 55px;
 	left: 150px;
 	z-index: 2;
-}
-
-.navbar-inverse .navbar-inner{
-    
-    background: transparent;
-    background-color: #E2E2E2;
-    border: 0;
-    box-shadow: none;
 }

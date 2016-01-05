@@ -3,39 +3,26 @@ function(Backbone, FileUtils, lang) {
 	'use strict';
 
 	return Backbone.View.extend({
-                events : {
-                       'keydown #export-json-file-name': '_updateDownload',
-                       'change #export-json-file-name' : '_makeDownloadable'
-                },
-                
 		initialize: function() {
-                        this._generators = this._editorModel.registry
-				.getBest('strut.presentation_generator.GeneratorCollection');
-
-			// TODO: we should keep session meta per bundle...
-			this._index = Math.min(window.sessionMeta.generator_index || 0, this._generators.length - 1);
-			this._generatorChanged();
-                        this.generator = this._generators[this._index];
-                        
-                        this.name = 'JSON';
+			this.name = 'JSON';
 			this._rendered = false;
 			/*
 			TODO: handle browsers that can't do the download attribute.  Safari?
 			*/
 			this._dlSupported = window.dlSupported;
-                        this.$el.html('<input id="export-json-file-name" type="text" placeholder="File Name">');  
-			this.$el.append('<div class="alert alert-info">' + lang.strut_exporter_json.explain + '</div>');
-//			if (this._dlSupported) {
-//				this.$el.append('<div class="alert alert-success">' + lang.strut_exporter_json.click_below + '</div>');
-//			}
+
+			this.$el.html('<div class="alert alert-info">' + lang.strut_exporter_json.explain + '</div>');
+			if (this._dlSupported) {
+				this.$el.append('<div class="alert alert-success">' + lang.strut_exporter_json.click_below + '</div>');
+			}
 		},
-                
+
 		show: function($container, $modal) {
 			this._$modal = $modal;
 			var $ok = this._$modal.find('.ok');
 			if (this._dlSupported) {
-				$ok.html('<i class="icon-download-alt icon-white"></i> Save');
-				this._makeDownloadable();
+				$ok.html('<i class="icon-download-alt icon-white"></i>');
+				this._makeDownloadable($ok);
 			} else {
 				$ok.html('');
 				if (window.hasFlash)
@@ -46,31 +33,18 @@ function(Backbone, FileUtils, lang) {
 
 			$container.append(this.$el);
 		},
-                _updateDownload: function() {
-                    var a = this._$modal.find('.ok')[0];
-                    a.href = "#!";
-                },
-                
-		_makeDownloadable: function() {
-                        var $ok = this._$modal.find('.ok');
-                        var name = this.$el.find("#export-json-file-name").val() || this._exportable.identifier();
-			var data = this._exportable.export();
-                        data.fileName = name || data.fileName;
-                        data.preview = this.generator.generate(this._editorModel.deck());
-                        var attrs = FileUtils.createDownloadAttrs('application\/json',
-				JSON.stringify(data, null, 2),
-				name + '.json');
+
+		_makeDownloadable: function($ok) {
+			var attrs = FileUtils.createDownloadAttrs('application\/json',
+				JSON.stringify(this._exportable.export(), null, 2),
+				this._exportable.identifier() + '.json');
 
 			var a = $ok[0];
 			a.download = attrs.download
 			a.href = attrs.href
 			a.dataset.downloadurl = attrs.downloadurl
 		},
-                _generatorChanged: function() {
-			this._editorModel.set('generator', this._generators[this._index]);
-			if (this._$readout)
-				this._$readout.text(this._generators[this._index].displayName);
-		}, 
+
 		_populateTextArea: function() {
 			var $txt = this.$el.find('textarea');
 			if ($txt.length == 0) {
@@ -135,10 +109,9 @@ function(Backbone, FileUtils, lang) {
 			// anything really to render?
 		},
 
-		constructor: function JsonExportView(editorModel) {
-			this._exportable = editorModel.exportable;
-			this._editorModel = editorModel;
-                        Backbone.View.prototype.constructor.call(this);
+		constructor: function JsonExportView(exportable) {
+			this._exportable = exportable;
+			Backbone.View.prototype.constructor.call(this);
 		}
 	});
 });
