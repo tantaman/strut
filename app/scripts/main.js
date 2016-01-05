@@ -48,6 +48,7 @@ require.config({
 
     	'tantaman/web': '../bundles/common/tantaman.web',
 		'tantaman/web/local_storage': '../bundles/common/tantaman.web.local_storage',
+                'iCharts/web/remote_storage': '../bundles/common/iCharts.web.remote_storage',
 		'tantaman/web/remote_storage': '../bundles/common/tantaman.web.remote_storage',
 		'tantaman/web/saver': '../bundles/common/tantaman.web.saver',
 		'tantaman/web/storage': '../bundles/common/tantaman.web.storage',
