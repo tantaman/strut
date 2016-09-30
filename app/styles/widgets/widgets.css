@@ -29,10 +29,18 @@
 	border-radius: 0;
 }
 
+.tablets-content > :last-child {
+	border-radius: 0 0 4px 4px;
+}
+
 /*TODO: move tablets css*/
 .tablets.hiding .tablets-content {
 	height: 0px;
 	overflow: hidden;
+}
+
+.tablets.showing .tablets-toggle {
+	border-radius: 0;
 }
 
 .tablets.showing .caret {
