@@ -1,6 +1,6 @@
 .slideTable {
 	position: absolute;
-	left: 0px;
+	left: 150px;
 	z-index: 1;
 	top: 56px;
 	bottom: 0px;
@@ -8,31 +8,31 @@
 }
 
 .cannedTransitionsView {
-	padding: 80px;
-	background: #EEE;
-	background: whitesmoke;
-	box-sizing: border-box;
-}
-
-.cannedTransitionsView .thumbnail {
-	border-width: 2px;
-}
-
-.cannedTransitionsView .thumbnail:hover {
-	border-color: #5BB75B;
-}
-
-.cannedTransitionsView .thumbnail.active {
-	border: 2px solid #5BB75B;
-	-webkit-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
-	-moz-box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
-	box-shadow: 0 1px 4px rgba(0, 105, 214, 0.25);
-}
-
-.bespoke-link {
 	position: absolute;
+	left: 0;
+	z-index: 1;
+	top: 56px;
 	bottom: 0px;
-	right: 0px;
-	padding: 5px;
-	background: #ccc;
+	width: 149px;
+	background-image: url(img/linen-light.png);
+	overflow-y: scroll;
+	border-right: 1px solid black;
+}
+
+.cannedTransitionsView a {
+	margin: 10px 0;
+	display: block;
+	transition: all 0.2s ease-in-out;
+}
+
+.cannedTransitionsView a:hover {
+	background-color: rgba(91, 183, 91, .25);
+}
+
+.cannedTransitionsView a.active {
+	background-color: rgba(91, 183, 91, .5);
+}
+
+.cannedTransitionsView img {
+	max-width: 100%;
 }

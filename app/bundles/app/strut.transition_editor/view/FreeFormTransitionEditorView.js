@@ -79,6 +79,9 @@ define(['libs/backbone',
 			dispose: function() {
 				Backbone.View.prototype.remove.call(this);
 				this.model.deck().off(null, null, this);
+				this.model.deck().get('slides').forEach(function(slide) {
+					slide.off(null, null, this);
+				}, this);
 			},
 
 			/**
@@ -111,6 +114,14 @@ define(['libs/backbone',
 						slide.set('y', ((cnt / colCnt) | 0) * 280 + 180);
 					}
 					++cnt;
+
+					slide.on('change', function(model, options) {
+						if(options.changes.some(function(change) {
+							return ['x', 'y', 'z', 'rotateX', 'rotateY', 'rotateZ', 'impScale'].includes(change);
+						})) {
+							this.model.cannedTransition('freeform');
+						}
+					}, this);
 
 					var snapshot = new TransitionSlideSnapshot({model: slide,
 						registry: this.model.registry, deck: deck});

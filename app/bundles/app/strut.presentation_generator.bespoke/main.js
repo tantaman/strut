@@ -6,7 +6,16 @@ function(BespokeGenerator) {
 		displayName: 'Bespoke',
 		id: 'bespoke',
 		capabilities: {
-			cannedTransitions: true
+			transitions: [
+				'none',
+				'carousel',
+				'classic',
+				'concave',
+				'coverflow',
+				'cube',
+				'cubeb',
+				'cards'
+			]
 		},
 		generate: function(deckAttrs) {
 			return BespokeGenerator.render(deckAttrs);

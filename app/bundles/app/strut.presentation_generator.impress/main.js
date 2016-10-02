@@ -6,7 +6,9 @@ function(ImpressGenerator) {
 		displayName: 'Impress',
 		id: 'impress',
 		capabilities: {
-			freeformStepping: true
+			transitions: [
+				'freeform'
+			]
 		},
 		generate: function(deckAttrs) {
 			return ImpressGenerator.render(deckAttrs);

@@ -35,21 +35,11 @@ function(ModeButton, OverviewModel, Overview, FreeFormTransitionEditorView,
 			}, service);
 
 			registry.register({
-				interfaces: 'strut.TransitionEditor',
-				meta: {
-					capabilities: {
-						freeformStepping: true
-					}
-				}
+				interfaces: 'strut.TransitionEditor'
 			}, FreeFormTransitionEditorView);
 
 			registry.register({
-				interfaces: 'strut.TransitionEditor',
-				meta: {
-					capabilities: {
-						cannedTransitions: true
-					}
-				}
+				interfaces: 'strut.TransitionEditor'
 			}, CannedTransitionsView);
 
 			// TODO: register the canned transitions and xy stepping.

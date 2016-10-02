@@ -1,81 +1,44 @@
 define(['libs/backbone'], function(Backbone) {
-	function img() {
-		return 'styles/img/' + this.name + '.png';
-	};
-
-	var canned = [
-		{
-			name: 'carousel',
-			img: img,
-			style: 'height: 126px;'
-		},
-		{
-			name: 'classic',
-			img: img
-		},
-		{
-			name: 'concave',
-			img: img,
-			style: 'height: 126px;'
-		},
-		{
-			name: 'coverflow',
-			img: img
-		},
-		{
-			name: 'cube',
-			img: img
-		},
-		{
-			name: 'cubeb',
-			img: img
-		},
-		{
-			name: 'cards',
-			img: img
-		},
-		{
-			name: 'none',
-			img: 'styles/strut.themes/img/nobg.png'
-		}
-	];
-
 	return Backbone.View.extend({
 		events: {
-			'click .thumbnail': '_transitionSelected'
+			'click a': '_transitionSelected'
 		},
 
 		className: 'cannedTransitionsView',
 		initialize: function() {
-			// TODO: get the available "canned" transitions
-			// from the generator's metadata?
-			// Or just drop Revea.js support and only focus
-			// on bespoke?
-
-			// Do a survey of the number of presentations
-			// that actually use the "basement" feature...
-			var transition = this.model.cannedTransition() || 'none';
-
-			canned.some(function(c) {
-				if (c.name == transition) {
-					c.active = true;
-				} else {
-					c.active = false;
-				}
-			});
+			this._generators = this.model.registry
+				.getBest('strut.presentation_generator.GeneratorCollection');
+			
+			this._transitions = Array.prototype.concat.apply([],
+				this._generators.map(function(generator) {
+					return generator.capabilities ? generator.capabilities.transitions : [];
+				}));
+			
+			this.model.deck().on('change:cannedTransition', this._cannedTransitionChanged, this);
 		},
 
 		_transitionSelected: function(e) {
-			this.$el.find('.active').removeClass('active');
 			var activated = e.currentTarget.dataset.name;
 			this.model.cannedTransition(activated);
-
-			$(e.currentTarget).addClass('active');
+		},
+		
+		_cannedTransitionChanged: function() {
+			var activated = this.model.cannedTransition() || this._transitions[0];
+			this.$el.find('.active').removeClass('active');
+			this.$el.find('[data-name="' + activated + '"]').addClass('active');
+			
+			this._generators.some(function(generator) {
+				if(generator.capabilities && generator.capabilities.transitions.includes(activated)) {
+					this.model.set('generator', generator);
+					return true;
+				}
+			}, this);
 		},
 
 		render: function() {
 			this.$el.html(
-				JST['strut.transition_editor/CannedTransitions'](canned));
+				JST['strut.transition_editor/CannedTransitions'](this._transitions));
+			this.$el.find('[data-name="' + (this.model.cannedTransition() || this._transitions[0]) + '"]').addClass('active');
 			return this;
 		},
 

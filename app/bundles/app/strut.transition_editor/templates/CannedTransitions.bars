@@ -1,12 +1,5 @@
-<ul class="thumbnails">
-	{{#.}}
-	<li class="span4">
-		<a href="#" data-name="{{name}}" class="thumbnail{{#if active}} active{{/if}}">
-			<img src="{{img}}" style="{{style}}"></img>
-		</a>
-	</li>
-	{{/.}}
-</ul>
-<span class="bespoke-link">
-	<a href="https://github.com/markdalgleish/bespoke.js" target="_blank">Bespoke.js</a>
-</span>
+{{#.}}
+<a href="#" data-name="{{.}}">
+	<img src="styles/img/{{.}}.png" alt="{{.}}"></img>
+</a>
+{{/.}}

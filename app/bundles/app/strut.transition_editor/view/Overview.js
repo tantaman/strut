@@ -6,9 +6,6 @@ function(Backbone, Utils, css) {
 	 */
 	return Backbone.View.extend({
 		initialize: function() {
-			this.model.on('change:transitionEditors',
-							this.render,
-							this);
 			this._currentEditors = [];
 		},
 
