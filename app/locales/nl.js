@@ -33,5 +33,6 @@ define({
 		click_below: 'Klik hieronder om te downloaden'
 	},
 	background: 'Achtergrond',
-	surface: 'Werkblad'
+	surface: 'Werkblad',
+	present: 'Presenteren'
 });

@@ -3,7 +3,8 @@ function(Backbone, PreviewLauncher) {
 	return Backbone.View.extend({
 		className: 'btn-group iconBtns',
 		events: {
-			'click .act': '_launch'
+			'click .act': '_launch',
+			'click .option': '_launchOption'
 		},
 
 		initialize: function() {
@@ -34,33 +35,18 @@ function(Backbone, PreviewLauncher) {
 			this._previewLauncher.launch(this._editorModel.get('generator'));
 		},
 
-		_bind: function() {
-			var self = this;
-			this.$el.find('li').each(function(i) {
-				var $btn = $(this);
-				$btn.click(function(e) {
-					// self._previewLauncher.launch(self._generators[i]);
-					self.$el.find('.check').css('visibility', 'hidden');
-					$btn.find('.check').css('visibility', '');
-					self._editorModel.set('generator', self._generators[i]);
-					self.$el.find('.dropdown-toggle').dropdown('toggle');
-					e.stopPropagation();
-				});
-			});
-		},
-
-		_generatorChanged: function() {
-			if (this._$readout)
-				this._$readout.text(this._editorModel.get('generator').displayName);
-			this.$el.find('.check').css('visibility', 'hidden');
-			this.$el.find('li[data-option="' + this._editorModel.get('generator').id + '"] .check').css('visibility', '');
+		_launchOption: function(evt) {
+			this._generators.some(function(generator) {
+				if(generator.id === evt.currentTarget.dataset.option) {
+					this._previewLauncher.launch(generator);
+					return true;
+				}
+			}, this);
+			this.$el.find('.dropdown-toggle').dropdown('toggle');
 		},
 
 		render: function() {
-			this.$el.html(this._template({generators: this._generators, chosen: this._editorModel.get('generator')}));
-			this._bind();
-			this._$readout = this.$el.find('.chosen');
-			this.$el.find('li[data-option="' + this._editorModel.get('generator').id + '"] .check').css('visibility', '');
+			this.$el.html(this._template(this._generators));
 			return this;
 		}
 	});

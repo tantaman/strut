@@ -1,12 +1,13 @@
-<button class="btn btn-success act"><i class="icon-play icon-white"/><span class="chosen">{{chosen.displayName}}</span></button>
+<button class="btn btn-success act"><i class="icon-play icon-white"/>{{#lang 'present'}}{{/lang}}</button>
 <button class="btn dropdown-toggle btn-success iconBtnsSplit" data-toggle="dropdown">
   <span class="caret whiteCaret"></span>
 </button>
 <ul class="dropdown-menu">
-	{{#each generators}}
-    <li data-option="{{id}}"><a>
-    		<span class="check" style="visibility: hidden;">&#10003;</span>
-    		{{displayName}}
-    </a></li>
-    {{/each}}
+	{{#each .}}
+		{{#unless capabilities}}
+			<li class="option" data-option="{{id}}"><a>
+				{{displayName}}
+			</a></li>
+		{{/unless}}
+	{{/each}}
 </ul>

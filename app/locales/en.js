@@ -33,5 +33,6 @@ define({
 		click_below: 'Click below to download'
 	},
 	background: 'Background',
-	surface: 'Surface'
+	surface: 'Surface',
+	present: 'Present'
 });
