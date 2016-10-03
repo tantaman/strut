@@ -5,7 +5,7 @@ define({
 	add_slide: 'Folie hinzufügen',
 	remove_slide: 'Folie entfernen',
 	slides: 'Folien',
-	overview: 'Übersicht',
+	transitions: 'Transitions',
 	open: 'Öffnen',
 	save: 'Speichern',
 	save_as: 'Speichern als...',

@@ -5,7 +5,7 @@ define({
 	add_slide: 'Ajouter une diapo',
 	remove_slide: 'Supprimer la diapo',
 	slides: 'Diapos',
-	overview: 'Panorama',
+	transitions: 'Transitions',
 	open: 'Ouvrir',
 	save: 'Enregistrer',
 	save_as: 'Enregistrer sous...',

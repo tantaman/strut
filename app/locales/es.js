@@ -5,7 +5,7 @@ define({
 	add_slide: 'Añadir    diapositiva',
 	remove_slide: 'Eliminar diapositiva',
 	slides: 'Diapositivas',
-	overview: 'Resumen',
+	transitions: 'Transitions',
 	open: 'Abrir',
 	save: 'Guardar',
 	save_as: 'Guardar como...',

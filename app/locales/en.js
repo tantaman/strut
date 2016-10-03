@@ -5,7 +5,7 @@ define({
 	add_slide: 'Add Slide',
 	remove_slide: 'Remove Slide',
 	slides: 'Slides',
-	overview: 'Overview',
+	transitions: 'Transitions',
 	open: 'Open',
 	save: 'Save',
 	save_as: 'Save as...',

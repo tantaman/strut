@@ -5,7 +5,7 @@ define({
 	add_slide: 'Dia toevoegen',
 	remove_slide: 'Dia verwijderen',
 	slides: 'Dia\'s',
-	overview: 'Overzicht',
+	transitions: 'Overgangen',
 	open: 'Openen',
 	save: 'Opslaan',
 	save_as: 'Opslaan als...',
