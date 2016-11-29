@@ -1,3 +1,4 @@
+console.log('test');
 require.config({
 	paths: {
 		libs: "../scripts/libs",
