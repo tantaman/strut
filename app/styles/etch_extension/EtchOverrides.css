@@ -1,15 +1,18 @@
 .etch-editor-panel > div {
   display: inline-block;
+    background: #eaeaea;
+    border: 1px solid #bdbdbd;
 }
 
 .etch-editor-panel {
-  height: 29px; /* Why isn't the height coming out correctly without this? */
+  height: 35px; /* Why isn't the height coming out correctly without this? */
   /*background-image: -moz-linear-gradient(center bottom, #222 0%, #333 100%);
     background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#333), to(#222));
     border: 1px solid #333;
     */
     box-shadow: inset 1px 0 0 #dfdfdf, inset 0 1px 0 #dfdfdf, inset -1px 0 0 #dfdfdf, inset 0 -1px 0 #dfdfdf, 0 0 5px rgba(0,0,0,.3);
     opacity: 0.8;
+  padding-top: 0px;
 }
 
 .etch-bold {

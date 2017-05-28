@@ -356,3 +356,7 @@ ul.navbar-nav {
 .mode-buttons ul.dropdown-menu {
   left: -60px;
 }
+
+.popover input {
+  color: #000000;
+}
