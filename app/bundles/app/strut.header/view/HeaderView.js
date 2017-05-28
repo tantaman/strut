@@ -6,7 +6,7 @@ define(['libs/backbone',
 		'css!styles/header/header.css'],
 function(Backbone, LogoView, PreviewButton, ThemeProviderView, Tablets, empty) {
 	return Backbone.View.extend({
-		className: 'row-fluid header',
+		className: 'row header',
 
 		initialize: function() {
 			this._template = JST['strut.header/Header'];

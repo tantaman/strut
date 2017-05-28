@@ -1,5 +1,5 @@
 <div class="btn-group">
-	<button class="btn btn-inverse dropdown-toggle btn-small fontFamilyBtn" data-toggle="dropdown" title="Choose the font family"><span class="text">Lato</span><span class="caret"></span></button>
+	<button class="btn btn-inverse dropdown-toggle btn-sm fontFamilyBtn" data-toggle="dropdown" title="Choose the font family"><span class="text">Lato</span><span class="caret"></span></button>
 	<ul class="dropdown-menu menuBarOption" data-option="fontFamily">
 		<li>
                   <a class="lato" href="#" data-value="'Lato', sans-serif">Lato</a>

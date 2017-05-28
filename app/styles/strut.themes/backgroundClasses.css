@@ -76,5 +76,6 @@ included for legacy support of old decks with the defaultbg attribute set.
 .themeProviders .thumbnail {
 	height: 20px;
 	width: 20px;
-	padding: 10px;
+    margin: 4px;
+    padding: 20px;
 }

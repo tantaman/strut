@@ -30,7 +30,7 @@ function(View, DeckUtils, ItemImportModal, ColorChooserModal, lang) {
 		tag: 'img',
 		name: lang.image,
 		title: lang.insert_image,
-		icon: 'icon-picture',
+		icon: 'glyphicon glyphicon-picture',
 		browsable: true
 	});
 	var colorChooserModal = new ColorChooserModal();

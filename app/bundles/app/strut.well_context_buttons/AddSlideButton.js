@@ -11,7 +11,7 @@ function(Backbone) {
 		},
 
 		render: function() {
-			this.$el.html('<center><i class="icon-plus icon-white"></i></center>');
+			this.$el.html('<center><i class="glyphicon glyphicon-plus icon-white"></i></center>');
 			return this;
 		},
 

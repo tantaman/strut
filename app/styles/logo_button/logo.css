@@ -1,5 +1,5 @@
 .logo {
-	width: 100px;
+	width: 126px;
 	height: 32px;
 	margin-left: 5px;
 	padding: 0px 20px 0px 5px;
@@ -24,7 +24,7 @@
 .logo-group .logo .caret {
 	position: absolute;
 	right: 6px;
-	top: 5px;
+	top: 15px;
 	border-top-color: #FFF;
 	border-bottom-color: #FFF;
 }

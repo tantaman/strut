@@ -258,6 +258,16 @@ module.exports = function (grunt) {
                 },
                 {
                     expand: true,
+                    dot: true,
+                    flatten: true,
+                    cwd: '<%= yeoman.app %>/components/bootstrap/fonts',
+                    dest: '<%= yeoman.dist %>/fonts',
+                    src: [
+                        '*.*'
+                    ]
+                },
+                {
+                    expand: true,
                     cwd: '<%= yeoman.app %>/styles/strut.themes',
                     dest: '<%= yeoman.dist %>/styles/strut.themes',
                     src: [

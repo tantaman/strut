@@ -1,2 +1,2 @@
 <a href="#" 
-	class="btn btn-small etch-{{button}}" title="{{title}}"><i class="icon-align-{{icon}}"></i></a>
+	class="btn btn-sm etch-{{button}}" title="{{title}}"><i class="glyphicon glyphicon-align-{{icon}}"></i></a>

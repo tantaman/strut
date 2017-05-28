@@ -5,7 +5,7 @@ function(Backbone, Archiver, lang) {
 		initialize: function() {
 			this.$el.html(
 				'<div class="alert alert-info">The most effective way to archive your rendered presentation is to:<p>' +
-				'<ol><li>Click the <div class="btn-group iconBtns"><button class="btn btn-success disabled"><i class="icon-play icon-white"></i>Present</button></div> button</li><li>Press <code>Ctrl+S</code>(windows) or <code>⌘+S</code>(Mac) to save the entire presentation to disk.</li></ol></p>'
+				'<ol><li>Click the <div class="btn-group iconBtns"><button class="btn btn-success disabled"><i class="glyphicon glyphicon-play icon-white"></i>Present</button></div> button</li><li>Press <code>Ctrl+S</code>(windows) or <code>⌘+S</code>(Mac) to save the entire presentation to disk.</li></ol></p>'
 				//+ '</div><div class="alert alert-success">Click below to continue downloading the generated zip</div>'
 				);
 		},

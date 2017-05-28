@@ -2,8 +2,8 @@
 	visibility: hidden;
 	background: none;
 	font-size: 100px;
-	color: rgba(255, 255, 255, .7);
-	text-shadow: 0 0 .2em rgba(50, 50, 50, .7) !important;
+	color: rgb(255, 255, 255);
+	text-shadow: 0 0 .2em rgba(100, 100, 100, 1) !important;
 }
 
 .component.textBox li {
@@ -113,7 +113,7 @@
 
 .component input {
 	width: 25px;
-	height: 12px;
+	height: 22px;
 	line-height: 12px;
 }
 
@@ -203,3 +203,4 @@
 .component.ui-selected .shape-color-picker {
 	visibility: visible;
 }
+

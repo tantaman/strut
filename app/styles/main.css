@@ -227,16 +227,132 @@ border-bottom-color: #000;
   border-radius: 0px
 }
 
-.header .navbar-inner .nav:first-child {
+.header .navbar-inner .navbar-nav:first-child {
   margin-right: 5%;
 }
 
 @media only screen
 and (min-device-width : 768px) 
 and (max-device-width : 1024px)  {
-    .header .navbar-inner .nav:first-child {
+    .header .navbar-inner .navbar-nav:first-child {
     margin-right: 0%;
   }
 }
 
+/* kept from Bootstrap 2 */
+.dropdown-submenu {
+    position:relative;
+}
+.dropdown-submenu>.dropdown-menu {
+    top:0;
+    left:100%;
+    margin-top:-6px;
+    margin-left:-1px;
+    -webkit-border-radius:0 6px 6px 6px;
+    -moz-border-radius:0 6px 6px 6px;
+    border-radius:0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+    display:block;
+}
+.dropdown-submenu>a:after {
+    display:block;
+    content:" ";
+    float:right;
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 0 5px 5px;
+    border-left-color:#cccccc;
+    margin-top:5px;
+    margin-right:-10px;
+}
+.dropdown-submenu:hover>a:after {
+    border-left-color:#ffffff;
+}
+.dropdown-submenu.pull-left {
+    float:none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left:-100%;
+    margin-left:10px;
+    -webkit-border-radius:6px 0 6px 6px;
+    -moz-border-radius:6px 0 6px 6px;
+    border-radius:6px 0 6px 6px;
+}
 
+.navbar .divider-vertical {
+height: 40px;
+margin: 0 9px;
+border-left: 1px solid #f2f2f2;
+border-right: 1px solid #ffffff;
+}
+
+.navbar-inverse .divider-vertical {
+    border-right-color: #222222;
+    border-left-color: #111111;
+}
+
+.header .navbar-inner, .header .divider-vertical {
+    height: 54px;
+}
+
+.btn-group + .btn-group {
+    margin-left: 5px;
+}
+
+.btn {
+    padding: 4px 12px;
+}
+
+/* Custom Fixes for bootstrap 2-to-3 migration */
+
+a span.label {
+  background: #999999;
+}
+
+.navbar-inverse {
+  border-radius: 0;
+}
+
+.row.header {
+  margin: 0;
+}
+
+.hide.in {
+    display: block !important;
+}
+
+ul.navbar-nav {
+  list-style: none;
+}
+
+.icon-white {
+  color: #FFFFFF;
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.header .navbar-inner > .navbar-nav {
+    margin-top: 5px;
+}
+
+.header .divider-vertical {
+  margin-top: -5px !important;
+}
+
+.header .tablets-toggle.btn {
+  margin-left: -1px;
+}
+
+.dropdown-cont {
+  width: 160px;
+  padding: 4px;
+}
+
+.mode-buttons ul.dropdown-menu {
+  left: -60px;
+}
