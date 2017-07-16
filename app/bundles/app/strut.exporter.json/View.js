@@ -21,7 +21,7 @@ function(Backbone, FileUtils, lang) {
 			this._$modal = $modal;
 			var $ok = this._$modal.find('.ok');
 			if (this._dlSupported) {
-				$ok.html('<i class="icon-download-alt icon-white"></i>');
+				$ok.html('<i class="glyphicon glyphicon-download-alt icon-white"></i>');
 				this._makeDownloadable($ok);
 			} else {
 				$ok.html('');

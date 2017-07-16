@@ -1,6 +1,6 @@
 <ul class="thumbnails">
 	{{#.}}
-	<li class="span4">
+	<li class="col-sm-4">
 		<a href="#" data-name="{{name}}" class="thumbnail{{#if active}} active{{/if}}">
 			<img src="{{img}}" style="{{style}}"></img>
 		</a>

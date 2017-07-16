@@ -37,14 +37,14 @@ define(['./view/ComponentButton',
 
 				buttons.push(new Button({
 					componentType: 'TextBox',
-					icon: 'icon-text-width',
+					icon: 'glyphicon glyphicon-text-width',
 					name: lang.text,
 					editorModel: editorModel
 				}));
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Image',
-					icon: 'icon-picture',
+					icon: 'glyphicon glyphicon-picture',
 					name: lang.image,
 					tag: 'img',
 					title: lang.insert_image,
@@ -54,7 +54,7 @@ define(['./view/ComponentButton',
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'Video',
-					icon: 'icon-film',
+					icon: 'glyphicon glyphicon-film',
 					name: lang.video,
 					tag: 'video',
 					title: lang.insert_video,
@@ -64,7 +64,7 @@ define(['./view/ComponentButton',
 
 				buttons.push(new ImportingComponentButton({
 					componentType: 'WebFrame',
-					icon: 'icon-globe',
+					icon: 'glyphicon glyphicon-globe',
 					name: lang.website,
 					tag: 'iframe',
 					title: lang.insert_website,

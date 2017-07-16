@@ -29,7 +29,7 @@ function(Backbone, Header, CustomBgStylesheet) {
 		},
 
 		_renderNoMode: function() {
-			this.$el.append('<div class="alert alert-error">No modes available.  Did some plugins fail to load?</div>');
+			this.$el.append('<div class="alert alert-danger">No modes available.  Did some plugins fail to load?</div>');
 		}
 	});
 });

@@ -1,3 +1,5 @@
+	<div class="modal-dialog">
+		<div class="modal-content">
 <div class="modal-header">
 	<button class="close" data-dismiss="modal">×</button>
 	<h3 class="title">{{title}}</h3>
@@ -14,3 +16,5 @@
 <div class="modal-footer">
 	<a href="#" class="btn btn-primary ok btn-inverse">Ok</a>
 </div>
+		</div>
+	</div>

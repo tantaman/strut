@@ -1,20 +1,20 @@
-<div class="navbar navbar-inverse span12">
+<div class="navbar navbar-inverse col-sm-12 no-padding">
 	<div class="navbar-inner">
-		<ul class="nav">
+		<ul class="navbar-nav no-padding">
 			<li class="logo-holder">
 			</li>
 			<li class="divider-vertical">
 			</li>
 		</ul>
-		<ul class="nav">
+		<ul class="navbar-nav">
 			<li class="create-comp-buttons">
 				<div class="btn-group iconBtns">
 				</div>
 			</li>
 		</ul>
-		<ul class="nav theme-buttons">
+		<ul class="navbar-nav theme-buttons">
 		</ul>
-		<ul class="nav pull-right">
+		<ul class="navbar-nav pull-right">
 			<li class="divider-vertical">
 			</li>
 			<li class="mode-buttons">

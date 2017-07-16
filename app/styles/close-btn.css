@@ -320,7 +320,7 @@
   width: 20px;
   position: absolute;
   top: -2px;
-  left: 0;
+  left: -2px;
   font-size: 20px;
   line-height: 20px;
   font-family: "Helvetica Neue", Consolas, Verdana, Tahoma, Calibri, Helvetica, Menlo, "Droid Sans", sans-serif;

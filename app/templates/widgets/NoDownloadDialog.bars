@@ -1,3 +1,5 @@
+	<div class="modal-dialog">
+		<div class="modal-content">
 <div class="modal-header">
 	<button class="close" data-dismiss="modal">×</button>
 	<h3>Download Ready</h3>
@@ -8,3 +10,5 @@
 <div class="modal-footer">
 	<a class="btn btn-plast" data-dismiss="modal">Close</a>
 </div>
+		</div>
+	</div>

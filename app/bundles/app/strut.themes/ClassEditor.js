@@ -9,7 +9,7 @@ define(['tantaman/web/widgets/Button',
 		 */
 		function ClassEditor(editorModel) {
 			this._button = new Button({
-				icon: 'icon-plus',
+				icon: 'glyphicon glyphicon-plus',
 				cb: this._launch.bind(this),
 				name: 'Class'
 			});

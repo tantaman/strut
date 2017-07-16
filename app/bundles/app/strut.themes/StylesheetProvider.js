@@ -33,7 +33,7 @@ function(CodeEditor, Button, CssManip, empty, preProcessor, cssmode) {
 			'change:customStylesheet', this._editorSheetChanged, this);
 
 		this._button = new Button({
-			icon: 'icon-edit',
+			icon: 'glyphicon glyphicon-edit',
 			cb: this._launch.bind(this),
 			name: 'CSS'
 		});
