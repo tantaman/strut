@@ -17,7 +17,7 @@
     "grunt-contrib-livereload": "0.1.1",
     "grunt-usemin": "~0.1.9",
     "grunt-contrib-requirejs": "~0.4.1",
-    "grunt-mocha": "~0.2.2",
+    "grunt-mocha": "~0.4.14",
     "grunt-open": "~0.2.0",
     "matchdep": "~0.1.2",
     "grunt-text-replace": "~0.3.2"
