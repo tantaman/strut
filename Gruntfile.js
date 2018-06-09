@@ -1,8 +1,9 @@
 // Generated on 2013-02-27 using generator-webapp 0.1.5
 'use strict';
+var serveStatic = require('serve-static');
 var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
 var mountFolder = function (connect, dir) {
-    return connect.static(require('path').resolve(dir));
+    return serveStatic(require('path').resolve(dir));
 };
 
 // # Globbing
