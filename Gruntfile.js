@@ -1,7 +1,6 @@
 // Generated on 2013-02-27 using generator-webapp 0.1.5
 'use strict';
 var serveStatic = require('serve-static');
-var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
 var mountFolder = function (connect, dir) {
     return serveStatic(require('path').resolve(dir));
 };
@@ -15,6 +14,7 @@ var mountFolder = function (connect, dir) {
 module.exports = function (grunt) {
     // load all grunt tasks
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // configurable paths
     var yeomanConfig = {
@@ -66,7 +66,10 @@ module.exports = function (grunt) {
                 files: [
                     "app/bundles/**/templates/*.bars"
                 ],
-                tasks: ['handlebars', 'livereload']
+                tasks: ['handlebars'],
+                options: {
+                    livereload: true
+                }
             },
             livereload: {
                 files: [
@@ -75,7 +78,9 @@ module.exports = function (grunt) {
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}'
                 ],
-                tasks: ['livereload']
+                options : {
+                    livereload: true
+                }
             }
         },
         connect: {
@@ -88,7 +93,7 @@ module.exports = function (grunt) {
                 options: {
                     middleware: function (connect) {
                         return [
-                            lrSnippet,
+                            require('connect-livereload')(),
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, 'app')
                         ];
@@ -285,7 +290,6 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:server',
             'handlebars',
-            'livereload-start',
             'connect:livereload',
             'watch'
         ]);
