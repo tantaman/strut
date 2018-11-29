@@ -18,7 +18,7 @@
     "grunt-mocha": "~1.0.4",
     "grunt-open": "~0.2.0",
     "grunt-text-replace": "~0.4.0",
-    "grunt-usemin": "~3.1.1",
+    "grunt-usemin": "~0.1.9",
     "matchdep": "~2.0.0",
     "serve-static": "^1.13.2"
   },
