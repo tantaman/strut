@@ -190,7 +190,7 @@ log.notice = function(msg) {
 		console.log(msg);
 }
 
-// reassigning rquire to r for
+// reassigning require to r for
 // the "preview" includes so they don't get built into the actual
 // amd app.
 // TODO: move this stuff into index.html
