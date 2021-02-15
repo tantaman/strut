@@ -1,0 +1,151 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Strut - An HTML5 Presentation Editor</title>
+        <meta name="description" content="An editor for creating web based presentations">
+        <meta name="keywords" content="Impress.js,powerpoint,presentations,keynote,gui,html5,javascript,css3"> 
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <!-- build:css(.tmp) styles/main.css -->
+        <link rel="stylesheet" href="styles/bootstrap.css">
+        <style>
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+        </style>
+        <link rel="stylesheet" href="styles/bootstrap.css">
+        <link rel="stylesheet" href="styles/main.css">
+        <!-- endbuild -->
+    </head>
+    <body>
+        <!--[if lt IE 10]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+
+       <div class="navbar navbar-inverse navbar-fixed-top infodiv">
+      <div class="container">
+      <div class="row">
+        <div class="navbar-header col-xs-4">
+          <a class="navbar-brand" href="index.html"><img src="images/logo.png" /></a>
+        </div>
+        <div class="col-xs-7">
+          <ul class="nav navbar-nav">
+            <li ><a href="index.html#learn">About</a></li>
+            <li class="active"><a href="showcase.html">Showcase</a></li>
+            <li ><a href="mailto:support@strut.io">Contact</a></li>
+          </ul>
+        </div><!--/.navbar-collapse --> 
+        <div class="col-xs-1">
+            <a href="http://strut.io/editor/index.html"><img src="images/ribbon.png" class="pull-right" /></a>
+        </div>
+      </div>
+      </div>
+    </div>
+ <div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h3>Featured Presentation</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+        <a href="/demo-pres/index.html" target="_blank">
+            <img class="frame" src="images/vid1.png" />
+        </a>
+        </div>
+
+        <div class="col-lg-4 videos showcaseDesc">
+            <ul>
+                <li>
+                    <h4>Strut Demo Presentation</h4>
+                </li>   
+                <li>    
+                    <p>A demo presentation to get you started and familiar with the transition editor.</p>
+                </li>
+            </ul>
+<br />
+            <ul class="authorInfo">
+                <li>
+                    <h4>Author Information</h4>
+                </li>   
+                <li>    
+                    <p><span style="font-size: 1.2em; font-weight: bold;">Matt C.</span><br /> Created 10/13/2013<br /> <a class="btn btn-default launch-btn" href="/demo-pres/index.html" target="_blank">Launch</a></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+      <br />
+      <div class="row">
+          <div class="col-lg-12 featureddiv">
+            <h3><span>Want to see your presentation featured on this page?</span><a class="btn btn-primary btn-lg" data-target="#sendit-notice" data-toggle="modal">Send it!</a></h3>
+          </div>
+    </div>
+
+	<br />
+    <div class="row">
+        
+        <div class="col-lg-4" style="text-align: center">
+            <!--<a href="" target="_blank">--><img class="frame" src="images/impressjs.png" /><!--</a>-->
+        </div>
+        
+        <div class="col-lg-4" style="text-align: center">
+            <!--<a href="" target="_blank">--><img class="frame" src="images/bespokejs.png" /><!--</a>-->
+        </div>
+        
+        <div class="col-lg-4" style="text-align: center">
+            <!--<a href="" target="_blank">--><img class="frame" src="images/handouts.png" /><!--</a>-->
+        </div>
+        
+    </div>
+      <hr>
+        <div class="modal fade" id="sendit-notice">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Submit Presentation</h4>
+              </div>
+              <div class="modal-body">
+                <p>We're still working on this one.  You'll be able to publish presentations from within Strut in the coming weeks.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+      <footer>
+        <p>&copy; Tantaman LLC 2013</p>
+      </footer>
+    </div> <!-- /container -->
+    <div id="lightbox-blur" class="blur hide"></div>
+
+
+        <!-- build:js scripts/vendor.js -->
+        <!-- bower:js -->
+        <script src="bower_components/jquery/jquery.js"></script>
+        <script src="scripts/bootstrap.js"></script>
+        <script src="scripts/lightbox.js"></script>
+        <script src="scripts/smooth-scroll.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-42322531-1');ga('send','pageview');
+        </script>
+</body>
+</html>
