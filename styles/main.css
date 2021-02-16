@@ -23,12 +23,12 @@
 	font-family: carthobold;
 	src: url('fonts/CartoGothicStd-Book.woff') format('woff');
 }
-   
+
 body {
-font-family: 'dejavu';
+	font-family: 'dejavu', Arial;
 	padding-top: 0;
 	background: url(../images/handmadepaper.png) repeat;
-	
+
 }
 
 body.modal-open, .modal-open .navbar-fixed-top {
@@ -104,7 +104,7 @@ body.modal-open {
 }
 
 .bold {
-	font-family: 'dejavubold';
+	font-family: 'dejavubold', Arial;
 	font-weight: bold;
 }
 
@@ -122,8 +122,8 @@ body.modal-open {
 	padding-bottom: 10px;
 	text-transform: uppercase;
 	font-size: 1.8em;
-	font-family: 'dejavubold';
-	
+	font-family: 'dejavubold', Arial;
+
 }
 
 .videos ul {
@@ -142,7 +142,7 @@ body.modal-open {
 	color: #0f1d27;
  }
 
- 
+
 .infodiv {
 	background: #fcfcfc;
 	-moz-box-shadow: 0 0 5px 0 #888;
@@ -150,12 +150,12 @@ body.modal-open {
 	box-shadow: 0 0 5px 0 #888;
 	border-bottom: 0;
  }
- 
+
  .featureddiv {
 	background-color: #e5e8e9;
 	padding: 5px 0;
  }
- 
+
 .featureddiv h3 {
 	/*padding-left: 40px;
 	padding-right: 40px;*/
@@ -173,23 +173,23 @@ body.modal-open {
 	font-weight: bold;
 	padding: 0px;
  }
- 
+
  .jumbotron img {
 	width: 300px;
 	padding-left: 0;
 	}
-	
-.jumbotron h1, 
+
+.jumbotron h1,
 .jumbotron p {
 	text-transform: uppercase;
 	text-align: right;
 	font-size: 55px;
  }
- 
+
  .jumbotron h1 {
  line-height: 70px;
  }
- 
+
 .jumbotron h1 span {
 	color: #e6523a;
 }
@@ -247,8 +247,8 @@ border: 1px solid #f2563d;
 	text-align: center;
 	font-family: 'cartho';
 }
-	
-.infopic {	
+
+.infopic {
 	font-family: sosa;
 	color: #99a0a4;
 	font-size: 100px;
@@ -267,7 +267,7 @@ border: 1px solid #f2563d;
 h1, h2, h3, h4, h5, h6 {
 
 	letter-spacing: 1px;
-	font-family: 'dejavubold';
+	font-family: 'dejavubold', Arial;
 
 	font-weight: bold;
 }
@@ -288,10 +288,3 @@ h1, h2, h3, h4, h5, h6 {
 	max-width: none !important;
 	width: 970px;
 }
-
-
-
-
-
-
-
