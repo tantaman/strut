@@ -1,0 +1,25 @@
+{
+  "name": "strut-site",
+  "version": "1.0.0",
+  "description": "srut website",
+  "main": "generate-site.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tantaman/Strut.git"
+  },
+  "author": "mlaw",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tantaman/Strut/issues"
+  },
+  "homepage": "https://github.com/tantaman/Strut#readme",
+  "devDependencies": {
+    "handlebars": "^4.7.7"
+  }
+}

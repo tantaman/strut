@@ -1,0 +1,69 @@
+{{> header}}
+ <div class="container">
+
+{{#featured}}
+    <div class="row">
+        <div class="col-lg-12">
+            <h3>Featured Presentation</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+        <a href="{{link}}" target="_blank">
+            <img class="frame" src="{{thumbnail}}" />
+        </a>
+        </div>
+
+        <div class="col-lg-4 videos showcaseDesc">
+            <ul>
+                <li>
+                    <h4>{{title}}</h4>
+                </li>   
+                <li>    
+                    <p>{{description}}</p>
+                </li>
+            </ul>
+<br />
+            <ul class="authorInfo">
+                <li>
+                    <h4>Author Information</h4>
+                </li>   
+                <li>    
+                    <p><span style="font-size: 1.2em; font-weight: bold;">{{author.name}}</span><br /> Created {{created}}<br /> <a class="btn btn-default launch-btn" href="{{link}}" target="_blank">Launch</a></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+      <br />
+      <div class="row">
+          <div class="col-lg-12 featureddiv">
+            <h3><span>Want to see your presentation featured on this page?</span><a class="btn btn-primary btn-lg" data-target="#sendit-notice" data-toggle="modal">Send it!</a></h3>
+          </div>
+    </div>
+{{/featured}}
+	<br />
+    <div class="row">
+        {{#showcased}}
+        <div class="col-lg-4" style="text-align: center">
+            <!--<a href="{{link}}" target="_blank">--><img class="frame" src="{{thumb}}" /><!--</a>-->
+        </div>
+        {{/showcased}}
+    </div>
+      <hr>
+        <div class="modal fade" id="sendit-notice">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Submit Presentation</h4>
+              </div>
+              <div class="modal-body">
+                <p>We're still working on this one.  You'll be able to publish presentations from within Strut in the coming weeks.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+{{> footer}}

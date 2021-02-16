@@ -1,0 +1,49 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Strut - An HTML5 Presentation Editor</title>
+        <meta name="description" content="An editor for creating web based presentations">
+        <meta name="keywords" content="Impress.js,powerpoint,presentations,keynote,gui,html5,javascript,css3">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <!-- build:css(.tmp) styles/main.css -->
+        <link rel="stylesheet" href="styles/bootstrap.css">
+        <style>
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+        </style>
+        <link rel="stylesheet" href="styles/bootstrap.css">
+        <link rel="stylesheet" href="styles/main.css">
+        <!-- endbuild -->
+    </head>
+    <body>
+        <!--[if lt IE 10]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+
+       <div class="navbar navbar-inverse navbar-fixed-top infodiv">
+      <div class="container">
+      <div class="row">
+        <div class="navbar-header col-xs-4">
+          <a class="navbar-brand" href="index.html"><img src="images/logo.png" /></a>
+        </div>
+        <div class="col-xs-7">
+          <ul class="nav navbar-nav">
+            <li {{#active.about}}class="active"{{/active.about}}><a href="index.html#learn">About</a></li>
+            <li {{#active.showcase}}class="active"{{/active.showcase}}><a href="showcase.html">Showcase</a></li>
+            <li {{#active.contact}}class="active"{{/active.contact}}><a href="mailto:support@strut.io">Contact</a></li>
+          </ul>
+        </div><!--/.navbar-collapse -->
+        <div class="col-xs-1">
+            <a href="http://strut.io/dist/index.html"><img src="images/ribbon.png" class="pull-right" /></a>
+        </div>
+      </div>
+      </div>
+    </div>

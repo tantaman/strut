@@ -1,0 +1,62 @@
+{
+	"looped": {
+		"sources": [
+			{
+				"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/strut-loop-3.h264.avi",
+				"type": "video/mp4"
+			},
+			{
+				"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/strut-loop-3.webm",
+				"type": "video/webm"
+			}
+		]
+	},
+
+	"videos": [
+		{
+			"name": "The Slide Editor",
+			"description": "Learn how the Slide Editor is organized and what things are called.",
+			"thumb": "images/vid2.png",
+			"sources": [
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/editor-overview-final.webm",
+					"type": "video/webm"
+				},
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/editor-overview-final.mp4",
+					"type": "video/mp4"
+				}
+			]
+		},
+		{
+			"name": "The Transition Editor",
+			"description": "Get an introduction to the transition editor.  How to create simple transitions and use pre-made transitions.",
+			"thumb": "images/vid3.png",
+			"sources": [
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/impress-overview-final.webm",
+					"type": "video/webm"
+				},
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/impress-overview-final.mp4",
+					"type": "video/mp4"
+				}
+			]
+		},
+		{
+			"name": "Backgrounds",
+			"description": "Learn a little more about the difference between backgrounds and surfaces as well as how to use background images.",
+			"thumb": "images/vid4.png",
+			"sources": [
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/bgs-final.webm",
+					"type": "video/webm"
+				},
+				{
+					"url": "http://strut.io.s3-website-us-west-2.amazonaws.com/videos/tutorials/bgs-final.mp4",
+					"type": "vodeo/mp4"
+				}
+			]
+		}
+	]
+}

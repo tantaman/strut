@@ -1,0 +1,135 @@
+{{> header}}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+      <div class="row">
+      <div class="col-xs-5">
+        <img src="images/slide.png" />
+      </div>
+          <div class="col-xs-7 bold">
+            <h1>Ready to make <span>impressive</span> presentations?</h1>
+
+            <p><a class="btn btn-primary btn-lg" href="http://strut.io/dist/index.html">Get Started</a></p>
+        </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 infodiv">
+                <h3 class="cartho"></h3>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <h3 id="learn">Learn About Strut</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+        {{#looped}}
+        <video class="frame" width="493" autoplay loop>
+            {{#sources}}
+            <source src="{{url}}" type="{{type}}">
+            {{/sources}}
+        </video>
+        {{/looped}}
+        </div>
+
+        <div class="col-xs-6 videos">
+            {{#each videos}}
+            <div class="row">
+                <div class="col-xs-5">
+                    <a data-toggle="lightbox" href="#!" data-target="#tut-vid-{{@index}}"><img class="frame" src="{{thumb}}" /></a>
+                </div>
+                <div class="col-xs-7">
+                    <ul class="pull-right">
+                        <li>
+                            <h4><a data-toggle="lightbox" href="#!" data-target="#tut-vid-{{@index}}">{{name}}</a></h4>
+                        </li>
+                        <li>
+                            <p>{{description}}</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+      <!-- Example row of columns -->
+      <div class="row">
+      <div class="col-xs-12">
+        <div class="separator"></div>
+      </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-4 ">
+            <div class="infocontent rightside">
+                <h4>Online/Offline</h4>
+                <p class="infopic">ë</p>
+                <p>Store your presentations on Strut.io or use Strut in offline mode.</p>
+                <!-- <p><a class="btn btn-default" href="#">View details &raquo;</a></p> -->
+            </div>
+        </div>
+        <div class="col-xs-4">
+          <div class="infocontent">
+            <h4>Present on any device</h4>
+            <p class="infopic">¼</p>
+            <p>All you need is a web browser.  Strut presentations work on desktops, laptops, mobile devices and tablets.</p>
+                <!-- <p><a class="btn btn-default" href="#">View details &raquo;</a></p> -->
+          </div>
+        </div>
+        <div class="col-xs-4 ">
+            <div class="infocontent leftside">
+                <h4>Share</h4>
+                <p class="infopic">Ý</p>
+                <p>Export your presentations or host them on Strut.io to share  with colleagues.</p>
+                <!-- <p><a class="btn btn-default" href="#">View details &raquo;</a></p> -->
+            </div>
+        </div>
+        </div>
+        <div class="row">
+              <div class="col-xs-12">
+                <div class="separator"></div>
+            </div>
+        </div>
+
+
+      <div class="row">
+          <div class="col-xs-12">
+            <h3> </h3>
+            <!-- <h3>Multi-framework Support</h3> -->
+          </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4" style="text-align: center">
+            <img class="frame" src="images/impressjs.png" />
+        </div>
+        <div class="col-xs-4" style="text-align: center">
+            <img class="frame" src="images/bespokejs.png" />
+        </div>
+
+        <div class="col-xs-4" style="text-align: center">
+            <img class="frame" src="images/handouts.png" />
+        </div>
+      </div>
+
+      {{#each videos}}
+        <div id="tut-vid-{{@index}}" class="lightbox hide">
+            <div class='lightbox-content'>
+                <video controls preload="none" width="100%">
+                    {{#sources}}
+                    <source src="{{url}}" type="{{type}}">
+                    {{/sources}}
+                </video>
+                <div class="lightbox-caption"><p>{{name}}</p></div>
+            </div>
+        </div>
+      {{/each}}
+      <hr>
+
+{{> footer}}

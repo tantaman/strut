@@ -1,0 +1,31 @@
+{
+	"active": {
+		"showcase": true
+	},
+
+	"featured": {
+			"title": "Strut Demo Presentation",
+			"description": "A demo presentation to get you started and familiar with the transition editor.",
+			"thumbnail": "images/vid1.png",
+			"created": "10/13/2013",
+			"author": {
+				"name": "Matt C."
+			},
+			"link": "/demo-pres/index.html"
+		},
+
+	"showcased": [
+		{
+			"thumb": "images/impressjs.png",
+			"link": ""
+		},
+		{
+			"thumb": "images/bespokejs.png",
+			"link": ""
+		},
+		{
+			"thumb": "images/handouts.png",
+			"link": ""
+		}
+	]
+}

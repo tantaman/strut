@@ -1,0 +1,28 @@
+{
+	"active": {
+		"about": true
+	},
+
+	"about": "",
+
+	"overviews": [
+		{
+			"name": "Impress.js",
+			"description": "This is the most flexible generator.  Impress allows you to set up complex transitions between slides (zooming, rotating, scaling) in the overview mode.",
+			"video": "images/vid1.png",
+			"anchor": "impress"
+		},
+		{
+			"name": "Bespoke.js",
+			"description": "For those in a rush, Bespoke is great because it offers several stock transitions in the overview mode.",
+			"video": "images/vid1.png",
+			"anchor": "bespoke"
+		},
+		{
+			"name": "Handouts",
+			"description": "This one is pretty self explanatory.  This generator lets you create handouts that you can print out and give to your audience.",
+			"video": "images/vid1.png",
+			"anchor": "handouts"
+		}
+	]
+}
