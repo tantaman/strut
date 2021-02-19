@@ -1,3 +1,13 @@
+All new development is happening in [Strut2](https://github.com/tantaman/strut2)
+
+Strut2 is currently private until we further solidify our `"open source dividened program."`
+
+**Open Source Divdened** is the idea that contributors to an open source project will earn revenue based on the overall usage of their contribution, relative to other contributors, in paid products.
+
+In Strut's case specifically, we're launching a subscription service based on Strut and would like to pay our open source contributors.
+
+Obviously there is a lot to figure out here, such as how "valuable" a contribution is and how does the "value" get dispersed as other developers make bugfixes and alterations to the original contribution. Given that, Strut2 is private until we figure out these details. Contact me if you'd like to know more.
+
 Strut
 =======
 
