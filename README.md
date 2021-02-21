@@ -1,4 +1,4 @@
-All new development is happening in [Strut2](https://github.com/tantaman/strut2)
+All new development is happening in [Strut2](https://github.com/tantaman/strut/blob/master/strut2.md)
 
 Strut2 is currently private until we further solidify our `"open source dividened program."`
 
