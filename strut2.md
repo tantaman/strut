@@ -24,36 +24,31 @@ Strut classic ran entirely via the browser's LocalStorage. Strut2 will have full
 
 # Roadmap
 
-## [v0.1](https://github.com/tantaman/strut2/milestone/1) 3/21
-1. Get everything building again
-2. Be able to load and use existing features with latest dependency versions
-3. Add typescript annotations
+## v0.1 3/21
+1. ~Get everything building again~ [done]
+2. ~Be able to load and use existing features with latest dependency versions~ [done]
+3. ~Add typescript annotations~ [done]
 
-## [v0.2](https://github.com/tantaman/strut2/milestone/2) 4/21
-1. Enable authoring of slides via Markdown
+## v0.2 4/21
+1. ~Enable authoring of slides via Markdown~ [done]
 2. Enable stock transitions via Bespoke.js
 3. Support drag & drop of images
 
-## [v0.3](https://github.com/tantaman/strut2/milestone/3) 5/21
+## v0.3 5/21
 1. Re-enable the Impress.js transition editor
-2. Re-add undo/redo support
+2. ~Re-add undo/redo support~ [done]
+3. Allow serving a presentation as a static & standalone website
 
-## [v0.4](https://github.com/tantaman/strut2/milestone/4) 6/21
+## v0.4 6/21
 1. Add support for "sub-slides"
 2. Add edges to transition editor
 3. Add support for embeds (e.g., youtube, iframes, video tag)
 
-## [v0.5](https://github.com/tantaman/strut2/milestone/5) 7/21
+## v0.5 7/21
 1. Support internal linking
 2. Support text search within a presentation
 3. Enable linking to other presentations from current presentation
 
-## [v0.6](https://github.com/tantaman/strut2/milestone/5) 8/21
+## v0.6 8/21
 1. Zettlekastin transition planning
 
-# Building & Running
-
-1. Clone: `git@github.com:tantaman/strut2.git`
-2. `yarn install`
-3. Pick one of: `yarn run watch` (development) / `yarn run build-prod` (release)
-4. Go to `file:///path/to/strut2/dist/index.html
