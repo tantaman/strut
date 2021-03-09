@@ -38,6 +38,7 @@ Strut classic ran entirely via the browser's LocalStorage. Strut2 will have full
 1. Re-enable the Impress.js transition editor
 2. ~Re-add undo/redo support~ [done]
 3. Allow serving a presentation as a static & standalone website
+4. Public launch
 
 ## v0.4 6/21
 1. Add support for "sub-slides"
