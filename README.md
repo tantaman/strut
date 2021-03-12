@@ -8,7 +8,7 @@ In Strut's case specifically, we're launching a subscription service based on St
 
 Obviously there is a lot to figure out here, such as how "valuable" a contribution is and how does the "value" get dispersed as other developers make bugfixes and alterations to the original contribution. Given that, Strut2 is private until we figure out these details. Contact me if you'd like to know more.
 
-Strut
+[Strut](http://strut.io/)
 =======
 
 [![Facelift](https://f.cloud.github.com/assets/1009003/515405/f1003c6a-be74-11e2-84b9-14776c652afb.png)](http://tantaman.github.io/Strut/dist/)
