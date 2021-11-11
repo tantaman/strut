@@ -2,7 +2,7 @@
 
 # Status
 
-Beta release: https://tantaman.com/strut2/
+Beta release: https://strut2.pages.dev/present
 
 **Strut2 is currently in development and not yet able to author a complete presentation.**
 
