@@ -1,4 +1,4 @@
-All new development is happening in [Strut2](https://github.com/tantaman/strut/blob/master/strut2.md)
+All new development is happening in [Strut2](https://github.com/tantaman/strut/blob/master/strut2.md) and is depdendent on completion of https://ahprodite.sh and https://github.com/aphrodite-sh/cf-sqlite
 
 Strut2 is currently private until we further solidify our `"open source dividened program."`
 
