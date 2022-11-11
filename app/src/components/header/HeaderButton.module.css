@@ -1,0 +1,27 @@
+.root {
+  top: -2px;
+  position: relative;
+}
+
+.root :global(.btn) {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  line-height: 1;
+}
+
+.icon {
+  display: block;
+  padding-top: 2px;
+}
+
+.iconLabel {
+  margin-top: 2px;
+}
+
+.fixHeight {
+  height: 100%;
+}
+
+.spacer {
+  margin-left: 50px;
+}

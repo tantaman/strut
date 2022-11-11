@@ -18,9 +18,9 @@ type QueryData<T> = {
 
 export function useQuery<T extends {}>(
   ctx: Ctx,
-  tables: string[],
+  tables: readonly string[],
   query: string,
-  bindings?: []
+  bindings?: readonly any[]
 ): QueryData<T> {
   const [state, setState] = useState<QueryData<T>>({
     data: [],
@@ -62,4 +62,17 @@ export function useQuery<T extends {}>(
   }, [query, ...(bindings || [])]);
 
   return state;
+}
+
+export function first<T>(data: T[]): T | undefined {
+  return data[0];
+}
+
+export function firstPick<T>(data: any[]): T | undefined {
+  const d = data[0];
+  if (d == null) {
+    return undefined;
+  }
+
+  return d[Object.keys(d)[0]];
 }

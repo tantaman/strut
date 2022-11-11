@@ -10,7 +10,8 @@
     "allowJs": true,
     "jsx": "react",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["./src/"]
 }
