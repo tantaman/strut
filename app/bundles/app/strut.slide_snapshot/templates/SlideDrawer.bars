@@ -1,6 +1,0 @@
-<div class="themedArea">
-{{#marked markdown}}{{/marked}}
-</div>
-{{#components}}
-{{#renderComponent . 'Video WebFrame'}}{{/renderComponent}}
-{{/components}}

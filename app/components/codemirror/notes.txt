@@ -1,8 +1,0 @@
-Changing mode at runtime:
-editor.setOption("mode", mode...);
-Change size at runtime:
-editor.setSize(w,h);
-Change content at runtime:
-editor.setValue(value);
-
-
