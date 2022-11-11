@@ -2,7 +2,8 @@ Coming back with collaborative editing and offline support, powered by [vlcn.io]
 
 # [Strut](http://strut.io/)
 
-[![Facelift](https://f.cloud.github.com/assets/1009003/515405/f1003c6a-be74-11e2-84b9-14776c652afb.png)](http://tantaman.github.io/Strut/dist/)
+
+[![Facelift](https://user-images.githubusercontent.com/1009003/201429020-ad350f8e-a488-4434-bc81-a1093bfa9c3c.png)](http://tantaman.github.io/Strut/dist/)
 
 #### A GUI / Authoring Tool for ImpressJS and Bespoke.js
 
