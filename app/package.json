@@ -1,0 +1,26 @@
+{
+  "name": "strut",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vlcn.io/network-webrtc": "^0.1.1",
+    "@vlcn.io/rx-tbl": "^0.1.1",
+    "@vlcn.io/wa-crsqlite": "^0.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.3",
+    "vitest": "^0.25.1"
+  }
+}
