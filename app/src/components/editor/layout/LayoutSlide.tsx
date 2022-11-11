@@ -1,11 +1,10 @@
 import React from "react";
-import Slide from "../../deck/Slide";
-import { persistLog, undoLog } from "../../app_state/AppLogs";
-import { commit } from "@strut/model/Changeset";
-import Deck from "../../deck/Deck";
-import { useQuery } from "@strut/model/Hooks";
+import { Slide } from "../../../domain/schema";
+import { Deck } from "../../../domain/schema";
+import { useQuery } from "../../../hooks";
 import * as styles from "./LayoutSlide.module.css";
-import Draggable from "~src/scripts/interactions/Draggable";
+import Draggable from "../../../interactions/Draggable";
+import queries from "../../../domain/queries";
 
 export default function LayoutSlide({
   deck,
@@ -16,6 +15,7 @@ export default function LayoutSlide({
   slide: Slide;
   i: number;
 }) {
+  // queries.selectedSlides();
   useQuery(["mostRecentlySelectedSlide"], deck);
   return (
     <Draggable
@@ -28,7 +28,9 @@ export default function LayoutSlide({
       onClick={() => {
         commit(deck.selectSlideById(slide.id), [persistLog, undoLog]);
       }}
-      onDragging={(pos) => {console.log(pos)}}
+      onDragging={(pos) => {
+        console.log(pos);
+      }}
     >
       <div className={styles.contentContainer}>
         <div

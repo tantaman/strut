@@ -8,12 +8,6 @@ import PresentButton from "../../header/PresentButton";
 import * as headerStyles from "../../header/HeaderButton.module.css";
 
 export default function LayoutEditorNav({ appState }: { appState: AppState }) {
-  // const genPresenter = useMemo(
-  //   () => Presenter.queryFrom(appState.deck)?.gen(),
-  //   [appState.deck.id]
-  // );
-  const genPresenter = null;
-
   return (
     <Header>
       <div>
@@ -22,9 +16,7 @@ export default function LayoutEditorNav({ appState }: { appState: AppState }) {
       <div></div>
       <div>
         <SlideEditorButton appState={appState} />
-        {genPresenter && (
-          <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
-        )}
+        <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
       </div>
     </Header>
   );

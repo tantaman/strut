@@ -8,13 +8,15 @@ import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
 import wdbRtc from "@vlcn.io/network-webrtc";
-import { tables } from "./domain/schema.js";
+import { tableNames, tables } from "./domain/schema.js";
 
 async function main() {
   const sqlite = await sqliteWasm();
 
   const db = await sqlite.open("strut3");
   (window as any).db = db;
+
+  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS ${n};`));
 
   await db.execMany(tables);
   const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");

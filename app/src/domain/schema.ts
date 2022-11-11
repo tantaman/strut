@@ -26,6 +26,7 @@ export const tables = [
   "SELECT crsql_as_crr('line_point');",
   "SELECT crsql_as_crr('theme');",
   "SELECT crsql_as_crr('recent_color');",
+  "SELECT crsql_as_crr('presenter');",
 
   // These tables are local to the given instance and should never replicate
   `CREATE TABLE IF NOT EXISTS "selected_slides" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
@@ -33,6 +34,24 @@ export const tables = [
   `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   `CREATE TABLE IF NOT EXISTS "recent_opens" ("deck_id" primary key, "timestamp");`,
+];
+
+export const tableNames = [
+  "deck",
+  "slide",
+  "text_component",
+  "embed_component",
+  "shape_component",
+  "line_component",
+  "line_point",
+  "theme",
+  "recent_color",
+  "presenter",
+  "selected_slides",
+  "selected_components",
+  "undo_stack",
+  "redo_stack",
+  "recent_opens",
 ];
 
 type ComponentBase = {
