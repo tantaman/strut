@@ -11,7 +11,9 @@
     "jsx": "react",
     "strict": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
+  "files": ["./src/global.d.ts"],
   "include": ["./src/"]
 }

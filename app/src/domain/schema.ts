@@ -1,4 +1,7 @@
+import { Editor } from "@tiptap/core";
+import { Ctx } from "../hooks";
 import { ID_of } from "../id";
+import { Transaction } from "prosemirror-state";
 
 export const tables = [
   `CREATE TABLE IF NOT EXISTS "deck" ("id" primary key, "title", "created", "modified", "theme_id");`,
@@ -21,11 +24,11 @@ export const tables = [
   "SELECT crsql_as_crr('theme');",
 
   // These tables are local to the given instance and should never replicate
-  `CREATE TABLE IF NOT EXISTS "app_state" ("id" primary key, "editor_mode", "current_deck_id", "open_type", "drawing");`,
   `CREATE TABLE IF NOT EXISTS "selected_slides" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
   `CREATE TABLE IF NOT EXISTS "selected_components" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
   `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
+  `CREATE TABLE IF NOT EXISTS "recent_opens" ("deck_id" primary key, "timestamp");`,
 ];
 
 type ComponentBase = {
@@ -89,17 +92,7 @@ export type LinePoint = {
   y?: number;
 };
 
-export type AppState = {
-  id: ID_of<AppState>;
-  editor_mode: "slide" | "layout";
-  current_deck_id: ID_of<Deck>;
-  open_type: boolean;
-  drawing: boolean;
-};
-
-export type Bus = {
-  authoringState: {};
-};
+// === Non-Replicateds
 
 export type SelectSlides = {
   deck_id: ID_of<Deck>;
@@ -131,3 +124,39 @@ export type RedoStack = {
 };
 
 export type Operation = {};
+
+// === Ephemerals
+
+// AppState is ephemeral
+// created for each new session
+// needs to be bindable given these states change
+export type AppState = {
+  ctx: Ctx;
+  editor_mode: "slide" | "layout";
+  current_deck_id: ID_of<Deck>;
+  open_type: boolean;
+  drawing: boolean;
+  authoringState: AuthoringState;
+  drawingInteractionState: DrawingInteractionState;
+};
+
+export type DrawingInteractionState = {
+  currentTool: Tool;
+
+  activateTool: (t: Tool) => void;
+};
+
+export type AuthoringState = {
+  editor: Editor;
+  transaction: Transaction;
+};
+
+export type Tool =
+  | "selection"
+  | "rectangle"
+  | "diamond"
+  | "ellipse"
+  | "arrow"
+  | "line"
+  | "freedraw"
+  | "text";

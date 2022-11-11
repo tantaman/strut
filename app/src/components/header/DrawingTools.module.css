@@ -1,0 +1,26 @@
+.root {
+  height: 40px;
+}
+
+.text_area {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.arrow {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.line {
+  font-size: 32px;
+  position: relative;
+  top: -13px;
+  left: 2px;
+  display: block;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}

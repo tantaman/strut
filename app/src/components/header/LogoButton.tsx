@@ -11,10 +11,11 @@ import { Deck } from "../../domain/schema";
 import { Ctx, firstPick, useQuery } from "../../hooks";
 import queries from "../../domain/queries";
 import mutations from "../../domain/mutations";
+import { ID_of } from "../../id";
 
-function LogoButton({ ctx, deck }: { ctx: Ctx; deck: Deck }) {
-  const canUndo = firstPick(useQuery(...queries.canUndo(ctx, deck.id)).data);
-  const canRedo = firstPick(useQuery(...queries.canRedo(ctx, deck.id)).data);
+function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
+  const canUndo = firstPick(useQuery(...queries.canUndo(ctx, deckId)).data);
+  const canRedo = firstPick(useQuery(...queries.canRedo(ctx, deckId)).data);
 
   return (
     <DropdownButton className="strt-logo-button">
@@ -29,7 +30,7 @@ function LogoButton({ ctx, deck }: { ctx: Ctx; deck: Deck }) {
               disabled: !canUndo,
             })}
             href="#!"
-            onClick={() => mutations.undo()}
+            onClick={() => mutations.undo(ctx, deckId)}
           >
             Undo
           </a>
@@ -41,7 +42,7 @@ function LogoButton({ ctx, deck }: { ctx: Ctx; deck: Deck }) {
               disabled: !canRedo,
             })}
             href="#!"
-            onClick={() => mutations.redo()}
+            onClick={() => mutations.redo(ctx, deckId)}
           >
             Redo
           </a>

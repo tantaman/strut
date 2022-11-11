@@ -1,0 +1,8 @@
+.fontColor {
+  height: 4px;
+  background-color: var(--default-markdown-color);
+  width: 20px;
+  margin-top: 2px;
+  display: block;
+  margin: 0 auto;
+}

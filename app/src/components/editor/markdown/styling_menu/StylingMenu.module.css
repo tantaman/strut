@@ -1,0 +1,12 @@
+.root :global(.dropdown-item) {
+  padding-right: 35px;
+}
+
+.root button > i {
+  font-size: 20px;
+}
+
+.vsplit {
+  position: relative;
+  left: 2px;
+}

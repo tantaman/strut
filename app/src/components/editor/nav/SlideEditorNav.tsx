@@ -11,20 +11,15 @@ import Header from "../../../widgets/Header";
 import LogoButton from "../../header/LogoButton";
 import useMatchMedia from "~src/scripts/interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
-import { Ctx } from "../../../hooks";
-import { Deck, AppState, Bus } from "../../../domain/schema";
+import { Deck, AppState } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
 
 export default function SlideEditorNav({
-  ctx,
   deck,
   appState,
-  bus,
 }: {
-  ctx: Ctx;
   deck: Deck;
   appState: AppState;
-  bus: Bus;
 }) {
   // listen for media state
   // collapse or not the slide editor menu
@@ -42,7 +37,7 @@ export default function SlideEditorNav({
   return (
     <Header>
       <div>
-        <LogoButton ctx={ctx} deck={deck} />
+        <LogoButton ctx={appState.ctx} deckId={appState.current_deck_id} />
         <div
           className={
             "btn-group strt-search-btn " +
@@ -71,7 +66,10 @@ export default function SlideEditorNav({
           </>
         ) : (
           <>
-            <StylingMenu state={bus.authoringState} theme={deck.theme_id} />
+            <StylingMenu
+              state={appState.authoringState}
+              theme={deck.theme_id}
+            />
             <div className={styles.header_spacer + " strt-header-spacer"} />
             <SlideComponentsButtons appState={appState} />
           </>
