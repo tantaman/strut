@@ -16,13 +16,13 @@ async function main() {
   (window as any).db = db;
 
   await db.execMany([
-    "CREATE TABLE IF NOT EXISTS deck (id primary key, title, created, modified);",
-    "CREATE TABLE IF NOT EXISTS slide (id primary key, deck_id, order, created, modified, x, y, z);",
-    'CREATE TABLE IF NOT EXISTS text_component (id primary key, slide_id, "text", styles, x, y);',
-    "CREATE TABLE IF NOT EXISTS embed_component (id primary key, slide_id, src, x, y);",
-    "CREATE TABLE IF NOT EXISTS shape_component (id primary key, slide_id, type, props, x, y);",
-    "CREATE TABLE IF NOT EXISTS line_component (id primary key, slide_id, props);",
-    "CREATE TABLE IF NOT EXISTS line_point (id primary key, line_id, x, y);",
+    `CREATE TABLE IF NOT EXISTS "deck" ("id" primary key, "title", "created", "modified");`,
+    `CREATE TABLE IF NOT EXISTS "slide" ("id" primary key, "deck_id", "order", "created", "modified", "x", "y", "z");`,
+    `CREATE TABLE IF NOT EXISTS "text_component" ("id" primary key, "slide_id", "text", "styles", "x", "y");`,
+    `CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");`,
+    `CREATE TABLE IF NOT EXISTS "shape_component" ("id" primary key, "slide_id", "type", "props", "x", "y");`,
+    `CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");`,
+    `CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");`,
 
     "SELECT crsql_as_crr('deck');",
     "SELECT crsql_as_crr('slide');",
