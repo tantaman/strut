@@ -17,6 +17,21 @@ const queries = {
       "SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1",
       [id],
     ] as const,
+
+  slides: (ctx: Ctx, id: ID_of<Deck>) =>
+    [
+      ctx,
+      ["slide"],
+      'SELECT * FROM slide WHERE deck_id = ? ORDER BY "order" ASC',
+      [id],
+    ] as const,
+  chosenPresenter: (ctx: Ctx, id: ID_of<Deck>) =>
+    [
+      ctx,
+      ["deck", "presenter"],
+      "SELECT presenter.* FROM presenter, deck WHERE deck.id = ? AND presenter.name = deck.chosen_presenter",
+      [id],
+    ] as const,
 };
 
 export default queries;

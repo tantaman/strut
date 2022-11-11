@@ -1,30 +1,29 @@
 "use strict";
 
-import React, { useMemo, memo } from "react";
-import { Presenter } from "~src/scripts/bundles/PluginInterfaces";
-import Header from "~src/scripts/widgets/Header";
-import AppState from "../../app_state/AppState";
+import React from "react";
+import Header from "../../../widgets/Header";
+import { AppState } from "../../../domain/schema";
 import LogoButton from "../../header/LogoButton";
 import PresentButton from "../../header/PresentButton";
 import * as headerStyles from "../../header/HeaderButton.module.css";
-import { commit } from "@strut/model/Changeset";
 
 export default function LayoutEditorNav({ appState }: { appState: AppState }) {
-  const genPresenter = useMemo(
-    () => Presenter.queryFrom(appState.deck)?.gen(),
-    [appState.deck.id]
-  );
+  // const genPresenter = useMemo(
+  //   () => Presenter.queryFrom(appState.deck)?.gen(),
+  //   [appState.deck.id]
+  // );
+  const genPresenter = null;
 
   return (
     <Header>
       <div>
-        <LogoButton appState={appState} />
+        <LogoButton ctx={appState.ctx} deckId={appState.current_deck_id} />
       </div>
       <div></div>
       <div>
         <SlideEditorButton appState={appState} />
         {genPresenter && (
-          <PresentButton genPresenter={genPresenter} deck={appState.deck} />
+          <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
         )}
       </div>
     </Header>
@@ -33,7 +32,7 @@ export default function LayoutEditorNav({ appState }: { appState: AppState }) {
 
 function SlideEditorButton({ appState }: { appState: AppState }) {
   const switchToSlideEditor = () => {
-    commit(appState.setEditorMode("slide"), []);
+    appState.setEditorMode("slide");
   };
   return (
     <div className={headerStyles.root + " right-pad inline-block"}>

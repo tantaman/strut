@@ -1,44 +1,41 @@
 import React, { useCallback, useState } from "react";
-import { IPresenter, Transition } from "../../bundles/PluginInterfaces";
 import useOnDocClick from "../../interactions/useOnDocClick";
-import useSyncify from "../../interactions/useSyncify";
-import { commit } from "@strut/model/Changeset";
-import { useQuery } from "@strut/model/Hooks";
-import { persistLog, undoLog } from "../app_state/AppLogs";
-import Deck from "../deck/Deck";
+import { Deck, Presenter, Transition } from "../../domain/schema";
 import * as styles from "./HeaderButton.module.css";
+import { ID_of } from "../../id";
+import fns from "../../domain/fns";
+import { Ctx, first, useQuery } from "../../hooks";
+import queries from "../../domain/queries";
+import actions from "../../domain/actions";
+import mutations from "../../domain/mutations";
 
 const pos = { left: -100 };
 export default function PresentButton({
-  genPresenter,
-  deck,
+  ctx,
+  deckId,
 }: {
-  genPresenter: Promise<IPresenter>;
-  deck: Deck;
+  ctx: Ctx;
+  deckId: ID_of<Deck>;
 }) {
-  const presenterResolution = useSyncify(genPresenter);
+  const presenter = first(
+    useQuery<Presenter>(...queries.chosenPresenter(ctx, deckId)).data
+  );
 
-  // then the promise
-  // cache result
-  // return fallbak till have cached result
-  if (presenterResolution == null) {
-    return <div>Loading Presenter</div>;
-  } else if (presenterResolution?.type === "EXCEPTION") {
-    console.error(presenterResolution.resolution);
-    return <div>Fatal</div>;
+  if (!presenter) {
+    return <div>No presenter chosen?</div>;
   }
 
-  return (
-    <PresentButtonImpl presenter={presenterResolution.resolution} deck={deck} />
-  );
+  return <PresentButtonImpl ctx={ctx} presenter={presenter} deckId={deckId} />;
 }
 
 function PresentButtonImpl({
+  ctx,
   presenter,
-  deck,
+  deckId,
 }: {
-  presenter: IPresenter;
-  deck: Deck;
+  ctx: Ctx;
+  presenter: Presenter;
+  deckId: ID_of<Deck>;
 }) {
   const [show, setShow] = useState(false);
   useOnDocClick(() => {
@@ -46,19 +43,15 @@ function PresentButtonImpl({
       setShow(false);
     }
   }, [show]);
-  useQuery(["transitionType"], presenter);
-  const transitions = presenter.cannedTransitions();
+  const transitions = fns.decodeTransitions(presenter.available_transitions);
   const launchPresentation = useCallback(
-    // If other plugins augment the deck, we'll need to gather their state
-    // from the plugins themselves to pass along for rendering?
-    () => presenter.launchPresentation(deck),
-    [deck]
+    () => actions.launchPresentation(deckId),
+    [deckId]
   );
 
   const onTransitionTypeChange = useCallback(
-    (transitionType: string) => {
-      commit(presenter.setTransitionType(transitionType), [persistLog]);
-    },
+    (transitionType: string) =>
+      mutations.setTransitionType(ctx, presenter.name, transitionType),
     [presenter]
   );
 
@@ -89,7 +82,7 @@ function PresentButtonImpl({
           <TransitionItem
             transition={t}
             key={t.name}
-            selected={presenter.transitionType === t.name}
+            selected={presenter.picked_transition === t.name}
             onClick={onTransitionTypeChange}
           />
         ))}
@@ -106,7 +99,7 @@ function PresentButtonImpl({
             <i
               className={
                 "bi abs-pull-right" +
-                (presenter.transitionType === "Custom"
+                (presenter.picked_transition === "Custom"
                   ? " bi-check-circle-fill"
                   : "")
               }
@@ -125,7 +118,7 @@ function TransitionItem({
 }: {
   transition: Transition;
   selected: boolean;
-  onClick: (name) => void;
+  onClick: (name: string) => void;
 }) {
   return (
     <li onClick={() => onClick(transition.name)}>

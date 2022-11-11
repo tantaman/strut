@@ -16,7 +16,9 @@ const mutations = {
         "DELETE FROM undo_stack WHERE deck_id = ? AND order = ?",
         [deckId, item.order]
       );
+      // TODO: that should be pushed onto redo stack!
       const op = fns.decodeOperation(item.operation);
+      // await mutations.revertOperation(ctx, op);
     }
   },
 
@@ -41,9 +43,18 @@ const mutations = {
 
   toggleDrawing() {},
 
+  async setTransitionType(ctx: Ctx, presenter: string, transitionType: string) {
+    // TODO encode an operation for undo/redo too
+    await ctx.db.exec(
+      "UPDATE presenter SET transition_type = ? WHERE name = ?",
+      [transitionType, presenter]
+    );
+  },
+
   async applyOperation(ctx: Ctx, op: Operation) {
     // get mutation from op.name
     // apply mutations from op.args and current ctx
+    // TODO: could also look into the sqlite undo/redo as triggers design
   },
 };
 
