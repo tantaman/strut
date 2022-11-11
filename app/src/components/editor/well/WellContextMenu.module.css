@@ -1,0 +1,22 @@
+.root {
+  position: absolute;
+  bottom: -20px;
+  left: calc(50% - 25px);
+  padding: 0px 10px !important;
+  z-index: 10;
+}
+
+.horizontal {
+  position: absolute;
+  right: -20px;
+  bottom: calc(50% - 20px);
+  width: 30px;
+  height: 38px;
+  z-index: 10;
+  padding: 8px 0px !important;
+}
+
+.root > i {
+  font-size: 20px;
+  font-weight: bold;
+}

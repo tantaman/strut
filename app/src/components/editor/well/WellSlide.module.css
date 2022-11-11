@@ -1,0 +1,85 @@
+.root {
+  position: relative;
+  cursor: pointer;
+}
+
+.root:global(.dragging) {
+  left: 10px;
+}
+
+.root > :global(.well-context-menu) {
+  display: none;
+}
+
+.root:hover > :global(.well-context-menu) {
+  display: block;
+}
+
+/* .root:hover {
+  background: #ffc107;
+} */
+
+/* TODO: slide size! should be gotten from config not hardcoded here! */
+.markdownContainer {
+  width: 960px;
+  height: 700px;
+  transform: scale(0.1459, 0.1428);
+  transform-origin: 0 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.badge {
+  position: absolute;
+  bottom: -5px;
+  left: -5px;
+}
+
+.close {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+}
+
+.root:hover > .close {
+  display: block;
+}
+
+.dropOutsideIndicator {
+  display: none;
+  border: 2px solid #ffc107;
+  width: 140px;
+  position: absolute;
+}
+
+.dropOutsideIndicator.top {
+  display: block;
+  top: -8px;
+}
+
+.dropOutsideIndicator.bottom {
+  display: block;
+  bottom: -8px;
+}
+
+.dropOutsideIndicator.left {
+  display: block;
+  left: -8px;
+  width: 0px;
+  height: 100px;
+}
+
+.dropOutsideIndicator.right {
+  display: block;
+  right: -8px;
+  width: 0px;
+  height: 100px;
+}
+
+.in:global(.strt-well-slide) {
+  background-color: #ffc107;
+}

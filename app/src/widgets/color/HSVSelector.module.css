@@ -1,0 +1,33 @@
+.root {
+  position: relative;
+}
+
+.saturation {
+  background-image: linear-gradient(to right, #fff, rgba(204, 154, 129, 0));
+}
+
+.value {
+  background-image: linear-gradient(to top, #000, rgba(204, 154, 129, 0));
+}
+
+.stretch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.selector {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  position: absolute;
+  border: 2px solid white;
+  outline: 2px solid black;
+  pointer-events: none;
+}
+
+.done {
+  margin-top: 8px;
+}

@@ -1,0 +1,31 @@
+.root {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 260px;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 8px;
+  color: #666;
+}
+
+.root :global(.badge) {
+  cursor: pointer;
+}
+
+.root strong {
+  font-size: 0.9rem;
+}
+
+.root svg {
+  width: 32px;
+  height: 16px;
+}
+
+.root .layers svg {
+  height: 24px;
+}
+
+.opacity {
+  width: 100%;
+}

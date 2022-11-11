@@ -1,0 +1,26 @@
+.root {
+  position: relative;
+  width: 164px;
+  height: 15px;
+  background: linear-gradient(
+    90deg,
+    #ff0000,
+    #ffff00,
+    #00ff00,
+    #00ffff,
+    #0000ff,
+    #ff00ff,
+    #ff0000
+  );
+  margin-top: 8px;
+}
+
+.control {
+  position: absolute;
+  width: 6px;
+  height: 15px;
+  border: 2px solid white;
+  outline: 1px solid black;
+  cursor: pointer;
+  pointer-events: none;
+}

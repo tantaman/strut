@@ -1,0 +1,37 @@
+.root {
+  position: absolute;
+  top: 10px;
+  width: 600px;
+  height: 80%;
+  left: calc((100% - 600px) / 2);
+  z-index: 99;
+  background-color: #fafafa;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  /* 0 1px 2px rgb(0 0 0 / 10%); */
+  border: 1px solid #efeef3;
+}
+
+.root > input {
+  width: calc(100% - 8px);
+  margin-left: 4px;
+  margin-right: 4px;
+  margin-top: 4px;
+}
+
+.root > ul {
+  margin-top: 6px;
+  list-style-type:none;
+  padding-left: 0px;
+}
+
+.root > ul > li {
+  padding-left: 16px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  cursor: pointer;
+}
+
+.active {
+  /* background: #e9ecef; */
+  background: #ffc107;
+}

@@ -1,0 +1,55 @@
+.root {
+  width: 264px;
+  background-color: white;
+  padding: 12px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-bottom: 8px;
+}
+
+.reset {
+  flex-grow: 2;
+  margin-right: 8px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+
+  margin: 2px;
+  outline: 1px solid #eee;
+  cursor: pointer;
+
+  line-height: 20px;
+  text-align: center;
+  vertical-align: top;
+  color: black;
+  font-weight: bold;
+}
+
+.swatch:hover {
+  outline: 1px solid black;
+}
+
+.swatchRow {
+  line-height: 0;
+}
+
+.input {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+.label {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+:global(.dropdown-menu).fieldDropdown {
+  padding: 8px;
+}

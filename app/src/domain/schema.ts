@@ -12,6 +12,8 @@ export const tables = [
   `CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");`,
   `CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");`,
   `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "props");`,
+  `CREATE TABLE IF NOT EXISTS "recent_color" ("id" primary key, "color", "last_used", "first_used", "theme_id");`,
+  // TODO: create fk indices
 
   // Make these tables collaborative
   "SELECT crsql_as_crr('deck');",

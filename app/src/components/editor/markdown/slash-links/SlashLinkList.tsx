@@ -5,9 +5,11 @@ import React, {
   useImperativeHandle,
 } from "react";
 import * as styles from "./SlashLink.module.css";
-import type { Suggestion } from "~src/scripts/components/deck-index/DeckIndex";
 import { truncateForDisplay } from "@strut/sid";
+import { ID_of } from "../../../../id";
+import { Slide } from "../../../../domain/schema";
 
+type Suggestion = { id: ID_of<Slide>; title: string /*match: string*/ };
 export type Props = {
   items: Suggestion[];
   command: (params: { id: string }) => void;
@@ -16,7 +18,7 @@ export type Props = {
 export default forwardRef((props: Props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const selectItem = (index) => {
+  const selectItem = (index: number) => {
     const item = props.items[index];
 
     if (item) {
@@ -41,7 +43,7 @@ export default forwardRef((props: Props, ref) => {
   useEffect(() => setSelectedIndex(0), [props.items]);
 
   useImperativeHandle(ref, () => ({
-    onKeyDown: ({ event }) => {
+    onKeyDown: ({ event }: { event: KeyboardEvent }) => {
       if (event.key === "ArrowUp") {
         upHandler();
         return true;

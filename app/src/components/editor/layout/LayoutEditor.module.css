@@ -1,0 +1,7 @@
+.container {
+  position: absolute;
+  top: var(--header-height);
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}

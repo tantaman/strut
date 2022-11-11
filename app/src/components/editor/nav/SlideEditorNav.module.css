@@ -1,0 +1,11 @@
+.middle_buttons {
+  display: flex;
+}
+
+.header_spacer {
+  width: 50px;
+}
+
+.searchBtn {
+  margin-left: 16px;
+}

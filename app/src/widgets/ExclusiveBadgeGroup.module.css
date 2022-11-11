@@ -1,0 +1,11 @@
+.badge:hover {
+  background-color: #ffc107 !important;
+}
+
+.badge {
+  margin-right: 4px;
+}
+
+.active {
+  background-color: #9ae8ff;
+}

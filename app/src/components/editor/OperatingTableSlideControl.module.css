@@ -1,0 +1,14 @@
+.root {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 2;
+}
+
+.root > i {
+  cursor: pointer;
+}
+
+.root > i:hover {
+  color: #e54d2c;
+}

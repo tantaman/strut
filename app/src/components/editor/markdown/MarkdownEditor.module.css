@@ -1,0 +1,15 @@
+.root {
+  height: 100%;
+  overflow-y: hidden;
+  width: 100%;
+  position: absolute;
+}
+
+.root > div {
+  height: 100%;
+}
+
+div:global(.ProseMirror-menubar-wrapper),
+div:global(.ProseMirror) {
+  height: 100%;
+}
