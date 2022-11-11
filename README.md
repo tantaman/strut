@@ -20,4 +20,4 @@ Don't know what ImpressJS is? Check out the ImpressJS demo presentation: http://
 
 
 # Strut2 Alpha Preview
-https://strut2.pages.dev/
+[https://strut2.pages.dev/](https://strut2.pages.dev/present)
