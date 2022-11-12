@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+
+.bespoke-slide > .markdown {
+  position: absolute;
+  top: 0;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: #606060;
+}
+
+#main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+article {
+  perspective: 600px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+}
+
+section {
+  transform: none;
+  background: #c0c0c0;
+  width: 960px;
+  height: 700px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -480px;
+  margin-top: -350px;
+  opacity: 0;
+}
+body,
+section.bespoke-slide {
+  transition: transform 0.7s ease, opacity 0.7s ease, background-color 0.7s ease;
+}
+section.bespoke-active {
+  opacity: 1;
+  z-index: 1;
+}
