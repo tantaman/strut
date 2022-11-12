@@ -49,7 +49,8 @@ function useQueryImpl<T>(
         setState({
           data:
             postProcess != null
-              ? data.map((d) => postProcess(d))
+              ? // TODO: postProcess should work on full dataset for more flexibility
+                data.map((d) => postProcess(d))
               : (data as T[]),
           loading: false,
         });

@@ -42,7 +42,7 @@ function WellSlide(props: {
   const theme = useQuery<Theme>(
     ...queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
   ).data;
-  const selectedSlideIds = useQueryA<[ID_of<Slide>], ID_of<Slide>>(
+  const selectedSlides = useQueryA<[ID_of<Slide>], ID_of<Slide>>(
     ...queries.selectedSlides(props.appState.ctx, props.id)
   ).data;
 
@@ -158,7 +158,12 @@ function WellSlide(props: {
       // Drop into a slide making a sub-folder
       return;
     }
-    commit(props.deck.reorder(fromIndex, toIndex), [persistLog, undoLog]);
+    mutations.reorderSlides(
+      props.appState.ctx,
+      props.appState.current_deck_id,
+      fromIndex,
+      toIndex
+    );
     // reorder
     // from index, to index
   };

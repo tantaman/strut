@@ -105,6 +105,14 @@ const mutations = {
   },
 
   addSlideAfter(ctx: Ctx, i: number, id: ID_of<Deck>) {},
+
+  // TODO: should be id rather than index based reordering in the future
+  reorderSlides(
+    ctx: Ctx,
+    id: ID_of<Deck>,
+    fromIndex: number,
+    toIndex: number
+  ) {},
 };
 
 export default mutations;

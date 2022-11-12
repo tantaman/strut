@@ -6,3 +6,8 @@ Althrough if there is a write going on in between them and us... we should not u
 
 How does `dataLoader` collect all the things in a tick? Can we just do the same and collapse the tick?
 https://github.com/graphql/dataloader
+
+# UseQuery
+
+- PostProcess against full dataset
+- Types in `queries.ts` rather than at callsite
