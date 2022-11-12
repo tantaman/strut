@@ -1,8 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 
-export function useDebounce<T>(cb: (p?: T) => void, time): (p?: T) => void {
+export function useDebounce<T>(
+  cb: (p: T) => void,
+  time: number
+): (p: T) => void {
   const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
-  return (p?: T) => {
+  return (p: T) => {
     if (pending.current != null) {
       clearTimeout(pending.current);
       pending.current = null;
@@ -34,7 +37,7 @@ export function useExclusiveBools<T extends { [key: string]: boolean }>(
 ): [T, (x: keyof T) => void, () => void] {
   const [state, setState] = useState(v);
 
-  const toggle = (toToggle) => {
+  const toggle = (toToggle: keyof T) => {
     const currentVal = state[toToggle];
     if (currentVal) {
       setState({
@@ -44,8 +47,10 @@ export function useExclusiveBools<T extends { [key: string]: boolean }>(
       return;
     }
 
-    const newState = {};
-    Object.keys(state).forEach((k) => (newState[k] = false));
+    const newState: T = {} as any;
+    // @ts-ignore
+    Object.keys(state).forEach((k: keyof T) => (newState[k] = false));
+    // @ts-ignore
     newState[toToggle] = true;
     // TODO: figure this out.
     // @ts-ignore
@@ -54,6 +59,7 @@ export function useExclusiveBools<T extends { [key: string]: boolean }>(
 
   const allOff = () => {
     const newState = {};
+    // @ts-ignore
     Object.keys(state).forEach((k) => (newState[k] = false));
     // TODO: figure this out.
     // @ts-ignore

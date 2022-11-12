@@ -1,0 +1,115 @@
+.wdgt-root {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  overflow: hidden;
+}
+
+.wdgt-crop-overlay {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.wdgt-crop-overlay:not(.editing) {
+  cursor: move;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.wdgt-crop-overlay.selected {
+  border-color: rgba(51, 102, 255, 0.75);
+  border-style: solid;
+  border-width: 1px;
+}
+
+.wdgt-grid-dashed-h {
+  box-sizing: border-box;
+  position: absolute;
+  border-top: 1px dashed #fff;
+  border-bottom: 1px dashed #fff;
+  top: 33%;
+  height: 33%;
+  width: 100%;
+  opacity: 0.5;
+}
+
+.wdgt-grid-dashed-v {
+  box-sizing: border-box;
+  position: absolute;
+  left: 33%;
+  height: 100%;
+  width: 33%;
+  border-left: 1px dashed #fff;
+  border-right: 1px dashed #fff;
+  opacity: 0.5;
+}
+
+.wdgt-resize-point {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: #69f;
+}
+
+.wdgt-s {
+  bottom: -2.5px;
+  left: calc(50% - 2.5px);
+  cursor: s-resize;
+}
+
+.wdgt-e {
+  right: -2.5px;
+  top: calc(50% - 2.5px);
+  cursor: e-resize;
+}
+
+.wdgt-n {
+  top: -2.5px;
+  left: calc(50% - 2.5px);
+  cursor: n-resize;
+}
+
+.wdgt-w {
+  left: -2.5px;
+  top: calc(50% - 2.5px);
+  cursor: w-resize;
+}
+
+.wdgt-nw {
+  left: -2.5px;
+  top: -2.5px;
+  cursor: nw-resize;
+}
+
+.wdgt-ne {
+  right: -2.5px;
+  top: -2.5px;
+  cursor: ne-resize;
+}
+
+.wdgt-sw {
+  bottom: -2.5px;
+  left: -2.5px;
+  cursor: sw-resize;
+}
+
+.wdgt-se {
+  right: -2.5px;
+  bottom: -2.5px;
+  cursor: se-resize;
+}
+
+.wdgt-crop-filter {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  background: rgba(0, 0, 0, 0.5);
+}

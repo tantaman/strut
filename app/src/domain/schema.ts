@@ -11,9 +11,10 @@ export const tables = [
   `CREATE TABLE IF NOT EXISTS "shape_component" ("id" primary key, "slide_id", "type", "props", "x", "y");`,
   `CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");`,
   `CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");`,
-  `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "props");`,
+  `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "name", "bg_colorset", "fg_colorset", "fontset");`,
   `CREATE TABLE IF NOT EXISTS "recent_color" ("color" primary key, "last_used", "first_used", "theme_id");`,
   `CREATE TABLE IF NOT EXISTS "presenter" ("name" primary key, "available_transitions", "picked_transition");`,
+  `CREATE TABLE IF NOT EXISTS "markdown" ("slide_id" primary key, "content");`, // TODO: sequence crdt support for makdown content
   // TODO: create fk indices
 
   // Make the above tables collaborative
@@ -27,6 +28,7 @@ export const tables = [
   "SELECT crsql_as_crr('theme');",
   "SELECT crsql_as_crr('recent_color');",
   "SELECT crsql_as_crr('presenter');",
+  "SELECT crsql_as_crr('markdown');",
 
   // These tables are local to the given instance and should never replicate
   `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
@@ -47,6 +49,7 @@ export const tableNames = [
   "theme",
   "recent_color",
   "presenter",
+  "markdown",
   "selected_slides",
   "selected_components",
   "undo_stack",
@@ -72,7 +75,10 @@ export type Deck = {
 // TODO: decoding methods in `queries`
 export type Theme = {
   id: ID_of<Theme>;
-  props?: string;
+  name: string;
+  bg_colorset: string;
+  fg_colorset: string;
+  fontset: string;
 };
 
 export type Slide = {
@@ -122,6 +128,11 @@ export type Presenter = {
   picked_transition?: string;
 };
 
+export type Markdown = {
+  slide_id: ID_of<Slide>;
+  content?: string;
+};
+
 // === Non-Replicateds
 
 export type SelectSlides = {
@@ -155,8 +166,6 @@ export type RedoStack = {
 
 export type Operation = {};
 
-export type DenormalizedTheme = {};
-
 // === Ephemerals
 
 // AppState is ephemeral
@@ -170,9 +179,10 @@ export type AppState = {
   drawing: boolean;
   authoringState: AuthoringState;
   drawingInteractionState: DrawingInteractionState;
-  previewTheme: DenormalizedTheme;
+  previewTheme: Theme;
 
   setEditorMode(mode: AppState["editor_mode"]): void;
+  toggleOpenType(): void;
 };
 
 export type DrawingInteractionState = {
@@ -184,6 +194,9 @@ export type DrawingInteractionState = {
 export type AuthoringState = {
   editor: Editor;
   transaction: Transaction;
+
+  updateEditor: (editor: Editor) => void;
+  updateTransaction: (transaction: Transaction) => void;
 };
 
 export type Tool =

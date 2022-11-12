@@ -1,0 +1,25 @@
+.strt-operating-table {
+  position: absolute;
+  left: 159px;
+  z-index: 2;
+  top: var(--header-height);
+  bottom: 0px;
+  right: 0px;
+}
+
+.strt-theme-light .strt-operating-table {
+  background: #fafafa;
+  border-left: 1px solid #dae3e9;
+  box-shadow: -3px 3px 3px -2px #f1f1f3;
+}
+
+.strt-ot-slide {
+  position: absolute;
+  top: 10px;
+  transform-origin: 0 0;
+}
+
+.strt-ot-slide {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  background: #fff;
+}

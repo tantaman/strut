@@ -1,0 +1,45 @@
+@font-face {
+  font-family: "Virgil";
+  src: url("../../../fonts/virgil.woff2") format("woff2");
+}
+
+.font-virgil {
+  font-family: "Virgil", sans-serif;
+}
+
+.font-roboto {
+  font-family: Roboto, sans-serif;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,700;1,100;1,700&display=swap");
+
+.font-fira {
+  font-family: "Fira Sans", sans-serif;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+.font-montserrat {
+  font-family: "Montserrat", sans-serif;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+.font-open-sans {
+  font-family: "Open Sans", sans-serif;
+}
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&display=swap");
+
+.font-dosis {
+  font-family: "Dosis", sans-serif;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=KoHo:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+.font-koho {
+  font-family: "KoHo", sans-serif;
+}
+
+.font-default {
+  font-family: Lato, Avenir Next, Avenir, Trebuchet MS, Segoe UI, sans-serif;
+}

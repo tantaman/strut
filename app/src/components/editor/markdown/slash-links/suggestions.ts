@@ -30,7 +30,7 @@ function render() {
       });
     },
 
-    onUpdate(props) {
+    onUpdate(props: any) {
       component.updateProps(props);
 
       popup[0].setProps({
@@ -92,7 +92,7 @@ const opts = {
   render,
 };
 
-export default function create(deckIndex: any) {
+export default function create(/*deckIndex: any*/) {
   return {
     char: "/",
     items: ({ query }: { query: string }) => {
@@ -100,5 +100,5 @@ export default function create(deckIndex: any) {
       return ["test", "test2"];
     },
     render,
-  };
+  } as const;
 }

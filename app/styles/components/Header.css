@@ -1,0 +1,69 @@
+.strt-logo-button {
+	position: relative;
+	top: -2px;
+	display: inline-block;
+}
+
+.strt-logo-button > .dropdown-toggle::after {
+	vertical-align: 0.7em;
+	margin-left: 0.5em;
+}
+
+.strt-logo-button .bg {
+	width: 100px;
+	height: 32px;
+	display: inline-block;
+}
+
+.strt-theme-light .bg {
+	background: url('../../images/logos/strut-logo-32.png');
+}
+
+.strt-theme-dark .bg {
+	background: url('../../images/logos/strut-logo-32.png');
+}
+
+.strt-logo-button > .btn-outline-warning {
+	color: #333;
+	border-color: #ccc;
+}
+
+.strt-logo-button .caret {
+	position: absolute;
+	right: 6px;
+	top: 17px;
+}
+
+.strt-logo-button > button {
+	padding: 0px;
+	padding-left: 8px;
+	padding-right: 10px;
+	padding-top: 3px;
+	height: 40px;
+}
+
+.strt-theme-light .navbar-default {
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	border-bottom: 1px solid #efeef3;
+	background: #fff;
+}
+
+.strt-theme-dark .navbar-default {
+	background: #34323a;
+	border: none;
+}
+
+.strt-header-component-area {
+	display: inline-block;
+	margin-left: 50px;
+}
+
+.strt-header-component-area .btn {
+	font-size: 13px;
+	padding: 4px 12px;
+	margin-top: 5px;
+}
+
+.navbar {
+	height: 57px;
+}

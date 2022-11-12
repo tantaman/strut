@@ -1,6 +1,6 @@
 import * as React from "react";
 import SlideComponentsButtons from "../../header/SlideComponentsButtons";
-import * as styles from "./SlideEditorNav.module.css";
+import styles from "./SlideEditorNav.module.css";
 import DrawingTools from "../../header/DrawingTools";
 import * as headerBtn from "../../header/HeaderButton.module.css";
 import StylingMenu from "../markdown/styling_menu/StylingMenu";
@@ -66,21 +66,16 @@ export default function SlideEditorNav({
           </>
         ) : (
           <>
-            <StylingMenu
-              state={appState.authoringState}
-              theme={deck.theme_id}
-            />
+            <StylingMenu appState={appState} />
             <div className={styles.header_spacer + " strt-header-spacer"} />
             <SlideComponentsButtons appState={appState} />
           </>
         )}
       </div>
       <div>
+        {genPresenter && <LayoutButton appState={appState} />}
         {genPresenter && (
-          <LayoutButton genPresenter={genPresenter} appState={appState} />
-        )}
-        {genPresenter && (
-          <PresentButton genPresenter={genPresenter} deck={deck} />
+          <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
         )}
       </div>
     </Header>

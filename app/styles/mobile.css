@@ -1,0 +1,36 @@
+@media screen and (max-width: 1212px) {
+  .strt-logo-button {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .strt-operating-table {
+    top: 0;
+    left: 0;
+    bottom: 128px;
+  }
+
+  .strt-slide-well {
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 128px;
+    width: auto;
+    top: auto;
+    white-space: nowrap;
+    padding-top: 5px;
+  }
+
+  .strt-well-slide {
+    margin: 0px 5px;
+    display: inline-block;
+  }
+}
+
+@media screen and (max-width: 1030px) {
+  .strt-search-btn,
+  .strt-header-spacer {
+    display: none;
+  }
+}

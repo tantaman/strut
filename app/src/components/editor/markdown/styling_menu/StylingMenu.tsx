@@ -1,7 +1,7 @@
 import React from "react";
 import * as styles from "./StylingMenu.module.css";
 import * as headerStyles from "../../../header/HeaderButton.module.css";
-import { AuthoringState } from "../../../../domain/schema";
+import { AppState, AuthoringState } from "../../../../domain/schema";
 import BlockElementDropdown from "./BlockElementDropdown";
 import AlignmentDropdown from "./AlignmentDropdown";
 import MarkMenu from "./MarkMenu";
@@ -9,15 +9,24 @@ import FontColorButton from "./FontColorButton";
 import { Theme } from "../../../../domain/schema";
 import useMatchMedia from "../../../../interactions/useMatchMedia";
 import mediaCuts from "../../../../components/mobile/mediaCuts";
-import { Ctx } from "../../../../hooks";
+import { Ctx, first, useQuery } from "../../../../hooks";
+import { ID_of } from "../../../../id";
+import queries from "../../../../domain/queries";
 
 type Props = {
-  ctx: Ctx;
-  state: AuthoringState;
-  theme: Theme;
+  appState: AppState;
 };
 
-export default function StylingMenu({ ctx, state, theme }: Props) {
+export default function StylingMenu({ appState }: Props) {
+  const state = appState.authoringState;
+  const ctx = appState.ctx;
+
+  const theme = first(
+    useQuery<Theme>(
+      ...queries.themeFromDeck(appState.ctx, appState.current_deck_id)
+    ).data
+  );
+
   const addImage = () => {
     // const url = window.prompt("URL");
     // if (url) {

@@ -1,17 +1,14 @@
 "use strict";
 
-import React, { memo, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import css from "../../../html/Css";
-import Deck from "../../deck/Deck";
-import { useQuery } from "@strut/model/Hooks";
-import Slide from "../../deck/Slide";
-import { EphemeralTheme } from "../../deck/Theme";
+import { useQuery } from "../../../hooks";
+import { Slide } from "../../../domain/schema";
+import { Theme } from "../../../domain/schema";
 import WellContextMenu from "./WellContextMenu";
 import * as styles from "./WellSlide.module.css";
-import { commit } from "@strut/model/Changeset";
-import { persistLog, undoLog } from "../../app_state/AppLogs";
 import WellSlideDrawingPreview from "./WellSlideDrawingPreview";
-import AppState from "../../app_state/AppState";
+import { AppState } from "../../../domain/schema";
 
 const dragImageUrl = new URL(
   "../../../../images/drag-slides.svg",
@@ -22,7 +19,6 @@ img.src = dragImageUrl.toString();
 
 function WellSlide(props: {
   slide: Slide;
-  deck: Deck;
   index: number;
   appState: AppState;
   orient: "horizontal" | "vertical";

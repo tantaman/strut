@@ -6,16 +6,17 @@ import mutations from "../../../../domain/mutations";
 import "@tiptap/extension-color";
 import queries from "../../../../domain/queries";
 import { Ctx, pick0, useQueryA } from "../../../../hooks";
+import config from "../../../../config";
 
 type Props = {
   ctx: Ctx;
   state: AuthoringState;
-  theme: Theme;
+  theme?: Theme;
 };
 
 export default function FontColorButton({ ctx, state, theme }: Props) {
-  const recentColors = useQueryA<string, [string]>(
-    ...queries.recentColors(ctx, theme.id)
+  const recentColors = useQueryA<[string], string>(
+    ...queries.recentColors(ctx, theme?.id || config.defaultThemeId)
   ).data;
   // useBind(["transaction"], state);
   // useQuery(["recentColors"], theme);
@@ -28,7 +29,11 @@ export default function FontColorButton({ ctx, state, theme }: Props) {
         state.editor?.chain().focus().unsetColor().run();
       } else {
         state.editor?.chain().focus().setColor(color).run();
-        mutations.addRecentColor(ctx, color, theme.id);
+        mutations.addRecentColor(
+          ctx,
+          color,
+          theme?.id || config.defaultThemeId
+        );
       }
 
       return false;

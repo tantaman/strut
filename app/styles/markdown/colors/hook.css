@@ -1,0 +1,137 @@
+/* https://hookagency.com/color-schemes/ */
+
+.color-default {
+  color: #455a64;
+  background: #fff;
+}
+
+/* DRIPPED */
+.color-orange_drip {
+  background: #051821;
+  color: #f8bc24;
+}
+
+.color-orange_drip h1,
+.color-orange_drip h2,
+.color-orange_drip h3,
+.color-orange_drip h4,
+.color-orange_drip h5,
+.color-orange_drip h6 {
+  color: #f58800;
+}
+
+.color-orange_drip blockquote {
+  background: #266867;
+}
+
+/* RIPPED */
+.color-ripped {
+  background: #360e95;
+  color: #f2bfc8;
+}
+
+.color-ripped h1,
+.color-ripped h2,
+.color-ripped h3,
+.color-ripped h4,
+.color-ripped h5,
+.color-ripped h6 {
+  color: #e87463;
+}
+
+.color-ripped blockquote {
+  background: #71cdc0;
+  color: #f4d83d;
+}
+
+/* Masculinity */
+.color-masculinity {
+  background: #2e2e2e;
+  color: #f9f9f9;
+}
+
+.color-masculinity h1,
+.color-masculinity h2,
+.color-masculinity h3,
+.color-masculinity h4,
+.color-masculinity h5,
+.color-masculinity h6 {
+  color: #d67860;
+}
+
+.color-masculinity blockquote {
+  background: #e9e9e6;
+  color: #2e2e2e;
+}
+
+/* dusted glass */
+.color-dusted {
+  background: #b19d99;
+  color: #f0edea;
+}
+
+.color-dusted h1,
+.color-dusted h2,
+.color-dusted h3,
+.color-dusted h4,
+.color-dusted h5,
+.color-dusted h6 {
+  color: #c1d2d8;
+}
+
+.color-dusted blockquote {
+  background: #dcc6ae;
+}
+
+/* Comfort fit */
+.color-comfort {
+  background: #d3c6b7;
+  color: #516360;
+}
+
+.color-comfort blockquote {
+  background: #edd8ca;
+}
+
+/* beach */
+.color-beach {
+  background: #fff3d9;
+  color: #2e6e8d;
+}
+
+.color-beach h1,
+.color-beach h2,
+.color-beach h3,
+.color-beach h4,
+.color-beach h5,
+.color-beach h6 {
+  color: #153240;
+}
+
+.color-beach blockquote {
+  background: #ffe6b3;
+}
+
+/* neon sunset */
+.color-nsunset {
+  background-image: linear-gradient(to bottom, #bf406c, #f1e678);
+  color: #2b1f46;
+}
+
+.color-nsunset blockquote {
+  background-image: linear-gradient(to bottom, #f1e678, #ed8f60);
+}
+
+/* greys */
+.color-greys {
+  background: #5e5d5d;
+  color: #eae6e4;
+}
+
+.color-greys blockquote {
+  background: #a4918e;
+}
+
+/* random: chroma.scale([chroma.random(),chroma.random()])
+    .mode('lch').colors(3)
+*/

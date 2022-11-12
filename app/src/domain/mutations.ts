@@ -87,6 +87,15 @@ const mutations = {
       [color, Date.now(), Date.now(), id]
     );
   },
+
+  async persistMarkdownToSlide(ctx: Ctx, id: ID_of<Slide>, dom: string) {
+    await ctx.db.exec(
+      `UPDATE markdown
+        SET "content" = ?
+        WHERE slide_id = ?`,
+      [dom, id]
+    );
+  },
 };
 
 export default mutations;

@@ -75,8 +75,8 @@ export function useQuery<T, X = T>(
   tables: readonly string[],
   query: string,
   bindings?: readonly any[],
-  postProcess?: (x: X) => T
-): QueryData<T> {
+  postProcess?: (x: T) => X
+): QueryData<X> {
   return useQueryImpl(ctx, tables, query, "o", bindings, postProcess);
 }
 
@@ -85,8 +85,8 @@ export function useQueryA<T, X = T>(
   tables: readonly string[],
   query: string,
   bindings?: readonly any[],
-  postProcess?: (x: X) => T
-): QueryData<T> {
+  postProcess?: (x: T) => X
+): QueryData<X> {
   return useQueryImpl(ctx, tables, query, "a", bindings, postProcess);
 }
 
@@ -109,4 +109,4 @@ export function pick0<T extends any[]>(data: T[]): T[0][] {
   return data.map((d) => d[0]);
 }
 
-export function useBind<T extends keyof D, D>(keys: T[], d: D) {}
+export function useBind<T extends keyof D, D>(keys: T[], d?: D) {}

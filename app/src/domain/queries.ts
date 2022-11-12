@@ -1,6 +1,6 @@
-import { Ctx, pick0 } from "../hooks";
+import { Ctx, first, pick0 } from "../hooks";
 import { ID_of } from "../id";
-import { Deck, Theme } from "./schema";
+import { Deck, Slide, Theme } from "./schema";
 
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
@@ -58,11 +58,22 @@ const queries = {
       (x: [string]) => x[0],
     ] as const,
 
-  denormalizedTheme: (ctx: Ctx, id: ID_of<Theme>) =>
+  theme: (ctx: Ctx, id: ID_of<Theme>) =>
+    [ctx, ["theme"], "SELECT * FROM theme WHERE id = ?", [id]] as const,
+
+  themeFromDeck: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
-      ["theme", "theme_props"],
-      "SELECT theme FROM theme WHERE theme_id = ?",
+      ["theme"],
+      "SELECT theme.* FROM theme JOIN deck ON theme.id = deck.theme_id WHERE deck.id = ?",
+      [id],
+    ] as const,
+
+  markdown: (ctx: Ctx, id: ID_of<Slide>) =>
+    [
+      ctx,
+      ["markdown"],
+      "SELECT * FROM markdown WHERE slide_id = ?",
       [id],
     ] as const,
 };
