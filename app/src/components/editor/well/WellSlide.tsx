@@ -1,14 +1,25 @@
 "use strict";
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  DragEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import css from "../../../html/Css";
-import { useQuery } from "../../../hooks";
-import { Slide } from "../../../domain/schema";
+import { first, useQuery, useQueryA } from "../../../hooks";
+import { Markdown, Slide } from "../../../domain/schema";
 import { Theme } from "../../../domain/schema";
 import WellContextMenu from "./WellContextMenu";
-import * as styles from "./WellSlide.module.css";
+import styles from "./WellSlide.module.css";
 import WellSlideDrawingPreview from "./WellSlideDrawingPreview";
 import { AppState } from "../../../domain/schema";
+import { ID_of } from "../../../id";
+import queries from "../../../domain/queries";
+import fns from "../../../domain/fns";
+import mutations from "../../../domain/mutations";
 
 const dragImageUrl = new URL(
   "../../../../images/drag-slides.svg",
@@ -18,35 +29,43 @@ const img = new Image();
 img.src = dragImageUrl.toString();
 
 function WellSlide(props: {
-  slide: Slide;
+  id: ID_of<Slide>;
   index: number;
   appState: AppState;
   orient: "horizontal" | "vertical";
 }) {
-  useQuery(["asDom"], props.slide);
-  const slide = props.slide;
-  useQuery(["mostRecentlySelectedSlide"], props.deck);
-  const previewTheme = props.appState.previewTheme;
-  const theme = props.deck.theme;
+  // TODO: these types should be part of `queries.` so the caller doesn't
+  // need to provide them
+  const markdown = first(
+    useQuery<Markdown>(...queries.markdown(props.appState.ctx, props.id)).data
+  );
+  const theme = useQuery<Theme>(
+    ...queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
+  ).data;
+  const selectedSlideIds = useQueryA<[ID_of<Slide>], ID_of<Slide>>(
+    ...queries.selectedSlides(props.appState.ctx, props.id)
+  ).data;
 
-  useQuery(["slideColor", "font"], previewTheme);
-  useQuery(["slideColor", "font"], theme);
+  const previewTheme = props.appState.previewTheme;
+
+  // TODO: `useBind` on `previewTheme`
+  // useQuery(["slideColor", "font"], previewTheme);
 
   const markdownContainer = useRef<ParentNode>();
   const [hideContextMenu, setHideContextMenu] = useState(false);
   const [dropClass, setDropClass] = useState("");
 
-  const setRef = useCallback((node) => {
+  const setRef = useCallback((node: ParentNode) => {
     markdownContainer.current = node;
     if (!node) {
       return;
     }
-    node.replaceChildren(slide.asDom);
+    node.replaceChildren(fns.mdStringAsDom(markdown?.content || ""));
   }, []);
 
-  const onDragStart = (e) => {
+  const onDragStart = (e: DragEvent) => {
     setHideContextMenu(true);
-    e.dataTransfer.setData("text/plain", props.index);
+    e.dataTransfer.setData("text/plain", props.index.toString());
     e.dataTransfer.dropEffect = "move";
     e.dataTransfer.setDragImage(img, 16, 20);
   };
@@ -59,9 +78,9 @@ function WellSlide(props: {
       return;
     }
 
-    const child = slide.asDom as HTMLElement;
+    const child = fns.mdStringAsDom(markdown?.content || "") as HTMLElement;
     node.replaceChildren(child);
-  }, [slide.asDom]);
+  }, [markdown?.content]);
 
   // useEffect(() => {
   //   let node = markdownContainer.current;
@@ -81,13 +100,13 @@ function WellSlide(props: {
   //   );
   // }, [previewTheme.color, theme.color, previewTheme.font, theme.font]);
 
-  const removeSlide = (e) => {
-    commit(props.deck.removeSlide(props.index) ?? [], [persistLog, undoLog]);
+  const removeSlide = (e: MouseEvent) => {
+    mutations.removeSlide(props.appState.ctx, props.id);
     e.stopPropagation();
     return false;
   };
 
-  const onDragOver = (e) => {
+  const onDragOver = (e: DragEvent) => {
     const me = containerRef?.current;
     if (me == null) {
       return;
@@ -126,7 +145,7 @@ function WellSlide(props: {
     setDropClass(styles.in);
   };
 
-  const onDrop = (e) => {
+  const onDrop = (e: DragEvent) => {
     e.preventDefault();
     const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
     setDropClass("");

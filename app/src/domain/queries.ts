@@ -33,6 +33,15 @@ const queries = {
       [id],
     ] as const,
 
+  slideIds: (ctx: Ctx, id: ID_of<Deck>) =>
+    [
+      ctx,
+      ["slide"],
+      'SELECT id FROM slide WHERE deck_id = ? ORDER BY "order" ASC',
+      [id],
+      (x: [ID_of<Slide>]) => x[0],
+    ] as const,
+
   chosenPresenter: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
@@ -64,7 +73,7 @@ const queries = {
   themeFromDeck: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
-      ["theme"],
+      ["theme", "deck"],
       "SELECT theme.* FROM theme JOIN deck ON theme.id = deck.theme_id WHERE deck.id = ?",
       [id],
     ] as const,

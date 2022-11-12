@@ -43,28 +43,31 @@ const mutations = {
 
   toggleDrawing() {},
 
-  async setTransitionType(ctx: Ctx, presenter: string, transitionType: string) {
+  setTransitionType(ctx: Ctx, presenter: string, transitionType: string) {
     // TODO encode an operation for undo/redo too
-    await ctx.db.exec(
+    return ctx.db.exec(
       "UPDATE presenter SET transition_type = ? WHERE name = ?",
       [transitionType, presenter]
     );
   },
 
-  async selectSlide(ctx: Ctx, deckId: ID_of<Deck>, id: ID_of<Slide>) {
+  selectSlide(ctx: Ctx, deckId: ID_of<Deck>, id: ID_of<Slide>) {
     // TODO: we need to hold notifications
     // until transaction completes
     // or not since replication won't be transactional and we can
     // make the user deal with that problem locally too
     // to ensure they deal with it remotely
-    await ctx.db.exec(
-      "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
-      [deckId, id]
-    );
-    await ctx.db.exec(
-      "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
-      [deckId, id]
-    );
+    return ctx.db
+      .exec(
+        "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
+        [deckId, id]
+      )
+      .then(() =>
+        ctx.db.exec(
+          "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
+          [deckId, id]
+        )
+      );
   },
 
   async applyOperation(ctx: Ctx, op: Operation) {
@@ -73,8 +76,8 @@ const mutations = {
     // TODO: could also look into the sqlite undo/redo as triggers design
   },
 
-  async addRecentColor(ctx: Ctx, color: string, id: ID_of<Theme>) {
-    await ctx.db.exec(
+  addRecentColor(ctx: Ctx, color: string, id: ID_of<Theme>) {
+    return ctx.db.exec(
       `INSERT INTO recent_color
         ("color", "last_used", "first_used", "theme_id")
       VALUES
@@ -88,14 +91,20 @@ const mutations = {
     );
   },
 
-  async persistMarkdownToSlide(ctx: Ctx, id: ID_of<Slide>, dom: string) {
-    await ctx.db.exec(
+  persistMarkdownToSlide(ctx: Ctx, id: ID_of<Slide>, dom: string) {
+    return ctx.db.exec(
       `UPDATE markdown
         SET "content" = ?
         WHERE slide_id = ?`,
       [dom, id]
     );
   },
+
+  removeSlide(ctx: Ctx, id: ID_of<Slide>) {
+    return ctx.db.exec(`DELETE FROM slide WHERE id = ?`, [id]);
+  },
+
+  addSlideAfter(ctx: Ctx, i: number, id: ID_of<Deck>) {},
 };
 
 export default mutations;

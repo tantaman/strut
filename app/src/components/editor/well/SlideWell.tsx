@@ -5,11 +5,12 @@ import Slide from "./WellSlide";
 
 import "styles/components/SlideWell.css";
 import Css from "../../../html/Css";
-import { useQuery } from "../../../hooks";
+import { useQuery, useQueryA } from "../../../hooks";
 import { AppState, Slide as SlideType } from "../../../domain/schema";
 import useMatchMedia from "../../../interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
 import queries from "../../../domain/queries";
+import { ID_of } from "../../../id";
 
 // const mediaQuery = window.matchMedia('(max-width: 900px)')
 // Create an oritentation hook. That can use a media query.
@@ -21,8 +22,8 @@ function SlideWell({
   appState: AppState;
 }) {
   // TODO: paginated fetch
-  const slides = useQuery<SlideType>(
-    ...queries.slides(appState.ctx, appState.current_deck_id)
+  const slideIds = useQueryA<[ID_of<SlideType>], ID_of<SlideType>>(
+    ...queries.slideIds(appState.ctx, appState.current_deck_id)
   ).data;
   const orientHorizontally = useMatchMedia(
     "(max-width: " + mediaCuts.horizontal + "px)"
@@ -30,12 +31,11 @@ function SlideWell({
 
   return (
     <div className={Css.joinClasses("strt-slide-well", className)}>
-      {slides.map((slide, index) => (
+      {slideIds.map((id, index) => (
         <Slide
-          deck={deck}
-          slide={slide}
+          id={id}
           index={index}
-          key={slide.id}
+          key={id}
           appState={appState}
           orient={orientHorizontally ? "horizontal" : "vertical"}
         />

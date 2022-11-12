@@ -1,15 +1,14 @@
 import * as styles from "./WellContextMenu.module.css";
 import React from "react";
-import Deck from "../../deck/Deck";
-import { commit } from "@strut/model/Changeset";
-import { persistLog } from "../../app_state/AppLogs";
+import { AppState, Deck } from "../../../domain/schema";
+import mutations from "../../../domain/mutations";
 
 export default function WellContextMenu({
-  deck,
+  appState,
   index,
   orient,
 }: {
-  deck: Deck;
+  appState: AppState;
   index: number;
   orient: "horizontal" | "vertical";
 }) {
@@ -21,7 +20,8 @@ export default function WellContextMenu({
         (orient === "horizontal" ? styles.horizontal : styles.root)
       }
       onClick={(e) => {
-        commit(deck.addSlideAfter(index), persistLog);
+        // TODO: index based or... slide id base?
+        mutations.addSlideAfter(appState.ctx, index);
         e.stopPropagation();
       }}
     >
