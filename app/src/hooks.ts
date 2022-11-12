@@ -22,7 +22,8 @@ function useQueryImpl<T>(
   tables: readonly string[],
   query: string,
   mode: "o" | "a",
-  bindings?: readonly any[]
+  bindings?: readonly any[],
+  postProcess?: (x: any) => T
 ): QueryData<T> {
   const [state, setState] = useState<QueryData<T>>({
     data: [],
@@ -46,7 +47,10 @@ function useQueryImpl<T>(
           return;
         }
         setState({
-          data: data as T[],
+          data:
+            postProcess != null
+              ? data.map((d) => postProcess(d))
+              : (data as T[]),
           loading: false,
         });
       });
@@ -66,22 +70,24 @@ function useQueryImpl<T>(
   return state;
 }
 
-export function useQuery<T extends {}>(
+export function useQuery<T, X = T>(
   ctx: Ctx,
   tables: readonly string[],
   query: string,
-  bindings?: readonly any[]
+  bindings?: readonly any[],
+  postProcess?: (x: X) => T
 ): QueryData<T> {
-  return useQueryImpl(ctx, tables, query, "o", bindings);
+  return useQueryImpl(ctx, tables, query, "o", bindings, postProcess);
 }
 
-export function useQueryA<T extends any[]>(
+export function useQueryA<T, X = T>(
   ctx: Ctx,
   tables: readonly string[],
   query: string,
-  bindings?: readonly any[]
+  bindings?: readonly any[],
+  postProcess?: (x: X) => T
 ): QueryData<T> {
-  return useQueryImpl(ctx, tables, query, "a", bindings);
+  return useQueryImpl(ctx, tables, query, "a", bindings, postProcess);
 }
 
 export function first<T>(data: T[]): T | undefined {

@@ -1,4 +1,4 @@
-import { Ctx } from "../hooks";
+import { Ctx, pick0 } from "../hooks";
 import { ID_of } from "../id";
 import { Deck, Theme } from "./schema";
 
@@ -55,12 +55,13 @@ const queries = {
       ["recent_color"],
       "SELECT color FROM recent_color WHERE theme_id = ?",
       [id],
+      (x: [string]) => x[0],
     ] as const,
 
   denormalizedTheme: (ctx: Ctx, id: ID_of<Theme>) =>
     [
       ctx,
-      ["theme", "props"],
+      ["theme", "theme_props"],
       "SELECT theme FROM theme WHERE theme_id = ?",
       [id],
     ] as const,
