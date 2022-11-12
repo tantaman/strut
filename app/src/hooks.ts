@@ -16,10 +16,12 @@ type QueryData<T> = {
   data: T[];
 };
 
-export function useQuery<T extends {}>(
+// TODO: `useQuery` should prepare a statement
+function useQueryImpl<T>(
   ctx: Ctx,
   tables: readonly string[],
   query: string,
+  mode: "o" | "a",
   bindings?: readonly any[]
 ): QueryData<T> {
   const [state, setState] = useState<QueryData<T>>({
@@ -39,12 +41,12 @@ export function useQuery<T extends {}>(
         }
       }
 
-      ctx.db.execO<T>(query).then((data) => {
+      (mode === "o" ? ctx.db.execO : ctx.db.execA)(query).then((data) => {
         if (!isMounted) {
           return;
         }
         setState({
-          data,
+          data: data as T[],
           loading: false,
         });
       });
@@ -64,6 +66,24 @@ export function useQuery<T extends {}>(
   return state;
 }
 
+export function useQuery<T extends {}>(
+  ctx: Ctx,
+  tables: readonly string[],
+  query: string,
+  bindings?: readonly any[]
+): QueryData<T> {
+  return useQueryImpl(ctx, tables, query, "o", bindings);
+}
+
+export function useQueryA<T extends any[]>(
+  ctx: Ctx,
+  tables: readonly string[],
+  query: string,
+  bindings?: readonly any[]
+): QueryData<T> {
+  return useQueryImpl(ctx, tables, query, "a", bindings);
+}
+
 export function first<T>(data: T[]): T | undefined {
   return data[0];
 }
@@ -76,3 +96,11 @@ export function firstPick<T>(data: any[]): T | undefined {
 
   return d[Object.keys(d)[0]];
 }
+
+// TODO -- roll these into `useQuery` so we don't have to
+// re-run them...
+export function pick0<T extends any[]>(data: T[]): T[0][] {
+  return data.map((d) => d[0]);
+}
+
+export function useBind<T extends keyof D, D>(keys: T[], d: D) {}

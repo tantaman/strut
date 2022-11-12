@@ -9,7 +9,7 @@ import LayoutButton from "../../header/LayoutButton";
 import PresentButton from "../../header/PresentButton";
 import Header from "../../../widgets/Header";
 import LogoButton from "../../header/LogoButton";
-import useMatchMedia from "~src/scripts/interactions/useMatchMedia";
+import useMatchMedia from "../../../interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
 import { Deck, AppState } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";

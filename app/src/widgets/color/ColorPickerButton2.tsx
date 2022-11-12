@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-import useOnDocClick from "~src/scripts/interactions/useOnDocClick";
-import alias from "~src/scripts/utils/alias";
+import useOnDocClick from "../../interactions/useOnDocClick";
+import alias from "../../utils/alias";
 import ColorPicker2 from "./ColorPicker2";
 
 const showAlias = alias(" show", "");

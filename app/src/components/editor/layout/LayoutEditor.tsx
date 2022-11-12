@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { AppState, Slide } from "../../../domain/schema";
 import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
@@ -19,10 +19,24 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
 
 function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
   const slides = useQuery<Slide>(...queries.slides(ctx, deckId)).data;
+  const selectedSlideIds = useQuery<ID_of<Slide>>(
+    ...queries.selectedSlides(ctx, deckId)
+  ).data;
+  const set = useMemo<Set<ID_of<Slide>>>(
+    () => new Set(selectedSlideIds),
+    [selectedSlideIds]
+  );
   return (
     <div className={styles.container}>
       {slides.map((slide, i) => (
-        <LayoutSlide key={slide.id} deck={deckId} slide={slide} i={i} />
+        <LayoutSlide
+          selectedSlideIds={set}
+          ctx={ctx}
+          key={slide.id}
+          deckId={deckId}
+          slide={slide}
+          i={i}
+        />
       ))}
     </div>
   );

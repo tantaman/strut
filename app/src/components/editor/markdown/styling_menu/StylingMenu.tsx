@@ -6,16 +6,18 @@ import BlockElementDropdown from "./BlockElementDropdown";
 import AlignmentDropdown from "./AlignmentDropdown";
 import MarkMenu from "./MarkMenu";
 import FontColorButton from "./FontColorButton";
-import Theme from "~src/scripts/components/deck/Theme";
-import useMatchMedia from "~src/scripts/interactions/useMatchMedia";
-import mediaCuts from "~src/scripts/components/mobile/mediaCuts";
+import { Theme } from "../../../../domain/schema";
+import useMatchMedia from "../../../../interactions/useMatchMedia";
+import mediaCuts from "../../../../components/mobile/mediaCuts";
+import { Ctx } from "../../../../hooks";
 
 type Props = {
+  ctx: Ctx;
   state: AuthoringState;
   theme: Theme;
 };
 
-export default function StylingMenu({ state, theme }: Props) {
+export default function StylingMenu({ ctx, state, theme }: Props) {
   const addImage = () => {
     // const url = window.prompt("URL");
     // if (url) {
@@ -50,7 +52,7 @@ export default function StylingMenu({ state, theme }: Props) {
       </div>
       <div className={styles.root + " btn-group me-2 " + headerStyles.root}>
         <MarkMenu state={state} />
-        <FontColorButton state={state} theme={theme} />
+        <FontColorButton ctx={ctx} state={state} theme={theme} />
       </div>
       <div className={styles.root + " btn-group me-2 " + headerStyles.root}>
         <AlignmentDropdown state={state} />

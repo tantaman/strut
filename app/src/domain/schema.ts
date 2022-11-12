@@ -29,11 +29,11 @@ export const tables = [
   "SELECT crsql_as_crr('presenter');",
 
   // These tables are local to the given instance and should never replicate
-  `CREATE TABLE IF NOT EXISTS "selected_slides" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
-  `CREATE TABLE IF NOT EXISTS "selected_components" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
+  `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
+  `CREATE TABLE IF NOT EXISTS "selected_component" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
   `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
-  `CREATE TABLE IF NOT EXISTS "recent_opens" ("deck_id" primary key, "timestamp");`,
+  `CREATE TABLE IF NOT EXISTS "recent_open" ("deck_id" primary key, "timestamp");`,
 ];
 
 export const tableNames = [
@@ -155,6 +155,8 @@ export type RedoStack = {
 
 export type Operation = {};
 
+export type DenormalizedTheme = {};
+
 // === Ephemerals
 
 // AppState is ephemeral
@@ -168,6 +170,7 @@ export type AppState = {
   drawing: boolean;
   authoringState: AuthoringState;
   drawingInteractionState: DrawingInteractionState;
+  previewTheme: DenormalizedTheme;
 
   setEditorMode(mode: AppState["editor_mode"]): void;
 };

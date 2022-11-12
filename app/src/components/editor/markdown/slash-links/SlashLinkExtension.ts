@@ -3,6 +3,7 @@ import { Node as ProseMirrorNode } from "prosemirror-model";
 import { PluginKey } from "prosemirror-state";
 import Suggestion, { SuggestionOptions } from "@tiptap/suggestion";
 import { truncateForDisplay } from "@strut/sid";
+import { Editor, Range } from "@tiptap/core";
 
 export type MentionOptions = {
   HTMLAttributes: Record<string, any>;
@@ -34,7 +35,15 @@ export const Mention = Node.create<MentionOptions>({
       suggestion: {
         char: "/",
         pluginKey: MentionPluginKey,
-        command: ({ editor, range, props }) => {
+        command: ({
+          editor,
+          range,
+          props,
+        }: {
+          editor: Editor;
+          range: Range;
+          props: any;
+        }) => {
           // increase range.to by one when the next node is of type "text"
           // and starts with a space character
           const nodeAfter = editor.view.state.selection.$to.nodeAfter;
@@ -59,7 +68,7 @@ export const Mention = Node.create<MentionOptions>({
             ])
             .run();
         },
-        allow: ({ editor, range }) => {
+        allow: ({ editor, range }: { editor: Editor; range: Range }) => {
           const $from = editor.state.doc.resolve(range.from);
           const type = editor.schema.nodes[this.name];
           // @ts-ignore -- multiple type imports to resolve...

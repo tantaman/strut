@@ -1,26 +1,34 @@
 import React, { useCallback } from "react";
 import * as styles from "./FontColorButton.module.css";
-import ColorPickerButton2 from "~src/scripts/widgets/color/ColorPickerButton2";
-import { AppState, Theme } from "../../../../domain/schema";
+import ColorPickerButton2 from "../../../../widgets/color/ColorPickerButton2";
+import { AppState, AuthoringState, Theme } from "../../../../domain/schema";
 import mutations from "../../../../domain/mutations";
 import "@tiptap/extension-color";
+import queries from "../../../../domain/queries";
+import { Ctx, pick0, useQueryA } from "../../../../hooks";
 
 type Props = {
-  appState: AppState;
+  ctx: Ctx;
+  state: AuthoringState;
   theme: Theme;
 };
 
-export default function FontColorButton({ appState, theme }: Props) {
-  const state = appState.authoringState;
+export default function FontColorButton({ ctx, state, theme }: Props) {
+  const recentColors = pick0(
+    useQueryA<[string]>(...queries.recentColors(ctx, theme.id)).data
+  );
   // useBind(["transaction"], state);
   // useQuery(["recentColors"], theme);
   const onColorChange = useCallback(
-    (color: string) => {
+    (color: string | undefined) => {
+      if (color == null) {
+        return false;
+      }
       if (color === "default") {
         state.editor?.chain().focus().unsetColor().run();
       } else {
         state.editor?.chain().focus().setColor(color).run();
-        mutations.addRecentColor(appState.ctx, color, theme.id);
+        mutations.addRecentColor(ctx, color, theme.id);
       }
 
       return false;
@@ -38,7 +46,7 @@ export default function FontColorButton({ appState, theme }: Props) {
     <ColorPickerButton2
       onChange={onColorChange}
       color={color || "default"}
-      recents={theme.recentColors}
+      recents={recentColors}
     >
       <strong>A</strong>
       <div className={styles.fontColor} style={style}></div>

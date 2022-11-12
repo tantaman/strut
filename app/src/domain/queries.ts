@@ -1,6 +1,6 @@
 import { Ctx } from "../hooks";
 import { ID_of } from "../id";
-import { Deck } from "./schema";
+import { Deck, Theme } from "./schema";
 
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
@@ -32,6 +32,7 @@ const queries = {
       'SELECT * FROM slide WHERE deck_id = ? ORDER BY "order" ASC',
       [id],
     ] as const,
+
   chosenPresenter: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
@@ -39,7 +40,30 @@ const queries = {
       "SELECT presenter.* FROM presenter, deck WHERE deck.id = ? AND presenter.name = deck.chosen_presenter",
       [id],
     ] as const,
-  selectedSlides: (ctx: Ctx, id: ID_of<Deck>) => [],
+
+  selectedSlides: (ctx: Ctx, id: ID_of<Deck>) =>
+    [
+      ctx,
+      ["selected_slide"],
+      "SELECT slide_id FROM selected_slide WHERE deck_id = ?",
+      [id],
+    ] as const,
+
+  recentColors: (ctx: Ctx, id: ID_of<Theme>) =>
+    [
+      ctx,
+      ["recent_color"],
+      "SELECT color FROM recent_color WHERE theme_id = ?",
+      [id],
+    ] as const,
+
+  denormalizedTheme: (ctx: Ctx, id: ID_of<Theme>) =>
+    [
+      ctx,
+      ["theme", "props"],
+      "SELECT theme FROM theme WHERE theme_id = ?",
+      [id],
+    ] as const,
 };
 
 export default queries;

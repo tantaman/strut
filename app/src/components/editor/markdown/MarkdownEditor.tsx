@@ -2,10 +2,8 @@ import React, { memo, useEffect, useRef } from "react";
 import * as styles from "./MarkdownEditor.module.css";
 import "styles/components/ProseMirror.css";
 import logger from "../../../logger/Log";
-import Slide from "../../deck/Slide";
+import { Slide } from "../../../domain/schema";
 import { useDebounce } from "../../../widgets/Hooks";
-import { commit } from "@strut/model/Changeset";
-import { persistLog, undoLog } from "../../app_state/AppLogs";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Editor, Extension } from "@tiptap/core";
@@ -13,8 +11,8 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
-import AppState from "../../app_state/AppState";
-import { useQuery } from "@strut/model/Hooks";
+import { AppState } from "../../../domain/schema";
+import { useBind, useQuery } from "../../../hooks";
 import Image from "@tiptap/extension-image";
 import Table from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
@@ -27,6 +25,7 @@ import { lowlight } from "lowlight";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import suggestions from "./slash-links/suggestions";
 import SlashLinkExtension from "./slash-links/SlashLinkExtension";
+import queries from "../../../domain/queries";
 
 // TODO: should we make sure this never gets unmounted? Only ever hidden?
 // TODO: should we use a portal instead? And use an element we can take offscreen
@@ -38,9 +37,11 @@ function MarkdownEditor({
   slide: Slide;
   appState: AppState;
 }) {
-  useQuery(["authoringState"], appState);
+  useBind(["authoringState"], appState);
   const previewTheme = appState.previewTheme;
-  const theme = appState.deck.theme;
+  // TODO: can `useQuery` provide a mapper too? to set in state
+  // for efficiency?
+  const theme = useQuery(queries.denormalizedTheme());
 
   useQuery(["defaultTextColor"], previewTheme);
   useQuery(["defaultTextColor"], theme);

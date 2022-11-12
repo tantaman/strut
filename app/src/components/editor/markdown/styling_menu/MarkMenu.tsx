@@ -1,7 +1,6 @@
 import { Editor } from "@tiptap/core";
 import React from "react";
-import { useQuery } from "@strut/model/Hooks";
-import AuthoringState from "../../../app_state/AuthoringState";
+import { AuthoringState } from "../../../../domain/schema";
 import * as headerStyles from "../../../header/HeaderButton.module.css";
 
 const marks = [
@@ -65,7 +64,8 @@ function MarkItem({
 }
 
 export default function MarkMenu({ state }: { state: AuthoringState }) {
-  useQuery(["transaction"], state);
+  // useQuery(["transaction"], state);
+  // useBind
   return (
     <>
       {marks.map((m, i) => (

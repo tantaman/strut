@@ -1,33 +1,35 @@
 import React from "react";
 import { Slide } from "../../../domain/schema";
 import { Deck } from "../../../domain/schema";
-import { useQuery } from "../../../hooks";
+import { Ctx } from "../../../hooks";
 import * as styles from "./LayoutSlide.module.css";
 import Draggable from "../../../interactions/Draggable";
-import queries from "../../../domain/queries";
+import { ID_of } from "../../../id";
+import mutations from "../../../domain/mutations";
+import config from "../../../config";
 
 export default function LayoutSlide({
-  deck,
+  ctx,
+  deckId,
   slide,
   i,
+  selectedSlideIds,
 }: {
-  deck: Deck;
+  ctx: Ctx;
+  deckId: ID_of<Deck>;
+  selectedSlideIds: Set<ID_of<Slide>>;
   slide: Slide;
   i: number;
 }) {
-  // queries.selectedSlides();
-  useQuery(["mostRecentlySelectedSlide"], deck);
   return (
     <Draggable
       className={
         styles.slide +
         " " +
-        (deck.getSelectedSlide() === slide ? styles.selected : "")
+        (selectedSlideIds.has(slide.id) ? styles.selected : "")
       }
       style={{ left: 250 + i * 250, top: 150 }}
-      onClick={() => {
-        commit(deck.selectSlideById(slide.id), [persistLog, undoLog]);
-      }}
+      onClick={() => mutations.selectSlide(ctx, deckId, slide.id)}
       onDragging={(pos) => {
         console.log(pos);
       }}
@@ -36,8 +38,8 @@ export default function LayoutSlide({
         <div
           className={styles.content}
           style={{
-            width: deck.config.slideWidth / 5,
-            height: deck.config.slideHeight / 5,
+            width: config.slideWidth / 5,
+            height: config.slideHeight / 5,
           }}
         >
           <SlideDrawer />
