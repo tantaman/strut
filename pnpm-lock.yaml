@@ -34,6 +34,7 @@ importers:
       '@types/jest': ^29.2.2
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
+      '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
       '@vlcn.io/network-webrtc': ^0.1.1
       '@vlcn.io/rx-tbl': ^0.1.1
@@ -68,6 +69,7 @@ importers:
       '@tiptap/react': 2.0.0-beta.202_b34bfmrzq6nwqs5zwwuhxagzky
       '@tiptap/starter-kit': 2.0.0-beta.202
       '@tiptap/suggestion': 2.0.0-beta.202_fosglmwb3u6jhi6bbjmnlbdsbu
+      '@vlcn.io/id': 0.1.0
       '@vlcn.io/network-webrtc': 0.1.1
       '@vlcn.io/rx-tbl': 0.1.1
       '@vlcn.io/wa-crsqlite': 0.1.1
@@ -857,6 +859,12 @@ packages:
       '@types/yargs-parser': 21.0.0
     dev: true
 
+  /@vlcn.io/id/0.1.0:
+    resolution: {integrity: sha512-0l/gqwD7Qj8yEp2rOwYXK3VyPwytxwFXJGLfDO5Qb65PAa96CJen6hCbKKN1vIh0jasHC7NOPlBMzhLUaaRIOw==}
+    dependencies:
+      '@vlcn.io/util': 0.1.0
+    dev: false
+
   /@vlcn.io/model/0.1.0:
     resolution: {integrity: sha512-9XkYB2mpBexY0DFj2ZZUt+IJCLbwwxaNf+I8PHwn3b56RwJcPN6TfBwoC1lXCqXCmnUrBxyY7veUKHg8K5Uh4Q==}
     dependencies:
@@ -889,7 +897,6 @@ packages:
 
   /@vlcn.io/util/0.1.0:
     resolution: {integrity: sha512-HaYtmvVxsng0rzQNsjBU7mWAtv53XYESE8nGMKoouHu0ELoNLIHnUwDMUnTGcbaJ14iGrSh6+iPqpKS/NLgZ1g==}
-    dev: true
 
   /@vlcn.io/value/0.1.0:
     resolution: {integrity: sha512-hmchBzAQSD7bNjRzlhb7ofZGLcnhfwbE4kCriX8pz7WplakPDJqVzVw83mmpGJeHFSbsA/Dwy5QiX/zFBW3Drg==}

@@ -8,8 +8,13 @@ import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
 import wdbRtc from "@vlcn.io/network-webrtc";
-import { AppState, tableNames, tables } from "./domain/schema.js";
+import { tableNames, tables } from "./domain/schema.js";
 import mutations from "./domain/mutations.js";
+import AppState from "./domain/ephemeral/AppState.js";
+import AuthoringState from "./domain/ephemeral/AuthoringState.js";
+import EphemeralTheme from "./domain/ephemeral/EphemeralTheme.js";
+import DeckIndex from "./domain/ephemeral/DeckIndex.js";
+import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.js";
 
 async function main() {
   const sqlite = await sqliteWasm();
@@ -30,7 +35,7 @@ async function main() {
     return db.close();
   };
 
-  startApp({
+  await startApp({
     db,
     siteid,
     rtc,
@@ -38,7 +43,7 @@ async function main() {
   });
 }
 
-function startApp(ctx: Ctx) {
+async function startApp(ctx: Ctx) {
   (window as any).ctx = ctx;
   const root = createRoot(document.getElementById("content")!);
 
@@ -52,6 +57,21 @@ function startApp(ctx: Ctx) {
   //   previewTheme: {},
   //   deckIndex: {},
   // };
+
+  const appState = new AppState({
+    ctx,
+    editor_mode: "slide",
+    current_deck_id: await mutations.genOrCreateCurrentDeck(ctx),
+    open_type: false,
+    drawing: false,
+    authoringState: new AuthoringState({}),
+    previewTheme: new EphemeralTheme({
+      id: asId("ephemeral_theme"),
+      bg_colorset: "default",
+    }),
+    drawingInteractionState: new DrawingInteractionState({}),
+    deckIndex: new DeckIndex({}),
+  });
 
   root.render(<App ctx={ctx} />);
 }

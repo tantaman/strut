@@ -188,9 +188,6 @@ export interface AppState {
   readonly drawingInteractionState: DrawingInteractionState;
   readonly previewTheme: EphemeralTheme;
   readonly deckIndex: DeckIndex;
-
-  setEditorMode(mode: AppState["editor_mode"]): void;
-  toggleOpenType(v?: boolean): void;
 }
 
 export interface DeckIndex {
@@ -199,16 +196,11 @@ export interface DeckIndex {
 
 export interface DrawingInteractionState {
   readonly currentTool: Tool;
-
-  activateTool: (t: Tool) => void;
 }
 
 export interface AuthoringState {
   readonly editor?: Editor;
   readonly transaction?: Transaction;
-
-  updateEditor: (editor: Editor) => void;
-  updateTransaction: (transaction: Transaction) => void;
 }
 
 // rm readonly from ephemeral

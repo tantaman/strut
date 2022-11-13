@@ -3,7 +3,7 @@ import { ID_of } from "../../id";
 import { EphemeralTheme as IEphemeralTheme, Theme } from "../schema";
 
 export default class EphemeralTheme
-  extends Model<IEphemeralTheme>
+  extends Model<Theme>
   implements IEphemeralTheme
 {
   get id(): ID_of<Theme> {

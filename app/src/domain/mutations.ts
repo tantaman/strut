@@ -1,5 +1,5 @@
 import { Ctx, first } from "../hooks";
-import { ID_of } from "../id";
+import { ID_of, newId } from "../id";
 import fns from "./fns";
 import { Deck, Operation, Slide, Theme, UndoStack } from "./schema";
 
@@ -114,7 +114,11 @@ const mutations = {
     toIndex: number
   ) {},
 
-  setAllSlideColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+  setAllSlideColor(
+    ctx: Ctx,
+    id: ID_of<Theme> | undefined,
+    c: string | undefined
+  ) {
     if (!id) {
       return;
     }
@@ -124,7 +128,11 @@ const mutations = {
     ]);
   },
 
-  setAllSurfaceColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+  setAllSurfaceColor(
+    ctx: Ctx,
+    id: ID_of<Theme> | undefined,
+    c: string | undefined
+  ) {
     if (!id) {
       return;
     }
@@ -134,7 +142,11 @@ const mutations = {
     ]);
   },
 
-  setAllTextColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+  setAllTextColor(
+    ctx: Ctx,
+    id: ID_of<Theme> | undefined,
+    c: string | undefined
+  ) {
     if (!id) {
       return;
     }
@@ -142,6 +154,37 @@ const mutations = {
       c == null ? null : c,
       id,
     ]);
+  },
+
+  async genOrCreateCurrentDeck(ctx: Ctx): Promise<ID_of<Deck>> {
+    // go thru recent opens
+    // open the most recent
+    // if none exists, write one
+    // return id of the thing
+
+    const ids = await ctx.db.execA(
+      `SELECT deck_id FROM recent_open ORDER BY timestamp DESC LIMIT 1`
+    );
+    if (ids.length == 0) {
+      // create
+      ctx.db.exec(`INSERT INTO deck (
+        "id",
+        "title",
+        "created",
+        "modified",
+        "theme_id",
+        "chosen_presenter"
+      ) VALUES (
+        X'${newId(ctx.siteid)}',
+        'First Deck',
+        ${Date.now()},
+        ${Date.now()},
+        1,
+        'impress'
+      )`);
+    }
+
+    return ids[0][0];
   },
 };
 
