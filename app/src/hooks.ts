@@ -10,16 +10,16 @@ export type Ctx = {
   rx: Awaited<ReturnType<typeof tblrx>>;
 };
 
-type QueryData<T> = {
+type QueryData<M> = {
   loading: boolean;
   error?: Error;
-  data: T[];
+  data: M;
 };
 
 type SQL<R> = string;
-export type Query<R, T extends string, M = R> =
+export type Query<R, T extends string, M = R[]> =
   | [Ctx, T[], SQL<R>, any[]]
-  | [Ctx, T[], SQL<R>, any[], (x: R) => M];
+  | [Ctx, T[], SQL<R>, any[], (x: R[]) => M];
 
 // TODO: `useQuery` should prepare a statement
 function useQueryImpl<R, T extends string, M = R>(
@@ -27,7 +27,7 @@ function useQueryImpl<R, T extends string, M = R>(
   mode: "o" | "a"
 ): QueryData<M> {
   const [state, setState] = useState<QueryData<M>>({
-    data: [],
+    data: [] as any,
     loading: true,
   });
   useEffect(() => {
@@ -51,8 +51,8 @@ function useQueryImpl<R, T extends string, M = R>(
           data:
             postProcess != null
               ? // TODO: postProcess should work on full dataset for more flexibility
-                data.map((d) => postProcess(d as R))
-              : (data as M[]),
+                postProcess(data as R[])
+              : (data as M),
           loading: false,
         });
       });

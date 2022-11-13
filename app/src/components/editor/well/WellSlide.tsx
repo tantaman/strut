@@ -3,6 +3,7 @@
 import React, {
   DragEvent,
   memo,
+  MouseEvent,
   useCallback,
   useEffect,
   useRef,
@@ -10,11 +11,9 @@ import React, {
 } from "react";
 import css from "../../../html/Css";
 import { first, useQuery, useQueryA } from "../../../hooks";
-import { Markdown, Slide } from "../../../domain/schema";
-import { Theme } from "../../../domain/schema";
+import { Slide } from "../../../domain/schema";
 import WellContextMenu from "./WellContextMenu";
 import styles from "./WellSlide.module.css";
-import WellSlideDrawingPreview from "./WellSlideDrawingPreview";
 import { AppState } from "../../../domain/schema";
 import { ID_of } from "../../../id";
 import queries from "../../../domain/queries";
@@ -57,7 +56,7 @@ function WellSlide(props: {
   const [hideContextMenu, setHideContextMenu] = useState(false);
   const [dropClass, setDropClass] = useState("");
 
-  const setRef = useCallback((node: ParentNode) => {
+  const setRef = useCallback((node: HTMLDivElement) => {
     markdownContainer.current = node;
     if (!node) {
       return;
@@ -183,29 +182,24 @@ function WellSlide(props: {
       draggable
       className={css.toClassString({
         "strt-well-slide": true,
-        selected: props.deck.mostRecentlySelectedSlide === props.index,
+        selected: selectedSlides.has(props.id),
         [styles.root]: true,
         [styles.in]: dropClass === styles.in,
-        [fns.getFontClass(previewTheme, theme)]: true,
+        [fns.getFontClass(previewTheme, theme) || ""]: true,
       })}
       onClick={() => {
-        commit(props.deck.setSelectedSlide(props.index, true), [
-          persistLog,
-          undoLog,
-        ]);
+        mutations.selectSlide(
+          props.appState.ctx,
+          props.appState.current_deck_id,
+          props.id
+        );
       }}
       style={{ backgroundColor: fns.getSlideColorStyle(previewTheme, theme) }}
     >
       <div className={styles.markdownContainer} ref={setRef}></div>
-      <WellSlideDrawingPreview
-        slide={slide}
-        deck={props.deck}
-        className={styles.markdownContainer}
-        errorState={props.appState.errorState}
-      />
       {hideContextMenu ? null : (
         <WellContextMenu
-          deck={props.deck}
+          appState={props.appState}
           index={props.index}
           orient={props.orient}
         />

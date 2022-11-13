@@ -3,13 +3,13 @@
 import React from "react";
 
 import SlideEditor from "./SlideEditor";
-import AppState from "../app_state/AppState";
-import { useQuery } from "@strut/model/Hooks";
+import { AppState } from "../../domain/schema";
+import { useBind, useQuery } from "../../hooks";
 import LayoutEditor from "./layout/LayoutEditor";
 
 export default function Editor(props: { appState: AppState }) {
-  useQuery(["editorMode"], props.appState);
-  const editorMode = props.appState.editorMode;
+  useBind(["editor_mode"], props.appState);
+  const editorMode = props.appState.editor_mode;
   return (
     <div className="strt-editor">
       {editorMode === "layout" ? (
