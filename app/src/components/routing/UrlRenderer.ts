@@ -6,30 +6,33 @@
  * so they don't munge it.
  */
 
-import { useQuery } from "@strut/model/Hooks";
-import AppState from "../app_state/AppState";
-import Slide from "../deck/Slide";
-import { SID_of } from "@strut/sid";
-import { EditorMode } from "../app_state/AppState";
+import { AppState, Slide } from "../../domain/schema";
+import { ID_of } from "../../id";
+
+// import { useQuery } from "@strut/model/Hooks";
+// import AppState from "../app_state/AppState";
+// import Slide from "../deck/Slide";
+// import { SID_of } from "@strut/sid";
+// import { EditorMode } from "../app_state/AppState";
 
 // As a react component so life-cycle and batching of updates are handled for us
 export default function UrlRenderer({ appState }: { appState: AppState }) {
-  const deck = appState.deck;
-  useQuery(["mostRecentlySelectedSlide"], deck);
-  useQuery(["editorMode"], appState);
+  // const deck = appState.deck;
+  // useQuery(["mostRecentlySelectedSlide"], deck);
+  // useQuery(["editorMode"], appState);
 
-  window.location.hash = encodeURIComponent(
-    JSON.stringify({
-      selectedSlide: deck.getSelectedSlide()?.id,
-      editorMode: appState.editorMode,
-    })
-  );
+  // window.location.hash = encodeURIComponent(
+  //   JSON.stringify({
+  //     selectedSlide: deck.getSelectedSlide()?.id,
+  //     editorMode: appState.editorMode,
+  //   })
+  // );
 
   return null;
 }
 
 export function decodeUrl():
-  | { selectedSlide: SID_of<Slide>; editorMode: EditorMode }
+  | { selectedSlide: ID_of<Slide>; editorMode: AppState["editor_mode"] }
   | undefined {
   try {
     return JSON.parse(decodeURIComponent(window.location.hash.substring(1)));

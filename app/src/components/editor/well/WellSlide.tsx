@@ -38,11 +38,9 @@ function WellSlide(props: {
   const markdown = first(
     useQuery(queries.markdown(props.appState.ctx, props.id)).data
   );
-  const theme = first(
-    useQuery(
-      queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
-    ).data
-  );
+  const theme = useQuery(
+    queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
+  ).data;
   const selectedSlides = useQueryA(
     queries.selectedSlides(props.appState.ctx, props.id)
   ).data;

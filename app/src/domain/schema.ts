@@ -11,7 +11,7 @@ export const tables = [
   /*sql*/ `CREATE TABLE IF NOT EXISTS "shape_component" ("id" primary key, "slide_id", "type", "props", "x", "y");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "name", "bg_colorset", "fg_colorset", "fontset");`,
+  /*sql*/ `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "name", "bg_colorset", "fg_colorset", "fontset", "surface_color", "font_color");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "recent_color" ("color" primary key, "last_used", "first_used", "theme_id");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "presenter" ("name" primary key, "available_transitions", "picked_transition");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "markdown" ("slide_id" primary key, "content");`,
@@ -76,12 +76,16 @@ export type Deck = {
 };
 
 // TODO: decoding methods in `queries`
+// TODO: remove `colorset` / `fontset` props?
 export type Theme = {
   readonly id: ID_of<Theme>;
-  readonly name: string;
-  readonly bg_colorset: string;
-  readonly fg_colorset: string;
-  readonly fontset: string;
+  readonly name?: string;
+  readonly bg_colorset?: string;
+  readonly fg_colorset?: string;
+  readonly fontset?: string;
+  readonly surface_color?: string;
+  readonly slide_color?: string;
+  readonly font_color?: string;
 };
 
 export type Slide = {
@@ -182,10 +186,15 @@ export type AppState = {
   drawing: boolean;
   authoringState: AuthoringState;
   drawingInteractionState: DrawingInteractionState;
-  previewTheme: Theme;
+  previewTheme: EphemeralTheme;
+  deckIndex: DeckIndex;
 
   setEditorMode(mode: AppState["editor_mode"]): void;
-  toggleOpenType(): void;
+  toggleOpenType(v?: boolean): void;
+};
+
+export type DeckIndex = {
+  getSuggestions(q: string): { id: ID_of<Slide>; title: string }[];
 };
 
 export type DrawingInteractionState = {
@@ -203,7 +212,9 @@ export type AuthoringState = {
 };
 
 // rm readonly from ephemeral
-export type EphemeralTheme = Theme;
+export type EphemeralTheme = Theme & {
+  set<K extends keyof Theme>(k: K, v: Theme[K]): void;
+};
 
 export type Tool =
   | "selection"

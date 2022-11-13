@@ -1,10 +1,9 @@
 import * as React from "react";
 import { useRef, useEffect, useState } from "react";
 import useOnDocClick from "../../interactions/useOnDocClick";
-import { commit } from "@strut/model/Changeset";
-import { persistLog, undoLog } from "../app_state/AppLogs";
-import AppState from "../app_state/AppState";
+import { AppState } from "../../domain/schema";
 import * as styles from "./OpenType.module.css";
+import mutations from "../../domain/mutations";
 
 export default function OpenType({ appState }: { appState: AppState }) {
   const input = useRef<HTMLInputElement | null>(null);
@@ -39,9 +38,10 @@ export default function OpenType({ appState }: { appState: AppState }) {
 
           if (e.code === "Enter") {
             if (activeIndex >= 0 && activeIndex < suggestions.length) {
-              commit(
-                appState.deck.selectSlideById(suggestions[activeIndex].id),
-                [persistLog, undoLog]
+              mutations.selectSlide(
+                appState.ctx,
+                appState.current_deck_id,
+                suggestions[activeIndex].id
               );
               appState.toggleOpenType(false);
             }
@@ -60,10 +60,11 @@ export default function OpenType({ appState }: { appState: AppState }) {
             key={s.id}
             className={i === activeIndex ? styles.active : ""}
             onClick={() => {
-              commit(appState.deck.selectSlideById(s.id), [
-                persistLog,
-                undoLog,
-              ]);
+              mutations.selectSlide(
+                appState.ctx,
+                appState.current_deck_id,
+                s.id
+              );
               appState.toggleOpenType(false);
             }}
           >

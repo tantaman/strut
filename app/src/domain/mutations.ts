@@ -113,6 +113,36 @@ const mutations = {
     fromIndex: number,
     toIndex: number
   ) {},
+
+  setAllSlideColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+    if (!id) {
+      return;
+    }
+    return ctx.db.exec(`UPDATE theme SET slide_color = ? WHERE id = ?`, [
+      c == null ? null : c,
+      id,
+    ]);
+  },
+
+  setAllSurfaceColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+    if (!id) {
+      return;
+    }
+    return ctx.db.exec(`UPDATE theme SET surface_color = ? WHERE id = ?`, [
+      c == null ? null : c,
+      id,
+    ]);
+  },
+
+  setAllTextColor(ctx: Ctx, id?: ID_of<Theme>, c: string | undefined) {
+    if (!id) {
+      return;
+    }
+    return ctx.db.exec(`UPDATE theme SET text_color = ? WHERE id = ?`, [
+      c == null ? null : c,
+      id,
+    ]);
+  },
 };
 
 export default mutations;

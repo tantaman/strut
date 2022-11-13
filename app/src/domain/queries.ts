@@ -71,12 +71,12 @@ const queries = {
       first,
     ] as Query<[ID_of<Slide>], TableName, ID_of<Slide> | undefined>,
 
-  recentColors: (ctx: Ctx, id: ID_of<Theme>) =>
+  recentColors: (ctx: Ctx, id: ID_of<Theme> | undefined) =>
     [
       ctx,
       ["recent_color"],
       /*sql*/ `SELECT color FROM recent_color WHERE theme_id = ?`,
-      [id],
+      [id == null ? null : id],
       (x: [string][]) => x.map((x) => x[0]),
     ] as Query<[string], TableName, string[]>,
 
@@ -92,7 +92,8 @@ const queries = {
       ["theme", "deck"],
       /*sql*/ `SELECT theme.* FROM theme JOIN deck ON theme.id = deck.theme_id WHERE deck.id = ?`,
       [id],
-    ] as Query<Theme, TableName>,
+      first,
+    ] as Query<Theme, TableName, Theme | undefined>,
 
   markdown: (ctx: Ctx, id: ID_of<Slide>) =>
     [

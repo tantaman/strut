@@ -1,5 +1,5 @@
 export default {
-	getHotkeyString: function(...keys) {
-		return keys.join('💪');
-	}
-}
+  getHotkeyString: function (...keys: any[]) {
+    return keys.join("💪");
+  },
+};

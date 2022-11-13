@@ -12,11 +12,10 @@
 // 2. Data for the event
 
 import { MouseEvent } from "react";
-import { commit } from "@strut/model/Changeset";
-import { persistLog, undoLog } from "../app_state/AppLogs";
-import AppState from "../app_state/AppState";
-import Slide from "../deck/Slide";
-import { SID_of } from "@strut/sid";
+import { AppState } from "../../domain/schema";
+import { Slide } from "../../domain/schema";
+import mutations from "../../domain/mutations";
+import { ID_of } from "../../id";
 
 // Technically this should be open for extension by bundles that want
 // to handle routing events
@@ -36,20 +35,20 @@ export type LinkClickEvent = SlideFromSlideEvent | SlideFromWellEvent;
 
 type SlideFromSlideEvent = {
   type: "SLIDE_FROM_SLIDE";
-  id: SID_of<Slide>;
+  id: ID_of<Slide>;
 };
 
 type SlideFromWellEvent = {
   type: "SLIDE_FROM_WELL";
-  index: number;
+  id: ID_of<Slide>;
 };
 
 const transformations = {
   SLIDE_FROM_SLIDE(state: AppState, e: SlideFromSlideEvent) {
-    commit(state.deck.selectSlideById(e.id), [persistLog, undoLog]);
+    return mutations.selectSlide(state.ctx, state.current_deck_id, e.id);
   },
   SLIDE_FROM_WELL(state: AppState, e: SlideFromWellEvent) {
-    commit(state.deck.setSelectedSlide(e.index, true), [persistLog, undoLog]);
+    return mutations.selectSlide(state.ctx, state.current_deck_id, e.id);
   },
 };
 

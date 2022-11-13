@@ -76,9 +76,7 @@ function OperatingTable({ appState }: { appState: AppState }) {
   const deckId = appState.current_deck_id;
   // TODO: are we binding current_deck_id everywhere else we use it?
   useBind(["current_deck_id", "editor_mode"], appState);
-  const theme = first(
-    useQuery(queries.themeFromDeck(appState.ctx, deckId)).data
-  );
+  const theme = useQuery(queries.themeFromDeck(appState.ctx, deckId)).data;
   const slideId = useQuery(
     queries.mostRecentlySelectedSlide(appState.ctx, deckId)
   ).data;

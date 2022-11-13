@@ -1,4 +1,4 @@
-import { Disposer } from "@strut/events/Observable";
+type Disposer = () => void;
 
 export default function bindDetectSwipe(
   el: HTMLElement,
@@ -8,7 +8,10 @@ export default function bindDetectSwipe(
   let startPosition = 0;
   let delta = 0;
 
-  const singleTouch = function (fn, preventDefault) {
+  const singleTouch = function (
+    fn: (d: number) => void,
+    preventDefault: boolean
+  ) {
     return function (e) {
       if (preventDefault) {
         e.preventDefault();

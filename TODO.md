@@ -7,7 +7,28 @@ Althrough if there is a write going on in between them and us... we should not u
 How does `dataLoader` collect all the things in a tick? Can we just do the same and collapse the tick?
 https://github.com/graphql/dataloader
 
-# UseQuery
+# Editor
+
+Strut1.0 like experience with Lexical?
+https://github.com/facebook/lexical
+
+# AppState bindings
+
+- Can we get away with never having to bind to `appState.current_deck_id`?
+- What about other ephermals? <- no on this
+
+Track down all uses of `current_deck_id` and decide.
+Audit `AppState` usage in general.
+
+# Export
+
+Export sql for deck
+
+---
+
+# Done
+
+~~## UseQuery
 
 - PostProcess against full dataset
-- Types in `queries.ts` rather than at callsite
+- Types in `queries.ts` rather than at callsite~~
