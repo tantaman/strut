@@ -19,6 +19,7 @@ import { ID_of } from "../../../id";
 import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
+import useTraceUpdate from "../../../utils/useTraceUpdate";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -33,8 +34,11 @@ function WellSlide(props: {
   appState: AppState;
   orient: "horizontal" | "vertical";
 }) {
-  // TODO: these types should be part of `queries.` so the caller doesn't
-  // need to provide them
+  useTraceUpdate("WellSlide", props);
+
+  // TODO: can we batch the result setting from `useQuery`
+  // right now we re-render each time a query resolves
+  // and each query resolves in turn.
   const markdown = first(
     useQuery(queries.markdown(props.appState.ctx, props.id)).data
   );
@@ -44,6 +48,8 @@ function WellSlide(props: {
   const selectedSlides = useQueryA(
     queries.selectedSlides(props.appState.ctx, props.id)
   ).data;
+
+  // TODO: understand why this re-renders so often
 
   const previewTheme = props.appState.previewTheme;
 

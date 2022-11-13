@@ -27,7 +27,7 @@ function useQueryImpl<R, T extends string, M = R>(
   mode: "o" | "a"
 ): QueryData<M> {
   const [state, setState] = useState<QueryData<M>>({
-    data: [] as any,
+    data: postProcess != null ? postProcess([]) : ([] as any),
     loading: true,
   });
   // TODO: counting / logging to ensure this runs as often as expected
@@ -45,19 +45,25 @@ function useQueryImpl<R, T extends string, M = R>(
       }
 
       (mode === "o" ? ctx.db.execO.bind(ctx.db) : ctx.db.execA.bind(ctx.db))(
-        query
+        query,
+        bindings
       ).then((data) => {
         if (!isMounted) {
           return;
         }
-        setState({
-          data:
-            postProcess != null
-              ? // TODO: postProcess should work on full dataset for more flexibility
-                postProcess(data as R[])
-              : (data as M),
-          loading: false,
-        });
+        try {
+          setState({
+            data:
+              postProcess != null
+                ? // TODO: postProcess should work on full dataset for more flexibility
+                  postProcess((data as R[]) || [])
+                : (data as M),
+            loading: false,
+          });
+        } catch (e) {
+          console.error("Failed post-processing data for query: " + query);
+          throw e;
+        }
       });
     };
 

@@ -38,6 +38,12 @@ Shouldn't it always be at least an empty array?
 So components can go thru remount cycle without flickering. Would need to return previously resolved promise
 so suspense can handl it correctly.
 
+## Resolve in batch
+
+## sqlite-api.js:91 unknown binding converted to null {slide_id: '637158ef3641244f'}
+
+^-- add query text to msg in our fork
+
 ---
 
 # Done

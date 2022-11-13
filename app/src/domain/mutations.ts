@@ -170,7 +170,9 @@ const mutations = {
     if (ids.length == 0) {
       // create
       const deckid = newId<Deck>(ctx.siteid.substring(0, 4));
-      ctx.db.exec(`INSERT INTO deck (
+      const slideId = newId(ctx.siteid.substring(0, 4));
+      await ctx.db.execMany([
+        `INSERT INTO "deck" (
         "id",
         "title",
         "created",
@@ -178,13 +180,25 @@ const mutations = {
         "theme_id",
         "chosen_presenter"
       ) VALUES (
-        X'${deckid}',
+        '${deckid}',
         'First Deck',
         ${Date.now()},
         ${Date.now()},
         1,
         'impress'
-      )`);
+      );`,
+        `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
+        '${slideId}',
+        '${deckid}',
+        0,
+        ${Date.now()},
+        ${Date.now()}
+      );`,
+        `INSERT INTO "markdown" ("slide_id", "content") VALUES (
+        '${slideId}',
+        ''
+      );`,
+      ]);
 
       return deckid;
     }
