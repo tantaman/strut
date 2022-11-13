@@ -2,7 +2,7 @@
 
 import React, { memo } from "react";
 import SlideWell from "./well/SlideWell";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import OperatingTable from "./OperatingTable";
 
 import SlideEditorNav from "./nav/SlideEditorNav";

@@ -11,7 +11,7 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
-import { AppState } from "../../../domain/schema";
+import AppState from "../../../domain/ephemeral/AppState";
 import { first, useBind, useQuery } from "../../../hooks";
 import Image from "@tiptap/extension-image";
 import Table from "@tiptap/extension-table";

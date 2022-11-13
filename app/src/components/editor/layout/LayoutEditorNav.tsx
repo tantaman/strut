@@ -2,7 +2,7 @@
 
 import React from "react";
 import Header from "../../../widgets/Header";
-import { AppState } from "../../../domain/schema";
+import AppState from "../../../domain/ephemeral/AppState";
 import LogoButton from "../../header/LogoButton";
 import PresentButton from "../../header/PresentButton";
 import * as headerStyles from "../../header/HeaderButton.module.css";

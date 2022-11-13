@@ -5,7 +5,7 @@ import Geometry from "../../math/Geometry";
 
 import "styles/components/OperatingTable.css";
 import { first, useBind, useQuery } from "../../hooks";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import OperatingTableSlide from "./OperatingTableSlide";
 import * as styles from "./OperatingTable.module.css";
 import counter from "@strut/counter";

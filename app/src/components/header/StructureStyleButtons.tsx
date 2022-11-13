@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import { Theme, EphemeralTheme } from "../../domain/schema";
 import * as styles from "./HeaderButton.module.css";
 import { Ctx, useQuery } from "../../hooks";

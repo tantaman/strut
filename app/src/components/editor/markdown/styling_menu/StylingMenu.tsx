@@ -1,7 +1,7 @@
 import React from "react";
 import * as styles from "./StylingMenu.module.css";
 import * as headerStyles from "../../../header/HeaderButton.module.css";
-import { AppState } from "../../../../domain/schema";
+import AppState from "../../../../domain/ephemeral/AppState";
 import BlockElementDropdown from "./BlockElementDropdown";
 import AlignmentDropdown from "./AlignmentDropdown";
 import MarkMenu from "./MarkMenu";

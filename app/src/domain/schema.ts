@@ -174,33 +174,12 @@ export type Operation = {};
 
 // === Ephemerals
 
-// AppState is ephemeral
-// created for each new session
-// needs to be bindable given these states change
-export interface AppState {
-  readonly ctx: Ctx;
-  readonly editor_mode: "slide" | "layout";
-  readonly current_deck_id: ID_of<Deck>;
-  readonly open_type: boolean;
-  readonly drawing: boolean;
-  readonly authoringState: AuthoringState;
-  readonly drawingInteractionState: DrawingInteractionState;
-  readonly previewTheme: EphemeralTheme;
-  readonly deckIndex: DeckIndex;
-  readonly errorState: ErrorState;
-}
-
 export interface DeckIndex {
   getSuggestions(q: string): { id: ID_of<Slide>; title: string }[];
 }
 
 export interface DrawingInteractionState {
   readonly currentTool: Tool;
-}
-
-export interface AuthoringState {
-  readonly editor?: Editor;
-  readonly transaction?: Transaction;
 }
 
 // rm readonly from ephemeral

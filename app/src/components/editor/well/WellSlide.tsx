@@ -14,7 +14,7 @@ import { first, useQuery, useQueryA } from "../../../hooks";
 import { Slide } from "../../../domain/schema";
 import WellContextMenu from "./WellContextMenu";
 import styles from "./WellSlide.module.css";
-import { AppState } from "../../../domain/schema";
+import AppState from "../../../domain/ephemeral/AppState";
 import { ID_of } from "../../../id";
 import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";

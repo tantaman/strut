@@ -1,6 +1,6 @@
 import * as React from "react";
 import mutations from "../../domain/mutations";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import * as styles from "./HeaderButton.module.css";
 
 export default function SlideComponentsButtons({

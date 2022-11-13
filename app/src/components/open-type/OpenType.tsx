@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRef, useEffect, useState } from "react";
 import useOnDocClick from "../../interactions/useOnDocClick";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import * as styles from "./OpenType.module.css";
 import mutations from "../../domain/mutations";
 

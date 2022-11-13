@@ -6,7 +6,7 @@ import OpenType from "./components/open-type/OpenType";
 import LinkClickHandler from "./components/routing/LinkClickHandler";
 import onPopState from "./components/routing/onPopState";
 import UrlRenderer from "./components/routing/UrlRenderer";
-import { AppState } from "./domain/schema";
+import AppState from "./domain/ephemeral/AppState";
 import ToastContainer from "./widgets/ToastContainer";
 
 import "styles/bootstrap.css";

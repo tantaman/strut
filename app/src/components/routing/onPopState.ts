@@ -1,4 +1,4 @@
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import { decodeUrl } from "./UrlRenderer";
 
 export default function onPopState(appState: AppState) {

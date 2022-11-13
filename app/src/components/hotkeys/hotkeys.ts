@@ -1,5 +1,5 @@
 import hotkeysjs from "hotkeys-js";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 
 export const bridge: {
   [key: string]: [string, string, (appState: AppState) => void];

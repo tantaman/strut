@@ -12,7 +12,7 @@
 // 2. Data for the event
 
 import { MouseEvent } from "react";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import { Slide } from "../../domain/schema";
 import mutations from "../../domain/mutations";
 import { ID_of } from "../../id";

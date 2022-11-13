@@ -3,7 +3,7 @@
 import React from "react";
 
 import SlideEditor from "./SlideEditor";
-import { AppState } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
 import { useBind, useQuery } from "../../hooks";
 import LayoutEditor from "./layout/LayoutEditor";
 

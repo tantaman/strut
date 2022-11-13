@@ -31,6 +31,13 @@ Export sql for deck for user to export their data.
 Better defensive primitives for `queries` in cases where null is returned rather than empty array.
 Shouldn't it always be at least an empty array?
 
+## Suspense
+
+## Long lived query cache
+
+So components can go thru remount cycle without flickering. Would need to return previously resolved promise
+so suspense can handl it correctly.
+
 ---
 
 # Done

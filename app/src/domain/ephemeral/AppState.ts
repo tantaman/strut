@@ -1,7 +1,5 @@
 import { Ctx } from "../../hooks";
 import {
-  AppState as IAppState,
-  AuthoringState,
   Deck,
   DeckIndex,
   DrawingInteractionState,
@@ -10,8 +8,22 @@ import {
 import { Model } from "@vlcn.io/model";
 import { ID_of } from "../../id";
 import ErrorState from "./ErrorState";
+import AuthoringState from "./AuthoringState";
 
-export default class AppState extends Model<IAppState> implements IAppState {
+export type Data = {
+  readonly ctx: Ctx;
+  readonly editor_mode: "slide" | "layout";
+  readonly current_deck_id: ID_of<Deck>;
+  readonly open_type: boolean;
+  readonly drawing: boolean;
+  readonly authoringState: AuthoringState;
+  readonly drawingInteractionState: DrawingInteractionState;
+  readonly previewTheme: EphemeralTheme;
+  readonly deckIndex: DeckIndex;
+  readonly errorState: ErrorState;
+};
+
+export default class AppState extends Model<Data> {
   static colorThemes = [
     {
       name: "color-default",
@@ -103,7 +115,7 @@ export default class AppState extends Model<IAppState> implements IAppState {
     return this.data.ctx;
   }
 
-  get editor_mode(): IAppState["editor_mode"] {
+  get editor_mode(): Data["editor_mode"] {
     return this.data.editor_mode;
   }
 

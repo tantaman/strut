@@ -1,12 +1,11 @@
 import { Editor } from "@tiptap/core";
 import { Transaction } from "prosemirror-state";
-import { AuthoringState as IAuthoringState } from "../schema";
 import { Model } from "@vlcn.io/model";
 
-export default class AuthoringState
-  extends Model<IAuthoringState>
-  implements IAuthoringState
-{
+export default class AuthoringState extends Model<{
+  readonly editor?: Editor;
+  readonly transaction?: Transaction;
+}> {
   #editor?: Editor;
   #transaction?: Transaction;
 
