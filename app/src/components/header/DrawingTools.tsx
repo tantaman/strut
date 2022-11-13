@@ -9,6 +9,7 @@ import {
   Tool,
 } from "../../domain/schema";
 import mutations from "../../domain/mutations";
+import { useBind } from "../../hooks";
 
 function active(state: DrawingInteractionState, tool: Tool) {
   return state.currentTool === tool ? " active" : "";
@@ -17,7 +18,7 @@ function active(state: DrawingInteractionState, tool: Tool) {
 export default function DrawingTools({ appState }: { appState: AppState }) {
   const back = () => mutations.toggleDrawing();
   const state = appState.drawingInteractionState;
-  useQuery(["currentTool"], state);
+  useBind(["currentTool"], state);
 
   return (
     <div className={headerStyles.root}>

@@ -28,6 +28,13 @@ const fns = {
     return undefined;
   },
 
+  getSurfaceColorStyle(
+    previewTheme: Theme,
+    pickedTheme?: Theme
+  ): string | undefined {
+    return undefined;
+  },
+
   mdStringAsDom(content: string) {
     return toDOM(content);
   },

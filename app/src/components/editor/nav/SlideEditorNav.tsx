@@ -14,13 +14,7 @@ import mediaCuts from "../../mobile/mediaCuts";
 import { Deck, AppState } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
 
-export default function SlideEditorNav({
-  deck,
-  appState,
-}: {
-  deck: Deck;
-  appState: AppState;
-}) {
+export default function SlideEditorNav({ appState }: { appState: AppState }) {
   // listen for media state
   // collapse or not the slide editor menu
   // or should we just put everything back into the floating menu?

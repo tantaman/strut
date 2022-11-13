@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import AppState from "../app_state/AppState";
-import Theme, { EphemeralTheme } from "../deck/Theme";
+import { AppState } from "../../domain/schema";
+import { Theme, EphemeralTheme } from "../../domain/schema";
 import * as styles from "./HeaderButton.module.css";
-import { useQuery } from "@strut/model/Hooks";
-import ColorPickerButton2 from "~src/scripts/widgets/color/ColorPickerButton2";
-import FontSelector from "~src/scripts/widgets/font-selector/FontSelector";
-import { commit } from "@strut/model/Changeset";
-import { persistLog, undoLog } from "../app_state/AppLogs";
+import { useQuery } from "../../hooks";
+import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
+import FontSelector from "../../widgets/font-selector/FontSelector";
 import * as textColorStyles from "~src/scripts/components/editor/markdown/styling_menu/FontColorButton.module.css";
 
 function Slideout({

@@ -14,8 +14,8 @@ import mutations from "../../domain/mutations";
 import { ID_of } from "../../id";
 
 function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
-  const canUndo = firstPick(useQuery(...queries.canUndo(ctx, deckId)).data);
-  const canRedo = firstPick(useQuery(...queries.canRedo(ctx, deckId)).data);
+  const canUndo = useQuery(queries.canUndo(ctx, deckId)).data;
+  const canRedo = useQuery(queries.canRedo(ctx, deckId)).data;
 
   return (
     <DropdownButton className="strt-logo-button">

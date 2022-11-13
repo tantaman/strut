@@ -37,6 +37,7 @@ importers:
       '@vlcn.io/network-webrtc': ^0.1.1
       '@vlcn.io/rx-tbl': ^0.1.1
       '@vlcn.io/wa-crsqlite': ^0.1.1
+      hotkeys-js: ^3.10.0
       prosemirror-model: ^1.18.1
       prosemirror-state: ^1.4.2
       react: ^18.2.0
@@ -68,6 +69,7 @@ importers:
       '@vlcn.io/network-webrtc': 0.1.1
       '@vlcn.io/rx-tbl': 0.1.1
       '@vlcn.io/wa-crsqlite': 0.1.1
+      hotkeys-js: 3.10.0
       prosemirror-model: 1.18.1
       prosemirror-state: 1.4.2
       react: 18.2.0
@@ -1859,6 +1861,10 @@ packages:
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
     dev: true
+
+  /hotkeys-js/3.10.0:
+    resolution: {integrity: sha512-20xeVdOqcgTkMox0+BqFwADZP7+5dy/9CFPpAinSMh2d0s3b0Hs2V2D+lMh4Hphkf7VE9pwnOl58eP1te+REcg==}
+    dev: false
 
   /human-id/1.0.2:
     resolution: {integrity: sha512-UNopramDEhHJD+VR+ehk8rOslwSfByxPIZyJRfV739NDhN5LF1fa1MqnzKm2lGTQRjNrjK19Q5fhkgIfjlVUKw==}

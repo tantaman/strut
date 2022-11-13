@@ -10,11 +10,9 @@ type Props = {
 };
 
 export default function LayoutButton({ appState }: Props) {
-  const presenter = first(
-    useQuery<Presenter>(
-      ...queries.chosenPresenter(appState.ctx, appState.current_deck_id)
-    ).data
-  );
+  const presenter = useQuery(
+    queries.chosenPresenter(appState.ctx, appState.current_deck_id)
+  ).data;
   return <LayoutButtonImpl presenter={presenter} appState={appState} />;
 }
 

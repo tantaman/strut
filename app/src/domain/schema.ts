@@ -30,7 +30,7 @@ export const tables = [
   /*sql*/ `SELECT crsql_as_crr('markdown');`,
 
   // These tables are local and do not replicate. Don't make them CRRs
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
+  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", "cnt" autoincrement, primary key ("deck_id", "slide_id"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_component" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
@@ -49,8 +49,8 @@ export const tableNames = [
   "recent_color",
   "presenter",
   "markdown",
-  "selected_slides",
-  "selected_components",
+  "selected_slide",
+  "selected_component",
   "undo_stack",
   "redo_stack",
   "recent_opens",
@@ -201,6 +201,9 @@ export type AuthoringState = {
   updateEditor: (editor: Editor) => void;
   updateTransaction: (transaction: Transaction) => void;
 };
+
+// rm readonly from ephemeral
+export type EphemeralTheme = Theme;
 
 export type Tool =
   | "selection"

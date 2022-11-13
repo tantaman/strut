@@ -30,28 +30,26 @@ import config from "../../../config";
 import mutations from "../../../domain/mutations";
 import { Transaction } from "prosemirror-state";
 import fns from "../../../domain/fns";
+import { ID_of } from "../../../id";
 
 // TODO: should we make sure this never gets unmounted? Only ever hidden?
 // TODO: should we use a portal instead? And use an element we can take offscreen
 // for the editor?
 function MarkdownEditor({
-  slide,
+  slideId,
   appState,
-  deck,
 }: {
-  slide: Slide;
+  slideId: ID_of<Slide>;
   appState: AppState;
-  deck: Deck;
 }) {
   useBind(["authoringState"], appState);
   const previewTheme = appState.previewTheme;
+  // TODO: any need to bind to current_deck_id?
   const theme = first(
-    useQuery<Theme>(
-      ...queries.theme(appState.ctx, deck.theme_id || config.defaultThemeId)
-    ).data
+    useQuery(queries.themeFromDeck(appState.ctx, appState.current_deck_id)).data
   );
   const markdown = first(
-    useQuery<Markdown>(...queries.markdown(appState.ctx, slide.id)).data
+    useQuery(queries.markdown(appState.ctx, slideId)).data
   );
 
   useBind(["fg_colorset"], previewTheme);
@@ -59,12 +57,12 @@ function MarkdownEditor({
   useBind(["fg_colorset"], theme);
 
   const state = appState.authoringState;
-  const slideRef = useRef<Slide>(slide);
+  const slideRef = useRef<Markdown | undefined>(markdown);
   const persistToSlide = useDebounce((editor: Editor) => {
     logger.debug("set content debounced");
     mutations.persistMarkdownToSlide(
       appState.ctx,
-      slide.id,
+      slideId,
       editor.getHTML() || ""
     );
   }, 250);
@@ -122,15 +120,15 @@ function MarkdownEditor({
   });
 
   useEffect(() => {
-    if (slideRef.current != slide) {
-      slideRef.current = slide;
+    if (slideRef.current != markdown) {
+      slideRef.current = markdown;
     } else {
       return;
     }
 
     console.log("Slide and thus content change");
     editor?.commands.setContent(markdown?.content || "");
-  }, [slide]);
+  }, [markdown]);
 
   return (
     <div className={styles.root}>

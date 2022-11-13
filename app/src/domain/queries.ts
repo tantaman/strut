@@ -1,4 +1,4 @@
-import { Ctx, Query } from "../hooks";
+import { Ctx, first, firstPick, Query } from "../hooks";
 import { ID_of } from "../id";
 import { Deck, Markdown, Presenter, Slide, TableName, Theme } from "./schema";
 
@@ -16,14 +16,16 @@ const queries = {
       ["undo_stack"],
       /*sql*/ `SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1`,
       [id],
-    ] as Query<boolean, TableName>,
+      firstPick,
+    ] as Query<boolean, TableName, boolean | undefined>,
   canRedo: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
       ["redo_stack"],
       /*sql*/ `SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1`,
       [id],
-    ] as Query<boolean, TableName>,
+      firstPick,
+    ] as Query<boolean, TableName, boolean | undefined>,
 
   slides: (ctx: Ctx, id: ID_of<Deck>) =>
     [
@@ -48,16 +50,26 @@ const queries = {
       ["deck", "presenter"],
       /*sql*/ `SELECT presenter.* FROM presenter, deck WHERE deck.id = ? AND presenter.name = deck.chosen_presenter`,
       [id],
-    ] as Query<Presenter, TableName>,
+      first,
+    ] as Query<Presenter, TableName, Presenter>,
 
   selectedSlides: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
-      ["slide"],
+      ["selected_slide"],
       /*sql*/ `SELECT slide_id FROM selected_slide WHERE deck_id = ?`,
       [id],
       (x: [ID_of<Slide>][]) => new Set(x.map((x) => x[0])),
     ] as Query<[ID_of<Slide>], TableName, Set<ID_of<Slide>>>,
+
+  mostRecentlySelectedSlide: (ctx: Ctx, id: ID_of<Deck>) =>
+    [
+      ctx,
+      ["selected_slide"],
+      /*sql*/ `SELECT slide_id FROM selected_slide WHERE deck_id = ? ORDER BY cnt DESC LIMIT 1`,
+      [id],
+      first,
+    ] as Query<[ID_of<Slide>], TableName, ID_of<Slide> | undefined>,
 
   recentColors: (ctx: Ctx, id: ID_of<Theme>) =>
     [
