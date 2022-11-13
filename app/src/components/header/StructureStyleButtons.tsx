@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AppState from "../../domain/ephemeral/AppState";
-import { Theme, EphemeralTheme } from "../../domain/schema";
+import { Theme } from "../../domain/schema";
+import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme";
 import * as styles from "./HeaderButton.module.css";
 import { Ctx, useQuery } from "../../hooks";
 import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
@@ -61,6 +62,7 @@ function Slideout({
         <div>Text</div>
       </ColorPickerButton2>
       <FontSelector
+        ctx={ctx}
         theme={theme}
         previewTheme={previewTheme}
         defaultLabel={defaultLabel}

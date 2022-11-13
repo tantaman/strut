@@ -1,8 +1,4 @@
-import { Editor } from "@tiptap/core";
-import { Ctx } from "../hooks";
 import { ID_of } from "../id";
-import { Transaction } from "prosemirror-state";
-import ErrorState from "./ephemeral/ErrorState";
 
 export const tables = [
   /*sql*/ `CREATE TABLE IF NOT EXISTS "deck" ("id" primary key, "title", "created", "modified", "theme_id", "chosen_presenter");`,
@@ -180,11 +176,6 @@ export interface DeckIndex {
 
 export interface DrawingInteractionState {
   readonly currentTool: Tool;
-}
-
-// rm readonly from ephemeral
-export interface EphemeralTheme extends Theme {
-  set<K extends keyof Theme>(k: K, v: Theme[K]): void;
 }
 
 export type Tool =

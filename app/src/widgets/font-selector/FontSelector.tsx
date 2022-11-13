@@ -37,7 +37,7 @@ function Option({
   ctx: Ctx;
   value: { name: string; label: string };
   defaultLabel: string;
-  theme: Theme;
+  theme?: Theme;
   previewTheme: EphemeralTheme;
   type: keyof Theme;
 }) {
@@ -48,7 +48,9 @@ function Option({
     previewTheme.set(type, undefined);
   };
   const updateTheme = () => {
-    mutations.setAllFont(ctx, theme.id, value.name);
+    if (theme) {
+      mutations.setAllFont(ctx, theme.id, value.name);
+    }
   };
   return (
     <li
@@ -71,7 +73,7 @@ export default function FontSelector({
 }: {
   ctx: Ctx;
   defaultLabel: string;
-  theme: Theme;
+  theme?: Theme;
   previewTheme: EphemeralTheme;
 }) {
   const [show, setShow] = useState(false);

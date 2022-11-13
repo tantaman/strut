@@ -1,11 +1,8 @@
 import { Model } from "@vlcn.io/model";
 import { ID_of } from "../../id";
-import { EphemeralTheme as IEphemeralTheme, Theme } from "../schema";
+import { Theme } from "../schema";
 
-export default class EphemeralTheme
-  extends Model<Theme>
-  implements IEphemeralTheme
-{
+export default class EphemeralTheme extends Model<Theme> {
   get id(): ID_of<Theme> {
     return this.data.id;
   }
