@@ -2,6 +2,7 @@ import { Editor } from "@tiptap/core";
 import { Ctx } from "../hooks";
 import { ID_of } from "../id";
 import { Transaction } from "prosemirror-state";
+import ErrorState from "./ephemeral/ErrorState";
 
 export const tables = [
   /*sql*/ `CREATE TABLE IF NOT EXISTS "deck" ("id" primary key, "title", "created", "modified", "theme_id", "chosen_presenter");`,
@@ -30,11 +31,10 @@ export const tables = [
   /*sql*/ `SELECT crsql_as_crr('markdown');`,
 
   // These tables are local and do not replicate. Don't make them CRRs
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", "cnt" autoincrement, primary key ("deck_id", "slide_id"));`,
+  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_component" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "recent_open" ("deck_id" primary key, "timestamp");`,
 ];
 
 export const tableNames = [
@@ -53,7 +53,6 @@ export const tableNames = [
   "selected_component",
   "undo_stack",
   "redo_stack",
-  "recent_opens",
 ] as const;
 
 export type TableName = typeof tableNames[number];
@@ -188,6 +187,7 @@ export interface AppState {
   readonly drawingInteractionState: DrawingInteractionState;
   readonly previewTheme: EphemeralTheme;
   readonly deckIndex: DeckIndex;
+  readonly errorState: ErrorState;
 }
 
 export interface DeckIndex {

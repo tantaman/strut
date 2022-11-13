@@ -1,14 +1,12 @@
-import { commit } from "@strut/model/Changeset";
 import React, { useRef, useState } from "react";
-import { persistLog, undoLog } from "~src/scripts/components/app_state/AppLogs";
-import AppState from "~src/scripts/components/app_state/AppState";
-import Theme, {
-  EphemeralTheme,
-  Data as ThemeData,
-} from "~src/scripts/components/deck/Theme";
-import useOnDocClick from "~src/scripts/interactions/useOnDocClick";
-import alias from "~src/scripts/utils/alias";
-import * as styles from "~src/scripts/components/header/HeaderButton.module.css";
+import AppState from "../../domain/ephemeral/AppState";
+import { Theme } from "../../domain/schema";
+import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme";
+import useOnDocClick from "../../interactions/useOnDocClick";
+import alias from "../../utils/alias";
+import styles from "../../components/header/HeaderButton.module.css";
+import mutations from "../../domain/mutations";
+import { Ctx } from "../../hooks";
 
 /*
 What do we do?
@@ -29,26 +27,28 @@ Could create ad-hoc theme class?
 
 const showAlias = alias(" show", "");
 function Option({
+  ctx,
   value,
   defaultLabel,
   theme,
   previewTheme,
   type,
 }: {
+  ctx: Ctx;
   value: { name: string; label: string };
   defaultLabel: string;
   theme: Theme;
   previewTheme: EphemeralTheme;
-  type: keyof ThemeData;
+  type: keyof Theme;
 }) {
   const updatePreview = () => {
-    commit(previewTheme.set(type, value.name), []);
+    previewTheme.set(type, value.name);
   };
   const removePreview = () => {
-    commit(previewTheme.set(type, undefined), []);
+    previewTheme.set(type, undefined);
   };
   const updateTheme = () => {
-    commit(theme.set(type, value.name), [persistLog, undoLog]);
+    mutations.setAllFont(ctx, theme.id, value.name);
   };
   return (
     <li
@@ -67,7 +67,9 @@ export default function FontSelector({
   defaultLabel,
   theme,
   previewTheme,
+  ctx,
 }: {
+  ctx: Ctx;
   defaultLabel: string;
   theme: Theme;
   previewTheme: EphemeralTheme;
@@ -100,9 +102,10 @@ export default function FontSelector({
       <ul className="dropdown-menu">
         {AppState.fontThemes.map((t) => (
           <Option
+            ctx={ctx}
             key={t.name}
             value={t}
-            type="font"
+            type="fontset"
             defaultLabel={defaultLabel}
             theme={theme}
             previewTheme={previewTheme}

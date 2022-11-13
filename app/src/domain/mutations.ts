@@ -7,13 +7,13 @@ const mutations = {
   async undo(ctx: Ctx, deckId: ID_of<Deck>) {
     const item = first(
       await ctx.db.execO<UndoStack>(
-        "SELECT * FROM undo_stack WHERE deck_id = ? ORDER BY order DESC LIMIT 1",
+        `SELECT * FROM undo_stack WHERE deck_id = ? ORDER BY "order" DESC LIMIT 1`,
         [deckId]
       )
     );
     if (item) {
       await ctx.db.exec(
-        "DELETE FROM undo_stack WHERE deck_id = ? AND order = ?",
+        `DELETE FROM undo_stack WHERE deck_id = ? AND "order" = ?`,
         [deckId, item.order]
       );
       // TODO: that should be pushed onto redo stack!
@@ -25,13 +25,13 @@ const mutations = {
   async redo(ctx: Ctx, deckId: ID_of<Deck>) {
     const item = first(
       await ctx.db.execO<UndoStack>(
-        "SELECT * FROM redo_stack WHERE deck_id = ? ORDER BY order ASC LIMIT 1",
+        `SELECT * FROM redo_stack WHERE deck_id = ? ORDER BY "order" ASC LIMIT 1`,
         [deckId]
       )
     );
     if (item) {
       await ctx.db.exec(
-        "DELETE FROM redo_stack WHERE deck_id = ? AND order = ?",
+        `DELETE FROM redo_stack WHERE deck_id = ? AND "order" = ?`,
         [deckId, item.order]
       );
       const op = fns.decodeOperation(item.operation);
@@ -156,6 +156,8 @@ const mutations = {
     ]);
   },
 
+  setAllFont(ctx: Ctx, id: ID_of<Theme>, name: string) {},
+
   async genOrCreateCurrentDeck(ctx: Ctx): Promise<ID_of<Deck>> {
     // go thru recent opens
     // open the most recent
@@ -163,10 +165,11 @@ const mutations = {
     // return id of the thing
 
     const ids = await ctx.db.execA(
-      `SELECT deck_id FROM recent_open ORDER BY timestamp DESC LIMIT 1`
+      `SELECT id FROM deck ORDER BY modified DESC LIMIT 1`
     );
     if (ids.length == 0) {
       // create
+      const deckid = newId<Deck>(ctx.siteid.substring(0, 4));
       ctx.db.exec(`INSERT INTO deck (
         "id",
         "title",
@@ -175,13 +178,15 @@ const mutations = {
         "theme_id",
         "chosen_presenter"
       ) VALUES (
-        X'${newId(ctx.siteid)}',
+        X'${deckid}',
         'First Deck',
         ${Date.now()},
         ${Date.now()},
         1,
         'impress'
       )`);
+
+      return deckid;
     }
 
     return ids[0][0];

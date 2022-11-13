@@ -30,6 +30,7 @@ function useQueryImpl<R, T extends string, M = R>(
     data: [] as any,
     loading: true,
   });
+  // TODO: counting / logging to ensure this runs as often as expected
   useEffect(() => {
     let isMounted = true;
     const runQuery = (changedTbls: Set<string> | null) => {
@@ -43,7 +44,9 @@ function useQueryImpl<R, T extends string, M = R>(
         }
       }
 
-      (mode === "o" ? ctx.db.execO : ctx.db.execA)(query).then((data) => {
+      (mode === "o" ? ctx.db.execO.bind(ctx.db) : ctx.db.execA.bind(ctx.db))(
+        query
+      ).then((data) => {
         if (!isMounted) {
           return;
         }
@@ -85,6 +88,9 @@ export function useQueryA<R, T extends string, M = R>(
 }
 
 export function first<T>(data: T[]): T | undefined {
+  if (!data) {
+    return undefined;
+  }
   return data[0];
 }
 

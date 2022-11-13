@@ -9,8 +9,96 @@ import {
 } from "../schema";
 import { Model } from "@vlcn.io/model";
 import { ID_of } from "../../id";
+import ErrorState from "./ErrorState";
 
 export default class AppState extends Model<IAppState> implements IAppState {
+  static colorThemes = [
+    {
+      name: "color-default",
+      label: "Default",
+    },
+    {
+      name: "color-orange_drip",
+      label: "Oranges",
+    },
+    // {
+    //   name: 'ripped',
+    //   label: 'Rip',
+    // },
+    {
+      name: "color-masculinity",
+      label: "Dark and Handsome",
+    },
+    // {
+    //   name: 'dusted',
+    //   label: 'Dusty',
+    // },
+    {
+      name: "color-comfort",
+      label: "Comfort",
+    },
+    {
+      name: "color-beach",
+      label: "Beach House",
+    },
+    {
+      name: "color-nsunset",
+      label: "Vice",
+    },
+    {
+      name: "color-greys",
+      label: "Greys",
+    },
+  ];
+  static structureThemes = [
+    {
+      name: "default",
+      label: "Default",
+    },
+    {
+      name: "structure-center",
+      label: "Center",
+    },
+    {
+      name: "structure-right",
+      label: "Right",
+    },
+  ];
+  static fontThemes = [
+    {
+      name: "font-default",
+      label: "Default",
+    },
+    {
+      name: "font-virgil",
+      label: "Virgil",
+    },
+    {
+      name: "font-roboto",
+      label: "Roboto",
+    },
+    {
+      name: "font-fira",
+      label: "Fira",
+    },
+    {
+      name: "font-montserrat",
+      label: "Montserrat",
+    },
+    {
+      name: "font-open-sans",
+      label: "Open Sans",
+    },
+    {
+      name: "font-dosis",
+      label: "Dosis",
+    },
+    {
+      name: "font-koho",
+      label: "KoHo",
+    },
+  ];
+
   get ctx(): Ctx {
     return this.data.ctx;
   }
@@ -45,6 +133,10 @@ export default class AppState extends Model<IAppState> implements IAppState {
 
   get deckIndex(): DeckIndex {
     return this.data.deckIndex;
+  }
+
+  get errorState(): ErrorState {
+    return this.data.errorState;
   }
 
   setEditorMode(mode: "slide" | "layout"): void {

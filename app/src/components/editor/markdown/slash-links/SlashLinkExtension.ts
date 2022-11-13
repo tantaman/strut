@@ -2,7 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { PluginKey } from "prosemirror-state";
 import Suggestion, { SuggestionOptions } from "@tiptap/suggestion";
-import { truncateForDisplay } from "@strut/sid";
+import { truncateForDisplay } from "@vlcn.io/id";
 import { Editor, Range } from "@tiptap/core";
 
 export type MentionOptions = {

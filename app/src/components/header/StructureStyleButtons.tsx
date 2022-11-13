@@ -5,7 +5,7 @@ import * as styles from "./HeaderButton.module.css";
 import { Ctx, useQuery } from "../../hooks";
 import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
 import FontSelector from "../../widgets/font-selector/FontSelector";
-import * as textColorStyles from "~src/scripts/components/editor/markdown/styling_menu/FontColorButton.module.css";
+import textColorStyles from "../editor/markdown/styling_menu/FontColorButton.module.css";
 import mutations from "../../domain/mutations";
 import queries from "../../domain/queries";
 

@@ -1,4 +1,6 @@
-# Data-Loader
+# TODO
+
+## Data-Loader
 
 wrapper.ts for wa-sqlite -- our queue should understand if someone is already resolving a submitted query. If so, return that promise instead.
 
@@ -7,12 +9,12 @@ Althrough if there is a write going on in between them and us... we should not u
 How does `dataLoader` collect all the things in a tick? Can we just do the same and collapse the tick?
 https://github.com/graphql/dataloader
 
-# Editor
+## Editor
 
 Strut1.0 like experience with Lexical?
 https://github.com/facebook/lexical
 
-# AppState bindings
+## AppState bindings
 
 - Can we get away with never having to bind to `appState.current_deck_id`?
 - What about other ephermals? <- no on this
@@ -20,9 +22,14 @@ https://github.com/facebook/lexical
 Track down all uses of `current_deck_id` and decide.
 Audit `AppState` usage in general.
 
-# Export
+## Export
 
-Export sql for deck
+Export sql for deck for user to export their data.
+
+## Defensive
+
+Better defensive primitives for `queries` in cases where null is returned rather than empty array.
+Shouldn't it always be at least an empty array?
 
 ---
 

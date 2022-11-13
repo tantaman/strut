@@ -21,7 +21,7 @@ import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 
 const dragImageUrl = new URL(
-  "../../../../images/drag-slides.svg",
+  "../../../images/drag-slides.svg",
   import.meta.url
 );
 const img = new Image();

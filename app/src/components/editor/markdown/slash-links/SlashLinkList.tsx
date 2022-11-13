@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import * as styles from "./SlashLink.module.css";
-import { truncateForDisplay } from "@strut/sid";
+import { truncateForDisplay } from "@vlcn.io/id";
 import { ID_of } from "../../../../id";
 import { Slide } from "../../../../domain/schema";
 

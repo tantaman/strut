@@ -15,14 +15,16 @@ import AuthoringState from "./domain/ephemeral/AuthoringState.js";
 import EphemeralTheme from "./domain/ephemeral/EphemeralTheme.js";
 import DeckIndex from "./domain/ephemeral/DeckIndex.js";
 import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.js";
+import { asId } from "@vlcn.io/id";
+import ErrorState from "./domain/ephemeral/ErrorState.js";
 
 async function main() {
-  const sqlite = await sqliteWasm();
+  const sqlite = await sqliteWasm((file) => "/" + file);
 
   const db = await sqlite.open("strut3");
   (window as any).db = db;
 
-  await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS ${n};`));
+  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS ${n};`));
 
   await db.execMany(tables);
   const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
@@ -47,17 +49,6 @@ async function startApp(ctx: Ctx) {
   (window as any).ctx = ctx;
   const root = createRoot(document.getElementById("content")!);
 
-  // const appState: AppState = {
-  //   ctx,
-  //   editor_mode: "slide",
-  //   current_deck_id: await mutations.getOrCreateCurrentDeck(ctx),
-  //   open_type: false,
-  //   drawing: false,
-  //   authoringState: {},
-  //   previewTheme: {},
-  //   deckIndex: {},
-  // };
-
   const appState = new AppState({
     ctx,
     editor_mode: "slide",
@@ -69,11 +60,14 @@ async function startApp(ctx: Ctx) {
       id: asId("ephemeral_theme"),
       bg_colorset: "default",
     }),
-    drawingInteractionState: new DrawingInteractionState({}),
-    deckIndex: new DeckIndex({}),
+    drawingInteractionState: new DrawingInteractionState({
+      currentTool: "arrow",
+    }),
+    deckIndex: new DeckIndex(),
+    errorState: new ErrorState(),
   });
 
-  root.render(<App ctx={ctx} />);
+  root.render(<App appState={appState} />);
 }
 
 main();

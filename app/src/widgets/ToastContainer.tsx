@@ -1,11 +1,11 @@
 import React, { memo } from "react";
-import ErrorState from "../components/app_state/ErrorState";
-import { useQuery } from "@strut/model/Hooks";
+import ErrorState from "../domain/ephemeral/ErrorState";
+import { useBind } from "../hooks";
 import Toast from "./Toast";
 import * as styles from "./ToastContainer.module.css";
 
 function ToastContainer({ errorState }: { errorState: ErrorState }) {
-  useQuery(["errors"], errorState);
+  useBind(["errors"], errorState);
   const errors = errorState.errors;
   return (
     <div aria-live="polite" aria-atomic="true" className={styles.root}>

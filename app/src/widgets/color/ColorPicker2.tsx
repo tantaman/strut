@@ -1,29 +1,31 @@
 import React, { useState } from "react";
 import * as styles from "./ColorPicker2.module.css";
 import chroma from "chroma-js";
-import useOnDocClick from "~src/scripts/interactions/useOnDocClick";
-import alias from "~src/scripts/utils/alias";
+import useOnDocClick from "../../interactions/useOnDocClick";
+import alias from "../../utils/alias";
 import HSVSelector from "./HSVSelector";
 import OpenColor from "open-color";
 
 const mode = "lch";
 const rowLen = 7;
 
-const swatches = [
-  OpenColor.gray,
-  OpenColor.red,
-  OpenColor.pink,
-  OpenColor.grape,
-  OpenColor.violet,
-  OpenColor.indigo,
-  OpenColor.blue,
-  OpenColor.cyan,
-  OpenColor.teal,
-  OpenColor.green,
-  OpenColor.lime,
-  OpenColor.yellow,
-  OpenColor.orange,
-].map((row) => row.map((color) => ({ background: color })));
+const swatches = (
+  [
+    OpenColor.gray,
+    OpenColor.red,
+    OpenColor.pink,
+    OpenColor.grape,
+    OpenColor.violet,
+    OpenColor.indigo,
+    OpenColor.blue,
+    OpenColor.cyan,
+    OpenColor.teal,
+    OpenColor.green,
+    OpenColor.lime,
+    OpenColor.yellow,
+    OpenColor.orange,
+  ] as const
+).map((row) => row.map((color) => ({ background: color })));
 
 // const swatches = [
 //   chroma

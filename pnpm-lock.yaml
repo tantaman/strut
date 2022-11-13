@@ -14,6 +14,7 @@ importers:
 
   app:
     specifiers:
+      '@strut/counter': ^0.0.11
       '@tiptap/core': 2.0.0-beta.202
       '@tiptap/extension-code-block': 2.0.0-beta.202
       '@tiptap/extension-code-block-lowlight': 2.0.0-beta.202
@@ -39,8 +40,11 @@ importers:
       '@vlcn.io/network-webrtc': ^0.1.1
       '@vlcn.io/rx-tbl': ^0.1.1
       '@vlcn.io/value': ^0.1.0
-      '@vlcn.io/wa-crsqlite': ^0.1.1
+      '@vlcn.io/wa-crsqlite': ^0.1.2
+      chroma-js: ^2.4.2
       hotkeys-js: ^3.10.0
+      lowlight: ^2.7.0
+      open-color: ^1.9.1
       prosemirror-model: ^1.18.1
       prosemirror-state: ^1.4.2
       react: ^18.2.0
@@ -52,6 +56,7 @@ importers:
       vite: ^3.2.3
       vitest: ^0.25.1
     dependencies:
+      '@strut/counter': 0.0.11
       '@tiptap/core': 2.0.0-beta.202
       '@tiptap/extension-code-block': 2.0.0-beta.202_fosglmwb3u6jhi6bbjmnlbdsbu
       '@tiptap/extension-code-block-lowlight': 2.0.0-beta.202_wiwlrtctbu32iu2iz2dns6n2dq
@@ -72,8 +77,11 @@ importers:
       '@vlcn.io/id': 0.1.0
       '@vlcn.io/network-webrtc': 0.1.1
       '@vlcn.io/rx-tbl': 0.1.1
-      '@vlcn.io/wa-crsqlite': 0.1.1
+      '@vlcn.io/wa-crsqlite': 0.1.2
+      chroma-js: 2.4.2
       hotkeys-js: 3.10.0
+      lowlight: 2.7.0
+      open-color: 1.9.1
       prosemirror-model: 1.18.1
       prosemirror-state: 1.4.2
       react: 18.2.0
@@ -406,6 +414,16 @@ packages:
   /@sinclair/typebox/0.24.51:
     resolution: {integrity: sha512-1P1OROm/rdubP5aFDSZQILU0vrLCJ4fvHt6EoqHEM+2D/G5MK3bIaymUKLit8Js9gbns5UyJnkP/TZROLw4tUA==}
     dev: true
+
+  /@strut/counter/0.0.11:
+    resolution: {integrity: sha512-xakuLHb385I0t38vWpmqXTSVc+IlNRvWTU7xZ/WGuXtvJ8f7QzWDCwGJzTGPFx2i1tsCgRwl0lrT9hHyzFSs9A==}
+    dependencies:
+      '@strut/utils': 0.0.11
+    dev: false
+
+  /@strut/utils/0.0.11:
+    resolution: {integrity: sha512-iKeBb4ud7wPEv9gJFBGlYfebroLib97SSmUapsL1nyx+njTHwynfaIwb0qwd8CP6Dh1+lRao2oE41Ao8GfyYGw==}
+    dev: false
 
   /@swc/helpers/0.3.17:
     resolution: {integrity: sha512-tb7Iu+oZ+zWJZ3HJqwx8oNwSDIU440hmVMDPhpACWQWnrZHK99Bxs70gT1L2dnr5Hg50ZRWEFkQCAnOVVV0z1Q==}
@@ -766,6 +784,12 @@ packages:
     resolution: {integrity: sha512-KnRanxnpfpjUTqTCXslZSEdLfXExwgNxYPdiO2WGUj8+HDjFi8R3k5RVKPeSCzLjCcshCAtVO2QBbVuAV4kTnw==}
     dev: true
 
+  /@types/hast/2.3.4:
+    resolution: {integrity: sha512-wLEm0QvaoawEDoTRwzTXp4b4jpwiJDvR5KMnFnVodm3scufTlBOWRD6N1OBf9TZMhjlNsSfcO5V+7AF4+Vy+9g==}
+    dependencies:
+      '@types/unist': 2.0.6
+    dev: false
+
   /@types/is-ci/3.0.0:
     resolution: {integrity: sha512-Q0Op0hdWbYd1iahB+IFNQcWXFq4O0Q5MwQP7uN0souuQ4rPg1vEYcnIOfr1gY+M+6rc8FGoRaBO1mOOvL29sEQ==}
     dependencies:
@@ -845,6 +869,10 @@ packages:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
     dev: true
 
+  /@types/unist/2.0.6:
+    resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
+    dev: false
+
   /@types/uuid/8.3.4:
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
     dev: false
@@ -906,8 +934,8 @@ packages:
       typescript: 4.8.4
     dev: true
 
-  /@vlcn.io/wa-crsqlite/0.1.1:
-    resolution: {integrity: sha512-O5pBJShRcENPWczvP+PnKCl4xdMYIr3yWGGctTEPXzuw0pGsv+BF0zgZxB2W2fl3EJlcGmZvTRZO/VnIK4bK4g==}
+  /@vlcn.io/wa-crsqlite/0.1.2:
+    resolution: {integrity: sha512-pXQ7HHtyLtWMgUHIb6jpK7tA+FkB0kYMW76uw9tcgdd2bkTX/kuHFPgjReku0iOUMvBuGy/MaSHanfbahhQscw==}
     dependencies:
       '@vlcn.io/wa-sqlite': 0.8.4
       '@vlcn.io/xplat-api': 0.1.1
@@ -1125,6 +1153,10 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  /chroma-js/2.4.2:
+    resolution: {integrity: sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==}
+    dev: false
 
   /ci-info/3.5.0:
     resolution: {integrity: sha512-yH4RezKOGlOhxkmhbeNuC4eYZKAUsEaGtBuBzDDP1eFUKiccDWzBABxBfOx31IDwDIXMTxWuwAxUGModvkbuVw==}
@@ -1701,6 +1733,12 @@ packages:
       reusify: 1.0.4
     dev: true
 
+  /fault/2.0.1:
+    resolution: {integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==}
+    dependencies:
+      format: 0.2.2
+    dev: false
+
   /fill-range/7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}
     engines: {node: '>=8'}
@@ -1730,6 +1768,11 @@ packages:
       micromatch: 4.0.5
       pkg-dir: 4.2.0
     dev: true
+
+  /format/0.2.2:
+    resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
+    engines: {node: '>=0.4.x'}
+    dev: false
 
   /fs-extra/7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
@@ -1891,6 +1934,11 @@ packages:
     dependencies:
       function-bind: 1.1.1
     dev: true
+
+  /highlight.js/11.6.0:
+    resolution: {integrity: sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==}
+    engines: {node: '>=12.0.0'}
+    dev: false
 
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
@@ -2310,6 +2358,14 @@ packages:
       get-func-name: 2.0.0
     dev: true
 
+  /lowlight/2.7.0:
+    resolution: {integrity: sha512-RRdrHalFfjpxL91ITTX7KhJYH3QmX5bW9Uie2D2E5GPIR3XBYDYhScBjE291ewFZkStz/k2PN9KC+8deNLiI3Q==}
+    dependencies:
+      '@types/hast': 2.3.4
+      fault: 2.0.1
+      highlight.js: 11.6.0
+    dev: false
+
   /lru-cache/4.1.5:
     resolution: {integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==}
     dependencies:
@@ -2481,6 +2537,10 @@ packages:
     dependencies:
       wrappy: 1.0.2
     dev: true
+
+  /open-color/1.9.1:
+    resolution: {integrity: sha512-vCseG/EQ6/RcvxhUcGJiHViOgrtz4x0XbZepXvKik66TMGkvbmjeJrKFyBEx6daG5rNyyd14zYXhz0hZVwQFOw==}
+    dev: false
 
   /orderedmap/2.1.0:
     resolution: {integrity: sha512-/pIFexOm6S70EPdznemIz3BQZoJ4VTFrhqzu0ACBqBgeLsLxq8e6Jim63ImIfwW/zAD1AlXpRMlOv3aghmo4dA==}

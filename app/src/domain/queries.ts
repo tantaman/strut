@@ -66,7 +66,7 @@ const queries = {
     [
       ctx,
       ["selected_slide"],
-      /*sql*/ `SELECT slide_id FROM selected_slide WHERE deck_id = ? ORDER BY cnt DESC LIMIT 1`,
+      /*sql*/ `SELECT slide_id FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1`,
       [id],
       first,
     ] as Query<[ID_of<Slide>], TableName, ID_of<Slide> | undefined>,

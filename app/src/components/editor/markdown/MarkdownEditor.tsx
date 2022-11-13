@@ -45,9 +45,9 @@ function MarkdownEditor({
   useBind(["authoringState"], appState);
   const previewTheme = appState.previewTheme;
   // TODO: any need to bind to current_deck_id?
-  const theme = first(
-    useQuery(queries.themeFromDeck(appState.ctx, appState.current_deck_id)).data
-  );
+  const theme = useQuery(
+    queries.themeFromDeck(appState.ctx, appState.current_deck_id)
+  ).data;
   const markdown = first(
     useQuery(queries.markdown(appState.ctx, slideId)).data
   );
