@@ -34,8 +34,10 @@ importers:
       '@types/jest': ^29.2.2
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
+      '@vlcn.io/model': ^0.1.0
       '@vlcn.io/network-webrtc': ^0.1.1
       '@vlcn.io/rx-tbl': ^0.1.1
+      '@vlcn.io/value': ^0.1.0
       '@vlcn.io/wa-crsqlite': ^0.1.1
       hotkeys-js: ^3.10.0
       prosemirror-model: ^1.18.1
@@ -80,6 +82,8 @@ importers:
       '@types/jest': 29.2.2
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.8
+      '@vlcn.io/model': 0.1.0
+      '@vlcn.io/value': 0.1.0
       typescript: 4.8.4
       typescript-plugin-css-modules: 3.4.0_typescript@4.8.4
       vite: 3.2.3
@@ -853,6 +857,13 @@ packages:
       '@types/yargs-parser': 21.0.0
     dev: true
 
+  /@vlcn.io/model/0.1.0:
+    resolution: {integrity: sha512-9XkYB2mpBexY0DFj2ZZUt+IJCLbwwxaNf+I8PHwn3b56RwJcPN6TfBwoC1lXCqXCmnUrBxyY7veUKHg8K5Uh4Q==}
+    dependencies:
+      '@vlcn.io/value': 0.1.0
+      typescript: 4.8.4
+    dev: true
+
   /@vlcn.io/network-webrtc/0.1.1:
     resolution: {integrity: sha512-BDEy2gZ6XrOKqb4JqU8f9jKqA6Wx7/P2sg8lKdZbmAXc2nEHKJ6BMqZRXcCCEypwdVzWUVmK8NLhnvwuEPv8Sg==}
     dependencies:
@@ -876,6 +887,18 @@ packages:
       '@vlcn.io/xplat-api': 0.1.1
     dev: false
 
+  /@vlcn.io/util/0.1.0:
+    resolution: {integrity: sha512-HaYtmvVxsng0rzQNsjBU7mWAtv53XYESE8nGMKoouHu0ELoNLIHnUwDMUnTGcbaJ14iGrSh6+iPqpKS/NLgZ1g==}
+    dev: true
+
+  /@vlcn.io/value/0.1.0:
+    resolution: {integrity: sha512-hmchBzAQSD7bNjRzlhb7ofZGLcnhfwbE4kCriX8pz7WplakPDJqVzVw83mmpGJeHFSbsA/Dwy5QiX/zFBW3Drg==}
+    dependencies:
+      '@vlcn.io/util': 0.1.0
+      '@vlcn.io/zone': 0.1.0
+      typescript: 4.8.4
+    dev: true
+
   /@vlcn.io/wa-crsqlite/0.1.1:
     resolution: {integrity: sha512-O5pBJShRcENPWczvP+PnKCl4xdMYIr3yWGGctTEPXzuw0pGsv+BF0zgZxB2W2fl3EJlcGmZvTRZO/VnIK4bK4g==}
     dependencies:
@@ -893,6 +916,10 @@ packages:
     dependencies:
       comlink: 4.3.1
     dev: false
+
+  /@vlcn.io/zone/0.1.0:
+    resolution: {integrity: sha512-VFzuZM4ea97EvAU59rEtY3n1Xom2jeaavJQ7A1N0UWFZC/KdT+UB/jgfsqLR48LnJRtmHQf+wuo1bHedPP2PVQ==}
+    dev: true
 
   /acorn-walk/8.2.0:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}

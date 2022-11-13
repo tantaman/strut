@@ -77,7 +77,7 @@ export type Deck = {
 
 // TODO: decoding methods in `queries`
 // TODO: remove `colorset` / `fontset` props?
-export type Theme = {
+export interface Theme {
   readonly id: ID_of<Theme>;
   readonly name?: string;
   readonly bg_colorset?: string;
@@ -86,7 +86,7 @@ export type Theme = {
   readonly surface_color?: string;
   readonly slide_color?: string;
   readonly font_color?: string;
-};
+}
 
 export type Slide = {
   readonly id: ID_of<Slide>;
@@ -178,43 +178,43 @@ export type Operation = {};
 // AppState is ephemeral
 // created for each new session
 // needs to be bindable given these states change
-export type AppState = {
-  ctx: Ctx;
-  editor_mode: "slide" | "layout";
-  current_deck_id: ID_of<Deck>;
-  open_type: boolean;
-  drawing: boolean;
-  authoringState: AuthoringState;
-  drawingInteractionState: DrawingInteractionState;
-  previewTheme: EphemeralTheme;
-  deckIndex: DeckIndex;
+export interface AppState {
+  readonly ctx: Ctx;
+  readonly editor_mode: "slide" | "layout";
+  readonly current_deck_id: ID_of<Deck>;
+  readonly open_type: boolean;
+  readonly drawing: boolean;
+  readonly authoringState: AuthoringState;
+  readonly drawingInteractionState: DrawingInteractionState;
+  readonly previewTheme: EphemeralTheme;
+  readonly deckIndex: DeckIndex;
 
   setEditorMode(mode: AppState["editor_mode"]): void;
   toggleOpenType(v?: boolean): void;
-};
+}
 
-export type DeckIndex = {
+export interface DeckIndex {
   getSuggestions(q: string): { id: ID_of<Slide>; title: string }[];
-};
+}
 
-export type DrawingInteractionState = {
-  currentTool: Tool;
+export interface DrawingInteractionState {
+  readonly currentTool: Tool;
 
   activateTool: (t: Tool) => void;
-};
+}
 
-export type AuthoringState = {
-  editor: Editor;
-  transaction: Transaction;
+export interface AuthoringState {
+  readonly editor?: Editor;
+  readonly transaction?: Transaction;
 
   updateEditor: (editor: Editor) => void;
   updateTransaction: (transaction: Transaction) => void;
-};
+}
 
 // rm readonly from ephemeral
-export type EphemeralTheme = Theme & {
+export interface EphemeralTheme extends Theme {
   set<K extends keyof Theme>(k: K, v: Theme[K]): void;
-};
+}
 
 export type Tool =
   | "selection"
