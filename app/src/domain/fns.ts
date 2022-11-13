@@ -17,6 +17,17 @@ const fns = {
     return undefined;
   },
 
+  getSlideColorStyle(
+    previewTheme: Theme,
+    pickedTheme?: Theme
+  ): string | undefined {
+    return undefined;
+  },
+
+  getFontClass(previewTheme: Theme, pickedTheme?: Theme): string | undefined {
+    return undefined;
+  },
+
   mdStringAsDom(content: string) {
     return toDOM(content);
   },

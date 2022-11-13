@@ -18,10 +18,8 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
 }
 
 function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
-  const slides = useQuery<Slide>(...queries.slides(ctx, deckId)).data;
-  const selectedSlideIds = useQuery<ID_of<Slide>>(
-    ...queries.selectedSlides(ctx, deckId)
-  ).data;
+  const slides = useQuery(queries.slides(ctx, deckId)).data;
+  const selectedSlideIds = useQuery(queries.selectedSlides(ctx, deckId)).data;
   const set = useMemo<Set<ID_of<Slide>>>(
     () => new Set(selectedSlideIds),
     [selectedSlideIds]

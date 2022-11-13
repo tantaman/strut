@@ -16,16 +16,17 @@ type QueryData<T> = {
   data: T[];
 };
 
+type SQL<R> = string;
+export type Query<R, T extends string, M = R> =
+  | [Ctx, T[], SQL<R>, any[]]
+  | [Ctx, T[], SQL<R>, any[], (x: R) => M];
+
 // TODO: `useQuery` should prepare a statement
-function useQueryImpl<T>(
-  ctx: Ctx,
-  tables: readonly string[],
-  query: string,
-  mode: "o" | "a",
-  bindings?: readonly any[],
-  postProcess?: (x: any) => T
-): QueryData<T> {
-  const [state, setState] = useState<QueryData<T>>({
+function useQueryImpl<R, T extends string, M = R>(
+  [ctx, tables, query, bindings, postProcess]: Query<R, T, M>,
+  mode: "o" | "a"
+): QueryData<M> {
+  const [state, setState] = useState<QueryData<M>>({
     data: [],
     loading: true,
   });
@@ -50,8 +51,8 @@ function useQueryImpl<T>(
           data:
             postProcess != null
               ? // TODO: postProcess should work on full dataset for more flexibility
-                data.map((d) => postProcess(d))
-              : (data as T[]),
+                data.map((d) => postProcess(d as R))
+              : (data as M[]),
           loading: false,
         });
       });
@@ -71,24 +72,16 @@ function useQueryImpl<T>(
   return state;
 }
 
-export function useQuery<T, X = T>(
-  ctx: Ctx,
-  tables: readonly string[],
-  query: string,
-  bindings?: readonly any[],
-  postProcess?: (x: T) => X
-): QueryData<X> {
-  return useQueryImpl(ctx, tables, query, "o", bindings, postProcess);
+export function useQuery<R, T extends string, M = R>(
+  q: Query<R, T, M>
+): QueryData<M> {
+  return useQueryImpl(q, "o");
 }
 
-export function useQueryA<T, X = T>(
-  ctx: Ctx,
-  tables: readonly string[],
-  query: string,
-  bindings?: readonly any[],
-  postProcess?: (x: T) => X
-): QueryData<X> {
-  return useQueryImpl(ctx, tables, query, "a", bindings, postProcess);
+export function useQueryA<R, T extends string, M = R>(
+  q: Query<R, T, M>
+): QueryData<M> {
+  return useQueryImpl(q, "a");
 }
 
 export function first<T>(data: T[]): T | undefined {

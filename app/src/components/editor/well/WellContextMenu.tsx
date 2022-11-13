@@ -21,7 +21,7 @@ export default function WellContextMenu({
       }
       onClick={(e) => {
         // TODO: index based or... slide id base?
-        mutations.addSlideAfter(appState.ctx, index);
+        mutations.addSlideAfter(appState.ctx, index, appState.current_deck_id);
         e.stopPropagation();
       }}
     >

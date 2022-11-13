@@ -1,6 +1,6 @@
-import { Ctx, first, pick0 } from "../hooks";
+import { Ctx, first, pick0, Query } from "../hooks";
 import { ID_of } from "../id";
-import { Deck, Slide, Theme } from "./schema";
+import { Deck, Markdown, Presenter, Slide, TableName, Theme } from "./schema";
 
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
@@ -16,14 +16,14 @@ const queries = {
       ["undo_stack"],
       "SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1",
       [id],
-    ] as const,
+    ] as Query<boolean, TableName>,
   canRedo: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
       ["redo_stack"],
       "SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1",
       [id],
-    ] as const,
+    ] as Query<boolean, TableName>,
 
   slides: (ctx: Ctx, id: ID_of<Deck>) =>
     [
@@ -31,7 +31,7 @@ const queries = {
       ["slide"],
       'SELECT * FROM slide WHERE deck_id = ? ORDER BY "order" ASC',
       [id],
-    ] as const,
+    ] as Query<Slide, TableName>,
 
   slideIds: (ctx: Ctx, id: ID_of<Deck>) =>
     [
@@ -40,7 +40,7 @@ const queries = {
       'SELECT id FROM slide WHERE deck_id = ? ORDER BY "order" ASC',
       [id],
       (x: [ID_of<Slide>]) => x[0],
-    ] as const,
+    ] as Query<[ID_of<Slide>], TableName, ID_of<Slide>>,
 
   chosenPresenter: (ctx: Ctx, id: ID_of<Deck>) =>
     [
@@ -48,15 +48,16 @@ const queries = {
       ["deck", "presenter"],
       "SELECT presenter.* FROM presenter, deck WHERE deck.id = ? AND presenter.name = deck.chosen_presenter",
       [id],
-    ] as const,
+    ] as Query<Presenter, TableName>,
 
   selectedSlides: (ctx: Ctx, id: ID_of<Deck>) =>
     [
       ctx,
-      ["selected_slide"],
+      ["slide"],
       "SELECT slide_id FROM selected_slide WHERE deck_id = ?",
       [id],
-    ] as const,
+      (x: [ID_of<Slide>]) => x[0],
+    ] as Query<[ID_of<Slide>], TableName, ID_of<Slide>>,
 
   recentColors: (ctx: Ctx, id: ID_of<Theme>) =>
     [
@@ -65,10 +66,13 @@ const queries = {
       "SELECT color FROM recent_color WHERE theme_id = ?",
       [id],
       (x: [string]) => x[0],
-    ] as const,
+    ] as Query<[string], TableName, string>,
 
   theme: (ctx: Ctx, id: ID_of<Theme>) =>
-    [ctx, ["theme"], "SELECT * FROM theme WHERE id = ?", [id]] as const,
+    [ctx, ["theme"], "SELECT * FROM theme WHERE id = ?", [id]] as Query<
+      Theme,
+      TableName
+    >,
 
   themeFromDeck: (ctx: Ctx, id: ID_of<Deck>) =>
     [
@@ -76,7 +80,7 @@ const queries = {
       ["theme", "deck"],
       "SELECT theme.* FROM theme JOIN deck ON theme.id = deck.theme_id WHERE deck.id = ?",
       [id],
-    ] as const,
+    ] as Query<Theme, TableName>,
 
   markdown: (ctx: Ctx, id: ID_of<Slide>) =>
     [
@@ -84,7 +88,7 @@ const queries = {
       ["markdown"],
       "SELECT * FROM markdown WHERE slide_id = ?",
       [id],
-    ] as const,
-};
+    ] as Query<Markdown, TableName>,
+} as const;
 
 export default queries;

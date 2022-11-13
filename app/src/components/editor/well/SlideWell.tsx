@@ -22,8 +22,8 @@ function SlideWell({
   appState: AppState;
 }) {
   // TODO: paginated fetch
-  const slideIds = useQueryA<[ID_of<SlideType>], ID_of<SlideType>>(
-    ...queries.slideIds(appState.ctx, appState.current_deck_id)
+  const slideIds = useQueryA(
+    queries.slideIds(appState.ctx, appState.current_deck_id)
   ).data;
   const orientHorizontally = useMatchMedia(
     "(max-width: " + mediaCuts.horizontal + "px)"

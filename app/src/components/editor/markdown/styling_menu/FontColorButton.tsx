@@ -15,8 +15,8 @@ type Props = {
 };
 
 export default function FontColorButton({ ctx, state, theme }: Props) {
-  const recentColors = useQueryA<[string], string>(
-    ...queries.recentColors(ctx, theme?.id || config.defaultThemeId)
+  const recentColors = useQueryA(
+    queries.recentColors(ctx, theme?.id || config.defaultThemeId)
   ).data;
   // useBind(["transaction"], state);
   // useQuery(["recentColors"], theme);

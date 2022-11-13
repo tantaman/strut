@@ -37,13 +37,15 @@ function WellSlide(props: {
   // TODO: these types should be part of `queries.` so the caller doesn't
   // need to provide them
   const markdown = first(
-    useQuery<Markdown>(...queries.markdown(props.appState.ctx, props.id)).data
+    useQuery(queries.markdown(props.appState.ctx, props.id)).data
   );
-  const theme = useQuery<Theme>(
-    ...queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
-  ).data;
-  const selectedSlides = useQueryA<[ID_of<Slide>], ID_of<Slide>>(
-    ...queries.selectedSlides(props.appState.ctx, props.id)
+  const theme = first(
+    useQuery(
+      queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
+    ).data
+  );
+  const selectedSlides = useQueryA(
+    queries.selectedSlides(props.appState.ctx, props.id)
   ).data;
 
   const previewTheme = props.appState.previewTheme;
@@ -184,7 +186,7 @@ function WellSlide(props: {
         selected: props.deck.mostRecentlySelectedSlide === props.index,
         [styles.root]: true,
         [styles.in]: dropClass === styles.in,
-        [previewTheme.getFontClass(theme)]: true,
+        [fns.getFontClass(previewTheme, theme)]: true,
       })}
       onClick={() => {
         commit(props.deck.setSelectedSlide(props.index, true), [
@@ -192,7 +194,7 @@ function WellSlide(props: {
           undoLog,
         ]);
       }}
-      style={{ backgroundColor: previewTheme.getSlideColorStyle(theme) }}
+      style={{ backgroundColor: fns.getSlideColorStyle(previewTheme, theme) }}
     >
       <div className={styles.markdownContainer} ref={setRef}></div>
       <WellSlideDrawingPreview

@@ -22,9 +22,7 @@ export default function StylingMenu({ appState }: Props) {
   const ctx = appState.ctx;
 
   const theme = first(
-    useQuery<Theme>(
-      ...queries.themeFromDeck(appState.ctx, appState.current_deck_id)
-    ).data
+    useQuery(queries.themeFromDeck(appState.ctx, appState.current_deck_id)).data
   );
 
   const addImage = () => {

@@ -54,120 +54,118 @@ export const tableNames = [
   "undo_stack",
   "redo_stack",
   "recent_opens",
-];
+] as const;
 
-type ComponentBase = Readonly<{
-  slide_id: ID_of<Slide>;
-  x?: number;
-  y?: number;
-}>;
+export type TableName = typeof tableNames[number];
 
-export type Deck = Readonly<{
-  id: ID_of<Deck>;
-  title?: string;
-  created?: number;
-  modified?: number;
-  theme_id?: ID_of<Theme>;
-  chosen_presenter?: string; // name of Presenter type
-}>;
+// See https://github.com/microsoft/TypeScript/issues/34777
+// as to why we use `readonly` explicitly instead of ReadOnly<T>
+type ComponentBase = {
+  readonly slide_id: ID_of<Slide>;
+  readonly x?: number;
+  readonly y?: number;
+};
+
+export type Deck = {
+  readonly id: ID_of<Deck>;
+  readonly title?: string;
+  readonly created?: number;
+  readonly modified?: number;
+  readonly theme_id?: ID_of<Theme>;
+  readonly chosen_presenter?: string; // name of Presenter type
+};
 
 // TODO: decoding methods in `queries`
-export type Theme = Readonly<{
-  id: ID_of<Theme>;
-  name: string;
-  bg_colorset: string;
-  fg_colorset: string;
-  fontset: string;
-}>;
+export type Theme = {
+  readonly id: ID_of<Theme>;
+  readonly name: string;
+  readonly bg_colorset: string;
+  readonly fg_colorset: string;
+  readonly fontset: string;
+};
 
-export type Slide = Readonly<{
-  id: ID_of<Slide>;
-  deck_id?: ID_of<Deck>;
-  order?: number;
-  created?: number;
-  modified?: number;
-  x?: number;
-  y?: number;
-  z?: number;
-}>;
+export type Slide = {
+  readonly id: ID_of<Slide>;
+  readonly deck_id?: ID_of<Deck>;
+  readonly order?: number;
+  readonly created?: number;
+  readonly modified?: number;
+  readonly x?: number;
+  readonly y?: number;
+  readonly z?: number;
+};
 
-export type TextComponent = Readonly<
-  {
-    id: ID_of<TextComponent>;
-    text?: string;
-    styles?: string;
-  } & ComponentBase
->;
+export type TextComponent = {
+  readonly id: ID_of<TextComponent>;
+  readonly text?: string;
+  readonly styles?: string;
+} & ComponentBase;
 
-export type EmbedComponent = Readonly<
-  {
-    id: ID_of<EmbedComponent>;
-    src?: string;
-  } & ComponentBase
->;
+export type EmbedComponent = {
+  readonly id: ID_of<EmbedComponent>;
+  readonly src?: string;
+} & ComponentBase;
 
-export type ShapeComponent = Readonly<
-  {
-    id: ID_of<ShapeComponent>;
-    type?: "ellipse" | "rectangle" | "triangle" | "hexagon" | "octagon";
-    props?: string;
-  } & ComponentBase
->;
+export type ShapeComponent = {
+  readonly id: ID_of<ShapeComponent>;
+  readonly type?: "ellipse" | "rectangle" | "triangle" | "hexagon" | "octagon";
+  readonly props?: string;
+} & ComponentBase;
 
-export type LineComponent = Readonly<{
-  id: ID_of<LineComponent>;
-  slide_id?: ID_of<Slide>;
-  props?: string;
-}>;
+export type LineComponent = {
+  readonly id: ID_of<LineComponent>;
+  readonly slide_id?: ID_of<Slide>;
+  readonly props?: string;
+};
 
-export type LinePoint = Readonly<{
-  id: ID_of<LinePoint>;
-  line_id?: ID_of<LineComponent>;
-  x?: number;
-  y?: number;
-}>;
+export type LinePoint = {
+  readonly id: ID_of<LinePoint>;
+  readonly line_id?: ID_of<LineComponent>;
+  readonly x?: number;
+  readonly y?: number;
+};
 
-export type Presenter = Readonly<{
-  name: string;
-  available_transitions?: string;
-  picked_transition?: string;
-}>;
+export type Presenter = {
+  readonly name: string;
+  readonly available_transitions?: string;
+  readonly picked_transition?: string;
+};
 
-export type Markdown = Readonly<{
-  slide_id: ID_of<Slide>;
-  content?: string;
-}>;
+export type Markdown = {
+  readonly slide_id: ID_of<Slide>;
+  readonly content?: string;
+};
 
 // === Non-Replicateds
 
-export type SelectSlides = Readonly<{
-  deck_id: ID_of<Deck>;
-  slide_id: ID_of<Slide>;
-}>;
+export type SelectSlides = {
+  readonly deck_id: ID_of<Deck>;
+  readonly slide_id: ID_of<Slide>;
+};
 
-export type SelectedComponents = Readonly<{
-  slide_id: ID_of<Slide>;
-  component_id: ID_of<
+export type SelectedComponents = {
+  readonly slide_id: ID_of<Slide>;
+  readonly component_id: ID_of<
     TextComponent | EmbedComponent | ShapeComponent | LineComponent
   >;
-  component_type:
+  readonly component_type:
     | "TextComponent"
     | "EmbedComponent"
     | "ShapeComponent"
     | "LineComponent";
-}>;
+};
 
-export type UndoStack = Readonly<{
-  deck_id: ID_of<Deck>;
-  operation: string;
-  order: number;
-}>;
+export type UndoStack = {
+  readonly deck_id: ID_of<Deck>;
+  readonly operation: string;
+  readonly order: number;
+};
 
-export type RedoStack = Readonly<{
-  deck_id: ID_of<Deck>;
-  operation: string;
-  order: number;
-}>;
+export type RedoStack = {
+  readonly deck_id: ID_of<Deck>;
+  readonly operation: string;
+  readonly order: number;
+};
 
 export type Operation = {};
 
