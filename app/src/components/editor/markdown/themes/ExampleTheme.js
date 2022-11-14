@@ -1,7 +1,9 @@
+import styles from "../TextEditor.module.css";
+
 const exampleTheme = {
   ltr: "ltr",
   rtl: "rtl",
-  placeholder: "editor-placeholder",
+  placeholder: styles.editor_placeholder,
   paragraph: "editor-paragraph",
   quote: "editor-quote",
   heading: {

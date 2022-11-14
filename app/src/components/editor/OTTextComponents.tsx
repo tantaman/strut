@@ -22,8 +22,13 @@ export default function OTTextComponents({
   ).data;
   return (
     <div style={style} className="markdown">
-      {components.map((c) => (
-        <TextEditor key={c.id} />
+      {components.map((c, i) => (
+        <TextEditor
+          key={c.id}
+          text={c.text || "Text"}
+          x={c.x == null ? i * 10 : c.x}
+          y={c.y == null ? i * 10 : c.y}
+        />
       ))}
     </div>
   );

@@ -1,5 +1,5 @@
 import { $getRoot, $getSelection, EditorState } from "lexical";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import React from "react";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -45,32 +45,43 @@ function onError(error: any) {
   throw error;
 }
 
-const editorConfig = {
-  namespace: "TextComponentEditor",
-  theme: ExampleTheme,
-  onError,
-  nodes: [
-    HeadingNode,
-    ListNode,
-    ListItemNode,
-    QuoteNode,
-    CodeNode,
-    CodeHighlightNode,
-    TableNode,
-    TableCellNode,
-    TableRowNode,
-    AutoLinkNode,
-    LinkNode,
-  ],
-};
+function TextEditorBase({
+  text,
+  x,
+  y,
+}: {
+  text: string;
+  x: number;
+  y: number;
+}) {
+  const editorConfig = {
+    namespace: "TextComponentEditor",
+    theme: ExampleTheme,
+    onError,
+    editorState: () => $convertFromMarkdownString(text, TRANSFORMERS),
+    nodes: [
+      HeadingNode,
+      ListNode,
+      ListItemNode,
+      QuoteNode,
+      CodeNode,
+      CodeHighlightNode,
+      TableNode,
+      TableCellNode,
+      TableRowNode,
+      AutoLinkNode,
+      LinkNode,
+    ],
+  };
 
-export default function TextEditor() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className={styles.root}>
+      <div className={styles.root} style={{ top: y, left: x }}>
         <RichTextPlugin
-          contentEditable={<ContentEditable />}
-          placeholder={<div>Enter some text...</div>}
+          contentEditable={
+            <ContentEditable className={styles.contentEditable} />
+          }
+          placeholder={<div className={styles.editor_placeholder}></div>}
           ErrorBoundary={LexicalErrorBoundary}
         />
         <OnChangePlugin onChange={onChange} />
@@ -80,9 +91,14 @@ export default function TextEditor() {
         <CodeHighlightPlugin />
         <AutoLinkPlugin />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        <div className={styles.cover}></div>
       </div>
     </LexicalComposer>
   );
 }
+
+// TODO: round off x,y so we can compare stably
+const TextEditor = memo(TextEditorBase);
+export default TextEditor;
 
 // https://codesandbox.io/s/lexical-rich-text-example-5tncvy?file=/src/Editor.js:1381-1759
