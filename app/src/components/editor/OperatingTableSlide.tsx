@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
-// import styles from "./OperatingTableSlide.module.css";
 import type { otsSqaure } from "./OperatingTable";
 import { useBind } from "../../hooks";
 import { ID_of } from "../../id";
@@ -47,16 +46,6 @@ function OperatingTableSlide({
             transformOrigin: "top left",
           }}
         />
-        {/* <div
-          style={{
-            transform: "scale(" + otsStyle.scale + ")",
-            width: otsStyle.width,
-            height: otsStyle.height,
-            transformOrigin: "top left",
-          }}
-        >
-          <MarkdownEditor slideId={slideId} appState={appState} />
-        </div> */}
       </div>
     </>
   );

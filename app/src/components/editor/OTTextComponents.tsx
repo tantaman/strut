@@ -1,9 +1,12 @@
 import { ID_of } from "@vlcn.io/id";
-import React, { memo } from "react";
+import React from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import queries from "../../domain/queries";
 import { Slide } from "../../domain/schema";
 import { useQuery } from "../../hooks";
+import TextEditor from "./markdown/TextEditor";
+
+import "styles/markdown/markdown-reset.css";
 
 export default function OTTextComponents({
   appState,
@@ -18,9 +21,9 @@ export default function OTTextComponents({
     queries.textComponents(appState.ctx, slideId)
   ).data;
   return (
-    <div style={style}>
+    <div style={style} className="markdown">
       {components.map((c) => (
-        <div key={c.id}>Text</div>
+        <TextEditor key={c.id} />
       ))}
     </div>
   );

@@ -15,10 +15,14 @@ importers:
   app:
     specifiers:
       '@lexical/clipboard': ^0.6.0
+      '@lexical/code': ^0.6.0
+      '@lexical/link': ^0.6.0
+      '@lexical/list': ^0.6.0
       '@lexical/markdown': ^0.6.0
       '@lexical/react': ^0.6.0
       '@lexical/rich-text': ^0.6.0
       '@lexical/selection': ^0.6.0
+      '@lexical/table': ^0.6.0
       '@lexical/utils': ^0.6.0
       '@strut/counter': ^0.0.11
       '@types/chroma-js': ^2.1.4
@@ -47,10 +51,14 @@ importers:
       vitest: ^0.25.1
     dependencies:
       '@lexical/clipboard': 0.6.0_lexical@0.6.0
+      '@lexical/code': 0.6.0_lexical@0.6.0
+      '@lexical/link': 0.6.0_lexical@0.6.0
+      '@lexical/list': 0.6.0_lexical@0.6.0
       '@lexical/markdown': 0.6.0_gvesoywphp56o6nob3ghyhbcia
       '@lexical/react': 0.6.0_6fhz367lkjrjgqa2bb2vqca4nq
       '@lexical/rich-text': 0.6.0_b5kwflnumeldwqibcponufodxe
       '@lexical/selection': 0.6.0_lexical@0.6.0
+      '@lexical/table': 0.6.0_lexical@0.6.0
       '@lexical/utils': 0.6.0_lexical@0.6.0
       '@strut/counter': 0.0.11
       '@vlcn.io/id': 0.1.0

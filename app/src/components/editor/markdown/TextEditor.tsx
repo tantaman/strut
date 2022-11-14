@@ -14,9 +14,19 @@ import {
   $convertToMarkdownString,
   TRANSFORMERS,
 } from "@lexical/markdown";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-
-const theme = {};
+// import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
+import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
+import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
+import ExampleTheme from "./themes/ExampleTheme";
+import styles from "./TextEditor.module.css";
 
 // When the editor changes, you can get notified via the
 // LexicalOnChangePlugin!
@@ -27,43 +37,52 @@ function onChange(editorState: EditorState) {
     const selection = $getSelection();
 
     // TODO: queue events to:
-    // 1. persist to slide
+    // 1. persist to text component
   });
 }
 
-function MyCustomAutoFocusPlugin() {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    // Focus the editor when the effect fires!
-    editor.focus();
-  }, [editor]);
-
-  return null;
-}
-
 function onError(error: any) {
-  console.error(error);
+  throw error;
 }
+
+const editorConfig = {
+  namespace: "TextComponentEditor",
+  theme: ExampleTheme,
+  onError,
+  nodes: [
+    HeadingNode,
+    ListNode,
+    ListItemNode,
+    QuoteNode,
+    CodeNode,
+    CodeHighlightNode,
+    TableNode,
+    TableCellNode,
+    TableRowNode,
+    AutoLinkNode,
+    LinkNode,
+  ],
+};
 
 export default function TextEditor() {
-  const initialConfig = {
-    namespace: "TextComponentEditor",
-    editorState: () => $convertFromMarkdownString("", TRANSFORMERS),
-    theme,
-    onError,
-  };
-
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <RichTextPlugin
-        contentEditable={<ContentEditable />}
-        placeholder={<div>Enter some text...</div>}
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-      <OnChangePlugin onChange={onChange} />
-      <HistoryPlugin />
-      <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+    <LexicalComposer initialConfig={editorConfig}>
+      <div className={styles.root}>
+        <RichTextPlugin
+          contentEditable={<ContentEditable />}
+          placeholder={<div>Enter some text...</div>}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <OnChangePlugin onChange={onChange} />
+        <HistoryPlugin />
+        <ListPlugin />
+        <LinkPlugin />
+        <CodeHighlightPlugin />
+        <AutoLinkPlugin />
+        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+      </div>
     </LexicalComposer>
   );
 }
+
+// https://codesandbox.io/s/lexical-rich-text-example-5tncvy?file=/src/Editor.js:1381-1759
