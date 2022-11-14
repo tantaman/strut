@@ -8,15 +8,17 @@ import { useQuery } from "../../hooks";
 export default function OTTextComponents({
   appState,
   slideId,
+  style,
 }: {
   appState: AppState;
   slideId: ID_of<Slide>;
+  style: Object;
 }) {
   const components = useQuery(
     queries.textComponents(appState.ctx, slideId)
   ).data;
   return (
-    <div>
+    <div style={style}>
       {components.map((c) => (
         <div key={c.id}>Text</div>
       ))}

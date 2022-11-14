@@ -37,7 +37,16 @@ function OperatingTableSlide({
           backgroundColor: fns.getSlideColorStyle(previewTheme, theme),
         }}
       >
-        <OTTextComponents appState={appState} slideId={slideId} />
+        <OTTextComponents
+          appState={appState}
+          slideId={slideId}
+          style={{
+            transform: "scale(" + otsStyle.scale + ")",
+            width: otsStyle.width,
+            height: otsStyle.height,
+            transformOrigin: "top left",
+          }}
+        />
         {/* <div
           style={{
             transform: "scale(" + otsStyle.scale + ")",
