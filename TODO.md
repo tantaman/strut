@@ -91,6 +91,10 @@ Or just expose `update_hook` ? Well we need `update_hook` to collect tables and 
 
 Drop tables doesn't remove clock tables.. so we need a convenience for dropping a crr.
 
+## Text Toolbar
+
+https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L403-L428
+
 ---
 
 # Low Pri

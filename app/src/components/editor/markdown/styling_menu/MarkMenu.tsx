@@ -1,4 +1,3 @@
-import { Editor } from "@tiptap/core";
 import React from "react";
 import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
 import headerStyles from "../../../header/HeaderButton.module.css";
@@ -7,32 +6,27 @@ const marks = [
   {
     type: "bold",
     iconClass: "bi-type-bold",
-    cmd: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleBold().run(),
+    cmd: (editor: undefined) => {},
   },
   {
     type: "italic",
     iconClass: "bi-type-italic",
-    cmd: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleItalic().run(),
+    cmd: (editor: undefined) => {},
   },
   {
     type: "underline",
     iconClass: "bi-type-underline",
-    cmd: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleUnderline().run(),
+    cmd: (editor: undefined) => {},
   },
   {
     type: "strike",
     iconClass: "bi-type-strikethrough",
-    cmd: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleStrike().run(),
+    cmd: (editor: undefined) => {},
   },
   {
     type: "code",
     iconClass: "bi-code-slash",
-    cmd: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleCode().run(),
+    cmd: (editor: undefined) => {},
   },
 ];
 
@@ -44,8 +38,8 @@ function MarkItem({
 }: {
   type: string;
   iconClass: string;
-  editor: Editor | undefined;
-  cmd: (e: Editor | undefined) => void;
+  editor: any;
+  cmd: (e: undefined) => void;
 }) {
   return (
     <button

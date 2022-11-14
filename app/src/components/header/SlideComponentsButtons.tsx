@@ -1,5 +1,6 @@
 import * as React from "react";
 import AppState from "../../domain/ephemeral/AppState";
+import mutations from "../../domain/mutations";
 // import styles from "./HeaderButton.module.css";
 import styles from "./SlideComponentButtons.module.css";
 
@@ -10,7 +11,13 @@ export default function SlideComponentsButtons({
 }) {
   return (
     <div className={"btn-group " + styles.root} role="group">
-      <button type="button" className="btn btn-outline-warning">
+      <button
+        type="button"
+        className="btn btn-outline-warning"
+        onClick={() =>
+          mutations.addText(appState.ctx, appState.current_deck_id)
+        }
+      >
         <i className={"bi bi-cursor " + styles.icon}></i>
       </button>
       <button type="button" className="btn btn-outline-warning">

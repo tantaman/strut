@@ -1,27 +1,27 @@
-import { Editor } from "@tiptap/core";
-import { Transaction } from "prosemirror-state";
 import { Model } from "@vlcn.io/model";
 
 export default class AuthoringState extends Model<{
-  readonly editor?: Editor;
-  readonly transaction?: Transaction;
+  // readonly editor?: Editor;
+  // readonly transaction?: Transaction;
 }> {
-  #editor?: Editor;
-  #transaction?: Transaction;
+  // #editor?: Editor;
+  // #transaction?: Transaction;
 
   get editor() {
-    return this.#editor;
+    // return this.#editor;
+    throw new Error();
   }
 
   get transaction() {
-    return this.#transaction;
+    throw new Error();
+    // return this.#transaction;
   }
 
-  updateEditor(editor: Editor): void {
-    this.#editor = editor;
+  updateEditor(editor: any): void {
+    // this.#editor = editor;
   }
 
-  updateTransaction(transaction: Transaction): void {
-    this.#transaction = transaction;
+  updateTransaction(transaction: any): void {
+    // this.#transaction = transaction;
   }
 }

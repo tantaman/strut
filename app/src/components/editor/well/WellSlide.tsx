@@ -40,9 +40,6 @@ function WellSlide(props: {
 }) {
   useTraceUpdate("WellSlide", props);
 
-  const markdown = first(
-    useQuery(queries.markdown(props.appState.ctx, props.id)).data
-  );
   const theme = useQuery(
     queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
   ).data;
@@ -55,17 +52,8 @@ function WellSlide(props: {
   // TODO: `useBind` on `previewTheme`
   // useQuery(["slideColor", "font"], previewTheme);
 
-  const markdownContainer = useRef<ParentNode>();
   const [hideContextMenu, setHideContextMenu] = useState(false);
   const [dropClass, setDropClass] = useState("");
-
-  const setRef = useCallback((node: HTMLDivElement) => {
-    markdownContainer.current = node;
-    if (!node) {
-      return;
-    }
-    node.replaceChildren(fns.mdStringAsDom(markdown?.content || ""));
-  }, []);
 
   const onDragStart = (e: DragEvent) => {
     setHideContextMenu(true);
@@ -75,16 +63,6 @@ function WellSlide(props: {
   };
   const onDragEnd = () => setHideContextMenu(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let node = markdownContainer.current;
-    if (!node) {
-      return;
-    }
-
-    const child = fns.mdStringAsDom(markdown?.content || "") as HTMLElement;
-    node.replaceChildren(child);
-  }, [markdown?.content]);
 
   // useEffect(() => {
   //   let node = markdownContainer.current;
@@ -204,7 +182,6 @@ function WellSlide(props: {
       }}
       style={{ backgroundColor: fns.getSlideColorStyle(previewTheme, theme) }}
     >
-      <div className={styles.markdownContainer} ref={setRef}></div>
       {hideContextMenu ? null : (
         <WellContextMenu
           appState={props.appState}

@@ -107,7 +107,8 @@ export default function BlockElementDropdown({
 }) {
   // useBind(["transaction"], state);
   let node;
-  const proseState = state.editor?.view.state;
+  // const proseState = state.editor?.view.state;
+  const proseState: TODO = undefined;
   if (proseState?.selection.constructor.name === "AllSelection") {
     node = proseState?.selection.$anchor.node(0);
   } else {
@@ -135,7 +136,7 @@ export default function BlockElementDropdown({
       <Options>
         {Object.entries(readouts).map(([name, r]) => (
           <DropdownItem
-            onApply={() => r.apply(state.editor)}
+            onApply={() => r.apply(/*state.editor*/ undefined)}
             onUnApply={
               () => {}
               // r.unApply(state.proseState, state.proseView?.dispatch)

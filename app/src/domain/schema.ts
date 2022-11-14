@@ -11,7 +11,6 @@ export const tables = [
   /*sql*/ `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "name", "bg_colorset", "fg_colorset", "fontset", "surface_color", "font_color");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "recent_color" ("color" primary key, "last_used", "first_used", "theme_id");`,
   /*sql*/ `CREATE TABLE IF NOT EXISTS "presenter" ("name" primary key, "available_transitions", "picked_transition");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "markdown" ("slide_id" primary key, "content");`,
 
   // Make the above tables collaborative and replicated by upgrading them to CRRs
   /*sql*/ `SELECT crsql_as_crr('deck');`,
@@ -24,7 +23,6 @@ export const tables = [
   /*sql*/ `SELECT crsql_as_crr('theme');`,
   /*sql*/ `SELECT crsql_as_crr('recent_color');`,
   /*sql*/ `SELECT crsql_as_crr('presenter');`,
-  /*sql*/ `SELECT crsql_as_crr('markdown');`,
 
   // These tables are local and do not replicate. Don't make them CRRs
   /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
@@ -44,7 +42,6 @@ export const tableNames = [
   "theme",
   "recent_color",
   "presenter",
-  "markdown",
   "selected_slide",
   "selected_component",
   "undo_stack",
@@ -64,7 +61,6 @@ export const crrTables = [
   "theme",
   "recent_color",
   "presenter",
-  "markdown",
 ];
 
 export type TableName = typeof tableNames[number];
@@ -144,11 +140,6 @@ export type Presenter = {
   readonly name: string;
   readonly available_transitions?: string;
   readonly picked_transition?: string;
-};
-
-export type Markdown = {
-  readonly slide_id: ID_of<Slide>;
-  readonly content?: string;
 };
 
 // === Non-Replicateds

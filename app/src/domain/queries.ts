@@ -1,6 +1,6 @@
 import { Ctx, first, firstPick, Query } from "../hooks";
 import { ID_of } from "../id";
-import { Deck, Markdown, Presenter, Slide, TableName, Theme } from "./schema";
+import { Deck, Presenter, Slide, TableName, Theme } from "./schema";
 
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
@@ -94,14 +94,6 @@ const queries = {
       [id],
       first,
     ] as Query<Theme, TableName, Theme | undefined>,
-
-  markdown: (ctx: Ctx, id: ID_of<Slide>) =>
-    [
-      ctx,
-      ["markdown"],
-      /*sql*/ `SELECT * FROM markdown WHERE slide_id = ?`,
-      [id],
-    ] as Query<Markdown, TableName>,
 } as const;
 
 export default queries;

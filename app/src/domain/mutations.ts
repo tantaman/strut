@@ -1,3 +1,4 @@
+import config from "../config";
 import { Ctx, first } from "../hooks";
 import { ID_of, newId } from "../id";
 import fns from "./fns";
@@ -175,6 +176,20 @@ const mutations = {
           ${Date.now()}
         );`);
       });
+  },
+
+  addText(ctx: Ctx, deckId: ID_of<Deck>) {
+    const id = objId(ctx);
+    return ctx.db.exec(
+      /*sql*/ `INSERT INTO text_component
+      ("id", "slide_id", "x", "y")
+    VALUES
+      (SELECT '${id}', "id", ${(Math.random() * config.slideWidth) | 0}, ${
+        (Math.random() * config.slideHeight) | 0
+      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1)
+    `,
+      [deckId]
+    );
   },
 
   // TODO: should be id rather than index based reordering in the future

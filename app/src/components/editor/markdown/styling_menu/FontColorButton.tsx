@@ -28,9 +28,9 @@ export default function FontColorButton({ ctx, state, theme }: Props) {
         return false;
       }
       if (color === "default") {
-        state.editor?.chain().focus().unsetColor().run();
+        // state.editor?.chain().focus().unsetColor().run();
       } else {
-        state.editor?.chain().focus().setColor(color).run();
+        // state.editor?.chain().focus().setColor(color).run();
         mutations.addRecentColor(
           ctx,
           color,
@@ -42,7 +42,8 @@ export default function FontColorButton({ ctx, state, theme }: Props) {
     },
     [state]
   );
-  const color = state.editor?.getAttributes("textStyle").color;
+  // const color = state.editor?.getAttributes("textStyle").color;
+  const color = null;
   let style;
   if (color) {
     style = {
