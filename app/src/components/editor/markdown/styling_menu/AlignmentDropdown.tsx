@@ -1,4 +1,3 @@
-import { Editor } from "@tiptap/core";
 import React from "react";
 import Button from "../../../../widgets/Button";
 import DropdownButton from "../../../../widgets/DropdownButton";
@@ -16,7 +15,7 @@ const alignments = {
       </>
     ),
     shortName: <i className={"bi bi-text-left"}></i>,
-    apply: (editor: Editor | null) => {},
+    apply: (editor: null) => {},
   },
   "": {
     children: (
@@ -25,7 +24,7 @@ const alignments = {
       </>
     ),
     shortName: <i className={"bi bi-text-left"}></i>,
-    apply: (editor: Editor | null) => {},
+    apply: (editor: null) => {},
     // editor?.chain().focus().setTextAlign("left").run(),
     // unApply: updateBlockClass(""),
   },
@@ -37,7 +36,7 @@ const alignments = {
       </>
     ),
     shortName: <i className={"bi bi-text-center"}></i>,
-    apply: (editor: Editor | null) => {},
+    apply: (editor: null) => {},
     // editor?.chain().focus().setTextAlign("center").run(),
     // unApply: updateBlockClass(""),
   },
@@ -48,7 +47,7 @@ const alignments = {
       </>
     ),
     shortName: <i className={"bi bi-text-right"}></i>,
-    apply: (editor: Editor | null) => {},
+    apply: (editor: null) => {},
     // editor?.chain().focus().setTextAlign("right").run(),
     // unApply: updateBlockClass(""),
   },

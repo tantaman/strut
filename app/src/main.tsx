@@ -1,3 +1,6 @@
+(window as any).__vlcn_whole_db_dbg = true;
+(window as any).__vlcn_wa_crsqlite_dbg = true;
+
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 // @ts-ignore

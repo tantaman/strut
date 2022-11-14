@@ -1,4 +1,3 @@
-import { Editor } from "@tiptap/core";
 import "@tiptap/starter-kit";
 import React from "react";
 import Button from "../../../../widgets/Button";
@@ -17,8 +16,7 @@ const readouts = {
       </>
     ),
     shortName: "Aa",
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().setParagraph().run(),
+    apply: (editor: undefined) => {}, // editor?.chain().focus().setParagraph().run(),
     unApply: () => {},
   },
   heading1: {
@@ -28,8 +26,8 @@ const readouts = {
       </>
     ),
     shortName: "H1",
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleHeading({ level: 1 }).run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleHeading({ level: 1 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
   heading2: {
@@ -39,8 +37,8 @@ const readouts = {
       </>
     ),
     shortName: "H2",
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleHeading({ level: 2 }).run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleHeading({ level: 2 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
   heading3: {
@@ -50,8 +48,8 @@ const readouts = {
       </>
     ),
     shortName: "H3",
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleHeading({ level: 3 }).run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleHeading({ level: 3 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
   bulletList: {
@@ -61,8 +59,8 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-list-ul"}></i>,
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleBulletList().run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleBulletList().run(),
     // unApply: lift,
   },
   orderedList: {
@@ -72,8 +70,8 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-list-ol"}></i>,
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleOrderedList().run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleOrderedList().run(),
     // unApply: lift,
   },
   blockquote: {
@@ -83,8 +81,8 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-blockquote-left"}></i>,
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleBlockquote().run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleBlockquote().run(),
     // unApply: lift,
   },
   codeBlock: {
@@ -94,8 +92,8 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-code-slash"}></i>,
-    apply: (editor: Editor | undefined) =>
-      editor?.chain().focus().toggleCodeBlock().run(),
+    apply: (editor: undefined) => {},
+    // editor?.chain().focus().toggleCodeBlock().run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
 };
