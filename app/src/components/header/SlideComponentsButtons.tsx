@@ -11,6 +11,9 @@ export default function SlideComponentsButtons({
 }) {
   return (
     <div className={"btn-group " + styles.root} role="group">
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-cursor " + styles.icon}></i>
+      </button>
       <button
         type="button"
         className="btn btn-outline-warning"
@@ -18,9 +21,6 @@ export default function SlideComponentsButtons({
           mutations.addText(appState.ctx, appState.current_deck_id)
         }
       >
-        <i className={"bi bi-cursor " + styles.icon}></i>
-      </button>
-      <button type="button" className="btn btn-outline-warning">
         <i className={"bi bi-fonts " + styles.icon}></i>
       </button>
       <button type="button" className="btn btn-outline-warning">

@@ -183,10 +183,11 @@ const mutations = {
     return ctx.db.exec(
       /*sql*/ `INSERT INTO text_component
       ("id", "slide_id", "x", "y")
-    VALUES
-      (SELECT '${id}', "id", ${(Math.random() * config.slideWidth) | 0}, ${
-        (Math.random() * config.slideHeight) | 0
-      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1)
+      SELECT '${id}', "slide_id", ${
+        ((Math.random() * config.slideWidth) / 2) | 0
+      }, ${
+        ((Math.random() * config.slideHeight) / 2) | 0
+      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
     `,
       [deckId]
     );
