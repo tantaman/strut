@@ -6,7 +6,7 @@ export default function BadgeGroup<T>({
   onClick,
 }: {
   options: { value: T; text: string; icon: JSX.Element }[];
-  onClick: (T) => void;
+  onClick: (x: T) => void;
 }) {
   return (
     <div>

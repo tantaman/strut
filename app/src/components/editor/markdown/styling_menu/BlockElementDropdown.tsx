@@ -4,8 +4,8 @@ import React from "react";
 import Button from "../../../../widgets/Button";
 import DropdownButton from "../../../../widgets/DropdownButton";
 const Options = DropdownButton.Options;
-import { AuthoringState } from "../../../../domain/schema";
-import * as headerStyles from "../../../header/HeaderButton.module.css";
+import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
+import headerStyles from "../../../header/HeaderButton.module.css";
 import DropdownItem from "./DropdownItem";
 import shorten from "./shorten";
 
@@ -17,7 +17,7 @@ const readouts = {
       </>
     ),
     shortName: "Aa",
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().setParagraph().run(),
     unApply: () => {},
   },
@@ -28,7 +28,7 @@ const readouts = {
       </>
     ),
     shortName: "H1",
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleHeading({ level: 1 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -39,7 +39,7 @@ const readouts = {
       </>
     ),
     shortName: "H2",
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleHeading({ level: 2 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -50,7 +50,7 @@ const readouts = {
       </>
     ),
     shortName: "H3",
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleHeading({ level: 3 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -61,7 +61,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-list-ul"}></i>,
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleBulletList().run(),
     // unApply: lift,
   },
@@ -72,7 +72,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-list-ol"}></i>,
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleOrderedList().run(),
     // unApply: lift,
   },
@@ -83,7 +83,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-blockquote-left"}></i>,
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleBlockquote().run(),
     // unApply: lift,
   },
@@ -94,7 +94,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-code-slash"}></i>,
-    apply: (editor: Editor | null) =>
+    apply: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleCodeBlock().run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -117,7 +117,7 @@ export default function BlockElementDropdown({
   // TODO: put this in the spec of the nodes
   let nodeName = node?.type.name;
   if (nodeName === "heading") {
-    nodeName = nodeName + node.attrs.level;
+    nodeName = nodeName + node?.attrs.level;
   }
 
   return (
@@ -129,7 +129,7 @@ export default function BlockElementDropdown({
       >
         <strong>
           {readouts[nodeName as keyof typeof readouts]?.shortName ||
-            shorten(nodeName)}
+            shorten(nodeName || "")}
         </strong>
       </Button>
       <Options>
@@ -142,7 +142,7 @@ export default function BlockElementDropdown({
             }
             name={name}
             children={r.children}
-            nodeName={nodeName}
+            nodeName={nodeName || ""}
             key={name}
           />
         ))}

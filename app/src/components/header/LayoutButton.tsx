@@ -1,9 +1,10 @@
 import React from "react";
 import * as headerStyles from "./HeaderButton.module.css";
 import * as styles from "./LayoutButton.module.css";
-import { first, useQuery } from "../../hooks";
-import { AppState, Presenter } from "../../domain/schema";
+import { useQuery } from "../../hooks";
+import { Presenter } from "../../domain/schema";
 import queries from "../../domain/queries";
+import AppState from "../../domain/ephemeral/AppState";
 
 type Props = {
   appState: AppState;

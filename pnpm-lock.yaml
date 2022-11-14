@@ -32,6 +32,7 @@ importers:
       '@tiptap/react': 2.0.0-beta.202
       '@tiptap/starter-kit': 2.0.0-beta.202
       '@tiptap/suggestion': 2.0.0-beta.202
+      '@types/chroma-js': ^2.1.4
       '@types/jest': ^29.2.2
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
@@ -89,6 +90,7 @@ importers:
       tippy.js: 6.3.7
       uuid: 9.0.0
     devDependencies:
+      '@types/chroma-js': 2.1.4
       '@types/jest': 29.2.2
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.8
@@ -782,6 +784,10 @@ packages:
 
   /@types/chai/4.3.4:
     resolution: {integrity: sha512-KnRanxnpfpjUTqTCXslZSEdLfXExwgNxYPdiO2WGUj8+HDjFi8R3k5RVKPeSCzLjCcshCAtVO2QBbVuAV4kTnw==}
+    dev: true
+
+  /@types/chroma-js/2.1.4:
+    resolution: {integrity: sha512-l9hWzP7cp7yleJUI7P2acmpllTJNYf5uU6wh50JzSIZt3fFHe+w2FM6w9oZGBTYzjjm2qHdnQvI+fF/JF/E5jQ==}
     dev: true
 
   /@types/hast/2.3.4:

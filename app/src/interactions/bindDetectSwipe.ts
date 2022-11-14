@@ -12,7 +12,7 @@ export default function bindDetectSwipe(
     fn: (d: number) => void,
     preventDefault: boolean
   ) {
-    return function (e) {
+    return function (e: TouchEvent) {
       if (preventDefault) {
         e.preventDefault();
       }

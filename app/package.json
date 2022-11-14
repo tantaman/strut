@@ -7,6 +7,7 @@
     "start": "vite",
     "build": "vite build",
     "tsc": "tsc --noEmit",
+    "tswatch": "tsc --noEmit --watch",
     "preview": "vite preview",
     "test:unit": "vitest"
   },
@@ -48,6 +49,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/chroma-js": "^2.1.4",
     "@types/jest": "^29.2.2",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",

@@ -174,10 +174,6 @@ export interface DeckIndex {
   getSuggestions(q: string): { id: ID_of<Slide>; title: string }[];
 }
 
-export interface DrawingInteractionState {
-  readonly currentTool: Tool;
-}
-
 export type Tool =
   | "selection"
   | "rectangle"

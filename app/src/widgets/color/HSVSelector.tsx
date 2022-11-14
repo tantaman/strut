@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { MouseEvent, useState } from "react";
 import * as styles from "./HSVSelector.module.css";
 import chroma from "chroma-js";
 import HueSlider from "./HueSlider";
@@ -20,51 +20,53 @@ export default function SaturationValueField({
   onPreview?: (c: string) => void;
 }) {
   const [mouseDown, setMouseDown] = useState(false);
-  const [state, setState] = useState(() => {
-    const chromaColor = chroma(color);
-    let [h, s, v] = chromaColor.hsv();
-    if (isNaN(h)) {
-      h = 0;
-    }
+  const [state, setState] = useState<{ h: number; s: number; v: number }>(
+    () => {
+      const chromaColor = chroma(color);
+      let [h, s, v] = chromaColor.hsv();
+      if (isNaN(h)) {
+        h = 0;
+      }
 
-    return {
-      h,
-      s,
-      v,
-    };
-  });
+      return {
+        h,
+        s,
+        v,
+      };
+    }
+  );
   const bottom = state.v * height - 6;
   const left = state.s * width - 6;
   const background = chroma.hsv(state.h, 1, 1).hex();
 
-  const onMouseUp = (e) => {
+  const onMouseUp = (e: MouseEvent) => {
     setMouseDown(false);
   };
 
-  const updateStateFromFieldMouseEvent = (e) => {
+  const updateStateFromFieldMouseEvent = (e: MouseEvent) => {
     const newState = {
       h: state.h,
-      s: e.nativeEvent.layerX / width,
-      v: (height - e.nativeEvent.layerY) / height,
+      s: (e.nativeEvent as TODO).layerX / width,
+      v: (height - (e.nativeEvent as TODO).layerY) / height,
     };
     setState(newState);
     onPreview &&
       onPreview(chroma.hsv(newState.h, newState.s, newState.v).hex());
   };
 
-  const onMouseDown = (e) => {
+  const onMouseDown = (e: MouseEvent) => {
     setMouseDown(true);
     updateStateFromFieldMouseEvent(e);
   };
 
-  const onMouseMove = (e) => {
+  const onMouseMove = (e: MouseEvent) => {
     if (!mouseDown) {
       return;
     }
     updateStateFromFieldMouseEvent(e);
   };
 
-  const onHueChange = (h) => {
+  const onHueChange = (h: number) => {
     const newState = {
       h,
       s: state.s,

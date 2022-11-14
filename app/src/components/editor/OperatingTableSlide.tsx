@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { AppState, Theme } from "../../domain/schema";
+import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
 import MarkdownEditor from "./markdown/MarkdownEditor";
 // import styles from "./OperatingTableSlide.module.css";
@@ -7,6 +7,7 @@ import type { otsSqaure } from "./OperatingTable";
 import { useBind } from "../../hooks";
 import { ID_of } from "../../id";
 import fns from "../../domain/fns";
+import AppState from "../../domain/ephemeral/AppState";
 
 function OperatingTableSlide({
   slideId,

@@ -1,6 +1,6 @@
 import React from "react";
-import ErrorState, { StrtError } from "../components/app_state/ErrorState";
-import { SID_of } from "@strut/sid";
+import ErrorState, { StrtError } from "../domain/ephemeral/ErrorState";
+import { ID_of } from "../id";
 import relativeTime from "../utils/relativeTime";
 
 export default function Toast({
@@ -10,7 +10,7 @@ export default function Toast({
   time,
   errorState,
 }: {
-  id: SID_of<StrtError>;
+  id: ID_of<StrtError>;
   level: string;
   message: string;
   time: Date;

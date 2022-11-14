@@ -1,17 +1,17 @@
-'use strict';
+"use strict";
 
-import { Logger } from '../logger/Log';
+import { Logger } from "../logger/Log";
 
 declare global {
   interface Window {
-    log: Logger,
-    serviceRegistry: any,
+    log: Logger;
+    serviceRegistry: any;
   }
 }
 
 declare global {
   interface ParentNode {
-    replaceChildren(...x: Node[]);
+    replaceChildren(...x: Node[]): void;
   }
 }
 

@@ -6,7 +6,8 @@
  * so they don't munge it.
  */
 
-import { AppState, Slide } from "../../domain/schema";
+import AppState from "../../domain/ephemeral/AppState";
+import { Slide } from "../../domain/schema";
 import { ID_of } from "../../id";
 
 // import { useQuery } from "@strut/model/Hooks";

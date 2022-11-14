@@ -8,7 +8,7 @@ export default function ExclusiveButtonGroup<T>({
 }: {
   options: { value: T; text: string; icon: JSX.Element }[];
   value: T;
-  onChange: (T) => void;
+  onChange: (t: T) => void;
 }) {
   return (
     <div>

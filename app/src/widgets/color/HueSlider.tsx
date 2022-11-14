@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { MouseEvent, useState } from "react";
 
 import * as styles from "./HueSlider.module.css";
 
@@ -11,17 +11,17 @@ export default function HueSlider({
   hue: number;
 }) {
   const [mouseDown, setMouseDown] = useState(false);
-  const updateHueFromMouseEvent = (e) => {
-    onChange(((e.nativeEvent.layerX || 0) / width) * 360);
+  const updateHueFromMouseEvent = (e: MouseEvent) => {
+    onChange((((e.nativeEvent as TODO).layerX || 0) / width) * 360);
   };
-  const onMouseDown = (e) => {
+  const onMouseDown = (e: MouseEvent) => {
     setMouseDown(true);
     updateHueFromMouseEvent(e);
   };
-  const onMouseUp = (e) => {
+  const onMouseUp = (e: MouseEvent) => {
     setMouseDown(false);
   };
-  const onMouseMove = (e) => {
+  const onMouseMove = (e: MouseEvent) => {
     if (!mouseDown) {
       return;
     }

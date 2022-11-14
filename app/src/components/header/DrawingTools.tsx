@@ -2,14 +2,11 @@ import React from "react";
 
 import * as headerStyles from "./HeaderButton.module.css";
 import * as styles from "./DrawingTools.module.css";
-import {
-  AppState,
-  Deck,
-  DrawingInteractionState,
-  Tool,
-} from "../../domain/schema";
+import { Deck, Tool } from "../../domain/schema";
 import mutations from "../../domain/mutations";
 import { useBind } from "../../hooks";
+import AppState from "../../domain/ephemeral/AppState";
+import DrawingInteractionState from "../../domain/ephemeral/DrawingInteractionState";
 
 function active(state: DrawingInteractionState, tool: Tool) {
   return state.currentTool === tool ? " active" : "";

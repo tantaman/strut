@@ -1,13 +1,11 @@
-import {
-  DrawingInteractionState as IDrawingInteractionState,
-  Tool,
-} from "../schema";
+import { Tool } from "../schema";
 import { Model } from "@vlcn.io/model";
 
-export default class DrawingInteractionState
-  extends Model<IDrawingInteractionState>
-  implements IDrawingInteractionState
-{
+type Data = {
+  readonly currentTool: Tool;
+};
+
+export default class DrawingInteractionState extends Model<Data> {
   get currentTool(): Tool {
     return this.data.currentTool;
   }

@@ -3,9 +3,12 @@ export default function shallowEqual<T extends Object>(l: T, r: T) {
     return false;
   }
 
-  if (Object.entries(r).every(
-    entry => l[entry[0]] === entry[1],
-  )) {
+  if (
+    Object.entries(r).every(
+      // @ts-ignore
+      (entry) => l[entry[0]] === entry[1]
+    )
+  ) {
     return true;
   }
 

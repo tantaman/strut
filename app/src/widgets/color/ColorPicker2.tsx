@@ -9,6 +9,8 @@ import OpenColor from "open-color";
 const mode = "lch";
 const rowLen = 7;
 
+type Style = { background: string };
+
 const swatches = (
   [
     OpenColor.gray,
@@ -25,7 +27,7 @@ const swatches = (
     OpenColor.yellow,
     OpenColor.orange,
   ] as const
-).map((row) => row.map((color) => ({ background: color })));
+).map((row) => row.map((color: string) => ({ background: color })));
 
 // const swatches = [
 //   chroma
@@ -83,7 +85,7 @@ export default function ColorPicker2({
   onPreview?: (color: string | undefined) => void;
 }) {
   const chromaColor = color === "default" ? null : chroma(color);
-  const normalized: string | null = chromaColor?.toString();
+  const normalized: string | undefined = chromaColor?.toString();
   const [show, setShow] = useState(false);
   useOnDocClick(() => {
     onPreview && onPreview(undefined);
@@ -130,9 +132,9 @@ export default function ColorPicker2({
         </div>
       </div>
       <div>
-        {swatches.map((r, i) => (
+        {swatches.map((r, i: number) => (
           <div key={i} className={styles.swatchRow}>
-            {r.map((s, i) => (
+            {r.map((s: Style, i: number) => (
               <Swatch
                 key={i}
                 s={s}
@@ -184,10 +186,10 @@ function Swatch({
   normalized,
   chromaColor,
 }: {
-  s: { background: string };
+  s: Style;
   onChange: (c: string) => void;
   onPreview?: (c: string | undefined) => void;
-  normalized: string | null;
+  normalized: string | undefined;
   chromaColor: any;
 }) {
   return (

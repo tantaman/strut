@@ -1,36 +1,38 @@
 import { Editor } from "@tiptap/core";
 import React from "react";
-import { AuthoringState } from "../../../../domain/schema";
-import * as headerStyles from "../../../header/HeaderButton.module.css";
+import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
+import headerStyles from "../../../header/HeaderButton.module.css";
 
 const marks = [
   {
     type: "bold",
     iconClass: "bi-type-bold",
-    cmd: (editor: Editor | null) => editor?.chain().focus().toggleBold().run(),
+    cmd: (editor: Editor | undefined) =>
+      editor?.chain().focus().toggleBold().run(),
   },
   {
     type: "italic",
     iconClass: "bi-type-italic",
-    cmd: (editor: Editor | null) =>
+    cmd: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleItalic().run(),
   },
   {
     type: "underline",
     iconClass: "bi-type-underline",
-    cmd: (editor: Editor | null) =>
+    cmd: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleUnderline().run(),
   },
   {
     type: "strike",
     iconClass: "bi-type-strikethrough",
-    cmd: (editor: Editor | null) =>
+    cmd: (editor: Editor | undefined) =>
       editor?.chain().focus().toggleStrike().run(),
   },
   {
     type: "code",
     iconClass: "bi-code-slash",
-    cmd: (editor: Editor | null) => editor?.chain().focus().toggleCode().run(),
+    cmd: (editor: Editor | undefined) =>
+      editor?.chain().focus().toggleCode().run(),
   },
 ];
 
@@ -42,8 +44,8 @@ function MarkItem({
 }: {
   type: string;
   iconClass: string;
-  editor: Editor | null;
-  cmd: (e: Editor | null) => void;
+  editor: Editor | undefined;
+  cmd: (e: Editor | undefined) => void;
 }) {
   return (
     <button

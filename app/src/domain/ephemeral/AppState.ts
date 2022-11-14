@@ -1,10 +1,11 @@
 import { Ctx } from "../../hooks";
-import { Deck, DeckIndex, DrawingInteractionState } from "../schema";
+import { Deck, DeckIndex } from "../schema";
 import { Model } from "@vlcn.io/model";
 import { ID_of } from "../../id";
 import ErrorState from "./ErrorState";
 import AuthoringState from "./AuthoringState";
 import EphemeralTheme from "./EphemeralTheme";
+import DrawingInteractionState from "./DrawingInteractionState";
 
 export type Data = {
   readonly ctx: Ctx;

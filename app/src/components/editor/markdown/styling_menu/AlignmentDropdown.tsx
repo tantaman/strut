@@ -2,7 +2,7 @@ import { Editor } from "@tiptap/core";
 import React from "react";
 import Button from "../../../../widgets/Button";
 import DropdownButton from "../../../../widgets/DropdownButton";
-import { AuthoringState } from "../../../../domain/schema";
+import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
 const Options = DropdownButton.Options;
 import * as headerStyles from "../../../header/HeaderButton.module.css";
 import DropdownItem from "./DropdownItem";
