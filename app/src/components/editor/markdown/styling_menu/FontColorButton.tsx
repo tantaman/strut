@@ -1,12 +1,14 @@
 import React, { useCallback } from "react";
 import * as styles from "./FontColorButton.module.css";
 import ColorPickerButton2 from "../../../../widgets/color/ColorPickerButton2";
-import { AppState, AuthoringState, Theme } from "../../../../domain/schema";
+import { Theme } from "../../../../domain/schema";
+import AppState from "../../../../domain/ephemeral/AppState";
 import mutations from "../../../../domain/mutations";
 import "@tiptap/extension-color";
 import queries from "../../../../domain/queries";
 import { Ctx, pick0, useQueryA } from "../../../../hooks";
 import config from "../../../../config";
+import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
 
 type Props = {
   ctx: Ctx;

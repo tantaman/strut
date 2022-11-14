@@ -11,67 +11,47 @@ import Header from "../../../widgets/Header";
 import LogoButton from "../../header/LogoButton";
 import useMatchMedia from "../../../interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
-import { Deck, AppState } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
+import AppState from "../../../domain/ephemeral/AppState";
 
 export default function SlideEditorNav({ appState }: { appState: AppState }) {
-  // listen for media state
+  // TODO listen for media state
   // collapse or not the slide editor menu
   // or should we just put everything back into the floating menu?
-  // const genPresenter = useMemo(
-  //   () => Presenter.queryFrom(appState.deck)?.gen(),
-  //   [appState.deck.id]
-  // );
-  const genPresenter = null;
 
-  const orientHorizontally = useMatchMedia(
-    "(max-width: " + mediaCuts.horizontal + "px)"
-  );
+  // const orientHorizontally = useMatchMedia(
+  //   "(max-width: " + mediaCuts.horizontal + "px)"
+  // );
 
   return (
     <Header>
       <div>
         <LogoButton ctx={appState.ctx} deckId={appState.current_deck_id} />
-        <div
-          className={
-            "btn-group strt-search-btn " +
-            headerBtn.root +
-            " " +
-            styles.searchBtn
-          }
-          onClick={() => mutations.toggleOpenType()}
-        >
-          <button type="button" className="btn btn-outline-warning">
-            <i className={"bi bi-search " + headerBtn.icon}></i>
-            <span>Search</span>
-          </button>
-        </div>
         <StructureStyleButtons
           appState={appState}
           className="inline-block left-pad"
         />
       </div>
       <div className={styles.middle_buttons}>
-        {orientHorizontally ? (
-          <div />
-        ) : appState.drawing ? (
+        {appState.drawing ? (
           <>
             <DrawingTools appState={appState} />
           </>
         ) : (
           <>
-            <StylingMenu appState={appState} />
-            <div className={styles.header_spacer + " strt-header-spacer"} />
             <SlideComponentsButtons appState={appState} />
           </>
         )}
       </div>
       <div>
-        {genPresenter && <LayoutButton appState={appState} />}
-        {genPresenter && (
-          <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
-        )}
+        {<LayoutButton appState={appState} />}
+        {<PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />}
       </div>
     </Header>
   );
 }
+
+/*
+<StylingMenu appState={appState} />
+            <div className={styles.header_spacer + " strt-header-spacer"} />
+*/

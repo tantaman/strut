@@ -1,7 +1,6 @@
 import * as React from "react";
-import mutations from "../../domain/mutations";
 import AppState from "../../domain/ephemeral/AppState";
-import * as styles from "./HeaderButton.module.css";
+import styles from "./HeaderButton.module.css";
 
 export default function SlideComponentsButtons({
   appState,
@@ -10,12 +9,20 @@ export default function SlideComponentsButtons({
 }) {
   return (
     <div className={"btn-group " + styles.root} role="group">
-      <button
-        type="button"
-        className="btn btn-outline-warning"
-        onClick={() => mutations.toggleDrawing()}
-      >
-        <i className={"bi bi-pen-fill " + styles.icon}></i>Sketch
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-cursor " + styles.icon}></i>
+      </button>
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-fonts " + styles.icon}></i>
+      </button>
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-square " + styles.icon}></i>
+      </button>
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-arrow-up-right " + styles.icon}></i>
+      </button>
+      <button type="button" className="btn btn-outline-warning">
+        <i className={"bi bi-image " + styles.icon}></i>
       </button>
     </div>
   );

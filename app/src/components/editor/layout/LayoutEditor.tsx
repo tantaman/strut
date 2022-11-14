@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { AppState, Slide } from "../../../domain/schema";
+import { Slide } from "../../../domain/schema";
 import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
 import LayoutSlide from "./LayoutSlide";
@@ -7,6 +7,7 @@ import { ID_of } from "../../../id";
 import { Ctx, useQuery } from "../../../hooks";
 import { Deck } from "../../../domain/schema";
 import queries from "../../../domain/queries";
+import AppState from "../../../domain/ephemeral/AppState";
 
 export default function LayoutEditor({ appState }: { appState: AppState }) {
   return (
