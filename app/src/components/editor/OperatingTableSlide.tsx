@@ -7,6 +7,7 @@ import { useBind } from "../../hooks";
 import { ID_of } from "../../id";
 import fns from "../../domain/fns";
 import AppState from "../../domain/ephemeral/AppState";
+import OTTextComponents from "./OTTextComponents";
 
 function OperatingTableSlide({
   slideId,
@@ -36,6 +37,7 @@ function OperatingTableSlide({
           backgroundColor: fns.getSlideColorStyle(previewTheme, theme),
         }}
       >
+        <OTTextComponents appState={appState} slideId={slideId} />
         {/* <div
           style={{
             transform: "scale(" + otsStyle.scale + ")",

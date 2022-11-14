@@ -65,6 +65,8 @@ AppState is mutable and we currently require components to bind to adjustments i
 
 Can react context solve this problem? So we just bind to app state once (in ctx provider) rather than in every component that uses it?
 
+If you do that Ctx should move out of `AppState` since everyone just uses `AppState` really only for that value.
+
 ## RM layerx layery usage?
 
 ## Check that rx/repl functions exists before call in trig

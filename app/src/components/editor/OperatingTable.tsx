@@ -4,7 +4,7 @@ import React, { DragEvent, useEffect, useRef, useState } from "react";
 import Geometry from "../../math/Geometry";
 
 import "styles/components/OperatingTable.css";
-import { first, useBind, useQuery } from "../../hooks";
+import { first, useBind, useQuery, useQueryA } from "../../hooks";
 import AppState from "../../domain/ephemeral/AppState";
 import OperatingTableSlide from "./OperatingTableSlide";
 import * as styles from "./OperatingTable.module.css";
@@ -77,7 +77,7 @@ function OperatingTable({ appState }: { appState: AppState }) {
   // TODO: are we binding current_deck_id everywhere else we use it?
   useBind(["current_deck_id", "editor_mode"], appState);
   const theme = useQuery(queries.themeFromDeck(appState.ctx, deckId)).data;
-  const slideId = useQuery(
+  const slideId = useQueryA(
     queries.mostRecentlySelectedSlide(appState.ctx, deckId)
   ).data;
 
