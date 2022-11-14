@@ -1,5 +1,12 @@
-import { $getRoot, $getSelection, EditorState } from "lexical";
-import { memo, useEffect } from "react";
+import {
+  $getRoot,
+  $getSelection,
+  BLUR_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  EditorState,
+  FOCUS_COMMAND,
+} from "lexical";
+import { memo, useEffect, useState } from "react";
 import React from "react";
 import Draggable from "react-draggable";
 
@@ -46,6 +53,51 @@ function onError(error: any) {
   throw error;
 }
 
+// function UnfocusPlugin() {
+//   const [editor] = useLexicalComposerContext();
+
+//   useEffect(() => {
+//     // Focus the editor when the effect fires!
+//     editor.blur();
+//   }, [editor]);
+
+//   return null;
+// }
+
+const useEditorHasFocus = () => {
+  const [editor] = useLexicalComposerContext();
+  // Possibly use useRef for synchronous updates but no re-rendering effect
+  const [hasFocus, setFocus] = useState(false);
+
+  useEffect(
+    () =>
+      editor.registerCommand(
+        BLUR_COMMAND,
+        () => {
+          setFocus(false);
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+    []
+  );
+
+  useEffect(
+    () =>
+      editor.registerCommand(
+        FOCUS_COMMAND,
+        () => {
+          setFocus(true);
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+    []
+  );
+
+  return hasFocus;
+};
+
 function TextEditorBase({
   text,
   x,
@@ -57,54 +109,83 @@ function TextEditorBase({
   y: number;
   scale: number;
 }) {
-  const editorConfig = {
-    namespace: "TextComponentEditor",
-    theme: ExampleTheme,
-    onError,
-    editorState: () => $convertFromMarkdownString(text, TRANSFORMERS),
-    nodes: [
-      HeadingNode,
-      ListNode,
-      ListItemNode,
-      QuoteNode,
-      CodeNode,
-      CodeHighlightNode,
-      TableNode,
-      TableCellNode,
-      TableRowNode,
-      AutoLinkNode,
-      LinkNode,
-    ],
-  };
+  const [config, setConfig] = useState(
+    () =>
+      ({
+        namespace: "TextComponentEditor",
+        theme: ExampleTheme,
+        onError,
+        editorState: () => $convertFromMarkdownString(text, TRANSFORMERS),
+        nodes: [
+          HeadingNode,
+          ListNode,
+          ListItemNode,
+          QuoteNode,
+          CodeNode,
+          CodeHighlightNode,
+          TableNode,
+          TableCellNode,
+          TableRowNode,
+          AutoLinkNode,
+          LinkNode,
+        ],
+      } as const)
+  );
 
   return (
-    <LexicalComposer initialConfig={editorConfig}>
-      <Draggable
-        defaultPosition={{
-          x,
-          y,
-        }}
-        scale={scale}
-      >
-        <div className={styles.root}>
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable className={styles.contentEditable} />
-            }
-            placeholder={<div className={styles.editor_placeholder}></div>}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <OnChangePlugin onChange={onChange} />
-          <HistoryPlugin />
-          <ListPlugin />
-          <LinkPlugin />
-          <CodeHighlightPlugin />
-          <AutoLinkPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-          <div className={styles.cover}></div>
-        </div>
-      </Draggable>
+    <LexicalComposer initialConfig={config}>
+      <TextEditorInner text={text} x={x} y={y} scale={scale} />
     </LexicalComposer>
+  );
+}
+
+function TextEditorInner({
+  text,
+  x,
+  y,
+  scale,
+}: {
+  text: string;
+  x: number;
+  y: number;
+  scale: number;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const hasFocus = useEditorHasFocus();
+  const [editing, setEditing] = useState(hasFocus);
+  const dblClicked = () => editor.focus(() => setEditing(true));
+
+  if (!hasFocus && editing) {
+    setEditing(false);
+  }
+  return (
+    <Draggable
+      defaultPosition={{
+        x,
+        y,
+      }}
+      scale={scale}
+    >
+      <div className={styles.root}>
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable className={styles.contentEditable} />
+          }
+          placeholder={<div className={styles.editor_placeholder}></div>}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <OnChangePlugin onChange={onChange} />
+        <HistoryPlugin />
+        <ListPlugin />
+        <LinkPlugin />
+        <CodeHighlightPlugin />
+        <AutoLinkPlugin />
+        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        {editing ? null : (
+          <div className={styles.cover} onDoubleClick={dblClicked}></div>
+        )}
+      </div>
+    </Draggable>
   );
 }
 
