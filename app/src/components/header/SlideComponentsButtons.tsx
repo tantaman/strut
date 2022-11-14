@@ -1,6 +1,7 @@
 import * as React from "react";
 import AppState from "../../domain/ephemeral/AppState";
-import styles from "./HeaderButton.module.css";
+// import styles from "./HeaderButton.module.css";
+import styles from "./SlideComponentButtons.module.css";
 
 export default function SlideComponentsButtons({
   appState,

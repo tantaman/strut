@@ -1,0 +1,16 @@
+.root {
+  top: -2px;
+  position: relative;
+}
+
+.root :global(.btn) {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1;
+}
+
+.icon {
+  display: block;
+  padding-top: 2px;
+  font-size: 20px;
+}
