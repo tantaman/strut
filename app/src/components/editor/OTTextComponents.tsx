@@ -12,10 +12,12 @@ export default function OTTextComponents({
   appState,
   slideId,
   style,
+  scale,
 }: {
   appState: AppState;
   slideId: ID_of<Slide>;
   style: Object;
+  scale: number;
 }) {
   const components = useQuery(
     queries.textComponents(appState.ctx, slideId)
@@ -26,6 +28,7 @@ export default function OTTextComponents({
         <TextEditor
           key={c.id}
           text={c.text || "Text"}
+          scale={scale}
           x={c.x == null ? i * 10 : c.x}
           y={c.y == null ? i * 10 : c.y}
         />

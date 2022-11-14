@@ -1,6 +1,7 @@
 import { $getRoot, $getSelection, EditorState } from "lexical";
 import { memo, useEffect } from "react";
 import React from "react";
+import Draggable from "react-draggable";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -49,10 +50,12 @@ function TextEditorBase({
   text,
   x,
   y,
+  scale,
 }: {
   text: string;
   x: number;
   y: number;
+  scale: number;
 }) {
   const editorConfig = {
     namespace: "TextComponentEditor",
@@ -76,23 +79,31 @@ function TextEditorBase({
 
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className={styles.root} style={{ top: y, left: x }}>
-        <RichTextPlugin
-          contentEditable={
-            <ContentEditable className={styles.contentEditable} />
-          }
-          placeholder={<div className={styles.editor_placeholder}></div>}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
-        <OnChangePlugin onChange={onChange} />
-        <HistoryPlugin />
-        <ListPlugin />
-        <LinkPlugin />
-        <CodeHighlightPlugin />
-        <AutoLinkPlugin />
-        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        <div className={styles.cover}></div>
-      </div>
+      <Draggable
+        defaultPosition={{
+          x,
+          y,
+        }}
+        scale={scale}
+      >
+        <div className={styles.root}>
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable className={styles.contentEditable} />
+            }
+            placeholder={<div className={styles.editor_placeholder}></div>}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <OnChangePlugin onChange={onChange} />
+          <HistoryPlugin />
+          <ListPlugin />
+          <LinkPlugin />
+          <CodeHighlightPlugin />
+          <AutoLinkPlugin />
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <div className={styles.cover}></div>
+        </div>
+      </Draggable>
     </LexicalComposer>
   );
 }
