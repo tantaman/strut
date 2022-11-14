@@ -26,6 +26,7 @@
     "@lexical/table": "^0.6.0",
     "@lexical/utils": "^0.6.0",
     "@strut/counter": "^0.0.11",
+    "@types/throttle-debounce": "^5.0.0",
     "@vlcn.io/id": "^0.1.0",
     "@vlcn.io/network-webrtc": "^0.1.1",
     "@vlcn.io/rx-tbl": "^0.1.1",
@@ -38,6 +39,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.5",
+    "throttle-debounce": "^5.0.0",
     "tippy.js": "^6.3.7",
     "uuid": "^9.0.0"
   },

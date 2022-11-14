@@ -97,6 +97,13 @@ Drop tables doesn't remove clock tables.. so we need a convenience for dropping 
 
 https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/ToolbarPlugin/index.tsx#L403-L428
 
+## Component Write Commit Perf Track
+
+We only re-render the component that was committed, correct?
+
+How might we incrementally re-fetch components in the OperatingTable in terms of reactivity when we do a point update?
+^-- you can be sensitive only to "create" and "delete" if desired as a simple optimization. Arg to `useQuery` to do this.
+
 ---
 
 # Low Pri

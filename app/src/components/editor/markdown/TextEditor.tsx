@@ -6,9 +6,9 @@ import {
   EditorState,
   FOCUS_COMMAND,
 } from "lexical";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import React from "react";
-import Draggable from "react-draggable";
+import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -35,19 +35,31 @@ import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
 import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 import ExampleTheme from "./themes/ExampleTheme";
 import styles from "./TextEditor.module.css";
+import { throttle } from "throttle-debounce";
+import { TextComponent } from "../../../domain/schema";
+import { ID_of } from "@vlcn.io/id";
+import mutations from "../../../domain/mutations";
+import { Ctx } from "../../../hooks";
 
-// When the editor changes, you can get notified via the
-// LexicalOnChangePlugin!
-function onChange(editorState: EditorState) {
-  editorState.read(() => {
-    // Read the contents of the EditorState here.
-    const root = $getRoot();
-    const selection = $getSelection();
+const persitText = throttle(
+  100,
+  (ctx: Ctx, markdown: string, componentId: ID_of<TextComponent>) => {
+    return mutations.saveText(ctx, markdown, componentId);
+  },
+  {
+    noLeading: true,
+  }
+);
 
-    // TODO: queue events to:
-    // 1. persist to text component
-  });
-}
+const persistDrag = throttle(
+  100,
+  (ctx: Ctx, x: number, y: number, componentId: ID_of<TextComponent>) => {
+    return mutations.saveDrag(ctx, "text_component", componentId, x, y);
+  },
+  {
+    noLeading: true,
+  }
+);
 
 function onError(error: any) {
   throw error;
@@ -99,15 +111,19 @@ const useEditorHasFocus = () => {
 };
 
 function TextEditorBase({
+  id,
   text,
   x,
   y,
   scale,
+  ctx,
 }: {
+  id: ID_of<TextComponent>;
   text: string;
   x: number;
   y: number;
   scale: number;
+  ctx: Ctx;
 }) {
   const [config, setConfig] = useState(
     () =>
@@ -134,26 +150,44 @@ function TextEditorBase({
 
   return (
     <LexicalComposer initialConfig={config}>
-      <TextEditorInner text={text} x={x} y={y} scale={scale} />
+      <TextEditorInner ctx={ctx} id={id} x={x} y={y} scale={scale} />
     </LexicalComposer>
   );
 }
 
 function TextEditorInner({
-  text,
+  id,
   x,
   y,
   scale,
+  ctx,
 }: {
-  text: string;
+  id: ID_of<TextComponent>;
   x: number;
   y: number;
   scale: number;
+  ctx: Ctx;
 }) {
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
   const [editing, setEditing] = useState(hasFocus);
   const dblClicked = () => editor.focus(() => setEditing(true));
+
+  const onChange = useCallback(
+    (editorState: EditorState) => {
+      editorState.read(() => {
+        persitText(ctx, $convertToMarkdownString(TRANSFORMERS), id);
+      });
+    },
+    [id]
+  );
+
+  const onDragged = useCallback(
+    (e: DraggableEvent, data: DraggableData) => {
+      persistDrag(ctx, data.x, data.y, id);
+    },
+    [id]
+  );
 
   if (!hasFocus && editing) {
     setEditing(false);
@@ -164,7 +198,9 @@ function TextEditorInner({
         x,
         y,
       }}
+      onDrag={onDragged}
       scale={scale}
+      disabled={editing}
     >
       <div className={styles.root}>
         <RichTextPlugin

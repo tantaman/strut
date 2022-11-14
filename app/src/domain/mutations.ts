@@ -2,7 +2,18 @@ import config from "../config";
 import { Ctx, first } from "../hooks";
 import { ID_of, newId } from "../id";
 import fns from "./fns";
-import { Deck, Operation, Slide, Theme, UndoStack } from "./schema";
+import {
+  Deck,
+  EmbedComponent,
+  LineComponent,
+  Operation,
+  ShapeComponent,
+  Slide,
+  TableName,
+  TextComponent,
+  Theme,
+  UndoStack,
+} from "./schema";
 
 function objId<T>(ctx: Ctx): ID_of<T> {
   return newId<T>(ctx.siteid.substring(0, 4));
@@ -292,6 +303,34 @@ const mutations = {
     }
 
     return ids[0][0];
+  },
+
+  saveText(ctx: Ctx, markdown: string, compnentId: ID_of<TextComponent>) {
+    return ctx.db.exec(
+      /* sql */ `UPDATE "text_component" SET "text" = ? WHERE "id" = ?`,
+      [markdown, compnentId]
+    );
+  },
+
+  saveDrag(
+    ctx: Ctx,
+    component:
+      | "text_component"
+      | "embed_component"
+      | "shape_component"
+      | "line_component",
+    compnentId:
+      | ID_of<TextComponent>
+      | ID_of<ShapeComponent>
+      | ID_of<LineComponent>
+      | ID_of<EmbedComponent>,
+    x: number,
+    y: number
+  ) {
+    return ctx.db.exec(
+      /* sql */ `UPDATE "text_component" SET "x" = ?, "y" = ? WHERE "id" = ?`,
+      [x, y, compnentId]
+    );
   },
 };
 

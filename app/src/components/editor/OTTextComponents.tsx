@@ -26,7 +26,9 @@ export default function OTTextComponents({
     <div style={style} className="markdown">
       {components.map((c, i) => (
         <TextEditor
+          ctx={appState.ctx}
           key={c.id}
+          id={c.id}
           text={c.text || "Text"}
           scale={scale}
           x={c.x == null ? i * 10 : c.x}

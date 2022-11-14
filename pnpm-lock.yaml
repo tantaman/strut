@@ -29,6 +29,7 @@ importers:
       '@types/jest': ^29.2.2
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
+      '@types/throttle-debounce': ^5.0.0
       '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
       '@vlcn.io/network-webrtc': ^0.1.1
@@ -43,6 +44,7 @@ importers:
       react: ^18.2.0
       react-dom: ^18.2.0
       react-draggable: ^4.4.5
+      throttle-debounce: ^5.0.0
       tippy.js: ^6.3.7
       typescript: ^4.8.4
       typescript-plugin-css-modules: ^3.4.0
@@ -61,6 +63,7 @@ importers:
       '@lexical/table': 0.6.0_lexical@0.6.0
       '@lexical/utils': 0.6.0_lexical@0.6.0
       '@strut/counter': 0.0.11
+      '@types/throttle-debounce': 5.0.0
       '@vlcn.io/id': 0.1.0
       '@vlcn.io/network-webrtc': 0.1.1
       '@vlcn.io/rx-tbl': 0.1.1
@@ -73,6 +76,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-draggable: 4.4.5_biqbaboplfbrettd7655fr4n2y
+      throttle-debounce: 5.0.0
       tippy.js: 6.3.7
       uuid: 9.0.0
     devDependencies:
@@ -728,6 +732,10 @@ packages:
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
     dev: true
+
+  /@types/throttle-debounce/5.0.0:
+    resolution: {integrity: sha512-Pb7k35iCGFcGPECoNE4DYp3Oyf2xcTd3FbFQxXUI9hEYKUl6YX+KLf7HrBmgVcD05nl50LIH6i+80js4iYmWbw==}
+    dev: false
 
   /@types/unist/2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
@@ -3071,6 +3079,11 @@ packages:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
     dev: true
+
+  /throttle-debounce/5.0.0:
+    resolution: {integrity: sha512-2iQTSgkkc1Zyk0MeVrt/3BvuOXYPl/R8Z0U2xxo9rjwNciaHDG3R+Lm6dh4EeUci49DanvBnuqI6jshoQQRGEg==}
+    engines: {node: '>=12.22'}
+    dev: false
 
   /tinybench/2.3.1:
     resolution: {integrity: sha512-hGYWYBMPr7p4g5IarQE7XhlyWveh1EKhy4wUBS1LrHXCKYgvz+4/jCqgmJqZxxldesn05vccrtME2RLLZNW7iA==}
