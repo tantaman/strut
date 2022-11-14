@@ -116,6 +116,8 @@ const mutations = {
     );
   },
 
+  // TODO: we need to cascade deletes to fk edges.
+  // Can we do SQLite FK cascade w/o FK enforcement?
   removeSlide(
     ctx: Ctx,
     id: ID_of<Slide>,
@@ -291,10 +293,6 @@ const mutations = {
         0,
         ${Date.now()},
         ${Date.now()}
-      );`,
-        `INSERT INTO "markdown" ("slide_id", "content") VALUES (
-        '${slideId}',
-        ''
       );`,
         `INSERT INTO "selected_slide" ("deck_id", "slide_id") VALUES ('${deckId}', '${slideId}')`,
       ]);

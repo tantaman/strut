@@ -61,6 +61,7 @@ export const crrTables = [
   "theme",
   "recent_color",
   "presenter",
+  "markdown",
 ];
 
 export type TableName = typeof tableNames[number];

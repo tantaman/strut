@@ -25,17 +25,20 @@ async function main() {
   const db = await sqlite.open("strut3");
   (window as any).db = db;
 
-  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS "${n}";`));
-  // await db.execMany(
-  //   crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
-  // );
+  await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS "${n}";`));
+  await db.execMany(
+    crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
+  );
 
   await db.execMany(tables);
   const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
   const siteid = uuidStringify(r[0][0]);
+  console.log(siteid);
 
   const rx = await tblrx(db);
   const rtc = await wdbRtc(db);
+
+  (window as any).rtc = rtc;
 
   await db.execMany(seeds);
 

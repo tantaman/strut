@@ -104,6 +104,11 @@ We only re-render the component that was committed, correct?
 How might we incrementally re-fetch components in the OperatingTable in terms of reactivity when we do a point update?
 ^-- you can be sensitive only to "create" and "delete" if desired as a simple optimization. Arg to `useQuery` to do this.
 
+## FK Delete Cascade ideas
+
+-> manual
+-> via fk constraint but w/o fk enforce
+
 ---
 
 # Low Pri

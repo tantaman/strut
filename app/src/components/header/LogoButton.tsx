@@ -8,7 +8,7 @@ const Options = DropdownButton.Options;
 import "styles/components/Header.css";
 import Css from "../../html/Css";
 import { Deck } from "../../domain/schema";
-import { Ctx, firstPick, useQuery } from "../../hooks";
+import { Ctx, useQuery } from "../../hooks";
 import queries from "../../domain/queries";
 import mutations from "../../domain/mutations";
 import { ID_of } from "../../id";
@@ -23,6 +23,17 @@ function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
         <span className="bg"></span>
       </Button>
       <Options>
+        <li>
+          <a
+            className={Css.toClassString({
+              "dropdown-item": true,
+            })}
+            href="#!"
+            onClick={() => {}}
+          >
+            Connect to Peer
+          </a>
+        </li>
         <li>
           <a
             className={Css.toClassString({
