@@ -38,11 +38,41 @@ Shouldn't it always be at least an empty array?
 So components can go thru remount cycle without flickering. Would need to return previously resolved promise
 so suspense can handl it correctly.
 
-## Resolve in batch
-
 ## sqlite-api.js:91 unknown binding converted to null {slide_id: '637158ef3641244f'}
 
 ^-- add query text to msg in our fork
+
+## Transaction Support
+
+via vlcn.io/value
+
+## Try new official WASM
+
+multi tab.
+Would need to comlink it...
+Could rm the serializer
+But would need to batch via `DataLoader` or some such
+
+## TX Support
+
+Problematic with serial+async nature or wa-sqlite.
+
+It can use the current zone to fine the current statement queue.
+
+## Move AppState to Context API?
+
+AppState is mutable and we currently require components to bind to adjustments in it...
+
+Can react context solve this problem? So we just bind to app state once (in ctx provider) rather than in every component that uses it?
+
+---
+
+# Low Pri
+
+## Resolve in batch
+
+Maybe. Queries are serialized and resolve in turn thus causing components with multiple `useQuery` calls to render multiple times.
+Although this should be fine since React should technically collapse re-renders that need collapsing?
 
 ---
 

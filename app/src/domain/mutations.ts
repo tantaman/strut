@@ -3,6 +3,10 @@ import { ID_of, newId } from "../id";
 import fns from "./fns";
 import { Deck, Operation, Slide, Theme, UndoStack } from "./schema";
 
+function objId<T>(ctx: Ctx): ID_of<T> {
+  return newId<T>(ctx.siteid.substring(0, 4));
+}
+
 const mutations = {
   async undo(ctx: Ctx, deckId: ID_of<Deck>) {
     const item = first(
@@ -100,11 +104,78 @@ const mutations = {
     );
   },
 
-  removeSlide(ctx: Ctx, id: ID_of<Slide>) {
-    return ctx.db.exec(`DELETE FROM slide WHERE id = ?`, [id]);
+  removeSlide(
+    ctx: Ctx,
+    id: ID_of<Slide>,
+    deckId: ID_of<Deck>,
+    selected: boolean
+  ) {
+    // TODO: tx
+    const deleteSlide = () =>
+      ctx.db.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
+    if (!selected) {
+      return deleteSlide();
+    }
+
+    return ctx.db
+      .execA<[ID_of<Slide>]>(
+        /*sql*/ `WITH "cte" AS (
+        SELECT "id", row_number() OVER (ORDER BY "order") as "rn" FROM "slide"
+      ), "current" AS (
+        SELECT "rn" FROM "cte"
+        WHERE id = '${id}'
+      )
+      SELECT "cte"."id" FROM "cte", "current"
+        WHERE ABS("cte"."rn" - "current"."rn") <= 1
+      ORDER BY "cte"."rn"`
+      )
+      .then((beforeAfter) => {
+        if (beforeAfter.length == 1) {
+          // only one slide, do not allow removing last slide
+          return;
+        }
+
+        let select = beforeAfter[beforeAfter.length - 1][0];
+        // removing the last slide, select one prior
+        if (select == id) {
+          select = beforeAfter[0][0];
+        }
+
+        return ctx.db
+          .exec(
+            `INSERT OR IGNORE INTO "selected_slide" ("deck_id", "slide_id") VALUES (?, ?)`,
+            [deckId, select]
+          )
+          .then(deleteSlide);
+      });
   },
 
-  addSlideAfter(ctx: Ctx, i: number, id: ID_of<Deck>) {},
+  addSlideAfter(ctx: Ctx, i: number, id: ID_of<Deck>) {
+    // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
+    // doable in a single sql stmt?
+    return ctx.db
+      .execA<[number]>(`SELECT "order" FROM "slide" LIMIT 2 OFFSET ${i}`)
+      .then((slides) => {
+        const first = slides[0];
+        const second = slides[1];
+        let order = first[0];
+        if (second == null) {
+          order += 1;
+        } else {
+          order = (first[0] + second[0]) / 2;
+        }
+
+        const slideId = objId<Slide>(ctx);
+        return ctx.db
+          .exec(`INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
+          '${slideId}',
+          '${id}',
+          ${order},
+          ${Date.now()},
+          ${Date.now()}
+        );`);
+      });
+  },
 
   // TODO: should be id rather than index based reordering in the future
   reorderSlides(
@@ -169,8 +240,8 @@ const mutations = {
     );
     if (ids.length == 0) {
       // create
-      const deckid = newId<Deck>(ctx.siteid.substring(0, 4));
-      const slideId = newId(ctx.siteid.substring(0, 4));
+      const deckId = objId<Deck>(ctx);
+      const slideId = objId<Slide>(ctx);
       await ctx.db.execMany([
         `INSERT INTO "deck" (
         "id",
@@ -180,7 +251,7 @@ const mutations = {
         "theme_id",
         "chosen_presenter"
       ) VALUES (
-        '${deckid}',
+        '${deckId}',
         'First Deck',
         ${Date.now()},
         ${Date.now()},
@@ -189,7 +260,7 @@ const mutations = {
       );`,
         `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
         '${slideId}',
-        '${deckid}',
+        '${deckId}',
         0,
         ${Date.now()},
         ${Date.now()}
@@ -198,9 +269,10 @@ const mutations = {
         '${slideId}',
         ''
       );`,
+        `INSERT INTO "selected_slide" ("deck_id", "slide_id") VALUES ('${deckId}', '${slideId}')`,
       ]);
 
-      return deckid;
+      return deckId;
     }
 
     return ids[0][0];

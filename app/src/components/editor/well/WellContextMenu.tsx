@@ -1,7 +1,7 @@
 import * as styles from "./WellContextMenu.module.css";
 import React from "react";
-import { AppState, Deck } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
+import AppState from "../../../domain/ephemeral/AppState";
 
 export default function WellContextMenu({
   appState,

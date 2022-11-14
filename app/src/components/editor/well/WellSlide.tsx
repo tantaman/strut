@@ -28,6 +28,10 @@ const dragImageUrl = new URL(
 const img = new Image();
 img.src = dragImageUrl.toString();
 
+// TODO: remove use of `index`?
+// it just causes needless re-render on slide addition
+// and we can probs re-do remove, order, insert, to not require the
+// index
 function WellSlide(props: {
   id: ID_of<Slide>;
   index: number;
@@ -36,9 +40,6 @@ function WellSlide(props: {
 }) {
   useTraceUpdate("WellSlide", props);
 
-  // TODO: can we batch the result setting from `useQuery`
-  // right now we re-render each time a query resolves
-  // and each query resolves in turn.
   const markdown = first(
     useQuery(queries.markdown(props.appState.ctx, props.id)).data
   );
@@ -46,10 +47,8 @@ function WellSlide(props: {
     queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
   ).data;
   const selectedSlides = useQueryA(
-    queries.selectedSlides(props.appState.ctx, props.id)
+    queries.selectedSlides(props.appState.ctx, props.appState.current_deck_id)
   ).data;
-
-  // TODO: understand why this re-renders so often
 
   const previewTheme = props.appState.previewTheme;
 
@@ -106,7 +105,12 @@ function WellSlide(props: {
   // }, [previewTheme.color, theme.color, previewTheme.font, theme.font]);
 
   const removeSlide = (e: MouseEvent) => {
-    mutations.removeSlide(props.appState.ctx, props.id);
+    mutations.removeSlide(
+      props.appState.ctx,
+      props.id,
+      props.appState.current_deck_id,
+      selectedSlides.has(props.id)
+    );
     e.stopPropagation();
     return false;
   };
