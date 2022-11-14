@@ -1,4 +1,4 @@
-Coming back with collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
+The original project is ancient (2011/2013) and dated. It is now coming back with a facelift, collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
 
 [Discord](https://discord.gg/Yxwr4SUQDT)
 
