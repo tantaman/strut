@@ -51,6 +51,22 @@ export const tableNames = [
   "redo_stack",
 ] as const;
 
+// TODO: we shouldn't need to know this detail
+// add a `drop crr` cmd
+export const crrTables = [
+  "deck",
+  "slide",
+  "text_component",
+  "embed_component",
+  "shape_component",
+  "line_component",
+  "line_point",
+  "theme",
+  "recent_color",
+  "presenter",
+  "markdown",
+];
+
 export type TableName = typeof tableNames[number];
 
 // See https://github.com/microsoft/TypeScript/issues/34777

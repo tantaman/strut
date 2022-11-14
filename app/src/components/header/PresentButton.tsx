@@ -18,6 +18,7 @@ export default function PresentButton({
   deckId: ID_of<Deck>;
 }) {
   const presenter = useQuery(queries.chosenPresenter(ctx, deckId)).data;
+  console.log(queries.chosenPresenter(ctx, deckId));
 
   if (!presenter) {
     return <div>No presenter chosen?</div>;

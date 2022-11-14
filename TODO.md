@@ -67,6 +67,30 @@ Can react context solve this problem? So we just bind to app state once (in ctx 
 
 ## RM layerx layery usage?
 
+## Check that rx/repl functions exists before call in trig
+
+short circuit and for sql? Use a `WHEN` statement
+https://sqlite.org/lang_createtrigger.html
+
+```sql
+CREATE TRIGGER ai AFTER INSERT ON foo WHEN EXISTS (SELECT 1 FROM pragma_function_list WHERE name = 'crsql_siteid') BEGIN
+  INSERT INTO bar VALUES (crsql_siteid());
+END;
+```
+
+^-- apparently still fails.
+
+We can expose a cb registrar from `crsqlite` itself that knows how to check for
+fn existence... `crsqlite` should always be in scope.
+
+Or crsqlite fn that invokes a fn if that fn exists?
+
+Or just expose `update_hook` ? Well we need `update_hook` to collect tables and `commit_hook` to release the notifications after tx complete.
+
+## Drop tbls + drop clocks
+
+Drop tables doesn't remove clock tables.. so we need a convenience for dropping a crr.
+
 ---
 
 # Low Pri

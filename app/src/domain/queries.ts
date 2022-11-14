@@ -48,7 +48,7 @@ const queries = {
     [
       ctx,
       ["deck", "presenter"],
-      /*sql*/ `SELECT presenter.* FROM presenter, deck WHERE deck.id = ? AND presenter.name = deck.chosen_presenter`,
+      /*sql*/ `SELECT presenter.* FROM presenter JOIN deck ON deck.chosen_presenter = presenter.name WHERE deck.id = ?`,
       [id],
       first,
     ] as Query<Presenter, TableName, Presenter>,

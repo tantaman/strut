@@ -8,7 +8,7 @@ import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
 import wdbRtc from "@vlcn.io/network-webrtc";
-import { tableNames, tables } from "./domain/schema.js";
+import { crrTables, tableNames, tables } from "./domain/schema.js";
 import mutations from "./domain/mutations.js";
 import AppState from "./domain/ephemeral/AppState.js";
 import AuthoringState from "./domain/ephemeral/AuthoringState.js";
@@ -17,6 +17,7 @@ import DeckIndex from "./domain/ephemeral/DeckIndex.js";
 import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.js";
 import { asId } from "@vlcn.io/id";
 import ErrorState from "./domain/ephemeral/ErrorState.js";
+import seeds from "./domain/seed-data.js";
 
 async function main() {
   const sqlite = await sqliteWasm((file) => "/" + file);
@@ -24,7 +25,10 @@ async function main() {
   const db = await sqlite.open("strut3");
   (window as any).db = db;
 
-  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS ${n};`));
+  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS "${n}";`));
+  // await db.execMany(
+  //   crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
+  // );
 
   await db.execMany(tables);
   const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
@@ -32,6 +36,8 @@ async function main() {
 
   const rx = await tblrx(db);
   const rtc = await wdbRtc(db);
+
+  await db.execMany(seeds);
 
   window.onbeforeunload = () => {
     return db.close();
