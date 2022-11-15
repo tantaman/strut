@@ -327,7 +327,7 @@ const mutations = {
   ) {
     return ctx.db.exec(
       /* sql */ `UPDATE "text_component" SET "x" = ?, "y" = ? WHERE "id" = ?`,
-      [x, y, compnentId]
+      [((x * 100) | 0) / 100, ((y * 100) | 0) / 100, compnentId]
     );
   },
 };

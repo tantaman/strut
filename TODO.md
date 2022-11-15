@@ -109,6 +109,15 @@ How might we incrementally re-fetch components in the OperatingTable in terms of
 -> manual
 -> via fk constraint but w/o fk enforce
 
+## Scientific notation floats being replicated
+
+fails to santizie. replicated as... string unquoted. so num quote concated.
+
+## Tag site_id in changesets so as not to send changes back to self
+
+-> xUpdate doesn't record site_id?
+-> select \* from crsql_changes doesn't return site_id?
+
 ---
 
 # Low Pri

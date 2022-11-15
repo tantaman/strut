@@ -41,7 +41,7 @@ import { ID_of } from "@vlcn.io/id";
 import mutations from "../../../domain/mutations";
 import { Ctx } from "../../../hooks";
 
-const persitText = throttle(
+const persistText = throttle(
   100,
   (ctx: Ctx, markdown: string, componentId: ID_of<TextComponent>) => {
     return mutations.saveText(ctx, markdown, componentId);
@@ -150,7 +150,14 @@ function TextEditorBase({
 
   return (
     <LexicalComposer initialConfig={config}>
-      <TextEditorInner ctx={ctx} id={id} x={x} y={y} scale={scale} />
+      <TextEditorInner
+        ctx={ctx}
+        id={id}
+        x={x}
+        y={y}
+        text={text}
+        scale={scale}
+      />
     </LexicalComposer>
   );
 }
@@ -160,12 +167,14 @@ function TextEditorInner({
   x,
   y,
   scale,
+  text,
   ctx,
 }: {
   id: ID_of<TextComponent>;
   x: number;
   y: number;
   scale: number;
+  text: string;
   ctx: Ctx;
 }) {
   const [editor] = useLexicalComposerContext();
@@ -176,29 +185,62 @@ function TextEditorInner({
   const onChange = useCallback(
     (editorState: EditorState) => {
       editorState.read(() => {
-        persitText(ctx, $convertToMarkdownString(TRANSFORMERS), id);
+        persistText(ctx, $convertToMarkdownString(TRANSFORMERS), id);
       });
     },
     [id]
   );
 
+  const [prevX, setPrevX] = useState(x);
+  const [prevY, setPrevY] = useState(y);
+  const [prevText, setPrevText] = useState(text);
+  const [dragging, setDragging] = useState(false);
+  const [currPos, setCurrPos] = useState<{ x: number; y: number }>({
+    x: ((x * 100) | 0) / 100,
+    y: ((y * 100) | 0) / 100,
+  });
+  if ((prevX != x || prevY != y) && !dragging) {
+    setPrevX(x);
+    setPrevY(y);
+    setCurrPos({
+      x,
+      y,
+    });
+  }
+  if (prevText != text && !editing) {
+    setPrevText(text);
+    editor.update(() => {
+      $convertFromMarkdownString(text, TRANSFORMERS);
+    });
+  }
+
   const onDragged = useCallback(
     (e: DraggableEvent, data: DraggableData) => {
+      setCurrPos({
+        x: data.x,
+        y: data.y,
+      });
       persistDrag(ctx, data.x, data.y, id);
     },
     [id]
   );
+
+  const onDragStart = useCallback(() => {
+    setDragging(true);
+  }, []);
+  const onDragStop = useCallback(() => {
+    setDragging(false);
+  }, []);
 
   if (!hasFocus && editing) {
     setEditing(false);
   }
   return (
     <Draggable
-      defaultPosition={{
-        x,
-        y,
-      }}
+      position={currPos}
+      onStart={onDragStart}
       onDrag={onDragged}
+      onStop={onDragStop}
       scale={scale}
       disabled={editing}
     >

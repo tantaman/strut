@@ -32,10 +32,10 @@ importers:
       '@types/throttle-debounce': ^5.0.0
       '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
-      '@vlcn.io/network-webrtc': ^0.1.2
-      '@vlcn.io/rx-tbl': ^0.1.1
+      '@vlcn.io/network-webrtc': link:../../cr-sqlite/pkg/network/webrtc
+      '@vlcn.io/rx-tbl': link:../../cr-sqlite/pkg/rx/table-based
       '@vlcn.io/value': ^0.1.0
-      '@vlcn.io/wa-crsqlite': ^0.1.3
+      '@vlcn.io/wa-crsqlite': link:../../cr-sqlite/pkg/wasm-esm/wa-crsqlite
       chroma-js: ^2.4.2
       hotkeys-js: ^3.10.0
       lexical: ^0.6.0
@@ -65,9 +65,11 @@ importers:
       '@strut/counter': 0.0.11
       '@types/throttle-debounce': 5.0.0
       '@vlcn.io/id': 0.1.0
-      '@vlcn.io/network-webrtc': 0.1.2
-      '@vlcn.io/rx-tbl': 0.1.1
-      '@vlcn.io/wa-crsqlite': 0.1.3
+      '@vlcn.io/model': 0.1.0
+      '@vlcn.io/network-webrtc': link:../../cr-sqlite/pkg/network/webrtc
+      '@vlcn.io/rx-tbl': link:../../cr-sqlite/pkg/rx/table-based
+      '@vlcn.io/value': 0.1.0
+      '@vlcn.io/wa-crsqlite': link:../../cr-sqlite/pkg/wasm-esm/wa-crsqlite
       chroma-js: 2.4.2
       hotkeys-js: 3.10.0
       lexical: 0.6.0
@@ -84,8 +86,6 @@ importers:
       '@types/jest': 29.2.2
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.8
-      '@vlcn.io/model': 0.1.0
-      '@vlcn.io/value': 0.1.0
       typescript: 4.8.4
       typescript-plugin-css-modules: 3.4.0_typescript@4.8.4
       vite: 3.2.3
@@ -628,12 +628,6 @@ packages:
     resolution: {integrity: sha512-iKeBb4ud7wPEv9gJFBGlYfebroLib97SSmUapsL1nyx+njTHwynfaIwb0qwd8CP6Dh1+lRao2oE41Ao8GfyYGw==}
     dev: false
 
-  /@swc/helpers/0.3.17:
-    resolution: {integrity: sha512-tb7Iu+oZ+zWJZ3HJqwx8oNwSDIU440hmVMDPhpACWQWnrZHK99Bxs70gT1L2dnr5Hg50ZRWEFkQCAnOVVV0z1Q==}
-    dependencies:
-      tslib: 2.4.1
-    dev: false
-
   /@types/chai-subset/1.3.3:
     resolution: {integrity: sha512-frBecisrNGz+F4T6bcc+NLeolfiojh5FxW2klu669+8BARtyQv2C/GkNW6FUodVe4BroGMP/wER/YDGc7rEllw==}
     dependencies:
@@ -741,10 +735,6 @@ packages:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
     dev: false
 
-  /@types/uuid/8.3.4:
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-    dev: false
-
   /@types/yargs-parser/21.0.0:
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
     dev: true
@@ -766,33 +756,11 @@ packages:
     dependencies:
       '@vlcn.io/value': 0.1.0
       typescript: 4.8.4
-    dev: true
-
-  /@vlcn.io/network-webrtc/0.1.2:
-    resolution: {integrity: sha512-Qh0853n27Bw9XXeT9GHNTl66pzv8jyKdx0TXPuXtx9VAPWzfj4AGRA+2MxOTb1FOBXALu/NhqS6SXzkUGZrZ/Q==}
-    dependencies:
-      '@vlcn.io/replicator-wholedb': 0.1.2
-      '@vlcn.io/xplat-api': 0.1.1
-      peerjs: 1.4.7
-      uuid: 9.0.0
-    dev: false
-
-  /@vlcn.io/replicator-wholedb/0.1.2:
-    resolution: {integrity: sha512-7AXMKuuUBn7AoVGh19s/vbzr6wVhGLqJDTOmtgPiXK6ViVj7fwU5sE3Mj4EotPmjjoEFwDfyXRPD3oDRh85GGA==}
-    dependencies:
-      '@types/uuid': 8.3.4
-      '@vlcn.io/xplat-api': 0.1.1
-      uuid: 9.0.0
-    dev: false
-
-  /@vlcn.io/rx-tbl/0.1.1:
-    resolution: {integrity: sha512-KbK0zK63fNA8gt4QqJVfkbkUSz15W62uS0Cf8ySNftglk1OJ8RIJiiyitW8CbClf2tp1qFYjp0NbTJVXepZfFA==}
-    dependencies:
-      '@vlcn.io/xplat-api': 0.1.1
     dev: false
 
   /@vlcn.io/util/0.1.0:
     resolution: {integrity: sha512-HaYtmvVxsng0rzQNsjBU7mWAtv53XYESE8nGMKoouHu0ELoNLIHnUwDMUnTGcbaJ14iGrSh6+iPqpKS/NLgZ1g==}
+    dev: false
 
   /@vlcn.io/value/0.1.0:
     resolution: {integrity: sha512-hmchBzAQSD7bNjRzlhb7ofZGLcnhfwbE4kCriX8pz7WplakPDJqVzVw83mmpGJeHFSbsA/Dwy5QiX/zFBW3Drg==}
@@ -800,29 +768,11 @@ packages:
       '@vlcn.io/util': 0.1.0
       '@vlcn.io/zone': 0.1.0
       typescript: 4.8.4
-    dev: true
-
-  /@vlcn.io/wa-crsqlite/0.1.3:
-    resolution: {integrity: sha512-XPjN7yFeaRFbWUo8R7RT4lZqwm1seQhIip8fMv1Kvj0vYm0K3bU5sBEaukxQgcZSQWFYkGPiABnETYaCnD49YA==}
-    dependencies:
-      '@vlcn.io/wa-sqlite': 0.8.5
-      '@vlcn.io/xplat-api': 0.1.1
-      comlink: 4.3.1
-    dev: false
-
-  /@vlcn.io/wa-sqlite/0.8.5:
-    resolution: {integrity: sha512-cnG7tc7gZNOHShV1MLD1irZODUJXlN5AK5U8afjaLFCaXebm2mn7rtzFIiOIrMHJGwBiAaPwObA4ePUOVfUfTQ==}
-    dev: false
-
-  /@vlcn.io/xplat-api/0.1.1:
-    resolution: {integrity: sha512-235/383SoSsGyuiCXYNaEXHO8Y5rgr+HinIRYTHwzjfGdi+i/OAiEZ0Lr0c2G+7RXEAqqKdcK6h5+GuamamcUg==}
-    dependencies:
-      comlink: 4.3.1
     dev: false
 
   /@vlcn.io/zone/0.1.0:
     resolution: {integrity: sha512-VFzuZM4ea97EvAU59rEtY3n1Xom2jeaavJQ7A1N0UWFZC/KdT+UB/jgfsqLR48LnJRtmHQf+wuo1bHedPP2PVQ==}
-    dev: true
+    dev: false
 
   /acorn-walk/8.2.0:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
@@ -1077,10 +1027,6 @@ packages:
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
     dev: true
-
-  /comlink/4.3.1:
-    resolution: {integrity: sha512-+YbhUdNrpBZggBAHWcgQMLPLH1KDF3wJpeqrCKieWQ8RL7atmgsgTQko1XEBK6PsecfopWNntopJ+ByYG1lRaA==}
-    dev: false
 
   /concat-map/0.0.1:
     resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
@@ -1556,10 +1502,6 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
     dev: true
-
-  /eventemitter3/4.0.7:
-    resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
-    dev: false
 
   /expect/29.3.1:
     resolution: {integrity: sha512-gGb1yTgU30Q0O/tQq+z30KBWv24ApkMgFUpvKBkyLUBL68Wv8dHdJxTBZFl/iT8K/bqDHvUYRH6IIN3rToopPA==}
@@ -2506,20 +2448,6 @@ packages:
     resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
     dev: true
 
-  /peerjs-js-binarypack/1.0.1:
-    resolution: {integrity: sha512-N6aeia3NhdpV7kiGxJV5xQiZZCVEEVjRz2T2C6UZQiBkHWHzUv/oWA4myQLcwBwO8LUoR1KWW5oStvwVesmfCg==}
-    dev: false
-
-  /peerjs/1.4.7:
-    resolution: {integrity: sha512-dWE2HIGvJO0Hm8lYHJiO/5OWl8xYtGcAuU08To1HMIfhh76ULzkCS3NIQO/PZm4noO1RhaGTkQaQ6sbAss6/Tg==}
-    engines: {node: '>= 10'}
-    dependencies:
-      '@swc/helpers': 0.3.17
-      eventemitter3: 4.0.7
-      peerjs-js-binarypack: 1.0.1
-      webrtc-adapter: 7.7.1
-    dev: false
-
   /picocolors/1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
     dev: true
@@ -2808,13 +2736,6 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /rtcpeerconnection-shim/1.2.15:
-    resolution: {integrity: sha512-C6DxhXt7bssQ1nHb154lqeL0SXz5Dx4RczXZu2Aa/L1NJFnEVDxFwCBo3fqtuljhHIGceg5JKBV4XJ0gW5JKyw==}
-    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
-    dependencies:
-      sdp: 2.12.0
-    dev: false
-
   /run-parallel/1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
@@ -2851,10 +2772,6 @@ packages:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
-
-  /sdp/2.12.0:
-    resolution: {integrity: sha512-jhXqQAQVM+8Xj5EjJGVweuEzgtGWb3tmEEpl3CLP3cStInSbVHSg0QWOGQzNq8pSID4JkpeV2mPqlMDLrm0/Vw==}
     dev: false
 
   /semver/5.7.1:
@@ -3135,6 +3052,7 @@ packages:
 
   /tslib/2.4.1:
     resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
+    dev: true
 
   /tty-table/4.1.6:
     resolution: {integrity: sha512-kRj5CBzOrakV4VRRY5kUWbNYvo/FpOsz65DzI5op9P+cHov3+IqPbo1JE1ZnQGkHdZgNFDsrEjrfqqy/Ply9fw==}
@@ -3259,7 +3177,6 @@ packages:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
@@ -3409,14 +3326,6 @@ packages:
     dependencies:
       defaults: 1.0.4
     dev: true
-
-  /webrtc-adapter/7.7.1:
-    resolution: {integrity: sha512-TbrbBmiQBL9n0/5bvDdORc6ZfRY/Z7JnEj+EYOD1ghseZdpJ+nF2yx14k3LgQKc7JZnG7HAcL+zHnY25So9d7A==}
-    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
-    dependencies:
-      rtcpeerconnection-shim: 1.2.15
-      sdp: 2.12.0
-    dev: false
 
   /which-boxed-primitive/1.0.2:
     resolution: {integrity: sha512-bwZdv0AKLpplFY2KZRX6TvyuN7ojjr7lwkg6ml0roIy9YeuSr7JS372qlNW18UQYzgYK9ziGcerWqZOmEn9VNg==}

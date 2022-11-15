@@ -28,10 +28,13 @@ async function main() {
   const db = await sqlite.open("strut3");
   (window as any).db = db;
 
-  await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS "${n}";`));
-  await db.execMany(
-    crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
-  );
+  // TODO: upgrade to common dev env reset fn
+  // just drop all except site.
+  // await db.execMany(tableNames.map((n) => `DROP TABLE IF EXISTS "${n}";`));
+  // await db.execMany(
+  //   crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
+  // );
+  // await db.exec(`DROP TABLE IF EXISTS "__crsql_wdbreplicator_peers"`);
 
   await db.execMany(tables);
   const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
