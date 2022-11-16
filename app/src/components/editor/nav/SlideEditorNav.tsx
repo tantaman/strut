@@ -1,17 +1,11 @@
 import * as React from "react";
 import SlideComponentsButtons from "../../header/SlideComponentsButtons";
 import styles from "./SlideEditorNav.module.css";
-import DrawingTools from "../../header/DrawingTools";
-import * as headerBtn from "../../header/HeaderButton.module.css";
-import StylingMenu from "../markdown/styling_menu/StylingMenu";
 import StructureStyleButtons from "../../header/StructureStyleButtons";
 import LayoutButton from "../../header/LayoutButton";
 import PresentButton from "../../header/PresentButton";
 import Header from "../../../widgets/Header";
 import LogoButton from "../../header/LogoButton";
-import useMatchMedia from "../../../interactions/useMatchMedia";
-import mediaCuts from "../../mobile/mediaCuts";
-import mutations from "../../../domain/mutations";
 import AppState from "../../../domain/ephemeral/AppState";
 
 export default function SlideEditorNav({ appState }: { appState: AppState }) {
@@ -33,15 +27,9 @@ export default function SlideEditorNav({ appState }: { appState: AppState }) {
         />
       </div>
       <div className={styles.middle_buttons}>
-        {appState.drawing ? (
-          <>
-            <DrawingTools appState={appState} />
-          </>
-        ) : (
-          <>
-            <SlideComponentsButtons appState={appState} />
-          </>
-        )}
+        <>
+          <SlideComponentsButtons appState={appState} />
+        </>
       </div>
       <div>
         {<LayoutButton appState={appState} />}

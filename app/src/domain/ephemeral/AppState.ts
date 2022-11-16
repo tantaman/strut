@@ -11,8 +11,7 @@ export type Data = {
   readonly ctx: Ctx;
   readonly editor_mode: "slide" | "layout";
   readonly current_deck_id: ID_of<Deck>;
-  readonly open_type: boolean;
-  readonly drawing: boolean;
+  readonly modal: "openType" | "peerSelection" | "deckSelection" | "none";
   readonly authoringState: AuthoringState;
   readonly drawingInteractionState: DrawingInteractionState;
   readonly previewTheme: EphemeralTheme;
@@ -121,11 +120,7 @@ export default class AppState extends Model<Data> {
   }
 
   get open_type(): boolean {
-    return this.data.open_type;
-  }
-
-  get drawing(): boolean {
-    return this.data.drawing;
+    return this.data.modal === "openType";
   }
 
   get authoringState(): AuthoringState {
@@ -155,8 +150,20 @@ export default class AppState extends Model<Data> {
   }
 
   toggleOpenType(v?: boolean | undefined): void {
-    this.update({
-      open_type: v,
-    });
+    let open = false;
+    if (v) open = true;
+    else if (v === false) open = false;
+    else if (this.data.modal === "openType") open = false;
+    else open = true;
+
+    if (open) {
+      this.update({
+        modal: "openType",
+      });
+    } else {
+      this.update({
+        modal: "none",
+      });
+    }
   }
 }
