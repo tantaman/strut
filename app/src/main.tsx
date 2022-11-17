@@ -22,8 +22,11 @@ import { asId } from "@vlcn.io/id";
 import ErrorState from "./domain/ephemeral/ErrorState.js";
 import seeds from "./domain/seed-data.js";
 
+// @ts-ignore
+import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
+
 async function main() {
-  const sqlite = await sqliteWasm((file) => "/" + file);
+  const sqlite = await sqliteWasm((file) => wasmUrl);
 
   const db = await sqlite.open("strut3");
   (window as any).db = db;
