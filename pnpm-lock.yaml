@@ -30,14 +30,13 @@ importers:
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.8
       '@types/throttle-debounce': ^5.0.0
-      '@vlcn.io/crsqlite-wasm': link:../../cr-sqlite/js/wasm-esm/crsqlite-wasm
       '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
       '@vlcn.io/network-webrtc': link:../../cr-sqlite/js/network/webrtc
       '@vlcn.io/rx-tbl': link:../../cr-sqlite/js/rx/table-based
       '@vlcn.io/value': ^0.1.0
+      '@vlcn.io/wa-crsqlite': link:../../cr-sqlite/js/wasm-esm/wa-crsqlite
       chroma-js: ^2.4.2
-      comlink: ^4.3.1
       hotkeys-js: ^3.10.0
       lexical: ^0.6.0
       lowlight: ^2.7.0
@@ -65,14 +64,13 @@ importers:
       '@lexical/utils': 0.6.0_lexical@0.6.0
       '@strut/counter': 0.0.11
       '@types/throttle-debounce': 5.0.0
-      '@vlcn.io/crsqlite-wasm': link:../../cr-sqlite/js/wasm-esm/crsqlite-wasm
       '@vlcn.io/id': 0.1.0
       '@vlcn.io/model': 0.1.0
       '@vlcn.io/network-webrtc': link:../../cr-sqlite/js/network/webrtc
       '@vlcn.io/rx-tbl': link:../../cr-sqlite/js/rx/table-based
       '@vlcn.io/value': 0.1.0
+      '@vlcn.io/wa-crsqlite': link:../../cr-sqlite/js/wasm-esm/wa-crsqlite
       chroma-js: 2.4.2
-      comlink: 4.3.1
       hotkeys-js: 3.10.0
       lexical: 0.6.0
       lowlight: 2.7.0
@@ -1029,10 +1027,6 @@ packages:
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
     dev: true
-
-  /comlink/4.3.1:
-    resolution: {integrity: sha512-+YbhUdNrpBZggBAHWcgQMLPLH1KDF3wJpeqrCKieWQ8RL7atmgsgTQko1XEBK6PsecfopWNntopJ+ByYG1lRaA==}
-    dev: false
 
   /concat-map/0.0.1:
     resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}

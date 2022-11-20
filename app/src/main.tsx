@@ -8,6 +8,7 @@ import { stringify as uuidStringify } from "uuid";
 
 import App from "./App.js";
 import { Ctx } from "./hooks.js";
+import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
 import wdbRtc from "@vlcn.io/network-webrtc";
 import { tables } from "./domain/schema.js";
@@ -22,16 +23,11 @@ import ErrorState from "./domain/ephemeral/ErrorState.js";
 import seeds from "./domain/seed-data.js";
 
 // @ts-ignore
-import DBWorker from "./db/dbworker.js?worker";
-import * as Comlink from "comlink";
-import { API } from "@vlcn.io/crsqlite-wasm/dist/comlinkable";
-import "./db/dbapi-ext.js";
-import wasmUrl from "@vlcn.io/crsqlite-wasm/dist/sqlite3.wasm?url";
-import proxyUrl from "@vlcn.io/crsqlite-wasm/dist/sqlite3-opfs-async-proxy.js?url";
-
-const sqlite = Comlink.wrap<API>(new DBWorker());
+import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
 
 async function main() {
+  const sqlite = await sqliteWasm((file) => wasmUrl);
+
   const db = await sqlite.open("strut3");
   (window as any).db = db;
 
@@ -91,11 +87,4 @@ async function startApp(ctx: Ctx) {
   root.render(<App appState={appState} />);
 }
 
-sqlite.onReady(
-  {
-    wasmUrl: wasmUrl,
-    proxyUrl: proxyUrl,
-  },
-  Comlink.proxy(main),
-  Comlink.proxy((e: any) => console.error(e))
-);
+main();
