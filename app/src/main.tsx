@@ -28,7 +28,7 @@ import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
 
-  const db = await sqlite.open("strut3");
+  const db = await sqlite.open("strut5");
   (window as any).db = db;
 
   // TODO: upgrade to common dev env reset fn
