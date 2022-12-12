@@ -1,6 +1,3 @@
-(window as any).__vlcn_whole_db_dbg = true;
-(window as any).__vlcn_wa_crsqlite_dbg = true;
-
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 // @ts-ignore
@@ -10,7 +7,6 @@ import App from "./App.js";
 import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
-import wdbRtc from "@vlcn.io/network-webrtc";
 import { tables } from "./domain/schema.js";
 import mutations from "./domain/mutations.js";
 import AppState from "./domain/ephemeral/AppState.js";
@@ -40,14 +36,8 @@ async function main() {
   // await db.exec(`DROP TABLE IF EXISTS "__crsql_wdbreplicator_peers"`);
 
   await db.execMany(tables);
-  const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
-  const siteid = uuidStringify(r[0][0]);
-  console.log(siteid);
 
-  const rx = await tblrx(db);
-  const rtc = await wdbRtc(db);
-
-  (window as any).rtc = rtc;
+  const rx = tblrx(db);
 
   await db.execMany(seeds);
 
@@ -57,8 +47,6 @@ async function main() {
 
   await startApp({
     db,
-    siteid,
-    rtc,
     rx,
   });
 }
