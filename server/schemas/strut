@@ -1,0 +1,96 @@
+CREATE TABLE IF NOT EXISTS "deck" (
+  "id" primary key,
+  "title",
+  "created",
+  "modified",
+  "theme_id",
+  "chosen_presenter"
+);
+
+CREATE TABLE IF NOT EXISTS "slide" (
+  "id" primary key,
+  "deck_id",
+  "order",
+  "created",
+  "modified",
+  "x",
+  "y",
+  "z"
+);
+
+CREATE TABLE IF NOT EXISTS "text_component" (
+  "id" primary key,
+  "slide_id",
+  "text",
+  "styles",
+  "x",
+  "y"
+);
+
+CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");
+
+CREATE TABLE IF NOT EXISTS "shape_component" (
+  "id" primary key,
+  "slide_id",
+  "type",
+  "props",
+  "x",
+  "y"
+);
+
+CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");
+
+CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
+
+CREATE TABLE IF NOT EXISTS "theme" (
+  "id" primary key,
+  "name",
+  "bg_colorset",
+  "fg_colorset",
+  "fontset",
+  "surface_color",
+  "font_color"
+);
+
+CREATE TABLE IF NOT EXISTS "recent_color" (
+  "color" primary key,
+  "last_used",
+  "first_used",
+  "theme_id"
+);
+
+CREATE TABLE IF NOT EXISTS "presenter" (
+  "name" primary key,
+  "available_transitions",
+  "picked_transition"
+);
+
+SELECT
+  crsql_as_crr('deck');
+
+SELECT
+  crsql_as_crr('slide');
+
+SELECT
+  crsql_as_crr('text_component');
+
+SELECT
+  crsql_as_crr('embed_component');
+
+SELECT
+  crsql_as_crr('shape_component');
+
+SELECT
+  crsql_as_crr('line_component');
+
+SELECT
+  crsql_as_crr('line_point');
+
+SELECT
+  crsql_as_crr('theme');
+
+SELECT
+  crsql_as_crr('recent_color');
+
+SELECT
+  crsql_as_crr('presenter');

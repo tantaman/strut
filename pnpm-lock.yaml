@@ -91,6 +91,12 @@ importers:
       vite: 3.2.5
       vitest: 0.25.7
 
+  server:
+    specifiers:
+      '@vlcn.io/sync-server': link:../../crsqlite/js/sync-reference/server/
+    dependencies:
+      '@vlcn.io/sync-server': link:../../crsqlite/js/sync-reference/server
+
 packages:
 
   /@babel/code-frame/7.18.6:

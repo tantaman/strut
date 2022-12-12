@@ -20,6 +20,7 @@ import seeds from "./domain/seed-data.js";
 
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
+import startSyncWith from "@vlcn.io/sync-client";
 
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
@@ -38,6 +39,20 @@ async function main() {
   await db.execMany(tables);
 
   const rx = tblrx(db);
+  const sync = await startSyncWith({
+    localDb: db,
+    // the id of the database to persist into on the server.
+    // if a db with that id does not exist it can be created for you
+    // TODO: this shouldn't be hardcoded!
+    remoteDbId: "6c4b1eee-0f77-4d5d-9f34-a37b96d2d992",
+    uri: `ws://${window.location.hostname}:8080/sync`,
+    // the schema to apply to the db if it does not exist
+    // TODO: validate that the opened db has the desired schema and version of that schema?
+    create: {
+      schemaName: "strut",
+    },
+    rx,
+  });
 
   await db.execMany(seeds);
 
@@ -48,6 +63,7 @@ async function main() {
   await startApp({
     db,
     rx,
+    siteid: "6c4b1eee",
   });
 }
 

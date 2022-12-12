@@ -5,6 +5,7 @@ import tblrx from "@vlcn.io/rx-tbl";
 export type Ctx = {
   db: DB;
   rx: Awaited<ReturnType<typeof tblrx>>;
+  siteid: string;
 };
 
 type QueryData<M> = {

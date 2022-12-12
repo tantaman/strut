@@ -12,8 +12,7 @@
     "test:unit": "vitest"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "tantaman",
   "dependencies": {
     "@lexical/clipboard": "^0.6.5",
     "@lexical/code": "^0.6.5",
