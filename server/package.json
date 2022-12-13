@@ -1,0 +1,14 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "vlcn-ref-server"
+  },
+  "keywords": [],
+  "author": "tantaman",
+  "dependencies": {
+    "@vlcn.io/sync-server": "link:../../crsqlite/js/sync-reference/server/"
+  }
+}

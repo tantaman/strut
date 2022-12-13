@@ -1,6 +1,3 @@
-(window as any).__vlcn_whole_db_dbg = true;
-(window as any).__vlcn_wa_crsqlite_dbg = true;
-
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 // @ts-ignore
@@ -10,7 +7,6 @@ import App from "./App.js";
 import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
-import wdbRtc from "@vlcn.io/network-webrtc";
 import { tables } from "./domain/schema.js";
 import mutations from "./domain/mutations.js";
 import AppState from "./domain/ephemeral/AppState.js";
@@ -24,11 +20,12 @@ import seeds from "./domain/seed-data.js";
 
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
+import startSyncWith from "@vlcn.io/sync-client";
 
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
 
-  const db = await sqlite.open("strut5");
+  const db = await sqlite.open("strut7");
   (window as any).db = db;
 
   // TODO: upgrade to common dev env reset fn
@@ -40,14 +37,22 @@ async function main() {
   // await db.exec(`DROP TABLE IF EXISTS "__crsql_wdbreplicator_peers"`);
 
   await db.execMany(tables);
-  const r = await db.execA<[Uint8Array]>("SELECT crsql_siteid()");
-  const siteid = uuidStringify(r[0][0]);
-  console.log(siteid);
 
-  const rx = await tblrx(db);
-  const rtc = await wdbRtc(db);
-
-  (window as any).rtc = rtc;
+  const rx = tblrx(db);
+  const sync = await startSyncWith({
+    localDb: db,
+    // the id of the database to persist into on the server.
+    // if a db with that id does not exist it can be created for you
+    // TODO: this shouldn't be hardcoded!
+    remoteDbId: "6c4b1eee-0f77-4d5d-9f34-a37b96d2d992",
+    uri: `ws://${window.location.hostname}:8080/sync`,
+    // the schema to apply to the db if it does not exist
+    // TODO: validate that the opened db has the desired schema and version of that schema?
+    create: {
+      schemaName: "strut",
+    },
+    rx,
+  });
 
   await db.execMany(seeds);
 
@@ -57,9 +62,8 @@ async function main() {
 
   await startApp({
     db,
-    siteid,
-    rtc,
     rx,
+    siteid: "6c4b1eee",
   });
 }
 

@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import wdbRtc from "@vlcn.io/network-webrtc";
 import { DB } from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
 
 export type Ctx = {
   db: DB;
-  siteid: string;
-  rtc: Awaited<ReturnType<typeof wdbRtc>>;
   rx: Awaited<ReturnType<typeof tblrx>>;
+  siteid: string;
 };
 
 type QueryData<M> = {
