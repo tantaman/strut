@@ -33,7 +33,7 @@ importers:
       '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
       '@vlcn.io/rx-tbl': ^0.4.1
-      '@vlcn.io/sync-client': ^0.4.1
+      '@vlcn.io/sync-client': link:../../crsqlite/js/sync-reference/client/
       '@vlcn.io/value': ^0.1.0
       '@vlcn.io/wa-crsqlite': ^0.5.1
       chroma-js: ^2.4.2
@@ -67,7 +67,7 @@ importers:
       '@vlcn.io/id': 0.1.0
       '@vlcn.io/model': 0.1.0
       '@vlcn.io/rx-tbl': 0.4.1
-      '@vlcn.io/sync-client': 0.4.1
+      '@vlcn.io/sync-client': link:../../crsqlite/js/sync-reference/client
       '@vlcn.io/value': 0.1.0
       '@vlcn.io/wa-crsqlite': 0.5.1
       chroma-js: 2.4.2
@@ -751,10 +751,6 @@ packages:
       '@types/yargs-parser': 21.0.0
     dev: true
 
-  /@vlcn.io/client-server-common/0.1.1:
-    resolution: {integrity: sha512-yE7MoEINVMG/W1D6yNIh8qe3huq2KiuIR/cNTVZ74lZwM7YhqISJ1wov0vge+9ad8vBZ+hKFtQmbx0OOTTditQ==}
-    dev: false
-
   /@vlcn.io/id/0.1.0:
     resolution: {integrity: sha512-0l/gqwD7Qj8yEp2rOwYXK3VyPwytxwFXJGLfDO5Qb65PAa96CJen6hCbKKN1vIh0jasHC7NOPlBMzhLUaaRIOw==}
     dependencies:
@@ -772,15 +768,6 @@ packages:
     resolution: {integrity: sha512-icrlHps1ES2IV0BkFK0O+dJMEqytM09VH/iPtDgqZtvfZLWdOJtuLqGeB8VmCxY+wHscJzT4agOFTRDd4v56uw==}
     dependencies:
       '@vlcn.io/xplat-api': 0.4.1
-    dev: false
-
-  /@vlcn.io/sync-client/0.4.1:
-    resolution: {integrity: sha512-wRO3NwJyB+rdKj5b9ejk/KQovW8mbO14FhvKXT7yS2M2IIC/UPq6bZutmYYUv7vxmMr1MU0kBZQ9PO64IN1yfg==}
-    dependencies:
-      '@vlcn.io/client-server-common': 0.1.1
-      '@vlcn.io/rx-tbl': 0.4.1
-      '@vlcn.io/xplat-api': 0.4.1
-      uuid: 9.0.0
     dev: false
 
   /@vlcn.io/util/0.1.0:
