@@ -32,10 +32,10 @@ importers:
       '@types/throttle-debounce': ^5.0.0
       '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
-      '@vlcn.io/rx-tbl': ^0.4.1
+      '@vlcn.io/rx-tbl': ^0.5.0
       '@vlcn.io/sync-client': link:../../crsqlite/js/sync-reference/client/
       '@vlcn.io/value': ^0.1.0
-      '@vlcn.io/wa-crsqlite': ^0.5.1
+      '@vlcn.io/wa-crsqlite': ^0.6.0
       chroma-js: ^2.4.2
       hotkeys-js: ^3.10.1
       lexical: ^0.6.5
@@ -66,10 +66,10 @@ importers:
       '@types/throttle-debounce': 5.0.0
       '@vlcn.io/id': 0.1.0
       '@vlcn.io/model': 0.1.0
-      '@vlcn.io/rx-tbl': 0.4.1
+      '@vlcn.io/rx-tbl': 0.5.0
       '@vlcn.io/sync-client': link:../../crsqlite/js/sync-reference/client
       '@vlcn.io/value': 0.1.0
-      '@vlcn.io/wa-crsqlite': 0.5.1
+      '@vlcn.io/wa-crsqlite': 0.6.0
       chroma-js: 2.4.2
       hotkeys-js: 3.10.1
       lexical: 0.6.5
@@ -764,10 +764,10 @@ packages:
       typescript: 4.9.4
     dev: false
 
-  /@vlcn.io/rx-tbl/0.4.1:
-    resolution: {integrity: sha512-icrlHps1ES2IV0BkFK0O+dJMEqytM09VH/iPtDgqZtvfZLWdOJtuLqGeB8VmCxY+wHscJzT4agOFTRDd4v56uw==}
+  /@vlcn.io/rx-tbl/0.5.0:
+    resolution: {integrity: sha512-5jFB6DUjVPLPtxiT+0JSc5udw0+h3GYZqbEkXW4QRY/3YIPmAb1p89PETdhvkQ0wjWR9Bd7WmLfmgOk3wAbqHA==}
     dependencies:
-      '@vlcn.io/xplat-api': 0.4.1
+      '@vlcn.io/xplat-api': 0.5.0
     dev: false
 
   /@vlcn.io/util/0.1.0:
@@ -782,20 +782,20 @@ packages:
       typescript: 4.9.4
     dev: false
 
-  /@vlcn.io/wa-crsqlite/0.5.1:
-    resolution: {integrity: sha512-SqGAEic+qyCq8pf97PdhbJZhzZbPYja5V7SMtQsiw7PRJuO+2RcrUoWEfmqFtw5/FpNgbnjYt0T4X8XdI2h98A==}
+  /@vlcn.io/wa-crsqlite/0.6.0:
+    resolution: {integrity: sha512-AbDUYz4t2XRawf3EQP2fFqqkOa/hZf5B381o0FIooxc/SHwOpj+QSKuzIEFiKJykYiIDLRCC+RuclV3BOtJj4g==}
     dependencies:
-      '@vlcn.io/wa-sqlite': 0.12.1
-      '@vlcn.io/xplat-api': 0.4.1
+      '@vlcn.io/wa-sqlite': 0.13.0
+      '@vlcn.io/xplat-api': 0.5.0
       comlink: 4.3.1
     dev: false
 
-  /@vlcn.io/wa-sqlite/0.12.1:
-    resolution: {integrity: sha512-2swWZhDJR2ET4q/v8QReWp46h7Z3gAJAMSUfsHIaUzF6x4G2MyEGj/ZcMsGxHMI5W9U3SQN0ulJklFDOrtBR/w==}
+  /@vlcn.io/wa-sqlite/0.13.0:
+    resolution: {integrity: sha512-c6EFZysdC4cfub8Rm2KOxYruaE7qAYKffrrij9MuuY2n0q8w5Z5r29oJnWg7frvfv7RMKJGwTwGO1yqpLSiJ+Q==}
     dev: false
 
-  /@vlcn.io/xplat-api/0.4.1:
-    resolution: {integrity: sha512-11E6VTgYuWQ5yjqb8sycDKBqdJIVdtIabKPkG3ASjuyCUxkuke4YDhuTwJ2buQzPVwTAPcNeH25rzrKWRd27sQ==}
+  /@vlcn.io/xplat-api/0.5.0:
+    resolution: {integrity: sha512-puQg1eylvPsT1janXM95Iz1SyAwO9SHhl+z6M00E/Y7e9aWOxDgZaOQ4sC8auCtcSo/LNsbrxIQblpmijtP0oQ==}
     dependencies:
       comlink: 4.3.1
     dev: false

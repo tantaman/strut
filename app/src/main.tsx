@@ -25,7 +25,7 @@ import startSyncWith from "@vlcn.io/sync-client";
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
 
-  const db = await sqlite.open("strut7");
+  const db = await sqlite.open("strut9");
   (window as any).db = db;
 
   // TODO: upgrade to common dev env reset fn
