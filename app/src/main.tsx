@@ -21,6 +21,7 @@ import schema from "@strut/app-server-shared/schema?raw";
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
 import startSync, { uuidStrToBytes } from "@vlcn.io/client-websocket";
+import newSyncState from "./domain/sync/SyncState.js";
 
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
@@ -84,6 +85,7 @@ async function startApp(ctx: Ctx) {
     }),
     deckIndex: new DeckIndex(),
     errorState: new ErrorState(),
+    syncState: newSyncState(ctx),
   });
 
   root.render(<App appState={appState} />);

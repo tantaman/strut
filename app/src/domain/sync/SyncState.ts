@@ -1,10 +1,10 @@
 import { Model } from "@vlcn.io/model";
-import mnemonicToBytes from "@tantaman/mnemonic";
+import { mnemonicToBytes } from "@tantaman/mnemonic";
 import startSync from "@vlcn.io/client-websocket";
 import { Ctx } from "../../hooks";
 export type Data = {
   ctx: Ctx;
-  realm?: string | null;
+  realm: string | null;
 };
 
 const key = "strt-realm";
@@ -16,7 +16,7 @@ export class SyncState extends Model<Data> {
     return this.data.realm;
   }
 
-  set realm(realm: string | undefined | null) {
+  set realm(realm: string | null) {
     if (mnemonicToBytes(realm).length !== 16) {
       throw new Error("Invalid realm provided");
     }
@@ -42,6 +42,16 @@ export class SyncState extends Model<Data> {
       },
       rx: this.data.ctx.rx,
     });
+  }
+
+  disconnect() {
+    this.#sync?.stop();
+    this.#sync = undefined;
+  }
+
+  get isConnected() {
+    // TODO: dig into connection status
+    return this.#sync != null;
   }
 }
 

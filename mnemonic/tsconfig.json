@@ -6,7 +6,7 @@
     "module": "esnext", // specify module code generation
     "target": "esnext", // specify ECMAScript target version
     "moduleResolution": "node",
-    "rootDir": "./",
+    "rootDir": "./src",
     "allowJs": true,
     "strict": true,
     "skipLibCheck": true,

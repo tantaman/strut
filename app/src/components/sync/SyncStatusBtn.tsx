@@ -8,7 +8,11 @@ export default function SyncStatusBtn({ appState }: { appState: AppState }) {
       className={styles.root}
       onClick={() => appState.setModal("configureSync")}
     >
-      <i className="bi bi-wifi-off"></i>
+      {appState.syncState.isConnected ? (
+        <i className="bi bi-wifi"></i>
+      ) : (
+        <i className="bi bi-wifi-off"></i>
+      )}
     </span>
   );
 }
