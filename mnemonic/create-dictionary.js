@@ -19,16 +19,25 @@ for (const word of words) {
 }
 
 let shortWords = [];
-for (const [len, words] of byLen) {
+const byLenSorted = Array.from(byLen.entries()).sort((a, b) => a[0] - b[0]);
+const seen = new Set();
+for (const [len, words] of byLenSorted) {
   // if (len < 4) {
   //   continue;
   // }
   for (const w of words) {
-    shortWords.push(w.toLowerCase());
+    const lower = w.toLowerCase();
+    if (w.indexOf(" ") != -1 || w.trim() === "" || seen.has(lower)) {
+      continue;
+    }
+    seen.add(lower);
+    shortWords.push(lower);
   }
   if (shortWords.length >= Math.pow(2, 16)) {
     break;
   }
 }
 
-console.log(shortWords.slice(0, Math.pow(2, 16)));
+console.log(
+  "export default " + JSON.stringify(shortWords.slice(0, Math.pow(2, 16)))
+);

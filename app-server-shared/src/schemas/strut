@@ -65,6 +65,33 @@ CREATE TABLE IF NOT EXISTS "presenter" (
   "picked_transition"
 );
 
+CREATE TABLE IF NOT EXISTS "selected_slide" (
+  "deck_id",
+  "slide_id",
+  primary key ("deck_id", "slide_id")
+);
+
+CREATE TABLE IF NOT EXISTS "selected_component" (
+  "slide_id",
+  "component_id",
+  "component_type",
+  primary key ("slide_id", "component_id")
+);
+
+CREATE TABLE IF NOT EXISTS "undo_stack" (
+  "deck_id",
+  "operation",
+  "order",
+  primary key ("deck_id", "order")
+);
+
+CREATE TABLE IF NOT EXISTS "redo_stack" (
+  "deck_id",
+  "operation",
+  "order",
+  primary key ("deck_id", "order")
+);
+
 SELECT
   crsql_as_crr('deck');
 

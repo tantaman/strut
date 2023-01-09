@@ -1,5 +1,5 @@
 {
-  "name": "app-server-common",
+  "name": "@strut/app-server-shared",
   "private": true,
   "version": "1.0.0",
   "description": "",

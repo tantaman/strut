@@ -1,4 +1,5 @@
 packages:
   - "app"
-  - "app-server-common"
+  - "app-server-shared"
   - "server"
+  - "mnemonic"

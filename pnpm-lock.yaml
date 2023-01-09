@@ -24,7 +24,9 @@ importers:
       '@lexical/selection': ^0.6.5
       '@lexical/table': ^0.6.5
       '@lexical/utils': ^0.6.5
+      '@strut/app-server-shared': workspace:*
       '@strut/counter': ^0.0.11
+      '@tantaman/mnemonic': workspace:*
       '@types/chroma-js': ^2.1.4
       '@types/jest': ^29.2.4
       '@types/react': ^18.0.26
@@ -62,7 +64,9 @@ importers:
       '@lexical/selection': 0.6.5_lexical@0.6.5
       '@lexical/table': 0.6.5_lexical@0.6.5
       '@lexical/utils': 0.6.5_lexical@0.6.5
+      '@strut/app-server-shared': link:../app-server-shared
       '@strut/counter': 0.0.11
+      '@tantaman/mnemonic': link:../mnemonic
       '@types/throttle-debounce': 5.0.0
       '@vlcn.io/client-websocket': 0.6.0
       '@vlcn.io/id': 0.1.0
@@ -91,16 +95,24 @@ importers:
       vite: 3.2.5
       vitest: 0.25.7
 
-  app-server-common:
+  app-server-shared:
     specifiers: {}
+
+  mnemonic:
+    specifiers:
+      fast-check: ^3.5.0
+      vitest: ^0.25.7
+    devDependencies:
+      fast-check: 3.5.0
+      vitest: 0.25.7
 
   server:
     specifiers:
+      '@strut/app-server-shared': workspace:*
       '@vlcn.io/server-websocket': 0.6.0
-      app-server-common: workspace:*
     dependencies:
+      '@strut/app-server-shared': link:../app-server-shared
       '@vlcn.io/server-websocket': 0.6.0
-      app-server-common: link:../app-server-common
 
 packages:
 
@@ -1882,6 +1894,13 @@ packages:
       tmp: 0.0.33
     dev: true
 
+  /fast-check/3.5.0:
+    resolution: {integrity: sha512-5Yk9kfPy1DR8+9nl+wgRbXGM+p7e25nDRuZ/4b3TjIaWu53p/KkwS4uyKFc+Ek2Ft5nF40KRCbPYGrWYp0SjPw==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      pure-rand: 5.0.5
+    dev: true
+
   /fast-glob/3.2.12:
     resolution: {integrity: sha512-DVj4CQIYYow0BlaelwK1pHl5n5cRSJfM60UA0zK891sVInoPri2Ekj7+e1CT3/3qxXenpI+nBBmQAcJPJgaj4w==}
     engines: {node: '>=8.6.0'}
@@ -3155,6 +3174,10 @@ packages:
       end-of-stream: 1.4.4
       once: 1.4.0
     dev: false
+
+  /pure-rand/5.0.5:
+    resolution: {integrity: sha512-BwQpbqxSCBJVpamI6ydzcKqyFmnd5msMWUGvzXLm1aXvusbbgkbOto/EUPM00hjveJEaJtdbhUjKSzWRhQVkaw==}
+    dev: true
 
   /qs/6.11.0:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}

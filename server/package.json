@@ -11,6 +11,6 @@
   "author": "tantaman",
   "dependencies": {
     "@vlcn.io/server-websocket": "0.6.0",
-    "app-server-common": "workspace:*"
+    "@strut/app-server-shared": "workspace:*"
   }
 }

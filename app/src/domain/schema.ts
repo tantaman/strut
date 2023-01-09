@@ -1,36 +1,5 @@
 import { ID_of } from "../id";
 
-export const tables = [
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "deck" ("id" primary key, "title", "created", "modified", "theme_id", "chosen_presenter");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "slide" ("id" primary key, "deck_id", "order", "created", "modified", "x", "y", "z");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "text_component" ("id" primary key, "slide_id", "text", "styles", "x", "y");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "shape_component" ("id" primary key, "slide_id", "type", "props", "x", "y");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "theme" ("id" primary key, "name", "bg_colorset", "fg_colorset", "fontset", "surface_color", "font_color");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "recent_color" ("color" primary key, "last_used", "first_used", "theme_id");`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "presenter" ("name" primary key, "available_transitions", "picked_transition");`,
-
-  // Make the above tables collaborative and replicated by upgrading them to CRRs
-  /*sql*/ `SELECT crsql_as_crr('deck');`,
-  /*sql*/ `SELECT crsql_as_crr('slide');`,
-  /*sql*/ `SELECT crsql_as_crr('text_component');`,
-  /*sql*/ `SELECT crsql_as_crr('embed_component');`,
-  /*sql*/ `SELECT crsql_as_crr('shape_component');`,
-  /*sql*/ `SELECT crsql_as_crr('line_component');`,
-  /*sql*/ `SELECT crsql_as_crr('line_point');`,
-  /*sql*/ `SELECT crsql_as_crr('theme');`,
-  /*sql*/ `SELECT crsql_as_crr('recent_color');`,
-  /*sql*/ `SELECT crsql_as_crr('presenter');`,
-
-  // These tables are local and do not replicate. Don't make them CRRs
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_slide" ("deck_id", "slide_id", primary key ("deck_id", "slide_id"));`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "selected_component" ("slide_id", "component_id", "component_type", primary key ("slide_id", "component_id"));`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "undo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
-  /*sql*/ `CREATE TABLE IF NOT EXISTS "redo_stack" ("deck_id", "operation", "order", primary key ("deck_id", "order"));`,
-];
-
 export const tableNames = [
   "deck",
   "slide",

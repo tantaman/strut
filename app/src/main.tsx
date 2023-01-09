@@ -5,7 +5,6 @@ import App from "./App.js";
 import { Ctx } from "./hooks.js";
 import sqliteWasm from "@vlcn.io/wa-crsqlite";
 import tblrx from "@vlcn.io/rx-tbl";
-import { tables } from "./domain/schema.js";
 import mutations from "./domain/mutations.js";
 import AppState from "./domain/ephemeral/AppState.js";
 import AuthoringState from "./domain/ephemeral/AuthoringState.js";
@@ -15,6 +14,7 @@ import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.
 import { asId } from "@vlcn.io/id";
 import ErrorState from "./domain/ephemeral/ErrorState.js";
 import seeds from "./domain/seed-data.js";
+// import schema from "";
 
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
@@ -32,22 +32,21 @@ async function main() {
   // await db.execMany(
   //   crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
   // );
-  // await db.exec(`DROP TABLE IF EXISTS "__crsql_wdbreplicator_peers"`);
 
   await db.execMany(tables);
 
   const rx = tblrx(db);
-  const sync = await startSync(`ws://${window.location.hostname}:8080/sync`, {
-    localDb: db,
-    // TODO: we need a user id...
-    remoteDbId: uuidStrToBytes("6c4b1eee-0f77-4d5d-9f34-a37b96d2d992"),
-    // the schema to apply to the db if it does not exist
-    // TODO: validate that the opened db has the desired schema and version of that schema?
-    create: {
-      schemaName: "strut",
-    },
-    rx,
-  });
+  // const sync = await startSync(`ws://${window.location.hostname}:8080/sync`, {
+  //   localDb: db,
+  //   // TODO: we need a user id...
+  //   remoteDbId: uuidStrToBytes("6c4b1eee-0f77-4d5d-9f34-a37b96d2d992"),
+  //   // the schema to apply to the db if it does not exist
+  //   // TODO: validate that the opened db has the desired schema and version of that schema?
+  //   create: {
+  //     schemaName: "strut",
+  //   },
+  //   rx,
+  // });
 
   await db.execMany(seeds);
 
