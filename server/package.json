@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "vlcn-ref-server"
+    "dev": "vlcn-ref-server --schemaDir=../app-server-common/src/schemas",
+    "start": "vlcn-ref-server --dbDir=/var/lib/litefs --static=./public"
   },
   "keywords": [],
   "author": "tantaman",
   "dependencies": {
-    "@vlcn.io/sync-server": "link:../../crsqlite/js/sync-reference/server/"
+    "@vlcn.io/server-websocket": "0.6.0"
   }
 }

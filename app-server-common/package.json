@@ -1,0 +1,13 @@
+{
+  "name": "app-server-common",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    "schema": "./src/schemas/strut"
+  },
+  "keywords": [],
+  "author": "tantaman",
+  "dependencies": {}
+}
