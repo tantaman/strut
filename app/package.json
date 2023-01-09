@@ -32,7 +32,6 @@
     "@vlcn.io/client-websocket": "^0.6.0",
     "@vlcn.io/value": "^0.1.0",
     "@vlcn.io/wa-crsqlite": "^0.7.0",
-    "@tantaman/mnemonic": "workspace:*",
     "@strut/app-server-shared": "workspace:*",
     "chroma-js": "^2.4.2",
     "hotkeys-js": "^3.10.1",

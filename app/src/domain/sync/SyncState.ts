@@ -1,5 +1,4 @@
 import { Model } from "@vlcn.io/model";
-import { mnemonicToBytes } from "@tantaman/mnemonic";
 import startSync from "@vlcn.io/client-websocket";
 import { Ctx } from "../../hooks";
 export type Data = {
@@ -17,9 +16,9 @@ export class SyncState extends Model<Data> {
   }
 
   set realm(realm: string | null) {
-    if (mnemonicToBytes(realm).length !== 16) {
-      throw new Error("Invalid realm provided");
-    }
+    // if (mnemonicToBytes(realm).length !== 16) {
+    //   throw new Error("Invalid realm provided");
+    // }
 
     this.data.realm = realm;
     localStorage.setItem(key, realm || "");
@@ -34,14 +33,14 @@ export class SyncState extends Model<Data> {
       this.#sync.stop();
     }
 
-    this.#sync = await startSync(getConnString(), {
-      localDb: this.data.ctx.db,
-      remoteDbId: mnemonicToBytes(this.realm),
-      create: {
-        schemaName: "strut",
-      },
-      rx: this.data.ctx.rx,
-    });
+    // this.#sync = await startSync(getConnString(), {
+    //   localDb: this.data.ctx.db,
+    //   // remoteDbId: mnemonicToBytes(this.realm),
+    //   create: {
+    //     schemaName: "strut",
+    //   },
+    //   rx: this.data.ctx.rx,
+    // });
   }
 
   disconnect() {
