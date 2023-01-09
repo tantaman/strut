@@ -1,7 +1,5 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-// @ts-ignore
-import { stringify as uuidStringify } from "uuid";
 
 import App from "./App.js";
 import { Ctx } from "./hooks.js";
@@ -20,12 +18,12 @@ import seeds from "./domain/seed-data.js";
 
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
-import startSyncWith from "@vlcn.io/sync-client";
+import startSync, { uuidStrToBytes } from "@vlcn.io/client-websocket";
 
 async function main() {
   const sqlite = await sqliteWasm((file) => wasmUrl);
 
-  const db = await sqlite.open("strut1");
+  const db = await sqlite.open("strut2");
   (window as any).db = db;
 
   // TODO: upgrade to common dev env reset fn
@@ -39,13 +37,10 @@ async function main() {
   await db.execMany(tables);
 
   const rx = tblrx(db);
-  const sync = await startSyncWith({
+  const sync = await startSync(`ws://${window.location.hostname}:8080/sync`, {
     localDb: db,
-    // the id of the database to persist into on the server.
-    // if a db with that id does not exist it can be created for you
-    // TODO: this shouldn't be hardcoded!
-    remoteDbId: "6c4b1eee-0f77-4d5d-9f34-a37b96d2d992",
-    uri: `ws://${window.location.hostname}:8080/sync`,
+    // TODO: we need a user id...
+    remoteDbId: uuidStrToBytes("6c4b1eee-0f77-4d5d-9f34-a37b96d2d992"),
     // the schema to apply to the db if it does not exist
     // TODO: validate that the opened db has the desired schema and version of that schema?
     create: {
