@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    "schema": "./src/schemas/strut"
+    "./schema": "./src/schemas/strut"
   },
   "keywords": [],
   "author": "tantaman",

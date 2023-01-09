@@ -11,7 +11,7 @@ export type Data = {
   readonly ctx: Ctx;
   readonly editor_mode: "slide" | "layout";
   readonly current_deck_id: ID_of<Deck>;
-  readonly modal: "openType" | "peerSelection" | "deckSelection" | "none";
+  readonly modal: "openType" | "configureSync" | "deckSelection" | "none";
   readonly authoringState: AuthoringState;
   readonly drawingInteractionState: DrawingInteractionState;
   readonly previewTheme: EphemeralTheme;
@@ -123,6 +123,10 @@ export default class AppState extends Model<Data> {
     return this.data.modal === "openType";
   }
 
+  get configureSync(): boolean {
+    return this.data.modal === "configureSync";
+  }
+
   get authoringState(): AuthoringState {
     return this.data.authoringState;
   }
@@ -146,6 +150,12 @@ export default class AppState extends Model<Data> {
   setEditorMode(mode: "slide" | "layout"): void {
     this.update({
       editor_mode: mode,
+    });
+  }
+
+  setModal(modal: Data["modal"]) {
+    this.update({
+      modal,
     });
   }
 

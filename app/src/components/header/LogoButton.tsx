@@ -31,7 +31,7 @@ function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
             href="#!"
             onClick={() => {}}
           >
-            Connect to Peer
+            Connect to Server
           </a>
         </li>
         <li>

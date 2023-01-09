@@ -14,7 +14,9 @@ import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.
 import { asId } from "@vlcn.io/id";
 import ErrorState from "./domain/ephemeral/ErrorState.js";
 import seeds from "./domain/seed-data.js";
-// import schema from "";
+
+// @ts-ignore
+import schema from "@strut/app-server-shared/schema?raw";
 
 // @ts-ignore
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
@@ -33,7 +35,9 @@ async function main() {
   //   crrTables.map((t) => `DROP TABLE IF EXISTS "${t}__crsql_clock";`)
   // );
 
-  await db.execMany(tables);
+  for (const x of schema.split(";")) {
+    await db.exec(x);
+  }
 
   const rx = tblrx(db);
   // const sync = await startSync(`ws://${window.location.hostname}:8080/sync`, {

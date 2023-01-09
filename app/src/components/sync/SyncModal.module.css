@@ -1,0 +1,5 @@
+.root {
+  position: absolute;
+  left: calc((100% - 600px) / 2);
+  z-index: 99;
+}

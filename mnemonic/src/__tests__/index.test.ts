@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import fc from "fast-check";
 import { bytesToMnemonic, hexToMnemonic, mnemonicToBytes } from "../index.js";
 
-function hexToBytes(hex) {
+function hexToBytes(hex: string) {
   const bytes = new Uint8Array(hex.length / 2);
   for (let c = 0; c < hex.length; c += 2) {
     bytes[c / 2] = parseInt(hex.substr(c, 2), 16);
