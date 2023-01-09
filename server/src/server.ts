@@ -11,6 +11,7 @@ import { Connection, logger, contextStore } from "@vlcn.io/server-core";
 import { WebSocketServer, WebSocket } from "ws";
 import WebSocketWrapper from "./WebSocketWrapper.js";
 import { IncomingMessage } from "node:http";
+import loginService from "./loginService.js";
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",
@@ -37,8 +38,45 @@ app.use(express.static("./public"));
 app.use(express.json());
 app.use(formidableMiddleware());
 
-app.post("/login", (req, res) => {});
-app.post("/register", (req, res) => {});
+app.post("/login", (req, res) => {
+  const fields = validateLoginFields(req.fields);
+  if (fields == null) {
+    logger.error("bad email of password", {
+      event: "login",
+    });
+    res.status(400).send("bad email or password");
+    return;
+  }
+
+  const dbuuid = loginService.login(db, fields.email, fields.pass);
+  if (dbuuid == null) {
+    logger.error("bad email of password", {
+      event: "login",
+    });
+    res.status(400).send("bad email or password");
+    return;
+  }
+
+  res.status(200).send({
+    dbuuid,
+  });
+});
+
+app.post("/register", async (req, res) => {
+  const fields = validateLoginFields(req.fields);
+  if (fields == null) {
+    logger.error("bad email of password", {
+      event: "register",
+    });
+    res.status(400).send("bad email or password");
+    return;
+  }
+
+  const dbuuid = await loginService.register(db, fields.email, fields.pass);
+  res.status(200).send({
+    dbuuid,
+  });
+});
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
@@ -87,3 +125,28 @@ server.on("upgrade", (request, socket, head) => {
 });
 
 server.listen(port, () => logger.log("info", `listening on port ${port}!`));
+
+function validateLoginFields(fields: Express.Request["fields"]): {
+  email: string;
+  pass: string;
+} | null {
+  const email = fields?.email;
+  const pass = fields?.pass;
+
+  if (!email || !pass) {
+    return null;
+  }
+
+  if (typeof email !== "string" || typeof pass !== "string") {
+    return null;
+  }
+
+  if (email.length > 500 || pass.length > 500) {
+    return null;
+  }
+
+  return {
+    email,
+    pass,
+  };
+}
