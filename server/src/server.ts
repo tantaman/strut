@@ -13,6 +13,8 @@ import WebSocketWrapper from "./WebSocketWrapper.js";
 import { IncomingMessage } from "node:http";
 import loginService from "./loginService.js";
 import cookieParser from "cookie-parser";
+import { apply } from "./schema.js";
+import { validateLoginFields } from "./inputValidation.js";
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",
@@ -28,9 +30,7 @@ if (arg && arg == "local") {
   db = sqlite3("/var/lib/litefs/accounts.db");
 }
 
-db.exec(
-  "CREATE TABLE IF NOT EXISTS accounts (email text primary key, passhash text, dbuuid blob) STRICT;"
-);
+apply(db);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -122,28 +122,3 @@ server.on("upgrade", (request, socket, head) => {
 });
 
 server.listen(port, () => logger.log("info", `listening on port ${port}!`));
-
-export function validateLoginFields(fields: Express.Request["fields"]): {
-  email: string;
-  pass: string;
-} | null {
-  const email = fields?.email;
-  const pass = fields?.pass;
-
-  if (!email || !pass) {
-    return null;
-  }
-
-  if (typeof email !== "string" || typeof pass !== "string") {
-    return null;
-  }
-
-  if (email.length > 500 || pass.length > 500) {
-    return null;
-  }
-
-  return {
-    email,
-    pass,
-  };
-}

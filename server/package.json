@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vlcn-ref-server --schemaDir=../app-server-common/src/schemas",
-    "start": "vlcn-ref-server --dbDir=/var/lib/litefs --static=./public"
+    "start": "vlcn-ref-server --dbDir=/var/lib/litefs --static=./public",
+    "test": "vitest --run"
   },
   "keywords": [],
   "author": "tantaman",

@@ -18,7 +18,7 @@ const loginService = {
       return null;
     }
 
-    return row.dbuuid;
+    return new Uint8Array(row.dbuuid);
   },
 
   async register(db: ReturnType<typeof sqlite3>, email: string, pass: string) {
@@ -38,9 +38,5 @@ const loginService = {
     return dbuuid;
   },
 };
-
-async function isValidPassword(pass: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(pass, hash);
-}
 
 export default loginService;
