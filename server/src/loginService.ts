@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import sqlite3 from "better-sqlite3";
 import { uuidStrToBytes } from "@vlcn.io/client-server-common";
+import { logger } from "@vlcn.io/server-core";
 
 const saltRounds = 8;
 const loginService = {
@@ -21,12 +22,18 @@ const loginService = {
   },
 
   async register(db: ReturnType<typeof sqlite3>, email: string, pass: string) {
-    const dbuuid = crypto.randomUUID();
-    const dbuuidBytes = uuidStrToBytes(dbuuid);
+    const dbuuid = uuidStrToBytes(crypto.randomUUID());
     const hash = await bcrypt.hash(pass, saltRounds);
-    db.prepare(
-      `INSERT INTO accounts (email, passhash, dbuuid) VALUES (?, ?, ?);`
-    ).run(email, hash, dbuuid);
+    try {
+      db.prepare(
+        `INSERT INTO accounts (email, passhash, dbuuid) VALUES (?, ?, ?);`
+      ).run(email, hash, dbuuid);
+    } catch (e: any) {
+      logger.error(e.message, {
+        event: "register.write",
+      });
+      return null;
+    }
 
     return dbuuid;
   },

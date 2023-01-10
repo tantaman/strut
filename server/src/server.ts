@@ -12,6 +12,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import WebSocketWrapper from "./WebSocketWrapper.js";
 import { IncomingMessage } from "node:http";
 import loginService from "./loginService.js";
+import cookieParser from "cookie-parser";
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",
@@ -22,7 +23,7 @@ const config = {
 const arg = process.argv[2];
 let db: ReturnType<typeof sqlite3>;
 if (arg && arg == "local") {
-  db = sqlite3("./dev.db");
+  db = sqlite3("./accounts-dev.db");
 } else {
   db = sqlite3("/var/lib/litefs/accounts.db");
 }
@@ -96,37 +97,33 @@ function authenticate(req: IncomingMessage, cb: (err: any) => void) {
 }
 
 server.on("upgrade", (request, socket, head) => {
-  contextStore.run(
-    {
-      reqId: nanoid(),
-    },
-    () => {
-      logger.info("upgrading to ws connection", {
-        event: "main.upgrade",
+  console.log(request.headers);
+  // @ts-ignore
+  console.log(request.cookies);
+  logger.info("upgrading to ws connection", {
+    event: "main.upgrade",
+    req: contextStore.get().reqId,
+  });
+  authenticate(request, (err) => {
+    if (err) {
+      logger.error("failed to authenticate", {
+        event: "auth",
         req: contextStore.get().reqId,
       });
-      authenticate(request, (err) => {
-        if (err) {
-          logger.error("failed to authenticate", {
-            event: "auth",
-            req: contextStore.get().reqId,
-          });
-          socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-          socket.destroy();
-          return;
-        }
-
-        wss.handleUpgrade(request, socket, head, (ws) => {
-          wss.emit("connection", ws, request);
-        });
-      });
+      socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+      socket.destroy();
+      return;
     }
-  );
+
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  });
 });
 
 server.listen(port, () => logger.log("info", `listening on port ${port}!`));
 
-function validateLoginFields(fields: Express.Request["fields"]): {
+export function validateLoginFields(fields: Express.Request["fields"]): {
   email: string;
   pass: string;
 } | null {
