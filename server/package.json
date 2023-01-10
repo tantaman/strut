@@ -13,6 +13,7 @@
   "keywords": [],
   "author": "tantaman",
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.245.0",
     "@strut/app-server-shared": "workspace:*",
     "@vlcn.io/client-server-common": "^0.3.0",
     "@vlcn.io/server-core": "^0.6.0",

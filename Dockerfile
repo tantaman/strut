@@ -4,7 +4,6 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY pnpm-lock.yaml ./
-COPY .npmrc ./
 RUN pnpm fetch --prod
 
 ADD . ./
