@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * - Support account creation
  * - Support login. Login returns your db uuid.
@@ -13,6 +14,10 @@ import { IncomingMessage } from "node:http";
 import cookieParser from "cookie-parser";
 import { apply as applySchema } from "./schema.js";
 import { install as installRoutes } from "./routes.js";
+import dotenv from "dotenv";
+
+const dotenvResult = dotenv.config({ path: "./.env" });
+const env = dotenvResult.parsed!;
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",

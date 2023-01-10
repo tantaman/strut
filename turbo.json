@@ -1,0 +1,17 @@
+{
+  "baseBranch": "origin/master",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "watch": {
+      "dependsOn": ["^watch"],
+      "outputs": []
+    },
+    "start": {
+      "dependsOn": ["^start"],
+      "outputs": []
+    }
+  }
+}

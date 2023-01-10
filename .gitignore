@@ -16,3 +16,4 @@ psd-export/
 server/dbs/
 .env
 notes-priv.md
+.turbo/
