@@ -12,19 +12,7 @@ export default function SyncModal({ appState }: { appState: AppState }) {
       <div className={modalStyles.title}>
         <h1>Sync</h1>
       </div>
-      <div>
-        Enter a realm to connect to.
-        <ul>
-          <li>All of your data will be copied to that realm</li>
-          <li>All data from that realm will be copied to your device</li>
-        </ul>
-        <RealmInput syncState={syncState} />
-        {!appState.syncState.isConnected ? (
-          <Disconnected syncState={syncState} />
-        ) : (
-          <Connected syncState={syncState} />
-        )}
-      </div>
+      <div>Username/Password</div>
     </div>
   );
 }

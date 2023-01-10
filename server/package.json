@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vlcn-ref-server --schemaDir=../app-server-common/src/schemas",
-    "start": "vlcn-ref-server --dbDir=/var/lib/litefs --static=./public",
-    "test": "vitest --run"
+    "dev": "pnpm build && node dist/server.js local",
+    "start": "node dist/server.js",
+    "test": "vitest --run",
+    "build": "tsc"
   },
+  "type": "module",
   "keywords": [],
   "author": "tantaman",
   "dependencies": {
