@@ -14,9 +14,15 @@ import { IncomingMessage } from "node:http";
 import cookieParser from "cookie-parser";
 import { apply as applySchema } from "./schema.js";
 import dotenv from "dotenv";
+import { jwtVerifier } from "access-token-jwt";
 
 const dotenvResult = dotenv.config({ path: "./.env" });
 const env = dotenvResult.parsed!;
+
+const verifyJwt = jwtVerifier({
+  audience: env.AUTH0_AUDIENCE,
+  issuerBaseURL: `https:/${env.AUTH0_DOMAIN}/`,
+});
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",
@@ -42,6 +48,18 @@ app.use(express.json());
 app.use(formidableMiddleware());
 app.use(cookieParser());
 
+app.get("/app/dbid", async (req, res) => {
+  const token = (req.headers.authorization || "").split(" ")[1];
+  if (!token) {
+    res.status(401).send("Unauthorized");
+    return;
+  }
+
+  const verification = await verifyJwt(token);
+  console.log(verification);
+  res.send({ msg: "verified" });
+});
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
@@ -54,11 +72,10 @@ wss.on("connection", (ws: WebSocket, request) => {
   new Connection(config, new WebSocketWrapper(ws));
 });
 
-// TODO: check origin heders and cookies
 function authenticate(req: IncomingMessage, cb: (err: any) => void) {
-  console.log(req.headers);
-  // @ts-ignore
-  console.log(req.cookies);
+  const token = req.headers["sec-websocket-protocol"];
+  console.log("Auth token: " + token);
+  // add header to response: Sec-WebSocket-Protocol=access_token ?
   cb(null);
 }
 

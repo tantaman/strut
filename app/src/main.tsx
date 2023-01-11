@@ -91,6 +91,7 @@ async function startApp(ctx: Ctx) {
 
   const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
   const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const auth0Audience = import.meta.env.VITE_AUTH0_AUDIENCE;
   if (auth0Domain) {
     root.render(
       <Auth0Provider
@@ -98,7 +99,7 @@ async function startApp(ctx: Ctx) {
         clientId={auth0ClientId}
         redirectUri={window.location.origin}
         cacheLocation="localstorage"
-        audience="https://strut.io/app/sync"
+        audience={auth0Audience}
         scope="read:crsql_changes write:crsql_changes"
       >
         <App appState={appState} />

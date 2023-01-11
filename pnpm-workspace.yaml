@@ -3,3 +3,5 @@ packages:
   - "app-server-shared"
   - "server"
   - "mnemonic"
+  - "deps/access-token-jwt"
+  - "deps/oauth2-bearer"

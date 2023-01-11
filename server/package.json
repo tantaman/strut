@@ -18,6 +18,7 @@
     "@vlcn.io/client-server-common": "^0.3.0",
     "@vlcn.io/server-core": "^0.6.0",
     "@vlcn.io/server-websocket": "0.6.0",
+    "access-token-jwt": "workspace:*",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^8.0.1",
     "cookie-parser": "^1.4.6",

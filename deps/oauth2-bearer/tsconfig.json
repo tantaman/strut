@@ -1,0 +1,14 @@
+{
+  "extends": "@tsconfig/node12/tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "useUnknownInCatchVariables": false,
+    "module": "ES2020",
+    "removeComments": true,
+    "declaration": true,
+    "outDir": "./dist"
+  },
+  "include": [
+    "src"
+  ]
+}

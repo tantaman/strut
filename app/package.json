@@ -28,7 +28,7 @@
     "@strut/app-server-shared": "workspace:*",
     "@strut/counter": "^0.0.11",
     "@types/throttle-debounce": "^5.0.0",
-    "@vlcn.io/client-websocket": "^0.6.0",
+    "@vlcn.io/client-websocket": "link!../../vlcn.io/client-websocket",
     "@vlcn.io/id": "^0.1.0",
     "@vlcn.io/model": "^0.1.0",
     "@vlcn.io/rx-tbl": "^0.6.0",
