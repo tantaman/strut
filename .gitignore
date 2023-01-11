@@ -18,3 +18,4 @@ server/dbs/
 notes-priv.md
 .turbo/
 accounts-dev.db
+udbs/

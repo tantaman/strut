@@ -10,23 +10,24 @@ const key = "strt-realm";
 export class SyncState extends Model<Data> {
   #sync?: Awaited<ReturnType<typeof startSync>>;
 
-  async connect(token: string) {
+  async connect(accessToken: string) {
     if (this.#sync) {
       this.#sync.stop();
     }
 
-    const dbidResponse = await fetch(getRestHost() + "/app/dbid", {
+    const dbidResponse = await fetch(getRestHost() + "app/dbid", {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
     const dbid = await dbidResponse.json();
 
+    console.log(dbid.uuid);
     this.#sync = await startSync(getConnString(), {
       localDb: this.data.ctx.db,
-      token,
-      remoteDbId: uuidStrToBytes(dbid.uuid),
+      accessToken,
+      remoteDbId: new Uint8Array(dbid.uuid.data),
       create: {
         schemaName: "strut",
       },

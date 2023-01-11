@@ -66,9 +66,9 @@ async function initiateSync(
   }
 
   const accessToken = await getAccessTokenSilently({
-    audience: `https://strut.io/app/sync`,
+    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
     scope: "read:crsql_changes write:crsql_changes",
   });
 
-  console.log(accessToken);
+  await appState.syncState.connect(accessToken);
 }

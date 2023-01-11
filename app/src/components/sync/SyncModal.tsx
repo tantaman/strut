@@ -12,11 +12,6 @@ export default function SyncModal({ appState }: { appState: AppState }) {
         <h1>Sync</h1>
       </div>
       <div className={styles.body}>
-        {syncState.isConnected ? (
-          <button>Disconnect</button>
-        ) : isAuthenticated ? (
-          <button>Connect</button>
-        ) : null}
         {isAuthenticated ? (
           <button onClick={() => logout({ returnTo: window.location.origin })}>
             Log Out
@@ -29,4 +24,12 @@ export default function SyncModal({ appState }: { appState: AppState }) {
       </div>
     </div>
   );
+}
+
+function ConnectBtn({ appState }: { appState: AppState }) {
+  // const [disabled, setDisabled] = React.useState(false);
+  // return <button disabled={disabled} onClick={() => {
+  //   setDisabled(true);
+  //   appState.syncState.connect().then(() => setDisabled(false));
+  // }}>Connect</button>;
 }

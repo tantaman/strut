@@ -11,10 +11,12 @@ import { Connection, logger, contextStore } from "@vlcn.io/server-core";
 import { WebSocketServer, WebSocket } from "ws";
 import WebSocketWrapper from "./WebSocketWrapper.js";
 import { IncomingMessage } from "node:http";
-import cookieParser from "cookie-parser";
 import { apply as applySchema } from "./schema.js";
 import dotenv from "dotenv";
 import { jwtVerifier } from "access-token-jwt";
+// @ts-ignore
+import cors from "cors";
+import { randomUuidBytes } from "@vlcn.io/client-server-common";
 
 const dotenvResult = dotenv.config({ path: "./.env" });
 const env = dotenvResult.parsed!;
@@ -34,6 +36,7 @@ const arg = process.argv[2];
 let db: ReturnType<typeof sqlite3>;
 if (arg && arg == "local") {
   db = sqlite3("./accounts-dev.db");
+  config.dbDir = "./udbs";
 } else {
   db = sqlite3("/var/lib/litefs/accounts.db");
 }
@@ -41,12 +44,12 @@ if (arg && arg == "local") {
 applySchema(db);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 app.use(express.static("./public"));
 app.use(express.json());
 app.use(formidableMiddleware());
-app.use(cookieParser());
+app.use(cors());
 
 app.get("/app/dbid", async (req, res) => {
   const token = (req.headers.authorization || "").split(" ")[1];
@@ -56,8 +59,13 @@ app.get("/app/dbid", async (req, res) => {
   }
 
   const verification = await verifyJwt(token);
-  console.log(verification);
-  res.send({ msg: "verified" });
+  const sub = verification.payload.sub;
+  db.prepare("insert or ignore into accounts (sub, dbuuid) values (?, ?)").run(
+    sub,
+    randomUuidBytes()
+  );
+  const row = db.prepare("select dbuuid from accounts where sub = ?").get(sub);
+  res.send({ uuid: row.dbuuid });
 });
 
 const server = http.createServer(app);
