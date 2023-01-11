@@ -28,7 +28,7 @@ const verifyJwt = jwtVerifier({
 
 const config = {
   dbDir: "/var/lib/litefs/udbs",
-  schemaDir: "./schemas",
+  schemaDir: "../app-server-shared/src/schemas",
   maxOutstandingAcks: 10,
 };
 
