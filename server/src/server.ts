@@ -46,7 +46,8 @@ applySchema(db);
 const app = express();
 const port = process.env.PORT || 8080;
 
-app.use(express.static("./public"));
+app.use(express.static("../app/public"));
+app.use(express.static("../app/dist"));
 app.use(express.json());
 app.use(formidableMiddleware());
 app.use(cors());
