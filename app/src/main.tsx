@@ -98,6 +98,8 @@ async function startApp(ctx: Ctx) {
         clientId={auth0ClientId}
         redirectUri={window.location.origin}
         cacheLocation="localstorage"
+        audience="https://strut.io/app/sync"
+        scope="read:crsql_changes write:crsql_changes"
       >
         <App appState={appState} />
       </Auth0Provider>

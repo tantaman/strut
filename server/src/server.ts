@@ -13,7 +13,6 @@ import WebSocketWrapper from "./WebSocketWrapper.js";
 import { IncomingMessage } from "node:http";
 import cookieParser from "cookie-parser";
 import { apply as applySchema } from "./schema.js";
-import { install as installRoutes } from "./routes.js";
 import dotenv from "dotenv";
 
 const dotenvResult = dotenv.config({ path: "./.env" });
@@ -42,8 +41,6 @@ app.use(express.static("./public"));
 app.use(express.json());
 app.use(formidableMiddleware());
 app.use(cookieParser());
-
-installRoutes(db, app);
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
