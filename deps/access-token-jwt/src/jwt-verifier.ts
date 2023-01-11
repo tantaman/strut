@@ -5,10 +5,10 @@ import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import { URL } from 'url';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
-import type { JWTPayload, JWSHeaderParameters } from 'jose'
+import type { JWTPayload, JWSHeaderParameters } from 'jose';
 import { InvalidTokenError } from 'oauth2-bearer';
-import discover, { IssuerMetadata } from './discovery';
-import validate, { defaultValidators, Validators } from './validate';
+import discover, { IssuerMetadata } from './discovery.js';
+import validate, { defaultValidators, Validators } from './validate.js';
 
 export interface JwtVerifierOptions {
   /**
@@ -239,10 +239,7 @@ const jwtVerifier = ({
         ),
         ...customValidators,
       };
-      const { payload, protectedHeader: header } = await jwtVerify(
-        jwt,
-        JWKS,
-      );
+      const { payload, protectedHeader: header } = await jwtVerify(jwt, JWKS);
       await validate(payload, header, validators);
       return { payload, header, token: jwt };
     } catch (e) {

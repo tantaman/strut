@@ -1,7 +1,7 @@
 import { URL } from 'url';
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import fetch from './fetch';
+import fetch from './fetch.js';
 import { strict as assert } from 'assert';
 
 const OIDC_DISCOVERY = '/.well-known/openid-configuration';

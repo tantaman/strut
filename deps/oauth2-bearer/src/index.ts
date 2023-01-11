@@ -1,2 +1,2 @@
-export * from './errors';
-export { default as getToken } from './get-token';
+export * from './errors.js';
+export { default as getToken } from './get-token.js';

@@ -6,6 +6,7 @@
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "test": "jest test --coverage",
     "lint": "eslint --fix --ext .ts ./src",
