@@ -14,6 +14,7 @@ import DrawingInteractionState from "./domain/ephemeral/DrawingInteractionState.
 import { asId } from "@vlcn.io/id";
 import ErrorState from "./domain/ephemeral/ErrorState.js";
 import seeds from "./domain/seed-data.js";
+import { Auth0Provider } from "@auth0/auth0-react";
 
 // @ts-ignore
 import schema from "@strut/app-server-shared/schema?raw";
@@ -88,7 +89,21 @@ async function startApp(ctx: Ctx) {
     syncState: newSyncState(ctx),
   });
 
-  root.render(<App appState={appState} />);
+  const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  if (auth0Domain) {
+    root.render(
+      <Auth0Provider
+        domain={auth0Domain}
+        clientId={auth0ClientId}
+        redirectUri={window.location.origin}
+      >
+        <App appState={appState} />
+      </Auth0Provider>
+    );
+  } else {
+    root.render(<App appState={appState} />);
+  }
 }
 
 main();
