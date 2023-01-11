@@ -97,6 +97,7 @@ async function startApp(ctx: Ctx) {
         domain={auth0Domain}
         clientId={auth0ClientId}
         redirectUri={window.location.origin}
+        cacheLocation="localstorage"
       >
         <App appState={appState} />
       </Auth0Provider>
