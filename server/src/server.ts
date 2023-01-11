@@ -27,7 +27,7 @@ const verifyJwt = jwtVerifier({
 });
 
 const config = {
-  dbDir: "/var/lib/litefs/udbs",
+  dbDir: "/litefs",
   schemaDir: "../app-server-shared/src/schemas",
   maxOutstandingAcks: 10,
 };
@@ -38,7 +38,7 @@ if (arg && arg == "local") {
   db = sqlite3("./accounts-dev.db");
   config.dbDir = "./udbs";
 } else {
-  db = sqlite3("/var/lib/litefs/accounts.db");
+  db = sqlite3("/litefs/accounts.db");
 }
 
 applySchema(db);
