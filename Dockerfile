@@ -1,5 +1,7 @@
 FROM node:19-alpine
 
+WORKDIR /app
+
 # Configure LiteFS -- https://fly.io/docs/litefs/getting-started/
 # https://github.com/superfly/litefs-example/blob/main/Dockerfile
 
@@ -20,8 +22,8 @@ RUN pnpm install -r --offline --prod
 
 EXPOSE 8080
 
-WORKDIR /server
-ENTRYPOINT litefs mount -- dist/server.js
+WORKDIR /app/server
+ENTRYPOINT litefs mount -- node dist/server.js
 
 # docs:
 # https://pnpm.io/cli/fetch
