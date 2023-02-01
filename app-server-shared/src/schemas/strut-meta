@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS "deck_map" (
+  "title",
+  "dbuuid" BLOB PRIMARY KEY,
+  "is_dirty" BOOLEAN
+) STRICT;

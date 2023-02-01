@@ -82,9 +82,22 @@ wss.on("connection", (ws: WebSocket, request) => {
 });
 
 function authenticate(req: IncomingMessage, cb: (err: any) => void) {
-  const token = req.headers["sec-websocket-protocol"];
-  console.log("Auth token: " + token);
-  // add header to response: Sec-WebSocket-Protocol=access_token ?
+  const authHeader = req.headers["sec-websocket-protocol"] || "";
+  const authToken = authHeader.split(", ")[1];
+  if (!authToken) {
+    cb({ message: 'missing "Sec-WebSocket-Protocol" header' });
+    return;
+  }
+  verifyJwt(authToken)
+    .then((verification) => {
+      if (!verification.payload.sub) {
+        throw new Error("missing verification payload");
+      }
+      return;
+    })
+    .catch((err) => {
+      cb(err);
+    });
   cb(null);
 }
 
@@ -95,7 +108,7 @@ server.on("upgrade", (request, socket, head) => {
   });
   authenticate(request, (err) => {
     if (err) {
-      logger.error("failed to authenticate", {
+      logger.error("failed to authenticate " + err.message, {
         event: "auth",
         req: contextStore.get().reqId,
       });
