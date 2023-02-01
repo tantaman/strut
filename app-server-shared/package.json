@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    "./schema": "./src/schemas/strut"
+    "./deck": "./src/schemas/strut",
+    "./meta": "./src/schemas/strut-meta"
   },
   "keywords": [],
   "author": "tantaman",

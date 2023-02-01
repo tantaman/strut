@@ -7,7 +7,6 @@ import PresentButton from "../../header/PresentButton";
 import Header from "../../../widgets/Header";
 import LogoButton from "../../header/LogoButton";
 import AppState from "../../../domain/ephemeral/AppState";
-import SyncStatusBtn from "../../sync/SyncStatusBtn";
 
 export default function SlideEditorNav({ appState }: { appState: AppState }) {
   // TODO listen for media state
@@ -34,7 +33,6 @@ export default function SlideEditorNav({ appState }: { appState: AppState }) {
       </div>
       <div>
         <LayoutButton appState={appState} />
-        <SyncStatusBtn appState={appState} />
         <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
       </div>
     </Header>

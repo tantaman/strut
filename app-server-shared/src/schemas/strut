@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS "slide" (
   "z"
 );
 
+CREATE INDEX IF NOT EXISTS "slide_deck_id" ON "slide" ("deck_id", "order");
+
 CREATE TABLE IF NOT EXISTS "text_component" (
   "id" primary key,
   "slide_id",
@@ -27,7 +29,11 @@ CREATE TABLE IF NOT EXISTS "text_component" (
   "y"
 );
 
+CREATE INDEX IF NOT EXISTS "text_component_slide_id" ON "text_component" ("slide_id");
+
 CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");
+
+CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS "shape_component" (
   "id" primary key,
@@ -38,9 +44,15 @@ CREATE TABLE IF NOT EXISTS "shape_component" (
   "y"
 );
 
+CREATE INDEX IF NOT EXISTS "shape_component_slide_id" ON "shape_component" ("slide_id");
+
 CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");
 
+CREATE INDEX IF NOT EXISTS "line_component_slide_id" ON "line_component" ("slide_id");
+
 CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
+
+CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
 
 CREATE TABLE IF NOT EXISTS "theme" (
   "id" primary key,
@@ -97,6 +109,9 @@ SELECT
 
 SELECT
   crsql_as_crr('slide');
+
+SELECT
+  crsql_fract_as_ordered('slide', 'order', 'deck_id');
 
 SELECT
   crsql_as_crr('text_component');

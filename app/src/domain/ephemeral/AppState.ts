@@ -6,7 +6,6 @@ import ErrorState from "./ErrorState";
 import AuthoringState from "./AuthoringState";
 import EphemeralTheme from "./EphemeralTheme";
 import DrawingInteractionState from "./DrawingInteractionState";
-import { SyncState } from "../sync/SyncState";
 
 export type Data = {
   readonly ctx: Ctx;
@@ -18,7 +17,6 @@ export type Data = {
   readonly previewTheme: EphemeralTheme;
   readonly deckIndex: DeckIndex;
   readonly errorState: ErrorState;
-  readonly syncState: SyncState;
 };
 
 export default class AppState extends Model<Data> {
@@ -147,10 +145,6 @@ export default class AppState extends Model<Data> {
 
   get errorState(): ErrorState {
     return this.data.errorState;
-  }
-
-  get syncState(): SyncState {
-    return this.data.syncState;
   }
 
   setEditorMode(mode: "slide" | "layout"): void {
