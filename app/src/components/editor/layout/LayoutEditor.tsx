@@ -4,7 +4,7 @@ import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
 import LayoutSlide from "./LayoutSlide";
 import { ID_of } from "../../../id";
-import { Ctx, useQuery } from "../../../hooks";
+import { Ctx, useAsyncQuery } from "@vlcn.io/react";
 import { Deck } from "../../../domain/schema";
 import queries from "../../../domain/queries";
 import AppState from "../../../domain/ephemeral/AppState";
@@ -19,8 +19,10 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
 }
 
 function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
-  const slides = useQuery(queries.slides(ctx, deckId)).data;
-  const selectedSlideIds = useQuery(queries.selectedSlides(ctx, deckId)).data;
+  const slides = queries.slides(ctx, deckId).data;
+  const selectedSlideIds = useAsyncQuery(
+    queries.selectedSlides(ctx, deckId)
+  ).data;
   const set = useMemo<Set<ID_of<Slide>>>(
     () => new Set(selectedSlideIds),
     [selectedSlideIds]
