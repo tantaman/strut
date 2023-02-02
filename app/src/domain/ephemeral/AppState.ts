@@ -1,7 +1,7 @@
-import { Ctx } from "../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { Deck, DeckIndex } from "../schema";
 import { Model } from "@vlcn.io/model";
-import { ID_of } from "../../id";
+import { IID_of } from "../../id";
 import ErrorState from "./ErrorState";
 import AuthoringState from "./AuthoringState";
 import EphemeralTheme from "./EphemeralTheme";
@@ -10,7 +10,7 @@ import DrawingInteractionState from "./DrawingInteractionState";
 export type Data = {
   readonly ctx: Ctx;
   readonly editor_mode: "slide" | "layout";
-  readonly current_deck_id: ID_of<Deck>;
+  readonly current_deck_id: IID_of<Deck>;
   readonly modal: "openType" | "configureSync" | "deckSelection" | "none";
   readonly authoringState: AuthoringState;
   readonly drawingInteractionState: DrawingInteractionState;
@@ -115,7 +115,7 @@ export default class AppState extends Model<Data> {
     return this.data.editor_mode;
   }
 
-  get current_deck_id(): ID_of<Deck> {
+  get current_deck_id(): IID_of<Deck> {
     return this.data.current_deck_id;
   }
 

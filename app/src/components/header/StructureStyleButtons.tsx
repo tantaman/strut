@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import { Theme } from "../../domain/schema";
 import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme";
 import * as styles from "./HeaderButton.module.css";
-import { Ctx, useQuery } from "../../hooks";
+import { CtxAsync as Ctx, RowID } from "@vlcn.io/react";
 import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
 import FontSelector from "../../widgets/font-selector/FontSelector";
 import textColorStyles from "../editor/markdown/styling_menu/FontColorButton.module.css";
 import mutations from "../../domain/mutations";
 import queries from "../../domain/queries";
+import { IID_of } from "../../id";
 
 function Slideout({
   ctx,
@@ -30,7 +31,7 @@ function Slideout({
     };
   }
 
-  const recentColors = useQuery(queries.recentColors(ctx, theme?.id)).data;
+  const recentColors = queries.recentColors(ctx, theme?.id).data;
   return (
     <>
       <ColorPickerButton2
@@ -81,23 +82,24 @@ function Slideout({
   );
 }
 
-function Section({
+const Section = memo(function s({
   appState,
   label,
   icon,
   defaultLabel,
-  theme,
+  themeId,
   previewTheme,
 }: {
   appState: AppState;
   label: string;
   icon: string;
   defaultLabel: string;
-  theme?: Theme;
+  themeId: IID_of<Theme>;
   previewTheme: EphemeralTheme;
 }) {
   const [expanded, setExpanded] = useState<boolean>(false);
   const expand = () => setExpanded(!expanded);
+  const theme = queries.pointTheme(appState.ctx, themeId).data;
   return (
     <div
       className={"btn-group " + styles.root}
@@ -132,7 +134,7 @@ function Section({
       )}
     </div>
   );
-}
+});
 
 export default function StructureStyleButtons({
   appState,
@@ -141,19 +143,22 @@ export default function StructureStyleButtons({
   appState: AppState;
   className?: string;
 }) {
-  const theme = useQuery(
-    queries.themeFromDeck(appState.ctx, appState.current_deck_id)
+  const themeId = queries.themeIdFromDeck(
+    appState.ctx,
+    appState.current_deck_id
   ).data;
   return (
     <div className={className}>
-      <Section
-        appState={appState}
-        label="Theme"
-        icon="bi-palette-fill"
-        defaultLabel="Default"
-        theme={theme}
-        previewTheme={appState.previewTheme}
-      />
+      {themeId != null ? (
+        <Section
+          appState={appState}
+          label="Theme"
+          icon="bi-palette-fill"
+          defaultLabel="Default"
+          themeId={themeId}
+          previewTheme={appState.previewTheme}
+        />
+      ) : null}
     </div>
   );
 }

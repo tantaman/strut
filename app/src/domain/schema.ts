@@ -1,6 +1,6 @@
-import { ID_of } from "../id";
+import { IID_of } from "../id";
 
-export const tableNames = [
+const tableNames = [
   "deck",
   "slide",
   "text_component",
@@ -33,29 +33,29 @@ export const crrTables = [
   "markdown",
 ];
 
-export type TableName = typeof tableNames[number];
+// export type TableName = typeof tableNames[number];
 
 // See https://github.com/microsoft/TypeScript/issues/34777
 // as to why we use `readonly` explicitly instead of ReadOnly<T>
 type ComponentBase = {
-  readonly slide_id: ID_of<Slide>;
+  readonly slide_id: IID_of<Slide>;
   readonly x?: number;
   readonly y?: number;
 };
 
 export type Deck = {
-  readonly id: ID_of<Deck>;
+  readonly id: IID_of<Deck>;
   readonly title?: string;
   readonly created?: number;
   readonly modified?: number;
-  readonly theme_id?: ID_of<Theme>;
+  readonly theme_id?: IID_of<Theme>;
   readonly chosen_presenter?: string; // name of Presenter type
 };
 
 // TODO: decoding methods in `queries`
 // TODO: remove `colorset` / `fontset` props?
 export interface Theme {
-  readonly id: ID_of<Theme>;
+  readonly id: IID_of<Theme>;
   readonly name?: string;
   readonly bg_colorset?: string;
   readonly fg_colorset?: string;
@@ -66,8 +66,8 @@ export interface Theme {
 }
 
 export type Slide = {
-  readonly id: ID_of<Slide>;
-  readonly deck_id?: ID_of<Deck>;
+  readonly id: IID_of<Slide>;
+  readonly deck_id?: IID_of<Deck>;
   readonly order?: number;
   readonly created?: number;
   readonly modified?: number;
@@ -77,31 +77,31 @@ export type Slide = {
 };
 
 export type TextComponent = {
-  readonly id: ID_of<TextComponent>;
+  readonly id: IID_of<TextComponent>;
   readonly text?: string;
   readonly styles?: string;
 } & ComponentBase;
 
 export type EmbedComponent = {
-  readonly id: ID_of<EmbedComponent>;
+  readonly id: IID_of<EmbedComponent>;
   readonly src?: string;
 } & ComponentBase;
 
 export type ShapeComponent = {
-  readonly id: ID_of<ShapeComponent>;
+  readonly id: IID_of<ShapeComponent>;
   readonly type?: "ellipse" | "rectangle" | "triangle" | "hexagon" | "octagon";
   readonly props?: string;
 } & ComponentBase;
 
 export type LineComponent = {
-  readonly id: ID_of<LineComponent>;
-  readonly slide_id?: ID_of<Slide>;
+  readonly id: IID_of<LineComponent>;
+  readonly slide_id?: IID_of<Slide>;
   readonly props?: string;
 };
 
 export type LinePoint = {
-  readonly id: ID_of<LinePoint>;
-  readonly line_id?: ID_of<LineComponent>;
+  readonly id: IID_of<LinePoint>;
+  readonly line_id?: IID_of<LineComponent>;
   readonly x?: number;
   readonly y?: number;
 };
@@ -115,13 +115,13 @@ export type Presenter = {
 // === Non-Replicateds
 
 export type SelectSlides = {
-  readonly deck_id: ID_of<Deck>;
-  readonly slide_id: ID_of<Slide>;
+  readonly deck_id: IID_of<Deck>;
+  readonly slide_id: IID_of<Slide>;
 };
 
 export type SelectedComponents = {
-  readonly slide_id: ID_of<Slide>;
-  readonly component_id: ID_of<
+  readonly slide_id: IID_of<Slide>;
+  readonly component_id: IID_of<
     TextComponent | EmbedComponent | ShapeComponent | LineComponent
   >;
   readonly component_type:
@@ -132,13 +132,13 @@ export type SelectedComponents = {
 };
 
 export type UndoStack = {
-  readonly deck_id: ID_of<Deck>;
+  readonly deck_id: IID_of<Deck>;
   readonly operation: string;
   readonly order: number;
 };
 
 export type RedoStack = {
-  readonly deck_id: ID_of<Deck>;
+  readonly deck_id: IID_of<Deck>;
   readonly operation: string;
   readonly order: number;
 };
@@ -148,7 +148,7 @@ export type Operation = {};
 // === Ephemerals
 
 export interface DeckIndex {
-  getSuggestions(q: string): { id: ID_of<Slide>; title: string }[];
+  getSuggestions(q: string): { id: IID_of<Slide>; title: string }[];
 }
 
 export type Tool =

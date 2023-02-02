@@ -1,6 +1,6 @@
 import config from "../config";
-import { Ctx, first } from "../hooks";
-import { ID_of, newId } from "../id";
+import { CtxAsync as Ctx, first } from "@vlcn.io/react";
+import { IID_of, newIID } from "../id";
 import fns from "./fns";
 import {
   Deck,
@@ -9,18 +9,18 @@ import {
   Operation,
   ShapeComponent,
   Slide,
-  TableName,
   TextComponent,
   Theme,
   UndoStack,
 } from "./schema";
 
-function objId<T>(ctx: Ctx): ID_of<T> {
-  return newId<T>(ctx.siteid.substring(0, 4));
+// TODO: use uuidv7 for ids base95 encoded
+function objId<T>(ctx: Ctx): IID_of<T> {
+  return newIID<T>(ctx.db.siteid.substring(0, 4));
 }
 
 const mutations = {
-  async undo(ctx: Ctx, deckId: ID_of<Deck>) {
+  async undo(ctx: Ctx, deckId: IID_of<Deck>) {
     const item = first(
       await ctx.db.execO<UndoStack>(
         `SELECT * FROM undo_stack WHERE deck_id = ? ORDER BY "order" DESC LIMIT 1`,
@@ -38,7 +38,7 @@ const mutations = {
     }
   },
 
-  async redo(ctx: Ctx, deckId: ID_of<Deck>) {
+  async redo(ctx: Ctx, deckId: IID_of<Deck>) {
     const item = first(
       await ctx.db.execO<UndoStack>(
         `SELECT * FROM redo_stack WHERE deck_id = ? ORDER BY "order" ASC LIMIT 1`,
@@ -67,7 +67,7 @@ const mutations = {
     );
   },
 
-  selectSlide(ctx: Ctx, deckId: ID_of<Deck>, id: ID_of<Slide>) {
+  selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
     // TODO: we need to hold notifications
     // until transaction completes
     // or not since replication won't be transactional and we can
@@ -92,7 +92,7 @@ const mutations = {
     // TODO: could also look into the sqlite undo/redo as triggers design
   },
 
-  addRecentColor(ctx: Ctx, color: string, id: ID_of<Theme>) {
+  addRecentColor(ctx: Ctx, color: string, id: IID_of<Theme>) {
     return ctx.db.exec(
       `INSERT INTO recent_color
         ("color", "last_used", "first_used", "theme_id")
@@ -107,7 +107,7 @@ const mutations = {
     );
   },
 
-  persistMarkdownToSlide(ctx: Ctx, id: ID_of<Slide>, dom: string) {
+  persistMarkdownToSlide(ctx: Ctx, id: IID_of<Slide>, dom: string) {
     return ctx.db.exec(
       `UPDATE markdown
         SET "content" = ?
@@ -120,8 +120,8 @@ const mutations = {
   // Can we do SQLite FK cascade w/o FK enforcement?
   removeSlide(
     ctx: Ctx,
-    id: ID_of<Slide>,
-    deckId: ID_of<Deck>,
+    id: IID_of<Slide>,
+    deckId: IID_of<Deck>,
     selected: boolean
   ) {
     // TODO: tx
@@ -132,7 +132,7 @@ const mutations = {
     }
 
     return ctx.db
-      .execA<[ID_of<Slide>]>(
+      .execA<[IID_of<Slide>]>(
         /*sql*/ `WITH "cte" AS (
         SELECT "id", row_number() OVER (ORDER BY "order") as "rn" FROM "slide"
       ), "current" AS (
@@ -164,7 +164,7 @@ const mutations = {
       });
   },
 
-  addSlideAfter(ctx: Ctx, i: number, id: ID_of<Deck>) {
+  addSlideAfter(ctx: Ctx, i: number, id: IID_of<Deck>) {
     // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
     // doable in a single sql stmt?
     return ctx.db
@@ -191,7 +191,7 @@ const mutations = {
       });
   },
 
-  addText(ctx: Ctx, deckId: ID_of<Deck>) {
+  addText(ctx: Ctx, deckId: IID_of<Deck>) {
     const id = objId(ctx);
     return ctx.db.exec(
       /*sql*/ `INSERT INTO text_component
@@ -209,14 +209,14 @@ const mutations = {
   // TODO: should be id rather than index based reordering in the future
   reorderSlides(
     ctx: Ctx,
-    id: ID_of<Deck>,
+    id: IID_of<Deck>,
     fromIndex: number,
     toIndex: number
   ) {},
 
   setAllSlideColor(
     ctx: Ctx,
-    id: ID_of<Theme> | undefined,
+    id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
@@ -230,7 +230,7 @@ const mutations = {
 
   setAllSurfaceColor(
     ctx: Ctx,
-    id: ID_of<Theme> | undefined,
+    id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
@@ -244,7 +244,7 @@ const mutations = {
 
   setAllTextColor(
     ctx: Ctx,
-    id: ID_of<Theme> | undefined,
+    id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
@@ -256,9 +256,9 @@ const mutations = {
     ]);
   },
 
-  setAllFont(ctx: Ctx, id: ID_of<Theme>, name: string) {},
+  setAllFont(ctx: Ctx, id: IID_of<Theme>, name: string) {},
 
-  async genOrCreateCurrentDeck(ctx: Ctx): Promise<ID_of<Deck>> {
+  async genOrCreateCurrentDeck(ctx: Ctx): Promise<IID_of<Deck>> {
     // go thru recent opens
     // open the most recent
     // if none exists, write one
@@ -303,7 +303,7 @@ const mutations = {
     return ids[0][0];
   },
 
-  saveText(ctx: Ctx, markdown: string, compnentId: ID_of<TextComponent>) {
+  saveText(ctx: Ctx, markdown: string, compnentId: IID_of<TextComponent>) {
     return ctx.db.exec(
       /* sql */ `UPDATE "text_component" SET "text" = ? WHERE "id" = ?`,
       [markdown, compnentId]
@@ -318,10 +318,10 @@ const mutations = {
       | "shape_component"
       | "line_component",
     compnentId:
-      | ID_of<TextComponent>
-      | ID_of<ShapeComponent>
-      | ID_of<LineComponent>
-      | ID_of<EmbedComponent>,
+      | IID_of<TextComponent>
+      | IID_of<ShapeComponent>
+      | IID_of<LineComponent>
+      | IID_of<EmbedComponent>,
     x: number,
     y: number
   ) {
