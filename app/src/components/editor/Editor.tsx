@@ -4,7 +4,7 @@ import React from "react";
 
 import SlideEditor from "./SlideEditor";
 import AppState from "../../domain/ephemeral/AppState";
-import { useBind } from "../../hooks";
+import { useBind } from "../../modelHooks";
 import LayoutEditor from "./layout/LayoutEditor";
 
 export default function Editor(props: { appState: AppState }) {

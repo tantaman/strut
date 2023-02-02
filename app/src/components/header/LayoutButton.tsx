@@ -1,7 +1,7 @@
 import React from "react";
 import * as headerStyles from "./HeaderButton.module.css";
 import * as styles from "./LayoutButton.module.css";
-import { useQuery } from "../../hooks";
+import { useQuery } from "@vlcn.io/react";
 import { Presenter } from "../../domain/schema";
 import queries from "../../domain/queries";
 import AppState from "../../domain/ephemeral/AppState";
@@ -11,8 +11,9 @@ type Props = {
 };
 
 export default function LayoutButton({ appState }: Props) {
-  const presenter = useQuery(
-    queries.chosenPresenter(appState.ctx, appState.current_deck_id)
+  const presenter = queries.chosenPresenter(
+    appState.ctx,
+    appState.current_deck_id
   ).data;
   return <LayoutButtonImpl presenter={presenter} appState={appState} />;
 }

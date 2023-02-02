@@ -40,7 +40,7 @@ const queries = {
     ),
 
   slideIds: (ctx: Ctx, id: IID_of<Deck>) =>
-    useRangeQuery<{ id: IID_of<Slide> }>(
+    useRangeQuery<{ id: IID_of<Slide> }, IID_of<Slide>[]>(
       ctx,
       /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC`,
       [id],

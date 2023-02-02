@@ -3,8 +3,8 @@ import { Slide } from "../../../domain/schema";
 import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
 import LayoutSlide from "./LayoutSlide";
-import { ID_of } from "../../../id";
-import { Ctx, useAsyncQuery } from "@vlcn.io/react";
+import { IID_of } from "../../../id";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { Deck } from "../../../domain/schema";
 import queries from "../../../domain/queries";
 import AppState from "../../../domain/ephemeral/AppState";
@@ -18,24 +18,22 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
   );
 }
 
-function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
-  const slides = queries.slides(ctx, deckId).data;
-  const selectedSlideIds = useAsyncQuery(
-    queries.selectedSlides(ctx, deckId)
-  ).data;
-  const set = useMemo<Set<ID_of<Slide>>>(
+function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
+  const slideIds = queries.slideIds(ctx, deckId).data;
+  const selectedSlideIds = queries.selectedSlideIds(ctx, deckId).data;
+  const set = useMemo<Set<IID_of<Slide>>>(
     () => new Set(selectedSlideIds),
     [selectedSlideIds]
   );
   return (
     <div className={styles.container}>
-      {slides.map((slide, i) => (
+      {slideIds.map((id, i) => (
         <LayoutSlide
-          selectedSlideIds={set}
+          selected={set.has(id)}
           ctx={ctx}
-          key={slide.id}
+          key={id.toString()}
           deckId={deckId}
-          slide={slide}
+          slideId={id}
           i={i}
         />
       ))}

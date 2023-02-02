@@ -37,13 +37,13 @@ import ExampleTheme from "./themes/ExampleTheme";
 import styles from "./TextEditor.module.css";
 import { throttle } from "throttle-debounce";
 import { TextComponent } from "../../../domain/schema";
-import { ID_of } from "@vlcn.io/id";
 import mutations from "../../../domain/mutations";
-import { Ctx } from "../../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
+import { IID_of } from "../../../id";
 
 const persistText = throttle(
   100,
-  (ctx: Ctx, markdown: string, componentId: ID_of<TextComponent>) => {
+  (ctx: Ctx, markdown: string, componentId: IID_of<TextComponent>) => {
     return mutations.saveText(ctx, markdown, componentId);
   },
   {
@@ -53,7 +53,7 @@ const persistText = throttle(
 
 const persistDrag = throttle(
   100,
-  (ctx: Ctx, x: number, y: number, componentId: ID_of<TextComponent>) => {
+  (ctx: Ctx, x: number, y: number, componentId: IID_of<TextComponent>) => {
     return mutations.saveDrag(ctx, "text_component", componentId, x, y);
   },
   {
@@ -118,7 +118,7 @@ function TextEditorBase({
   scale,
   ctx,
 }: {
-  id: ID_of<TextComponent>;
+  id: IID_of<TextComponent>;
   text: string;
   x: number;
   y: number;
@@ -170,7 +170,7 @@ function TextEditorInner({
   text,
   ctx,
 }: {
-  id: ID_of<TextComponent>;
+  id: IID_of<TextComponent>;
   x: number;
   y: number;
   scale: number;

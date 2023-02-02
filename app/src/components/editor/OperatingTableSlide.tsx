@@ -2,8 +2,8 @@ import React, { memo } from "react";
 import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
 import type { otsSqaure } from "./OperatingTable";
-import { useBind } from "../../hooks";
-import { ID_of } from "../../id";
+import { useBind } from "../../modelHooks";
+import { IID_of } from "../../id";
 import fns from "../../domain/fns";
 import AppState from "../../domain/ephemeral/AppState";
 import OTTextComponents from "./OTTextComponents";
@@ -14,7 +14,7 @@ function OperatingTableSlide({
   otsStyle,
   theme,
 }: {
-  slideId: ID_of<Slide>;
+  slideId: IID_of<Slide>;
   appState: AppState;
   otsStyle: otsSqaure;
   theme?: Theme;

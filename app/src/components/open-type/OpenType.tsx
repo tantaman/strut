@@ -57,7 +57,7 @@ export default function OpenType({ appState }: { appState: AppState }) {
       <ul>
         {suggestions.map((s, i) => (
           <li
-            key={s.id}
+            key={s.id.toString()}
             className={i === activeIndex ? styles.active : ""}
             onClick={() => {
               mutations.selectSlide(

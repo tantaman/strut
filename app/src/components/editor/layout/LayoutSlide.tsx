@@ -1,35 +1,31 @@
-import React from "react";
+import React, { memo } from "react";
 import { Slide } from "../../../domain/schema";
 import { Deck } from "../../../domain/schema";
-import { Ctx } from "../../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 import * as styles from "./LayoutSlide.module.css";
 import Draggable from "../../../interactions/Draggable";
-import { ID_of } from "../../../id";
+import { IID_of } from "../../../id";
 import mutations from "../../../domain/mutations";
 import config from "../../../config";
 
-export default function LayoutSlide({
+const LayoutSlide = memo(function l({
   ctx,
   deckId,
-  slide,
+  slideId,
   i,
-  selectedSlideIds,
+  selected,
 }: {
   ctx: Ctx;
-  deckId: ID_of<Deck>;
-  selectedSlideIds: Set<ID_of<Slide>>;
-  slide: Slide;
+  deckId: IID_of<Deck>;
+  selected: boolean;
+  slideId: IID_of<Slide>;
   i: number;
 }) {
   return (
     <Draggable
-      className={
-        styles.slide +
-        " " +
-        (selectedSlideIds.has(slide.id) ? styles.selected : "")
-      }
+      className={styles.slide + " " + (selected ? styles.selected : "")}
       style={{ left: 250 + i * 250, top: 150 }}
-      onClick={() => mutations.selectSlide(ctx, deckId, slide.id)}
+      onClick={() => mutations.selectSlide(ctx, deckId, slideId)}
       onDragging={(pos) => {
         console.log(pos);
       }}
@@ -80,7 +76,9 @@ export default function LayoutSlide({
       <div className={styles.formInline + " " + styles.positioningCtrls}></div>
     </Draggable>
   );
-}
+});
+
+export default LayoutSlide;
 
 function SlideDrawer() {
   return <div></div>;
