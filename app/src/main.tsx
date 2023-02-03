@@ -17,21 +17,15 @@ async function main() {
   const metaDb = await newMetaDB(sqlite);
   await startApp({
     metaDb,
-    siteid: metaDb.dbid.substring(
-      metaDb.dbid.length - 9,
-      metaDb.dbid.length - 1
-    ),
     sqlite,
   });
 }
 
 async function startApp({
   metaDb,
-  siteid,
   sqlite,
 }: {
   metaDb: MetaDB;
-  siteid: string;
   sqlite: SQLite3;
 }) {
   const root = createRoot(document.getElementById("content")!);
@@ -49,22 +43,12 @@ async function startApp({
         audience={auth0Audience}
         scope="read:crsql_changes write:crsql_changes"
       >
-        <Bootstrap
-          metaDb={metaDb}
-          siteid={siteid}
-          hasAuthProvider={true}
-          sqlite={sqlite}
-        />
+        <Bootstrap metaDb={metaDb} hasAuthProvider={true} sqlite={sqlite} />
       </Auth0Provider>
     );
   } else {
     root.render(
-      <Bootstrap
-        metaDb={metaDb}
-        siteid={siteid}
-        hasAuthProvider={false}
-        sqlite={sqlite}
-      />
+      <Bootstrap metaDb={metaDb} hasAuthProvider={false} sqlite={sqlite} />
     );
   }
 }

@@ -27,9 +27,9 @@ function MetaInfo({ metaDeck }: { metaDeck: MetaDeck }) {
   return (
     <>
       <div>
-        Last modified: {new Date(metaDeck.lastModified).toLocaleDateString()}
+        Last modified: {new Date(metaDeck.last_modified).toLocaleDateString()}
       </div>
-      <div>Synced? {metaDeck.isDirty ? "No" : "Yes"}</div>
+      <div>Synced? {metaDeck.is_dirty ? "No" : "Yes"}</div>
     </>
   );
 }

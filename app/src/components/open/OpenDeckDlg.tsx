@@ -34,8 +34,9 @@ export default function OpenDeckDlg({
               metaDeck={{
                 title: "New Deck",
                 dbid: new Uint8Array(0),
-                lastModified: 0,
-                isDirty: false,
+                deck_id: null,
+                last_modified: 0,
+                is_dirty: false,
               }}
               onClick={onNewDeck}
               description="Start from scratch"

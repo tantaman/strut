@@ -1,4 +1,3 @@
-import { ID_of } from "@vlcn.io/id";
 import { SQLite3, DB } from "@vlcn.io/wa-crsqlite";
 import { getConnString, getRestHost } from "./conectionInfo";
 import startSync from "@vlcn.io/client-websocket";
@@ -6,13 +5,6 @@ import tblrx, { TblRx } from "@vlcn.io/rx-tbl";
 import { Model } from "@vlcn.io/model";
 import metaSchema from "@strut/app-server-shared/meta?raw";
 import { CtxAsync } from "@vlcn.io/react";
-
-export type DeckMeta = {
-  dbid: ID_of<DB>;
-  title: string;
-  lastModified: number;
-  isDirty: boolean;
-};
 
 type Data = {
   connected: boolean;
@@ -36,8 +28,6 @@ export class MetaDB extends Model<Data> {
       rx: this.rx,
     };
   }
-
-  openCurrentDeck() {}
 
   get connecting() {
     return this.data.connecting;
@@ -104,9 +94,11 @@ export class MetaDB extends Model<Data> {
   close() {
     this.update({
       connected: false,
+      connecting: false,
     });
     this.rx.dispose();
     this.db.close();
+    this.#sync?.stop();
   }
 }
 

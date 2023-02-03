@@ -13,10 +13,12 @@ import {
   Theme,
   UndoStack,
 } from "./schema";
+import { DB } from "@vlcn.io/wa-crsqlite";
+import { DBAsync } from "@vlcn.io/xplat-api";
 
 // TODO: use uuidv7 for ids base95 encoded
-function objId<T>(ctx: Ctx): IID_of<T> {
-  return newIID<T>(ctx.db.siteid.substring(0, 4));
+function objId<T>(db: DBAsync): IID_of<T> {
+  return newIID<T>(db.siteid.substring(0, 4));
 }
 
 const mutations = {
@@ -179,7 +181,7 @@ const mutations = {
           order = (first[0] + second[0]) / 2;
         }
 
-        const slideId = objId<Slide>(ctx);
+        const slideId = objId<Slide>(ctx.db);
         return ctx.db
           .exec(`INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
           '${slideId}',
@@ -192,7 +194,7 @@ const mutations = {
   },
 
   addText(ctx: Ctx, deckId: IID_of<Deck>) {
-    const id = objId(ctx);
+    const id = objId(ctx.db);
     return ctx.db.exec(
       /*sql*/ `INSERT INTO text_component
       ("id", "slide_id", "x", "y")
@@ -258,20 +260,20 @@ const mutations = {
 
   setAllFont(ctx: Ctx, id: IID_of<Theme>, name: string) {},
 
-  async genOrCreateCurrentDeck(ctx: Ctx): Promise<IID_of<Deck>> {
+  async genOrCreateCurrentDeck(db: DB): Promise<IID_of<Deck>> {
     // go thru recent opens
     // open the most recent
     // if none exists, write one
     // return id of the thing
 
-    const ids = await ctx.db.execA(
+    const ids = await db.execA(
       `SELECT id FROM deck ORDER BY modified DESC LIMIT 1`
     );
     if (ids.length == 0) {
       // create
-      const deckId = objId<Deck>(ctx);
-      const slideId = objId<Slide>(ctx);
-      await ctx.db.execMany([
+      const deckId = objId<Deck>(db);
+      const slideId = objId<Slide>(db);
+      await db.execMany([
         `INSERT INTO "deck" (
         "id",
         "title",

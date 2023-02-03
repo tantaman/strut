@@ -33,12 +33,12 @@ importers:
       '@types/react-dom': ^18.0.9
       '@types/throttle-debounce': ^5.0.0
       '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
-      '@vlcn.io/id': ^0.1.0
       '@vlcn.io/model': ^0.1.0
       '@vlcn.io/react': link:../../crsqlite/js/react
       '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
       '@vlcn.io/value': ^0.1.0
       '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
+      '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: ^2.4.2
       hotkeys-js: ^3.10.1
       lexical: ^0.6.5
@@ -71,12 +71,12 @@ importers:
       '@strut/counter': 0.0.11
       '@types/throttle-debounce': 5.0.0
       '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
-      '@vlcn.io/id': 0.1.0
       '@vlcn.io/model': 0.1.0
       '@vlcn.io/react': link:../../crsqlite/js/react
       '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
       '@vlcn.io/value': 0.1.0
       '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
+      '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: 2.4.2
       hotkeys-js: 3.10.1
       lexical: 0.6.5
@@ -1930,12 +1930,6 @@ packages:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.1
-    dev: false
-
-  /@vlcn.io/id/0.1.0:
-    resolution: {integrity: sha512-0l/gqwD7Qj8yEp2rOwYXK3VyPwytxwFXJGLfDO5Qb65PAa96CJen6hCbKKN1vIh0jasHC7NOPlBMzhLUaaRIOw==}
-    dependencies:
-      '@vlcn.io/util': 0.1.0
     dev: false
 
   /@vlcn.io/model/0.1.0:

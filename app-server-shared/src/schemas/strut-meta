@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS "deck_map" (
   "title" TEXT,
   "dbid" BLOB PRIMARY KEY,
-  "lastModified" INTEGER,
-  "isDirty" INTEGER
+  "deck_id" INTEGER,
+  "last_modified" INTEGER,
+  "is_dirty" INTEGER
 ) STRICT;
 
-CREATE INDEX IF NOT EXISTS "deck_map_touched" ON "deck_map" ("lastModified");
+CREATE INDEX IF NOT EXISTS "deck_map_touched" ON "deck_map" ("last_modified");
