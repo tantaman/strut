@@ -1,7 +1,11 @@
+import "styles/bootstrap.css";
+import "styles/bootstrap-icons/bootstrap-icons.css";
+import "styles/main.css";
+
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-import sqliteWasm from "@vlcn.io/wa-crsqlite";
+import sqliteWasm, { SQLite3 } from "@vlcn.io/wa-crsqlite";
 import { Auth0Provider } from "@auth0/auth0-react";
 
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
@@ -17,15 +21,18 @@ async function main() {
       metaDb.dbid.length - 9,
       metaDb.dbid.length - 1
     ),
+    sqlite,
   });
 }
 
 async function startApp({
   metaDb,
   siteid,
+  sqlite,
 }: {
   metaDb: MetaDB;
   siteid: string;
+  sqlite: SQLite3;
 }) {
   const root = createRoot(document.getElementById("content")!);
 
@@ -42,12 +49,22 @@ async function startApp({
         audience={auth0Audience}
         scope="read:crsql_changes write:crsql_changes"
       >
-        <Bootstrap metaDb={metaDb} siteid={siteid} hasAuthProvider={true} />
+        <Bootstrap
+          metaDb={metaDb}
+          siteid={siteid}
+          hasAuthProvider={true}
+          sqlite={sqlite}
+        />
       </Auth0Provider>
     );
   } else {
     root.render(
-      <Bootstrap metaDb={metaDb} siteid={siteid} hasAuthProvider={false} />
+      <Bootstrap
+        metaDb={metaDb}
+        siteid={siteid}
+        hasAuthProvider={false}
+        sqlite={sqlite}
+      />
     );
   }
 }

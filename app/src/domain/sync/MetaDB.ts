@@ -5,6 +5,7 @@ import startSync from "@vlcn.io/client-websocket";
 import tblrx, { TblRx } from "@vlcn.io/rx-tbl";
 import { Model } from "@vlcn.io/model";
 import metaSchema from "@strut/app-server-shared/meta?raw";
+import { CtxAsync } from "@vlcn.io/react";
 
 export type DeckMeta = {
   dbid: ID_of<DB>;
@@ -22,9 +23,7 @@ type Data = {
 export class MetaDB extends Model<Data> {
   #sync?: Awaited<ReturnType<typeof startSync>>;
   public readonly rx: TblRx;
-
-  static readonly DecksQuery =
-    'SELECT * FROM "deck_map" ORDER BY "lastModified" DESC';
+  public readonly ctx: CtxAsync;
 
   constructor(public readonly dbid: string, private db: DB) {
     super({
@@ -32,6 +31,10 @@ export class MetaDB extends Model<Data> {
       connected: false,
     });
     this.rx = tblrx(db);
+    this.ctx = {
+      db,
+      rx: this.rx,
+    };
   }
 
   openCurrentDeck() {}
@@ -53,7 +56,7 @@ export class MetaDB extends Model<Data> {
    * @param accessToken
    */
   async connect(accessToken: string) {
-    if (this.connecting) {
+    if (this.connecting || this.connected) {
       return;
     }
 
