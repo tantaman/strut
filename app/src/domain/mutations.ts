@@ -139,7 +139,7 @@ const mutations = {
         SELECT "id", row_number() OVER (ORDER BY "order") as "rn" FROM "slide"
       ), "current" AS (
         SELECT "rn" FROM "cte"
-        WHERE id = '${id}'
+        WHERE id = ${id}
       )
       SELECT "cte"."id" FROM "cte", "current"
         WHERE ABS("cte"."rn" - "current"."rn") <= 1
@@ -184,8 +184,8 @@ const mutations = {
         const slideId = objId<Slide>(ctx.db);
         return ctx.db
           .exec(`INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
-          '${slideId}',
-          '${id}',
+          ${slideId},
+          ${id},
           ${order},
           ${Date.now()},
           ${Date.now()}
@@ -198,7 +198,7 @@ const mutations = {
     return ctx.db.exec(
       /*sql*/ `INSERT INTO text_component
       ("id", "slide_id", "x", "y")
-      SELECT '${id}', "slide_id", ${
+      SELECT ${id}, "slide_id", ${
         ((Math.random() * config.slideWidth) / 2) | 0
       }, ${
         ((Math.random() * config.slideHeight) / 2) | 0
@@ -282,7 +282,7 @@ const mutations = {
         "theme_id",
         "chosen_presenter"
       ) VALUES (
-        '${deckId}',
+        ${deckId},
         'First Deck',
         ${Date.now()},
         ${Date.now()},
@@ -290,13 +290,13 @@ const mutations = {
         'impress'
       );`,
         `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
-        '${slideId}',
-        '${deckId}',
+        ${slideId},
+        ${deckId},
         0,
         ${Date.now()},
         ${Date.now()}
       );`,
-        `INSERT INTO "selected_slide" ("deck_id", "slide_id") VALUES ('${deckId}', '${slideId}')`,
+        `INSERT INTO "selected_slide" ("deck_id", "slide_id") VALUES (${deckId}, ${slideId})`,
       ]);
 
       return deckId;

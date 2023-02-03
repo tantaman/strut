@@ -10,8 +10,8 @@ const metaMutations = {
     title: string
   ) {
     return ctx.db.exec(
-      /*sql*/ `INSERT INTO "deck_map" ("dbid", title, last_modified, is_dirty) VALUES (?, ?, ?, ?)`,
-      [dbid, title, Date.now(), false]
+      /*sql*/ `INSERT INTO "deck_map" ("dbid", title, last_modified, deck_id, is_dirty) VALUES (?, ?, ?, ?, ?)`,
+      [dbid, title, Date.now(), deckid, false]
     );
   },
 } as const;

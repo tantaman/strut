@@ -10,6 +10,9 @@ import hexToBytes from "../../hexToBytes";
 import { IID_of } from "../../id";
 import { Deck } from "../schema";
 import mutations from "../mutations";
+import seeds from "../seed-data";
+
+import schema from "@strut/app-server-shared/deck?raw";
 
 type Data = {
   connected: boolean;
@@ -22,6 +25,7 @@ export class DeckDB extends Model<Data> {
   #sync?: Awaited<ReturnType<typeof startSync>>;
   public readonly rx: TblRx;
   public readonly ctx: CtxAsync;
+  private closed = false;
 
   constructor(
     private readonly db: DB,
@@ -82,6 +86,9 @@ export class DeckDB extends Model<Data> {
   }
 
   close() {
+    if (this.closed) {
+      return;
+    }
     this.update({
       connected: false,
       connecting: false,
@@ -89,6 +96,7 @@ export class DeckDB extends Model<Data> {
     this.rx.dispose();
     this.db.close();
     this.#sync?.stop();
+    this.closed = true;
   }
 }
 
@@ -99,19 +107,22 @@ export async function newDeckDB(
 ) {
   // we are connecting to a remote which exists.
   if (remoteDbid && mainDeckId) {
-    return new DeckDB(
-      await sqlite.open(remoteDbid),
-      hexToBytes(remoteDbid),
-      mainDeckId
-    );
+    const db = await sqlite.open(remoteDbid);
+    await setupSchema(db);
+    return new DeckDB(db, hexToBytes(remoteDbid), mainDeckId);
   } else {
     // we are connecting to a new remote, generated an id for it locally
     const remoteDbidHex = crypto.randomUUID().replaceAll("-", "");
     const remoteDbidBytes = hexToBytes(remoteDbidHex);
     const db = await sqlite.open(remoteDbidHex);
-
+    await setupSchema(db);
     const deckId = await mutations.genOrCreateCurrentDeck(db);
 
     return new DeckDB(db, remoteDbidBytes, deckId);
   }
+}
+
+async function setupSchema(db: DB) {
+  await db.exec(schema);
+  await db.execMany(seeds);
 }

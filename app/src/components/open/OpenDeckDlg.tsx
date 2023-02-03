@@ -14,6 +14,7 @@ export default function OpenDeckDlg({
   onDeckChosen: (dbid: Uint8Array) => void;
   onNewDeck: () => void;
 }) {
+  (window as any).ctx = ctx;
   const decks = metaQueries.decks(ctx).data;
 
   return (
@@ -42,7 +43,11 @@ export default function OpenDeckDlg({
               description="Start from scratch"
             />
             {decks.map((d) => (
-              <DeckCard metaDeck={d} onClick={() => onDeckChosen(d.dbid)} />
+              <DeckCard
+                key={d.deck_id?.toString()}
+                metaDeck={d}
+                onClick={() => onDeckChosen(d.dbid)}
+              />
             ))}
           </div>
         </div>

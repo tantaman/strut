@@ -15,9 +15,9 @@ export default function DeckCard({
     <div className="card" style={cardStyle} onClick={onClick}>
       <div className="card-body">
         <h5 className="card-title">{metaDeck.title}</h5>
-        <p className="card-text">
+        <div className="card-text">
           {description ? description : <MetaInfo metaDeck={metaDeck} />}
-        </p>
+        </div>
       </div>
     </div>
   );

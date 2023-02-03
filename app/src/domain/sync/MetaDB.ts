@@ -104,9 +104,7 @@ export class MetaDB extends Model<Data> {
 
 export default function newMetaDB(sqlite: SQLite3): Promise<MetaDB> {
   return sqlite.open("meta.db").then(async (db) => {
-    for (const x of metaSchema.split(";")) {
-      await db.exec(x);
-    }
+    await db.exec(metaSchema);
     const dbid = await db.execA("SELECT quote(crsql_siteid())");
     return new MetaDB(dbid[0][0], db);
   });

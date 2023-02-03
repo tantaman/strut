@@ -13,6 +13,7 @@ import metaMutations from "./domain/metaMutations.js";
 import { DeckDB, newDeckDB } from "./domain/sync/DeckDB.js";
 import { SQLite3 } from "@vlcn.io/wa-crsqlite";
 import App from "./App.js";
+import bytesToHex from "./bytesToHex.js";
 
 export default function Bootstrap({
   metaDb,
@@ -33,32 +34,52 @@ export default function Bootstrap({
   );
 
   // In here we'll create the app state for the chosen deck
-  function onDeckChosen(dbid: Uint8Array) {}
-
-  async function onNewDeck() {
+  function onDeckChosen(dbid: Uint8Array) {
     setOpeningDeck(true);
 
-    try {
-      const deckDb = await newDeckDB(sqlite);
-      await metaMutations.recordNewDB(
-        metaDb.ctx,
-        deckDb.remoteDbid,
-        deckDb.mainDeckId,
-        "Untitled"
-      );
-
-      await createAppStateForDeck(deckDb);
-    } catch (e: any) {
-      setOpeningDeck(false);
-      setError(e.message);
+    if (deckDb != null) {
+      deckDb.close();
     }
+    newDeckDB(sqlite, bytesToHex(dbid))
+      .then((newDb) => {
+        createAppStateForDeck(newDb);
+      })
+      .catch((e: any) => {
+        setOpeningDeck(false);
+        setError(e.message);
+      });
   }
 
-  async function createAppStateForDeck(deckDb: DeckDB) {
+  function onNewDeck() {
+    setOpeningDeck(true);
+
     if (deckDb != null) {
       // TODO: appState.dispose();
       deckDb.close();
     }
+
+    newDeckDB(sqlite)
+      .then((newDb) => {
+        // createAppStateForDeck(newDb);
+        return metaMutations
+          .recordNewDB(
+            metaDb.ctx,
+            newDb.remoteDbid,
+            newDb.mainDeckId,
+            "Untitled"
+          )
+          .then(() => {
+            createAppStateForDeck(newDb);
+          });
+      })
+      .catch((e: any) => {
+        setOpeningDeck(false);
+        setError(e.message);
+      });
+  }
+
+  async function createAppStateForDeck(deckDb: DeckDB) {
+    console.log("create app state!");
 
     const ctx = deckDb.ctx;
     const newAppState = new AppState({
@@ -79,6 +100,7 @@ export default function Bootstrap({
     });
     setAppState(newAppState);
     setDeckDb(deckDb);
+    (window as any).deckDb = deckDb;
   }
 
   useEffect(() => {
