@@ -26,6 +26,7 @@ function SlideWell({
     appState.ctx,
     appState.current_deck_id
   ).data;
+  console.log(slideIds);
   const orientHorizontally = useMatchMedia(
     "(max-width: " + mediaCuts.horizontal + "px)"
   );

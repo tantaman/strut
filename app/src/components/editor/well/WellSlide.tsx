@@ -178,7 +178,7 @@ function WellSlide(props: {
       {hideContextMenu ? null : (
         <WellContextMenu
           appState={props.appState}
-          index={props.index}
+          slideId={props.id}
           orient={props.orient}
         />
       )}

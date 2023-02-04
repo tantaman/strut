@@ -166,31 +166,23 @@ const mutations = {
       });
   },
 
-  addSlideAfter(ctx: Ctx, i: number, id: IID_of<Deck>) {
+  addSlideAfter(
+    ctx: Ctx,
+    adterSlideId: IID_of<Slide> | null,
+    id: IID_of<Deck>
+  ) {
     // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
     // doable in a single sql stmt?
-    return ctx.db
-      .execA<[number]>(`SELECT "order" FROM "slide" LIMIT 2 OFFSET ${i}`)
-      .then((slides) => {
-        const first = slides[0];
-        const second = slides[1];
-        let order = first[0];
-        if (second == null) {
-          order += 1;
-        } else {
-          order = (first[0] + second[0]) / 2;
-        }
-
-        const slideId = objId<Slide>(ctx.db);
-        return ctx.db
-          .exec(`INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
-          ${slideId},
-          ${id},
-          ${order},
-          ${Date.now()},
-          ${Date.now()}
-        );`);
-      });
+    const slideId = objId<Slide>(ctx.db);
+    const query = `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
+      ${slideId},
+      ${id},
+      1,
+      ${Date.now()},
+      ${Date.now()}
+    );`;
+    console.log(query);
+    return ctx.db.exec(query);
   },
 
   addText(ctx: Ctx, deckId: IID_of<Deck>) {
@@ -292,7 +284,7 @@ const mutations = {
         `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
         ${slideId},
         ${deckId},
-        0,
+        1,
         ${Date.now()},
         ${Date.now()}
       );`,
