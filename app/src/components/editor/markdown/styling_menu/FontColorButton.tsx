@@ -6,7 +6,7 @@ import AppState from "../../../../domain/ephemeral/AppState";
 import mutations from "../../../../domain/mutations";
 import "@tiptap/extension-color";
 import queries from "../../../../domain/queries";
-import { Ctx, pick0, useQueryA } from "../../../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 import config from "../../../../config";
 import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
 
@@ -17,8 +17,9 @@ type Props = {
 };
 
 export default function FontColorButton({ ctx, state, theme }: Props) {
-  const recentColors = useQueryA(
-    queries.recentColors(ctx, theme?.id || config.defaultThemeId)
+  const recentColors = queries.recentColors(
+    ctx,
+    theme?.id || config.defaultThemeId
   ).data;
   // useBind(["transaction"], state);
   // useQuery(["recentColors"], theme);

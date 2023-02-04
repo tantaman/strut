@@ -1,13 +1,19 @@
-import { Ctx, first, firstPick, Query } from "../hooks";
-import { ID_of } from "../id";
 import {
-  Deck,
-  Presenter,
-  Slide,
-  TableName,
-  TextComponent,
-  Theme,
-} from "./schema";
+  CtxAsync as Ctx,
+  first,
+  firstPick,
+  pick,
+  SQL,
+  useQuery,
+  useRangeQuery,
+  usePointQuery,
+} from "@vlcn.io/react";
+import { IID_of } from "../id";
+import { Deck, Presenter, Slide, TextComponent, Theme } from "./schema";
+
+export type Query<R, M = R[]> =
+  | [Ctx, SQL<R>, any[]]
+  | [Ctx, SQL<R>, any[], (x: R[]) => M];
 
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
@@ -17,101 +23,96 @@ const queries = {
   // and/or prepared statement level?
   // we enqueue.. we can check if anyone ahead of us in the queue is fulfilling our result.
   // if so, we return that promise instead of enqueueing a new one.
-  canUndo: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  canUndo: (ctx: Ctx, id: IID_of<Deck>) =>
+    useQuery<{ exists: number }, boolean | undefined>(
       ctx,
-      ["undo_stack"],
-      /*sql*/ `SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1`,
+      /*sql*/ `SELECT 1 as "exists" FROM undo_stack WHERE deck_id = ? LIMIT 1`,
       [id],
-      firstPick,
-    ] as Query<boolean, TableName, boolean | undefined>,
+      firstPick
+    ),
 
-  canRedo: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  canRedo: (ctx: Ctx, id: IID_of<Deck>) =>
+    useQuery<{ exists: number }, boolean | undefined>(
       ctx,
-      ["redo_stack"],
-      /*sql*/ `SELECT 1 FROM undo_stack WHERE deck_id = ? LIMIT 1`,
+      /*sql*/ `SELECT 1 as "exists" FROM undo_stack WHERE deck_id = ? LIMIT 1`,
       [id],
-      firstPick,
-    ] as Query<boolean, TableName, boolean | undefined>,
+      firstPick
+    ),
 
-  slides: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  slideIds: (ctx: Ctx, id: IID_of<Deck>) =>
+    useRangeQuery<{ id: IID_of<Slide> }, IID_of<Slide>[]>(
       ctx,
-      ["slide"],
-      /*sql*/ `SELECT * FROM slide WHERE deck_id = ? ORDER BY "order" ASC`,
-      [id],
-    ] as Query<Slide, TableName>,
-
-  slideIds: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
-      ctx,
-      ["slide"],
       /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC`,
       [id],
-      (x: [ID_of<Slide>][]) => x.map((x) => x[0]),
-    ] as Query<[ID_of<Slide>], TableName, ID_of<Slide>[]>,
+      pick
+    ),
 
-  chosenPresenter: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  chosenPresenter: (ctx: Ctx, id: IID_of<Deck>) =>
+    useQuery<Presenter, Presenter | undefined>(
       ctx,
-      ["deck", "presenter"],
       /*sql*/ `SELECT "presenter".* FROM "presenter" JOIN "deck" ON deck.chosen_presenter = presenter.name WHERE deck.id = ?`,
       [id],
-      first,
-    ] as Query<Presenter, TableName, Presenter>,
+      first
+    ),
 
-  selectedSlides: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  selectedSlideIds: (ctx: Ctx, id: IID_of<Deck>) =>
+    useRangeQuery<IID_of<Slide>, Set<IID_of<Slide>>>(
       ctx,
-      ["selected_slide"],
       /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ?`,
       [id],
-      (x: [ID_of<Slide>][]) => new Set(x.map((x) => x[0])),
-    ] as Query<[ID_of<Slide>], TableName, Set<ID_of<Slide>>>,
+      (x: any) => new Set(x.map((x: any) => x.slide_id))
+    ),
 
-  mostRecentlySelectedSlide: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
+    useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
       ctx,
-      ["selected_slide"],
       /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1`,
       [id],
-      firstPick,
-    ] as Query<[ID_of<Slide>], TableName, ID_of<Slide> | undefined>,
+      firstPick
+    ),
 
-  recentColors: (ctx: Ctx, id: ID_of<Theme> | undefined) =>
-    [
+  recentColors: (ctx: Ctx, id: IID_of<Theme> | undefined) =>
+    useQuery<{ color: string }, string[]>(
       ctx,
-      ["recent_color"],
       /*sql*/ `SELECT "color" FROM "recent_color" WHERE "theme_id" = ?`,
       [id == null ? null : id],
-      (x: [string][]) => x.map((x) => x[0]),
-    ] as Query<[string], TableName, string[]>,
+      pick
+    ),
 
-  theme: (ctx: Ctx, id: ID_of<Theme>) =>
-    [
-      ctx,
-      ["theme"],
-      /*sql*/ `SELECT * FROM "theme" WHERE "id" = ?`,
-      [id],
-    ] as Query<Theme, TableName>,
+  theme: (ctx: Ctx, id: IID_of<Theme>) =>
+    useQuery<Theme>(ctx, /*sql*/ `SELECT * FROM "theme" WHERE "id" = ?`, [id]),
 
-  themeFromDeck: (ctx: Ctx, id: ID_of<Deck>) =>
-    [
+  themeFromDeck: (ctx: Ctx, id: IID_of<Deck>) =>
+    useQuery<Theme, Theme | undefined>(
       ctx,
-      ["theme", "deck"],
       /*sql*/ `SELECT theme.* FROM "theme" JOIN "deck" ON theme.id = deck.theme_id WHERE deck.id = ?`,
       [id],
-      first,
-    ] as Query<Theme, TableName, Theme | undefined>,
+      first
+    ),
 
-  textComponents: (ctx: Ctx, id: ID_of<Slide>) =>
-    [
+  themeIdFromDeck: (ctx: Ctx, id: IID_of<Deck>) =>
+    usePointQuery<Theme, IID_of<Theme> | undefined>(
       ctx,
-      ["text_component"],
-      /*sql*/ `SELECT * FROM "text_component" WHERE "slide_id" = ?`,
+      id as any, // todo: move iid code to vlcn.io
+      /*sql*/ `SELECT theme_id FROM "deck" WHERE id = ?`,
       [id],
-    ] as Query<TextComponent, TableName>,
+      firstPick
+    ),
+
+  pointTheme: (ctx: Ctx, id: IID_of<Theme>) =>
+    useQuery<Theme, Theme | undefined>(
+      ctx,
+      `SELECT * FROM "theme" WHERE id = ?`,
+      [id],
+      first
+    ),
+
+  textComponents: (ctx: Ctx, id: IID_of<Slide>) =>
+    useQuery<TextComponent>(
+      ctx,
+      /*sql*/ `SELECT * FROM "text_component" WHERE "slide_id" = ?`,
+      [id]
+    ),
 } as const;
 
 export default queries;

@@ -1,17 +1,10 @@
-import { ID_of } from "@vlcn.io/id";
 import { SQLite3, DB } from "@vlcn.io/wa-crsqlite";
 import { getConnString, getRestHost } from "./conectionInfo";
 import startSync from "@vlcn.io/client-websocket";
 import tblrx, { TblRx } from "@vlcn.io/rx-tbl";
 import { Model } from "@vlcn.io/model";
 import metaSchema from "@strut/app-server-shared/meta?raw";
-
-export type DeckMeta = {
-  dbid: ID_of<DB>;
-  title: string;
-  lastModified: number;
-  isDirty: boolean;
-};
+import { CtxAsync } from "@vlcn.io/react";
 
 type Data = {
   connected: boolean;
@@ -22,9 +15,7 @@ type Data = {
 export class MetaDB extends Model<Data> {
   #sync?: Awaited<ReturnType<typeof startSync>>;
   public readonly rx: TblRx;
-
-  static readonly DecksQuery =
-    'SELECT * FROM "deck_map" ORDER BY "lastModified" DESC';
+  public readonly ctx: CtxAsync;
 
   constructor(public readonly dbid: string, private db: DB) {
     super({
@@ -32,9 +23,11 @@ export class MetaDB extends Model<Data> {
       connected: false,
     });
     this.rx = tblrx(db);
+    this.ctx = {
+      db,
+      rx: this.rx,
+    };
   }
-
-  openCurrentDeck() {}
 
   get connecting() {
     return this.data.connecting;
@@ -53,7 +46,7 @@ export class MetaDB extends Model<Data> {
    * @param accessToken
    */
   async connect(accessToken: string) {
-    if (this.connecting) {
+    if (this.connecting || this.connected) {
       return;
     }
 
@@ -101,17 +94,17 @@ export class MetaDB extends Model<Data> {
   close() {
     this.update({
       connected: false,
+      connecting: false,
     });
     this.rx.dispose();
     this.db.close();
+    this.#sync?.stop();
   }
 }
 
 export default function newMetaDB(sqlite: SQLite3): Promise<MetaDB> {
   return sqlite.open("meta.db").then(async (db) => {
-    for (const x of metaSchema.split(";")) {
-      await db.exec(x);
-    }
+    await db.exec(metaSchema);
     const dbid = await db.execA("SELECT quote(crsql_siteid())");
     return new MetaDB(dbid[0][0], db);
   });

@@ -9,9 +9,6 @@ import UrlRenderer from "./components/routing/UrlRenderer";
 import AppState from "./domain/ephemeral/AppState";
 import ToastContainer from "./widgets/ToastContainer";
 
-import "styles/bootstrap.css";
-import "styles/bootstrap-icons/bootstrap-icons.css";
-import "styles/main.css";
 import "styles/markdown/markdown-reset.css";
 import "styles/mobile.css";
 

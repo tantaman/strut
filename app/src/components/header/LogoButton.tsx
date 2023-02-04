@@ -8,14 +8,14 @@ const Options = DropdownButton.Options;
 import "styles/components/Header.css";
 import Css from "../../html/Css";
 import { Deck } from "../../domain/schema";
-import { Ctx, useQuery } from "../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 import queries from "../../domain/queries";
 import mutations from "../../domain/mutations";
-import { ID_of } from "../../id";
+import { IID_of } from "../../id";
 
-function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: ID_of<Deck> }) {
-  const canUndo = useQuery(queries.canUndo(ctx, deckId)).data;
-  const canRedo = useQuery(queries.canRedo(ctx, deckId)).data;
+function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
+  const canUndo = queries.canUndo(ctx, deckId).data;
+  const canRedo = queries.canRedo(ctx, deckId).data;
 
   return (
     <DropdownButton className="strt-logo-button">

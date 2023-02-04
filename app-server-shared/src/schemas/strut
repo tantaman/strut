@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "deck" (
-  "id" primary key,
+  "id" INTEGER primary key,
   "title",
   "created",
   "modified",
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "deck" (
 );
 
 CREATE TABLE IF NOT EXISTS "slide" (
-  "id" primary key,
+  "id" INTEGER primary key,
   "deck_id",
   "order",
   "created",
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "slide" (
 CREATE INDEX IF NOT EXISTS "slide_deck_id" ON "slide" ("deck_id", "order");
 
 CREATE TABLE IF NOT EXISTS "text_component" (
-  "id" primary key,
+  "id" INTEGER primary key,
   "slide_id",
   "text",
   "styles",
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src
 CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS "shape_component" (
-  "id" primary key,
+  "id" INTEGER primary key,
   "slide_id",
   "type",
   "props",
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
 CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
 
 CREATE TABLE IF NOT EXISTS "theme" (
-  "id" primary key,
+  "id" INTEGER primary key,
   "name",
   "bg_colorset",
   "fg_colorset",
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS "theme" (
 );
 
 CREATE TABLE IF NOT EXISTS "recent_color" (
-  "color" primary key,
+  "color" INTEGER primary key,
   "last_used",
   "first_used",
   "theme_id"
