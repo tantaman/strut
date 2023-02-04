@@ -103,7 +103,7 @@ export class DeckDB extends Model<Data> {
 export async function newDeckDB(
   sqlite: SQLite3,
   remoteDbid?: string,
-  mainDeckId?: IID_of<Deck>
+  mainDeckId?: IID_of<Deck> | null
 ) {
   // we are connecting to a remote which exists.
   if (remoteDbid && mainDeckId) {
@@ -113,6 +113,7 @@ export async function newDeckDB(
   } else {
     // we are connecting to a new remote, generated an id for it locally
     const remoteDbidHex = crypto.randomUUID().replaceAll("-", "");
+    console.log(remoteDbidHex);
     const remoteDbidBytes = hexToBytes(remoteDbidHex);
     const db = await sqlite.open(remoteDbidHex);
     await setupSchema(db);

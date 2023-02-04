@@ -14,6 +14,8 @@ import { DeckDB, newDeckDB } from "./domain/sync/DeckDB.js";
 import { SQLite3 } from "@vlcn.io/wa-crsqlite";
 import App from "./App.js";
 import bytesToHex from "./bytesToHex.js";
+import { IID_of } from "./id.js";
+import { Deck } from "./domain/schema.js";
 
 export default function Bootstrap({
   metaDb,
@@ -34,13 +36,15 @@ export default function Bootstrap({
   );
 
   // In here we'll create the app state for the chosen deck
-  function onDeckChosen(dbid: Uint8Array) {
+  function onDeckChosen(dbid: Uint8Array, mainDeckId: IID_of<Deck> | null) {
+    console.log("Chose: ", dbid);
+    console.log("As hex: ", bytesToHex(dbid));
     setOpeningDeck(true);
 
     if (deckDb != null) {
       deckDb.close();
     }
-    newDeckDB(sqlite, bytesToHex(dbid))
+    newDeckDB(sqlite, bytesToHex(dbid), mainDeckId)
       .then((newDb) => {
         createAppStateForDeck(newDb);
       })
@@ -61,6 +65,8 @@ export default function Bootstrap({
     newDeckDB(sqlite)
       .then((newDb) => {
         // createAppStateForDeck(newDb);
+        console.log("Created: ", newDb.remoteDbid);
+        console.log("Name: ", bytesToHex(newDb.remoteDbid));
         return metaMutations
           .recordNewDB(
             metaDb.ctx,

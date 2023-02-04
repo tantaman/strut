@@ -1,9 +1,11 @@
 import { CtxAsync as Ctx, useQuery } from "@vlcn.io/react";
+import { IID_of } from "../id";
+import { Deck } from "./schema";
 
 export type MetaDeck = {
   title: string;
   dbid: Uint8Array;
-  deck_id: bigint | null;
+  deck_id: IID_of<Deck> | null;
   last_modified: number;
   is_dirty: boolean;
 };

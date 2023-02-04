@@ -1,6 +1,8 @@
 import { CtxAsync } from "@vlcn.io/react";
 import React from "react";
 import metaQueries from "../../domain/metaQueries";
+import { Deck } from "../../domain/schema";
+import { IID_of } from "../../id";
 import DeckCard from "./DeckCard";
 
 const style = { display: "block" };
@@ -11,11 +13,12 @@ export default function OpenDeckDlg({
   onNewDeck,
 }: {
   ctx: CtxAsync;
-  onDeckChosen: (dbid: Uint8Array) => void;
+  onDeckChosen: (dbid: Uint8Array, deckId: IID_of<Deck> | null) => void;
   onNewDeck: () => void;
 }) {
   (window as any).ctx = ctx;
   const decks = metaQueries.decks(ctx).data;
+  console.log(decks);
 
   return (
     <div className="modal" tabIndex={-1} style={style}>
@@ -46,7 +49,7 @@ export default function OpenDeckDlg({
               <DeckCard
                 key={d.deck_id?.toString()}
                 metaDeck={d}
-                onClick={() => onDeckChosen(d.dbid)}
+                onClick={() => onDeckChosen(d.dbid, d.deck_id)}
               />
             ))}
           </div>
