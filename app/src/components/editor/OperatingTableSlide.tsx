@@ -21,8 +21,8 @@ function OperatingTableSlide({
 }) {
   const previewTheme = appState.previewTheme;
 
-  useBind(["bg_colorset", "fontset"], previewTheme);
-  useBind(["editor_mode"], appState);
+  useBind(previewTheme, ["bg_colorset", "fontset"]);
+  useBind(appState, ["editor_mode"]);
 
   return (
     <>

@@ -15,7 +15,7 @@ function active(state: DrawingInteractionState, tool: Tool) {
 export default function DrawingTools({ appState }: { appState: AppState }) {
   const back = () => mutations.toggleDrawing();
   const state = appState.drawingInteractionState;
-  useBind(["currentTool"], state);
+  useBind(state, ["currentTool"]);
 
   return (
     <div className={headerStyles.root}>

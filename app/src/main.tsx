@@ -11,6 +11,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
 import newMetaDB, { MetaDB } from "./domain/sync/MetaDB.js";
 import Bootstrap from "./Bootstrap.js";
+import MetaState from "./domain/ephemeral/MetaState.js";
 
 async function main() {
   const sqlite = await sqliteWasm((_file) => wasmUrl);
@@ -33,6 +34,20 @@ async function startApp({
   const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
   const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
   const auth0Audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+
+  const metaState = new MetaState(
+    {
+      metaDb,
+      deckDb: null,
+      error: null,
+      isAuthenticated: false,
+      hasAuthProvider: auth0Domain != null,
+      useLoggedOut: false,
+      appState: null,
+    },
+    sqlite
+  );
+
   if (auth0Domain) {
     root.render(
       <Auth0Provider
@@ -43,13 +58,11 @@ async function startApp({
         audience={auth0Audience}
         scope="read:crsql_changes write:crsql_changes"
       >
-        <Bootstrap metaDb={metaDb} hasAuthProvider={true} sqlite={sqlite} />
+        <Bootstrap metaState={metaState} />
       </Auth0Provider>
     );
   } else {
-    root.render(
-      <Bootstrap metaDb={metaDb} hasAuthProvider={false} sqlite={sqlite} />
-    );
+    root.render(<Bootstrap metaState={metaState} />);
   }
 }
 

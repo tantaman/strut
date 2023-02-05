@@ -16,7 +16,7 @@ import "styles/markdown/colors/hook.css";
 import "styles/markdown/structures/structures.css";
 import "styles/markdown/fonts/fonts.css";
 import SyncModal from "./components/sync/SyncModal";
-import { useBind } from "./interactions/useBind";
+import { useBind } from "./modelHooks";
 
 export default function App({ appState }: { appState: AppState }) {
   useEffect(() => {

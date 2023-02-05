@@ -11,6 +11,7 @@ import { Slide } from "../../domain/schema";
 import { ID_of } from "../../id";
 
 import { useEffect } from "react";
+import MetaState from "../../domain/ephemeral/MetaState";
 
 // import { useQuery } from "@strut/model/Hooks";
 // import AppState from "../app_state/AppState";
@@ -19,13 +20,8 @@ import { useEffect } from "react";
 // import { EditorMode } from "../app_state/AppState";
 
 // As a react component so life-cycle and batching of updates are handled for us
-export default function UrlRenderer({
-  appState,
-  what,
-}: {
-  appState: AppState | null;
-  what: "login" | "open" | "app";
-}) {
+export default function UrlRenderer({ metaState }: { metaState: MetaState }) {
+  const what = metaState.phase;
   switch (what) {
     case "login":
       window.history.pushState(
@@ -51,7 +47,7 @@ export default function UrlRenderer({
           what,
         },
         "",
-        `/app/${appState?.current_deck_id}`
+        `/app/${metaState.data.appState?.current_deck_id}`
       );
       break;
   }

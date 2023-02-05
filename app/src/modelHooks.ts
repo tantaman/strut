@@ -33,7 +33,7 @@ export function useBind<M extends IModel<D>, D extends {}>(
 class ReactBridge<M extends IModel<D>, D extends {}> {
   constructor(public readonly model: M, private keys?: (keyof D)[]) {}
 
-  subscribeReactInternals(internals: () => void) {
+  subscribeReactInternals = (internals: () => void) => {
     if (this.keys != null) {
       // count.bump('keyed.subscription.' + m.constructor.name);
       // subscribe returns a function which will dispose of the subscription
@@ -42,9 +42,9 @@ class ReactBridge<M extends IModel<D>, D extends {}> {
       // subscribe returns a function which will dispose of the subscription
       return this.model.subscribe(() => internals());
     }
-  }
+  };
 
-  getSnapshot() {
+  getSnapshot = () => {
     return this.model.data;
-  }
+  };
 }
