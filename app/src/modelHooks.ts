@@ -1,15 +1,15 @@
 import { IModel } from "@vlcn.io/model";
 import { useEffect, useSyncExternalStore, useRef } from "react";
 
-export function useBind<M extends IModel<D>, D extends {}>(m: M): void;
-export function useBind<M extends IModel<D>, D extends {}>(
+export function useBind<M extends IModel<Partial<D>>, D extends {}>(m: M): void;
+export function useBind<M extends IModel<Partial<D>>, D extends {}>(
   m: M,
-  keys: (keyof D)[]
+  keys: (keyof Partial<D>)[]
 ): void;
 
 export function useBind<M extends IModel<D>, D extends {}>(
   m: M,
-  keys?: (keyof D)[]
+  keys?: (keyof Partial<D>)[]
 ): D {
   // count.bump("useBind." + m.constructor.name);
   const bridge = useRef<ReactBridge<M, D> | null>(null);

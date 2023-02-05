@@ -107,6 +107,17 @@ export default class MetaState extends Model<Data> {
       });
   };
 
+  closeCurrentDeck = () => {
+    if (this.data.deckDb != null) {
+      this.data.deckDb.close();
+      // this.data.appState && this.data.appState.dispose();
+    }
+    this.update({
+      deckDb: null,
+      appState: null,
+    });
+  };
+
   updateAuthState = (
     isAuthenticated: boolean,
     getAccessTokenSilently: (args: any) => Promise<string>
@@ -185,10 +196,14 @@ export default class MetaState extends Model<Data> {
 
 // TODO: track deps one day where each access of a data object is tracked
 // so we can bind to methods that depend on data items.
+// TODO: enforce callers create a transaction before making any changes to domain model objects.
+// via our STM implementation -- https://github.com/vlcn-io/vulcan/tree/main/ts/packages/value
 
 /*
 Knockout - 
 Whenever you declare a computed observable, KO immediately invokes its evaluator function to get its initial value.
 While the evaluator function is running, KO sets up a subscription to any observables (including other computed observables) that the evaluator reads. The subscription callback is set to cause the evaluator to run again, looping the whole process back to step 1 (disposing of any old subscriptions that no longer apply).
 KO notifies any subscribers about the new value of your computed observable.
+
+^-- can our STM system figure this out for us?? We track all reads and writes against all domain memory... hmmm
 */
