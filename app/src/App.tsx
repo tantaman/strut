@@ -19,8 +19,6 @@ import SyncModal from "./components/sync/SyncModal";
 import { useBind } from "./interactions/useBind";
 
 export default function App({ appState }: { appState: AppState }) {
-  const [linkClickHandler, _] = useState(() => new LinkClickHandler(appState));
-
   useEffect(() => {
     hotkeys.install(appState);
     window.onpopstate = (_e) => onPopState(appState);
@@ -30,10 +28,7 @@ export default function App({ appState }: { appState: AppState }) {
 
   return (
     <>
-      <UrlRenderer appState={appState} />
-      <div onClick={linkClickHandler.handleMaybeBubbledLinkClick}>
-        <Editor appState={appState} />
-      </div>
+      <Editor appState={appState} />
       {appState.open_type ? <OpenType appState={appState} /> : null}
       {appState.configureSync ? <SyncModal appState={appState} /> : null}
       <ToastContainer errorState={appState.errorState} />

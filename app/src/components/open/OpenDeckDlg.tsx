@@ -6,6 +6,11 @@ import { IID_of } from "../../id";
 import DeckCard from "./DeckCard";
 
 const style = { display: "block" };
+const bodyStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr 1fr",
+  gap: "1rem",
+};
 
 export default function OpenDeckDlg({
   ctx,
@@ -18,7 +23,6 @@ export default function OpenDeckDlg({
 }) {
   (window as any).ctx = ctx;
   const decks = metaQueries.decks(ctx).data;
-  console.log(decks);
 
   return (
     <div className="modal" tabIndex={-1} style={style}>
@@ -33,7 +37,7 @@ export default function OpenDeckDlg({
               aria-label="Close"
             ></button>
           </div>
-          <div className="modal-body">
+          <div className="modal-body" style={bodyStyle}>
             <DeckCard
               metaDeck={{
                 title: "New Deck",

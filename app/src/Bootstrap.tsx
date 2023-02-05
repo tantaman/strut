@@ -16,6 +16,7 @@ import App from "./App.js";
 import bytesToHex from "./bytesToHex.js";
 import { IID_of } from "./id.js";
 import { Deck } from "./domain/schema.js";
+import UrlRenderer from "./components/routing/UrlRenderer.js";
 
 export default function Bootstrap({
   metaDb,
@@ -124,24 +125,34 @@ export default function Bootstrap({
     };
   }, [isAuthenticated, deckDb]);
 
+  let content = null;
+  let what: "login" | "open" | "app";
   // if not authenticated, log in or continue without logging in
   if (!isAuthenticated && shouldLogin) {
     // user can choose not to login and thus we set shouldLogin to false
-    return <LoginDlg onNoLogin={() => setShouldLogin(false)} />;
-  }
-
-  if (appState == null) {
+    what = "login";
+    content = <LoginDlg onNoLogin={() => setShouldLogin(false)} />;
+  } else if (appState == null) {
     // user needs to open a deck
-    return (
+    what = "open";
+    content = (
       <OpenDeckDlg
         onDeckChosen={onDeckChosen}
         onNewDeck={onNewDeck}
         ctx={metaDb.ctx}
       />
     );
+  } else {
+    what = "app";
+    content = <App appState={appState} />;
   }
 
-  return <App appState={appState} />;
+  return (
+    <>
+      <UrlRenderer appState={appState} what={what} />
+      {content}
+    </>
+  );
 }
 
 async function initiateSync(

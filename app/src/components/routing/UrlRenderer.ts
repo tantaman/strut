@@ -10,6 +10,8 @@ import AppState from "../../domain/ephemeral/AppState";
 import { Slide } from "../../domain/schema";
 import { ID_of } from "../../id";
 
+import { useEffect } from "react";
+
 // import { useQuery } from "@strut/model/Hooks";
 // import AppState from "../app_state/AppState";
 // import Slide from "../deck/Slide";
@@ -17,7 +19,42 @@ import { ID_of } from "../../id";
 // import { EditorMode } from "../app_state/AppState";
 
 // As a react component so life-cycle and batching of updates are handled for us
-export default function UrlRenderer({ appState }: { appState: AppState }) {
+export default function UrlRenderer({
+  appState,
+  what,
+}: {
+  appState: AppState | null;
+  what: "login" | "open" | "app";
+}) {
+  switch (what) {
+    case "login":
+      window.history.pushState(
+        {
+          what,
+        },
+        "",
+        "/login"
+      );
+      break;
+    case "open":
+      window.history.pushState(
+        {
+          what,
+        },
+        "",
+        "/open"
+      );
+      break;
+    case "app":
+      window.history.pushState(
+        {
+          what,
+        },
+        "",
+        `/app/${appState?.current_deck_id}`
+      );
+      break;
+  }
   // const deck = appState.deck;
   // useQuery(["mostRecentlySelectedSlide"], deck);
   // useQuery(["editorMode"], appState);
@@ -28,6 +65,16 @@ export default function UrlRenderer({ appState }: { appState: AppState }) {
   //     editorMode: appState.editorMode,
   //   })
   // );
+
+  useEffect(() => {
+    function cb(event: PopStateEvent) {
+      console.log("POP STATE!", event);
+    }
+    window.addEventListener("popstate", cb);
+    return () => {
+      window.removeEventListener("popstate", cb);
+    };
+  }, []);
 
   return null;
 }

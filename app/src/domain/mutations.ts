@@ -168,20 +168,19 @@ const mutations = {
 
   addSlideAfter(
     ctx: Ctx,
-    adterSlideId: IID_of<Slide> | null,
+    afterSlideId: IID_of<Slide> | null,
     id: IID_of<Deck>
   ) {
     // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
     // doable in a single sql stmt?
     const slideId = objId<Slide>(ctx.db);
-    const query = `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
+    const query = `INSERT INTO "slide_fractindex" ("id", "deck_id", "after_id", "created", "modified") VALUES (
       ${slideId},
       ${id},
-      1,
+      ${afterSlideId},
       ${Date.now()},
       ${Date.now()}
     );`;
-    console.log(query);
     return ctx.db.exec(query);
   },
 
