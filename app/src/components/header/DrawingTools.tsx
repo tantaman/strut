@@ -4,7 +4,7 @@ import * as headerStyles from "./HeaderButton.module.css";
 import * as styles from "./DrawingTools.module.css";
 import { Deck, Tool } from "../../domain/schema";
 import mutations from "../../domain/mutations";
-import { useBind } from "../../hooks";
+import { useBind } from "../../modelHooks";
 import AppState from "../../domain/ephemeral/AppState";
 import DrawingInteractionState from "../../domain/ephemeral/DrawingInteractionState";
 

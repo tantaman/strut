@@ -1,9 +1,10 @@
 import { Model } from "@vlcn.io/model";
-import { ID_of } from "../../id";
+import { IID_of } from "../../id";
 import { Theme } from "../schema";
 
 export default class EphemeralTheme extends Model<Theme> {
-  get id(): ID_of<Theme> {
+  static defaultThemeId = 1n as IID_of<EphemeralTheme>;
+  get id(): IID_of<Theme> {
     return this.data.id;
   }
   get name(): string | undefined {

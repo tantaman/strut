@@ -15,7 +15,7 @@ import { MouseEvent } from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import { Slide } from "../../domain/schema";
 import mutations from "../../domain/mutations";
-import { ID_of } from "../../id";
+import { IID_of } from "../../id";
 
 // Technically this should be open for extension by bundles that want
 // to handle routing events
@@ -35,12 +35,12 @@ export type LinkClickEvent = SlideFromSlideEvent | SlideFromWellEvent;
 
 type SlideFromSlideEvent = {
   type: "SLIDE_FROM_SLIDE";
-  id: ID_of<Slide>;
+  id: IID_of<Slide>;
 };
 
 type SlideFromWellEvent = {
   type: "SLIDE_FROM_WELL";
-  id: ID_of<Slide>;
+  id: IID_of<Slide>;
 };
 
 const transformations = {

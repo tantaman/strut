@@ -1,7 +1,7 @@
-import { ID_of } from "../id";
+import { IID_of } from "../id";
 import { Deck } from "./schema";
 
 const actions = {
-  launchPresentation(deckId: ID_of<Deck>) {},
+  launchPresentation(deckId: IID_of<Deck>) {},
 };
 export default actions;

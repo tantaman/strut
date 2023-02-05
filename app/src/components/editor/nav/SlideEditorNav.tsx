@@ -32,8 +32,8 @@ export default function SlideEditorNav({ appState }: { appState: AppState }) {
         </>
       </div>
       <div>
-        {<LayoutButton appState={appState} />}
-        {<PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />}
+        <LayoutButton appState={appState} />
+        <PresentButton ctx={appState.ctx} deckId={appState.current_deck_id} />
       </div>
     </Header>
   );

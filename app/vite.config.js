@@ -1,6 +1,7 @@
 // vite.config.js
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   resolve: {
@@ -8,6 +9,8 @@ export default defineConfig({
       styles: resolve(__dirname, "src/styles"),
     },
   },
+
+  plugins: [visualizer()],
 
   build: {
     target: "es2020",
@@ -21,10 +24,6 @@ export default defineConfig({
   server: {
     fs: {
       strict: false,
-    },
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin",
-      "Cross-Origin-Embedder-Policy": "require-corp",
     },
   },
 });

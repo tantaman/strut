@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/", // path to output directory
+    "sourceMap": true, // allow sourcemap support
+    "strictNullChecks": true, // enable strict null checks as a best practice
+    "module": "esnext", // specify module code generation
+    "target": "esnext", // specify ECMAScript target version
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "allowJs": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "resolveJsonModule": true
+  },
+  "include": ["./src/"]
+}

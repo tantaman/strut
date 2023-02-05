@@ -1,0 +1,14 @@
+{
+  "name": "@strut/app-server-shared",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    "./deck": "./src/schemas/strut",
+    "./meta": "./src/schemas/strut-meta"
+  },
+  "keywords": [],
+  "author": "tantaman",
+  "dependencies": {}
+}

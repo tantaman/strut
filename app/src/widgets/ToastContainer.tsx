@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import ErrorState from "../domain/ephemeral/ErrorState";
-import { useBind } from "../hooks";
+import { useBind } from "../modelHooks";
 import Toast from "./Toast";
 import * as styles from "./ToastContainer.module.css";
 

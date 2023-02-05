@@ -6,7 +6,7 @@ import useOnDocClick from "../../interactions/useOnDocClick";
 import alias from "../../utils/alias";
 import styles from "../../components/header/HeaderButton.module.css";
 import mutations from "../../domain/mutations";
-import { Ctx } from "../../hooks";
+import { CtxAsync as Ctx } from "@vlcn.io/react";
 
 /*
 What do we do?

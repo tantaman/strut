@@ -2,9 +2,9 @@ import React, { useCallback, useState } from "react";
 import useOnDocClick from "../../interactions/useOnDocClick";
 import { Deck, Presenter, Transition } from "../../domain/schema";
 import * as styles from "./HeaderButton.module.css";
-import { ID_of } from "../../id";
+import { IID_of } from "../../id";
 import fns from "../../domain/fns";
-import { Ctx, first, useQuery } from "../../hooks";
+import { CtxAsync as Ctx, first } from "@vlcn.io/react";
 import queries from "../../domain/queries";
 import actions from "../../domain/actions";
 import mutations from "../../domain/mutations";
@@ -15,9 +15,9 @@ export default function PresentButton({
   deckId,
 }: {
   ctx: Ctx;
-  deckId: ID_of<Deck>;
+  deckId: IID_of<Deck>;
 }) {
-  const presenter = useQuery(queries.chosenPresenter(ctx, deckId)).data;
+  const presenter = queries.chosenPresenter(ctx, deckId).data;
 
   if (!presenter) {
     return <div>No presenter chosen?</div>;
@@ -33,7 +33,7 @@ function PresentButtonImpl({
 }: {
   ctx: Ctx;
   presenter: Presenter;
-  deckId: ID_of<Deck>;
+  deckId: IID_of<Deck>;
 }) {
   const [show, setShow] = useState(false);
   useOnDocClick(() => {

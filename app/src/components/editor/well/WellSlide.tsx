@@ -1,21 +1,12 @@
 "use strict";
 
-import React, {
-  DragEvent,
-  memo,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { DragEvent, memo, MouseEvent, useRef, useState } from "react";
 import css from "../../../html/Css";
-import { first, useQuery, useQueryA } from "../../../hooks";
 import { Slide } from "../../../domain/schema";
 import WellContextMenu from "./WellContextMenu";
 import styles from "./WellSlide.module.css";
 import AppState from "../../../domain/ephemeral/AppState";
-import { ID_of } from "../../../id";
+import { IID_of } from "../../../id";
 import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
@@ -33,18 +24,20 @@ img.src = dragImageUrl.toString();
 // and we can probs re-do remove, order, insert, to not require the
 // index
 function WellSlide(props: {
-  id: ID_of<Slide>;
+  id: IID_of<Slide>;
   index: number;
   appState: AppState;
   orient: "horizontal" | "vertical";
 }) {
   useTraceUpdate("WellSlide", props);
 
-  const theme = useQuery(
-    queries.themeFromDeck(props.appState.ctx, props.appState.current_deck_id)
+  const theme = queries.themeFromDeck(
+    props.appState.ctx,
+    props.appState.current_deck_id
   ).data;
-  const selectedSlides = useQueryA(
-    queries.selectedSlides(props.appState.ctx, props.appState.current_deck_id)
+  const selectedSlides = queries.selectedSlideIds(
+    props.appState.ctx,
+    props.appState.current_deck_id
   ).data;
 
   const previewTheme = props.appState.previewTheme;
@@ -185,7 +178,7 @@ function WellSlide(props: {
       {hideContextMenu ? null : (
         <WellContextMenu
           appState={props.appState}
-          index={props.index}
+          slideId={props.id}
           orient={props.orient}
         />
       )}

@@ -7,7 +7,6 @@ import AlignmentDropdown from "./AlignmentDropdown";
 import MarkMenu from "./MarkMenu";
 import FontColorButton from "./FontColorButton";
 import queries from "../../../../domain/queries";
-import { useQuery } from "../../../../hooks";
 
 type Props = {
   appState: AppState;
@@ -17,8 +16,9 @@ export default function StylingMenu({ appState }: Props) {
   const state = appState.authoringState;
   const ctx = appState.ctx;
 
-  const theme = useQuery(
-    queries.themeFromDeck(appState.ctx, appState.current_deck_id)
+  const theme = queries.themeFromDeck(
+    appState.ctx,
+    appState.current_deck_id
   ).data;
 
   const addImage = () => {

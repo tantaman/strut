@@ -2,14 +2,16 @@ import * as styles from "./WellContextMenu.module.css";
 import React from "react";
 import mutations from "../../../domain/mutations";
 import AppState from "../../../domain/ephemeral/AppState";
+import { IID_of } from "../../../id";
+import { Slide } from "../../../domain/schema";
 
 export default function WellContextMenu({
   appState,
-  index,
+  slideId,
   orient,
 }: {
   appState: AppState;
-  index: number;
+  slideId: IID_of<Slide> | null;
   orient: "horizontal" | "vertical";
 }) {
   return (
@@ -21,7 +23,11 @@ export default function WellContextMenu({
       }
       onClick={(e) => {
         // TODO: index based or... slide id base?
-        mutations.addSlideAfter(appState.ctx, index, appState.current_deck_id);
+        mutations.addSlideAfter(
+          appState.ctx,
+          slideId,
+          appState.current_deck_id
+        );
         e.stopPropagation();
       }}
     >

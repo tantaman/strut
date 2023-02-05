@@ -1,12 +1,11 @@
-import { ID_of } from "@vlcn.io/id";
 import React from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import queries from "../../domain/queries";
 import { Slide } from "../../domain/schema";
-import { useQuery } from "../../hooks";
 import TextEditor from "./markdown/TextEditor";
 
 import "styles/markdown/markdown-reset.css";
+import { IID_of } from "../../id";
 
 export default function OTTextComponents({
   appState,
@@ -15,19 +14,18 @@ export default function OTTextComponents({
   scale,
 }: {
   appState: AppState;
-  slideId: ID_of<Slide>;
+  slideId: IID_of<Slide>;
   style: Object;
   scale: number;
 }) {
-  const components = useQuery(
-    queries.textComponents(appState.ctx, slideId)
-  ).data;
+  // TODO: flip to gathering component ids instead?
+  const components = queries.textComponents(appState.ctx, slideId).data;
   return (
     <div style={style} className="markdown">
       {components.map((c, i) => (
         <TextEditor
           ctx={appState.ctx}
-          key={c.id}
+          key={c.id.toString()}
           id={c.id}
           text={c.text || "Text"}
           scale={scale}

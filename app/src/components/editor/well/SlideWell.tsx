@@ -5,11 +5,9 @@ import Slide from "./WellSlide";
 
 import "styles/components/SlideWell.css";
 import Css from "../../../html/Css";
-import { useQueryA } from "../../../hooks";
 import useMatchMedia from "../../../interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
 import queries from "../../../domain/queries";
-import { ID_of } from "../../../id";
 import AppState from "../../../domain/ephemeral/AppState";
 import useTraceUpdate from "../../../utils/useTraceUpdate";
 
@@ -24,9 +22,11 @@ function SlideWell({
 }) {
   useTraceUpdate("SlideWell", { className, appState });
   // TODO: paginated fetch
-  const slideIds = useQueryA(
-    queries.slideIds(appState.ctx, appState.current_deck_id)
+  const slideIds = queries.slideIds(
+    appState.ctx,
+    appState.current_deck_id
   ).data;
+  console.log(slideIds);
   const orientHorizontally = useMatchMedia(
     "(max-width: " + mediaCuts.horizontal + "px)"
   );
@@ -37,7 +37,7 @@ function SlideWell({
         <Slide
           id={id}
           index={index}
-          key={id}
+          key={id.toString()}
           appState={appState}
           orient={orientHorizontally ? "horizontal" : "vertical"}
         />
