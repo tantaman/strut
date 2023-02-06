@@ -73,7 +73,7 @@ export default class MetaState extends Model<Data> {
 
   onNewDeck = () => {
     if (this.data.deckDb != null) {
-      // TODO: appState.dispose();
+      this.data.appState?.dispose();
       this.data.deckDb.close();
     }
 
@@ -110,7 +110,7 @@ export default class MetaState extends Model<Data> {
   closeCurrentDeck = () => {
     if (this.data.deckDb != null) {
       this.data.deckDb.close();
-      // this.data.appState && this.data.appState.dispose();
+      this.data.appState?.dispose();
     }
     this.update({
       deckDb: null,

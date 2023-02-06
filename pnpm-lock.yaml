@@ -26,17 +26,17 @@ importers:
       '@lexical/table': ^0.6.5
       '@lexical/utils': ^0.6.5
       '@strut/app-server-shared': workspace:*
-      '@strut/counter': ^0.0.11
+      '@strut/counter': link:../../misc/typescript/packages/counter
       '@types/chroma-js': ^2.1.4
       '@types/jest': ^29.2.4
       '@types/react': ^18.0.26
       '@types/react-dom': ^18.0.9
       '@types/throttle-debounce': ^5.0.0
       '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
-      '@vlcn.io/model': ^0.1.0
+      '@vlcn.io/model': link:../../model/ts/packages/model
       '@vlcn.io/react': link:../../crsqlite/js/react
       '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
-      '@vlcn.io/value': ^0.1.0
+      '@vlcn.io/value': link:../../model/ts/packages/value
       '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
       '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: ^2.4.2
@@ -68,13 +68,13 @@ importers:
       '@lexical/table': 0.6.5_lexical@0.6.5
       '@lexical/utils': 0.6.5_lexical@0.6.5
       '@strut/app-server-shared': link:../app-server-shared
-      '@strut/counter': 0.0.11
+      '@strut/counter': link:../../misc/typescript/packages/counter
       '@types/throttle-debounce': 5.0.0
       '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
-      '@vlcn.io/model': 0.1.0
+      '@vlcn.io/model': link:../../model/ts/packages/model
       '@vlcn.io/react': link:../../crsqlite/js/react
       '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
-      '@vlcn.io/value': 0.1.0
+      '@vlcn.io/value': link:../../model/ts/packages/value
       '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
       '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: 2.4.2
@@ -1438,16 +1438,6 @@ packages:
     resolution: {integrity: sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==}
     dev: true
 
-  /@strut/counter/0.0.11:
-    resolution: {integrity: sha512-xakuLHb385I0t38vWpmqXTSVc+IlNRvWTU7xZ/WGuXtvJ8f7QzWDCwGJzTGPFx2i1tsCgRwl0lrT9hHyzFSs9A==}
-    dependencies:
-      '@strut/utils': 0.0.11
-    dev: false
-
-  /@strut/utils/0.0.11:
-    resolution: {integrity: sha512-iKeBb4ud7wPEv9gJFBGlYfebroLib97SSmUapsL1nyx+njTHwynfaIwb0qwd8CP6Dh1+lRao2oE41Ao8GfyYGw==}
-    dev: false
-
   /@szmarczak/http-timer/4.0.6:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
@@ -1906,29 +1896,6 @@ packages:
       '@typescript-eslint/types': 5.48.1
       eslint-visitor-keys: 3.3.0
     dev: true
-
-  /@vlcn.io/model/0.1.0:
-    resolution: {integrity: sha512-9XkYB2mpBexY0DFj2ZZUt+IJCLbwwxaNf+I8PHwn3b56RwJcPN6TfBwoC1lXCqXCmnUrBxyY7veUKHg8K5Uh4Q==}
-    dependencies:
-      '@vlcn.io/value': 0.1.0
-      typescript: 4.9.4
-    dev: false
-
-  /@vlcn.io/util/0.1.0:
-    resolution: {integrity: sha512-HaYtmvVxsng0rzQNsjBU7mWAtv53XYESE8nGMKoouHu0ELoNLIHnUwDMUnTGcbaJ14iGrSh6+iPqpKS/NLgZ1g==}
-    dev: false
-
-  /@vlcn.io/value/0.1.0:
-    resolution: {integrity: sha512-hmchBzAQSD7bNjRzlhb7ofZGLcnhfwbE4kCriX8pz7WplakPDJqVzVw83mmpGJeHFSbsA/Dwy5QiX/zFBW3Drg==}
-    dependencies:
-      '@vlcn.io/util': 0.1.0
-      '@vlcn.io/zone': 0.1.0
-      typescript: 4.9.4
-    dev: false
-
-  /@vlcn.io/zone/0.1.0:
-    resolution: {integrity: sha512-VFzuZM4ea97EvAU59rEtY3n1Xom2jeaavJQ7A1N0UWFZC/KdT+UB/jgfsqLR48LnJRtmHQf+wuo1bHedPP2PVQ==}
-    dev: false
 
   /abab/2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
@@ -6976,6 +6943,7 @@ packages:
     resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}

@@ -11,6 +11,7 @@ export default function Bootstrap({ metaState }: { metaState: MetaState }) {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   useBind(metaState);
 
+  console.log(isAuthenticated);
   useEffect(() => {
     metaState.updateAuthState(isAuthenticated, getAccessTokenSilently);
   }, [isAuthenticated]);
