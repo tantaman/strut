@@ -50,7 +50,7 @@ function WellSlide(props: {
 
   const onDragStart = (e: DragEvent) => {
     setHideContextMenu(true);
-    e.dataTransfer.setData("text/plain", props.index.toString());
+    e.dataTransfer.setData("text/plain", props.id.toString());
     e.dataTransfer.dropEffect = "move";
     e.dataTransfer.setDragImage(img, 16, 20);
   };
@@ -127,13 +127,17 @@ function WellSlide(props: {
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
-    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    const fromId = BigInt(
+      e.dataTransfer.getData("text/plain")
+    ) as IID_of<Slide>;
     setDropClass("");
-    let toIndex = 0;
+    let toId = null;
+    let side: "after" | "before" = "after";
     if (dropClass === styles.top || dropClass === styles.left) {
-      toIndex = props.index;
+      toId = props.id;
+      side = "before";
     } else if (dropClass === styles.bottom || dropClass === styles.right) {
-      toIndex = props.index + 1;
+      toId = props.id;
     } else {
       // Drop into a slide making a sub-folder
       return;
@@ -141,11 +145,10 @@ function WellSlide(props: {
     mutations.reorderSlides(
       props.appState.ctx,
       props.appState.current_deck_id,
-      fromIndex,
-      toIndex
+      fromId,
+      toId,
+      side
     );
-    // reorder
-    // from index, to index
   };
 
   const onDragLeave = () => setDropClass("");

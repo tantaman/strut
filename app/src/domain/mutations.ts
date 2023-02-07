@@ -200,12 +200,40 @@ const mutations = {
   },
 
   // TODO: should be id rather than index based reordering in the future
-  reorderSlides(
+  async reorderSlides(
     ctx: Ctx,
-    id: IID_of<Deck>,
-    fromIndex: number,
-    toIndex: number
-  ) {},
+    deckId: IID_of<Deck>,
+    fromId: IID_of<Slide>,
+    toId: IID_of<Slide>,
+    side: "after" | "before"
+  ) {
+    // if before, query for the slide before toId
+    // then insert after that point
+    let afterId;
+    if (side === "before") {
+      let result = (
+        await ctx.db.execA(
+          /*sql */ `SELECT "id" FROM "slide"
+          WHERE "deck_id" = ? AND "order" < (SELECT "order" FROM "slide" WHERE "id" = ?)
+          ORDER BY "order" DESC LIMIT 1`,
+          [deckId, toId]
+        )
+      )[0];
+      if (result) {
+        afterId = result[0];
+      } else {
+        afterId = null;
+      }
+    } else {
+      afterId = toId;
+    }
+
+    console.log(afterId, fromId);
+    await ctx.db.exec(
+      /*sql*/ `UPDATE "slide_fractindex" SET "after_id" = ? WHERE "id" = ?`,
+      [afterId, fromId]
+    );
+  },
 
   setAllSlideColor(
     ctx: Ctx,
