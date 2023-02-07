@@ -107,11 +107,20 @@ const queries = {
       first
     ),
 
-  textComponents: (ctx: Ctx, id: IID_of<Slide>) =>
-    useQuery<TextComponent>(
+  textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
+    useRangeQuery<IID_of<TextComponent>>(
       ctx,
-      /*sql*/ `SELECT * FROM "text_component" WHERE "slide_id" = ?`,
-      [id]
+      /*sql*/ `SELECT id FROM "text_component" WHERE "slide_id" = ?`,
+      [id],
+      pick
+    ),
+  textComponent: (ctx: Ctx, id: IID_of<TextComponent>) =>
+    usePointQuery<TextComponent, TextComponent | undefined>(
+      ctx,
+      id as any,
+      /*sql*/ `SELECT * FROM "text_component" WHERE "id" = ?`,
+      [id],
+      first
     ),
 } as const;
 

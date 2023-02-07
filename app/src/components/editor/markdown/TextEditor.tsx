@@ -40,6 +40,7 @@ import { TextComponent } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
 import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
+import queries from "../../../domain/queries";
 
 const persistText = throttle(
   100,
@@ -110,21 +111,41 @@ const useEditorHasFocus = () => {
   return hasFocus;
 };
 
-function TextEditorBase({
+function TextEditorOuter({
   id,
-  text,
-  x,
-  y,
+  index,
   scale,
   ctx,
 }: {
   id: IID_of<TextComponent>;
-  text: string;
-  x: number;
-  y: number;
+  index: number;
   scale: number;
   ctx: Ctx;
 }) {
+  const c = queries.textComponent(ctx, id).data;
+  if (c == null) {
+    return null;
+  }
+
+  return <TextEditorBase c={c} id={id} index={index} scale={scale} ctx={ctx} />;
+}
+
+function TextEditorBase({
+  id,
+  index,
+  scale,
+  ctx,
+  c,
+}: {
+  id: IID_of<TextComponent>;
+  index: number;
+  scale: number;
+  ctx: Ctx;
+  c: TextComponent;
+}) {
+  const text = c.text || "Text";
+  const x = c.x == null ? index * 10 : c.x;
+  const y = c.y == null ? index * 10 : c.y;
   const [config, setConfig] = useState(
     () =>
       ({
@@ -164,17 +185,17 @@ function TextEditorBase({
 
 function TextEditorInner({
   id,
+  scale,
+  ctx,
+  text,
   x,
   y,
-  scale,
-  text,
-  ctx,
 }: {
   id: IID_of<TextComponent>;
+  text: string;
   x: number;
   y: number;
   scale: number;
-  text: string;
   ctx: Ctx;
 }) {
   const [editor] = useLexicalComposerContext();
@@ -268,7 +289,7 @@ function TextEditorInner({
 }
 
 // TODO: round off x,y so we can compare stably
-const TextEditor = memo(TextEditorBase);
+const TextEditor = memo(TextEditorOuter);
 export default TextEditor;
 
 // https://codesandbox.io/s/lexical-rich-text-example-5tncvy?file=/src/Editor.js:1381-1759

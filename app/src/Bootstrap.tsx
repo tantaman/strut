@@ -3,7 +3,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import LoginDlg from "./components/LoginDlg.js";
 import OpenDeckDlg from "./components/open/OpenDeckDlg.js";
 import App from "./App.js";
-import UrlRenderer from "./components/routing/UrlRenderer.js";
 import MetaState from "./domain/ephemeral/MetaState.js";
 import { useBind } from "./modelHooks.js";
 
@@ -35,10 +34,5 @@ export default function Bootstrap({ metaState }: { metaState: MetaState }) {
       break;
   }
 
-  return (
-    <>
-      <UrlRenderer metaState={metaState} />
-      {content}
-    </>
-  );
+  return <>{content}</>;
 }
