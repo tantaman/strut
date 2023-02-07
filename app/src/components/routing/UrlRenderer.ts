@@ -10,8 +10,9 @@ import AppState from "../../domain/ephemeral/AppState";
 import { Slide } from "../../domain/schema";
 import { ID_of } from "../../id";
 
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import MetaState from "../../domain/ephemeral/MetaState";
+import { useBind } from "../../modelHooks";
 
 // import { useQuery } from "@strut/model/Hooks";
 // import AppState from "../app_state/AppState";
@@ -20,37 +21,41 @@ import MetaState from "../../domain/ephemeral/MetaState";
 // import { EditorMode } from "../app_state/AppState";
 
 // As a react component so life-cycle and batching of updates are handled for us
-export default function UrlRenderer({ metaState }: { metaState: MetaState }) {
-  const what = metaState.phase;
-  switch (what) {
-    case "login":
-      window.history.pushState(
-        {
-          what,
-        },
-        "",
-        "/login"
-      );
-      break;
-    case "open":
-      window.history.pushState(
-        {
-          what,
-        },
-        "",
-        "/open"
-      );
-      break;
-    case "app":
-      window.history.pushState(
-        {
-          what,
-        },
-        "",
-        `/app/${metaState.data.appState?.current_deck_id}`
-      );
-      break;
-  }
+function UrlRendererImpl({ metaState }: { metaState: MetaState }) {
+  const phase = metaState.phase;
+  // TODO: `useBind(metaState, ["shouldLogin"])`  -- we should track dependencies automatically
+  // useBind(metaState, ["appState", "isAuthenticated", "useLoggedOut"]);
+  // switch (phase) {
+  //   case "login":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //       },
+  //       "",
+  //       "/login"
+  //     );
+  //     break;
+  //   case "open":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //       },
+  //       "",
+  //       "/open"
+  //     );
+  //     break;
+  //   case "app":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //         deck_id: metaState.data.appState?.current_deck_id,
+  //         dbid: metaState.data.deckDb?.remoteDbid,
+  //       },
+  //       "",
+  //       `/app/${metaState.data.appState?.current_deck_id}`
+  //     );
+  //     break;
+  // }
   // const deck = appState.deck;
   // useQuery(["mostRecentlySelectedSlide"], deck);
   // useQuery(["editorMode"], appState);
@@ -62,18 +67,11 @@ export default function UrlRenderer({ metaState }: { metaState: MetaState }) {
   //   })
   // );
 
-  useEffect(() => {
-    function cb(event: PopStateEvent) {
-      console.log("POP STATE!", event);
-    }
-    window.addEventListener("popstate", cb);
-    return () => {
-      window.removeEventListener("popstate", cb);
-    };
-  }, []);
-
   return null;
 }
+
+const UrlRenderer = memo(UrlRendererImpl);
+export default UrlRenderer;
 
 export function decodeUrl():
   | { selectedSlide: ID_of<Slide>; editorMode: AppState["editor_mode"] }

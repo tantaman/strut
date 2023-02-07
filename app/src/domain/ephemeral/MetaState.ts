@@ -38,6 +38,30 @@ export default class MetaState extends Model<Data> {
     null;
   constructor(data: Data, private readonly sqlite: SQLite3) {
     super(data);
+    window.addEventListener("popstate", this.#onPopState);
+  }
+
+  #onPopState = (e: PopStateEvent) => {
+    let phase = e.state?.phase || "open";
+    if (phase !== this.phase) {
+      switch (phase) {
+        case "login":
+          return;
+        case "open":
+          this.closeCurrentDeck();
+          return;
+        case "app":
+          this.onDeckChosen(e.state.remoteDbid, e.state.mainDeckId, false);
+          return;
+      }
+    }
+  };
+
+  dispose() {
+    window.removeEventListener("popstate", this.#onPopState);
+    this.data.appState?.dispose();
+    this.data.deckDb?.close();
+    super.dispose();
   }
 
   get ctx() {
@@ -82,7 +106,7 @@ export default class MetaState extends Model<Data> {
         return metaMutations
           .recordNewDB(this.ctx, newDb.remoteDbid, newDb.mainDeckId, "Untitled")
           .then(() => {
-            this.createAppStateForDeck(newDb);
+            this.createAppStateForDeck(newDb, true);
           });
       })
       .catch((e: any) => {
@@ -92,13 +116,17 @@ export default class MetaState extends Model<Data> {
       });
   };
 
-  onDeckChosen = (dbid: Uint8Array, mainDeckId: IID_of<Deck> | null) => {
+  onDeckChosen = (
+    dbid: Uint8Array,
+    mainDeckId: IID_of<Deck> | null,
+    updateHistory: boolean = true
+  ) => {
     if (this.data.deckDb != null) {
       this.data.deckDb.close();
     }
     newDeckDB(this.sqlite, bytesToHex(dbid), mainDeckId)
       .then((newDb) => {
-        this.createAppStateForDeck(newDb);
+        this.createAppStateForDeck(newDb, updateHistory);
       })
       .catch((e: any) => {
         this.update({
@@ -166,7 +194,7 @@ export default class MetaState extends Model<Data> {
     }
   }
 
-  createAppStateForDeck = (deckDb: DeckDB) => {
+  createAppStateForDeck = (deckDb: DeckDB, updateHistory: boolean) => {
     const ctx = deckDb.ctx;
     const newAppState = new AppState({
       ctx,
@@ -189,6 +217,17 @@ export default class MetaState extends Model<Data> {
       deckDb,
       appState: newAppState,
     });
+    if (updateHistory) {
+      window.history.pushState(
+        {
+          phase: this.phase,
+          remoteDbid: deckDb.remoteDbid,
+          mainDeckId: deckDb.mainDeckId,
+        },
+        "",
+        `/app/${bytesToHex(deckDb.remoteDbid)}/${deckDb.mainDeckId}`
+      );
+    }
 
     this.startSync();
   };
