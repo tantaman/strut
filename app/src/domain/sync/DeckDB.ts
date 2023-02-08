@@ -36,6 +36,7 @@ export class DeckDB extends Model<Data> {
       connected: false,
       connecting: false,
     });
+    (window as any).ddb = db;
     this.rx = tblrx(db);
     this.ctx = {
       db,

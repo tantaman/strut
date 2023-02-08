@@ -5,12 +5,16 @@ import {
   COMMAND_PRIORITY_LOW,
   EditorState,
   FOCUS_COMMAND,
+  KEY_DELETE_COMMAND,
 } from "lexical";
-import { memo, useCallback, useEffect, useState } from "react";
+import { KeyboardEvent, memo, useCallback, useEffect, useState } from "react";
 import React from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import {
+  InitialConfigType,
+  LexicalComposer,
+} from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
@@ -36,10 +40,11 @@ import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 import ExampleTheme from "./themes/ExampleTheme";
 import styles from "./TextEditor.module.css";
 import { throttle } from "throttle-debounce";
-import { TextComponent } from "../../../domain/schema";
+import { AnyComponentID, Slide, TextComponent } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
 import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
+import queries from "../../../domain/queries";
 
 const persistText = throttle(
   100,
@@ -65,17 +70,6 @@ function onError(error: any) {
   throw error;
 }
 
-// function UnfocusPlugin() {
-//   const [editor] = useLexicalComposerContext();
-
-//   useEffect(() => {
-//     // Focus the editor when the effect fires!
-//     editor.blur();
-//   }, [editor]);
-
-//   return null;
-// }
-
 const useEditorHasFocus = () => {
   const [editor] = useLexicalComposerContext();
   // Possibly use useRef for synchronous updates but no re-rendering effect
@@ -87,6 +81,7 @@ const useEditorHasFocus = () => {
         BLUR_COMMAND,
         () => {
           setFocus(false);
+          editor.setEditable(false);
           return false;
         },
         COMMAND_PRIORITY_LOW
@@ -100,6 +95,7 @@ const useEditorHasFocus = () => {
         FOCUS_COMMAND,
         () => {
           setFocus(true);
+          editor.setEditable(true);
           return false;
         },
         COMMAND_PRIORITY_LOW
@@ -110,27 +106,61 @@ const useEditorHasFocus = () => {
   return hasFocus;
 };
 
-function TextEditorBase({
+function TextEditorOuter({
   id,
-  text,
-  x,
-  y,
+  index,
   scale,
   ctx,
+  selectedComponents,
 }: {
   id: IID_of<TextComponent>;
-  text: string;
-  x: number;
-  y: number;
+  index: number;
   scale: number;
   ctx: Ctx;
+  selectedComponents: Set<AnyComponentID>;
 }) {
-  const [config, setConfig] = useState(
+  const c = queries.textComponent(ctx, id).data;
+  if (c == null) {
+    return null;
+  }
+
+  return (
+    <TextEditorBase
+      c={c}
+      id={id}
+      index={index}
+      scale={scale}
+      ctx={ctx}
+      selectedComponents={selectedComponents}
+    />
+  );
+}
+
+function TextEditorBase({
+  id,
+  index,
+  scale,
+  ctx,
+  c,
+  selectedComponents,
+}: {
+  id: IID_of<TextComponent>;
+  index: number;
+  scale: number;
+  ctx: Ctx;
+  c: TextComponent;
+  selectedComponents: Set<AnyComponentID>;
+}) {
+  const text = c.text || "Text";
+  const x = c.x == null ? index * 10 : c.x;
+  const y = c.y == null ? index * 10 : c.y;
+  const [config, setConfig] = useState<InitialConfigType>(
     () =>
       ({
         namespace: "TextComponentEditor",
         theme: ExampleTheme,
         onError,
+        editable: false,
         editorState: () => $convertFromMarkdownString(text, TRANSFORMERS),
         nodes: [
           HeadingNode,
@@ -155,8 +185,10 @@ function TextEditorBase({
         id={id}
         x={x}
         y={y}
+        slideId={c.slide_id}
         text={text}
         scale={scale}
+        selectedComponents={selectedComponents}
       />
     </LexicalComposer>
   );
@@ -164,23 +196,31 @@ function TextEditorBase({
 
 function TextEditorInner({
   id,
+  scale,
+  ctx,
+  text,
   x,
   y,
-  scale,
-  text,
-  ctx,
+  selectedComponents,
+  slideId,
 }: {
   id: IID_of<TextComponent>;
+  text: string;
   x: number;
   y: number;
   scale: number;
-  text: string;
   ctx: Ctx;
+  selectedComponents: Set<AnyComponentID>;
+  slideId: IID_of<Slide>;
 }) {
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
-  const [editing, setEditing] = useState(hasFocus);
-  const dblClicked = () => editor.focus(() => setEditing(true));
+  // const [editing, setEditing] = useState(hasFocus);
+  const dblClicked = () => {
+    editor.setEditable(true);
+    editor.focus();
+  };
+  const onSelect = () => mutations.selectComponent(ctx, slideId, id, "text");
 
   const onChange = useCallback(
     (editorState: EditorState) => {
@@ -207,7 +247,7 @@ function TextEditorInner({
       y,
     });
   }
-  if (prevText != text && !editing) {
+  if (prevText != text && !hasFocus) {
     setPrevText(text);
     editor.update(() => {
       $convertFromMarkdownString(text, TRANSFORMERS);
@@ -232,9 +272,6 @@ function TextEditorInner({
     setDragging(false);
   }, []);
 
-  if (!hasFocus && editing) {
-    setEditing(false);
-  }
   return (
     <Draggable
       position={currPos}
@@ -242,7 +279,7 @@ function TextEditorInner({
       onDrag={onDragged}
       onStop={onDragStop}
       scale={scale}
-      disabled={editing}
+      disabled={hasFocus}
     >
       <div className={styles.root}>
         <RichTextPlugin
@@ -259,8 +296,16 @@ function TextEditorInner({
         <CodeHighlightPlugin />
         <AutoLinkPlugin />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        {editing ? null : (
-          <div className={styles.cover} onDoubleClick={dblClicked}></div>
+        {hasFocus ? null : (
+          <div
+            className={
+              styles.cover +
+              " " +
+              (selectedComponents.has(id) ? styles.selected : "")
+            }
+            onMouseDown={onSelect}
+            onDoubleClick={dblClicked}
+          ></div>
         )}
       </div>
     </Draggable>
@@ -268,7 +313,7 @@ function TextEditorInner({
 }
 
 // TODO: round off x,y so we can compare stably
-const TextEditor = memo(TextEditorBase);
+const TextEditor = memo(TextEditorOuter);
 export default TextEditor;
 
 // https://codesandbox.io/s/lexical-rich-text-example-5tncvy?file=/src/Editor.js:1381-1759

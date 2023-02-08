@@ -1,22 +1,5 @@
 import { IID_of } from "../id";
 
-const tableNames = [
-  "deck",
-  "slide",
-  "text_component",
-  "embed_component",
-  "shape_component",
-  "line_component",
-  "line_point",
-  "theme",
-  "recent_color",
-  "presenter",
-  "selected_slide",
-  "selected_component",
-  "undo_stack",
-  "redo_stack",
-] as const;
-
 // TODO: we shouldn't need to know this detail
 // add a `drop crr` cmd
 export const crrTables = [
@@ -75,6 +58,11 @@ export type Slide = {
   readonly y?: number;
   readonly z?: number;
 };
+
+export type ComponentType = "text" | "embed" | "shape" | "line";
+export type AnyComponentID = IID_of<
+  TextComponent | EmbedComponent | ShapeComponent | LineComponent
+>;
 
 export type TextComponent = {
   readonly id: IID_of<TextComponent>;
