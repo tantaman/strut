@@ -75,13 +75,13 @@ function OperatingTable({ appState }: { appState: AppState }) {
   const rootEl = useRef<HTMLDivElement>(null);
   const deckId = appState.current_deck_id;
   // TODO: are we binding current_deck_id everywhere else we use it?
-  useBind(["current_deck_id", "editor_mode"], appState);
+  useBind(appState, ["current_deck_id", "editor_mode"]);
   const theme = queries.themeFromDeck(appState.ctx, deckId).data;
   const slideId = queries.mostRecentlySelectedSlide(appState.ctx, deckId).data;
   const [affordance, setAffordance] = useState("");
   const previewTheme = appState.previewTheme;
 
-  useBind(["bg_colorset"], previewTheme);
+  useBind(previewTheme, ["bg_colorset"]);
 
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();

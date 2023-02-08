@@ -19,18 +19,21 @@ export default function OTTextComponents({
   scale: number;
 }) {
   // TODO: flip to gathering component ids instead?
-  const components = queries.textComponents(appState.ctx, slideId).data;
+  const componentIds = queries.textComponentIds(appState.ctx, slideId).data;
+  const selectedComponents = queries.selectedComponentIds(
+    appState.ctx,
+    slideId
+  ).data;
   return (
     <div style={style} className="markdown">
-      {components.map((c, i) => (
+      {componentIds.map((id, i) => (
         <TextEditor
+          index={i}
           ctx={appState.ctx}
-          key={c.id.toString()}
-          id={c.id}
-          text={c.text || "Text"}
+          key={id.toString()}
+          id={id}
           scale={scale}
-          x={c.x == null ? i * 10 : c.x}
-          y={c.y == null ? i * 10 : c.y}
+          selectedComponents={selectedComponents}
         />
       ))}
     </div>

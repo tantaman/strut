@@ -9,7 +9,14 @@ import {
   usePointQuery,
 } from "@vlcn.io/react";
 import { IID_of } from "../id";
-import { Deck, Presenter, Slide, TextComponent, Theme } from "./schema";
+import {
+  AnyComponentID,
+  Deck,
+  Presenter,
+  Slide,
+  TextComponent,
+  Theme,
+} from "./schema";
 
 export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
@@ -40,7 +47,7 @@ const queries = {
     ),
 
   slideIds: (ctx: Ctx, id: IID_of<Deck>) =>
-    useRangeQuery<{ id: IID_of<Slide> }, IID_of<Slide>[]>(
+    useQuery<{ id: IID_of<Slide> }, IID_of<Slide>[]>(
       ctx,
       /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC`,
       [id],
@@ -61,6 +68,30 @@ const queries = {
       /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ?`,
       [id],
       (x: any) => new Set(x.map((x: any) => x.slide_id))
+    ),
+
+  selectedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
+    useRangeQuery<AnyComponentID, Set<AnyComponentID>>(
+      ctx,
+      /*sql*/ `SELECT "component_id" FROM "selected_component" WHERE "slide_id" = ?`,
+      [id],
+      (x: any) => new Set(x.map((x: any) => x.component_id))
+    ),
+
+  allComponentPositions: (ctx: Ctx, id: IID_of<Slide>) =>
+    useRangeQuery<{
+      id: AnyComponentID;
+      x: number;
+      y: number;
+    }>(
+      ctx,
+      /*sql*/ `SELECT "id", "x", "y" FROM "text_component" WHERE "slide_id" = ?
+      UNION ALL
+      SELECT "id", "x", "y" FROM "embed_component" WHERE "slide_id" = ?
+      UNION ALL
+      SELECT "id", "x", "y" FROM "shape_component" WHERE "slide_id" = ?
+      `,
+      [id, id, id]
     ),
 
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
@@ -107,11 +138,20 @@ const queries = {
       first
     ),
 
-  textComponents: (ctx: Ctx, id: IID_of<Slide>) =>
-    useQuery<TextComponent>(
+  textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
+    useQuery<IID_of<TextComponent>>(
       ctx,
-      /*sql*/ `SELECT * FROM "text_component" WHERE "slide_id" = ?`,
-      [id]
+      /*sql*/ `SELECT id FROM "text_component" WHERE "slide_id" = ?`,
+      [id],
+      pick
+    ),
+  textComponent: (ctx: Ctx, id: IID_of<TextComponent>) =>
+    usePointQuery<TextComponent, TextComponent | undefined>(
+      ctx,
+      id as any,
+      /*sql*/ `SELECT * FROM "text_component" WHERE "id" = ?`,
+      [id],
+      first
     ),
 } as const;
 

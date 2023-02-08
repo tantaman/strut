@@ -11,6 +11,7 @@ import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 import useTraceUpdate from "../../../utils/useTraceUpdate";
+import WellSlidePreview from "./WellSlidePreview";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -50,7 +51,7 @@ function WellSlide(props: {
 
   const onDragStart = (e: DragEvent) => {
     setHideContextMenu(true);
-    e.dataTransfer.setData("text/plain", props.index.toString());
+    e.dataTransfer.setData("text/plain", props.id.toString());
     e.dataTransfer.dropEffect = "move";
     e.dataTransfer.setDragImage(img, 16, 20);
   };
@@ -127,13 +128,17 @@ function WellSlide(props: {
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
-    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    const fromId = BigInt(
+      e.dataTransfer.getData("text/plain")
+    ) as IID_of<Slide>;
     setDropClass("");
-    let toIndex = 0;
+    let toId = null;
+    let side: "after" | "before" = "after";
     if (dropClass === styles.top || dropClass === styles.left) {
-      toIndex = props.index;
+      toId = props.id;
+      side = "before";
     } else if (dropClass === styles.bottom || dropClass === styles.right) {
-      toIndex = props.index + 1;
+      toId = props.id;
     } else {
       // Drop into a slide making a sub-folder
       return;
@@ -141,11 +146,10 @@ function WellSlide(props: {
     mutations.reorderSlides(
       props.appState.ctx,
       props.appState.current_deck_id,
-      fromIndex,
-      toIndex
+      fromId,
+      toId,
+      side
     );
-    // reorder
-    // from index, to index
   };
 
   const onDragLeave = () => setDropClass("");
@@ -185,6 +189,8 @@ function WellSlide(props: {
       <span className={"badge bg-light text-dark " + styles.badge}>
         {props.index + 1}
       </span>
+      <div className={styles.dropOutsideIndicator + " " + dropClass}></div>
+      <WellSlidePreview ctx={props.appState.ctx} slideId={props.id} />
       {hideContextMenu ? null : (
         <button
           type="button"
@@ -193,7 +199,6 @@ function WellSlide(props: {
           onClick={removeSlide}
         ></button>
       )}
-      <div className={styles.dropOutsideIndicator + " " + dropClass}></div>
     </div>
   );
 }

@@ -10,6 +10,10 @@ import AppState from "../../domain/ephemeral/AppState";
 import { Slide } from "../../domain/schema";
 import { ID_of } from "../../id";
 
+import { memo, useEffect } from "react";
+import MetaState from "../../domain/ephemeral/MetaState";
+import { useBind } from "../../modelHooks";
+
 // import { useQuery } from "@strut/model/Hooks";
 // import AppState from "../app_state/AppState";
 // import Slide from "../deck/Slide";
@@ -17,7 +21,41 @@ import { ID_of } from "../../id";
 // import { EditorMode } from "../app_state/AppState";
 
 // As a react component so life-cycle and batching of updates are handled for us
-export default function UrlRenderer({ appState }: { appState: AppState }) {
+function UrlRendererImpl({ metaState }: { metaState: MetaState }) {
+  const phase = metaState.phase;
+  // TODO: `useBind(metaState, ["shouldLogin"])`  -- we should track dependencies automatically
+  // useBind(metaState, ["appState", "isAuthenticated", "useLoggedOut"]);
+  // switch (phase) {
+  //   case "login":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //       },
+  //       "",
+  //       "/login"
+  //     );
+  //     break;
+  //   case "open":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //       },
+  //       "",
+  //       "/open"
+  //     );
+  //     break;
+  //   case "app":
+  //     window.history.pushState(
+  //       {
+  //         phase,
+  //         deck_id: metaState.data.appState?.current_deck_id,
+  //         dbid: metaState.data.deckDb?.remoteDbid,
+  //       },
+  //       "",
+  //       `/app/${metaState.data.appState?.current_deck_id}`
+  //     );
+  //     break;
+  // }
   // const deck = appState.deck;
   // useQuery(["mostRecentlySelectedSlide"], deck);
   // useQuery(["editorMode"], appState);
@@ -31,6 +69,9 @@ export default function UrlRenderer({ appState }: { appState: AppState }) {
 
   return null;
 }
+
+const UrlRenderer = memo(UrlRendererImpl);
+export default UrlRenderer;
 
 export function decodeUrl():
   | { selectedSlide: ID_of<Slide>; editorMode: AppState["editor_mode"] }

@@ -3,6 +3,8 @@ import { CtxAsync as Ctx, first } from "@vlcn.io/react";
 import { IID_of, newIID } from "../id";
 import fns from "./fns";
 import {
+  AnyComponentID,
+  ComponentType,
   Deck,
   EmbedComponent,
   LineComponent,
@@ -70,22 +72,84 @@ const mutations = {
   },
 
   selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    // TODO: we need to hold notifications
-    // until transaction completes
-    // or not since replication won't be transactional and we can
-    // make the user deal with that problem locally too
-    // to ensure they deal with it remotely
-    return ctx.db
-      .exec(
+    return ctx.db.transaction(async () => {
+      await ctx.db.exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
         [deckId, id]
-      )
-      .then(() =>
-        ctx.db.exec(
-          "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
-          [deckId, id]
-        )
       );
+      await ctx.db.exec(
+        "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
+        [deckId, id]
+      );
+    });
+  },
+
+  selectComponent(
+    ctx: Ctx,
+    slideId: IID_of<Slide>,
+    componentId: AnyComponentID,
+    componentType: ComponentType
+  ) {
+    return ctx.db.transaction(async () => {
+      await ctx.db.exec(
+        "INSERT OR IGNORE INTO selected_component (slide_id, component_id, component_type) VALUES (?, ?, ?)",
+        [slideId, componentId, componentType]
+      );
+      await ctx.db.exec(
+        "DELETE FROM selected_component WHERE slide_id = ? AND component_id != ?",
+        [slideId, componentId]
+      );
+    });
+  },
+
+  removeComponent_ignoreSelection(
+    ctx: Ctx,
+    componentId: AnyComponentID,
+    componentType: ComponentType
+  ) {
+    switch (componentType) {
+      case "text":
+        return ctx.db.exec("DELETE FROM text_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "line":
+        return ctx.db.exec("DELETE FROM line_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "shape":
+        return ctx.db.exec("DELETE FROM shape_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "embed":
+        return ctx.db.exec("DELETE FROM embed_component WHERE id = ?", [
+          componentId,
+        ]);
+    }
+  },
+
+  removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
+    return ctx.db.transaction(async () => {
+      const components = await ctx.db.execA(
+        "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
+        [slideId]
+      );
+      for (const component of components) {
+        await mutations.removeComponent_ignoreSelection(
+          ctx,
+          component[0],
+          component[1]
+        );
+      }
+      await ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+        slideId,
+      ]);
+    });
+  },
+
+  deselectAllComponents(ctx: Ctx, slideId: IID_of<Slide>) {
+    return ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+      slideId,
+    ]);
   },
 
   async applyOperation(ctx: Ctx, op: Operation) {
@@ -126,6 +190,7 @@ const mutations = {
     deckId: IID_of<Deck>,
     selected: boolean
   ) {
+    console.log("remove...");
     // TODO: tx
     const deleteSlide = () =>
       ctx.db.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
@@ -157,31 +222,35 @@ const mutations = {
           select = beforeAfter[0][0];
         }
 
-        return ctx.db
-          .exec(
+        return ctx.db.transaction(async () => {
+          await ctx.db.exec(
+            `DELETE FROM "selected_slide" WHERE "slide_id" = ? AND deck_id = ?`,
+            [id, deckId]
+          );
+          await ctx.db.exec(
             `INSERT OR IGNORE INTO "selected_slide" ("deck_id", "slide_id") VALUES (?, ?)`,
             [deckId, select]
-          )
-          .then(deleteSlide);
+          );
+          await deleteSlide();
+        });
       });
   },
 
   addSlideAfter(
     ctx: Ctx,
-    adterSlideId: IID_of<Slide> | null,
+    afterSlideId: IID_of<Slide> | null,
     id: IID_of<Deck>
   ) {
     // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
     // doable in a single sql stmt?
     const slideId = objId<Slide>(ctx.db);
-    const query = `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
+    const query = `INSERT INTO "slide_fractindex" ("id", "deck_id", "after_id", "created", "modified") VALUES (
       ${slideId},
       ${id},
-      1,
+      ${afterSlideId},
       ${Date.now()},
       ${Date.now()}
     );`;
-    console.log(query);
     return ctx.db.exec(query);
   },
 
@@ -201,12 +270,40 @@ const mutations = {
   },
 
   // TODO: should be id rather than index based reordering in the future
-  reorderSlides(
+  async reorderSlides(
     ctx: Ctx,
-    id: IID_of<Deck>,
-    fromIndex: number,
-    toIndex: number
-  ) {},
+    deckId: IID_of<Deck>,
+    fromId: IID_of<Slide>,
+    toId: IID_of<Slide>,
+    side: "after" | "before"
+  ) {
+    // if before, query for the slide before toId
+    // then insert after that point
+    let afterId;
+    if (side === "before") {
+      let result = (
+        await ctx.db.execA(
+          /*sql */ `SELECT "id" FROM "slide"
+          WHERE "deck_id" = ? AND "order" < (SELECT "order" FROM "slide" WHERE "id" = ?)
+          ORDER BY "order" DESC LIMIT 1`,
+          [deckId, toId]
+        )
+      )[0];
+      if (result) {
+        afterId = result[0];
+      } else {
+        afterId = null;
+      }
+    } else {
+      afterId = toId;
+    }
+
+    console.log(afterId, fromId);
+    await ctx.db.exec(
+      /*sql*/ `UPDATE "slide_fractindex" SET "after_id" = ? WHERE "id" = ?`,
+      [afterId, fromId]
+    );
+  },
 
   setAllSlideColor(
     ctx: Ctx,

@@ -23,3 +23,7 @@
   right: 0;
   bottom: 0;
 }
+
+.selected {
+  outline: 1px dashed #000;
+}
