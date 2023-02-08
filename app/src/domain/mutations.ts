@@ -146,6 +146,12 @@ const mutations = {
     });
   },
 
+  deselectAllComponents(ctx: Ctx, slideId: IID_of<Slide>) {
+    return ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+      slideId,
+    ]);
+  },
+
   async applyOperation(ctx: Ctx, op: Operation) {
     // get mutation from op.name
     // apply mutations from op.args and current ctx

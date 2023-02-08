@@ -9,6 +9,7 @@ import AppState from "../../domain/ephemeral/AppState";
 import OTTextComponents from "./OTTextComponents";
 import { useSelectionContainer } from "@air/react-drag-to-select";
 import mutations from "../../domain/mutations";
+import queries from "../../domain/queries";
 
 function OperatingTableSlide({
   slideId,
@@ -26,9 +27,20 @@ function OperatingTableSlide({
   useBind(previewTheme, ["bg_colorset", "fontset"]);
   useBind(appState, ["editor_mode"]);
   const container = useRef<HTMLDivElement | null>(null);
+  const allComponentPositions = queries.allComponentPositions(
+    appState.ctx,
+    slideId
+  );
+
   const { DragSelection } = useSelectionContainer({
     eventsElement: container.current,
     onSelectionChange: (selection) => {
+      const containerRect = container.current?.getBoundingClientRect();
+      if (containerRect == null) {
+        return;
+      }
+      const offsetTop = containerRect.top;
+      const offsetLeft = containerRect.left;
       // console.log(selection);
       // selection is viewport positions...
       // we'll need to translate to slide positions
@@ -41,10 +53,12 @@ function OperatingTableSlide({
     },
   });
   const onkeydown = (e: KeyboardEvent<HTMLDivElement>) => {
-    console.log(e);
     if (e.key == "Delete") {
       mutations.removeSelectedComponents(appState.ctx, slideId);
     }
+  };
+  const deselectAll = (_: React.MouseEvent) => {
+    mutations.deselectAllComponents(appState.ctx, slideId);
   };
 
   return (
@@ -63,6 +77,7 @@ function OperatingTableSlide({
           outline: "none",
         }}
         onKeyDown={onkeydown}
+        onMouseDown={deselectAll}
         tabIndex={0}
       >
         <OTTextComponents
