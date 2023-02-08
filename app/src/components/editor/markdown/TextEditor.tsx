@@ -5,8 +5,9 @@ import {
   COMMAND_PRIORITY_LOW,
   EditorState,
   FOCUS_COMMAND,
+  KEY_DELETE_COMMAND,
 } from "lexical";
-import { memo, useCallback, useEffect, useState } from "react";
+import { KeyboardEvent, memo, useCallback, useEffect, useState } from "react";
 import React from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
@@ -68,17 +69,6 @@ const persistDrag = throttle(
 function onError(error: any) {
   throw error;
 }
-
-// function UnfocusPlugin() {
-//   const [editor] = useLexicalComposerContext();
-
-//   useEffect(() => {
-//     // Focus the editor when the effect fires!
-//     editor.blur();
-//   }, [editor]);
-
-//   return null;
-// }
 
 const useEditorHasFocus = () => {
   const [editor] = useLexicalComposerContext();

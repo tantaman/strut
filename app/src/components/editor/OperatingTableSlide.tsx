@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from "react";
+import React, { KeyboardEvent, memo, useRef, useState } from "react";
 import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
 import type { otsSqaure } from "./OperatingTable";
@@ -8,6 +8,7 @@ import fns from "../../domain/fns";
 import AppState from "../../domain/ephemeral/AppState";
 import OTTextComponents from "./OTTextComponents";
 import { useSelectionContainer } from "@air/react-drag-to-select";
+import mutations from "../../domain/mutations";
 
 function OperatingTableSlide({
   slideId,
@@ -39,6 +40,12 @@ function OperatingTableSlide({
       return false;
     },
   });
+  const onkeydown = (e: KeyboardEvent<HTMLDivElement>) => {
+    console.log(e);
+    if (e.key == "Delete") {
+      mutations.removeSelectedComponents(appState.ctx, slideId);
+    }
+  };
 
   return (
     <>
@@ -53,7 +60,10 @@ function OperatingTableSlide({
           width: otsStyle.scaledWidth,
           height: otsStyle.scaledHeight,
           backgroundColor: fns.getSlideColorStyle(previewTheme, theme),
+          outline: "none",
         }}
+        onKeyDown={onkeydown}
+        tabIndex={0}
       >
         <OTTextComponents
           appState={appState}

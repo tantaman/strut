@@ -102,6 +102,50 @@ const mutations = {
     });
   },
 
+  removeComponent_ignoreSelection(
+    ctx: Ctx,
+    componentId: AnyComponentID,
+    componentType: ComponentType
+  ) {
+    switch (componentType) {
+      case "text":
+        return ctx.db.exec("DELETE FROM text_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "line":
+        return ctx.db.exec("DELETE FROM line_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "shape":
+        return ctx.db.exec("DELETE FROM shape_component WHERE id = ?", [
+          componentId,
+        ]);
+      case "embed":
+        return ctx.db.exec("DELETE FROM embed_component WHERE id = ?", [
+          componentId,
+        ]);
+    }
+  },
+
+  removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
+    return ctx.db.transaction(async () => {
+      const components = await ctx.db.execA(
+        "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
+        [slideId]
+      );
+      for (const component of components) {
+        await mutations.removeComponent_ignoreSelection(
+          ctx,
+          component[0],
+          component[1]
+        );
+      }
+      await ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+        slideId,
+      ]);
+    });
+  },
+
   async applyOperation(ctx: Ctx, op: Operation) {
     // get mutation from op.name
     // apply mutations from op.args and current ctx

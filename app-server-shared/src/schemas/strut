@@ -29,6 +29,29 @@ CREATE TABLE IF NOT EXISTS "text_component" (
   "y"
 );
 
+CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");
+
+CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
+
+CREATE TABLE IF NOT EXISTS "shape_component" (
+  "id" INTEGER primary key,
+  "slide_id",
+  "type",
+  "props",
+  "x",
+  "y"
+);
+
+CREATE INDEX IF NOT EXISTS "shape_component_slide_id" ON "shape_component" ("slide_id");
+
+CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");
+
+CREATE INDEX IF NOT EXISTS "line_component_slide_id" ON "line_component" ("slide_id");
+
+CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
+
+CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
+
 CREATE INDEX IF NOT EXISTS "text_component_slide_id" ON "text_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS "theme" (
@@ -113,26 +136,3 @@ CREATE TABLE IF NOT EXISTS "redo_stack" (
   "order",
   primary key ("deck_id", "order")
 );
-
-CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");
-
-CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
-
-CREATE TABLE IF NOT EXISTS "shape_component" (
-  "id" INTEGER primary key,
-  "slide_id",
-  "type",
-  "props",
-  "x",
-  "y"
-);
-
-CREATE INDEX IF NOT EXISTS "shape_component_slide_id" ON "shape_component" ("slide_id");
-
-CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");
-
-CREATE INDEX IF NOT EXISTS "line_component_slide_id" ON "line_component" ("slide_id");
-
-CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
-
-CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
