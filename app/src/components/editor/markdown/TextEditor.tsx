@@ -39,7 +39,7 @@ import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 import ExampleTheme from "./themes/ExampleTheme";
 import styles from "./TextEditor.module.css";
 import { throttle } from "throttle-debounce";
-import { TextComponent } from "../../../domain/schema";
+import { AnyComponentID, Slide, TextComponent } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
 import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
@@ -91,6 +91,7 @@ const useEditorHasFocus = () => {
         BLUR_COMMAND,
         () => {
           setFocus(false);
+          editor.setEditable(false);
           return false;
         },
         COMMAND_PRIORITY_LOW
@@ -104,6 +105,7 @@ const useEditorHasFocus = () => {
         FOCUS_COMMAND,
         () => {
           setFocus(true);
+          editor.setEditable(true);
           return false;
         },
         COMMAND_PRIORITY_LOW
@@ -119,18 +121,29 @@ function TextEditorOuter({
   index,
   scale,
   ctx,
+  selectedComponents,
 }: {
   id: IID_of<TextComponent>;
   index: number;
   scale: number;
   ctx: Ctx;
+  selectedComponents: Set<AnyComponentID>;
 }) {
   const c = queries.textComponent(ctx, id).data;
   if (c == null) {
     return null;
   }
 
-  return <TextEditorBase c={c} id={id} index={index} scale={scale} ctx={ctx} />;
+  return (
+    <TextEditorBase
+      c={c}
+      id={id}
+      index={index}
+      scale={scale}
+      ctx={ctx}
+      selectedComponents={selectedComponents}
+    />
+  );
 }
 
 function TextEditorBase({
@@ -139,12 +152,14 @@ function TextEditorBase({
   scale,
   ctx,
   c,
+  selectedComponents,
 }: {
   id: IID_of<TextComponent>;
   index: number;
   scale: number;
   ctx: Ctx;
   c: TextComponent;
+  selectedComponents: Set<AnyComponentID>;
 }) {
   const text = c.text || "Text";
   const x = c.x == null ? index * 10 : c.x;
@@ -180,8 +195,10 @@ function TextEditorBase({
         id={id}
         x={x}
         y={y}
+        slideId={c.slide_id}
         text={text}
         scale={scale}
+        selectedComponents={selectedComponents}
       />
     </LexicalComposer>
   );
@@ -194,6 +211,8 @@ function TextEditorInner({
   text,
   x,
   y,
+  selectedComponents,
+  slideId,
 }: {
   id: IID_of<TextComponent>;
   text: string;
@@ -201,11 +220,17 @@ function TextEditorInner({
   y: number;
   scale: number;
   ctx: Ctx;
+  selectedComponents: Set<AnyComponentID>;
+  slideId: IID_of<Slide>;
 }) {
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
-  const [editing, setEditing] = useState(hasFocus);
-  const dblClicked = () => editor.focus(() => setEditing(true));
+  // const [editing, setEditing] = useState(hasFocus);
+  const dblClicked = () => {
+    editor.setEditable(true);
+    editor.focus();
+  };
+  const onSelect = () => mutations.selectComponent(ctx, slideId, id, "text");
 
   const onChange = useCallback(
     (editorState: EditorState) => {
@@ -232,7 +257,7 @@ function TextEditorInner({
       y,
     });
   }
-  if (prevText != text && !editing) {
+  if (prevText != text && !hasFocus) {
     setPrevText(text);
     editor.update(() => {
       $convertFromMarkdownString(text, TRANSFORMERS);
@@ -257,9 +282,6 @@ function TextEditorInner({
     setDragging(false);
   }, []);
 
-  if (!hasFocus && editing) {
-    setEditing(false);
-  }
   return (
     <Draggable
       position={currPos}
@@ -267,7 +289,7 @@ function TextEditorInner({
       onDrag={onDragged}
       onStop={onDragStop}
       scale={scale}
-      disabled={editing}
+      disabled={hasFocus}
     >
       <div className={styles.root}>
         <RichTextPlugin
@@ -284,8 +306,16 @@ function TextEditorInner({
         <CodeHighlightPlugin />
         <AutoLinkPlugin />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-        {editing ? null : (
-          <div className={styles.cover} onDoubleClick={dblClicked}></div>
+        {hasFocus ? null : (
+          <div
+            className={
+              styles.cover +
+              " " +
+              (selectedComponents.has(id) ? styles.selected : "")
+            }
+            onMouseDown={onSelect}
+            onDoubleClick={dblClicked}
+          ></div>
         )}
       </div>
     </Draggable>

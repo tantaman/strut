@@ -9,7 +9,14 @@ import {
   usePointQuery,
 } from "@vlcn.io/react";
 import { IID_of } from "../id";
-import { Deck, Presenter, Slide, TextComponent, Theme } from "./schema";
+import {
+  AnyComponentID,
+  Deck,
+  Presenter,
+  Slide,
+  TextComponent,
+  Theme,
+} from "./schema";
 
 export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
@@ -61,6 +68,14 @@ const queries = {
       /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ?`,
       [id],
       (x: any) => new Set(x.map((x: any) => x.slide_id))
+    ),
+
+  selectedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
+    useRangeQuery<AnyComponentID, Set<AnyComponentID>>(
+      ctx,
+      /*sql*/ `SELECT "component_id" FROM "selected_component" WHERE "slide_id" = ?`,
+      [id],
+      (x: any) => new Set(x.map((x: any) => x.component_id))
     ),
 
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>

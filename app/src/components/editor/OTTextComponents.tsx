@@ -20,6 +20,10 @@ export default function OTTextComponents({
 }) {
   // TODO: flip to gathering component ids instead?
   const componentIds = queries.textComponentIds(appState.ctx, slideId).data;
+  const selectedComponents = queries.selectedComponentIds(
+    appState.ctx,
+    slideId
+  ).data;
   return (
     <div style={style} className="markdown">
       {componentIds.map((id, i) => (
@@ -29,6 +33,7 @@ export default function OTTextComponents({
           key={id.toString()}
           id={id}
           scale={scale}
+          selectedComponents={selectedComponents}
         />
       ))}
     </div>

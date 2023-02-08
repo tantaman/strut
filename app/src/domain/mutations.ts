@@ -3,6 +3,8 @@ import { CtxAsync as Ctx, first } from "@vlcn.io/react";
 import { IID_of, newIID } from "../id";
 import fns from "./fns";
 import {
+  AnyComponentID,
+  ComponentType,
   Deck,
   EmbedComponent,
   LineComponent,
@@ -70,17 +72,34 @@ const mutations = {
   },
 
   selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    return ctx.db
-      .exec(
+    return ctx.db.transaction(async () => {
+      await ctx.db.exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
         [deckId, id]
-      )
-      .then(() =>
-        ctx.db.exec(
-          "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
-          [deckId, id]
-        )
       );
+      await ctx.db.exec(
+        "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
+        [deckId, id]
+      );
+    });
+  },
+
+  selectComponent(
+    ctx: Ctx,
+    slideId: IID_of<Slide>,
+    componentId: AnyComponentID,
+    componentType: ComponentType
+  ) {
+    return ctx.db.transaction(async () => {
+      await ctx.db.exec(
+        "INSERT OR IGNORE INTO selected_component (slide_id, component_id, component_type) VALUES (?, ?, ?)",
+        [slideId, componentId, componentType]
+      );
+      await ctx.db.exec(
+        "DELETE FROM selected_component WHERE slide_id = ? AND component_id != ?",
+        [slideId, componentId]
+      );
+    });
   },
 
   async applyOperation(ctx: Ctx, op: Operation) {
