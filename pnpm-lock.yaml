@@ -14,6 +14,7 @@ importers:
 
   app:
     specifiers:
+      '@air/react-drag-to-select': ^5.0.5
       '@auth0/auth0-react': ^1.12.0
       '@lexical/clipboard': ^0.6.5
       '@lexical/code': ^0.6.5
@@ -61,6 +62,7 @@ importers:
       vite: ^3.2.5
       vitest: ^0.25.7
     dependencies:
+      '@air/react-drag-to-select': 5.0.5_biqbaboplfbrettd7655fr4n2y
       '@auth0/auth0-react': 1.12.0_biqbaboplfbrettd7655fr4n2y
       '@lexical/clipboard': 0.6.5_lexical@0.6.5
       '@lexical/code': 0.6.5_lexical@0.6.5
@@ -249,6 +251,17 @@ importers:
       vitest: 0.25.7
 
 packages:
+
+  /@air/react-drag-to-select/5.0.5_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-kzio4JBN2PEVxClLiflnK5E5y7NGuT8DxLjH3ZEBa2+t3ss9U3JZk4ShcHsBsyGQli/aaz5bERVy3wTlPs2jtg==}
+    peerDependencies:
+      react: 16 - 18
+      react-dom: 16 - 18
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-style-object-to-css: 1.1.2
+    dev: false
 
   /@ampproject/remapping/2.2.0:
     resolution: {integrity: sha512-qRmjj8nj9qmLTQXXmaR1cck3UXSRMPrbsLJAasZpF+t3riI71BXed5ebIOYwQntykeZuhjsdweEc9BxH5Jc26w==}
@@ -6536,6 +6549,10 @@ packages:
   /react-is/18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
     dev: true
+
+  /react-style-object-to-css/1.1.2:
+    resolution: {integrity: sha512-+5MFULqCCj7wwJJ/ISKFP91ZlHVF1Rv8o0neiTKvt21XDTU5e34tc8hy+XPLeYWYOupdHt25HxxwocvYm3HM6A==}
+    dev: false
 
   /react/18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}

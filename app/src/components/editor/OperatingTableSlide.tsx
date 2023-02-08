@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useRef, useState } from "react";
 import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
 import type { otsSqaure } from "./OperatingTable";
@@ -7,6 +7,7 @@ import { IID_of } from "../../id";
 import fns from "../../domain/fns";
 import AppState from "../../domain/ephemeral/AppState";
 import OTTextComponents from "./OTTextComponents";
+import { useSelectionContainer } from "@air/react-drag-to-select";
 
 function OperatingTableSlide({
   slideId,
@@ -23,11 +24,29 @@ function OperatingTableSlide({
 
   useBind(previewTheme, ["bg_colorset", "fontset"]);
   useBind(appState, ["editor_mode"]);
+  const container = useRef<HTMLDivElement | null>(null);
+  const { DragSelection } = useSelectionContainer({
+    eventsElement: container.current,
+    onSelectionChange: (selection) => {
+      // console.log(selection);
+      // selection is viewport positions...
+      // we'll need to translate to slide positions
+    },
+    shouldStartSelecting: (target) => {
+      if (target instanceof HTMLElement) {
+        return target.classList.contains("markdown");
+      }
+      return false;
+    },
+  });
 
   return (
     <>
       <div
         className={"strt-ot-slide " + fns.getFontClass(previewTheme, theme)}
+        ref={(el) => {
+          container.current = el;
+        }}
         style={{
           left: otsStyle.left,
           top: otsStyle.top,
@@ -45,8 +64,10 @@ function OperatingTableSlide({
             width: otsStyle.width,
             height: otsStyle.height,
             transformOrigin: "top left",
+            userSelect: "none",
           }}
         />
+        <DragSelection />
       </div>
     </>
   );

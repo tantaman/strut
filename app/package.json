@@ -14,6 +14,7 @@
   "keywords": [],
   "author": "tantaman",
   "dependencies": {
+    "@air/react-drag-to-select": "^5.0.5",
     "@auth0/auth0-react": "^1.12.0",
     "@lexical/clipboard": "^0.6.5",
     "@lexical/code": "^0.6.5",

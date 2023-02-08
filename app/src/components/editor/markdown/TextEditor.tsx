@@ -10,7 +10,10 @@ import { memo, useCallback, useEffect, useState } from "react";
 import React from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import {
+  InitialConfigType,
+  LexicalComposer,
+} from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
@@ -146,12 +149,13 @@ function TextEditorBase({
   const text = c.text || "Text";
   const x = c.x == null ? index * 10 : c.x;
   const y = c.y == null ? index * 10 : c.y;
-  const [config, setConfig] = useState(
+  const [config, setConfig] = useState<InitialConfigType>(
     () =>
       ({
         namespace: "TextComponentEditor",
         theme: ExampleTheme,
         onError,
+        editable: false,
         editorState: () => $convertFromMarkdownString(text, TRANSFORMERS),
         nodes: [
           HeadingNode,
