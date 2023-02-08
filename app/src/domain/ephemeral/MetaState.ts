@@ -1,6 +1,7 @@
 import { Model } from "@vlcn.io/model";
 import { SQLite3 } from "@vlcn.io/wa-crsqlite";
 import bytesToHex from "../../bytesToHex";
+import hexToBytes from "../../hexToBytes";
 import { IID_of } from "../../id";
 import metaMutations from "../metaMutations";
 import { Deck } from "../schema";
@@ -36,9 +37,11 @@ export default class MetaState extends Model<Data> {
   private startingSync: boolean = false;
   private getAccessTokenSilently: ((args: any) => Promise<string>) | null =
     null;
+  private preauthURL: string;
   constructor(data: Data, private readonly sqlite: SQLite3) {
     super(data);
     window.addEventListener("popstate", this.#onPopState);
+    this.preauthURL = window.location.pathname;
   }
 
   #onPopState = (e: PopStateEvent) => {
@@ -93,7 +96,21 @@ export default class MetaState extends Model<Data> {
     this.update({
       useLoggedOut: true,
     });
+    this.maybeNavigateToPreauthURL();
   };
+
+  maybeNavigateToPreauthURL() {
+    if (this.preauthURL.startsWith("/app/")) {
+      const parts = this.preauthURL.split("/");
+      try {
+        const dbid = hexToBytes(parts[2]);
+        const mainDeckId = BigInt(parts[3]);
+        this.onDeckChosen(dbid, mainDeckId as IID_of<Deck>, false);
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
+  }
 
   onNewDeck = () => {
     if (this.data.deckDb != null) {
@@ -162,6 +179,7 @@ export default class MetaState extends Model<Data> {
       this.stopSync();
     } else {
       // set up things
+      this.maybeNavigateToPreauthURL();
       this.startSync();
     }
   };

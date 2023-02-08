@@ -21,7 +21,6 @@ export default function OpenDeckDlg({
   onDeckChosen: (dbid: Uint8Array, deckId: IID_of<Deck> | null) => void;
   onNewDeck: () => void;
 }) {
-  (window as any).ctx = ctx;
   const decks = metaQueries.decks(ctx).data;
 
   return (

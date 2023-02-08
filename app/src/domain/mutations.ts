@@ -70,11 +70,6 @@ const mutations = {
   },
 
   selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    // TODO: we need to hold notifications
-    // until transaction completes
-    // or not since replication won't be transactional and we can
-    // make the user deal with that problem locally too
-    // to ensure they deal with it remotely
     return ctx.db
       .exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
@@ -126,6 +121,7 @@ const mutations = {
     deckId: IID_of<Deck>,
     selected: boolean
   ) {
+    console.log("remove...");
     // TODO: tx
     const deleteSlide = () =>
       ctx.db.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
@@ -157,12 +153,17 @@ const mutations = {
           select = beforeAfter[0][0];
         }
 
-        return ctx.db
-          .exec(
+        return ctx.db.transaction(async () => {
+          await ctx.db.exec(
+            `DELETE FROM "selected_slide" WHERE "slide_id" = ? AND deck_id = ?`,
+            [id, deckId]
+          );
+          await ctx.db.exec(
             `INSERT OR IGNORE INTO "selected_slide" ("deck_id", "slide_id") VALUES (?, ?)`,
             [deckId, select]
-          )
-          .then(deleteSlide);
+          );
+          await deleteSlide();
+        });
       });
   },
 

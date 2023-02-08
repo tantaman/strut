@@ -108,7 +108,7 @@ const queries = {
     ),
 
   textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
-    useRangeQuery<IID_of<TextComponent>>(
+    useQuery<IID_of<TextComponent>>(
       ctx,
       /*sql*/ `SELECT id FROM "text_component" WHERE "slide_id" = ?`,
       [id],

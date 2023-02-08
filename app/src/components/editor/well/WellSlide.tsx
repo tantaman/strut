@@ -11,6 +11,7 @@ import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 import useTraceUpdate from "../../../utils/useTraceUpdate";
+import WellSlidePreview from "./WellSlidePreview";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -188,6 +189,8 @@ function WellSlide(props: {
       <span className={"badge bg-light text-dark " + styles.badge}>
         {props.index + 1}
       </span>
+      <div className={styles.dropOutsideIndicator + " " + dropClass}></div>
+      <WellSlidePreview ctx={props.appState.ctx} slideId={props.id} />
       {hideContextMenu ? null : (
         <button
           type="button"
@@ -196,7 +199,6 @@ function WellSlide(props: {
           onClick={removeSlide}
         ></button>
       )}
-      <div className={styles.dropOutsideIndicator + " " + dropClass}></div>
     </div>
   );
 }
