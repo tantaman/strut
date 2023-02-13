@@ -45,6 +45,7 @@ import mutations from "../../../domain/mutations";
 import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
 import queries from "../../../domain/queries";
+import useTraceUpdate from "../../../utils/useTraceUpdate";
 
 const persistText = throttle(
   100,
@@ -119,6 +120,7 @@ function TextEditorOuter({
   ctx: Ctx;
   selectedComponents: Set<AnyComponentID>;
 }) {
+  useTraceUpdate("WellSlide", { id, index, scale, ctx, selectedComponents });
   const c = queries.textComponent(ctx, id).data;
   if (c == null) {
     return null;
