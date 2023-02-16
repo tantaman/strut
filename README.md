@@ -15,6 +15,8 @@ mkdir strut-workspace
 cd strut-workspace
 ```
 
+All the following cloned repositories should exist in `strut-workspace` as the main `strut` project links to them by path ([example](https://github.com/tantaman/Strut/blob/557ed08cf9de669e0b95979e8becdac4bcccf5ed/app/package.json#L32-L38)).
+
 ## Clone a few dependency repositories
 
 **vlcn-io/cr-sqlite:**
