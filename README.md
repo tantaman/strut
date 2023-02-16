@@ -2,8 +2,75 @@ The original project is ancient (2011/2013) and dated. It is now coming back wit
 
 [Discord](https://discord.gg/Yxwr4SUQDT)
 
+# Building
 
-----
+The re-write currently requires bleeding edge builds of `cr-sqlite` and refers to packages provided by that project as local dependencies.
+
+To build Strut, you'll need to:
+
+## Create a workspace
+
+```
+mkdir strut-workspace
+cd strut-workspace
+```
+
+## Clone a few dependency repositories
+
+**vlcn-io/cr-sqlite:**
+
+```
+git clone --recurse-submodules git@github.com:vlcn-io/cr-sqlite.git
+cd cr-sqlite
+pnpm install
+pnpm build
+```
+
+**vlcn-io/model:**
+
+```
+git clone git@github.com:vlcn-io/model.git
+cd model/ts
+pnpm install
+pnpm build
+```
+
+**tantaman/misc:**
+
+```
+git clone git@github.com:tantaman/misc.git
+cd misc/typescript
+pnpm install
+pnpm build
+```
+
+## Clone Strut
+
+```
+git clone git@github.com:tantaman/Strut.git
+cd strut
+pnpm install
+```
+
+You can now run the `app` and `server` components:
+
+**app**
+
+```
+cd strut/app
+pnpm start
+```
+
+**server**
+
+```
+cd strut/server
+pnpm dev
+```
+
+Once `cr-sqlite`, `model` and `misc` stabilize the first few steps will not be required.
+
+---
 
 Readme from 2013:
 
@@ -23,4 +90,3 @@ Don't know what ImpressJS is? Check out the ImpressJS demo presentation: http://
 
 - http://www.youtube.com/watch?v=TTpiDXEIulg
 - previous video: http://www.youtube.com/watch?v=zA5s8wwme44
-
