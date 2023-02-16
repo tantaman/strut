@@ -120,9 +120,9 @@ function TextEditorOuter({
   ctx: Ctx;
   selectedComponents: Set<AnyComponentID>;
 }) {
-  useTraceUpdate("WellSlide", { id, index, scale, ctx, selectedComponents });
   const c = queries.textComponent(ctx, id).data;
   if (c == null) {
+    console.log("null");
     return null;
   }
 

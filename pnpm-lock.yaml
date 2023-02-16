@@ -33,13 +33,13 @@ importers:
       '@types/react': ^18.0.26
       '@types/react-dom': ^18.0.9
       '@types/throttle-debounce': ^5.0.0
-      '@vlcn.io/client-websocket': 0.6.3
-      '@vlcn.io/model': ^0.1.0
-      '@vlcn.io/react': 0.7.3
-      '@vlcn.io/rx-tbl': 0.6.2
-      '@vlcn.io/value': ^0.1.0
-      '@vlcn.io/wa-crsqlite': 0.7.4
-      '@vlcn.io/xplat-api': 0.6.2
+      '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
+      '@vlcn.io/model': link:../../model/ts/packages/model
+      '@vlcn.io/react': link:../../crsqlite/js/react
+      '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
+      '@vlcn.io/value': link:../../model/ts/packages/value
+      '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
+      '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: ^2.4.2
       hotkeys-js: ^3.10.1
       lexical: ^0.6.5
@@ -77,13 +77,13 @@ importers:
       '@strut/app-server-shared': link:../app-server-shared
       '@strut/counter': link:../../misc/typescript/packages/counter
       '@types/throttle-debounce': 5.0.0
-      '@vlcn.io/client-websocket': 0.6.3
-      '@vlcn.io/model': 0.1.0
-      '@vlcn.io/react': 0.7.3_react@18.2.0
-      '@vlcn.io/rx-tbl': 0.6.2
-      '@vlcn.io/value': 0.1.0
-      '@vlcn.io/wa-crsqlite': 0.7.4
-      '@vlcn.io/xplat-api': 0.6.2
+      '@vlcn.io/client-websocket': link:../../crsqlite/js/sync-reference/client-websocket
+      '@vlcn.io/model': link:../../model/ts/packages/model
+      '@vlcn.io/react': link:../../crsqlite/js/react
+      '@vlcn.io/rx-tbl': link:../../crsqlite/js/rx-tbl
+      '@vlcn.io/value': link:../../model/ts/packages/value
+      '@vlcn.io/wa-crsqlite': link:../../crsqlite/js/browser/wa-crsqlite
+      '@vlcn.io/xplat-api': link:../../crsqlite/js/xplat-api
       chroma-js: 2.4.2
       hotkeys-js: 3.10.1
       lexical: 0.6.5
@@ -1932,87 +1932,6 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@vlcn.io/client-core/0.6.3:
-    resolution: {integrity: sha512-b1yzrR0apKgUanqALBQCtepwSClX+qb5Tp7H82vbAq+KEJjvOlpJ9zuuzshnmUzsFAoNmaOGZLgp7VKYYfMc4g==}
-    dependencies:
-      '@vlcn.io/client-server-common': 0.3.3
-      '@vlcn.io/rx-tbl': 0.6.2
-      '@vlcn.io/xplat-api': 0.6.2
-      throttle-debounce: 5.0.0
-    dev: false
-
-  /@vlcn.io/client-server-common/0.3.3:
-    resolution: {integrity: sha512-ap890bAPiWZEdVI4vaCUiaEz6MP2BO/MiglyEpEHby+dsNCfj6n3eXfwNzNqaOvnfFV+YJH4pm+ftCafok0PkA==}
-    dependencies:
-      lib0: 0.2.62
-    dev: false
-
-  /@vlcn.io/client-websocket/0.6.3:
-    resolution: {integrity: sha512-+1O8SxfWUiU93L9LaHBx7BXwP7UFDXw4EcyU8WhYsF26FZhD6KSFSliyWC30rxPHf9CqXw7S8o1g5P/qFLVzmw==}
-    dependencies:
-      '@vlcn.io/client-core': 0.6.3
-      '@vlcn.io/client-server-common': 0.3.3
-      '@vlcn.io/rx-tbl': 0.6.2
-      '@vlcn.io/xplat-api': 0.6.2
-    dev: false
-
-  /@vlcn.io/model/0.1.0:
-    resolution: {integrity: sha512-9XkYB2mpBexY0DFj2ZZUt+IJCLbwwxaNf+I8PHwn3b56RwJcPN6TfBwoC1lXCqXCmnUrBxyY7veUKHg8K5Uh4Q==}
-    dependencies:
-      '@vlcn.io/value': 0.1.0
-      typescript: 4.9.4
-    dev: false
-
-  /@vlcn.io/react/0.7.3_react@18.2.0:
-    resolution: {integrity: sha512-s/0S7mqPzrhA1I77T2X5ZtMfPy1kqissWKRheRX91CT4IdEZ1dlytXAbm17a03ZMURYvrByXBlmE7NSYwGB7ZA==}
-    peerDependencies:
-      react: ^18
-    dependencies:
-      '@vlcn.io/rx-tbl': 0.6.2
-      '@vlcn.io/xplat-api': 0.6.2
-      react: 18.2.0
-    dev: false
-
-  /@vlcn.io/rx-tbl/0.6.2:
-    resolution: {integrity: sha512-PXaJtAgn1Od0X6n8h8bieY54NDfOZYqf5TO4TrKYpic1MXtmuR1GXnpqW/ZMfE/QLOumenfMgAN8kbbuY7ReyA==}
-    dependencies:
-      '@vlcn.io/xplat-api': 0.6.2
-    dev: false
-
-  /@vlcn.io/util/0.1.0:
-    resolution: {integrity: sha512-HaYtmvVxsng0rzQNsjBU7mWAtv53XYESE8nGMKoouHu0ELoNLIHnUwDMUnTGcbaJ14iGrSh6+iPqpKS/NLgZ1g==}
-    dev: false
-
-  /@vlcn.io/value/0.1.0:
-    resolution: {integrity: sha512-hmchBzAQSD7bNjRzlhb7ofZGLcnhfwbE4kCriX8pz7WplakPDJqVzVw83mmpGJeHFSbsA/Dwy5QiX/zFBW3Drg==}
-    dependencies:
-      '@vlcn.io/util': 0.1.0
-      '@vlcn.io/zone': 0.1.0
-      typescript: 4.9.4
-    dev: false
-
-  /@vlcn.io/wa-crsqlite/0.7.4:
-    resolution: {integrity: sha512-9W7/Cz8OrSXrPa6PHyArBAHZNN9iaWNd45V4LKh3mHZSez5vzghdRrqBu6Y6Aa5S8OjH0DZMxA6t4PbBRG7vHQ==}
-    dependencies:
-      '@vlcn.io/wa-sqlite': 0.14.3
-      '@vlcn.io/xplat-api': 0.6.2
-      comlink: 4.4.1
-    dev: false
-
-  /@vlcn.io/wa-sqlite/0.14.3:
-    resolution: {integrity: sha512-O16OHakgR7udJJ7HxlXQSDq0Ez52WG4/jP63T+I1ECkvWdE3wgPfRVGNFKb8jDh2GgWw9EI37NTOMBiE3wVCXA==}
-    dev: false
-
-  /@vlcn.io/xplat-api/0.6.2:
-    resolution: {integrity: sha512-/DiSmga9koqWrn/oyevbhEkkIXeWKAJ4QU/D7jSUQGICo710tAJ9nVc5vgti/X8QJ1G57VwQq3gyudHaITNfJQ==}
-    dependencies:
-      comlink: 4.4.1
-    dev: false
-
-  /@vlcn.io/zone/0.1.0:
-    resolution: {integrity: sha512-VFzuZM4ea97EvAU59rEtY3n1Xom2jeaavJQ7A1N0UWFZC/KdT+UB/jgfsqLR48LnJRtmHQf+wuo1bHedPP2PVQ==}
-    dev: false
-
   /abab/2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
     dev: true
@@ -2657,10 +2576,6 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
     dev: true
-
-  /comlink/4.4.1:
-    resolution: {integrity: sha512-+1dlx0aY5Jo1vHy/tSsIGpSkN4tS9rZSW8FIhG0JH/crs9wwweswIo/POr451r7bZww3hFbPAKnTpimzL/mm4Q==}
-    dev: false
 
   /comma-separated-tokens/2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
@@ -4494,10 +4409,6 @@ packages:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
 
-  /isomorphic.js/0.2.5:
-    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
-    dev: false
-
   /istanbul-lib-coverage/3.2.0:
     resolution: {integrity: sha512-eOeJ5BHCmHYvQK7xt9GkdHuzuCGS1Y6g9Gvnx3Ym33fz/HpLRYxiS0wHNr+m/MBC8B647Xt608vCDEvhl9c6Mw==}
     engines: {node: '>=8'}
@@ -5257,13 +5168,6 @@ packages:
 
   /lexical/0.6.5:
     resolution: {integrity: sha512-DV4/lw/CX5XLJ2qdHurkn/KjjvMw83EJidvH7Os/ub61yoaffMQxovPvsfzyOHSZ3/V+GBFCGF2hLAaaB1s37g==}
-    dev: false
-
-  /lib0/0.2.62:
-    resolution: {integrity: sha512-DY0G8AaQloUvpiss7EpAo/t4R82b9m/AydbQRNAa9Khssn9oGDJnSN8Q1qQ8u82Wog4iaT1O8yM+DfhzGCrrpQ==}
-    engines: {node: '>=14'}
-    dependencies:
-      isomorphic.js: 0.2.5
     dev: false
 
   /lilconfig/2.0.6:
@@ -7658,6 +7562,7 @@ packages:
     resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
