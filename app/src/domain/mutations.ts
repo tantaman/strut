@@ -16,7 +16,7 @@ import {
   UndoStack,
 } from "./schema";
 import { DB } from "@vlcn.io/wa-crsqlite";
-import { DBAsync } from "@vlcn.io/xplat-api";
+import { DBAsync, TXAsync } from "@vlcn.io/xplat-api";
 
 // TODO: use uuidv7 for ids base95 encoded
 function objId<T>(db: DBAsync): IID_of<T> {
@@ -72,12 +72,12 @@ const mutations = {
   },
 
   selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    return ctx.db.transaction(async () => {
-      await ctx.db.exec(
+    return ctx.db.transaction(async (tx) => {
+      await tx.exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
         [deckId, id]
       );
-      await ctx.db.exec(
+      await tx.exec(
         "DELETE FROM selected_slide WHERE deck_id = ? AND slide_id != ?",
         [deckId, id]
       );
@@ -90,12 +90,12 @@ const mutations = {
     componentId: AnyComponentID,
     componentType: ComponentType
   ) {
-    return ctx.db.transaction(async () => {
-      await ctx.db.exec(
+    return ctx.db.transaction(async (tx) => {
+      await tx.exec(
         "INSERT OR IGNORE INTO selected_component (slide_id, component_id, component_type) VALUES (?, ?, ?)",
         [slideId, componentId, componentType]
       );
-      await ctx.db.exec(
+      await tx.exec(
         "DELETE FROM selected_component WHERE slide_id = ? AND component_id != ?",
         [slideId, componentId]
       );
@@ -128,8 +128,8 @@ const mutations = {
   },
 
   removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
-    return ctx.db.transaction(async () => {
-      const components = await ctx.db.execA(
+    return ctx.db.transaction(async (tx) => {
+      const components = await tx.execA(
         "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
         [slideId]
       );
@@ -140,7 +140,7 @@ const mutations = {
           component[1]
         );
       }
-      await ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+      await tx.exec("DELETE FROM selected_component WHERE slide_id = ?", [
         slideId,
       ]);
     });
@@ -192,10 +192,10 @@ const mutations = {
   ) {
     console.log("remove...");
     // TODO: tx
-    const deleteSlide = () =>
-      ctx.db.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
+    const deleteSlide = (tx: TXAsync) =>
+      tx.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
     if (!selected) {
-      return deleteSlide();
+      return deleteSlide(ctx.db);
     }
 
     return ctx.db
@@ -222,16 +222,16 @@ const mutations = {
           select = beforeAfter[0][0];
         }
 
-        return ctx.db.transaction(async () => {
-          await ctx.db.exec(
+        return ctx.db.transaction(async (tx) => {
+          await tx.exec(
             `DELETE FROM "selected_slide" WHERE "slide_id" = ? AND deck_id = ?`,
             [id, deckId]
           );
-          await ctx.db.exec(
+          await tx.exec(
             `INSERT OR IGNORE INTO "selected_slide" ("deck_id", "slide_id") VALUES (?, ?)`,
             [deckId, select]
           );
-          await deleteSlide();
+          await deleteSlide(tx);
         });
       });
   },
