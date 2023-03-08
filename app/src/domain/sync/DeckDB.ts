@@ -3,7 +3,7 @@
 import { Model } from "@vlcn.io/model";
 import { CtxAsync } from "@vlcn.io/react";
 import tblrx, { TblRx } from "@vlcn.io/rx-tbl";
-import { DB, SQLite3 } from "@vlcn.io/wa-crsqlite";
+import { DB, SQLite3 } from "@vlcn.io/crsqlite-wasm";
 import startSync from "@vlcn.io/client-websocket";
 import { getConnString } from "./conectionInfo";
 import hexToBytes from "../../hexToBytes";

@@ -15,7 +15,7 @@ import {
   Theme,
   UndoStack,
 } from "./schema";
-import { DB } from "@vlcn.io/wa-crsqlite";
+import { DB } from "@vlcn.io/crsqlite-wasm";
 import { DBAsync, TXAsync } from "@vlcn.io/xplat-api";
 
 // TODO: use uuidv7 for ids base95 encoded
@@ -72,7 +72,7 @@ const mutations = {
   },
 
   selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    return ctx.db.transaction(async (tx) => {
+    return ctx.db.tx(async (tx) => {
       await tx.exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
         [deckId, id]
@@ -90,7 +90,7 @@ const mutations = {
     componentId: AnyComponentID,
     componentType: ComponentType
   ) {
-    return ctx.db.transaction(async (tx) => {
+    return ctx.db.tx(async (tx) => {
       await tx.exec(
         "INSERT OR IGNORE INTO selected_component (slide_id, component_id, component_type) VALUES (?, ?, ?)",
         [slideId, componentId, componentType]
@@ -128,7 +128,7 @@ const mutations = {
   },
 
   removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
-    return ctx.db.transaction(async (tx) => {
+    return ctx.db.tx(async (tx) => {
       const components = await tx.execA(
         "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
         [slideId]
@@ -222,7 +222,7 @@ const mutations = {
           select = beforeAfter[0][0];
         }
 
-        return ctx.db.transaction(async (tx) => {
+        return ctx.db.tx(async (tx) => {
           await tx.exec(
             `DELETE FROM "selected_slide" WHERE "slide_id" = ? AND deck_id = ?`,
             [id, deckId]

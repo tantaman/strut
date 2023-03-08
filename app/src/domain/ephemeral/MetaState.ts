@@ -1,5 +1,5 @@
 import { Model } from "@vlcn.io/model";
-import { SQLite3 } from "@vlcn.io/wa-crsqlite";
+import { SQLite3 } from "@vlcn.io/crsqlite-wasm";
 import bytesToHex from "../../bytesToHex";
 import hexToBytes from "../../hexToBytes";
 import { IID_of } from "../../id";

@@ -1,4 +1,4 @@
-import { SQLite3, DB } from "@vlcn.io/wa-crsqlite";
+import { SQLite3, DB } from "@vlcn.io/crsqlite-wasm";
 import { getConnString, getRestHost } from "./conectionInfo";
 import startSync from "@vlcn.io/client-websocket";
 import tblrx, { TblRx } from "@vlcn.io/rx-tbl";

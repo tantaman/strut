@@ -12,7 +12,7 @@
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "build": "turbo build",
-    "server:start": "cd server && pnpm start"
+    "dev:ui": "cd app && pnpm start",
+    "dev:server": "cd server && pnpm dev"
   }
 }
