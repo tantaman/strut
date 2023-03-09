@@ -22,6 +22,8 @@ export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
   | [Ctx, SQL<R>, any[], (x: R[]) => M];
 
+type Result<T> = any;
+
 const queries = {
   // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
   // e.g. if 50 components all want the same data can just collapse to 1 query.
@@ -67,7 +69,8 @@ const queries = {
       ctx,
       /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ?`,
       [id],
-      (x: any) => new Set(x.map((x: any) => x.slide_id))
+      (x: Result<"slide_id">[]) =>
+        new Set(x.map((x: Result<"slide_id">) => x.slide_id))
     ),
 
   selectedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>

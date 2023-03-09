@@ -5,10 +5,10 @@ import "styles/main.css";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-import sqliteWasm, { SQLite3 } from "@vlcn.io/wa-crsqlite";
+import sqliteWasm, { SQLite3 } from "@vlcn.io/crsqlite-wasm";
 import { Auth0Provider } from "@auth0/auth0-react";
 
-import wasmUrl from "@vlcn.io/wa-crsqlite/wa-sqlite-async.wasm?url";
+import wasmUrl from "@vlcn.io/crsqlite-wasm/crsqlite.wasm?url";
 import newMetaDB, { MetaDB } from "./domain/sync/MetaDB.js";
 import Bootstrap from "./Bootstrap.js";
 import MetaState from "./domain/ephemeral/MetaState.js";
