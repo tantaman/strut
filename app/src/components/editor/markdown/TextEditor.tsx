@@ -45,7 +45,6 @@ import mutations from "../../../domain/mutations";
 import { CtxAsync as Ctx } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
 import queries from "../../../domain/queries";
-import useTraceUpdate from "../../../utils/useTraceUpdate";
 
 const persistText = throttle(
   100,
@@ -107,22 +106,16 @@ const useEditorHasFocus = () => {
   return hasFocus;
 };
 
-function TextEditorOuter({
-  id,
-  index,
-  scale,
-  ctx,
-  selectedComponents,
-}: {
+function TextEditorOuter(props: {
   id: IID_of<TextComponent>;
   index: number;
   scale: number;
   ctx: Ctx;
   selectedComponents: Set<AnyComponentID>;
 }) {
+  const { id, index, scale, ctx, selectedComponents } = props;
   const c = queries.textComponent(ctx, id).data;
   if (c == null) {
-    console.log("null");
     return null;
   }
 

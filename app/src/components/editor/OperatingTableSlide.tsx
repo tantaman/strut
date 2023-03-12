@@ -83,7 +83,7 @@ function OperatingTableSlide({
         <OTTextComponents
           appState={appState}
           slideId={slideId}
-          scale={otsStyle.scale}
+          scale={((otsStyle.scale * 100) | 0) / 100}
           style={{
             transform: "scale(" + otsStyle.scale + ")",
             width: otsStyle.width,

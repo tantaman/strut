@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import queries from "../../domain/queries";
 import { Slide } from "../../domain/schema";
@@ -24,6 +24,11 @@ export default function OTTextComponents({
     appState.ctx,
     slideId
   ).data;
+  useEffect(() => {
+    return () => {
+      console.log("unmount ottext");
+    };
+  }, []);
   return (
     <div style={style} className="markdown">
       {componentIds.map((id, i) => (

@@ -76,7 +76,7 @@ const queries = {
   selectedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
     useRangeQuery<AnyComponentID, Set<AnyComponentID>>(
       ctx,
-      /*sql*/ `SELECT "component_id" FROM "selected_component" WHERE "slide_id" = ?`,
+      /*sql*/ `SELECT "component_id" FROM "selected_component" WHERE "slide_id" = ? ORDER BY "component_id" ASC`,
       [id],
       (x: any) => new Set(x.map((x: any) => x.component_id))
     ),
@@ -144,7 +144,7 @@ const queries = {
   textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
     useQuery<IID_of<TextComponent>>(
       ctx,
-      /*sql*/ `SELECT id FROM "text_component" WHERE "slide_id" = ?`,
+      /*sql*/ `SELECT id FROM "text_component" WHERE "slide_id" = ? ORDER BY id ASC`,
       [id],
       pick
     ),
