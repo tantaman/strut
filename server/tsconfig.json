@@ -12,7 +12,12 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
+    "incremental": true,
     "resolveJsonModule": true
   },
-  "include": ["./src/"]
+  "include": ["./src/"],
+  "references": [
+    { "path": "../deps/access-token-jwt" },
+    { "path": "../deps/oauth2-bearer" }
+  ]
 }

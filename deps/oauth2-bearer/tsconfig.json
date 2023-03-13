@@ -6,9 +6,10 @@
     "module": "ES2020",
     "removeComments": true,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "incremental": true,
+    "composite": true,
+    "rootDir": "./src"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

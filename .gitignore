@@ -19,3 +19,4 @@ notes-priv.md
 .turbo/
 accounts-dev.db
 udbs/
+tsconfig.tsbuildinfo
