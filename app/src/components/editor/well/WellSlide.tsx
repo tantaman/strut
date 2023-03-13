@@ -30,8 +30,6 @@ function WellSlide(props: {
   appState: AppState;
   orient: "horizontal" | "vertical";
 }) {
-  useTraceUpdate("WellSlide", props);
-
   const theme = queries.themeFromDeck(
     props.appState.ctx,
     props.appState.current_deck_id
