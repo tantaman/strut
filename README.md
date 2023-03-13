@@ -2,75 +2,49 @@ The original project is ancient (2011/2013) and dated. It is now coming back wit
 
 [Discord](https://discord.gg/Yxwr4SUQDT)
 
-# Building
+# Contributing
 
 The re-write currently requires bleeding edge builds of `cr-sqlite` and refers to packages provided by that project as local dependencies.
 
-To build Strut, you'll need to:
+To build & work on strut:
 
-## Create a workspace
+Get Rust Nightly installed:
 
+```bash
+rustup toolchain install nightly
+rustup default nightly
 ```
-mkdir strut-workspace
+
+Make sure you have `pnpm` installed:
+```bash
+npm install -g pnpm
+```
+
+Finally:
+
+```bash
+git clone --recurse-submodules git@github.com:vlcn-io/workspace.git strut-workspace
 cd strut-workspace
+make
 ```
 
-All the following cloned repositories should exist in `strut-workspace` as the main `strut` project links to them by path ([example](https://github.com/tantaman/Strut/blob/557ed08cf9de669e0b95979e8becdac4bcccf5ed/app/package.json#L32-L38)).
+Make should download, install and build all the things you need.
 
-## Clone a few dependency repositories
+Now you can:
 
-**vlcn-io/cr-sqlite:**
-
-```
-git clone --recurse-submodules git@github.com:vlcn-io/cr-sqlite.git
-cd cr-sqlite
-pnpm install
-pnpm build
-```
-
-**vlcn-io/model:**
-
-```
-git clone git@github.com:vlcn-io/model.git
-cd model/ts
-pnpm install
-pnpm build
-```
-
-**tantaman/misc:**
-
-```
-git clone git@github.com:tantaman/misc.git
-cd misc/typescript
-pnpm install
-pnpm build
-```
-
-## Clone Strut
-
-```
-git clone git@github.com:tantaman/Strut.git
-cd strut
-pnpm install
-```
-
-You can now run the `app` and `server` components:
-
-**app**
-
-```
+```bash
 cd strut/app
 pnpm start
 ```
 
-**server**
+To start the UI.
 
-```
+```bash
 cd strut/server
 pnpm dev
 ```
 
-Once `cr-sqlite`, `model` and `misc` stabilize the first few steps will not be required.
+To start the server
 
 ---
 
