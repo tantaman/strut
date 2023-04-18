@@ -23,7 +23,7 @@ npm install -g pnpm
 Finally:
 
 ```bash
-git clone --recurse-submodules git@github.com:vlcn-io/workspace.git strut-workspace
+git clone --recurse-submodules git@github.com:tantaman/strut-workspace.git
 cd strut-workspace
 make
 ```
