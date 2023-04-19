@@ -75,6 +75,7 @@ export class MetaDB extends Model<Data> {
           schemaName: "strut-meta",
         },
         rx: this.rx,
+        worker: false,
       });
       this.update({
         connected: true,

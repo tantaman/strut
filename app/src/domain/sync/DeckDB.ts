@@ -75,6 +75,7 @@ export class DeckDB extends Model<Data> {
           schemaName: "strut",
         },
         rx: this.rx,
+        worker: false,
       });
       this.update({
         connected: true,
