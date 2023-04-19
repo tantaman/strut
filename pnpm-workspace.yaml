@@ -6,3 +6,7 @@ packages:
   - "deps/counter"
   - "deps/oauth2-bearer"
   - "deps/utils"
+  - "deps/model/ts/packages/model"
+  - "deps/model/ts/packages/value"
+  - "deps/model/ts/packages/util"
+  - "deps/model/ts/packages/zone"

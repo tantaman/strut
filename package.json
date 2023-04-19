@@ -13,6 +13,7 @@
   },
   "scripts": {
     "dev:ui": "cd app && pnpm start",
-    "dev:server": "cd server && pnpm dev"
+    "dev:server": "cd server && pnpm dev",
+    "build": "turbo run build"
   }
 }
