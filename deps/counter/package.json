@@ -1,0 +1,16 @@
+{
+  "name": "@strut/counter",
+  "version": "0.0.11",
+  "main": "lib/index.js",
+  "type": "module",
+  "dependencies": {
+    "@strut/utils": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --build -w"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4"
+  }
+}

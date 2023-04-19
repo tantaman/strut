@@ -1,0 +1,8 @@
+packages:
+  - "app"
+  - "server"
+  - "app-server-shared"
+  - "deps/access-token-jwt"
+  - "deps/counter"
+  - "deps/oauth2-bearer"
+  - "deps/utils"

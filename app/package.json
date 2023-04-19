@@ -30,7 +30,7 @@
     "@strut/app-server-shared": "workspace:*",
     "@strut/counter": "workspace:*",
     "@types/throttle-debounce": "^5.0.0",
-    "@vlcn.io/client-websocket": "workspace:*",
+    "@vlcn.io/client-websocket": "0.8.3-next.0",
     "@vlcn.io/model": "workspace:*",
     "@vlcn.io/react": "workspace:*",
     "@vlcn.io/rx-tbl": "workspace:*",
