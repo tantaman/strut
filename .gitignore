@@ -14,7 +14,6 @@ psd-export/
 .buildpath
 .tern-port
 server/dbs/
-.env
 notes-priv.md
 .turbo/
 accounts-dev.db

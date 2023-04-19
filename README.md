@@ -6,45 +6,24 @@ The original project is ancient (2011/2013) and dated. It is now coming back wit
 
 The re-write currently requires bleeding edge builds of `cr-sqlite` and refers to packages provided by that project as local dependencies.
 
-To build & work on strut:
-
-Get Rust Nightly installed:
+Clone & Install
 
 ```bash
-rustup toolchain install nightly
-rustup default nightly
+git clone git@github.com:tantaman/strut.git
+cd strut
+pnpm install
+pnpm build
 ```
 
-Make sure you have `pnpm` installed:
-```bash
-npm install -g pnpm
-```
-
-Finally:
+Start:
 
 ```bash
-git clone --recurse-submodules git@github.com:tantaman/strut-workspace.git
-cd strut-workspace
-make
+pnpm dev:server
 ```
-
-Make should download, install and build all the things you need.
-
-Now you can:
 
 ```bash
-cd strut/app
-pnpm start
+pnpm dev:ui
 ```
-
-To start the UI.
-
-```bash
-cd strut/server
-pnpm dev
-```
-
-To start the server
 
 ---
 
