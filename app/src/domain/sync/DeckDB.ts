@@ -13,6 +13,7 @@ import mutations from "../mutations";
 import seeds from "../seed-data";
 
 import schema from "@strut/app-server-shared/deck?raw";
+import workerUri from "@vlcn.io/client-websocket/worker.js?url";
 
 type Data = {
   connected: boolean;
@@ -75,7 +76,8 @@ export class DeckDB extends Model<Data> {
           schemaName: "strut",
         },
         rx: this.rx,
-        worker: false,
+        // worker: false,
+        workerUri,
       });
       this.update({
         connected: true,

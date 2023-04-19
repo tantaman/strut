@@ -5,6 +5,7 @@ import tblrx, { TblRx } from "@vlcn.io/rx-tbl";
 import { Model } from "@vlcn.io/model";
 import metaSchema from "@strut/app-server-shared/meta?raw";
 import { CtxAsync } from "@vlcn.io/react";
+import workerUri from "@vlcn.io/client-websocket/worker.js?url";
 
 type Data = {
   connected: boolean;
@@ -75,7 +76,7 @@ export class MetaDB extends Model<Data> {
           schemaName: "strut-meta",
         },
         rx: this.rx,
-        worker: false,
+        workerUri,
       });
       this.update({
         connected: true,
