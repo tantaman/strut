@@ -9,7 +9,7 @@ The re-write currently requires bleeding edge builds of `cr-sqlite` and refers t
 Clone & Install
 
 ```bash
-git clone git@github.com:tantaman/strut.git
+git clone --recurse-submodules git@github.com:tantaman/strut.git
 cd strut
 pnpm install
 pnpm build
