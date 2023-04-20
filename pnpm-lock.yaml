@@ -396,11 +396,11 @@ importers:
         specifier: 0.5.2
         version: 0.5.2
       '@vlcn.io/server-core':
-        specifier: 0.8.2
-        version: 0.8.2
+        specifier: 0.8.3
+        version: 0.8.3
       '@vlcn.io/server-websocket':
-        specifier: 0.8.2
-        version: 0.8.2
+        specifier: 0.8.3
+        version: 0.8.3
       access-token-jwt:
         specifier: workspace:*
         version: link:../deps/access-token-jwt
@@ -3260,8 +3260,8 @@ packages:
       async-mutex: 0.4.0
     dev: false
 
-  /@vlcn.io/crsqlite@0.9.2:
-    resolution: {integrity: sha512-MfqBfJQMB9lImAx+WcsGsSoCoKl3roq+Xq5HYfTTsrxS03kv7vsbpgwE3k+hn5PpKAtRlVnKT/Dy0fRHtTB53g==}
+  /@vlcn.io/crsqlite@0.9.3:
+    resolution: {integrity: sha512-DFomb4B9O3x9N/dWqo6qd16TDkZXnXJjmJmBHHZ/g/9JXOow9fgRtMXDhbWD6RPP+Z4PXB08eWWrWs/zj241ig==}
     requiresBuild: true
     dev: false
 
@@ -3281,25 +3281,25 @@ packages:
       '@vlcn.io/xplat-api': 0.8.2
     dev: false
 
-  /@vlcn.io/server-core@0.8.2:
-    resolution: {integrity: sha512-62ODkk6HdUZGEfUDMcGEI2UCU3iJRIhDPm+aW3cbnzTz+ukAtaJHJToJLxKn75yer/8EGzhmmbsSCAKu40dGaw==}
+  /@vlcn.io/server-core@0.8.3:
+    resolution: {integrity: sha512-iO0vK4mbECBbh9XmbRdnN4f21DKADVTl1/i6DMw8lXmjUUfp8yMDrnaTRULlNyg8VnyjzV8IyQyIAnr2GXEnzA==}
     dependencies:
       '@vlcn.io/client-server-common': 0.5.2
-      '@vlcn.io/crsqlite': 0.9.2
+      '@vlcn.io/crsqlite': 0.9.3
       better-sqlite3: 8.3.0
       uuid: 9.0.0
       winston: 3.8.2
       yargs: 17.7.1
     dev: false
 
-  /@vlcn.io/server-websocket@0.8.2:
-    resolution: {integrity: sha512-HRhmwUVKwXBD5JRjfduJ7Rev2To2Qdbc/UA28j9zBd0glCG90fKnFNe/fPacj29+FUwj1YTtRZZWmI29pMgdbw==}
+  /@vlcn.io/server-websocket@0.8.3:
+    resolution: {integrity: sha512-A0upfGaVquph3r9uE5XdtPlTbMAlOLj3t2w7KNErMAo0KQNVpBQ1Y6a6/IjQ1zfKpKvNCJJojeiEcvjyUF8h9A==}
     hasBin: true
     dependencies:
       '@types/yargs': 17.0.24
       '@vlcn.io/client-server-common': 0.5.2
-      '@vlcn.io/crsqlite': 0.9.2
-      '@vlcn.io/server-core': 0.8.2
+      '@vlcn.io/crsqlite': 0.9.3
+      '@vlcn.io/server-core': 0.8.3
       better-sqlite3: 8.3.0
       cors: 2.8.5
       express: 4.18.2
