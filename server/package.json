@@ -15,9 +15,9 @@
   "author": "tantaman",
   "dependencies": {
     "@strut/app-server-shared": "workspace:*",
-    "@vlcn.io/client-server-common": "0.5.2-next.0",
-    "@vlcn.io/server-core": "0.8.2-next.0",
-    "@vlcn.io/server-websocket": "0.8.2-next.0",
+    "@vlcn.io/client-server-common": "0.5.2",
+    "@vlcn.io/server-core": "0.8.2",
+    "@vlcn.io/server-websocket": "0.8.2",
     "access-token-jwt": "workspace:*",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^8.0.1",
