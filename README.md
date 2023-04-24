@@ -1,6 +1,7 @@
 The original project is ancient (2011/2013) and dated. It is now coming back with a facelift, collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
 
-[Discord](https://discord.gg/Yxwr4SUQDT)
+We're in the [#strut.io channel](https://discord.com/channels/929781625473073245/1098619886009327617) of [![](https://dcbadge.vercel.app/api/server/lfwdev)](https://discord.gg/lfwdev)
+
 
 # Contributing
 
@@ -9,7 +10,7 @@ The re-write currently requires bleeding edge builds of `cr-sqlite` and refers t
 Clone & Install
 
 ```bash
-git clone git@github.com:tantaman/strut.git
+git clone --recurse-submodules git@github.com:tantaman/strut.git
 cd strut
 pnpm install
 pnpm build
