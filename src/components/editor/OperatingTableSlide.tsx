@@ -57,7 +57,10 @@ function OperatingTableSlide({
       mutations.removeSelectedComponents(appState.ctx, slideId);
     }
   };
-  const deselectAll = (_: React.MouseEvent) => {
+  const deselectAll = (e: React.MouseEvent<HTMLElement>) => {
+    if (!(e.target as HTMLElement).classList.contains("markdown")) {
+      return;
+    }
     mutations.deselectAllComponents(appState.ctx, slideId);
   };
 

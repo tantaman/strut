@@ -4,7 +4,7 @@ import {
   EditorState,
   FOCUS_COMMAND,
 } from "lexical";
-import { memo, useCallback, useEffect, useState } from "react";
+import { MouseEvent, memo, useCallback, useEffect, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {
@@ -207,11 +207,13 @@ function TextEditorInner({
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
   // const [editing, setEditing] = useState(hasFocus);
-  const dblClicked = () => {
+  const dblClicked = (e) => {
     editor.setEditable(true);
     editor.focus();
   };
-  const onSelect = () => mutations.selectComponent(ctx, slideId, id, "text");
+  const onSelect = () => {
+    return mutations.selectComponent(ctx, slideId, id, "text");
+  };
 
   const onChange = useCallback(
     (editorState: EditorState) => {

@@ -128,6 +128,7 @@ const mutations = {
 
   removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
     return ctx.db.tx(async (tx) => {
+      console.log("rm selected components");
       const components = await tx.execA(
         "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
         [slideId]

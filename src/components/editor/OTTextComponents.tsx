@@ -18,7 +18,6 @@ export default function OTTextComponents({
   style: Object;
   scale: number;
 }) {
-  // TODO: flip to gathering component ids instead?
   const componentIds = queries.textComponentIds(appState.ctx, slideId).data;
   const selectedComponents = queries.selectedComponentIds(
     appState.ctx,

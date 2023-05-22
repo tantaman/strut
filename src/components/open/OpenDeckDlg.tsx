@@ -47,8 +47,11 @@ export default function OpenDeckDlg({
               description="Start from scratch"
             />
             {decks.map((d) => (
-              <Link to={`/create/${bytesToHex(d.dbid)}/${d.deck_id}`}>
-                <DeckCard key={d.deck_id?.toString()} metaDeck={d} />
+              <Link
+                key={d.deck_id?.toString()}
+                to={`/create/${bytesToHex(d.dbid)}/${d.deck_id}`}
+              >
+                <DeckCard metaDeck={d} />
               </Link>
             ))}
           </div>
