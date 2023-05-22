@@ -158,9 +158,6 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.3.4
         version: 0.3.4(eslint@8.38.0)
-      react-drag-to-select:
-        specifier: link:@types/@air/react-drag-to-select
-        version: link:@types/@air/react-drag-to-select
       turbo:
         specifier: ^1.9.8
         version: 1.9.8

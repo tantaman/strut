@@ -1,4 +1,10 @@
-import { ClerkProvider, SignedIn, SignIn, SignUp } from "@clerk/clerk-react";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  SignIn,
+  SignUp,
+} from "@clerk/clerk-react";
 import {
   BrowserRouter,
   Route,
@@ -26,7 +32,19 @@ function ClerkProviderWithRoutes() {
   return (
     <ClerkProvider publishableKey={clerkPubKey} navigate={(to) => navigate(to)}>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <SignedIn>
+                <Dashboard />
+              </SignedIn>
+              <SignedOut>
+                <LandingPage />
+              </SignedOut>
+            </>
+          }
+        />
         <Route
           path="/sign-in/*"
           element={
@@ -45,14 +63,6 @@ function ClerkProviderWithRoutes() {
               path="/sign-up"
               afterSignUpUrl="/dashboard"
             />
-          }
-        />
-        <Route
-          path="/dashboard/*"
-          element={
-            <SignedIn>
-              <Dashboard />
-            </SignedIn>
           }
         />
         <Route
