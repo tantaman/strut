@@ -1,48 +1,18 @@
-The original project is ancient (2011/2013) and dated. It is now coming back with a facelift, collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
-
-We're in the [#strut.io channel](https://discord.com/channels/929781625473073245/1098619886009327617) of [![](https://dcbadge.vercel.app/api/server/lfwdev)](https://discord.gg/lfwdev)
+# vite-starter
 
 
-# Contributing
-
-The re-write currently requires bleeding edge builds of `cr-sqlite` and refers to packages provided by that project as local dependencies.
-
-Clone & Install
-
-```bash
-git clone --recurse-submodules git@github.com:tantaman/strut.git
-cd strut
+```
+git clone git@github.com:vlcn-io/vite-starter.git
 pnpm install
-pnpm build
+pnpm dev
 ```
 
-Start:
+What you get:
+- A client ([App.tsx](https://github.com/vlcn-io/vite-starter/blob/main/src/App.tsx)) that runs a SQLite DB
+- A server ([server.js](https://github.com/vlcn-io/vite-starter/blob/main/server.js)) that the client (or many clients) can sync to when online
+- A database schema file ([schema.mjs](https://github.com/vlcn-io/vite-starter/blob/main/src/schemas/testSchema.mjs)) that is automatically migrated to on server and client restart.
 
-```bash
-pnpm dev:server
-```
 
-```bash
-pnpm dev:ui
-```
+Demo Video: [![example scaffolding result](https://img.youtube.com/vi/QJBQLYmXReI/0.jpg)](https://www.youtube.com/watch?v=QJBQLYmXReI)
 
----
-
-Readme from 2013:
-
-# [Strut](http://strut.io/)
-
-[![Facelift](https://user-images.githubusercontent.com/1009003/201429020-ad350f8e-a488-4434-bc81-a1093bfa9c3c.png)](http://tantaman.github.io/Strut/dist/)
-
-#### A GUI / Authoring Tool for ImpressJS and Bespoke.js
-
-Don't know what ImpressJS is? Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
-
-### Start using Strut! http://tantaman.github.io/Strut/dist/
-
-(works in Firefox, Chrome and Safari with basic support for IE10)
-
-#### Learn a bit about Strut
-
-- http://www.youtube.com/watch?v=TTpiDXEIulg
-- previous video: http://www.youtube.com/watch?v=zA5s8wwme44
+Deployed Scaffolding: https://vite-starter.fly.dev/ Try it out! Collaborate between all your devices.

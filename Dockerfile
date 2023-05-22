@@ -1,30 +1,32 @@
-FROM node:19-alpine
+FROM debian:bullseye as builder
 
+ENV PATH=/usr/local/node/bin:$PATH
+ARG NODE_VERSION=19.0.1
+
+RUN apt-get update; apt install -y curl python-is-python3 pkg-config build-essential && \
+    curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
+    /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
+rm -rf /tmp/node-build-master
+
+RUN mkdir /app
 WORKDIR /app
 
-# Configure LiteFS -- https://fly.io/docs/litefs/getting-started/
-# https://github.com/superfly/litefs-example/blob/main/Dockerfile
-
-RUN apk add bash fuse sqlite ca-certificates curl
-COPY --from=flyio/litefs:0.3 /usr/local/bin/litefs /usr/local/bin/litefs
-ADD etc/litefs.yml /etc/litefs.yml
-
-RUN apk add --update alpine-sdk
-RUN apk add python3
+COPY . .
 
 RUN npm install -g pnpm
+RUN pnpm install
+RUN pnpm run build
 
-COPY pnpm-lock.yaml ./
-RUN pnpm fetch --prod
 
-ADD . ./
-RUN pnpm install -r --offline --prod
+FROM debian:bullseye-slim
 
-EXPOSE 8080
+LABEL fly_launch_runtime="nodejs"
 
-WORKDIR /app/server
-ENTRYPOINT litefs mount -- node dist/server.js
+COPY --from=builder /usr/local/node /usr/local/node
+COPY --from=builder /app /app
 
-# docs:
-# https://pnpm.io/cli/fetch
-# https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
+WORKDIR /app
+ENV NODE_ENV production
+ENV PATH /usr/local/node/bin:$PATH
+
+CMD [ "pnpm", "run", "start" ]

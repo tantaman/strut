@@ -1,16 +1,20 @@
-# fly.toml file generated for strut on 2023-01-10T11:44:09-05:00
+# fly.toml file generated for vite-starter on 2023-05-18T15:37:10-04:00
 
-app = "strut"
+app = "vite-starter"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "iad"
 processes = []
 
 [env]
+  PORT = "8080"
 
 [experimental]
-  allowed_public_ports = []
   auto_rollback = true
-  enable_consul = true
+  
+[mounts]
+  destination = "/app/dbs"
+  source = "dbs"
 
 [[services]]
   http_checks = []
@@ -19,8 +23,8 @@ processes = []
   protocol = "tcp"
   script_checks = []
   [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
+    hard_limit = 250
+    soft_limit = 200
     type = "connections"
 
   [[services.ports]]
@@ -37,7 +41,3 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
-
-[mounts]
-  source = "litefs"
-  destination = "/var/lib/litefs"

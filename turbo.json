@@ -1,16 +1,8 @@
 {
-  "baseBranch": "origin/master",
+  "baseBranch": "origin/main",
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": []
-    },
-    "watch": {
-      "dependsOn": ["^watch"],
-      "outputs": []
-    },
-    "start": {
-      "dependsOn": ["^start"],
       "outputs": []
     }
   }

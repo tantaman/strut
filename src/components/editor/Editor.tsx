@@ -1,0 +1,70 @@
+"use strict";
+
+import SlideEditor from "./SlideEditor";
+import AppState from "../../domain/ephemeral/AppState";
+import { useBind } from "../../modelHooks";
+import LayoutEditor from "./layout/LayoutEditor";
+import { useParams } from "react-router-dom";
+import DBProvider from "../db/DBProvider.js";
+import strutSchema from "../../schemas/strut.mjs";
+import { useState } from "react";
+import useDB from "../db/useDB.js";
+import { DBID } from "../db/DBFactory.js";
+import { IID_of } from "../../id.js";
+import { Deck } from "../../domain/schema.js";
+import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme.js";
+import AuthoringState from "../../domain/ephemeral/AuthoringState.js";
+import DrawingInteractionState from "../../domain/ephemeral/DrawingInteractionState.js";
+import DeckIndex from "../../domain/ephemeral/DeckIndex.js";
+import ErrorState from "../../domain/ephemeral/ErrorState.js";
+
+/**
+ * Start authoring a presentation.
+ */
+export default function Editor() {
+  const { dbid, deckid } = useParams();
+
+  return (
+    <DBProvider dbid={dbid!} schema={strutSchema}>
+      <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
+    </DBProvider>
+  );
+}
+
+function DBProvided({ dbid, deckid }: { dbid: DBID; deckid: IID_of<Deck> }) {
+  const ctx = useDB(dbid);
+  const [appState, _setAppState] = useState<AppState>(() => {
+    return new AppState({
+      ctx,
+      editor_mode: "slide",
+      modal: "none",
+      current_deck_id: deckid,
+      authoringState: new AuthoringState({}),
+      previewTheme: new EphemeralTheme({
+        id: EphemeralTheme.defaultThemeId,
+        bg_colorset: "default",
+      }),
+      drawingInteractionState: new DrawingInteractionState({
+        currentTool: "arrow",
+      }),
+      deckIndex: new DeckIndex(),
+      errorState: new ErrorState(),
+    });
+  });
+
+  return <EditorInernal appState={appState} />;
+}
+
+function EditorInernal(props: { appState: AppState }) {
+  useBind(props.appState, ["editor_mode"]);
+  const editorMode = props.appState.editor_mode;
+  return (
+    <div className="strt-editor">
+      {editorMode === "layout" ? (
+        <LayoutEditor appState={props.appState} />
+      ) : (
+        <SlideEditor appState={props.appState} />
+      )}
+    </div>
+  );
+}
