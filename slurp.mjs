@@ -31,8 +31,14 @@ async function slurp() {
   db.transaction(() => {
     for (const mod of schemas) {
       const s = mod.default;
+      if (s.active) {
+        db.prepare(`
+          UPDATE schema SET active = 0 WHERE namespace = ? AND name = ?;
+        `);
+      }
+
       db.prepare(
-        `INSERT OR IGNORE INTO schema (namespace, name, version, content, active) VALUES (?, ?, ?, ?, ?);`
+        `INSERT OR REPLACE INTO schema (namespace, name, version, content, active) VALUES (?, ?, ?, ?, ?);`
       ).run(
         s.namespace,
         s.name,

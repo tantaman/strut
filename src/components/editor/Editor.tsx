@@ -35,6 +35,7 @@ export default function Editor() {
 
 function DBProvided({ dbid, deckid }: { dbid: DBID; deckid: IID_of<Deck> }) {
   const ctx = useDB(dbid);
+  (window as any).db = ctx.db;
   const [appState, _setAppState] = useState<AppState>(() => {
     const appState = new AppState({
       ctx,

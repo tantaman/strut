@@ -1,6 +1,6 @@
 export default {
   namespace: "default",
-  name: "testSchema",
+  name: "meta",
   active: true,
   content: /*sql*/ `
 CREATE TABLE IF NOT EXISTS "deck_map" (

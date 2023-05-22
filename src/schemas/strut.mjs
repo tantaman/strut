@@ -1,6 +1,6 @@
 export default {
   namespace: "default",
-  name: "testSchema",
+  name: "strut",
   active: true,
   content: /*sql*/ `
 CREATE TABLE IF NOT EXISTS "deck" (
@@ -82,38 +82,27 @@ CREATE TABLE IF NOT EXISTS "presenter" (
   "picked_transition"
 );
 
-SELECT
-  crsql_as_crr('deck');
+SELECT crsql_as_crr('deck');
 
-SELECT
-  crsql_as_crr('slide');
+SELECT crsql_as_crr('slide');
 
-SELECT
-  crsql_fract_as_ordered('slide', 'order', 'deck_id');
+SELECT crsql_fract_as_ordered('slide', 'order', 'deck_id');
 
-SELECT
-  crsql_as_crr('text_component');
+SELECT crsql_as_crr('text_component');
 
-SELECT
-  crsql_as_crr('embed_component');
+SELECT crsql_as_crr('embed_component');
 
-SELECT
-  crsql_as_crr('shape_component');
+SELECT crsql_as_crr('shape_component');
 
-SELECT
-  crsql_as_crr('line_component');
+SELECT crsql_as_crr('line_component');
 
-SELECT
-  crsql_as_crr('line_point');
+SELECT crsql_as_crr('line_point');
 
-SELECT
-  crsql_as_crr('theme');
+SELECT crsql_as_crr('theme');
 
-SELECT
-  crsql_as_crr('recent_color');
+SELECT crsql_as_crr('recent_color');
 
-SELECT
-  crsql_as_crr('presenter');
+SELECT crsql_as_crr('presenter');
 
 CREATE TABLE IF NOT EXISTS "selected_slide" (
   "deck_id",
