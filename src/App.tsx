@@ -47,23 +47,11 @@ function ClerkProviderWithRoutes() {
         />
         <Route
           path="/sign-in/*"
-          element={
-            <SignIn
-              routing="path"
-              path="/sign-in"
-              afterSignInUrl="/dashboard"
-            />
-          }
+          element={<SignIn routing="path" path="/sign-in" afterSignInUrl="/" />}
         />
         <Route
           path="/sign-up/*"
-          element={
-            <SignUp
-              routing="path"
-              path="/sign-up"
-              afterSignUpUrl="/dashboard"
-            />
-          }
+          element={<SignUp routing="path" path="/sign-up" afterSignUpUrl="/" />}
         />
         <Route
           path="/create/:dbid/:deckid"
