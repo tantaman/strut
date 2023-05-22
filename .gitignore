@@ -23,4 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 dbs/
-deps/counter/tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
