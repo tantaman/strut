@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useRef } from "react";
+import React, { ChangeEvent, useRef } from "react";
 
 function FileInput(props: {
   label: string;

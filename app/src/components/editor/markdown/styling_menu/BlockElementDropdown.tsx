@@ -16,7 +16,7 @@ const readouts = {
       </>
     ),
     shortName: "Aa",
-    apply: (editor: undefined) => {}, // editor?.chain().focus().setParagraph().run(),
+    apply: (_editor: undefined) => {}, // editor?.chain().focus().setParagraph().run(),
     unApply: () => {},
   },
   heading1: {
@@ -26,7 +26,7 @@ const readouts = {
       </>
     ),
     shortName: "H1",
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleHeading({ level: 1 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -37,7 +37,7 @@ const readouts = {
       </>
     ),
     shortName: "H2",
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleHeading({ level: 2 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -48,7 +48,7 @@ const readouts = {
       </>
     ),
     shortName: "H3",
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleHeading({ level: 3 }).run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },
@@ -70,7 +70,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-list-ol"}></i>,
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleOrderedList().run(),
     // unApply: lift,
   },
@@ -81,7 +81,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-blockquote-left"}></i>,
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleBlockquote().run(),
     // unApply: lift,
   },
@@ -92,7 +92,7 @@ const readouts = {
       </>
     ),
     shortName: <i className={"bi bi-code-slash"}></i>,
-    apply: (editor: undefined) => {},
+    apply: (_editor: undefined) => {},
     // editor?.chain().focus().toggleCodeBlock().run(),
     // unApply: setBlockType(schema.nodes.paragraph),
   },

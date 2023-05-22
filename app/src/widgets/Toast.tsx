@@ -5,7 +5,6 @@ import relativeTime from "../utils/relativeTime";
 
 export default function Toast({
   id,
-  level,
   message,
   time,
   errorState,

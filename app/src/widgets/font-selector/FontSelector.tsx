@@ -88,7 +88,7 @@ export default function FontSelector({
     <div
       className={"btn-group dropdown" + showAlias(show)}
       role="group"
-      onClick={(e) => {
+      onClick={(_e) => {
         setShow(!show);
       }}
       ref={rootRef}

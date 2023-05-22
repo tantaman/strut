@@ -18,7 +18,7 @@ export default function HueSlider({
     setMouseDown(true);
     updateHueFromMouseEvent(e);
   };
-  const onMouseUp = (e: MouseEvent) => {
+  const onMouseUp = (_e: MouseEvent) => {
     setMouseDown(false);
   };
   const onMouseMove = (e: MouseEvent) => {
