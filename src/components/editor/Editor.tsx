@@ -17,6 +17,8 @@ import AuthoringState from "../../domain/ephemeral/AuthoringState.js";
 import DrawingInteractionState from "../../domain/ephemeral/DrawingInteractionState.js";
 import DeckIndex from "../../domain/ephemeral/DeckIndex.js";
 import ErrorState from "../../domain/ephemeral/ErrorState.js";
+import hotkeys from "../hotkeys/hotkeys.js";
+import OpenType from "../open-type/OpenType.js";
 
 /**
  * Start authoring a presentation.
@@ -34,7 +36,7 @@ export default function Editor() {
 function DBProvided({ dbid, deckid }: { dbid: DBID; deckid: IID_of<Deck> }) {
   const ctx = useDB(dbid);
   const [appState, _setAppState] = useState<AppState>(() => {
-    return new AppState({
+    const appState = new AppState({
       ctx,
       editor_mode: "slide",
       modal: "none",
@@ -50,9 +52,18 @@ function DBProvided({ dbid, deckid }: { dbid: DBID; deckid: IID_of<Deck> }) {
       deckIndex: new DeckIndex(),
       errorState: new ErrorState(),
     });
+    hotkeys.install(appState);
+    return appState;
   });
 
-  return <EditorInernal appState={appState} />;
+  useBind(appState, ["modal"]);
+
+  return (
+    <>
+      {appState.open_type ? <OpenType appState={appState} /> : null}
+      <EditorInernal appState={appState} />
+    </>
+  );
 }
 
 function EditorInernal(props: { appState: AppState }) {

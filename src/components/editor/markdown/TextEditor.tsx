@@ -207,7 +207,7 @@ function TextEditorInner({
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
   // const [editing, setEditing] = useState(hasFocus);
-  const dblClicked = (e) => {
+  const dblClicked = () => {
     editor.setEditable(true);
     editor.focus();
   };

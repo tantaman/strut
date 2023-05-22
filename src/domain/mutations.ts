@@ -58,8 +58,6 @@ const mutations = {
     }
   },
 
-  toggleOpenType() {},
-
   toggleDrawing() {},
 
   setTransitionType(ctx: Ctx, presenter: string, transitionType: string) {
