@@ -1,3 +1,0 @@
-[submodule "deps/model"]
-	path = deps/model
-	url = git@github.com:vlcn-io/model.git
