@@ -13,7 +13,7 @@ cd strut
 # Install npm packages
 pnpm install
 # Build submodule repositories
-pnpm turbo run build
+pnpm turbo run build --force
 # Start the dev server
 pnpm dev
 ```
