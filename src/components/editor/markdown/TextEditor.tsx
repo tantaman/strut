@@ -4,7 +4,14 @@ import {
   EditorState,
   FOCUS_COMMAND,
 } from "lexical";
-import { MouseEvent, memo, useCallback, useEffect, useState } from "react";
+import {
+  KeyboardEvent,
+  MouseEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {
@@ -264,6 +271,11 @@ function TextEditorInner({
   const onDragStop = useCallback(() => {
     setDragging(false);
   }, []);
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Backspace" && !selectedComponents.has(id)) {
+      // delete the thing
+    }
+  };
 
   return (
     <Draggable
@@ -274,7 +286,7 @@ function TextEditorInner({
       scale={scale}
       disabled={hasFocus}
     >
-      <div className={styles.root}>
+      <div className={styles.root} onKeyDown={onKeyDown} tabIndex={1}>
         <RichTextPlugin
           contentEditable={
             <ContentEditable className={styles.contentEditable} />

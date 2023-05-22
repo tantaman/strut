@@ -99,6 +99,9 @@ const mutations = {
     });
   },
 
+  // remove the thing, updating selection state appropriately
+  removeComponent(ctx: Ctx, componentId: AnyComponentID) {},
+
   removeComponent_ignoreSelection(
     ctx: Ctx,
     componentId: AnyComponentID,
@@ -126,6 +129,7 @@ const mutations = {
 
   removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
     return ctx.db.tx(async (tx) => {
+      // TODO: just do in a single query!
       console.log("rm selected components");
       const components = await tx.execA(
         "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
