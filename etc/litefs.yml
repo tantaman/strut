@@ -1,0 +1,32 @@
+# This directory is where your application will access the database.
+fuse:
+  dir: "/app/dbs"
+
+# This directory is where LiteFS will store internal data.
+# You must place this directory on a persistent volume.
+data:
+  dir: "/var/lib/litefs"
+
+lease:
+  type: "consul"
+
+  # Specifies if this node can become primary. The expression below evaluates
+  # to true on nodes that are run in the primary region. Nodes in other regions
+  # act as non-candidate, read-only replicas.
+  candidate: ${FLY_REGION == PRIMARY_REGION}
+
+  # If true, then the node will automatically become primary after it has
+  # connected with the cluster and sync'd up. This makes it easier to run
+  # migrations on start up.
+  promote: true
+
+  # The API URL that other nodes will use to connect to this node.
+  advertise-url: "http://${FLY_ALLOC_ID}.vm.${FLY_APP_NAME}.internal:20202"
+
+  consul:
+    # The URL of the Consul cluster.
+    url: "${FLY_CONSUL_URL}"
+
+    # A unique key shared by all nodes in the LiteFS cluster.
+    # Change this if you are running multiple clusters in a single app!
+    key: "${FLY_APP_NAME}/primary"

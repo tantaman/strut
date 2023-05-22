@@ -1,6 +1,6 @@
 # fly.toml file generated for vite-starter on 2023-05-18T15:37:10-04:00
 
-app = "vite-starter"
+app = "strut"
 kill_signal = "SIGINT"
 kill_timeout = 5
 primary_region = "iad"
@@ -13,8 +13,8 @@ processes = []
   auto_rollback = true
   
 [mounts]
-  destination = "/app/dbs"
-  source = "dbs"
+  source = "litefs"
+  destination = "/var/lib/litefs"
 
 [[services]]
   http_checks = []

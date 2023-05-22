@@ -8,6 +8,10 @@ RUN apt-get update; apt install -y curl python-is-python3 pkg-config build-essen
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
 rm -rf /tmp/node-build-master
 
+RUN apt install -y fuse3 sqlite3
+COPY --from=flyio/litefs:0.4 /usr/local/bin/litefs /usr/local/bin/litefs
+ADD etc/litefs.yml /etc/litefs.yml
+
 RUN mkdir /app
 WORKDIR /app
 
@@ -29,4 +33,4 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV PATH /usr/local/node/bin:$PATH
 
-CMD [ "pnpm", "run", "start" ]
+ENTRYPOINT litefs mount -- pnpm run start

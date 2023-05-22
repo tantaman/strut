@@ -4,14 +4,7 @@ import {
   EditorState,
   FOCUS_COMMAND,
 } from "lexical";
-import {
-  KeyboardEvent,
-  MouseEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { KeyboardEvent, memo, useCallback, useEffect, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {

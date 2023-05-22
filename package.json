@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ./slurp.mjs && node ./server.js",
     "start": "node ./slurp.mjs && NODE_ENV=production node ./server.js",
-    "build": "tsc && vite build",
+    "build": "turbo run build --force && tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

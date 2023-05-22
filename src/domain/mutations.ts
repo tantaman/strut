@@ -100,7 +100,7 @@ const mutations = {
   },
 
   // remove the thing, updating selection state appropriately
-  removeComponent(ctx: Ctx, componentId: AnyComponentID) {},
+  removeComponent(_ctx: Ctx, _componentId: AnyComponentID) {},
 
   removeComponent_ignoreSelection(
     ctx: Ctx,
