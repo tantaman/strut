@@ -8,10 +8,6 @@ RUN apt-get update; apt install -y curl python-is-python3 pkg-config build-essen
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
 rm -rf /tmp/node-build-master
 
-RUN apt install -y fuse3 sqlite3
-COPY --from=flyio/litefs:0.4 /usr/local/bin/litefs /usr/local/bin/litefs
-ADD etc/litefs.yml /etc/litefs.yml
-
 RUN mkdir /app
 WORKDIR /app
 
@@ -29,8 +25,12 @@ LABEL fly_launch_runtime="nodejs"
 COPY --from=builder /usr/local/node /usr/local/node
 COPY --from=builder /app /app
 
+RUN apt-get update; apt install -y fuse3 ca-certificates curl
+COPY --from=flyio/litefs:0.4 /usr/local/bin/litefs /usr/local/bin/litefs
+ADD etc/litefs.yml /etc/litefs.yml
+
 WORKDIR /app
 ENV NODE_ENV production
-ENV PATH /usr/local/node/bin:$PATH
+ENV PATH /usr/local/node/bin:/usr/local/bin:$PATH
 
-ENTRYPOINT litefs mount -- pnpm run start
+ENTRYPOINT litefs mount
