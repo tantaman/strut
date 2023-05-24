@@ -4,7 +4,14 @@ import {
   EditorState,
   FOCUS_COMMAND,
 } from "lexical";
-import { KeyboardEvent, memo, useCallback, useEffect, useState } from "react";
+import {
+  KeyboardEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 
 import {
@@ -54,7 +61,14 @@ const persistText = throttle(
 
 const persistDrag = throttle(
   100,
-  (ctx: Ctx, x: number, y: number, componentId: IID_of<TextComponent>) => {
+  (
+    ctx: Ctx,
+    x: number,
+    y: number,
+    componentId: IID_of<TextComponent>,
+    ignore: Set<string>
+  ) => {
+    ignore.add(x.toFixed(1) + y.toFixed(1));
     return mutations.saveDrag(ctx.db, "text_component", componentId, x, y);
   },
   {
@@ -206,6 +220,7 @@ function TextEditorInner({
 }) {
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
+  const ignore = useRef<Set<string>>(new Set());
   // const [editing, setEditing] = useState(hasFocus);
   const dblClicked = () => {
     editor.setEditable(true);
@@ -232,7 +247,13 @@ function TextEditorInner({
     x: ((x * 100) | 0) / 100,
     y: ((y * 100) | 0) / 100,
   });
-  if ((prevX != x || prevY != y) && !dragging) {
+
+  // TODO: abstract throttling of updates and ignoring while moving into a hook.
+  if (
+    (prevX != x || prevY != y) &&
+    !dragging &&
+    !ignore.current.has(x.toFixed(1) + y.toFixed(1))
+  ) {
     setPrevX(x);
     setPrevY(y);
     setCurrPos({
@@ -253,12 +274,13 @@ function TextEditorInner({
         x: data.x,
         y: data.y,
       });
-      persistDrag(ctx, data.x, data.y, id);
+      persistDrag(ctx, data.x, data.y, id, ignore.current);
     },
     [id]
   );
 
   const onDragStart = useCallback(() => {
+    ignore.current.clear();
     setDragging(true);
   }, []);
   const onDragStop = useCallback(() => {
