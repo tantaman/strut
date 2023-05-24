@@ -30,7 +30,7 @@
     "@vlcn.io/direct-connect-common": "0.1.2",
     "@vlcn.io/direct-connect-nodejs": "0.1.2-next.0",
     "@vlcn.io/model": "workspace:*",
-    "@vlcn.io/react": "0.10.3-next.3",
+    "@vlcn.io/react": "0.10.3-next.4",
     "@vlcn.io/rx-tbl": "0.9.1",
     "@vlcn.io/xplat-api": "0.9.1",
     "chroma-js": "^2.4.2",

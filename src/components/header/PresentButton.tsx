@@ -20,7 +20,7 @@ export default function PresentButton({
   const presenter = queries.chosenPresenter(ctx, deckId).data;
 
   if (!presenter) {
-    return <div>No presenter chosen?</div>;
+    return null;
   }
 
   return <PresentButtonImpl ctx={ctx} presenter={presenter} deckId={deckId} />;

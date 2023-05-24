@@ -15,6 +15,13 @@ import {
 import Dashboard from "./Dashboard";
 import Editor from "./components/editor/Editor";
 
+import "styles/markdown/markdown-reset.css";
+import "styles/mobile.css";
+
+import "styles/markdown/colors/hook.css";
+import "styles/markdown/structures/structures.css";
+import "styles/markdown/fonts/fonts.css";
+
 const clerkPubKey = import.meta.env.VITE_REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 function LandingPage() {
