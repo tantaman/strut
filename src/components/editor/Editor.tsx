@@ -19,6 +19,7 @@ import DeckIndex from "../../domain/ephemeral/DeckIndex.js";
 import ErrorState from "../../domain/ephemeral/ErrorState.js";
 import hotkeys from "../hotkeys/hotkeys.js";
 import OpenType from "../open-type/OpenType.js";
+import { endpoints } from "../../SyncEndpoints.js";
 
 /**
  * Start authoring a presentation.
@@ -27,7 +28,7 @@ export default function Editor() {
   const { dbid, deckid } = useParams();
 
   return (
-    <DBProvider dbid={dbid!} schema={strutSchema}>
+    <DBProvider dbid={dbid!} schema={strutSchema} endpoints={endpoints}>
       <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
     </DBProvider>
   );

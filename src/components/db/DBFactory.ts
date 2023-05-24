@@ -19,8 +19,19 @@ const sqlite = await initWasm(() => wasmUrl);
 const dbMap = new Map<DBID, Promise<CtxAsync>>();
 const hooks = new Map<DBID, () => CtxAsync | null>();
 
+export type SyncEdnpoints = {
+  createOrMigrate: URL;
+  applyChanges: URL;
+  startOutboundStream: URL;
+};
+
 const dbFactory = {
-  async get(dbid: DBID, schema: Schema, hook?: () => CtxAsync | null) {
+  async get(
+    dbid: DBID,
+    schema: Schema,
+    endpoints: SyncEdnpoints,
+    hook?: () => CtxAsync | null
+  ) {
     if (hook) {
       hooks.set(dbid, hook);
     }
@@ -33,21 +44,7 @@ const dbFactory = {
       await db.automigrateTo(schema.name, schema.content);
       const rx = tblrx(db);
       const syncWorker = new WorkerInterface(workerUrl, wasmUrl);
-      syncWorker.startSync(
-        dbid as any,
-        {
-          createOrMigrate: new URL(
-            "/sync/create-or-migrate",
-            window.location.origin
-          ),
-          applyChanges: new URL("/sync/changes", window.location.origin),
-          startOutboundStream: new URL(
-            "/sync/start-outbound-stream",
-            window.location.origin
-          ),
-        },
-        rx
-      );
+      syncWorker.startSync(dbid as any, endpoints, rx);
       return {
         db,
         rx,

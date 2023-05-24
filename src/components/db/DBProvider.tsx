@@ -5,24 +5,28 @@
  */
 import react, { useEffect, useRef, useState } from "react";
 import { createContext } from "./DBContext.js";
-import dbFactory, { Schema, DBID } from "./DBFactory.js";
+import dbFactory, { Schema, DBID, SyncEdnpoints } from "./DBFactory.js";
 import { CtxAsync } from "@vlcn.io/react";
 
 export default function DBProvider({
   dbid,
   children,
   schema,
+  endpoints,
 }: {
   dbid: DBID;
   schema: Schema;
   children: react.ReactNode;
+  endpoints: SyncEdnpoints;
 }) {
   const contextRef = useRef(createContext());
   const [dbRef, setDbRef] = useState<CtxAsync | null>(null);
   useEffect(() => {
-    dbFactory.get(dbid, schema, contextRef.current.useDb).then((db) => {
-      setDbRef(db);
-    });
+    dbFactory
+      .get(dbid, schema, endpoints, contextRef.current.useDb)
+      .then((db) => {
+        setDbRef(db);
+      });
     return () => {
       dbFactory.closeAndRemove(dbid);
     };
