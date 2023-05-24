@@ -32,7 +32,7 @@ export default function FontColorButton({ ctx, state, theme }: Props) {
       } else {
         // state.editor?.chain().focus().setColor(color).run();
         mutations.addRecentColor(
-          ctx,
+          ctx.db,
           color,
           theme?.id || config.defaultThemeId
         );

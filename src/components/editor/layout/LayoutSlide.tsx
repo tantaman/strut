@@ -25,7 +25,7 @@ const LayoutSlide = memo(function l({
     <Draggable
       className={styles.slide + " " + (selected ? styles.selected : "")}
       style={{ left: 250 + i * 250, top: 150 }}
-      onClick={() => mutations.selectSlide(ctx, deckId, slideId)}
+      onClick={() => mutations.selectSlide(ctx.db, deckId, slideId)}
       onDragging={(pos) => {
         console.log(pos);
       }}

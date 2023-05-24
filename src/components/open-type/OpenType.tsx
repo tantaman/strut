@@ -38,7 +38,7 @@ export default function OpenType({ appState }: { appState: AppState }) {
           if (e.code === "Enter") {
             if (activeIndex >= 0 && activeIndex < suggestions.length) {
               mutations.selectSlide(
-                appState.ctx,
+                appState.ctx.db,
                 appState.current_deck_id,
                 suggestions[activeIndex].id
               );
@@ -60,7 +60,7 @@ export default function OpenType({ appState }: { appState: AppState }) {
             className={i === activeIndex ? styles.active : ""}
             onClick={() => {
               mutations.selectSlide(
-                appState.ctx,
+                appState.ctx.db,
                 appState.current_deck_id,
                 s.id
               );

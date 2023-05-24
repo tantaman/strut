@@ -1,5 +1,5 @@
 import config from "../config.js";
-import { CtxAsync as Ctx, first } from "@vlcn.io/react";
+import { first } from "@vlcn.io/react";
 import { IID_of, newIID } from "../id";
 import fns from "./fns";
 import {
@@ -23,15 +23,15 @@ function objId<T>(db: DBAsync): IID_of<T> {
 }
 
 const mutations = {
-  async undo(ctx: Ctx, deckId: IID_of<Deck>) {
+  async undo(tx: TXAsync, deckId: IID_of<Deck>) {
     const item = first(
-      await ctx.db.execO<UndoStack>(
+      await tx.execO<UndoStack>(
         `SELECT * FROM undo_stack WHERE deck_id = ? ORDER BY "order" DESC LIMIT 1`,
         [deckId]
       )
     );
     if (item) {
-      await ctx.db.exec(
+      await tx.exec(
         `DELETE FROM undo_stack WHERE deck_id = ? AND "order" = ?`,
         [deckId, item.order]
       );
@@ -41,35 +41,35 @@ const mutations = {
     }
   },
 
-  async redo(ctx: Ctx, deckId: IID_of<Deck>) {
+  async redo(tx: TXAsync, deckId: IID_of<Deck>) {
     const item = first(
-      await ctx.db.execO<UndoStack>(
+      await tx.execO<UndoStack>(
         `SELECT * FROM redo_stack WHERE deck_id = ? ORDER BY "order" ASC LIMIT 1`,
         [deckId]
       )
     );
     if (item) {
-      await ctx.db.exec(
+      await tx.exec(
         `DELETE FROM redo_stack WHERE deck_id = ? AND "order" = ?`,
         [deckId, item.order]
       );
       const op = fns.decodeOperation(item.operation);
-      await mutations.applyOperation(ctx, op);
+      await mutations.applyOperation(tx, op);
     }
   },
 
   toggleDrawing() {},
 
-  setTransitionType(ctx: Ctx, presenter: string, transitionType: string) {
+  setTransitionType(tx: TXAsync, presenter: string, transitionType: string) {
     // TODO encode an operation for undo/redo too
-    return ctx.db.exec(
-      "UPDATE presenter SET transition_type = ? WHERE name = ?",
-      [transitionType, presenter]
-    );
+    return tx.exec("UPDATE presenter SET transition_type = ? WHERE name = ?", [
+      transitionType,
+      presenter,
+    ]);
   },
 
-  selectSlide(ctx: Ctx, deckId: IID_of<Deck>, id: IID_of<Slide>) {
-    return ctx.db.tx(async (tx) => {
+  selectSlide(tx: TXAsync, deckId: IID_of<Deck>, id: IID_of<Slide>) {
+    return tx.tx(async (tx) => {
       await tx.exec(
         "INSERT OR IGNORE INTO selected_slide (deck_id, slide_id) VALUES (?, ?)",
         [deckId, id]
@@ -82,12 +82,12 @@ const mutations = {
   },
 
   selectComponent(
-    ctx: Ctx,
+    tx: TXAsync,
     slideId: IID_of<Slide>,
     componentId: AnyComponentID,
     componentType: ComponentType
   ) {
-    return ctx.db.tx(async (tx) => {
+    return tx.tx(async (tx) => {
       await tx.exec(
         "INSERT OR IGNORE INTO selected_component (slide_id, component_id, component_type) VALUES (?, ?, ?)",
         [slideId, componentId, componentType]
@@ -100,68 +100,64 @@ const mutations = {
   },
 
   // remove the thing, updating selection state appropriately
-  removeComponent(_ctx: Ctx, _componentId: AnyComponentID) {},
+  removeComponent(_tx: TXAsync, _componentId: AnyComponentID) {},
 
   removeComponent_ignoreSelection(
-    ctx: Ctx,
+    tx: TXAsync,
     componentId: AnyComponentID,
     componentType: ComponentType
   ) {
     switch (componentType) {
       case "text":
-        return ctx.db.exec("DELETE FROM text_component WHERE id = ?", [
+        return tx.exec("DELETE FROM text_component WHERE id = ?", [
           componentId,
         ]);
       case "line":
-        return ctx.db.exec("DELETE FROM line_component WHERE id = ?", [
+        return tx.exec("DELETE FROM line_component WHERE id = ?", [
           componentId,
         ]);
       case "shape":
-        return ctx.db.exec("DELETE FROM shape_component WHERE id = ?", [
+        return tx.exec("DELETE FROM shape_component WHERE id = ?", [
           componentId,
         ]);
       case "embed":
-        return ctx.db.exec("DELETE FROM embed_component WHERE id = ?", [
+        return tx.exec("DELETE FROM embed_component WHERE id = ?", [
           componentId,
         ]);
     }
   },
 
-  removeSelectedComponents(ctx: Ctx, slideId: IID_of<Slide>) {
-    return ctx.db.tx(async (tx) => {
-      // TODO: just do in a single query!
-      console.log("rm selected components");
+  removeSelectedComponents(tx: TXAsync, slideId: IID_of<Slide>) {
+    return tx.tx(async (tx) => {
       const components = await tx.execA(
         "SELECT component_id, component_type FROM selected_component WHERE slide_id = ?",
         [slideId]
       );
       for (const component of components) {
         await mutations.removeComponent_ignoreSelection(
-          ctx,
+          tx,
           component[0],
           component[1]
         );
       }
-      await tx.exec("DELETE FROM selected_component WHERE slide_id = ?", [
-        slideId,
-      ]);
+      await tx.exec(/*sql*/ `DELETE FROM selected_component`);
     });
   },
 
-  deselectAllComponents(ctx: Ctx, slideId: IID_of<Slide>) {
-    return ctx.db.exec("DELETE FROM selected_component WHERE slide_id = ?", [
+  deselectAllComponents(tx: TXAsync, slideId: IID_of<Slide>) {
+    return tx.exec("DELETE FROM selected_component WHERE slide_id = ?", [
       slideId,
     ]);
   },
 
-  async applyOperation(_ctx: Ctx, _op: Operation) {
+  async applyOperation(_tx: TXAsync, _op: Operation) {
     // get mutation from op.name
     // apply mutations from op.args and current ctx
     // TODO: could also look into the sqlite undo/redo as triggers design
   },
 
-  addRecentColor(ctx: Ctx, color: string, id: IID_of<Theme>) {
-    return ctx.db.exec(
+  addRecentColor(tx: TXAsync, color: string, id: IID_of<Theme>) {
+    return tx.exec(
       `INSERT INTO recent_color
         ("color", "last_used", "first_used", "theme_id")
       VALUES
@@ -175,8 +171,8 @@ const mutations = {
     );
   },
 
-  persistMarkdownToSlide(ctx: Ctx, id: IID_of<Slide>, dom: string) {
-    return ctx.db.exec(
+  persistMarkdownToSlide(tx: TXAsync, id: IID_of<Slide>, dom: string) {
+    return tx.exec(
       `UPDATE markdown
         SET "content" = ?
         WHERE slide_id = ?`,
@@ -187,7 +183,7 @@ const mutations = {
   // TODO: we need to cascade deletes to fk edges.
   // Can we do SQLite FK cascade w/o FK enforcement?
   removeSlide(
-    ctx: Ctx,
+    tx: TXAsync,
     id: IID_of<Slide>,
     deckId: IID_of<Deck>,
     selected: boolean
@@ -197,10 +193,10 @@ const mutations = {
     const deleteSlide = (tx: TXAsync) =>
       tx.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);
     if (!selected) {
-      return deleteSlide(ctx.db);
+      return deleteSlide(tx);
     }
 
-    return ctx.db
+    return tx
       .execA<[IID_of<Slide>]>(
         /*sql*/ `WITH "cte" AS (
         SELECT "id", row_number() OVER (ORDER BY "order") as "rn" FROM "slide"
@@ -224,7 +220,7 @@ const mutations = {
           select = beforeAfter[0][0];
         }
 
-        return ctx.db.tx(async (tx) => {
+        return tx.tx(async (tx) => {
           await tx.exec(
             `DELETE FROM "selected_slide" WHERE "slide_id" = ? AND deck_id = ?`,
             [id, deckId]
@@ -238,14 +234,16 @@ const mutations = {
       });
   },
 
+  // TODO: TXAsync should include `siteid` to de-dupe these args
   addSlideAfter(
-    ctx: Ctx,
+    db: DBAsync,
+    tx: TXAsync,
     afterSlideId: IID_of<Slide> | null,
     id: IID_of<Deck>
   ) {
     // TODO: do this in a tx once we add tx support to wa-sqlite wrapper
     // doable in a single sql stmt?
-    const slideId = objId<Slide>(ctx.db);
+    const slideId = objId<Slide>(db);
     const query = `INSERT INTO "slide_fractindex" ("id", "deck_id", "after_id", "created", "modified") VALUES (
       ${slideId},
       ${id},
@@ -253,12 +251,12 @@ const mutations = {
       ${Date.now()},
       ${Date.now()}
     );`;
-    return ctx.db.exec(query);
+    return tx.exec(query);
   },
 
-  addText(ctx: Ctx, deckId: IID_of<Deck>) {
-    const id = objId(ctx.db);
-    return ctx.db.exec(
+  addText(db: DBAsync, tx: TXAsync, deckId: IID_of<Deck>) {
+    const id = objId(db);
+    return tx.exec(
       /*sql*/ `INSERT INTO text_component
       ("id", "slide_id", "x", "y")
       SELECT ${id}, "slide_id", ${
@@ -273,7 +271,7 @@ const mutations = {
 
   // TODO: should be id rather than index based reordering in the future
   async reorderSlides(
-    ctx: Ctx,
+    tx: TXAsync,
     deckId: IID_of<Deck>,
     fromId: IID_of<Slide>,
     toId: IID_of<Slide>,
@@ -284,7 +282,7 @@ const mutations = {
     let afterId;
     if (side === "before") {
       let result = (
-        await ctx.db.execA(
+        await tx.execA(
           /*sql */ `SELECT "id" FROM "slide"
           WHERE "deck_id" = ? AND "order" < (SELECT "order" FROM "slide" WHERE "id" = ?)
           ORDER BY "order" DESC LIMIT 1`,
@@ -301,55 +299,55 @@ const mutations = {
     }
 
     console.log(afterId, fromId);
-    await ctx.db.exec(
+    await tx.exec(
       /*sql*/ `UPDATE "slide_fractindex" SET "after_id" = ? WHERE "id" = ?`,
       [afterId, fromId]
     );
   },
 
   setAllSlideColor(
-    ctx: Ctx,
+    tx: TXAsync,
     id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
       return;
     }
-    return ctx.db.exec(`UPDATE theme SET slide_color = ? WHERE id = ?`, [
+    return tx.exec(`UPDATE theme SET slide_color = ? WHERE id = ?`, [
       c == null ? null : c,
       id,
     ]);
   },
 
   setAllSurfaceColor(
-    ctx: Ctx,
+    tx: TXAsync,
     id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
       return;
     }
-    return ctx.db.exec(`UPDATE theme SET surface_color = ? WHERE id = ?`, [
+    return tx.exec(`UPDATE theme SET surface_color = ? WHERE id = ?`, [
       c == null ? null : c,
       id,
     ]);
   },
 
   setAllTextColor(
-    ctx: Ctx,
+    tx: TXAsync,
     id: IID_of<Theme> | undefined,
     c: string | undefined
   ) {
     if (!id) {
       return;
     }
-    return ctx.db.exec(`UPDATE theme SET text_color = ? WHERE id = ?`, [
+    return tx.exec(`UPDATE theme SET text_color = ? WHERE id = ?`, [
       c == null ? null : c,
       id,
     ]);
   },
 
-  setAllFont(_ctx: Ctx, _id: IID_of<Theme>, _name: string) {},
+  setAllFont(_tx: TXAsync, _id: IID_of<Theme>, _name: string) {},
 
   async genOrCreateCurrentDeck(db: DBAsync): Promise<IID_of<Deck>> {
     // go thru recent opens
@@ -396,15 +394,15 @@ const mutations = {
     return ids[0][0];
   },
 
-  saveText(ctx: Ctx, markdown: string, compnentId: IID_of<TextComponent>) {
-    return ctx.db.exec(
+  saveText(tx: TXAsync, markdown: string, compnentId: IID_of<TextComponent>) {
+    return tx.exec(
       /* sql */ `UPDATE "text_component" SET "text" = ? WHERE "id" = ?`,
       [markdown, compnentId]
     );
   },
 
   saveDrag(
-    ctx: Ctx,
+    tx: TXAsync,
     _component:
       | "text_component"
       | "embed_component"
@@ -418,7 +416,7 @@ const mutations = {
     x: number,
     y: number
   ) {
-    return ctx.db.exec(
+    return tx.exec(
       /* sql */ `UPDATE "text_component" SET "x" = ?, "y" = ? WHERE "id" = ?`,
       [((x * 100) | 0) / 100, ((y * 100) | 0) / 100, compnentId]
     );

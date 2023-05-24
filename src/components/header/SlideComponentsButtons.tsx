@@ -17,7 +17,11 @@ export default function SlideComponentsButtons({
         type="button"
         className="btn btn-outline-warning"
         onClick={() =>
-          mutations.addText(appState.ctx, appState.current_deck_id)
+          mutations.addText(
+            appState.ctx.db,
+            appState.ctx.db,
+            appState.current_deck_id
+          )
         }
       >
         <i className={"bi bi-fonts " + styles.icon}></i>

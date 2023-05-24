@@ -29,7 +29,7 @@ function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
               disabled: !canUndo,
             })}
             href="#!"
-            onClick={() => mutations.undo(ctx, deckId)}
+            onClick={() => mutations.undo(ctx.db, deckId)}
           >
             Undo
           </a>
@@ -41,7 +41,7 @@ function LogoButton({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
               disabled: !canRedo,
             })}
             href="#!"
-            onClick={() => mutations.redo(ctx, deckId)}
+            onClick={() => mutations.redo(ctx.db, deckId)}
           >
             Redo
           </a>

@@ -35,7 +35,7 @@ function Slideout({
   return (
     <>
       <ColorPickerButton2
-        onChange={(c) => mutations.setAllSlideColor(ctx, theme?.id, c)}
+        onChange={(c) => mutations.setAllSlideColor(ctx.db, theme?.id, c)}
         onPreview={(c) => previewTheme.set("slide_color", c)}
         color={theme?.slide_color || "default"}
         recents={recentColors}
@@ -45,7 +45,7 @@ function Slideout({
       </ColorPickerButton2>
       <ColorPickerButton2
         onPreview={(c) => previewTheme.set("surface_color", c)}
-        onChange={(c) => mutations.setAllSurfaceColor(ctx, theme?.id, c)}
+        onChange={(c) => mutations.setAllSurfaceColor(ctx.db, theme?.id, c)}
         color={theme?.surface_color || "default"}
         recents={recentColors}
       >
@@ -54,7 +54,7 @@ function Slideout({
       </ColorPickerButton2>
       <ColorPickerButton2
         onPreview={(c) => previewTheme.set("font_color", c)}
-        onChange={(c) => mutations.setAllTextColor(ctx, theme?.id, c)}
+        onChange={(c) => mutations.setAllTextColor(ctx.db, theme?.id, c)}
         color={theme?.font_color || "default"}
         recents={recentColors}
       >

@@ -45,7 +45,7 @@ import queries from "../../../domain/queries";
 const persistText = throttle(
   100,
   (ctx: Ctx, markdown: string, componentId: IID_of<TextComponent>) => {
-    return mutations.saveText(ctx, markdown, componentId);
+    return mutations.saveText(ctx.db, markdown, componentId);
   },
   {
     noLeading: true,
@@ -55,7 +55,7 @@ const persistText = throttle(
 const persistDrag = throttle(
   100,
   (ctx: Ctx, x: number, y: number, componentId: IID_of<TextComponent>) => {
-    return mutations.saveDrag(ctx, "text_component", componentId, x, y);
+    return mutations.saveDrag(ctx.db, "text_component", componentId, x, y);
   },
   {
     noLeading: true,
@@ -212,7 +212,7 @@ function TextEditorInner({
     editor.focus();
   };
   const onSelect = () => {
-    return mutations.selectComponent(ctx, slideId, id, "text");
+    return mutations.selectComponent(ctx.db, slideId, id, "text");
   };
 
   const onChange = useCallback(

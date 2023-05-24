@@ -49,7 +49,7 @@ function PresentButtonImpl({
 
   const onTransitionTypeChange = useCallback(
     (transitionType: string) =>
-      mutations.setTransitionType(ctx, presenter.name, transitionType),
+      mutations.setTransitionType(ctx.db, presenter.name, transitionType),
     [presenter]
   );
 

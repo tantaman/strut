@@ -75,7 +75,7 @@ function WellSlide(props: {
 
   const removeSlide = (e: MouseEvent) => {
     mutations.removeSlide(
-      props.appState.ctx,
+      props.appState.ctx.db,
       props.id,
       props.appState.current_deck_id,
       selectedSlides.has(props.id)
@@ -141,7 +141,7 @@ function WellSlide(props: {
       return;
     }
     mutations.reorderSlides(
-      props.appState.ctx,
+      props.appState.ctx.db,
       props.appState.current_deck_id,
       fromId,
       toId,
@@ -169,7 +169,7 @@ function WellSlide(props: {
       })}
       onClick={() => {
         mutations.selectSlide(
-          props.appState.ctx,
+          props.appState.ctx.db,
           props.appState.current_deck_id,
           props.id
         );

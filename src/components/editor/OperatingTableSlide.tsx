@@ -54,14 +54,14 @@ function OperatingTableSlide({
   });
   const onkeydown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key == "Delete") {
-      mutations.removeSelectedComponents(appState.ctx, slideId);
+      mutations.removeSelectedComponents(appState.ctx.db, slideId);
     }
   };
   const deselectAll = (e: React.MouseEvent<HTMLElement>) => {
     if (!(e.target as HTMLElement).classList.contains("markdown")) {
       return;
     }
-    mutations.deselectAllComponents(appState.ctx, slideId);
+    mutations.deselectAllComponents(appState.ctx.db, slideId);
   };
 
   return (

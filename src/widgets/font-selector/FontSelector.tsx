@@ -49,7 +49,7 @@ function Option({
   };
   const updateTheme = () => {
     if (theme) {
-      mutations.setAllFont(ctx, theme.id, value.name);
+      mutations.setAllFont(ctx.db, theme.id, value.name);
     }
   };
   return (
