@@ -1,4 +1,5 @@
-import { SyncEdnpoints } from "./components/db/DBFactory";
+import worker from "@vlcn.io/direct-connect-browser/shared.worker.js?url";
+import wasm from "@vlcn.io/crsqlite-wasm/crsqlite.wasm?url";
 
 export const endpoints = {
   createOrMigrate: new URL("/sync/create-or-migrate", window.location.origin),
@@ -7,4 +8,6 @@ export const endpoints = {
     "/sync/start-outbound-stream",
     window.location.origin
   ),
-} as SyncEdnpoints;
+  worker: import.meta.env.DEV ? worker : undefined,
+  wasm,
+};

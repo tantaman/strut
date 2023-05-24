@@ -5,11 +5,9 @@ import AppState from "../../domain/ephemeral/AppState";
 import { useBind } from "../../modelHooks";
 import LayoutEditor from "./layout/LayoutEditor";
 import { useParams } from "react-router-dom";
-import DBProvider from "../db/DBProvider.js";
 import strutSchema from "../../schemas/strut.mjs";
 import { useState } from "react";
-import useDB from "../db/useDB.js";
-import { DBID } from "../db/DBFactory.js";
+import { DBProvider, useDB } from "@vlcn.io/react";
 import { IID_of } from "../../id.js";
 import { Deck } from "../../domain/schema.js";
 import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme.js";
@@ -34,7 +32,7 @@ export default function Editor() {
   );
 }
 
-function DBProvided({ dbid, deckid }: { dbid: DBID; deckid: IID_of<Deck> }) {
+function DBProvided({ dbid, deckid }: { dbid: string; deckid: IID_of<Deck> }) {
   const ctx = useDB(dbid);
   (window as any).db = ctx.db;
   const [appState, _setAppState] = useState<AppState>(() => {

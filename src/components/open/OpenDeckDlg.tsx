@@ -1,8 +1,7 @@
 import metaQueries from "../../domain/metaQueries";
 import DeckCard from "./DeckCard.js";
 import useMetaDBID from "../metadb/useMetaDBID";
-import useDB from "../db/useDB.js";
-import { CtxAsync } from "@vlcn.io/react";
+import { CtxAsync, useDB } from "@vlcn.io/react";
 import { Link } from "react-router-dom";
 import { bytesToHex } from "@vlcn.io/direct-connect-common";
 

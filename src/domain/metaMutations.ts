@@ -1,6 +1,5 @@
 import { hexToBytes } from "@vlcn.io/direct-connect-common";
-import { CtxAsync } from "@vlcn.io/react";
-import dbFactory from "../components/db/DBFactory";
+import { CtxAsync, dbFactory } from "@vlcn.io/react";
 import strutSchema from "../schemas/strut.mjs";
 import mutations from "./mutations.js";
 import { IID_of } from "../id.js";
