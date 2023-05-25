@@ -1,0 +1,11 @@
+- full RX SQL to fix drag eyesore (ignore set)
+- Log and count re-queries
+  - grafana metrics and otel?
+- Query debug tools?
+  - Which queries are active
+  - How often are they hit
+  - ...
+  - Make this a pane that opens. Add it as a component within a db context.
+- Return same reference when same data?
+  - diff data? timestamp pulling?
+- Show fps pane

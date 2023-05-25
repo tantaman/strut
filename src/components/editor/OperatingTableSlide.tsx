@@ -39,11 +39,15 @@ function OperatingTableSlide({
       if (containerRect == null) {
         return;
       }
-      // const offsetTop = containerRect.top;
-      // const offsetLeft = containerRect.left;
-      // console.log(selection);
-      // selection is viewport positions...
-      // we'll need to translate to slide positions
+
+      // const left = selection.left - containerRect.left;
+      // const top = selection.top - containerRect.top;
+      // const width = selection.width;
+      // const height = selection.height;
+
+      // now find components that our box intersects.
+      // we should just query for all components up here at this level then.
+      // and pass them down rather than having lower components query on their own?
     },
     shouldStartSelecting: (target: Node) => {
       if (target instanceof HTMLElement) {

@@ -10,6 +10,7 @@ import {
 } from "@vlcn.io/react";
 import { IID_of } from "../id";
 import {
+  AnyComponent,
   AnyComponentID,
   Deck,
   Presenter,
@@ -82,12 +83,8 @@ const queries = {
       (x: any) => new Set(x.map((x: any) => x.component_id))
     ),
 
-  allComponentPositions: (ctx: Ctx, id: IID_of<Slide>) =>
-    useRangeQuery<{
-      id: AnyComponentID;
-      x: number;
-      y: number;
-    }>(
+  allComponents: (ctx: Ctx, id: IID_of<Slide>) =>
+    useQuery<AnyComponent>(
       ctx,
       /*sql*/ `SELECT "id", "x", "y" FROM "text_component" WHERE "slide_id" = ?
       UNION ALL

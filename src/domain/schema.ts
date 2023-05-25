@@ -63,6 +63,11 @@ export type ComponentType = "text" | "embed" | "shape" | "line";
 export type AnyComponentID = IID_of<
   TextComponent | EmbedComponent | ShapeComponent | LineComponent
 >;
+export type AnyComponent =
+  | TextComponent
+  | EmbedComponent
+  | ShapeComponent
+  | LineComponent;
 
 export type TextComponent = {
   readonly id: IID_of<TextComponent>;
