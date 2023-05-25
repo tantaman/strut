@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import AppState from "../../domain/ephemeral/AppState";
 import queries from "../../domain/queries";
 import { Slide } from "../../domain/schema";
@@ -6,6 +5,7 @@ import TextEditor from "./markdown/TextEditor";
 
 import "styles/markdown/markdown-reset.css";
 import { IID_of } from "../../id";
+import { useRef } from "react";
 
 export default function OTTextComponents({
   appState,
@@ -18,18 +18,16 @@ export default function OTTextComponents({
   style: Object;
   scale: number;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const componentIds = queries.textComponentIds(appState.ctx, slideId).data;
+
   const selectedComponents = queries.selectedComponentIds(
     appState.ctx,
     slideId
   ).data;
-  useEffect(() => {
-    return () => {
-      console.log("unmount ottext");
-    };
-  }, []);
+
   return (
-    <div style={style} className="markdown">
+    <div style={style} className="markdown" ref={containerRef}>
       {componentIds.map((id, i) => (
         <TextEditor
           index={i}

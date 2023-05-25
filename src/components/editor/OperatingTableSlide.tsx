@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, memo, useRef } from "react";
+import React, { KeyboardEvent, memo, useRef, useState } from "react";
 import { Theme } from "../../domain/schema";
 import { Slide } from "../../domain/schema";
 import type { otsSqaure } from "./OperatingTable";
@@ -10,6 +10,7 @@ import OTTextComponents from "./OTTextComponents";
 // @ts-ignore
 import { useSelectionContainer } from "@air/react-drag-to-select";
 import mutations from "../../domain/mutations";
+import { BoundingBox } from "../../MathTypes";
 
 function OperatingTableSlide({
   slideId,
@@ -27,27 +28,24 @@ function OperatingTableSlide({
   useBind(previewTheme, ["bg_colorset", "fontset"]);
   useBind(appState, ["editor_mode"]);
   const container = useRef<HTMLDivElement | null>(null);
-  // const allComponentPositions = queries.allComponentPositions(
-  //   appState.ctx,
-  //   slideId
-  // );
+  const [selectionBox, setSelectionBox] = useState<BoundingBox | null>(null);
 
   const { DragSelection } = useSelectionContainer({
     eventsElement: container.current,
-    onSelectionChange: (_selection: any) => {
+    onSelectionChange: (selection: any) => {
       const containerRect = container.current?.getBoundingClientRect();
       if (containerRect == null) {
         return;
       }
 
-      // const left = selection.left - containerRect.left;
-      // const top = selection.top - containerRect.top;
-      // const width = selection.width;
-      // const height = selection.height;
-
-      // now find components that our box intersects.
-      // we should just query for all components up here at this level then.
-      // and pass them down rather than having lower components query on their own?
+      const left = selection.left - containerRect.left;
+      const top = selection.top - containerRect.top;
+      const width = selection.width;
+      const height = selection.height;
+      setSelectionBox({ left, top, width, height });
+    },
+    onSelectionEnd: () => {
+      setSelectionBox(null);
     },
     shouldStartSelecting: (target: Node) => {
       if (target instanceof HTMLElement) {
@@ -92,7 +90,7 @@ function OperatingTableSlide({
           slideId={slideId}
           scale={((otsStyle.scale * 100) | 0) / 100}
           style={{
-            transform: "scale(" + otsStyle.scale + ")",
+            zoom: otsStyle.scale,
             width: otsStyle.width,
             height: otsStyle.height,
             transformOrigin: "top left",

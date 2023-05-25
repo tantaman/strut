@@ -14,6 +14,8 @@ import {
 } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Editor from "./components/editor/Editor";
+// @ts-ignore
+import FPSStats from "react-fps-stats";
 
 import "styles/markdown/markdown-reset.css";
 import "styles/mobile.css";
@@ -38,6 +40,7 @@ function ClerkProviderWithRoutes() {
 
   return (
     <ClerkProvider publishableKey={clerkPubKey} navigate={(to) => navigate(to)}>
+      <FPSStats right={0} left="auto" bottom={0} top="auto" />
       <Routes>
         <Route
           path="/"

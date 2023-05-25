@@ -9,6 +9,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -125,6 +126,7 @@ function TextEditorOuter(props: {
 }) {
   const { id, index, scale, ctx, selectedComponents } = props;
   const c = queries.textComponent(ctx, id).data;
+
   if (c == null) {
     return null;
   }
@@ -262,6 +264,7 @@ function TextEditorInner({
     });
   }
   if (prevText != text && !hasFocus) {
+    console.log("stopped editing " + prevText);
     setPrevText(text);
     editor.update(() => {
       $convertFromMarkdownString(text, TRANSFORMERS);
