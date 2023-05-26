@@ -84,6 +84,19 @@ const queries = {
       (x: any) => new Set(x.map((x: any) => x.component_id))
     ),
 
+  componentBoxes: (ctx: Ctx, id: IID_of<Slide>) =>
+    useQuery<{
+      id: AnyComponentID;
+      left: number;
+      top: number;
+      width: number;
+      height: number;
+    }>(
+      ctx,
+      /*sql*/ `SELECT "id", "x" as "left", "y" as "top", "width", "height" FROM text_component WHERE "slide_id" = ?`,
+      [id]
+    ),
+
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
     useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
       ctx,
