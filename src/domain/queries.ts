@@ -26,13 +26,6 @@ export type Query<R, M = R[]> =
 type Result<T> = any;
 
 const queries = {
-  // TODO: we can collapse all "same calls" in the same tick. to just do 1 query
-  // e.g. if 50 components all want the same data can just collapse to 1 query.
-  // DataLoader pattern.
-  // do the data loader pattern at the db wrapper level?
-  // and/or prepared statement level?
-  // we enqueue.. we can check if anyone ahead of us in the queue is fulfilling our result.
-  // if so, we return that promise instead of enqueueing a new one.
   canUndo: (ctx: Ctx, id: IID_of<Deck>) =>
     useQuery<{ exists: number }, boolean | undefined>(
       ctx,
@@ -85,8 +78,12 @@ const queries = {
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
     useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
       ctx,
-      /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1`,
-      [id],
+      /*sql*/ `SELECT 
+        coalesce(
+          (SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1),
+          (SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "id" ASC LIMIT 1)
+        ) as "slide_id"`,
+      [id, id],
       firstPick
     ),
 

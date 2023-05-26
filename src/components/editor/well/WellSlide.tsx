@@ -11,6 +11,7 @@ import queries from "../../../domain/queries";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 import WellSlidePreview from "./WellSlidePreview";
+import { useBind } from "../../../modelHooks";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -41,6 +42,7 @@ function WellSlide(props: {
   const previewTheme = props.appState.previewTheme;
 
   // TODO: `useBind` on `previewTheme`
+  useBind(previewTheme, ["slide_color"]);
   // useQuery(["slideColor", "font"], previewTheme);
 
   const [hideContextMenu, setHideContextMenu] = useState(false);
@@ -162,7 +164,10 @@ function WellSlide(props: {
       draggable
       className={css.toClassString({
         "strt-well-slide": true,
-        selected: selectedSlides.has(props.id),
+        selected:
+          selectedSlides.size == 0
+            ? props.index == 0
+            : selectedSlides.has(props.id),
         [styles.root]: true,
         [styles.in]: dropClass === styles.in,
         [fns.getFontClass(previewTheme, theme) || ""]: true,
