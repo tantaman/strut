@@ -28,7 +28,7 @@ function OperatingTableSlide({
   useBind(previewTheme, ["bg_colorset", "fontset"]);
   useBind(appState, ["editor_mode"]);
   const container = useRef<HTMLDivElement | null>(null);
-  const [selectionBox, setSelectionBox] = useState<BoundingBox | null>(null);
+  const [_selectionBox, setSelectionBox] = useState<BoundingBox | null>(null);
 
   const { DragSelection } = useSelectionContainer({
     eventsElement: container.current,

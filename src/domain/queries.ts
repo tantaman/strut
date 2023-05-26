@@ -10,7 +10,6 @@ import {
 } from "@vlcn.io/react";
 import { IID_of } from "../id";
 import {
-  AnyComponent,
   AnyComponentID,
   Deck,
   Presenter,
