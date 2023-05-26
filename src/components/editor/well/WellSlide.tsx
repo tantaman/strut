@@ -162,7 +162,10 @@ function WellSlide(props: {
       draggable
       className={css.toClassString({
         "strt-well-slide": true,
-        selected: selectedSlides.has(props.id),
+        selected:
+          selectedSlides.size == 0
+            ? props.index == 0
+            : selectedSlides.has(props.id),
         [styles.root]: true,
         [styles.in]: dropClass === styles.in,
         [fns.getFontClass(previewTheme, theme) || ""]: true,

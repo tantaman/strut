@@ -85,8 +85,12 @@ const queries = {
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
     useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
       ctx,
-      /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1`,
-      [id],
+      /*sql*/ `SELECT 
+        coalesce(
+          (SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1),
+          (SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "id" ASC LIMIT 1)
+        ) as "slide_id"`,
+      [id, id],
       firstPick
     ),
 
