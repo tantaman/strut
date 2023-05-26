@@ -99,6 +99,18 @@ const mutations = {
     });
   },
 
+  setTextComponentSize(
+    tx: TXAsync,
+    id: AnyComponentID,
+    width: number,
+    height: number
+  ) {
+    return tx.exec(
+      "UPDATE text_component SET width = ?, height = ? WHERE id = ?",
+      [width, height, id]
+    );
+  },
+
   // remove the thing, updating selection state appropriately
   removeComponent(
     tx: TXAsync,
@@ -270,12 +282,12 @@ const mutations = {
     const id = objId(db);
     return tx.exec(
       /*sql*/ `INSERT INTO text_component
-      ("id", "slide_id", "x", "y")
+      ("id", "slide_id", "x", "y", "width", "height")
       SELECT ${id}, "slide_id", ${
         ((Math.random() * config.slideWidth) / 2) | 0
       }, ${
         ((Math.random() * config.slideHeight) / 2) | 0
-      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
+      }, 60, 55 FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
     `,
       [deckId]
     );

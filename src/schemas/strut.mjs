@@ -31,7 +31,9 @@ CREATE TABLE IF NOT EXISTS "text_component" (
   "text",
   "styles",
   "x",
-  "y"
+  "y",
+  "width",
+  "height"
 );
 
 CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");

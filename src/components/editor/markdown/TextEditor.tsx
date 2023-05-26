@@ -222,6 +222,7 @@ function TextEditorInner({
   const [editor] = useLexicalComposerContext();
   const hasFocus = useEditorHasFocus();
   const ignore = useRef<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
   // const [editing, setEditing] = useState(hasFocus);
   const dblClicked = () => {
     editor.setEditable(true);
@@ -263,11 +264,15 @@ function TextEditorInner({
     });
   }
   if (prevText != text && !hasFocus) {
-    console.log("stopped editing " + prevText);
     setPrevText(text);
     editor.update(() => {
       $convertFromMarkdownString(text, TRANSFORMERS);
     });
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      mutations.setTextComponentSize(ctx.db, id, rect.width, rect.height);
+    }
   }
 
   const onDragged = useCallback(
@@ -304,7 +309,12 @@ function TextEditorInner({
       scale={scale}
       disabled={hasFocus}
     >
-      <div className={styles.root} onKeyDown={onKeyDown} tabIndex={1}>
+      <div
+        className={styles.root}
+        ref={containerRef}
+        onKeyDown={onKeyDown}
+        tabIndex={1}
+      >
         <RichTextPlugin
           contentEditable={
             <ContentEditable className={styles.contentEditable} />
