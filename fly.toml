@@ -1,20 +1,28 @@
-# fly.toml file generated for strut on 2023-05-18T15:37:10-04:00
+# fly.toml app configuration file generated for strut on 2023-06-01T10:31:39-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "strut"
 kill_signal = "SIGINT"
 kill_timeout = 5
-primary_region = "iad"
 processes = []
 
 [env]
   PORT = "8080"
+  PRIMARY_REGION = "iad"
 
 [experimental]
   auto_rollback = true
-  
-[mounts]
-  source = "litefs"
+  cmd = []
+  entrypoint = []
+  exec = []
+
+[[mounts]]
   destination = "/var/lib/litefs"
+  encrypted = false
+  processes = []
+  source = "litefs"
 
 [[services]]
   http_checks = []
