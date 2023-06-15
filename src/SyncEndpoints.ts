@@ -1,4 +1,4 @@
-import worker from "@vlcn.io/direct-connect-browser/shared.worker.js?url";
+import worker from "@vlcn.io/direct-connect-browser/dedicated.worker.js?url";
 import wasm from "@vlcn.io/crsqlite-wasm/crsqlite.wasm?url";
 
 export const endpoints = {
