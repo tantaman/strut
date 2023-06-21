@@ -18,6 +18,7 @@ import ErrorState from "../../domain/ephemeral/ErrorState.js";
 import hotkeys from "../hotkeys/hotkeys.js";
 import OpenType from "../open-type/OpenType.js";
 import { endpoints } from "../../SyncEndpoints.js";
+import EmbedModal from "./embed/EmbedModal.js";
 
 /**
  * Start authoring a presentation.
@@ -61,6 +62,7 @@ function DBProvided({ dbid, deckid }: { dbid: string; deckid: IID_of<Deck> }) {
   return (
     <>
       {appState.open_type ? <OpenType appState={appState} /> : null}
+      {appState.add_embed ? <EmbedModal appState={appState} /> : null}
       <EditorInernal appState={appState} />
     </>
   );

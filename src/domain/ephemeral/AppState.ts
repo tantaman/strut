@@ -11,7 +11,12 @@ export type Data = {
   readonly ctx: Ctx;
   readonly editor_mode: "slide" | "layout";
   readonly current_deck_id: IID_of<Deck>;
-  readonly modal: "openType" | "configureSync" | "deckSelection" | "none";
+  readonly modal:
+    | "openType"
+    | "configureSync"
+    | "deckSelection"
+    | "addEmbed"
+    | "none";
   readonly authoringState: AuthoringState;
   readonly drawingInteractionState: DrawingInteractionState;
   readonly previewTheme: EphemeralTheme;
@@ -123,6 +128,10 @@ export default class AppState extends Model<Data> {
     return this.data.modal === "openType";
   }
 
+  get add_embed(): boolean {
+    return this.data.modal === "addEmbed";
+  }
+
   get configureSync(): boolean {
     return this.data.modal === "configureSync";
   }
@@ -160,15 +169,19 @@ export default class AppState extends Model<Data> {
   }
 
   toggleOpenType(v?: boolean | undefined): void {
+    this.toggleModal("openType", v);
+  }
+
+  toggleModal(type: Data["modal"], v?: boolean | undefined): void {
     let open = false;
     if (v) open = true;
     else if (v === false) open = false;
-    else if (this.data.modal === "openType") open = false;
+    else if (this.data.modal === type) open = false;
     else open = true;
 
     if (open) {
       this.update({
-        modal: "openType",
+        modal: type,
       });
     } else {
       this.update({

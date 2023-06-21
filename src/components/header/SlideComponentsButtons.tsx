@@ -26,13 +26,17 @@ export default function SlideComponentsButtons({
       >
         <i className={"bi bi-fonts " + styles.icon}></i>
       </button>
-      <button type="button" className="btn btn-outline-warning">
+      {/* <button type="button" className="btn btn-outline-warning">
         <i className={"bi bi-square " + styles.icon}></i>
       </button>
       <button type="button" className="btn btn-outline-warning">
         <i className={"bi bi-arrow-up-right " + styles.icon}></i>
-      </button>
-      <button type="button" className="btn btn-outline-warning">
+      </button> */}
+      <button
+        type="button"
+        className="btn btn-outline-warning"
+        onClick={() => appState.toggleModal("addEmbed")}
+      >
         <i className={"bi bi-image " + styles.icon}></i>
       </button>
     </div>
