@@ -251,7 +251,7 @@ const mutations = {
       ${Date.now()},
       ${Date.now()}
     );`;
-    return tx.exec(query);
+    return tx.exec(query).then(() => slideId);
   },
 
   addText(db: DBAsync, tx: TXAsync, deckId: IID_of<Deck>) {

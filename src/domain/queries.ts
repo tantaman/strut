@@ -50,6 +50,14 @@ const queries = {
       pick
     ),
 
+  firstSlideId: (ctx: Ctx, id: IID_of<Deck>) =>
+    useQuery<{ id: IID_of<Slide> }, IID_of<Slide> | undefined>(
+      ctx,
+      /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC LIMIT 1`,
+      [id],
+      firstPick
+    ),
+
   chosenPresenter: (ctx: Ctx, id: IID_of<Deck>) =>
     useQuery<Presenter, Presenter | undefined>(
       ctx,

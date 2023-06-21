@@ -12,6 +12,7 @@ import counter from "@strut/counter";
 import config from "../../config";
 import fns from "../../domain/fns";
 import queries from "../../domain/queries";
+import CreateOrSelectSlide from "./CreateOrSelectSlide";
 
 const count = counter("OperatingTable");
 
@@ -130,6 +131,12 @@ function OperatingTable({ appState }: { appState: AppState }) {
           slideId={slideId}
           otsStyle={otsStyles[0]}
           theme={theme}
+        />
+      ) : otsStyles != null ? (
+        <CreateOrSelectSlide
+          ctx={appState.ctx}
+          otsStyle={otsStyles[0]}
+          deckId={deckId}
         />
       ) : null}
       {/* <PropertyPanel
