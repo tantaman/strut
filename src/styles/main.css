@@ -62,6 +62,10 @@ body.strt-theme-dark {
   background-color: #eee;
 }
 
+.grow {
+  flex-grow: 1;
+}
+
 .navbar-static-top {
   z-index: 3;
 }
