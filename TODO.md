@@ -1,3 +1,5 @@
+- Drizzle for structural queries
+- re-introduce lint -- "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 - full RX SQL to fix drag eyesore (ignore set)
 - Log and count re-queries
   - grafana metrics and otel?
