@@ -6,16 +6,16 @@
 
 @media screen and (max-width: 900px) {
   .strt-operating-table {
-    top: 0;
+    /* top: 0; */
     left: 0;
-    bottom: 128px;
+    bottom: 95px;
   }
 
   .strt-slide-well {
     bottom: 0px;
     left: 0px;
     right: 0px;
-    height: 128px;
+    height: 95px;
     width: auto;
     top: auto;
     white-space: nowrap;
