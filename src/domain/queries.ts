@@ -12,6 +12,7 @@ import { IID_of } from "../id";
 import {
   AnyComponentID,
   Deck,
+  EmbedComponent,
   Presenter,
   Slide,
   TextComponent,
@@ -127,7 +128,13 @@ const queries = {
       first
     ),
 
-  embedComponentIds: (ctx: Ctx, id: IID_of<Slide>) => {},
+  embedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
+    useQuery<IID_of<EmbedComponent>>(
+      ctx,
+      /*sql*/ `SELECT id FROM "embed_component" WHERE "slide_id" = ? ORDER BY id ASC`,
+      [id],
+      pick
+    ),
 
   textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
     useQuery<IID_of<TextComponent>>(
@@ -141,6 +148,14 @@ const queries = {
       ctx,
       id as any,
       /*sql*/ `SELECT * FROM "text_component" WHERE "id" = ?`,
+      [id],
+      first
+    ),
+  embedComponent: (ctx: Ctx, id: IID_of<EmbedComponent>) =>
+    usePointQuery<EmbedComponent, EmbedComponent | undefined>(
+      ctx,
+      id as any,
+      /*sql*/ `SELECT * FROM "embed_component" WHERE "id" = ?`,
       [id],
       first
     ),

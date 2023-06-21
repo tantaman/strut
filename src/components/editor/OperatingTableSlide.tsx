@@ -11,6 +11,7 @@ import OTTextComponents from "./OTTextComponents";
 import { useSelectionContainer } from "@air/react-drag-to-select";
 import mutations from "../../domain/mutations";
 import { BoundingBox } from "../../MathTypes";
+import OTEmbedComponents from "./OTEmbedComponents";
 
 function OperatingTableSlide({
   slideId,
@@ -65,6 +66,13 @@ function OperatingTableSlide({
     }
     mutations.deselectAllComponents(appState.ctx.db, slideId);
   };
+  const componentContainerStyle = {
+    zoom: otsStyle.scale,
+    width: otsStyle.width,
+    height: otsStyle.height,
+    transformOrigin: "top left",
+    userSelect: "none",
+  };
 
   return (
     <>
@@ -89,13 +97,12 @@ function OperatingTableSlide({
           appState={appState}
           slideId={slideId}
           scale={((otsStyle.scale * 100) | 0) / 100}
-          style={{
-            zoom: otsStyle.scale,
-            width: otsStyle.width,
-            height: otsStyle.height,
-            transformOrigin: "top left",
-            userSelect: "none",
-          }}
+          style={componentContainerStyle}
+        />
+        <OTEmbedComponents
+          style={componentContainerStyle}
+          appState={appState}
+          slideId={slideId}
         />
         <DragSelection />
       </div>

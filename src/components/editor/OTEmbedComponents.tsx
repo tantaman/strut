@@ -1,38 +1,31 @@
 import AppState from "../../domain/ephemeral/AppState";
 import queries from "../../domain/queries";
 import { Slide } from "../../domain/schema";
-import TextEditor from "./markdown/TextEditor";
-
-import "styles/markdown/markdown-reset.css";
 import { IID_of } from "../../id";
+import EmbedViewer from "./embed/EmbedViewer";
 
-export default function OTTextComponents({
+export default function OTEmbedComponents({
   appState,
-  slideId,
   style,
-  scale,
+  slideId,
 }: {
   appState: AppState;
-  slideId: IID_of<Slide>;
   style: Object;
-  scale: number;
+  slideId: IID_of<Slide>;
 }) {
-  const componentIds = queries.textComponentIds(appState.ctx, slideId).data;
-
+  const componentIds = queries.embedComponentIds(appState.ctx, slideId).data;
   const selectedComponents = queries.selectedComponentIds(
     appState.ctx,
     slideId
   ).data;
 
   return (
-    <div style={style} className="markdown">
-      {componentIds.map((id, i) => (
-        <TextEditor
-          index={i}
+    <div style={style}>
+      {componentIds.map((id) => (
+        <EmbedViewer
           ctx={appState.ctx}
           key={id.toString()}
           id={id}
-          scale={scale}
           selectedComponents={selectedComponents}
         />
       ))}
