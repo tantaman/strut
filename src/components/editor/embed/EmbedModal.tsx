@@ -2,6 +2,7 @@ import { useState } from "react";
 import AppState from "../../../domain/ephemeral/AppState";
 import style from "./EmbedModal.module.css";
 import { ChangeEvent } from "react";
+import mutations from "../../../domain/mutations";
 
 export default function EmbedModal({ appState }: { appState: AppState }) {
   const [url, setUrl] = useState("");
@@ -10,9 +11,15 @@ export default function EmbedModal({ appState }: { appState: AppState }) {
     appState.toggleModal("addEmbed", false);
   }
 
-  function onOk() {
+  async function onOk() {
     // run the mutations to add to the deck...
     // sanity check url
+    await mutations.addEmbed(
+      appState.ctx.db,
+      appState.ctx.db,
+      appState.current_deck_id,
+      url
+    );
     appState.toggleModal("addEmbed", false);
   }
 

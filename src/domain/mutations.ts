@@ -269,6 +269,21 @@ const mutations = {
     );
   },
 
+  addEmbed(db: DBAsync, tx: TXAsync, deckId: IID_of<Deck>, src: string) {
+    const id = objId(db);
+    return tx.exec(
+      /*sql*/ `INSERT INTO embed_component
+      ("id", "slide_id", "src", "x", "y")
+      SELECT ${id}, "slide_id", ?, ${
+        ((Math.random() * config.slideWidth) / 2) | 0
+      }, ${
+        ((Math.random() * config.slideHeight) / 2) | 0
+      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
+    `,
+      [src, deckId]
+    );
+  },
+
   // TODO: should be id rather than index based reordering in the future
   async reorderSlides(
     tx: TXAsync,

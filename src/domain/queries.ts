@@ -127,6 +127,8 @@ const queries = {
       first
     ),
 
+  embedComponentIds: (ctx: Ctx, id: IID_of<Slide>) => {},
+
   textComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
     useQuery<IID_of<TextComponent>>(
       ctx,
