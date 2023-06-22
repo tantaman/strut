@@ -40,6 +40,12 @@ app.post(
   })
 );
 
+app.get("/dweb", (req, res) => {
+  res.redirect(
+    "https://strut.fly.dev/create/af55409a8729482690fda5fb9cf140c6/7247346370156314282"
+  );
+});
+
 app.get(
   "/sync/start-outbound-stream",
   makeSafe(async (req, res) => {

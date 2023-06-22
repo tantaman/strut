@@ -289,8 +289,9 @@ function TextEditorInner({
     setDragging(false);
   }, []);
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Backspace" && !selectedComponents.has(id)) {
+    if (e.key === "Backspace" && !editor.isEditable()) {
       // delete the thing
+      return mutations.removeSelectedComponents(ctx.db, slideId);
     }
   };
 

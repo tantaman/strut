@@ -100,7 +100,20 @@ const mutations = {
   },
 
   // remove the thing, updating selection state appropriately
-  removeComponent(_tx: TXAsync, _componentId: AnyComponentID) {},
+  removeComponent(
+    tx: TXAsync,
+    componentId: AnyComponentID,
+    componentType: ComponentType
+  ) {
+    tx.tx(async (tx) => {
+      await this.removeComponent_ignoreSelection(
+        tx,
+        componentId,
+        componentType
+      );
+      await tx.exec(/* sql */ `DELETE FROM selected_component`);
+    });
+  },
 
   removeComponent_ignoreSelection(
     tx: TXAsync,
