@@ -8,17 +8,18 @@ export default function OTEmbedComponents({
   appState,
   style,
   slideId,
+  scale,
 }: {
   appState: AppState;
   style: Object;
   slideId: IID_of<Slide>;
+  scale: number;
 }) {
   const componentIds = queries.embedComponentIds(appState.ctx, slideId).data;
   const selectedComponents = queries.selectedComponentIds(
     appState.ctx,
     slideId
   ).data;
-
   return (
     <div style={style}>
       {componentIds.map((id) => (
@@ -26,6 +27,8 @@ export default function OTEmbedComponents({
           ctx={appState.ctx}
           key={id.toString()}
           id={id}
+          scale={scale}
+          slideId={slideId}
           selectedComponents={selectedComponents}
         />
       ))}

@@ -103,6 +103,7 @@ function OperatingTableSlide({
           style={componentContainerStyle}
           appState={appState}
           slideId={slideId}
+          scale={((otsStyle.scale * 100) | 0) / 100}
         />
         <DragSelection />
       </div>

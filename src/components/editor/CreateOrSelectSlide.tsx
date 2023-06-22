@@ -42,7 +42,7 @@ export default function CreateOrSelectSlide({
           Add Slide
         </button>
       ) : (
-        <div>Select a slide on the left to get started!</div>
+        <div>Select a slide to get started!</div>
       )}
     </div>
   );

@@ -62,6 +62,18 @@ body.strt-theme-dark {
   background-color: #eee;
 }
 
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.overlay-container {
+  position: relative;
+}
+
 .grow {
   flex-grow: 1;
 }

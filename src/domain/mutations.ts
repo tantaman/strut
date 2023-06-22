@@ -287,11 +287,7 @@ const mutations = {
     return tx.exec(
       /*sql*/ `INSERT INTO embed_component
       ("id", "slide_id", "src", "x", "y")
-      SELECT ${id}, "slide_id", ?, ${
-        ((Math.random() * config.slideWidth) / 2) | 0
-      }, ${
-        ((Math.random() * config.slideHeight) / 2) | 0
-      } FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
+      SELECT ${id}, "slide_id", ?, 0, -700 FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
     `,
       [src, deckId]
     );
@@ -431,7 +427,7 @@ const mutations = {
 
   saveDrag(
     tx: TXAsync,
-    _component:
+    componentType:
       | "text_component"
       | "embed_component"
       | "shape_component"
@@ -444,8 +440,9 @@ const mutations = {
     x: number,
     y: number
   ) {
+    const table = componentType;
     return tx.exec(
-      /* sql */ `UPDATE "text_component" SET "x" = ?, "y" = ? WHERE "id" = ?`,
+      /* sql */ `UPDATE "${table}" SET "x" = ?, "y" = ? WHERE "id" = ?`,
       [((x * 100) | 0) / 100, ((y * 100) | 0) / 100, compnentId]
     );
   },
