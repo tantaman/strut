@@ -201,7 +201,6 @@ const mutations = {
     deckId: IID_of<Deck>,
     selected: boolean
   ) {
-    console.log("remove...");
     // TODO: tx
     const deleteSlide = (tx: TXAsync) =>
       tx.exec(`DELETE FROM "slide" WHERE "id" = ?`, [id]);

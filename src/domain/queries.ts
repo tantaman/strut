@@ -151,10 +151,10 @@ const queries = {
       [id],
       first
     ),
+  // TODO: usePointQuery doesn't always reactively update?
   embedComponent: (ctx: Ctx, id: IID_of<EmbedComponent>) =>
-    usePointQuery<EmbedComponent, EmbedComponent | undefined>(
+    useQuery<EmbedComponent, EmbedComponent | undefined>(
       ctx,
-      id as any,
       /*sql*/ `SELECT * FROM "embed_component" WHERE "id" = ?`,
       [id],
       first
