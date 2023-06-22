@@ -2,6 +2,7 @@ import { CtxAsync } from "@vlcn.io/react";
 import config from "../../../config";
 import queries from "../../../domain/queries";
 import {
+  EmbedComponent,
   Slide,
   TextComponent as TextComponentModel,
 } from "../../../domain/schema";
@@ -29,10 +30,14 @@ export default function WellSlidePreview({
   slideId: IID_of<Slide>;
 }) {
   const componentIds = queries.textComponentIds(ctx, slideId).data;
+  const embedIds = queries.embedComponentIds(ctx, slideId).data;
   return (
     <div className="markdown" style={mdStyle}>
       {componentIds.map((id) => (
         <TextComponent ctx={ctx} id={id} key={id.toString()} />
+      ))}
+      {embedIds.map((id) => (
+        <Embed ctx={ctx} id={id} key={id.toString()} />
       ))}
     </div>
   );
@@ -68,4 +73,19 @@ function TextComponent({
       dangerouslySetInnerHTML={{ __html: text.value.toString() }}
     ></div>
   );
+}
+
+function Embed({ ctx, id }: { ctx: CtxAsync; id: IID_of<EmbedComponent> }) {
+  const comp = queries.embedComponent(ctx, id).data;
+  if (comp == null) {
+    return null;
+  }
+
+  const style = {
+    top: comp.y,
+    left: comp.x,
+    position: "absolute",
+    maxWidth: 700, // TODO: move to common CSS with Op Table
+  } as const;
+  return <img style={style} src={comp.src} />;
 }

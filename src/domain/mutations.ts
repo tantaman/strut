@@ -287,7 +287,7 @@ const mutations = {
     return tx.exec(
       /*sql*/ `INSERT INTO embed_component
       ("id", "slide_id", "src", "x", "y")
-      SELECT ${id}, "slide_id", ?, 0, -700 FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
+      SELECT ${id}, "slide_id", ?, 0, 0 FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1
     `,
       [src, deckId]
     );

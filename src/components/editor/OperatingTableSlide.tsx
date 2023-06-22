@@ -67,7 +67,8 @@ function OperatingTableSlide({
     mutations.deselectAllComponents(appState.ctx.db, slideId);
   };
   const componentContainerStyle = {
-    zoom: otsStyle.scale,
+    transform: "scale(" + otsStyle.scale + ")",
+    // zoom: otsStyle.scale,
     width: otsStyle.width,
     height: otsStyle.height,
     transformOrigin: "top left",
