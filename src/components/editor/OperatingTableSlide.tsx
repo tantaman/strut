@@ -6,12 +6,11 @@ import { useBind } from "../../modelHooks";
 import { IID_of } from "../../id";
 import fns from "../../domain/fns";
 import AppState from "../../domain/ephemeral/AppState";
-import OTTextComponents from "./OTTextComponents";
 // @ts-ignore
 import { useSelectionContainer } from "@air/react-drag-to-select";
 import mutations from "../../domain/mutations";
 import { BoundingBox } from "../../MathTypes";
-import OTEmbedComponents from "./OTEmbedComponents";
+import OTComponents from "./OTComponents";
 
 function OperatingTableSlide({
   slideId,
@@ -94,17 +93,11 @@ function OperatingTableSlide({
         onMouseDown={deselectAll}
         tabIndex={0}
       >
-        <OTTextComponents
+        <OTComponents
           appState={appState}
           slideId={slideId}
           scale={((otsStyle.scale * 100) | 0) / 100}
           style={componentContainerStyle}
-        />
-        <OTEmbedComponents
-          style={componentContainerStyle}
-          appState={appState}
-          slideId={slideId}
-          scale={((otsStyle.scale * 100) | 0) / 100}
         />
         <DragSelection />
       </div>
