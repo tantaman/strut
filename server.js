@@ -42,6 +42,12 @@ app.post(
 
 app.get("/dweb", (req, res) => {
   res.redirect(
+    "https://strut.fly.dev/create/7322e90f6b9341da9c14ecd20bf49020/7247360460605550524"
+  );
+});
+
+app.get("/dweb2", (req, res) => {
+  res.redirect(
     "https://strut.fly.dev/create/af55409a8729482690fda5fb9cf140c6/7247346370156314282"
   );
 });
