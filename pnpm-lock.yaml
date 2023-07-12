@@ -60,8 +60,8 @@ importers:
         specifier: 0.5.0-next.1
         version: 0.5.0-next.1
       '@vlcn.io/direct-connect-nodejs':
-        specifier: 0.5.0-next.6
-        version: 0.5.0-next.6
+        specifier: 0.5.0-next.7
+        version: 0.5.0-next.7
       '@vlcn.io/model':
         specifier: workspace:*
         version: link:deps/model/ts/packages/model
@@ -2731,8 +2731,8 @@ packages:
       lib0: 0.2.74
     dev: false
 
-  /@vlcn.io/direct-connect-nodejs@0.5.0-next.6:
-    resolution: {integrity: sha512-zOGYmG1SXpDy7D6yPLFZit0q77tarurOj36clyzxpVZ7sMCc3AGTM6zlAb57Tw64338vDcFI34XQoKdf/j4bSg==}
+  /@vlcn.io/direct-connect-nodejs@0.5.0-next.7:
+    resolution: {integrity: sha512-sXU2u/jKCWlg+N+mtqXM/1anOMj7tv6wWjx2eTRM/WexTWCC03Xv1tUGHAZFFcQbGdLsVXTfSNsEpU4hTHQEtg==}
     dependencies:
       '@vlcn.io/crsqlite': 0.14.0-next.0
       '@vlcn.io/direct-connect-common': 0.5.0-next.1
@@ -5606,8 +5606,8 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /node-abi@3.40.0:
-    resolution: {integrity: sha512-zNy02qivjjRosswoYmPi8hIKJRr8MpQyeKT6qlcq/OnOgA3Rhoae+IYOqsM9V5+JnHWmxKnWOT2GxvtqdtOCXA==}
+  /node-abi@3.45.0:
+    resolution: {integrity: sha512-iwXuFrMAcFVi/ZoZiqq8BzAdsLw9kxDfTC0HMyjXfSL/6CSDAGD5UmR7azrAgWV1zKYq7dUUMj4owusBWKLsiQ==}
     engines: {node: '>=10'}
     dependencies:
       semver: 7.5.1
@@ -5907,7 +5907,7 @@ packages:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 1.0.2
-      node-abi: 3.40.0
+      node-abi: 3.45.0
       pump: 3.0.0
       rc: 1.2.8
       simple-get: 4.0.1
