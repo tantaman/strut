@@ -20,8 +20,11 @@ async function slurp() {
   const schemas = await Promise.all(
     fs.readdirSync(dir).map((file) => {
       const filePath = path.join(dir, file);
-      console.log(filePath);
-      return import("./" + filePath);
+      const stats = fs.statSync(filePath);
+      if (stats.isFile) {
+        return import("./" + filePath);
+      }
+      return null;
     })
   );
 
@@ -30,6 +33,7 @@ async function slurp() {
   const db = svcDb.__internal_getDb();
   db.transaction(() => {
     for (const mod of schemas) {
+      if (mod == null) continue;
       const s = mod.default;
       if (s.active) {
         db.prepare(`

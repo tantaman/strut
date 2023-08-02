@@ -7,7 +7,9 @@
     "dev": "node ./slurp.mjs && node ./server.js",
     "start": "node ./slurp.mjs && NODE_ENV=production node ./server.js",
     "build": "turbo run build --force && tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tsql": "typed-sql -p .",
+    "tscw": "pnpm tsc --build --watch"
   },
   "dependencies": {
     "@air/react-drag-to-select": "^5.0.6",
@@ -52,7 +54,8 @@
     "tippy.js": "^6.3.7",
     "unified": "^10.1.2",
     "uuid62": "^1.0.2",
-    "vite-express": "^0.7.0"
+    "vite-express": "^0.7.0",
+    "@strut/schema": "workspace:*"
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.0",

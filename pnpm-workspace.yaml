@@ -5,3 +5,4 @@ packages:
   - "deps/model/ts/packages/zone"
   - "deps/utils"
   - "deps/counter"
+  - "deps/schema"

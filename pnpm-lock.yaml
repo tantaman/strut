@@ -47,6 +47,9 @@ importers:
       '@strut/counter':
         specifier: workspace:*
         version: link:deps/counter
+      '@strut/schema':
+        specifier: workspace:*
+        version: link:deps/schema
       '@strut/utils':
         specifier: workspace:*
         version: link:deps/utils
@@ -291,6 +294,12 @@ importers:
       typescript:
         specifier: ^4.8.2
         version: 4.8.2
+
+  deps/schema:
+    dependencies:
+      '@vlcn.io/typed-sql':
+        specifier: link:../../../typed-sql/packages/typed-sql
+        version: link:../../../typed-sql/packages/typed-sql
 
   deps/utils:
     devDependencies:
