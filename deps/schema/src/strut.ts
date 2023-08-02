@@ -1,4 +1,4 @@
-import { schema } from "@vlcn.io/typed-sql";
+import { schema, RecordTypes } from "@vlcn.io/typed-sql";
 
 export type ShapeType =
   | "ellipse"
@@ -8,10 +8,24 @@ export type ShapeType =
   | "octagon";
 export type ComponentType = "text" | "embed" | "shape" | "line";
 
+type X<T> = string;
+
+function Y<T>() {}
+
+interface A {}
+
+Y<{}>();
+
+type Foo = {
+  bar: {
+    id: X<Foo["bar"]>;
+  };
+};
+
 export const StrutSchema = schema<
   Readonly<{
     deck: Readonly<{
-      id: number;
+      id: "IID_of<Deck>";
       title: string | null;
       created: number;
       modified: number;
@@ -106,7 +120,7 @@ export const StrutSchema = schema<
   }>
 >`
 CREATE TABLE IF NOT EXISTS "deck" (
-  "id" INT PRIMARY KEY NOT NULL,
+  "id" 'IID_of<Deck>' PRIMARY KEY NOT NULL,
   "title" TEXT DEFAULT '',
   "created" INT NOT NULL DEFAULT (strftime('%s','now')),
   "modified" INT NOT NULL DEFAULT (strftime('%s','now')),
@@ -250,3 +264,5 @@ CREATE TABLE IF NOT EXISTS "redo_stack" (
   primary key ("deck_id", "order")
 );
 `;
+
+export type StrutRecords = RecordTypes<typeof StrutSchema>;

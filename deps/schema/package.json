@@ -2,7 +2,13 @@
   "name": "@strut/schema",
   "type": "module",
   "main": "dist/index.js",
+  "scripts": {
+    "tsql": "typed-sql -p ."
+  },
   "dependencies": {
     "@vlcn.io/typed-sql": "link:../../../typed-sql/packages/typed-sql"
+  },
+  "devDependencies": {
+    "@vlcn.io/typed-sql-cli": "link:../../../typed-sql/packages/cli"
   }
 }
