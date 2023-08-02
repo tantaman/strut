@@ -71,6 +71,9 @@ importers:
       '@vlcn.io/rx-tbl':
         specifier: link:../crsqlite/js/packages/rx-tbl
         version: link:../crsqlite/js/packages/rx-tbl
+      '@vlcn.io/typed-sql':
+        specifier: link:../typed-sql/packages/typed-sql
+        version: link:../typed-sql/packages/typed-sql
       '@vlcn.io/xplat-api':
         specifier: link:../crsqlite/js/packages/xplat-api
         version: link:../crsqlite/js/packages/xplat-api
@@ -156,6 +159,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.0.0
         version: 4.0.0(vite@4.3.2)
+      '@vlcn.io/typed-sql-cli':
+        specifier: link:../typed-sql/packages/cli
+        version: link:../typed-sql/packages/cli
       eslint:
         specifier: ^8.38.0
         version: 8.38.0
