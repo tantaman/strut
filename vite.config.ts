@@ -23,5 +23,10 @@ export default defineConfig({
       target: "esnext",
     },
   },
+  server: {
+    fs: {
+      strict: false,
+    },
+  },
   plugins: [react()],
 });
