@@ -5,7 +5,7 @@ import metaSchema from "./schemas/meta.mjs";
 import OpenDeckDlg from "./components/open/OpenDeckDlg.js";
 import metaMutations from "./domain/metaMutations.js";
 import { CtxAsync, DBProvider } from "@vlcn.io/react";
-import { bytesToHex } from "@vlcn.io/direct-connect-common";
+import { bytesToHex } from "@vlcn.io/ws-common";
 
 export default function Dashboard() {
   const metaDBID = useMetaDBID();

@@ -3,7 +3,6 @@ import {
   first,
   firstPick,
   pick,
-  SQL,
   useQuery,
   useRangeQuery,
   usePointQuery,
@@ -19,6 +18,7 @@ import {
   Theme,
 } from "./schema";
 
+type SQL<R> = string;
 export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
   | [Ctx, SQL<R>, any[], (x: R[]) => M];

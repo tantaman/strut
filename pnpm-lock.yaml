@@ -53,15 +53,6 @@ importers:
       '@vlcn.io/crsqlite-wasm':
         specifier: link:../js/packages/crsqlite-wasm
         version: link:../js/packages/crsqlite-wasm
-      '@vlcn.io/direct-connect-browser':
-        specifier: link:../js/packages/direct-connect-browser
-        version: link:../js/packages/direct-connect-browser
-      '@vlcn.io/direct-connect-common':
-        specifier: link:../js/packages/direct-connect-common
-        version: link:../js/packages/direct-connect-common
-      '@vlcn.io/direct-connect-nodejs':
-        specifier: link:../js/packages/direct-connect-nodejs
-        version: link:../js/packages/direct-connect-nodejs
       '@vlcn.io/model':
         specifier: workspace:*
         version: link:deps/model/ts/packages/model
@@ -74,6 +65,15 @@ importers:
       '@vlcn.io/typed-sql':
         specifier: link:../typed-sql/packages/typed-sql
         version: link:../typed-sql/packages/typed-sql
+      '@vlcn.io/ws-client':
+        specifier: link:../js/packages/ws-client
+        version: link:../js/packages/ws-client
+      '@vlcn.io/ws-common':
+        specifier: link:../js/packages/ws-common
+        version: link:../js/packages/ws-common
+      '@vlcn.io/ws-server':
+        specifier: link:../js/packages/ws-server
+        version: link:../js/packages/ws-server
       '@vlcn.io/xplat-api':
         specifier: link:../js/packages/xplat-api
         version: link:../js/packages/xplat-api

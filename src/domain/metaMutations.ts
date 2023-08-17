@@ -1,4 +1,4 @@
-import { hexToBytes } from "@vlcn.io/direct-connect-common";
+import { hexToBytes } from "@vlcn.io/ws-common";
 import { CtxAsync, dbFactory } from "@vlcn.io/react";
 import strutSchema from "../schemas/strut.mjs";
 import mutations from "./mutations.js";
