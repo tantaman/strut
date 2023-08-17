@@ -17,7 +17,6 @@ import DeckIndex from "../../domain/ephemeral/DeckIndex.js";
 import ErrorState from "../../domain/ephemeral/ErrorState.js";
 import hotkeys from "../hotkeys/hotkeys.js";
 import OpenType from "../open-type/OpenType.js";
-import { endpoints } from "../../SyncEndpoints.js";
 import EmbedModal from "./embed/EmbedModal.js";
 
 /**
@@ -27,7 +26,7 @@ export default function Editor() {
   const { dbid, deckid } = useParams();
 
   return (
-    <DBProvider dbid={dbid!} schema={strutSchema} endpoints={endpoints}>
+    <DBProvider dbname={dbid!} schema={strutSchema}>
       <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
     </DBProvider>
   );

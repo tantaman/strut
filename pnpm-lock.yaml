@@ -51,29 +51,32 @@ importers:
         specifier: workspace:*
         version: link:deps/utils
       '@vlcn.io/crsqlite-wasm':
-        specifier: link:../crsqlite/js/packages/crsqlite-wasm
-        version: link:../crsqlite/js/packages/crsqlite-wasm
+        specifier: link:../js/packages/crsqlite-wasm
+        version: link:../js/packages/crsqlite-wasm
       '@vlcn.io/direct-connect-browser':
-        specifier: link:../crsqlite/js/packages/direct-connect-browser
-        version: link:../crsqlite/js/packages/direct-connect-browser
+        specifier: link:../js/packages/direct-connect-browser
+        version: link:../js/packages/direct-connect-browser
       '@vlcn.io/direct-connect-common':
-        specifier: link:../crsqlite/js/packages/direct-connect-common
-        version: link:../crsqlite/js/packages/direct-connect-common
+        specifier: link:../js/packages/direct-connect-common
+        version: link:../js/packages/direct-connect-common
       '@vlcn.io/direct-connect-nodejs':
-        specifier: link:../crsqlite/js/packages/direct-connect-nodejs
-        version: link:../crsqlite/js/packages/direct-connect-nodejs
+        specifier: link:../js/packages/direct-connect-nodejs
+        version: link:../js/packages/direct-connect-nodejs
       '@vlcn.io/model':
         specifier: workspace:*
         version: link:deps/model/ts/packages/model
       '@vlcn.io/react':
-        specifier: link:../crsqlite/js/packages/react
-        version: link:../crsqlite/js/packages/react
+        specifier: link:../js/packages/react
+        version: link:../js/packages/react
       '@vlcn.io/rx-tbl':
-        specifier: link:../crsqlite/js/packages/rx-tbl
-        version: link:../crsqlite/js/packages/rx-tbl
+        specifier: link:../js/packages/rx-tbl
+        version: link:../js/packages/rx-tbl
+      '@vlcn.io/typed-sql':
+        specifier: link:../typed-sql/packages/typed-sql
+        version: link:../typed-sql/packages/typed-sql
       '@vlcn.io/xplat-api':
-        specifier: link:../crsqlite/js/packages/xplat-api
-        version: link:../crsqlite/js/packages/xplat-api
+        specifier: link:../js/packages/xplat-api
+        version: link:../js/packages/xplat-api
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
@@ -156,6 +159,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.0.0
         version: 4.0.0(vite@4.3.2)
+      '@vlcn.io/typed-sql-cli':
+        specifier: link:../typed-sql/packages/cli
+        version: link:../typed-sql/packages/cli
       eslint:
         specifier: ^8.38.0
         version: 8.38.0

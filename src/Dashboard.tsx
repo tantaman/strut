@@ -6,7 +6,6 @@ import OpenDeckDlg from "./components/open/OpenDeckDlg.js";
 import metaMutations from "./domain/metaMutations.js";
 import { CtxAsync, DBProvider } from "@vlcn.io/react";
 import { bytesToHex } from "@vlcn.io/direct-connect-common";
-import { endpoints } from "./SyncEndpoints.js";
 
 export default function Dashboard() {
   const metaDBID = useMetaDBID();
@@ -23,7 +22,7 @@ function UserReady({ metadbid }: { metadbid: string }) {
     navigate(`/create/${bytesToHex(dbid)}/${deckid}`);
   };
   return (
-    <DBProvider dbid={metadbid} schema={metaSchema} endpoints={endpoints}>
+    <DBProvider dbname={metadbid} schema={metaSchema}>
       <OpenDeckDlg onNewDeck={onNewDeck} />
     </DBProvider>
   );
