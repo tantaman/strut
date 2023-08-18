@@ -18,7 +18,7 @@ import {
   Theme,
 } from "./schema";
 
-type SQL<R> = Opaque<string, R>;
+type SQL<R> = Opaque<R>;
 export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
   | [Ctx, SQL<R>, any[], (x: R[]) => M];
