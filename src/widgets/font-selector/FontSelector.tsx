@@ -45,7 +45,7 @@ function Option({
     previewTheme.set(type, value.name);
   };
   const removePreview = () => {
-    previewTheme.set(type, undefined);
+    previewTheme.set(type, null);
   };
   const updateTheme = () => {
     if (theme) {

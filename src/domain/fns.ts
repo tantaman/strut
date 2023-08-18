@@ -1,4 +1,4 @@
-import { Operation, Theme, Transition } from "./schema";
+import { JsonSerialized, Operation, Theme, Transition } from "./schema";
 import { toDOM } from "./Document";
 
 const fns = {
@@ -6,7 +6,9 @@ const fns = {
     return {};
   },
 
-  decodeTransitions(_transitions?: string): Transition[] {
+  decodeTransitions(
+    _transitions: JsonSerialized<string[]> | null
+  ): Transition[] {
     return [];
   },
 

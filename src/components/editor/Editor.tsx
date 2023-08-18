@@ -42,10 +42,11 @@ function DBProvided({ dbid, deckid }: { dbid: string; deckid: IID_of<Deck> }) {
       modal: "none",
       current_deck_id: deckid,
       authoringState: new AuthoringState({}),
+      // TODO: figure me out
       previewTheme: new EphemeralTheme({
         id: EphemeralTheme.defaultThemeId,
         bg_colorset: "default",
-      }),
+      } as any),
       drawingInteractionState: new DrawingInteractionState({
         currentTool: "arrow",
       }),

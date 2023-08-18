@@ -8,6 +8,21 @@ export type ShapeComponent = StrutSchemaType["shape_component"];
 export type LineComponent = StrutSchemaType["line_component"];
 export type JsonSerialized<T> = Opaque<string, T>;
 export type Theme = StrutSchemaType["theme"];
+export type AnyComponentID = IID_of<
+  TextComponent | EmbedComponent | ShapeComponent | LineComponent
+>;
+export type ComponentType = "text" | "embed" | "shape" | "line";
+export type AnyComponent =
+  | TextComponent
+  | EmbedComponent
+  | ShapeComponent
+  | LineComponent;
+export type Presenter = StrutSchemaType["presenter"];
+export type UndoStack = StrutSchemaType["undo_stack"];
+export type RedoStack = StrutSchemaType["redo_stack"];
+export type Operation = {};
+
+export interface ITheme extends Theme {}
 
 // === custom code above this line ===
 export type StrutSchemaType = {
@@ -47,7 +62,7 @@ export type StrutSchemaType = {
   readonly shape_component: Readonly<{
     id: IID_of<ShapeComponent> | null;
     slide_id: IID_of<Slide> | null;
-    type: "rectangle" | "oval" | "line" | null;
+    type: "rectangle" | "ellipse" | "triangle" | "ngon" | "line" | null;
     props: string | null;
     x: number | null;
     y: number | null
@@ -70,6 +85,7 @@ export type StrutSchemaType = {
     fg_colorset: string | null;
     fontset: string | null;
     surface_color: string | null;
+    slide_color: string | null;
     font_color: string | null
   }>;
   readonly recent_color: Readonly<{
@@ -89,8 +105,8 @@ export type StrutSchemaType = {
   }>;
   readonly selected_component: Readonly<{
     slide_id: IID_of<Slide>;
-    component_id: IID_of<TextComponent>;
-    component_type: "text" | "embed" | "shape" | "line" | null
+    component_id: AnyComponentID;
+    component_type: ComponentType | null
   }>;
   readonly undo_stack: Readonly<{
     deck_id: IID_of<Deck>;

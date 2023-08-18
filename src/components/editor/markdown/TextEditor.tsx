@@ -184,6 +184,10 @@ function TextEditorBase({
       } as const)
   );
 
+  if (c.slide_id == null) {
+    return <div></div>;
+  }
+
   return (
     <LexicalComposer initialConfig={config}>
       <TextEditorInner

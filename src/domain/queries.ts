@@ -7,7 +7,7 @@ import {
   useRangeQuery,
   usePointQuery,
 } from "@vlcn.io/react";
-import { IID_of } from "../id";
+import { IID_of, Opaque } from "../id";
 import {
   AnyComponentID,
   Deck,
@@ -18,7 +18,7 @@ import {
   Theme,
 } from "./schema";
 
-type SQL<R> = string;
+type SQL<R> = Opaque<string, R>;
 export type Query<R, M = R[]> =
   | [Ctx, SQL<R>, any[]]
   | [Ctx, SQL<R>, any[], (x: R[]) => M];

@@ -41,7 +41,7 @@ CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("sli
 CREATE TABLE IF NOT EXISTS "shape_component" (
   "id" 'IID_of<ShapeComponent>' primary key,
   "slide_id" 'IID_of<Slide>',
-  "type" '"rectangle" | "oval" | "line"',
+  "type" '"rectangle" | "ellipse" | "triangle" | "ngon" | "line"',
   "props" TEXT,
   "x" FLOAT,
   "y" FLOAT
@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS theme (
   fg_colorset TEXT,
   fontset TEXT,
   surface_color TEXT,
+  slide_color TEXT,
   font_color TEXT
 );
 
@@ -112,8 +113,8 @@ CREATE TABLE IF NOT EXISTS "selected_slide" (
 
 CREATE TABLE IF NOT EXISTS "selected_component" (
   "slide_id" 'IID_of<Slide>' NOT NULL,
-  "component_id" 'IID_of<TextComponent>' NOT NULL,
-  "component_type" '"text" | "embed" | "shape" | "line"',
+  "component_id" 'AnyComponentID' NOT NULL,
+  "component_type" 'ComponentType',
   primary key ("slide_id", "component_id")
 );
 
