@@ -34,12 +34,12 @@ CREATE TABLE IF NOT EXISTS "text_component" (
   "y" FLOAT
 );
 
-CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src", "x", "y");
+CREATE TABLE IF NOT EXISTS "embed_component" ("id" 'IID_of<EmbedComponent>' primary key not null, "slide_id" 'IID_of<Slide>', "src", "x", "y");
 
 CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS "shape_component" (
-  "id" 'IID_of<ShapeComponent>' primary key,
+  "id" 'IID_of<ShapeComponent>' primary key NOT NULL,
   "slide_id" 'IID_of<Slide>',
   "type" '"rectangle" | "ellipse" | "triangle" | "ngon" | "line"',
   "props" TEXT,
@@ -49,11 +49,11 @@ CREATE TABLE IF NOT EXISTS "shape_component" (
 
 CREATE INDEX IF NOT EXISTS "shape_component_slide_id" ON "shape_component" ("slide_id");
 
-CREATE TABLE IF NOT EXISTS "line_component" ("id" primary key, "slide_id", "props");
+CREATE TABLE IF NOT EXISTS "line_component" ("id" 'IID_of<LineComponent>' primary key not null, "slide_id" 'IID_of<Slide>', "props");
 
 CREATE INDEX IF NOT EXISTS "line_component_slide_id" ON "line_component" ("slide_id");
 
-CREATE TABLE IF NOT EXISTS "line_point" ("id" primary key, "line_id", "x", "y");
+CREATE TABLE IF NOT EXISTS "line_point" ("id" 'IID_of<LinePoint>' primary key not null, "line_id" 'IID_of<LineComponent>', "x", "y");
 
 CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
 
