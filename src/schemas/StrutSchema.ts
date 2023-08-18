@@ -1,6 +1,7 @@
 import { StrutSchemaType } from "./StrutSchemaType.js";
 import { schema } from "@vlcn.io/typed-sql";
 
+export const StrutSchemaName = "strut";
 export const StrutSchema = schema<StrutSchemaType>`
 CREATE TABLE IF NOT EXISTS deck (
   id 'IID_of<Deck>' PRIMARY KEY NOT NULL,

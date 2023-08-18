@@ -5,7 +5,7 @@ import AppState from "../../domain/ephemeral/AppState";
 import { useBind } from "../../modelHooks";
 import LayoutEditor from "./layout/LayoutEditor";
 import { useParams } from "react-router-dom";
-import strutSchema from "../../schemas/strut.mjs";
+import { StrutSchema, StrutSchemaName } from "../../schemas/StrutSchema.js";
 import { useState } from "react";
 import { DBProvider, useDB } from "@vlcn.io/react";
 import { IID_of } from "../../id.js";
@@ -26,7 +26,13 @@ export default function Editor() {
   const { dbid, deckid } = useParams();
 
   return (
-    <DBProvider dbname={dbid!} schema={strutSchema}>
+    <DBProvider
+      dbname={dbid!}
+      schema={{
+        name: StrutSchemaName,
+        content: StrutSchema.__content,
+      }}
+    >
       <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
     </DBProvider>
   );
