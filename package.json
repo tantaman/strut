@@ -7,7 +7,8 @@
     "dev": "node ./slurp.mjs && node ./server.js",
     "start": "node ./slurp.mjs && NODE_ENV=production node ./server.js",
     "build": "turbo run build --force && tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sql-watch": "typed-sql -p . --sql --schemaTyping=parallel"
   },
   "dependencies": {
     "@air/react-drag-to-select": "^5.0.6",
