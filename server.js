@@ -7,11 +7,11 @@ const PORT = parseInt(process.env.PORT || "8080");
 const app = express();
 app.use(express.json());
 
-attachWebsocketServer(server, {
-  dbFolder: "./dbs",
-  schemaFolder: "./src/schemas",
-  pathPattern: /\/sync/,
-});
+// attachWebsocketServer(server, {
+//   dbFolder: "./dbs",
+//   schemaFolder: "./src/schemas",
+//   pathPattern: /\/sync/,
+// });
 
 ViteExpress.listen(app, PORT, () =>
   console.log(`Listening at http://localhost:${PORT}`)
