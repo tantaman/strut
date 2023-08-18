@@ -1,20 +1,19 @@
 import { StrutSchemaType } from "./StrutSchemaType.js";
 import { schema } from "@vlcn.io/typed-sql";
-import { IID_of } from "../id.js";
 
 export const StrutSchema = schema<StrutSchemaType>`
 CREATE TABLE IF NOT EXISTS deck (
-  id 'IID_of<StrutSchemaType["deck"]>' PRIMARY KEY NOT NULL,
+  id 'IID_of<Deck>' PRIMARY KEY NOT NULL,
   title TEXT DEFAULT 'Untitled',
   created INT,
   modified INT,
-  theme_id 'IID_of<StrutSchemaType["theme"]>',
+  theme_id 'IID_of<Theme>',
   chosen_presenter TEXT DEFAULT 'impress'
 );
 
 CREATE TABLE IF NOT EXISTS "slide" (
-  id 'IID_of<StrutSchemaType["slide"]>' PRIMARY KEY NOT NULL,
-  deck_id 'IID_of<StrutSchemaType["deck"]>',
+  id 'IID_of<Slide>' PRIMARY KEY NOT NULL,
+  deck_id 'IID_of<Deck>',
   "order" TEXT,
   created INT,
   modified INT,
@@ -27,8 +26,8 @@ CREATE TABLE IF NOT EXISTS "slide" (
 CREATE INDEX IF NOT EXISTS "slide_deck_id_order" ON "slide" ("deck_id", "order");
 
 CREATE TABLE IF NOT EXISTS "text_component" (
-  "id" 'IID_of<StrutSchemaType["text_component"]>' primary key not null,
-  "slide_id" 'IID_of<StrutSchemaType["slide"]>',
+  "id" 'IID_of<TextComponent>' primary key not null,
+  "slide_id" 'IID_of<Slide>',
   "text" TEXT,
   "styles" TEXT,
   "x" FLOAT,
@@ -40,12 +39,12 @@ CREATE TABLE IF NOT EXISTS "embed_component" ("id" primary key, "slide_id", "src
 CREATE INDEX IF NOT EXISTS "embed_component_slide_id" ON "embed_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS "shape_component" (
-  "id" INTEGER primary key,
-  "slide_id",
-  "type",
-  "props",
-  "x",
-  "y"
+  "id" 'IID_of<ShapeComponent>' primary key,
+  "slide_id" 'IID_of<Slide>',
+  "type" '"rectangle" | "oval" | "line"',
+  "props" TEXT,
+  "x" FLOAT,
+  "y" FLOAT
 );
 
 CREATE INDEX IF NOT EXISTS "shape_component_slide_id" ON "shape_component" ("slide_id");
@@ -61,7 +60,7 @@ CREATE INDEX IF NOT EXISTS "line_point_line_id" ON "line_point" ("line_id");
 CREATE INDEX IF NOT EXISTS "text_component_slide_id" ON "text_component" ("slide_id");
 
 CREATE TABLE IF NOT EXISTS theme (
-  id 'IID_of<StrutSchemaType["theme"]>' PRIMARY KEY NOT NULL,
+  id 'IID_of<Theme>' PRIMARY KEY NOT NULL,
   name TEXT,
   bg_colorset TEXT,
   fg_colorset TEXT,
@@ -72,15 +71,15 @@ CREATE TABLE IF NOT EXISTS theme (
 
 CREATE TABLE IF NOT EXISTS "recent_color" (
   "color" INTEGER primary key,
-  "last_used",
-  "first_used",
-  "theme_id"
+  "last_used" INT,
+  "first_used" INT,
+  "theme_id" 'IID_of<Theme>'
 );
 
 CREATE TABLE IF NOT EXISTS "presenter" (
-  "name" primary key,
-  "available_transitions",
-  "picked_transition"
+  "name" text primary key not null,
+  "available_transitions" 'JsonSerialized<string[]>',
+  "picked_transition" text
 );
 
 SELECT crsql_as_crr('deck');
@@ -119,18 +118,16 @@ CREATE TABLE IF NOT EXISTS "selected_component" (
 );
 
 CREATE TABLE IF NOT EXISTS "undo_stack" (
-  "deck_id" 'IID_of<Deck>',
+  "deck_id" 'IID_of<Deck>' NOT NULL,
   "operation",
-  "order",
+  "order" INT NOT NULL,
   primary key ("deck_id", "order")
 );
 
 CREATE TABLE IF NOT EXISTS "redo_stack" (
-  "deck_id" 'IID_of<Deck>',
+  "deck_id" 'IID_of<Deck>' NOT NULL,
   "operation",
-  "order",
+  "order" INT NOT NULL,
   primary key ("deck_id", "order")
 );
 `;
-
-// 'IID_of<>'
