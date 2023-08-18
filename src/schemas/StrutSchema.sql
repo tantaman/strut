@@ -102,15 +102,15 @@ SELECT crsql_as_crr('recent_color');
 SELECT crsql_as_crr('presenter');
 
 CREATE TABLE IF NOT EXISTS "selected_slide" (
-  "deck_id",
-  "slide_id",
+  "deck_id" 'IID_of<Deck>',
+  "slide_id" 'IID_of<Slide>',
   primary key ("deck_id", "slide_id")
 );
 
 CREATE TABLE IF NOT EXISTS "selected_component" (
-  "slide_id" 'IID_of<Slide>',
-  "component_id" 'IID_of<TextComponent>',
-  "component_type",
+  "slide_id" 'IID_of<Slide>' NOT NULL,
+  "component_id" 'IID_of<TextComponent>' NOT NULL,
+  "component_type" '"text" | "embed" | "shape" | "line"',
   primary key ("slide_id", "component_id")
 );
 

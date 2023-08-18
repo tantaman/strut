@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS "theme" (
   "font_color"
 );
 
+-- deck.id as deck_id, theme.* FROM deck JOIN theme ON deck.theme_id = theme.id WHERE deck.id = ?
+
 CREATE TABLE IF NOT EXISTS "recent_color" (
   "color" INTEGER primary key,
   "last_used",
