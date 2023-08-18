@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ./slurp.mjs && node ./server.js",
-    "start": "node ./slurp.mjs && NODE_ENV=production node ./server.js",
+    "dev": "node ./server.js",
+    "start": "NODE_ENV=production node ./server.js",
     "build": "turbo run build --force && tsc && vite build",
     "preview": "vite preview",
     "sql-watch": "typed-sql -p . --sql --schemaTyping=parallel"
