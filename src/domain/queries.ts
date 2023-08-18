@@ -27,38 +27,6 @@ export type Query<R, M = R[]> =
 type Result<T> = any;
 
 const queries = {
-  canUndo: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<{ exists: number }, boolean | undefined>(
-      ctx,
-      /*sql*/ `SELECT 1 as "exists" FROM undo_stack WHERE deck_id = ? LIMIT 1`,
-      [id],
-      firstPick
-    ),
-
-  canRedo: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<{ exists: number }, boolean | undefined>(
-      ctx,
-      /*sql*/ `SELECT 1 as "exists" FROM undo_stack WHERE deck_id = ? LIMIT 1`,
-      [id],
-      firstPick
-    ),
-
-  slideIds: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<{ id: IID_of<Slide> }, IID_of<Slide>[]>(
-      ctx,
-      /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC`,
-      [id],
-      pick
-    ),
-
-  firstSlideId: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<{ id: IID_of<Slide> }, IID_of<Slide> | undefined>(
-      ctx,
-      /*sql*/ `SELECT "id" FROM "slide" WHERE "deck_id" = ? ORDER BY "order" ASC LIMIT 1`,
-      [id],
-      firstPick
-    ),
-
   chosenPresenter: (ctx: Ctx, id: IID_of<Deck>) =>
     useQuery<Presenter, Presenter | undefined>(
       ctx,

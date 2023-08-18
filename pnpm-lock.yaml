@@ -63,8 +63,8 @@ importers:
         specifier: link:../js/packages/rx-tbl
         version: link:../js/packages/rx-tbl
       '@vlcn.io/typed-sql':
-        specifier: link:../typed-sql/packages/typed-sql
-        version: link:../typed-sql/packages/typed-sql
+        specifier: link:../js/deps/typed-sql/packages/typed-sql
+        version: link:../js/deps/typed-sql/packages/typed-sql
       '@vlcn.io/ws-client':
         specifier: link:../js/packages/ws-client
         version: link:../js/packages/ws-client

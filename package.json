@@ -30,7 +30,7 @@
     "@vlcn.io/react": "link:../js/packages/react",
     "@vlcn.io/rx-tbl": "link:../js/packages/rx-tbl",
     "@vlcn.io/xplat-api": "link:../js/packages/xplat-api",
-    "@vlcn.io/typed-sql": "link:../typed-sql/packages/typed-sql",
+    "@vlcn.io/typed-sql": "link:../js/deps/typed-sql/packages/typed-sql",
     "@vlcn.io/ws-common": "link:../js/packages/ws-common",
     "@vlcn.io/ws-client": "link:../js/packages/ws-client",
     "@vlcn.io/ws-server": "link:../js/packages/ws-server",
