@@ -43,7 +43,7 @@ export const queries = {
     component_type: ComponentType | null;
   }>`SELECT component_id, component_type FROM selected_component WHERE slide_id = ? ORDER BY component_id ASC`,
 
-  mostRecentlySelectedSlide: S.sql<{
+  mostRecentlySelectedSlideId: S.sql<{
     slide_id: IID_of<Slide> | null;
   }>`SELECT slide_id FROM selected_slide WHERE deck_id = ? ORDER BY rowid DESC LIMIT 1`,
 

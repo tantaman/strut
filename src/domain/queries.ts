@@ -1,14 +1,12 @@
 import {
   CtxAsync as Ctx,
   first,
-  firstPick,
   pick,
   useQuery,
-  useRangeQuery,
   usePointQuery,
 } from "@vlcn.io/react";
 import { IID_of, Opaque } from "../id";
-import { Deck, EmbedComponent, Slide, TextComponent, Theme } from "./schema";
+import { EmbedComponent, Slide, TextComponent } from "./schema";
 
 type SQL<R> = Opaque<R>;
 export type Query<R, M = R[]> =
@@ -19,50 +17,6 @@ export type Query<R, M = R[]> =
 type Result<T> = any;
 
 const queries = {
-  mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
-    useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
-      ctx,
-      /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ? ORDER BY "rowid" DESC LIMIT 1`,
-      [id],
-      firstPick
-    ),
-
-  recentColors: (ctx: Ctx, id: IID_of<Theme> | undefined) =>
-    useQuery<{ color: string }, string[]>(
-      ctx,
-      /*sql*/ `SELECT "color" FROM "recent_color" WHERE "theme_id" = ?`,
-      [id == null ? null : id],
-      pick
-    ),
-
-  theme: (ctx: Ctx, id: IID_of<Theme>) =>
-    useQuery<Theme>(ctx, /*sql*/ `SELECT * FROM "theme" WHERE "id" = ?`, [id]),
-
-  themeFromDeck: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<Theme, Theme | undefined>(
-      ctx,
-      /*sql*/ `SELECT theme.* FROM "theme" JOIN "deck" ON theme.id = deck.theme_id WHERE deck.id = ?`,
-      [id],
-      first
-    ),
-
-  themeIdFromDeck: (ctx: Ctx, id: IID_of<Deck>) =>
-    usePointQuery<Theme, IID_of<Theme> | undefined>(
-      ctx,
-      id as any, // todo: move iid code to vlcn.io
-      /*sql*/ `SELECT theme_id FROM "deck" WHERE id = ?`,
-      [id],
-      firstPick
-    ),
-
-  pointTheme: (ctx: Ctx, id: IID_of<Theme>) =>
-    useQuery<Theme, Theme | undefined>(
-      ctx,
-      `SELECT * FROM "theme" WHERE id = ?`,
-      [id],
-      first
-    ),
-
   embedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
     useQuery<IID_of<EmbedComponent>>(
       ctx,

@@ -5,7 +5,8 @@ import BlockElementDropdown from "./BlockElementDropdown";
 import AlignmentDropdown from "./AlignmentDropdown";
 import MarkMenu from "./MarkMenu";
 import FontColorButton from "./FontColorButton";
-import queries from "../../../../domain/queries";
+import { queries } from "../../../../domain/queries2";
+import { first, useQuery2 } from "@vlcn.io/react";
 
 type Props = {
   appState: AppState;
@@ -15,10 +16,14 @@ export default function StylingMenu({ appState }: Props) {
   const state = appState.authoringState;
   const ctx = appState.ctx;
 
-  const theme = queries.themeFromDeck(
-    appState.ctx,
-    appState.current_deck_id
-  ).data;
+  const theme = first(
+    useQuery2(appState.ctx, queries.themeFromDeck, [appState.current_deck_id])
+      .data
+  );
+  // const theme = queries.themeFromDeck(
+  //   appState.ctx,
+  //   appState.current_deck_id
+  // ).data;
 
   const addImage = () => {
     // const url = window.prompt("URL");
