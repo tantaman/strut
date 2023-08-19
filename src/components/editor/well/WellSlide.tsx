@@ -12,7 +12,7 @@ import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 import WellSlidePreview from "./WellSlidePreview";
 import { useBind } from "../../../modelHooks";
-import { first, useQuery2 } from "@vlcn.io/react";
+import { first, useQuery2, useRangeQuery2 } from "@vlcn.io/react";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -36,7 +36,7 @@ function WellSlide(props: {
       props.appState.current_deck_id,
     ]).data
   );
-  const selectedSlides = useQuery2(
+  const selectedSlides = useRangeQuery2(
     props.appState.ctx,
     queries.selectedSlideIds,
     [props.appState.current_deck_id],

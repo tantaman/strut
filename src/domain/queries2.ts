@@ -87,23 +87,6 @@ export const queries = {
       UNION
     SELECT id, 'EmbedComponent' as component_type FROM embed_component WHERE slide_id = ?`,
 
-  textComponentsForSlide: S.sql<{
-    id: IID_of<TextComponent>;
-    slide_id: IID_of<Slide> | null;
-    text: string | null;
-    styles: string | null;
-    x: number | null;
-    y: number | null;
-  }>`SELECT * FROM text_component WHERE slide_id = ?`,
-
-  embedComponentsForSlide: S.sql<{
-    id: IID_of<EmbedComponent>;
-    slide_id: IID_of<Slide> | null;
-    src: any | null;
-    x: any | null;
-    y: any | null;
-  }>`SELECT * FROM embed_component WHERE slide_id = ?`,
-
   shapeComponentsForSlide: S.sql<{
     id: IID_of<ShapeComponent>;
     slide_id: IID_of<Slide> | null;

@@ -3,7 +3,13 @@ import AppState from "../../domain/ephemeral/AppState";
 import { Theme } from "../../domain/schema";
 import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme";
 import * as styles from "./HeaderButton.module.css";
-import { CtxAsync as Ctx, first, pick, useQuery2 } from "@vlcn.io/react";
+import {
+  CtxAsync as Ctx,
+  first,
+  pick,
+  useQuery2,
+  usePointQuery2,
+} from "@vlcn.io/react";
 import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
 import FontSelector from "../../widgets/font-selector/FontSelector";
 import textColorStyles from "../editor/markdown/styling_menu/FontColorButton.module.css";
@@ -104,7 +110,9 @@ const Section = memo(function s({
 }) {
   const [expanded, setExpanded] = useState<boolean>(false);
   const expand = () => setExpanded(!expanded);
-  const theme = first(useQuery2(appState.ctx, queries.theme, [themeId]).data);
+  const theme = usePointQuery2(appState.ctx, themeId as any, queries.theme, [
+    themeId,
+  ]).data;
   return (
     <div
       className={"btn-group " + styles.root}

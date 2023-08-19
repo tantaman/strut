@@ -1,6 +1,6 @@
 // Component to render all components on the OT
 
-import { useQuery2 } from "@vlcn.io/react";
+import { useRangeQuery2 } from "@vlcn.io/react";
 import AppState from "../../domain/ephemeral/AppState";
 import { queries } from "../../domain/queries2";
 import { Slide } from "../../domain/schema";
@@ -19,12 +19,12 @@ export default function OTComponents({
   style: Object;
   scale: number;
 }) {
-  const componentIds = useQuery2(appState.ctx, queries.componentIds, [
+  const componentIds = useRangeQuery2(appState.ctx, queries.componentIds, [
     slideId,
     slideId,
     slideId,
   ]).data;
-  const selectedComponents = useQuery2(
+  const selectedComponents = useRangeQuery2(
     appState.ctx,
     queries.selectedComponentIds,
     [slideId],
