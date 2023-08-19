@@ -404,7 +404,7 @@ const mutations = {
         `INSERT INTO "slide" ("id", "deck_id", "order", "created", "modified") VALUES (
         ${slideId},
         ${deckId},
-        1,
+        'a0',
         ${Date.now()},
         ${Date.now()}
       );`,
