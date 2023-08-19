@@ -7,11 +7,12 @@ import WellContextMenu from "./WellContextMenu";
 import styles from "./WellSlide.module.css";
 import AppState from "../../../domain/ephemeral/AppState";
 import { IID_of } from "../../../id";
-import queries from "../../../domain/queries";
+import { queries } from "../../../domain/queries2";
 import fns from "../../../domain/fns";
 import mutations from "../../../domain/mutations";
 import WellSlidePreview from "./WellSlidePreview";
 import { useBind } from "../../../modelHooks";
+import { first, useQuery2 } from "@vlcn.io/react";
 
 const dragImageUrl = new URL(
   "../../../images/drag-slides.svg",
@@ -30,13 +31,16 @@ function WellSlide(props: {
   appState: AppState;
   orient: "horizontal" | "vertical";
 }) {
-  const theme = queries.themeFromDeck(
+  const theme = first(
+    useQuery2(props.appState.ctx, queries.themeFromDeck, [
+      props.appState.current_deck_id,
+    ]).data
+  );
+  const selectedSlides = useQuery2(
     props.appState.ctx,
-    props.appState.current_deck_id
-  ).data;
-  const selectedSlides = queries.selectedSlideIds(
-    props.appState.ctx,
-    props.appState.current_deck_id
+    queries.selectedSlideIds,
+    [props.appState.current_deck_id],
+    (x) => new Set(x.map((x) => x.slide_id))
   ).data;
 
   const previewTheme = props.appState.previewTheme;

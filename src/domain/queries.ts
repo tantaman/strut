@@ -8,15 +8,7 @@ import {
   usePointQuery,
 } from "@vlcn.io/react";
 import { IID_of, Opaque } from "../id";
-import {
-  AnyComponentID,
-  Deck,
-  EmbedComponent,
-  Presenter,
-  Slide,
-  TextComponent,
-  Theme,
-} from "./schema";
+import { Deck, EmbedComponent, Slide, TextComponent, Theme } from "./schema";
 
 type SQL<R> = Opaque<R>;
 export type Query<R, M = R[]> =
@@ -27,31 +19,6 @@ export type Query<R, M = R[]> =
 type Result<T> = any;
 
 const queries = {
-  chosenPresenter: (ctx: Ctx, id: IID_of<Deck>) =>
-    useQuery<Presenter, Presenter | undefined>(
-      ctx,
-      /*sql*/ `SELECT "presenter".* FROM "presenter" JOIN "deck" ON deck.chosen_presenter = presenter.name WHERE deck.id = ?`,
-      [id],
-      first
-    ),
-
-  selectedSlideIds: (ctx: Ctx, id: IID_of<Deck>) =>
-    useRangeQuery<IID_of<Slide>, Set<IID_of<Slide>>>(
-      ctx,
-      /*sql*/ `SELECT "slide_id" FROM "selected_slide" WHERE "deck_id" = ?`,
-      [id],
-      (x: Result<"slide_id">[]) =>
-        new Set(x.map((x: Result<"slide_id">) => x.slide_id))
-    ),
-
-  selectedComponentIds: (ctx: Ctx, id: IID_of<Slide>) =>
-    useRangeQuery<AnyComponentID, Set<AnyComponentID>>(
-      ctx,
-      /*sql*/ `SELECT "component_id" FROM "selected_component" WHERE "slide_id" = ? ORDER BY "component_id" ASC`,
-      [id],
-      (x: any) => new Set(x.map((x: any) => x.component_id))
-    ),
-
   mostRecentlySelectedSlide: (ctx: Ctx, id: IID_of<Deck>) =>
     useRangeQuery<{ slide_id: IID_of<Slide> }, IID_of<Slide> | undefined>(
       ctx,
