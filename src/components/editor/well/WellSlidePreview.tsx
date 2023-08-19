@@ -31,6 +31,8 @@ export default function WellSlidePreview({
 }) {
   const componentIds = useRangeQuery2(ctx, queries.componentIds, [
     slideId,
+    slideId,
+    slideId,
   ]).data;
   return (
     <div className="markdown" style={mdStyle}>
