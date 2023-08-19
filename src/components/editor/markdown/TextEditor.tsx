@@ -45,9 +45,9 @@ import styles from "./TextEditor.module.css";
 import { throttle } from "throttle-debounce";
 import { AnyComponentID, Slide, TextComponent } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
-import { CtxAsync as Ctx } from "@vlcn.io/react";
+import { CtxAsync as Ctx, usePointQuery2 } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
-import queries from "../../../domain/queries";
+import { queries } from "../../../domain/queries2";
 
 const persistText = throttle(
   100,
@@ -124,7 +124,8 @@ function TextEditorOuter(props: {
   selectedComponents: Set<AnyComponentID>;
 }) {
   const { id, index, scale, ctx, selectedComponents } = props;
-  const c = queries.textComponent(ctx, id).data;
+  // TODO:
+  const c = usePointQuery2(ctx, id as any, queries.textComponent, [id]).data;
 
   if (c == null) {
     return null;
