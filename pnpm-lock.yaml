@@ -65,6 +65,9 @@ importers:
       '@vlcn.io/typed-sql':
         specifier: link:../js/deps/typed-sql/packages/typed-sql
         version: link:../js/deps/typed-sql/packages/typed-sql
+      '@vlcn.io/ws-browserdb':
+        specifier: link:../js/packages/ws-browserdb
+        version: link:../js/packages/ws-browserdb
       '@vlcn.io/ws-client':
         specifier: link:../js/packages/ws-client
         version: link:../js/packages/ws-client
