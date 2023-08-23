@@ -51,35 +51,35 @@ importers:
         specifier: workspace:*
         version: link:deps/utils
       '@vlcn.io/crsqlite-wasm':
-        specifier: link:../js/packages/crsqlite-wasm
-        version: link:../js/packages/crsqlite-wasm
+        specifier: link:../vulcan/js/packages/crsqlite-wasm
+        version: link:../vulcan/js/packages/crsqlite-wasm
       '@vlcn.io/model':
         specifier: workspace:*
         version: link:deps/model/ts/packages/model
       '@vlcn.io/react':
-        specifier: link:../js/packages/react
-        version: link:../js/packages/react
+        specifier: link:../vulcan/js/packages/react
+        version: link:../vulcan/js/packages/react
       '@vlcn.io/rx-tbl':
-        specifier: link:../js/packages/rx-tbl
-        version: link:../js/packages/rx-tbl
+        specifier: link:../vulcan/js/packages/rx-tbl
+        version: link:../vulcan/js/packages/rx-tbl
       '@vlcn.io/typed-sql':
-        specifier: link:../js/deps/typed-sql/packages/typed-sql
-        version: link:../js/deps/typed-sql/packages/typed-sql
+        specifier: link:../vulcan/typed-sql/packages/typed-sql
+        version: link:../vulcan/typed-sql/packages/typed-sql
       '@vlcn.io/ws-browserdb':
-        specifier: link:../js/packages/ws-browserdb
-        version: link:../js/packages/ws-browserdb
+        specifier: link:../vulcan/js/packages/ws-browserdb
+        version: link:../vulcan/js/packages/ws-browserdb
       '@vlcn.io/ws-client':
-        specifier: link:../js/packages/ws-client
-        version: link:../js/packages/ws-client
+        specifier: link:../vulcan/js/packages/ws-client
+        version: link:../vulcan/js/packages/ws-client
       '@vlcn.io/ws-common':
-        specifier: link:../js/packages/ws-common
-        version: link:../js/packages/ws-common
+        specifier: link:../vulcan/js/packages/ws-common
+        version: link:../vulcan/js/packages/ws-common
       '@vlcn.io/ws-server':
-        specifier: link:../js/packages/ws-server
-        version: link:../js/packages/ws-server
+        specifier: link:../vulcan/js/packages/ws-server
+        version: link:../vulcan/js/packages/ws-server
       '@vlcn.io/xplat-api':
-        specifier: link:../js/packages/xplat-api
-        version: link:../js/packages/xplat-api
+        specifier: link:../vulcan/js/packages/xplat-api
+        version: link:../vulcan/js/packages/xplat-api
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
@@ -163,8 +163,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(vite@4.3.2)
       '@vlcn.io/typed-sql-cli':
-        specifier: link:../typed-sql/packages/cli
-        version: link:../typed-sql/packages/cli
+        specifier: link:../vulcan/typed-sql/packages/cli
+        version: link:../vulcan/typed-sql/packages/cli
       eslint:
         specifier: ^8.38.0
         version: 8.38.0
