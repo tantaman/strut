@@ -30,7 +30,7 @@ Readme from 2013:
 
 Don't know what ImpressJS is? Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
 
-### Start using Strut! http://tantaman.github.io/Strut/dist/
+### [Start using Strut!](http://strut.io/)
 
 (works in Firefox, Chrome and Safari with basic support for IE10)
 
