@@ -18,11 +18,12 @@ import ErrorState from "../../domain/ephemeral/ErrorState.js";
 import hotkeys from "../hotkeys/hotkeys.js";
 import OpenType from "../open-type/OpenType.js";
 import EmbedModal from "./embed/EmbedModal.js";
-import workerUrl from "../../sync/worker.js?url";
+import SyncWorker from "../../sync/worker.js?worker";
 
 /**
  * Start authoring a presentation.
  */
+const worker = new SyncWorker();
 export default function Editor() {
   const { dbid, deckid } = useParams();
 
@@ -46,7 +47,7 @@ function DBProvided({ dbid, deckid }: { dbid: string; deckid: IID_of<Deck> }) {
     dbname: dbid,
     endpoint: "ws://localhost:8080/sync",
     room: dbid,
-    workerUrl,
+    worker,
   });
   const [appState, _setAppState] = useState<AppState>(() => {
     const appState = new AppState({

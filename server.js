@@ -15,7 +15,7 @@ attachWebsocketServer(server, {
 });
 
 server.listen(PORT, () =>
-  console.log("info", `listening on https://localhost:${PORT}!`)
+  console.log("info", `listening on http://localhost:${PORT}!`)
 );
 
 ViteExpress.bind(app, server);

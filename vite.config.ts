@@ -19,6 +19,7 @@ export default defineConfig({
     target: "esnext",
   },
   optimizeDeps: {
+    exclude: ["@vlcn.io/crsqlite-wasm"],
     esbuildOptions: {
       target: "esnext",
     },
