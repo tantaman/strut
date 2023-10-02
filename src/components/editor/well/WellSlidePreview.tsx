@@ -1,6 +1,6 @@
-import { CtxAsync } from "@vlcn.io/react";
+import { CtxAsync, usePointQuery2, useRangeQuery2 } from "@vlcn.io/react";
 import config from "../../../config";
-import queries from "../../../domain/queries";
+import { queries } from "../../../domain/queries2";
 import {
   EmbedComponent,
   Slide,
@@ -29,16 +29,21 @@ export default function WellSlidePreview({
   ctx: CtxAsync;
   slideId: IID_of<Slide>;
 }) {
-  const componentIds = queries.textComponentIds(ctx, slideId).data;
-  const embedIds = queries.embedComponentIds(ctx, slideId).data;
+  const componentIds = useRangeQuery2(ctx, queries.componentIds, [
+    slideId,
+    slideId,
+    slideId,
+  ]).data;
   return (
     <div className="markdown" style={mdStyle}>
-      {componentIds.map((id) => (
-        <TextComponent ctx={ctx} id={id} key={id.toString()} />
-      ))}
-      {embedIds.map((id) => (
-        <Embed ctx={ctx} id={id} key={id.toString()} />
-      ))}
+      {componentIds.map((c) => {
+        switch (c.component_type) {
+          case "TextComponent":
+            return <TextComponent ctx={ctx} id={c.id} key={c.id.toString()} />;
+          case "EmbedComponent" as any: // TODO: union queries!
+            return <Embed ctx={ctx} id={c.id as any} key={c.id.toString()} />;
+        }
+      })}
     </div>
   );
 }
@@ -50,7 +55,7 @@ function TextComponent({
   ctx: CtxAsync;
   id: IID_of<TextComponentModel>;
 }) {
-  const comp = queries.textComponent(ctx, id).data;
+  const comp = usePointQuery2(ctx, id as any, queries.textComponent, [id]).data;
   if (comp == null) {
     return null;
   }
@@ -76,7 +81,9 @@ function TextComponent({
 }
 
 function Embed({ ctx, id }: { ctx: CtxAsync; id: IID_of<EmbedComponent> }) {
-  const comp = queries.embedComponent(ctx, id).data;
+  const comp = usePointQuery2(ctx, id as any, queries.embedComponent, [
+    id,
+  ]).data;
   if (comp == null) {
     return null;
   }

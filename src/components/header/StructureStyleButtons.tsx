@@ -3,12 +3,18 @@ import AppState from "../../domain/ephemeral/AppState";
 import { Theme } from "../../domain/schema";
 import EphemeralTheme from "../../domain/ephemeral/EphemeralTheme";
 import * as styles from "./HeaderButton.module.css";
-import { CtxAsync as Ctx } from "@vlcn.io/react";
+import {
+  CtxAsync as Ctx,
+  first,
+  pick,
+  useQuery2,
+  usePointQuery2,
+} from "@vlcn.io/react";
 import ColorPickerButton2 from "../../widgets/color/ColorPickerButton2";
 import FontSelector from "../../widgets/font-selector/FontSelector";
 import textColorStyles from "../editor/markdown/styling_menu/FontColorButton.module.css";
 import mutations from "../../domain/mutations";
-import queries from "../../domain/queries";
+import { queries } from "../../domain/queries2";
 import { IID_of } from "../../id";
 
 function Slideout({
@@ -31,7 +37,12 @@ function Slideout({
     };
   }
 
-  const recentColors = queries.recentColors(ctx, theme?.id).data;
+  const recentColors = useQuery2(
+    ctx,
+    queries.recentColors,
+    [theme?.id],
+    pick<any, string>
+  ).data;
   return (
     <>
       <ColorPickerButton2
@@ -99,7 +110,9 @@ const Section = memo(function s({
 }) {
   const [expanded, setExpanded] = useState<boolean>(false);
   const expand = () => setExpanded(!expanded);
-  const theme = queries.pointTheme(appState.ctx, themeId).data;
+  const theme = usePointQuery2(appState.ctx, themeId as any, queries.theme, [
+    themeId,
+  ]).data;
   return (
     <div
       className={"btn-group " + styles.root}
@@ -143,10 +156,10 @@ export default function StructureStyleButtons({
   appState: AppState;
   className?: string;
 }) {
-  const themeId = queries.themeIdFromDeck(
-    appState.ctx,
-    appState.current_deck_id
-  ).data;
+  const themeId = first(
+    useQuery2(appState.ctx, queries.themeIdFromDeck, [appState.current_deck_id])
+      .data
+  )?.theme_id;
   return (
     <div className={className}>
       {themeId != null ? (

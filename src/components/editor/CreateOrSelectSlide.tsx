@@ -1,9 +1,9 @@
 import { otsSqaure } from "./OperatingTable";
 import style from "./CreateOrSelectSlide.module.css";
-import queries from "../../domain/queries";
+import { queries } from "../../domain/queries2";
 import { IID_of } from "../../id";
 import { Deck } from "../../domain/schema";
-import { CtxAsync } from "@vlcn.io/react";
+import { CtxAsync, first, useRangeQuery2 } from "@vlcn.io/react";
 import mutations from "../../domain/mutations";
 
 export default function CreateOrSelectSlide({
@@ -15,7 +15,9 @@ export default function CreateOrSelectSlide({
   otsStyle: otsSqaure;
   deckId: IID_of<Deck>;
 }) {
-  const firstSlide = queries.firstSlideId(ctx, deckId).data;
+  const firstSlide = first(
+    useRangeQuery2(ctx, queries.firstSlideId, [deckId]).data
+  )?.id;
   function addSlide() {
     ctx.db.tx(async (tx) => {
       const slideId = await mutations.addSlideAfter(ctx.db, tx, null, deckId);

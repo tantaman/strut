@@ -4,9 +4,9 @@ import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
 import LayoutSlide from "./LayoutSlide";
 import { IID_of } from "../../../id";
-import { CtxAsync as Ctx } from "@vlcn.io/react";
+import { CtxAsync as Ctx, pick, useRangeQuery2 } from "@vlcn.io/react";
 import { Deck } from "../../../domain/schema";
-import queries from "../../../domain/queries";
+import { queries } from "../../../domain/queries2";
 import AppState from "../../../domain/ephemeral/AppState";
 
 export default function LayoutEditor({ appState }: { appState: AppState }) {
@@ -19,8 +19,18 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
 }
 
 function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
-  const slideIds = queries.slideIds(ctx, deckId).data;
-  const selectedSlideIds = queries.selectedSlideIds(ctx, deckId).data;
+  const slideIds = useRangeQuery2(
+    ctx,
+    queries.slideIds,
+    [deckId],
+    pick<any, IID_of<Slide>>
+  ).data;
+  const selectedSlideIds = useRangeQuery2(
+    ctx,
+    queries.selectedSlideIds,
+    [deckId],
+    pick<any, IID_of<Slide>>
+  ).data;
   const set = useMemo<Set<IID_of<Slide>>>(
     () => new Set(selectedSlideIds),
     [selectedSlideIds]

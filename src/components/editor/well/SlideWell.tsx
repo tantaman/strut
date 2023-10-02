@@ -6,9 +6,13 @@ import "styles/components/SlideWell.css";
 import Css from "../../../html/Css";
 import useMatchMedia from "../../../interactions/useMatchMedia";
 import mediaCuts from "../../mobile/mediaCuts";
-import queries from "../../../domain/queries";
+import { queries } from "../../../domain/queries2";
 import AppState from "../../../domain/ephemeral/AppState";
 import useTraceUpdate from "../../../utils/useTraceUpdate";
+import { pick } from "@vlcn.io/xplat-api";
+import { IID_of } from "../../../id";
+import { useQuery2 } from "@vlcn.io/react";
+import { Slide as SlideType } from "../../../schemas/StrutSchemaType";
 
 // const mediaQuery = window.matchMedia('(max-width: 900px)')
 // Create an oritentation hook. That can use a media query.
@@ -21,9 +25,11 @@ function SlideWell({
 }) {
   useTraceUpdate("SlideWell", { className, appState });
   // TODO: paginated fetch
-  const slideIds = queries.slideIds(
+  const slideIds = useQuery2(
     appState.ctx,
-    appState.current_deck_id
+    queries.slideIds,
+    [appState.current_deck_id],
+    pick<any, IID_of<SlideType>>
   ).data;
   const orientHorizontally = useMatchMedia(
     "(max-width: " + mediaCuts.horizontal + "px)"
