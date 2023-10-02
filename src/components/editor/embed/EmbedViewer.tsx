@@ -1,4 +1,4 @@
-import { CtxAsync, usePointQuery2 } from "@vlcn.io/react";
+import { CtxAsync, useQuery2 } from "@vlcn.io/react";
 import { queries } from "../../../domain/queries2";
 import { AnyComponentID, EmbedComponent, Slide } from "../../../domain/schema";
 import { IID_of } from "../../../id";
@@ -49,7 +49,7 @@ export default function EmbedViewer({
   // these blobs would be synced over cr-sqlite if we did this...
   // write up on blob storage in cr-sqlite!
   // Till then, just img tags.
-  const c = usePointQuery2(ctx, id as any, queries.embedComponent, [id]).data;
+  const c = useQuery2(ctx, queries.embedComponent, [id]).data[0];
   if (c == null) {
     return null;
   }

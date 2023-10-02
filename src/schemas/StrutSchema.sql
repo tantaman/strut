@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS theme (
 );
 
 CREATE TABLE IF NOT EXISTS "recent_color" (
-  "color" INTEGER primary key,
+  "color" INTEGER primary key not null,
   "last_used" INT,
   "first_used" INT,
   "theme_id" 'IID_of<Theme>'
@@ -103,8 +103,8 @@ SELECT crsql_as_crr('recent_color');
 SELECT crsql_as_crr('presenter');
 
 CREATE TABLE IF NOT EXISTS "selected_slide" (
-  "deck_id" 'IID_of<Deck>',
-  "slide_id" 'IID_of<Slide>',
+  "deck_id" 'IID_of<Deck>' not null,
+  "slide_id" 'IID_of<Slide>' not null,
   primary key ("deck_id", "slide_id")
 );
 

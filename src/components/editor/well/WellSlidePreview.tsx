@@ -1,4 +1,4 @@
-import { CtxAsync, usePointQuery2, useRangeQuery2 } from "@vlcn.io/react";
+import { CtxAsync, useQuery2, useRangeQuery2 } from "@vlcn.io/react";
 import config from "../../../config";
 import { queries } from "../../../domain/queries2";
 import {
@@ -55,7 +55,7 @@ function TextComponent({
   ctx: CtxAsync;
   id: IID_of<TextComponentModel>;
 }) {
-  const comp = usePointQuery2(ctx, id as any, queries.textComponent, [id]).data;
+  const comp = useQuery2(ctx, queries.textComponent, [id]).data[0];
   if (comp == null) {
     return null;
   }
@@ -81,9 +81,7 @@ function TextComponent({
 }
 
 function Embed({ ctx, id }: { ctx: CtxAsync; id: IID_of<EmbedComponent> }) {
-  const comp = usePointQuery2(ctx, id as any, queries.embedComponent, [
-    id,
-  ]).data;
+  const comp = useQuery2(ctx, queries.embedComponent, [id]).data[0];
   if (comp == null) {
     return null;
   }

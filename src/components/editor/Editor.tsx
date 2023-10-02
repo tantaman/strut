@@ -34,9 +34,10 @@ export default function Editor() {
         name: StrutSchemaName,
         content: StrutSchema.__content,
       }}
-    >
-      <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
-    </DBProvider>
+      Render={() => (
+        <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
+      )}
+    ></DBProvider>
   );
 }
 

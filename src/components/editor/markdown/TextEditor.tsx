@@ -45,7 +45,7 @@ import styles from "./TextEditor.module.css";
 import { throttle } from "throttle-debounce";
 import { AnyComponentID, Slide, TextComponent } from "../../../domain/schema";
 import mutations from "../../../domain/mutations";
-import { CtxAsync as Ctx, usePointQuery2 } from "@vlcn.io/react";
+import { CtxAsync as Ctx, useQuery2 } from "@vlcn.io/react";
 import { IID_of } from "../../../id";
 import { queries } from "../../../domain/queries2";
 
@@ -125,7 +125,7 @@ function TextEditorOuter(props: {
 }) {
   const { id, index, scale, ctx, selectedComponents } = props;
   // TODO:
-  const c = usePointQuery2(ctx, id as any, queries.textComponent, [id]).data;
+  const c = useQuery2(ctx, queries.textComponent, [id]).data[0];
 
   if (c == null) {
     return null;

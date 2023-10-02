@@ -22,8 +22,10 @@ function UserReady({ metadbid }: { metadbid: string }) {
     navigate(`/create/${bytesToHex(dbid)}/${deckid}`);
   };
   return (
-    <DBProvider dbname={metadbid} schema={metaSchema}>
-      <OpenDeckDlg onNewDeck={onNewDeck} />
-    </DBProvider>
+    <DBProvider
+      dbname={metadbid}
+      schema={metaSchema}
+      Render={() => <OpenDeckDlg onNewDeck={onNewDeck} />}
+    ></DBProvider>
   );
 }
