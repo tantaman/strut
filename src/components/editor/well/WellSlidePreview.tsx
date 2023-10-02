@@ -63,8 +63,8 @@ function TextComponent({
     .processSync(comp.text || "Text");
 
   const style = {
-    top: comp.y,
-    left: comp.x,
+    top: comp.y ?? undefined,
+    left: comp.x ?? undefined,
     position: "absolute",
   } as const;
   return (

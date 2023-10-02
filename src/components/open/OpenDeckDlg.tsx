@@ -3,7 +3,7 @@ import DeckCard from "./DeckCard.js";
 import useMetaDBID from "../metadb/useMetaDBID";
 import { CtxAsync, useDB } from "@vlcn.io/react";
 import { Link } from "react-router-dom";
-import { bytesToHex } from "@vlcn.io/direct-connect-common";
+import { bytesToHex } from "@vlcn.io/ws-common";
 
 const style = { display: "block" };
 const bodyStyle = {

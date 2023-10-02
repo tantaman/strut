@@ -5,7 +5,7 @@ import AppState from "../../domain/ephemeral/AppState";
 import { useBind } from "../../modelHooks";
 import LayoutEditor from "./layout/LayoutEditor";
 import { useParams } from "react-router-dom";
-import strutSchema from "../../schemas/strut.mjs";
+import { StrutSchema, StrutSchemaName } from "../../schemas/StrutSchema.js";
 import { useState } from "react";
 import { DBProvider, useDB } from "@vlcn.io/react";
 import { IID_of } from "../../id.js";
@@ -17,7 +17,6 @@ import DeckIndex from "../../domain/ephemeral/DeckIndex.js";
 import ErrorState from "../../domain/ephemeral/ErrorState.js";
 import hotkeys from "../hotkeys/hotkeys.js";
 import OpenType from "../open-type/OpenType.js";
-import { endpoints } from "../../SyncEndpoints.js";
 import EmbedModal from "./embed/EmbedModal.js";
 
 /**
@@ -27,7 +26,13 @@ export default function Editor() {
   const { dbid, deckid } = useParams();
 
   return (
-    <DBProvider dbid={dbid!} schema={strutSchema} endpoints={endpoints}>
+    <DBProvider
+      dbname={dbid!}
+      schema={{
+        name: StrutSchemaName,
+        content: StrutSchema.__content,
+      }}
+    >
       <DBProvided dbid={dbid!} deckid={BigInt(deckid!) as IID_of<Deck>} />
     </DBProvider>
   );
@@ -43,10 +48,11 @@ function DBProvided({ dbid, deckid }: { dbid: string; deckid: IID_of<Deck> }) {
       modal: "none",
       current_deck_id: deckid,
       authoringState: new AuthoringState({}),
+      // TODO: figure me out
       previewTheme: new EphemeralTheme({
         id: EphemeralTheme.defaultThemeId,
         bg_colorset: "default",
-      }),
+      } as any),
       drawingInteractionState: new DrawingInteractionState({
         currentTool: "arrow",
       }),

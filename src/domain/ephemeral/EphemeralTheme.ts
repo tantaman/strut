@@ -7,25 +7,25 @@ export default class EphemeralTheme extends Model<Theme> {
   get id(): IID_of<Theme> {
     return this.data.id;
   }
-  get name(): string | undefined {
+  get name(): string | null {
     return this.data.name;
   }
-  get bg_colorset(): string | undefined {
+  get bg_colorset(): string | null {
     return this.data.bg_colorset;
   }
-  get fg_colorset(): string | undefined {
+  get fg_colorset(): string | null {
     return this.data.fg_colorset;
   }
-  get fontset(): string | undefined {
+  get fontset(): string | null {
     return this.data.fontset;
   }
-  get surface_color(): string | undefined {
+  get surface_color(): string | null {
     return this.data.surface_color;
   }
-  get slide_color(): string | undefined {
+  get slide_color(): string | null {
     return this.data.slide_color;
   }
-  get font_color(): string | undefined {
+  get font_color(): string | null {
     return this.data.font_color;
   }
 
