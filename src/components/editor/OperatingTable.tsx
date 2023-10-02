@@ -11,8 +11,9 @@ import * as styles from "./OperatingTable.module.css";
 import counter from "@strut/counter";
 import config from "../../config";
 import fns from "../../domain/fns";
-import queries from "../../domain/queries";
+import { queries } from "../../domain/queries2";
 import CreateOrSelectSlide from "./CreateOrSelectSlide";
+import { first, useQuery2 } from "@vlcn.io/react";
 
 const count = counter("OperatingTable");
 
@@ -77,8 +78,12 @@ function OperatingTable({ appState }: { appState: AppState }) {
   const deckId = appState.current_deck_id;
   // TODO: are we binding current_deck_id everywhere else we use it?
   useBind(appState, ["current_deck_id", "editor_mode"]);
-  const theme = queries.themeFromDeck(appState.ctx, deckId).data;
-  const slideId = queries.mostRecentlySelectedSlide(appState.ctx, deckId).data;
+  const theme = first(
+    useQuery2(appState.ctx, queries.themeFromDeck, [deckId]).data
+  );
+  const slideId = first(
+    useQuery2(appState.ctx, queries.mostRecentlySelectedSlideId, [deckId]).data
+  )?.slide_id;
   const [affordance, setAffordance] = useState("");
   const previewTheme = appState.previewTheme;
 

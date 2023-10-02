@@ -4,8 +4,8 @@ import ColorPickerButton2 from "../../../../widgets/color/ColorPickerButton2";
 import { Theme } from "../../../../domain/schema";
 import mutations from "../../../../domain/mutations";
 import "@tiptap/extension-color";
-import queries from "../../../../domain/queries";
-import { CtxAsync as Ctx } from "@vlcn.io/react";
+import { queries } from "../../../../domain/queries2";
+import { CtxAsync as Ctx, pick, useQuery2 } from "@vlcn.io/react";
 import config from "../../../../config";
 import AuthoringState from "../../../../domain/ephemeral/AuthoringState";
 
@@ -16,9 +16,11 @@ type Props = {
 };
 
 export default function FontColorButton({ ctx, state, theme }: Props) {
-  const recentColors = queries.recentColors(
+  const recentColors = useQuery2(
     ctx,
-    theme?.id || config.defaultThemeId
+    queries.recentColors,
+    [theme?.id ?? config.defaultThemeId],
+    pick<any, string>
   ).data;
   // useBind(["transaction"], state);
   // useQuery(["recentColors"], theme);

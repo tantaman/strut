@@ -4,8 +4,8 @@ import { Deck, Presenter, Transition } from "../../domain/schema";
 import * as styles from "./HeaderButton.module.css";
 import { IID_of } from "../../id";
 import fns from "../../domain/fns";
-import { CtxAsync as Ctx } from "@vlcn.io/react";
-import queries from "../../domain/queries";
+import { CtxAsync as Ctx, first, useQuery2 } from "@vlcn.io/react";
+import { queries } from "../../domain/queries2";
 import actions from "../../domain/actions";
 import mutations from "../../domain/mutations";
 
@@ -17,7 +17,9 @@ export default function PresentButton({
   ctx: Ctx;
   deckId: IID_of<Deck>;
 }) {
-  const presenter = queries.chosenPresenter(ctx, deckId).data;
+  const presenter = first(
+    useQuery2(ctx, queries.chosenPresenter, [deckId]).data
+  );
 
   if (!presenter) {
     return null;
