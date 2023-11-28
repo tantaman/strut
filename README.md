@@ -1,6 +1,6 @@
 The original project is ancient (2011/2013) and dated. It is now coming back with a facelift, collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
 
-We're in the [#strut.io channel](https://discord.com/channels/929781625473073245/1098619886009327617) of [![](https://dcbadge.vercel.app/api/server/lfwdev)](https://discord.gg/lfwdev)
+We're in the [#strut.io channel](https://discord.com/channels/929781625473073245/1179183030468870235) of [![](https://dcbadge.vercel.app/api/server/lfwdev)](https://discord.gg/lfwdev)
 
 # Contributing
 
