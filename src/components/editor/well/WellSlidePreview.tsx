@@ -1,4 +1,4 @@
-import { CtxAsync, useQuery2, useRangeQuery2 } from "@vlcn.io/react";
+import { CtxAsync, useQuery2 } from "@vlcn.io/react";
 import config from "../../../config";
 import { queries } from "../../../domain/queries2";
 import {
@@ -29,7 +29,7 @@ export default function WellSlidePreview({
   ctx: CtxAsync;
   slideId: IID_of<Slide>;
 }) {
-  const componentIds = useRangeQuery2(ctx, queries.componentIds, [
+  const componentIds = useQuery2(ctx, queries.componentIds, [
     slideId,
     slideId,
     slideId,

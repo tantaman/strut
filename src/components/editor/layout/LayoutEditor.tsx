@@ -4,7 +4,7 @@ import LayoutEditorNav from "./LayoutEditorNav";
 import * as styles from "./LayoutEditor.module.css";
 import LayoutSlide from "./LayoutSlide";
 import { IID_of } from "../../../id";
-import { CtxAsync as Ctx, pick, useRangeQuery2 } from "@vlcn.io/react";
+import { CtxAsync as Ctx, pick, useQuery2 } from "@vlcn.io/react";
 import { Deck } from "../../../domain/schema";
 import { queries } from "../../../domain/queries2";
 import AppState from "../../../domain/ephemeral/AppState";
@@ -19,13 +19,13 @@ export default function LayoutEditor({ appState }: { appState: AppState }) {
 }
 
 function LayoutSurface({ ctx, deckId }: { ctx: Ctx; deckId: IID_of<Deck> }) {
-  const slideIds = useRangeQuery2(
+  const slideIds = useQuery2(
     ctx,
     queries.slideIds,
     [deckId],
     pick<any, IID_of<Slide>>
   ).data;
-  const selectedSlideIds = useRangeQuery2(
+  const selectedSlideIds = useQuery2(
     ctx,
     queries.selectedSlideIds,
     [deckId],
