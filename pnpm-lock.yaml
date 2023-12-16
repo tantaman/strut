@@ -51,35 +51,35 @@ importers:
         specifier: workspace:*
         version: link:deps/utils
       '@vlcn.io/crsqlite-wasm':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.16.0
+        version: 0.16.0
       '@vlcn.io/model':
         specifier: workspace:*
         version: link:deps/model/ts/packages/model
       '@vlcn.io/react':
-        specifier: 3.0.3
-        version: 3.0.3(react@18.2.0)
+        specifier: 3.1.0
+        version: 3.1.0(react@18.2.0)
       '@vlcn.io/rx-tbl':
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.15.0
+        version: 0.15.0
       '@vlcn.io/typed-sql':
-        specifier: 0.2.13
-        version: 0.2.13
+        specifier: 0.3.0
+        version: 0.3.0
       '@vlcn.io/ws-browserdb':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.2.0
+        version: 0.2.0
       '@vlcn.io/ws-client':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.2.0
+        version: 0.2.0
       '@vlcn.io/ws-common':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.2.0
+        version: 0.2.0
       '@vlcn.io/ws-server':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.2.2
+        version: 0.2.2
       '@vlcn.io/xplat-api':
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.15.0
+        version: 0.15.0
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
@@ -2397,6 +2397,12 @@ packages:
       '@babel/types': 7.21.5
     dev: true
 
+  /@types/better-sqlite3@7.6.8:
+    resolution: {integrity: sha512-ASndM4rdGrzk7iXXqyNC4fbwt4UEjpK0i3j4q4FyeQrLAthfB6s7EF135ZJE0qQxtKIMFwmyT6x0switET7uIw==}
+    dependencies:
+      '@types/node': 17.0.31
+    dev: false
+
   /@types/chai-subset@1.3.3:
     resolution: {integrity: sha512-frBecisrNGz+F4T6bcc+NLeolfiojh5FxW2klu669+8BARtyQv2C/GkNW6FUodVe4BroGMP/wER/YDGc7rEllw==}
     dependencies:
@@ -2468,7 +2474,6 @@ packages:
 
   /@types/node@17.0.31:
     resolution: {integrity: sha512-AR0x5HbXGqkEx9CadRH3EBYx/VkiUgZIhP4wvPn/+5KIsgpNoyFaRlVe0Zlx9gRtg8fA06a9tskE2MSN7TcG4Q==}
-    dev: true
 
   /@types/node@20.2.3:
     resolution: {integrity: sha512-pg9d0yC4rVNWQzX8U7xb4olIOFuuVL9za3bzMT2pu2SU0SNEi66i2qrvhE2qt0HvkhuCaWJu7pLNOt/Pj8BIrw==}
@@ -2728,84 +2733,85 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@vlcn.io/crsqlite-wasm@0.15.2:
-    resolution: {integrity: sha512-yftBNDo6oMUJmEpUYFeh5iftJVoYiXpECvjvAFVXaWX7FPaV+kTKtWK3I4x4mB9rXXu1gk1+12E78HNZO1a55w==}
+  /@vlcn.io/crsqlite-wasm@0.16.0:
+    resolution: {integrity: sha512-5gf52eyMYvZirxuEUo4QS65JhEsw3fndoO+tCtCEOxuiIEtvaKB2/6wuuKGRlMVkxIp4Bls70D3DCF5v9lcJxA==}
     dependencies:
-      '@vlcn.io/wa-sqlite': 0.21.0
-      '@vlcn.io/xplat-api': 0.14.1
+      '@vlcn.io/wa-sqlite': 0.22.0
+      '@vlcn.io/xplat-api': 0.15.0
       async-mutex: 0.4.0
     dev: false
 
-  /@vlcn.io/crsqlite@0.15.1:
-    resolution: {integrity: sha512-TE5Vks7/aOqfhSZ1BPV0+C+X4Mz6aTZ7SqwDUNAMTrxdkC3wgzaXB+8MbsEpfFyd7dcAMjdE1bBnFXNFANGNeQ==}
+  /@vlcn.io/crsqlite@0.16.1:
+    resolution: {integrity: sha512-ju6dONV/xq3haiHUVkY/mUuz14lXqak1GAyCsY8YqEoZUUORIx8nXa8aIOM6A+n31+KreTsJ4qSiG0VCnZLveA==}
     requiresBuild: true
     dev: false
 
-  /@vlcn.io/logger-provider@0.1.2:
-    resolution: {integrity: sha512-vLYcd3bR97rG8ePEvMDd0xgOinTWaF8quxdSQ939Fa9oIYbcUtLZw5dJ9KsJD6H7Axz8xfltQmgayqdXwiqBsQ==}
+  /@vlcn.io/logger-provider@0.2.0:
+    resolution: {integrity: sha512-HLYSnXDo5gCLN22CEIX1eg78JTuw49l7F/KEDTbtoZXch6IJDQ1621z0m162q6T9oIOGTM400y/RUOXaKCRo8w==}
     dependencies:
       winston: 3.10.0
     dev: false
 
-  /@vlcn.io/react@3.0.3(react@18.2.0):
-    resolution: {integrity: sha512-fodFg+/XtGJdeO3q/agfl30MXmoBs/xC4653Cuzys+WlQjL5tfzJlEPW9hOByVNa+SWffzbPm+RIeBKksoTlMg==}
+  /@vlcn.io/react@3.1.0(react@18.2.0):
+    resolution: {integrity: sha512-sWAoEMVhuPXk4zCxIZa4SoSElNXWO8TwvcQf0xWfKTwQzkPldhiUqCIwXxHzQ37X47rlHrLfMuSvv5dT1vQupA==}
     peerDependencies:
       react: ^18
     dependencies:
-      '@vlcn.io/crsqlite-wasm': 0.15.2
-      '@vlcn.io/rx-tbl': 0.14.1
-      '@vlcn.io/typed-sql': 0.2.13
-      '@vlcn.io/ws-client': 0.1.2
-      '@vlcn.io/xplat-api': 0.14.1
+      '@vlcn.io/crsqlite-wasm': 0.16.0
+      '@vlcn.io/rx-tbl': 0.15.0
+      '@vlcn.io/typed-sql': 0.3.0
+      '@vlcn.io/ws-client': 0.2.0
+      '@vlcn.io/xplat-api': 0.15.0
       async-mutex: 0.4.0
       react: 18.2.0
     dev: false
 
-  /@vlcn.io/rx-tbl@0.14.1:
-    resolution: {integrity: sha512-sUDMzZR0SWSUOSUOZ+raTSVTQXlN/z0Gk4A0Kol6gMfhnZCJW5hu5wMOjGu2EMR+wWdDVJTfvRsw47Nz10Kb8A==}
+  /@vlcn.io/rx-tbl@0.15.0:
+    resolution: {integrity: sha512-6P5R8E5EJ6oASDyT7TbuV18Af4P/YobGEI3+uGUoquQi0GVl+NLdtbYA/sR4PkXsjQ1zBcs0oAi5TmYGe+Cd6A==}
     dependencies:
-      '@vlcn.io/xplat-api': 0.14.1
+      '@vlcn.io/xplat-api': 0.15.0
     dev: false
 
-  /@vlcn.io/typed-sql@0.2.13:
-    resolution: {integrity: sha512-gPwhZ4nmkA9+S5gUGJ5DH/O9EKDXroSB0LiF7nBXtAluISwrb/h+VI6FQY8Pc8TBQcLYbCKHDIF2rWXaFWPrig==}
+  /@vlcn.io/typed-sql@0.3.0:
+    resolution: {integrity: sha512-cKRh2RNzTNIv6NJs5Q2Nda8c4VQ1kEDhR6ERJEyFkmBEHnY/dBFWtZFN2ku35zfDjwVQxFqsr9GiJh0KpvtcXw==}
     dev: false
 
-  /@vlcn.io/wa-sqlite@0.21.0:
-    resolution: {integrity: sha512-aCeTGIGyi+HOv8wzJQ8n4lG9XqjjBEKVAPLXq/dekW6AM/x0ITA5vAQ7YUhpn9xNq3U1cp5DPIX+vzMkpsRNww==}
+  /@vlcn.io/wa-sqlite@0.22.0:
+    resolution: {integrity: sha512-OujKro0mAqP7/efUeCGB6zBiyMoSCFVe7jQKPF0n47U9ZhOaIW3kQUVCwF+CmzvzQfN1Vl4PrFQRNNxlSwTCNQ==}
     dev: false
 
-  /@vlcn.io/ws-browserdb@0.1.2:
-    resolution: {integrity: sha512-5LqRH0UpoWIzjCYzr4tyd9NRwenKea3nI1+cerhOIIvpCgcw2QqmW2a5PKr/lh8I9FIV1VgXSfBibOOIFkCaYg==}
-    dependencies:
-      '@types/throttle-debounce': 5.0.0
-      '@vlcn.io/crsqlite-wasm': 0.15.2
-      '@vlcn.io/rx-tbl': 0.14.1
-      '@vlcn.io/ws-client': 0.1.2
-      '@vlcn.io/ws-common': 0.1.2
-      '@vlcn.io/xplat-api': 0.14.1
-    dev: false
-
-  /@vlcn.io/ws-client@0.1.2:
-    resolution: {integrity: sha512-DFrb4rocRVEoYk/Fwm68+bzZaUkAlOo8Eu3J2W20C01IvNM2LS69BgAQv5A2DhBv5DuKSvbuFNwxRAzYpZkxUA==}
+  /@vlcn.io/ws-browserdb@0.2.0:
+    resolution: {integrity: sha512-TKPygQomMPurQ8mwAwEefN5BROw30FagL21S3FzvUunyCybOByysAEoV/OrJ7xNCvYXN9yjg0qyf7iZZfeOsYg==}
     dependencies:
       '@types/throttle-debounce': 5.0.0
-      '@vlcn.io/ws-common': 0.1.2
+      '@vlcn.io/crsqlite-wasm': 0.16.0
+      '@vlcn.io/rx-tbl': 0.15.0
+      '@vlcn.io/ws-client': 0.2.0
+      '@vlcn.io/ws-common': 0.2.0
+      '@vlcn.io/xplat-api': 0.15.0
     dev: false
 
-  /@vlcn.io/ws-common@0.1.2:
-    resolution: {integrity: sha512-rUx/1HsVZB1AMS2eldXljbF+P72DtVvUip+qybavJuho57LVtcJQfqJSfyXaMgVVuvvtqlECssS7e9SF41CMWA==}
+  /@vlcn.io/ws-client@0.2.0:
+    resolution: {integrity: sha512-0Nwqh/vBrKZNmRvVS2/LHUm8ssgfXbAzS5J3h3b2l9FQWDDsF3f+DfFekR/ExNagFGHEk8ZEjTQtIzj+F9doJw==}
+    dependencies:
+      '@types/throttle-debounce': 5.0.0
+      '@vlcn.io/ws-common': 0.2.0
+    dev: false
+
+  /@vlcn.io/ws-common@0.2.0:
+    resolution: {integrity: sha512-c7a470fCAzKzsjn+dchp+zAHXXem2eG2W7RxjHowZuO9PUfLjMAKp0GpZ9rsKAyLiyYRMOFAFnpl0HmFxERjig==}
     dependencies:
       lib0: 0.2.74
     dev: false
 
-  /@vlcn.io/ws-server@0.1.2:
-    resolution: {integrity: sha512-ZJg1Q6JEQsIIp6zP7PidKx8GWZfcHs8T4YPGzxHNgOAR79Zcitd0BmjZWrbsFwrKd6I7GrJ9srEt0+Br+tTMfw==}
+  /@vlcn.io/ws-server@0.2.2:
+    resolution: {integrity: sha512-pRdaKVMuVEU6ij0zdnRAEXebLmCShcEZNMDxGBkQy9/wAXjMFsRdpw6RcbHvcNfLHUrbGurc+3dB3dJQa8QtPQ==}
     dependencies:
-      '@vlcn.io/crsqlite': 0.15.1
-      '@vlcn.io/logger-provider': 0.1.2
-      '@vlcn.io/ws-common': 0.1.2
-      better-sqlite3: 8.7.0
+      '@types/better-sqlite3': 7.6.8
+      '@vlcn.io/crsqlite': 0.16.1
+      '@vlcn.io/logger-provider': 0.2.0
+      '@vlcn.io/ws-common': 0.2.0
+      better-sqlite3: 9.2.2
       chokidar: 3.5.3
       throttle-debounce: 5.0.0
       winston: 3.10.0
@@ -2815,8 +2821,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@vlcn.io/xplat-api@0.14.1:
-    resolution: {integrity: sha512-Y63WDk0kkt6i1WzlD6StiFXXHP+YJaDO/SW0S9+dyoEZDvkDLHr1HrKsfBn1JreBnbCd5fOhm/gRP49m1Ksfhg==}
+  /@vlcn.io/xplat-api@0.15.0:
+    resolution: {integrity: sha512-2/aE7VgI3EbIO5EcJGrskAJuCa2pteY1rWNWfhovFKMERe9NhJdlDMIB1I31X0sN/WC2DnF30RqcdTXNfYyzhQ==}
     dependencies:
       comlink: 4.4.1
     dev: false
@@ -3054,8 +3060,8 @@ packages:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
     dev: false
 
-  /better-sqlite3@8.7.0:
-    resolution: {integrity: sha512-99jZU4le+f3G6aIl6PmmV0cxUIWqKieHxsiF7G34CVFiE+/UabpYqkU0NJIkY/96mQKikHeBjtR27vFfs5JpEw==}
+  /better-sqlite3@9.2.2:
+    resolution: {integrity: sha512-qwjWB46il0lsDkeB4rSRI96HyDQr8sxeu1MkBVLMrwusq1KRu4Bpt1TMI+8zIJkDUtZ3umjAkaEjIlokZKWCQw==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
@@ -3446,6 +3452,7 @@ packages:
 
   /debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
+    requiresBuild: true
     peerDependencies:
       supports-color: '*'
     peerDependenciesMeta:
@@ -4289,6 +4296,7 @@ packages:
   /iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     dependencies:
       safer-buffer: 2.1.2
     dev: true
@@ -5914,6 +5922,7 @@ packages:
   /pify@4.0.1:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -6092,6 +6101,7 @@ packages:
 
   /prr@1.0.1:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -6443,6 +6453,7 @@ packages:
   /semver@5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
     hasBin: true
+    requiresBuild: true
     dev: true
     optional: true
 
