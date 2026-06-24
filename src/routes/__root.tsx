@@ -14,6 +14,9 @@ export const Route = createRootRoute({
       { title: 'Strut' },
     ],
     links: [
+      // Strut favicon (the stacked-bars mark from strut.io). Versioned to bust the
+      // browser's aggressive favicon cache when it changes.
+      { rel: 'icon', href: '/favicon.ico?v=strut', sizes: 'any' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       {
         rel: 'preconnect',
