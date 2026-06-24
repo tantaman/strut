@@ -2,36 +2,44 @@
 // and the app itself (for `app.mutate.*`). Renders a loading state until connected — which also keeps
 // SSR happy (the effect never runs on the server, so both tiers first render "Connecting…").
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { Rindle } from "@rindle/react";
-import { getApp, type StrutApp } from "./client.ts";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react'
+import { Rindle } from '@rindle/react'
+import { getApp, type StrutApp } from './client.ts'
 
-const AppContext = createContext<StrutApp | null>(null);
+const AppContext = createContext<StrutApp | null>(null)
 
 export function useApp(): StrutApp {
-  const app = useContext(AppContext);
-  if (!app) throw new Error("useApp() used outside <RindleProvider>");
-  return app;
+  const app = useContext(AppContext)
+  if (!app) throw new Error('useApp() used outside <RindleProvider>')
+  return app
 }
 
 /** `app.mutate` — the named mutator facade. */
-export function useMutate(): StrutApp["mutate"] {
-  return useApp().mutate;
+export function useMutate(): StrutApp['mutate'] {
+  return useApp().mutate
 }
 
 export function RindleProvider({ children }: { children: ReactNode }) {
-  const [app, setApp] = useState<StrutApp | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [app, setApp] = useState<StrutApp | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let live = true;
+    let live = true
     getApp()
       .then((a) => live && setApp(a))
-      .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
+      .catch(
+        (e) => live && setError(e instanceof Error ? e.message : String(e)),
+      )
     return () => {
-      live = false;
-    };
-  }, []);
+      live = false
+    }
+  }, [])
 
   if (error)
     return (
@@ -39,16 +47,17 @@ export function RindleProvider({ children }: { children: ReactNode }) {
         <p>Couldn’t connect to Rindle.</p>
         <pre>{error}</pre>
         <p className="strut-boot__hint">
-          Is the daemon (<code>rindle up</code>) and API server (<code>pnpm dev:api</code>) running?
+          Is the daemon (<code>rindle up</code>) running? (<code>pnpm dev</code>{' '}
+          starts it.)
         </p>
       </div>
-    );
+    )
 
-  if (!app) return <div className="strut-boot">Connecting…</div>;
+  if (!app) return <div className="strut-boot">Connecting…</div>
 
   return (
     <AppContext.Provider value={app}>
       <Rindle store={app.store}>{children}</Rindle>
     </AppContext.Provider>
-  );
+  )
 }

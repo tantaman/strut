@@ -14,18 +14,20 @@ truth; this app implements it.
 - **React 19** + **[TanStack Start](https://tanstack.com/start)** (file-based routing, SSR) on **Vite**.
 - **[Rindle](https://rindle.sh)** for the data layer (wired): SQL migrations as source of truth →
   generated TypeScript schema → optimistic local store + live windowed queries + named mutators, with
-  a `rindled` daemon and a stateless API server. See `RINDLE_NOTES.md` for the integration write-up.
+  a `rindled` daemon behind the app's own server routes. See `RINDLE_NOTES.md` for the write-up.
 - Plain CSS for the editor chrome (`src/strut.css`); Tailwind is available for one-offs.
 
 ## Architecture
 
-Three tiers (Rindle):
-
 - **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7600` control, `:7601` ws).
-- **API server** (`server/rindle-api.ts`, `:7700`) — stateless; validates args, runs authoritative SQL
-  mutators, registers the named queries. Mirrors the predicted client mutators in `shared/app-def.ts`.
+- **API** — TanStack Start server routes (`src/routes/api.rindle.*`) host the stateless Rindle API
+  (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators, and register the named
+  queries. Same-origin, no separate process. Image uploads (`server/upload.ts`) go to Cloudflare R2
+  when configured, else a local dev fallback. Mirrors the predicted client mutators in
+  `shared/app-def.ts`.
 - **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
-  live reads, and `app.mutate.*` writes. The Vite dev server proxies `/api/rindle/*` → `:7700`.
+  live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket connects
+  directly to the daemon (`:7601`).
 
 Schema lives in `migrations/`; `shared/` holds the generated schema, query builder, named queries, and
 client mutators (imported by both browser and server). App code is in `src/` (`routes/`, `editor/`,
@@ -36,7 +38,7 @@ client mutators (imported by both browser and server). App code is in `src/` (`r
 ```bash
 pnpm install
 
-# Terminal 1 — daemon + API server + web (all three, via concurrently):
+# Terminal 1 — daemon + web (via concurrently; the API is served by the web app):
 pnpm dev                  # web on http://localhost:3000
 
 # Terminal 2 — first run only, while the daemon is up: apply migrations + regen schema
@@ -46,10 +48,9 @@ pnpm setup
 Then open http://localhost:3000. Other scripts:
 
 ```bash
-pnpm build            # production build (client + SSR)
+pnpm build            # production build (client + SSR + API routes)
 pnpm daemon           # just the rindled daemon
-pnpm dev:api          # just the API server (tsx watch)
-pnpm dev:web          # just vite
+pnpm dev:web          # just vite (web + API routes)
 pnpm generate-routes  # regenerate src/routeTree.gen.ts
 pnpm test             # vitest
 ```

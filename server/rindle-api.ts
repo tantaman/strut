@@ -1,14 +1,9 @@
-// Strut's Rindle API server — stateless: validates args, runs AUTHORITATIVE SQL against the daemon,
-// and registers the named queries. Mirrors the predicted client mutators in shared/app-def.ts.
+// Strut's Rindle API — stateless: validates args, runs AUTHORITATIVE SQL against the daemon, and
+// registers the named queries. Mirrors the predicted client mutators in shared/app-def.ts.
 //
-// Dev: `node server/rindle-api.ts` (or `tsx server/rindle-api.ts`) on :7700; the web dev server
-// proxies /api/rindle/* here. The daemon control plane is :7600.
+// Hosted by the TanStack Start server routes in src/routes/api.rindle.* (no separate process):
+// they import handleRindleJson() below. The daemon control plane is :7600 (RINDLE_DAEMON_URL).
 
-import {
-  createServer,
-  type IncomingMessage,
-  type ServerResponse,
-} from 'node:http'
 import {
   createRindleApiServer,
   defineApiMutators,
@@ -20,12 +15,6 @@ import {
 } from '@rindle/api-server'
 import { HttpRindleDaemonClient, type WireValue } from '@rindle/daemon-client'
 import { serverQueries } from './queries.ts'
-import {
-  handleUpload,
-  serveUpload,
-  UPLOAD_ROUTE,
-  UPLOAD_SERVE_PREFIX,
-} from './upload.ts'
 import { isComponentTable } from '../shared/app-def.ts'
 import type {
   AddCollaboratorArgs,
@@ -57,8 +46,7 @@ import type {
   TransformComponentArgs,
 } from '../shared/app-def.ts'
 
-type User = string
-const PORT = Number(process.env.STRUT_API_PORT ?? 7700)
+export type User = string
 const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
 
 // ---- small SQL helpers so server twins mirror the client row-shapes 1:1 -------------------------
@@ -531,66 +519,30 @@ const api = createRindleApiServer<User>({
   authorizeMutation: ({ user }) => typeof user === 'string' && user.length > 0,
 })
 
-function readBody(req: IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = ''
-    req.on('data', (c) => (data += c))
-    req.on('end', () => resolve(data))
-    req.on('error', reject)
-  })
-}
+// Web-standard entrypoint used by the TanStack Start server routes (src/routes/api.rindle.*).
+// The app no longer runs a second HTTP process — Start hosts these handlers same-origin.
+export type RindleRouteKind = 'query' | 'read' | 'mutate'
 
-createServer((req: IncomingMessage, res: ServerResponse) => {
-  void (async () => {
-    try {
-      // Serve locally-stored fallback images (GET).
-      if (req.method === 'GET' && req.url?.startsWith(UPLOAD_SERVE_PREFIX)) {
-        await serveUpload(req, res)
-        return
-      }
-      if (req.method !== 'POST') {
-        res.writeHead(405).end('method not allowed')
-        return
-      }
-      // Binary image upload — handled before the JSON body parse below.
-      if (req.url === UPLOAD_ROUTE) {
-        await handleUpload(req, res)
-        return
-      }
-      const body = JSON.parse((await readBody(req)) || '{}')
-      const ctx: ApiContext<User> = {
-        user: (req.headers['x-user'] as string) ?? '',
-        request: req,
-      }
-      let out: unknown
-      if (req.url === api.routes.query)
-        out = await api.handleQueryJson(body, ctx)
-      else if (req.url === api.routes.read)
-        out = await api.handleReadJson(body, ctx)
-      else if (req.url === api.routes.mutate)
-        out = await api.handleMutateJson(body, ctx)
-      else {
-        res
-          .writeHead(404, { 'content-type': 'application/json' })
-          .end(JSON.stringify({ error: 'not found' }))
-        return
-      }
-      res
-        .writeHead(200, { 'content-type': 'application/json' })
-        .end(JSON.stringify(out))
-    } catch (err) {
-      const status = err instanceof RindleApiError ? err.status : 500
-      const message = err instanceof Error ? err.message : 'internal error'
-      res
-        .writeHead(status, { 'content-type': 'application/json' })
-        .end(JSON.stringify({ error: message }))
+export async function handleRindleJson(
+  kind: RindleRouteKind,
+  request: Request,
+): Promise<Response> {
+  try {
+    const body = JSON.parse((await request.text()) || '{}')
+    const ctx: ApiContext<User> = {
+      user: request.headers.get('x-user') ?? '',
+      request,
     }
-  })()
-}).listen(PORT, () => {
-  console.log(
-    `[strut-api] listening on http://127.0.0.1:${PORT} → daemon ${DAEMON_URL}`,
-  )
-  console.log(
-    `[strut-api] routes: ${api.routes.query} | ${api.routes.read} | ${api.routes.mutate}`,
-  )
-})
+    const out =
+      kind === 'query'
+        ? await api.handleQueryJson(body, ctx)
+        : kind === 'read'
+          ? await api.handleReadJson(body, ctx)
+          : await api.handleMutateJson(body, ctx)
+    return Response.json(out)
+  } catch (err) {
+    const status = err instanceof RindleApiError ? err.status : 500
+    const message = err instanceof Error ? err.message : 'internal error'
+    return Response.json({ error: message }, { status })
+  }
+}

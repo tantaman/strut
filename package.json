@@ -8,9 +8,8 @@
   "scripts": {
     "daemon": "rindle up",
     "setup": "rindle migrate apply && rindle schema gen --out shared/schema.ts",
-    "dev": "concurrently -k -n daemon,api,web -c blue,magenta,green \"rindle up\" \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev": "concurrently -k -n daemon,web -c blue,green \"rindle up\" \"pnpm dev:web\"",
     "dev:web": "vite dev --port 3000",
-    "dev:api": "tsx watch --env-file-if-exists=.env server/rindle-api.ts",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",

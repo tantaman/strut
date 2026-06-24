@@ -13,6 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
 import { Route as DeckDeckIdPlayRouteImport } from './routes/deck.$deckId_.play'
+import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
+import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
+import { Route as ApiRindleQueryRouteImport } from './routes/api.rindle.query'
+import { Route as ApiRindleMutateRouteImport } from './routes/api.rindle.mutate'
+import { Route as ApiRindleUploadsKeyRouteImport } from './routes/api.rindle.uploads.$key'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,44 +39,112 @@ const DeckDeckIdPlayRoute = DeckDeckIdPlayRouteImport.update({
   path: '/deck/$deckId/play',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRindleUploadRoute = ApiRindleUploadRouteImport.update({
+  id: '/api/rindle/upload',
+  path: '/api/rindle/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleReadRoute = ApiRindleReadRouteImport.update({
+  id: '/api/rindle/read',
+  path: '/api/rindle/read',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleQueryRoute = ApiRindleQueryRouteImport.update({
+  id: '/api/rindle/query',
+  path: '/api/rindle/query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleMutateRoute = ApiRindleMutateRouteImport.update({
+  id: '/api/rindle/mutate',
+  path: '/api/rindle/mutate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleUploadsKeyRoute = ApiRindleUploadsKeyRouteImport.update({
+  id: '/api/rindle/uploads/$key',
+  path: '/api/rindle/uploads/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/mutate': typeof ApiRindleMutateRoute
+  '/api/rindle/query': typeof ApiRindleQueryRoute
+  '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId/play': typeof DeckDeckIdPlayRoute
+  '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/mutate': typeof ApiRindleMutateRoute
+  '/api/rindle/query': typeof ApiRindleQueryRoute
+  '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId/play': typeof DeckDeckIdPlayRoute
+  '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/mutate': typeof ApiRindleMutateRoute
+  '/api/rindle/query': typeof ApiRindleQueryRoute
+  '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId_/play': typeof DeckDeckIdPlayRoute
+  '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/deck/$deckId' | '/share/$deckId' | '/deck/$deckId/play'
+  fullPaths:
+    | '/'
+    | '/deck/$deckId'
+    | '/share/$deckId'
+    | '/api/rindle/mutate'
+    | '/api/rindle/query'
+    | '/api/rindle/read'
+    | '/api/rindle/upload'
+    | '/deck/$deckId/play'
+    | '/api/rindle/uploads/$key'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/deck/$deckId' | '/share/$deckId' | '/deck/$deckId/play'
+  to:
+    | '/'
+    | '/deck/$deckId'
+    | '/share/$deckId'
+    | '/api/rindle/mutate'
+    | '/api/rindle/query'
+    | '/api/rindle/read'
+    | '/api/rindle/upload'
+    | '/deck/$deckId/play'
+    | '/api/rindle/uploads/$key'
   id:
     | '__root__'
     | '/'
     | '/deck/$deckId'
     | '/share/$deckId'
+    | '/api/rindle/mutate'
+    | '/api/rindle/query'
+    | '/api/rindle/read'
+    | '/api/rindle/upload'
     | '/deck/$deckId_/play'
+    | '/api/rindle/uploads/$key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
+  ApiRindleMutateRoute: typeof ApiRindleMutateRoute
+  ApiRindleQueryRoute: typeof ApiRindleQueryRoute
+  ApiRindleReadRoute: typeof ApiRindleReadRoute
+  ApiRindleUploadRoute: typeof ApiRindleUploadRoute
   DeckDeckIdPlayRoute: typeof DeckDeckIdPlayRoute
+  ApiRindleUploadsKeyRoute: typeof ApiRindleUploadsKeyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +177,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeckDeckIdPlayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rindle/upload': {
+      id: '/api/rindle/upload'
+      path: '/api/rindle/upload'
+      fullPath: '/api/rindle/upload'
+      preLoaderRoute: typeof ApiRindleUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/read': {
+      id: '/api/rindle/read'
+      path: '/api/rindle/read'
+      fullPath: '/api/rindle/read'
+      preLoaderRoute: typeof ApiRindleReadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/query': {
+      id: '/api/rindle/query'
+      path: '/api/rindle/query'
+      fullPath: '/api/rindle/query'
+      preLoaderRoute: typeof ApiRindleQueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/mutate': {
+      id: '/api/rindle/mutate'
+      path: '/api/rindle/mutate'
+      fullPath: '/api/rindle/mutate'
+      preLoaderRoute: typeof ApiRindleMutateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/uploads/$key': {
+      id: '/api/rindle/uploads/$key'
+      path: '/api/rindle/uploads/$key'
+      fullPath: '/api/rindle/uploads/$key'
+      preLoaderRoute: typeof ApiRindleUploadsKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -111,7 +219,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
+  ApiRindleMutateRoute: ApiRindleMutateRoute,
+  ApiRindleQueryRoute: ApiRindleQueryRoute,
+  ApiRindleReadRoute: ApiRindleReadRoute,
+  ApiRindleUploadRoute: ApiRindleUploadRoute,
   DeckDeckIdPlayRoute: DeckDeckIdPlayRoute,
+  ApiRindleUploadsKeyRoute: ApiRindleUploadsKeyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

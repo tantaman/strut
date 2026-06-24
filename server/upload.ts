@@ -1,18 +1,18 @@
-// Image upload endpoint (POST /api/rindle/upload). The browser sends the raw file bytes with the
-// image mime in Content-Type; we store the object and return its public URL, which the client saves
-// as the component's `src`. This replaces inlining images as base64 data URLs in the deck rows.
+// Image upload, hosted by the TanStack Start server routes in src/routes/api.rindle.upload.tsx and
+// api.rindle.uploads.$key.tsx. The browser sends the raw file bytes with the image mime in
+// Content-Type; we store the object and return its public URL, saved as the component's `src`. This
+// replaces inlining images as base64 data URLs in the deck rows.
 //
 // Storage: Cloudflare R2 (S3-compatible) when the R2_* env vars are set; otherwise a local-disk
-// fallback under public/uploads/ so uploads work in dev with zero config. See .env.example.
+// fallback under .uploads/ (served back by serveUploadByKey) so uploads work in dev with zero
+// config. See .env.example.
 
 import { randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { IncomingMessage, ServerResponse } from 'node:http'
 
-export const UPLOAD_ROUTE = '/api/rindle/upload'
-// Local-fallback files are served back by this same API server (Vite doesn't reliably serve
-// files written into public/ at runtime). With R2 configured, URLs point at the bucket instead.
+// Local-fallback files are served back by serveUploadByKey (Vite/Start won't serve files written at
+// runtime). With R2 configured, URLs point at the bucket instead.
 export const UPLOAD_SERVE_PREFIX = '/api/rindle/uploads/'
 const LOCAL_DIR = join(process.cwd(), '.uploads')
 
@@ -34,24 +34,6 @@ class UploadError extends Error {
     super(message)
     this.status = status
   }
-}
-
-function readRaw(req: IncomingMessage, max: number): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []
-    let size = 0
-    req.on('data', (c: Buffer) => {
-      size += c.length
-      if (size > max) {
-        reject(new UploadError('image must be under 10 MB', 413))
-        req.destroy()
-        return
-      }
-      chunks.push(c)
-    })
-    req.on('end', () => resolve(Buffer.concat(chunks)))
-    req.on('error', reject)
-  })
 }
 
 interface R2Config {
@@ -116,53 +98,52 @@ async function putR2(
 async function putLocal(key: string, body: Buffer): Promise<string> {
   await mkdir(LOCAL_DIR, { recursive: true })
   await writeFile(join(LOCAL_DIR, key), body)
-  // Served back by serveUpload() below (proxied to this server via /api/rindle).
+  // Served back by serveUploadByKey() (a Start server route).
   return `${UPLOAD_SERVE_PREFIX}${key}`
 }
 
 // GET /api/rindle/uploads/<key> — stream a locally-stored fallback image.
-export async function serveUpload(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
-  const key = decodeURIComponent((req.url ?? '').slice(UPLOAD_SERVE_PREFIX.length))
+export async function serveUploadByKey(key: string): Promise<Response> {
   // Only a bare filename — no path traversal.
-  if (!/^[\w-]+\.[a-z0-9]+$/i.test(key)) {
-    res.writeHead(400).end('bad key')
-    return
-  }
+  if (!/^[\w-]+\.[a-z0-9]+$/i.test(key))
+    return new Response('bad key', { status: 400 })
   const ext = key.split('.').pop()!.toLowerCase()
   const mime = Object.entries(EXT).find(([, e]) => e === ext)?.[0]
   try {
     const body = await readFile(join(LOCAL_DIR, key))
-    res
-      .writeHead(200, {
+    return new Response(body, {
+      headers: {
         'content-type': mime ?? 'application/octet-stream',
         'cache-control': 'public, max-age=31536000, immutable',
-      })
-      .end(body)
+      },
+    })
   } catch {
-    res.writeHead(404).end('not found')
+    return new Response('not found', { status: 404 })
   }
 }
 
-export async function handleUpload(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
+// POST /api/rindle/upload — store the request body image, return { url }.
+export async function uploadFromRequest(request: Request): Promise<Response> {
   try {
-    const user = (req.headers['x-user'] as string) ?? ''
+    const user = request.headers.get('x-user') ?? ''
     if (!user) throw new UploadError('unauthorized', 401)
 
-    const contentType = ((req.headers['content-type'] as string) || '')
+    const contentType = (request.headers.get('content-type') || '')
       .split(';')[0]
       .trim()
       .toLowerCase()
     const ext = EXT[contentType]
-    if (!ext) throw new UploadError(`unsupported image type: ${contentType}`, 415)
+    if (!ext)
+      throw new UploadError(`unsupported image type: ${contentType}`, 415)
 
-    const body = await readRaw(req, MAX_BYTES)
+    const declared = Number(request.headers.get('content-length') || 0)
+    if (declared > MAX_BYTES)
+      throw new UploadError('image must be under 10 MB', 413)
+
+    const body = Buffer.from(await request.arrayBuffer())
     if (body.length === 0) throw new UploadError('empty upload', 400)
+    if (body.length > MAX_BYTES)
+      throw new UploadError('image must be under 10 MB', 413)
 
     const key = `${randomUUID()}.${ext}`
     const cfg = r2Config()
@@ -170,15 +151,10 @@ export async function handleUpload(
       ? await putR2(cfg, key, body, contentType)
       : await putLocal(key, body)
 
-    res
-      .writeHead(200, { 'content-type': 'application/json' })
-      .end(JSON.stringify({ url }))
+    return Response.json({ url })
   } catch (err) {
     const status = err instanceof UploadError ? err.status : 500
     const message = err instanceof Error ? err.message : 'upload failed'
-    if (!res.headersSent)
-      res
-        .writeHead(status, { 'content-type': 'application/json' })
-        .end(JSON.stringify({ error: message }))
+    return Response.json({ error: message }, { status })
   }
 }
