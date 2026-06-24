@@ -1,17 +1,38 @@
-/* Strut editor chrome. Plain CSS (the presentation surface/background vocabulary from spec §8 will
-   layer on later); Tailwind is still available for one-offs. */
+/* Strut editor chrome — brand skin (strut.io): light, warm neutrals, coral→red accent, geometric
+   display type. All class names are stable; this file only restyles. The slide surface vocabulary
+   from spec §8 layers on top of the white canvas. Tailwind is still available for one-offs. */
 
 :root {
-  --bg: #16181d;
-  --panel: #1e2128;
-  --panel-2: #262a33;
-  --line: #333845;
-  --text: #e7e9ee;
-  --muted: #9aa3b2;
-  --accent: #4f8cff;
-  --accent-2: #3aa76d;
+  /* brand */
+  --coral: #e0523a;
+  --coral-strong: #c8412b;
+  --coral-soft: #fcefe9;
+  --grad: linear-gradient(135deg, #f6a25f 0%, #e0432e 100%);
+
+  /* light neutrals */
+  --bg: #edeef1;
+  --panel: #ffffff;
+  --panel-2: #f5f6f8;
+  --line: #e4e6ea;
+  --line-strong: #d4d7de;
+  --text: #2b2d34;
+  --muted: #8b909c;
+  --stage: radial-gradient(circle at 50% 28%, #eceef2 0%, #d9dce2 100%);
+
+  /* mapped legacy names so existing rules pick up the brand automatically */
+  --accent: var(--coral);
+  --accent-2: #2f9e6b;
   --danger: #e5534b;
-  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+
+  --shadow-sm: 0 1px 2px rgba(24, 26, 33, 0.06);
+  --shadow:
+    0 1px 2px rgba(24, 26, 33, 0.06), 0 8px 24px rgba(24, 26, 33, 0.1);
+  --shadow-lg:
+    0 2px 4px rgba(24, 26, 33, 0.06), 0 18px 48px rgba(24, 26, 33, 0.18);
+
+  --radius: 10px;
+  --font-brand:
+    'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 * {
@@ -36,6 +57,7 @@ body {
     Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
@@ -63,6 +85,7 @@ button {
 }
 .strut-boot pre {
   background: var(--panel);
+  border: 1px solid var(--line);
   padding: 10px 14px;
   border-radius: 8px;
   max-width: 600px;
@@ -79,107 +102,152 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
   padding: 7px 12px;
   color: var(--text);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
   transition:
-    background 0.12s,
-    border-color 0.12s;
+    background 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    transform 0.05s ease;
 }
 .btn:hover {
-  background: #2e333d;
+  background: var(--panel-2);
+  border-color: var(--line-strong);
+}
+.btn:active {
+  transform: translateY(0.5px);
 }
 .btn--primary {
-  background: var(--accent);
+  background-image: var(--grad);
+  background-color: var(--coral);
   border-color: transparent;
-  color: white;
+  color: #fff;
+  box-shadow:
+    0 1px 2px rgba(224, 67, 46, 0.25), 0 6px 16px rgba(224, 67, 46, 0.28);
 }
 .btn--primary:hover {
-  background: #3f7cf0;
+  background-image: var(--grad);
+  filter: brightness(1.04) saturate(1.05);
 }
 .btn--ghost {
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
 }
 .btn--ghost:hover {
   background: var(--panel-2);
+  border-color: transparent;
 }
 .btn--danger:hover {
-  background: rgba(229, 83, 75, 0.18);
+  background: var(--coral-soft);
   border-color: var(--danger);
-  color: #ff8c84;
+  color: var(--danger);
 }
 .btn[disabled] {
   opacity: 0.45;
   cursor: default;
+  box-shadow: none;
 }
 
 /* ---- dashboard ---- */
 .dash {
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 28px 28px 64px;
+}
+.brandbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0 26px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 30px;
+}
+.brandbar__logo {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+.brandbar__tag {
+  color: var(--muted);
+  font-size: 13px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+  letter-spacing: 0.01em;
 }
 .dash__head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 .dash__title {
-  font-size: 28px;
+  font-family: var(--font-brand);
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   margin: 0;
-}
-.dash__title span {
-  color: var(--accent);
+  color: var(--text);
 }
 .dash__sub {
   color: var(--muted);
-  margin: 4px 0 0;
+  margin: 5px 0 0;
 }
 .deck-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(244px, 1fr));
+  gap: 20px;
 }
 .deck-card {
   position: relative;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   text-align: left;
   padding: 0;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
   transition:
-    transform 0.1s,
-    border-color 0.12s;
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 .deck-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
+  transform: translateY(-3px);
+  border-color: var(--line);
+  box-shadow: var(--shadow);
 }
 .deck-card__preview {
   aspect-ratio: 16 / 9;
-  background: radial-gradient(circle at 50% 40%, #2d3340, #1a1d24);
+  background:
+    radial-gradient(
+      circle at 70% 18%,
+      rgba(246, 162, 95, 0.16),
+      transparent 60%
+    ),
+    linear-gradient(135deg, #fbfbfc 0%, #eef0f3 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
-  font-size: 30px;
+  font-family: var(--font-brand);
+  font-size: 44px;
   font-weight: 700;
+  color: var(--coral);
+  border-bottom: 1px solid var(--line);
 }
 .deck-card__meta {
-  padding: 12px 14px;
+  padding: 13px 15px 15px;
 }
 .deck-card__name {
   font-weight: 600;
-  margin: 0 0 2px;
+  margin: 0 0 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -190,16 +258,20 @@ button {
 }
 .deck-card__del {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 9px;
+  right: 9px;
   width: 28px;
   height: 28px;
-  border-radius: 7px;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: #fff;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--line);
+  color: var(--muted);
   opacity: 0;
-  transition: opacity 0.12s;
+  transition:
+    opacity 0.12s,
+    background 0.12s,
+    color 0.12s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,13 +281,16 @@ button {
 }
 .deck-card__del:hover {
   background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
 }
 .dash__empty {
   color: var(--muted);
-  padding: 60px;
+  padding: 72px;
   text-align: center;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 16px;
+  background: var(--panel);
 }
 
 /* ---- editor shell ---- */
@@ -228,10 +303,27 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 9px 14px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
   flex: 0 0 auto;
+  z-index: 30;
+}
+.hdr__home {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.hdr__home:hover {
+  background: var(--panel-2);
+}
+.hdr__home img {
+  height: 22px;
+  width: auto;
+  display: block;
 }
 .hdr__group {
   display: flex;
@@ -242,7 +334,7 @@ button {
   width: 1px;
   align-self: stretch;
   background: var(--line);
-  margin: 2px 6px;
+  margin: 3px 6px;
 }
 .hdr__spacer {
   flex: 1;
@@ -251,32 +343,47 @@ button {
   font-weight: 600;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 4px 8px;
+  border-radius: 8px;
+  padding: 5px 9px;
   color: var(--text);
-  min-width: 120px;
+  min-width: 130px;
 }
-.hdr__title:hover,
-.hdr__title:focus {
-  border-color: var(--line);
-  outline: none;
+.hdr__title:hover {
   background: var(--panel-2);
+}
+.hdr__title:focus {
+  border-color: var(--coral);
+  outline: none;
+  background: var(--panel);
+  box-shadow: 0 0 0 3px var(--coral-soft);
 }
 .seg {
   display: inline-flex;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
   overflow: hidden;
+  background: var(--panel-2);
+  padding: 2px;
+  gap: 2px;
 }
 .seg button {
   background: transparent;
   border: none;
-  padding: 7px 12px;
+  padding: 5px 14px;
+  border-radius: 7px;
   color: var(--muted);
+  font-weight: 500;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.seg button:hover {
+  color: var(--text);
 }
 .seg button.is-active {
-  background: var(--accent);
-  color: white;
+  background: var(--panel);
+  color: var(--coral);
+  box-shadow: var(--shadow-sm);
 }
 
 .editor__body {
@@ -287,25 +394,32 @@ button {
 
 /* ---- slide well ---- */
 .well {
-  flex: 0 0 168px;
+  flex: 0 0 176px;
   background: var(--panel);
   border-right: 1px solid var(--line);
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 11px;
 }
 .well__slide {
   position: relative;
   border: 2px solid transparent;
-  border-radius: 8px;
-  background: #0d0f13;
+  border-radius: 9px;
+  background: #fff;
   overflow: hidden;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+}
+.well__slide:hover {
+  box-shadow: var(--shadow);
 }
 .well__slide.is-active {
-  border-color: var(--accent);
+  border-color: var(--coral);
 }
 .well__slide.is-selected {
   border-color: var(--accent-2);
@@ -314,6 +428,7 @@ button {
   aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
+  background: #fff;
 }
 .well__thumb-inner {
   position: absolute;
@@ -325,9 +440,10 @@ button {
   position: absolute;
   bottom: 4px;
   left: 4px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(20, 22, 30, 0.62);
   color: #fff;
   font-size: 11px;
+  font-weight: 600;
   border-radius: 5px;
   padding: 1px 6px;
 }
@@ -335,15 +451,18 @@ button {
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   border: none;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(20, 22, 30, 0.55);
   color: #fff;
   opacity: 0;
   font-size: 12px;
   line-height: 1;
+  transition:
+    opacity 0.12s,
+    background 0.12s;
 }
 .well__slide:hover .well__del {
   opacity: 1;
@@ -352,18 +471,24 @@ button {
   background: var(--danger);
 }
 .well__add {
-  border: 1px dashed var(--line);
-  border-radius: 8px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 9px;
   background: transparent;
   color: var(--muted);
-  padding: 10px;
+  padding: 12px;
+  font-weight: 500;
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    background 0.12s;
 }
 .well__add:hover {
-  border-color: var(--accent);
-  color: var(--text);
+  border-color: var(--coral);
+  color: var(--coral);
+  background: var(--coral-soft);
 }
 .well__slide.is-drop-target {
-  box-shadow: 0 -2px 0 0 var(--accent);
+  box-shadow: 0 -2px 0 0 var(--coral);
 }
 
 /* ---- stage (operating table) ---- */
@@ -374,7 +499,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0c0d11;
+  background: var(--stage);
   overflow: hidden;
   padding: 24px;
 }
@@ -383,7 +508,8 @@ button {
 }
 .slide-surface {
   position: relative;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
+  border-radius: 2px;
 }
 .slide-canvas {
   position: absolute;
@@ -401,7 +527,7 @@ button {
   transform-origin: center center;
 }
 .cmp.is-selected {
-  outline: 1px solid var(--accent);
+  outline: 1px solid var(--coral);
 }
 .cmp__inner {
   width: 100%;
@@ -429,9 +555,10 @@ button {
   width: 12px;
   height: 12px;
   background: #fff;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--coral);
   border-radius: 50%;
   transform: translate(-50%, -50%);
+  box-shadow: var(--shadow-sm);
   z-index: 10;
 }
 .handle--nw {
@@ -458,7 +585,7 @@ button {
   top: -26px;
   left: 50%;
   cursor: grab;
-  background: var(--accent);
+  background: var(--coral);
 }
 .handle__del {
   position: absolute;
@@ -472,14 +599,15 @@ button {
   color: #fff;
   font-size: 12px;
   line-height: 1;
+  box-shadow: var(--shadow-sm);
   z-index: 11;
 }
 
 /* marquee */
 .marquee {
   position: absolute;
-  border: 1px solid var(--accent);
-  background: rgba(79, 140, 255, 0.12);
+  border: 1px solid var(--coral);
+  background: rgba(224, 82, 58, 0.1);
   z-index: 5;
 }
 
@@ -488,7 +616,7 @@ button {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 20%, #20242d, #0c0d11);
+  background: radial-gradient(circle at 35% 18%, #eef0f3 0%, #d7dae0 100%);
 }
 .overview__world {
   position: absolute;
@@ -506,7 +634,7 @@ button {
   overflow: hidden;
 }
 .ov-card.is-active {
-  border-color: var(--accent);
+  border-color: var(--coral);
 }
 .ov-card.is-selected {
   border-color: var(--accent-2);
@@ -515,24 +643,26 @@ button {
   position: absolute;
   top: 6px;
   left: 6px;
-  background: var(--accent);
+  background: var(--coral);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
   border-radius: 6px;
   padding: 1px 8px;
   z-index: 2;
+  box-shadow: var(--shadow-sm);
 }
 .ov-hint {
   position: absolute;
   bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
-  color: var(--muted);
+  color: #fff;
   font-size: 12px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 10px;
-  border-radius: 6px;
+  background: rgba(20, 22, 30, 0.5);
+  backdrop-filter: blur(6px);
+  padding: 5px 12px;
+  border-radius: 8px;
 }
 
 /* inputs */
@@ -546,7 +676,7 @@ button {
 .field input {
   width: 56px;
   background: var(--panel-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
   color: var(--text);
   padding: 4px 6px;
@@ -555,8 +685,8 @@ button {
   position: absolute;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
   padding: 10px;
   z-index: 50;
 }
@@ -568,14 +698,19 @@ button {
 .swatch {
   width: 22px;
   height: 22px;
-  border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(20, 22, 30, 0.12);
   cursor: pointer;
+  transition: transform 0.08s;
+}
+.swatch:hover {
+  transform: scale(1.12);
 }
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(24, 26, 33, 0.32);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -584,23 +719,31 @@ button {
 .modal {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 22px;
   width: 420px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
 }
 .modal h3 {
-  margin: 0 0 12px;
+  font-family: var(--font-brand);
+  font-weight: 600;
+  margin: 0 0 14px;
 }
 .modal input[type='text'],
 .modal input[type='url'] {
   width: 100%;
   background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
   color: var(--text);
-  padding: 9px 11px;
+  padding: 10px 12px;
   margin-bottom: 12px;
+}
+.modal input[type='text']:focus,
+.modal input[type='url']:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
 }
 .modal__row {
   display: flex;
@@ -627,13 +770,14 @@ button {
   border: 0;
   color: var(--text);
   padding: 8px 10px;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   white-space: nowrap;
 }
 .menu-item:hover {
-  background: var(--panel-2);
+  background: var(--coral-soft);
+  color: var(--coral-strong);
 }
 
 /* ---- custom color swatch (in bg/surface pickers) ---- */
@@ -656,7 +800,7 @@ button {
   padding: 0;
 }
 .swatch.is-active {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--coral);
   outline-offset: 1px;
 }
 
@@ -665,12 +809,12 @@ button {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 224px;
+  width: 232px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 12px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 14px;
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -678,10 +822,11 @@ button {
   font-size: 13px;
 }
 .insp__head {
-  text-transform: capitalize;
-  font-weight: 600;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 11px;
   color: var(--muted);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
 }
 .insp__row {
   display: flex;
@@ -706,10 +851,16 @@ button {
   flex: 1;
   min-width: 0;
   background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
   color: var(--text);
-  padding: 5px 8px;
+  padding: 6px 9px;
+}
+.insp__row select:focus,
+.insp__row input:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
 }
 .insp__zrow .btn {
   flex: 1;
@@ -735,8 +886,8 @@ button {
 .insp__custom input[type='color'] {
   width: 28px;
   height: 22px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
   background: var(--panel-2);
   padding: 0;
   cursor: pointer;
@@ -756,8 +907,8 @@ button {
   padding: 4px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 9px;
-  box-shadow: var(--shadow);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
   z-index: 60;
   white-space: nowrap;
 }
@@ -768,13 +919,17 @@ button {
   width: 28px;
   height: 26px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 7px;
   background: none;
   color: var(--text);
   cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .rtt__btn:hover {
-  background: var(--panel-2);
+  background: var(--coral-soft);
+  color: var(--coral-strong);
 }
 
 /* ---- custom CSS editor (spec §8.4) ---- */
@@ -791,9 +946,9 @@ button {
   width: 100%;
   height: 360px;
   resize: vertical;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: #fbfbfc;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
   color: var(--text);
   padding: 12px;
   margin-bottom: 12px;
@@ -802,6 +957,11 @@ button {
   font-size: 13px;
   line-height: 1.5;
   tab-size: 2;
+}
+.css-editor:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
 }
 
 /* ---- canned transitions picker (spec §7.2) ---- */
@@ -815,33 +975,41 @@ button {
   gap: 6px;
   flex-wrap: wrap;
   max-width: 90vw;
-  padding: 8px 12px;
+  padding: 9px 13px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
   z-index: 40;
 }
 .ov-transitions__label {
   color: var(--muted);
   font-size: 12px;
+  font-weight: 600;
   margin-right: 4px;
 }
 .ov-transitions__btn {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: var(--panel-2);
   color: var(--text);
-  border-radius: 7px;
-  padding: 5px 10px;
+  border-radius: 8px;
+  padding: 5px 11px;
   font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   text-transform: capitalize;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
 }
 .ov-transitions__btn:hover {
-  border-color: var(--accent);
+  border-color: var(--coral);
+  color: var(--coral);
 }
 .ov-transitions__btn.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background-image: var(--grad);
+  background-color: var(--coral);
+  border-color: transparent;
   color: #fff;
 }

@@ -205,8 +205,8 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 
   return (
     <div className="hdr">
-      <Link to="/" className="btn btn--ghost" title="All decks">
-        ←
+      <Link to="/" className="hdr__home" title="All decks">
+        <img src="/strut-logo.png" alt="Strut" />
       </Link>
       <input
         className="hdr__title"

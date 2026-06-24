@@ -43,13 +43,16 @@ function Dashboard() {
 
   return (
     <div className="dash">
+      <div className="brandbar">
+        <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
+        <span className="brandbar__tag">Spatial presentations</span>
+      </div>
       <div className="dash__head">
         <div>
-          <h1 className="dash__title">
-            St<span>r</span>ut
-          </h1>
+          <h1 className="dash__title">Your decks</h1>
           <p className="dash__sub">
-            Spatial presentations, local-first on Rindle.
+            {decks.length} presentation{decks.length === 1 ? '' : 's'}, local-first
+            on Rindle.
           </p>
         </div>
         <div className="dash__actions">
