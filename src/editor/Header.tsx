@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
+import { uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
 import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
@@ -527,8 +528,23 @@ function MediaModal({
   onSubmit: (url: string) => void
 }) {
   const [url, setUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const label =
     kind === 'image' ? 'Image' : kind === 'video' ? 'Video' : 'Web page'
+
+  async function pickFile(f: File) {
+    setError(null)
+    setUploading(true)
+    try {
+      onSubmit(await uploadImage(f))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -551,25 +567,27 @@ function MediaModal({
           }}
         />
         {kind === 'image' && (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (!f) return
-              const reader = new FileReader()
-              reader.onload = () => onSubmit(String(reader.result))
-              reader.readAsDataURL(f)
-            }}
-          />
+          <>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) void pickFile(f)
+              }}
+            />
+            {uploading && <p className="modal__note">Uploading…</p>}
+          </>
         )}
+        {error && <p className="modal__error">{error}</p>}
         <div className="modal__row">
           <button className="btn btn--ghost" onClick={onCancel}>
             Cancel
           </button>
           <button
             className="btn btn--primary"
-            disabled={!url}
+            disabled={!url || uploading}
             onClick={() => onSubmit(url)}
           >
             Add

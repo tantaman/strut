@@ -10,7 +10,7 @@
     "setup": "rindle migrate apply && rindle schema gen --out shared/schema.ts",
     "dev": "concurrently -k -n daemon,api,web -c blue,magenta,green \"rindle up\" \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:web": "vite dev --port 3000",
-    "dev:api": "tsx watch server/rindle-api.ts",
+    "dev:api": "tsx watch --env-file-if-exists=.env server/rindle-api.ts",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -20,6 +20,7 @@
     "check": "prettier --check ."
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
     "@rindle/api-server": "^0.1.2",
     "@rindle/client": "^0.1.2",
     "@rindle/daemon-client": "^0.1.2",

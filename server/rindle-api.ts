@@ -20,6 +20,12 @@ import {
 } from '@rindle/api-server'
 import { HttpRindleDaemonClient, type WireValue } from '@rindle/daemon-client'
 import { serverQueries } from './queries.ts'
+import {
+  handleUpload,
+  serveUpload,
+  UPLOAD_ROUTE,
+  UPLOAD_SERVE_PREFIX,
+} from './upload.ts'
 import { isComponentTable } from '../shared/app-def.ts'
 import type {
   AddCollaboratorArgs,
@@ -537,8 +543,18 @@ function readBody(req: IncomingMessage): Promise<string> {
 createServer((req: IncomingMessage, res: ServerResponse) => {
   void (async () => {
     try {
+      // Serve locally-stored fallback images (GET).
+      if (req.method === 'GET' && req.url?.startsWith(UPLOAD_SERVE_PREFIX)) {
+        await serveUpload(req, res)
+        return
+      }
       if (req.method !== 'POST') {
         res.writeHead(405).end('method not allowed')
+        return
+      }
+      // Binary image upload — handled before the JSON body parse below.
+      if (req.url === UPLOAD_ROUTE) {
+        await handleUpload(req, res)
         return
       }
       const body = JSON.parse((await readBody(req)) || '{}')

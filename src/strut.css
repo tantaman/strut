@@ -895,6 +895,16 @@ button {
   justify-content: flex-end;
   gap: 8px;
 }
+.modal__note {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.modal__error {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--danger);
+}
 
 .dash__actions {
   display: flex;
