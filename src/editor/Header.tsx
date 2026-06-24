@@ -3,9 +3,10 @@
 
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Image as ImageIcon, Play, Shapes, Square, Type, Video, Globe } from 'lucide-react'
+import { Download, Image as ImageIcon, Play, Shapes, Square, Type, Video, Globe } from 'lucide-react'
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
-import { useMutate } from '../rindle/RindleProvider'
+import { useApp, useMutate } from '../rindle/RindleProvider'
+import { exportDeckHTML, exportDeckJSON } from './deckIO'
 import { useEditor } from './EditorState'
 import {
   BACKGROUND_SWATCHES,
@@ -31,8 +32,12 @@ const place = () => ({ x: 440 + (Date.now() % 4) * 24, y: 280 + (Date.now() % 3)
 export function Header({ deck }: { deck: DeckRow | null }) {
   const editor = useEditor()
   const mutate = useMutate()
+  const app = useApp()
   const navigate = useNavigate()
-  const [menu, setMenu] = useState<null | 'shapes' | 'bg' | 'surface' | 'media-image' | 'media-video' | 'media-web'>(null)
+  const [menu, setMenu] = useState<
+    null | 'shapes' | 'bg' | 'surface' | 'media-image' | 'media-video' | 'media-web' | 'export'
+  >(null)
+  const [exporting, setExporting] = useState(false)
   const active = editor.activeSlideId
   const canInsert = active != null && editor.mode === 'slide'
 
@@ -80,6 +85,18 @@ export function Header({ deck }: { deck: DeckRow | null }) {
     if (!deck) return
     mutate.setDeckTheme({ id: deck.id, [scope === 'bg' ? 'background' : 'surface']: value, now: Date.now() })
     setMenu(null)
+  }
+
+  async function doExport(kind: 'json' | 'html') {
+    if (!deck || exporting) return
+    setMenu(null)
+    setExporting(true)
+    try {
+      if (kind === 'json') await exportDeckJSON(app.store, deck.id)
+      else await exportDeckHTML(app.store, deck.id)
+    } finally {
+      setExporting(false)
+    }
   }
 
   // Custom color: mint a `bg-custom-<hex>` class recorded on the deck (spec §8.3), then assign it.
@@ -178,6 +195,22 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         <button className={editor.mode === 'overview' ? 'is-active' : ''} onClick={() => editor.setMode('overview')}>
           Overview
         </button>
+      </div>
+
+      <div style={{ position: 'relative' }}>
+        <button className="btn" onClick={() => setMenu(menu === 'export' ? null : 'export')} title="Export" disabled={!deck || exporting}>
+          <Download size={16} /> {exporting ? 'Exporting…' : 'Export'}
+        </button>
+        {menu === 'export' && (
+          <div className="popover popover--menu" style={{ top: '110%', right: 0 }}>
+            <button className="menu-item" onClick={() => doExport('json')}>
+              Strut JSON (.strut)
+            </button>
+            <button className="menu-item" onClick={() => doExport('html')}>
+              Standalone HTML (impress.js)
+            </button>
+          </div>
+        )}
       </div>
 
       <button

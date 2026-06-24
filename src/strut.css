@@ -582,6 +582,34 @@ button {
   gap: 8px;
 }
 
+.dash__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---- dropdown menu (export) ---- */
+.popover--menu {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+.menu-item {
+  text-align: left;
+  background: none;
+  border: 0;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.menu-item:hover {
+  background: var(--panel-2);
+}
+
 /* ---- custom color swatch (in bg/surface pickers) ---- */
 .swatch--custom {
   position: relative;

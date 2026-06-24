@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQuery } from '@rindle/react'
-import { Plus, X } from 'lucide-react'
+import { Plus, Upload, X } from 'lucide-react'
 import { decksQuery } from '../../shared/queries'
 import { useMutate } from '../rindle/RindleProvider'
 import { newId } from '../config'
+import { importDeck, readDeckFile } from '../editor/deckIO'
 
 export const Route = createFileRoute('/')({ component: Dashboard })
 
@@ -13,6 +14,7 @@ function Dashboard() {
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   function createDeck(title: string) {
     const id = newId()
@@ -24,6 +26,18 @@ function Dashboard() {
     navigate({ to: '/deck/$deckId', params: { deckId: id } })
   }
 
+  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-importing the same file
+    if (!file) return
+    try {
+      const deckId = importDeck(mutate, await readDeckFile(file))
+      navigate({ to: '/deck/$deckId', params: { deckId } })
+    } catch (err) {
+      alert(`Import failed: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
   return (
     <div className="dash">
       <div className="dash__head">
@@ -33,9 +47,21 @@ function Dashboard() {
           </h1>
           <p className="dash__sub">Spatial presentations, local-first on Rindle.</p>
         </div>
-        <button className="btn btn--primary" onClick={() => setCreating(true)}>
-          <Plus size={16} /> New deck
-        </button>
+        <div className="dash__actions">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".strut,.json,application/json"
+            style={{ display: 'none' }}
+            onChange={onImportFile}
+          />
+          <button className="btn" onClick={() => fileRef.current?.click()} title="Import a .strut file">
+            <Upload size={16} /> Import
+          </button>
+          <button className="btn btn--primary" onClick={() => setCreating(true)}>
+            <Plus size={16} /> New deck
+          </button>
+        </div>
       </div>
 
       {decks.length === 0 ? (

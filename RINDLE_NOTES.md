@@ -156,3 +156,11 @@ lint).
   remote lease on its own — it reaches `resultType="complete"` with data even with no `.subscribe()`
   listener, so a one-shot script read is just materialize + poll. `subscribe` is only needed to react
   to later changes.)
+
+### FYI 12. Export amplifies the polymorphic-component cost (#6)
+JSON / standalone-HTML export needs a one-shot read of the *whole* deck subtree. With 5 per-type
+component tables that's `slides × 5 + 3` materializations (one per component query per slide, plus
+deck/slides/customBackgrounds). The `materialize → poll resultType → read → destroy` one-shot pattern
+(no subscriber) made this clean and it's fast locally, but a `store.readOnce(query): Promise<data>`
+convenience (or a documented subtree/batch read) would remove the boilerplate and the N-query
+amplification. Cross-ref #6 (no polymorphic/UNION set query).
