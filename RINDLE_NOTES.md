@@ -89,12 +89,28 @@ MyRow[]` rather than importing the inferred type. Likely my own ergonomics gap �
 "export this query's row type" recipe (e.g. `type Row = QueryData<typeof slidesQuery>[number]`) would
 remove the casts.
 
-### ⚠️ 9. Browser runtime (WASM + WS sync) not verified headlessly
-Everything server-side is verified via curl + a full client/SSR build. The actual browser path —
-`@rindle/optimistic` dynamic-importing `@rindle/wasm`, opening the ws to :7601, optimistic apply +
-rebase — can't be driven in this environment. Needs a manual `pnpm dev` + open localhost:3000. Noting
-so it isn't mistaken for "fully proven". (SSR is safe: client is lazy + dynamic-imported; the SSR
-build and shell render confirm no wasm import leaks to the server.)
+### 🔴 9. `@rindle/wasm` won't initialize under Node 24 (blocks headless client testing)
+I tried to exercise the REAL optimistic client headlessly (Node has global `WebSocket` + `WebAssembly`,
+and `initWasm` reads the wasm from disk in Node). `createRindleClient` got as far as `initWasm()` then
+threw:
+```
+RangeError: WebAssembly.Table.grow(): failed to grow table by 4
+  at __wbindgen_init_externref_table (@rindle/wasm/pkg/rindle.js)
+```
+This is a wasm-bindgen externref-table-growth incompatibility with Node's WASM engine (browsers handle
+it). WASM is browser-only in this app (the API server uses `HttpRindleDaemonClient`, SSR uses the
+`read` endpoint — neither touches wasm), so it doesn't affect the running app, but it does mean the
+optimistic client path can't be smoke-tested outside a browser.
+- **Ask:** if Rindle wants Node-side testability (or Node/SSR use of the optimistic store), the wasm
+  build likely needs the externref table emitted with a `maximum`, or a documented Node init path. At
+  minimum, document "the optimistic client is browser-only; here's how to test it."
+
+### ⚠️ 10. Browser runtime (WASM + WS sync) therefore unverified end-to-end here
+Verified: data layer over HTTP (curl), client+SSR production build, SSR shell render, and the full
+Vite→API→daemon proxy returning leases. NOT verified in this environment (per #9): the in-browser
+wasm engine + ws sync + optimistic apply/rebase. Needs a manual `pnpm dev` + open localhost:3000.
+(SSR is safe by construction: the client is lazy + dynamic-imported, and the SSR build confirms no
+wasm import leaks server-side.)
 
 ### FYI 5. Routes constant is exported but the join rule isn't documented
 `DEFAULT_RINDLE_API_ROUTES` (`/api/rindle/{query,read,mutate}`) is exported from `@rindle/api-server`
