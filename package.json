@@ -6,7 +6,11 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "daemon": "rindle up",
+    "setup": "rindle migrate apply && rindle schema gen --out shared/schema.ts",
+    "dev": "concurrently -k -n daemon,api,web -c blue,magenta,green \"rindle up\" \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev:web": "vite dev --port 3000",
+    "dev:api": "tsx watch server/rindle-api.ts",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -16,6 +20,12 @@
     "check": "prettier --check ."
   },
   "dependencies": {
+    "@rindle/api-server": "^0.1.1",
+    "@rindle/client": "^0.1.1",
+    "@rindle/daemon-client": "^0.1.1",
+    "@rindle/optimistic": "^0.1.1",
+    "@rindle/react": "^0.1.1",
+    "@rindle/wasm": "^0.1.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
@@ -23,12 +33,14 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "fractional-indexing": "^3.3.0",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@rindle/cli": "^0.1.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/eslint-config": "latest",
@@ -39,9 +51,11 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^10.0.3",
     "eslint": "^9.20.0",
     "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
     "vitest": "^4.1.5"

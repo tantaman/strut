@@ -1,0 +1,8 @@
+{
+  "bindHost": "127.0.0.1",
+  "db": "rindle.db",
+  "httpPort": 7600,
+  "nWorkers": 2,
+  "tables": [],
+  "wsPort": 7601
+}
