@@ -1,40 +1,36 @@
-The original project is ancient (2011/2013) and dated. It is now coming back with a facelift, collaborative editing and offline support, powered by [vlcn.io](https://vlcn.io)
+# Strut
 
-We're in the [#strut.io channel](https://discord.com/channels/929781625473073245/1179183030468870235) of [![](https://dcbadge.vercel.app/api/server/lfwdev)](https://discord.gg/lfwdev)
+An HTML5 GUI authoring tool for **spatial presentations** — build a deck of slides, place rich
+content on each, arrange the slides in 3-D space, and play the deck as a camera flight through that
+world (the impress.js model, made visual and editable).
 
-# Contributing
+This repository is a **ground-up rewrite**. The authoritative description of what Strut is and how it
+behaves lives in **[`docs/STRUT_SPEC.md`](docs/STRUT_SPEC.md)** — a framework-agnostic behavior +
+data-model spec reverse-engineered from the feature-complete 2012 build. Treat it as the source of
+truth; this app implements it.
 
-The re-write currently requires bleeding edge builds of `cr-sqlite` and refers to packages provided by that project as local dependencies.
+## Stack
+
+- **React 19** + **[TanStack Start](https://tanstack.com/start)** (file-based routing, SSR) on **Vite**.
+- **Rindle** (incoming) for the data layer: a normalized SQL schema as source of truth → generated
+  TypeScript → optimistic local store + live windowed queries + named mutators. Not yet wired up.
+- Tailwind CSS is available; component-scoped CSS modules are also fine.
+
+## Getting started
 
 ```bash
-# Clone the repo + submodules
-git clone --recurse-submodules git@github.com:tantaman/strut.git
-cd strut
-# Install npm packages
 pnpm install
-# Build submodule repositories
-pnpm turbo run build --force
-# Start the dev server
-pnpm dev
+pnpm dev            # dev server on http://localhost:3000
+pnpm build          # production build (client + SSR)
+pnpm generate-routes # regenerate src/routeTree.gen.ts (also runs on dev/build)
+pnpm test           # vitest
+pnpm lint / format / check
 ```
 
----
+Routes live in `src/routes` (file-based); the app shell is `src/routes/__root.tsx`.
 
-Readme from 2013:
+## History
 
-# [Strut](http://strut.io/)
-
-[![Facelift](https://user-images.githubusercontent.com/1009003/201429020-ad350f8e-a488-4434-bc81-a1093bfa9c3c.png)](http://tantaman.github.io/Strut/dist/)
-
-#### A GUI / Authoring Tool for ImpressJS and Bespoke.js
-
-Don't know what ImpressJS is? Check out the ImpressJS demo presentation: http://bartaz.github.com/impress.js/#/bored
-
-### [Start using Strut!](http://strut.io/)
-
-(works in Firefox, Chrome and Safari with basic support for IE10)
-
-#### Learn a bit about Strut
-
-- http://www.youtube.com/watch?v=TTpiDXEIulg
-- previous video: http://www.youtube.com/watch?v=zA5s8wwme44
+The prior in-progress React + cr-sqlite (vlcn.io) rewrite is archived at branch
+`archive/cr-sqlite-rewrite` (tag `rewrite-archive-v1`) for reference. The feature-complete original
+lives at `origin/old-master`.
