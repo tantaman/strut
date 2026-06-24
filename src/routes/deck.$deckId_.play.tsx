@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useQuery } from '@rindle/react'
 import { deckQuery, slidesQuery } from '../../shared/queries'
 import { SlideThumb } from '../editor/SlideThumb'
@@ -8,7 +8,22 @@ import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { SLIDE_H, SLIDE_W } from '../config'
 
-export const Route = createFileRoute('/deck/$deckId_/play')({ component: Play })
+export const Route = createFileRoute('/deck/$deckId_/play')({
+  component: Play,
+  // The editor passes the view it left + the slide to start on; Esc hands them back so the editor
+  // reopens where you were (§5).
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { view?: 'slide' | 'overview'; slide?: string } => ({
+    view:
+      s.view === 'overview'
+        ? 'overview'
+        : s.view === 'slide'
+          ? 'slide'
+          : undefined,
+    slide: typeof s.slide === 'string' ? s.slide : undefined,
+  }),
+})
 
 // Overview (x,y) are in "card" units (240px wide); the world places full 1280px slides, so scale up.
 const WORLD = SLIDE_W / 240
@@ -35,6 +50,7 @@ function Play() {
     canned_transition: string
   } | null
   const slides = useQuery(slidesQuery({ deckId })) as unknown as PlaySlide[]
+  const { view, slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
@@ -46,6 +62,17 @@ function Play() {
     return () => window.removeEventListener('resize', on)
   }, [])
 
+  // Start the presentation on the slide the editor was sitting on (once, after slides resolve).
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (startedRef.current || slides.length === 0) return
+    startedRef.current = true
+    if (slide) {
+      const idx = slides.findIndex((s) => s.id === slide)
+      if (idx >= 0) setI(idx)
+    }
+  }, [slides, slide])
+
   useEffect(() => {
     function key(e: KeyboardEvent) {
       if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key))
@@ -53,11 +80,16 @@ function Play() {
       else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key))
         setI((n) => Math.max(0, n - 1))
       else if (e.key === 'Escape')
-        navigate({ to: '/deck/$deckId', params: { deckId } })
+        // Return to the editor in the view we came from, on whatever slide we ended on.
+        navigate({
+          to: '/deck/$deckId',
+          params: { deckId },
+          search: { view: view ?? 'slide', slide: slides[i]?.id ?? slide },
+        })
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [slides.length, navigate, deckId])
+  }, [slides, navigate, deckId, view, slide, i])
 
   if (slides.length === 0)
     return <div className="strut-boot">No slides to present.</div>

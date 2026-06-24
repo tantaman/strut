@@ -1,7 +1,20 @@
-// Ephemeral editor state (NOT persisted — spec lets selection be ephemeral, §3.2). Active slide,
-// component multi-selection, and the slide/overview mode, shared across the editor via context.
+// Editor state shared across the editor via context. The view (slide/overview) and the active slide
+// live in the route's URL search params (`?view=&slide=`) so they survive a round-trip through Present
+// (Esc restores the last view) and are deep-linkable. Component multi-selection stays ephemeral (NOT
+// persisted — spec §3.2) as plain React state.
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+import { getRouteApi } from '@tanstack/react-router'
+
+// Reach the editor route's search/navigate by id (no module import → no coupling to the route file).
+const editorRoute = getRouteApi('/deck/$deckId')
 
 export type EditorMode = 'slide' | 'overview'
 
@@ -41,14 +54,31 @@ export function EditorStateProvider({
   canEdit: boolean
   children: ReactNode
 }) {
-  const [activeSlideId, setActiveSlideId] = useState<string | null>(null)
-  const [mode, setMode] = useState<EditorMode>('slide')
+  const search = editorRoute.useSearch()
+  const navigate = editorRoute.useNavigate()
+  const mode: EditorMode = search.view ?? 'slide'
+  const activeSlideId = search.slide ?? null
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  const setActiveSlide = useCallback((id: string | null) => {
-    setActiveSlideId(id)
-    setSelected(new Set()) // switching slides clears component selection (§5.2)
-  }, [])
+  const setMode = useCallback(
+    (m: EditorMode) => {
+      void navigate({ search: (prev) => ({ ...prev, view: m }), replace: true })
+    },
+    [navigate],
+  )
+
+  const setActiveSlide = useCallback(
+    (id: string | null) => {
+      // Switching slides clears component selection (§5.2) — but keep the same empty Set when it's
+      // already empty so we don't needlessly recreate the `editor` memo (and re-render consumers).
+      setSelected((prev) => (prev.size ? new Set() : prev))
+      void navigate({
+        search: (prev) => ({ ...prev, slide: id ?? undefined }),
+        replace: true,
+      })
+    },
+    [navigate],
+  )
 
   const select = useCallback((id: string, additive = false) => {
     setSelected((prev) => {
@@ -61,7 +91,10 @@ export function EditorStateProvider({
     })
   }, [])
 
-  const selectMany = useCallback((ids: string[]) => setSelected(new Set(ids)), [])
+  const selectMany = useCallback(
+    (ids: string[]) => setSelected(new Set(ids)),
+    [],
+  )
   const clearSelection = useCallback(() => setSelected(new Set()), [])
   const isSelected = useCallback((id: string) => selected.has(id), [selected])
 
@@ -79,7 +112,19 @@ export function EditorStateProvider({
       selectMany,
       clearSelection,
     }),
-    [deckId, canEdit, activeSlideId, setActiveSlide, mode, selected, isSelected, select, selectMany, clearSelection],
+    [
+      deckId,
+      canEdit,
+      activeSlideId,
+      setActiveSlide,
+      mode,
+      setMode,
+      selected,
+      isSelected,
+      select,
+      selectMany,
+      clearSelection,
+    ],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

@@ -410,7 +410,15 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         className="btn btn--primary"
         onClick={() =>
           deck &&
-          navigate({ to: '/deck/$deckId/play', params: { deckId: deck.id } })
+          navigate({
+            to: '/deck/$deckId/play',
+            params: { deckId: deck.id },
+            // Carry the current view + slide so Esc can drop back into exactly this spot.
+            search: {
+              view: editor.mode,
+              slide: editor.activeSlideId ?? undefined,
+            },
+          })
         }
         title="Present"
       >
