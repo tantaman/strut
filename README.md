@@ -12,22 +12,49 @@ truth; this app implements it.
 ## Stack
 
 - **React 19** + **[TanStack Start](https://tanstack.com/start)** (file-based routing, SSR) on **Vite**.
-- **Rindle** (incoming) for the data layer: a normalized SQL schema as source of truth → generated
-  TypeScript → optimistic local store + live windowed queries + named mutators. Not yet wired up.
-- Tailwind CSS is available; component-scoped CSS modules are also fine.
+- **[Rindle](https://rindle.sh)** for the data layer (wired): SQL migrations as source of truth →
+  generated TypeScript schema → optimistic local store + live windowed queries + named mutators, with
+  a `rindled` daemon and a stateless API server. See `RINDLE_NOTES.md` for the integration write-up.
+- Plain CSS for the editor chrome (`src/strut.css`); Tailwind is available for one-offs.
+
+## Architecture
+
+Three tiers (Rindle):
+
+- **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7600` control, `:7601` ws).
+- **API server** (`server/rindle-api.ts`, `:7700`) — stateless; validates args, runs authoritative SQL
+  mutators, registers the named queries. Mirrors the predicted client mutators in `shared/app-def.ts`.
+- **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
+  live reads, and `app.mutate.*` writes. The Vite dev server proxies `/api/rindle/*` → `:7700`.
+
+Schema lives in `migrations/`; `shared/` holds the generated schema, query builder, named queries, and
+client mutators (imported by both browser and server). App code is in `src/` (`routes/`, `editor/`,
+`rindle/`).
 
 ## Getting started
 
 ```bash
 pnpm install
-pnpm dev            # dev server on http://localhost:3000
-pnpm build          # production build (client + SSR)
-pnpm generate-routes # regenerate src/routeTree.gen.ts (also runs on dev/build)
-pnpm test           # vitest
-pnpm lint / format / check
+
+# Terminal 1 — daemon + API server + web (all three, via concurrently):
+pnpm dev                  # web on http://localhost:3000
+
+# Terminal 2 — first run only, while the daemon is up: apply migrations + regen schema
+pnpm setup
 ```
 
-Routes live in `src/routes` (file-based); the app shell is `src/routes/__root.tsx`.
+Then open http://localhost:3000. Other scripts:
+
+```bash
+pnpm build            # production build (client + SSR)
+pnpm daemon           # just the rindled daemon
+pnpm dev:api          # just the API server (tsx watch)
+pnpm dev:web          # just vite
+pnpm generate-routes  # regenerate src/routeTree.gen.ts
+pnpm test             # vitest
+```
+
+After editing `migrations/`, re-run `pnpm setup` to apply + regenerate `shared/schema.ts`.
 
 ## History
 
