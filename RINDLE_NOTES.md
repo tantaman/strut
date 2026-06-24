@@ -63,6 +63,39 @@ the raw HTTP contract with curl. All worked first try once #1/#2 were fixed:
 - `mutate` deleteDeck → authoritative cascade emptied slides+deck.
 The split predicted/authoritative mutator model + named queries are pleasant once the shapes click.
 
+### ✅ `.folded` mutations are a perfect fit for drag
+`mutate.foo.folded({ key: id }, args)` (debounced, last-value-wins) maps exactly onto the spec's
+"high-frequency drags should fold to the last value" (§13.3). Move/resize/rotate on the canvas and
+card drags in the overview all use it with `key` = component/slide id. No custom throttling needed.
+This is a genuinely nice piece of the API.
+
+### FYI 6. Polymorphic "all components on a slide" = N subscriptions
+Strut components are 5 per-type tables (typed, per spec §13.1). To render one slide I run 5 live
+queries (`useSlideComponents`) and merge by `z_order` in JS — and each live thumbnail/overview card
+does the same, so a 12-slide deck opens ~60+ subscriptions. There's no UNION / polymorphic-set query
+in the builder I could find, so the cost is inherent to the normalized choice.
+- **Ask:** a documented pattern for "fetch a heterogeneous child set" (UNION view, or a recommended
+  single polymorphic table with a typed `json<T>()` payload column) would help. Also: guidance on the
+  practical ceiling for concurrent `useQuery` subscriptions.
+
+### FYI 7. `.one()` → `useQuery` returns `R | null` — clean
+`q.deck.where.id(x).one()` makes `useQuery(deckQuery(...))` return a single row or null, no array
+unwrapping. Worked as hoped.
+
+### FYI 8. Had to cast `useQuery` rows to hand-written interfaces in a couple spots
+The inferred row type from a `defineQuery` value is great inside the file that builds it, but passing
+results across module boundaries into presentational components I ended up using `as unknown as
+MyRow[]` rather than importing the inferred type. Likely my own ergonomics gap — a documented
+"export this query's row type" recipe (e.g. `type Row = QueryData<typeof slidesQuery>[number]`) would
+remove the casts.
+
+### ⚠️ 9. Browser runtime (WASM + WS sync) not verified headlessly
+Everything server-side is verified via curl + a full client/SSR build. The actual browser path —
+`@rindle/optimistic` dynamic-importing `@rindle/wasm`, opening the ws to :7601, optimistic apply +
+rebase — can't be driven in this environment. Needs a manual `pnpm dev` + open localhost:3000. Noting
+so it isn't mistaken for "fully proven". (SSR is safe: client is lazy + dynamic-imported; the SSR
+build and shell render confirm no wasm import leaks to the server.)
+
 ### FYI 5. Routes constant is exported but the join rule isn't documented
 `DEFAULT_RINDLE_API_ROUTES` (`/api/rindle/{query,read,mutate}`) is exported from `@rindle/api-server`
 and mirrored privately in the client — handy, but see #2: the client `url`+`routes` composition is
