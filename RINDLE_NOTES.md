@@ -157,6 +157,26 @@ lint).
   listener, so a one-shot script read is just materialize + poll. `subscribe` is only needed to react
   to later changes.)
 
+### ✅ 13. Undo/redo is clean as a pure client-side command stack — two small frictions
+Implemented spec §3.7 (bounded-20 `{label,undo,redo}` history, atomic `batch()`) entirely on the
+client: every editor op records an inverse built from the SAME named mutators (move↔move,
+add↔removeComponent, delete↔reinsert, edit↔edit-with-old-value). No Rindle primitive needed, and it
+composes with optimistic sync for free — undo just fires another optimistic mutation. Verified in real
+headless Chrome (Cmd+Z removes an added component, Cmd+Shift+Z restores it). Two friction points:
+- **Re-inserting a deleted row needs add* + transformComponent + setComponentClasses (3 mutators).**
+  The `add*` mutators only take position + type fields and reset the spatial base (scale/rotate/skew/
+  z) via `spatialBase`, so restoring a moved/rotated/resized component on undo (or on import/duplicate)
+  is a 3-call dance. An `upsert(table, fullRow)` or an add that accepts the whole spatial base would
+  make undo/import/duplicate one call. (Re-inserting by the ORIGINAL id after a delete works fine —
+  insert of a previously-deleted id is accepted, which is what makes redo-of-delete / undo-of-delete
+  stable.)
+- **Undo of a slide delete must snapshot the slide's components first** (the server cascades component
+  rows by slide_id, so they're gone after delete). That's the polymorphic 5-query read again (#6/#12)
+  on a hot path (every slide delete now does a `readSlideComponents` before deleting). A
+  `store.readOnce(query)` (#12) plus a cascade that's *reversible* (or a delete that returns the
+  deleted subtree) would remove the snapshot boilerplate. Net: undo/redo didn't need anything FROM
+  Rindle, but a full-row upsert + a one-shot subtree read would make the surrounding code much smaller.
+
 ### FYI 12. Export amplifies the polymorphic-component cost (#6)
 JSON / standalone-HTML export needs a one-shot read of the *whole* deck subtree. With 5 per-type
 component tables that's `slides × 5 + 3` materializations (one per component query per slide, plus

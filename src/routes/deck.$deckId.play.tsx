@@ -4,6 +4,8 @@ import { useQuery } from '@rindle/react'
 import { deckQuery, slidesQuery } from '../../shared/queries'
 import { SlideThumb } from '../editor/SlideThumb'
 import { resolveSurface } from '../editor/types'
+import { UserStyle } from '../editor/CssEditor'
+import { flightFor } from '../editor/transitions'
 import { SLIDE_H, SLIDE_W } from '../config'
 
 export const Route = createFileRoute('/deck/$deckId/play')({ component: Play })
@@ -26,7 +28,12 @@ interface PlaySlide {
 
 function Play() {
   const { deckId } = Route.useParams()
-  const deck = useQuery(deckQuery({ deckId })) as unknown as { background: string; surface: string } | null
+  const deck = useQuery(deckQuery({ deckId })) as unknown as {
+    background: string
+    surface: string
+    custom_stylesheet: string
+    canned_transition: string
+  } | null
   const slides = useQuery(slidesQuery({ deckId })) as unknown as PlaySlide[]
   const navigate = useNavigate()
   const [i, setI] = useState(0)
@@ -41,29 +48,47 @@ function Play() {
 
   useEffect(() => {
     function key(e: KeyboardEvent) {
-      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) setI((n) => Math.min(slides.length - 1, n + 1))
-      else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) setI((n) => Math.max(0, n - 1))
-      else if (e.key === 'Escape') navigate({ to: '/deck/$deckId', params: { deckId } })
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key))
+        setI((n) => Math.min(slides.length - 1, n + 1))
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key))
+        setI((n) => Math.max(0, n - 1))
+      else if (e.key === 'Escape')
+        navigate({ to: '/deck/$deckId', params: { deckId } })
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
   }, [slides.length, navigate, deckId])
 
-  if (slides.length === 0) return <div className="strut-boot">No slides to present.</div>
+  if (slides.length === 0)
+    return <div className="strut-boot">No slides to present.</div>
 
   const active = slides[Math.min(i, slides.length - 1)]
-  const zoom = (Math.min(vp.w / SLIDE_W, vp.h / SLIDE_H) * 0.92) / ((active.imp_scale || 3) / 3)
+  const zoom =
+    (Math.min(vp.w / SLIDE_W, vp.h / SLIDE_H) * 0.92) /
+    ((active.imp_scale || 3) / 3)
   const acx = active.x * WORLD
   const acy = active.y * WORLD
   // The presentation surface (deck-wide "table") shows behind the flying slide cards.
   const surf = resolveSurface(active.surface, deck?.surface)
+  // The chosen canned transition (spec §7.2) drives the camera-flight feel.
+  const flight = flightFor(deck?.canned_transition)
+  const camTransition = flight.duration
+    ? `transform ${flight.duration}ms ${flight.easing}`
+    : 'none'
 
   return (
     <div
       className="play"
       onClick={() => setI((n) => Math.min(slides.length - 1, n + 1))}
-      style={{ position: 'fixed', inset: 0, background: surf, overflow: 'hidden', perspective: 1000 }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: surf,
+        overflow: 'hidden',
+        perspective: 1000,
+      }}
     >
+      <UserStyle css={deck?.custom_stylesheet} />
       <div
         className="play__cam"
         style={{
@@ -71,13 +96,14 @@ function Play() {
           left: 0,
           top: 0,
           transformStyle: 'preserve-3d',
-          transition: 'transform 0.9s cubic-bezier(.4,0,.2,1)',
+          transition: camTransition,
           transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotate(${-active.rotate_z}rad) scale(${zoom}) translate(${-acx}px, ${-acy}px)`,
         }}
       >
         {slides.map((s) => (
           <div
             key={s.id}
+            className="strut-surface"
             style={{
               position: 'absolute',
               left: s.x * WORLD,
@@ -88,7 +114,7 @@ function Play() {
               boxShadow: '0 10px 60px rgba(0,0,0,.6)',
               transform: `translate(-50%, -50%) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale(${(s.imp_scale || 3) / 3})`,
               opacity: s.id === active.id ? 1 : 0.55,
-              transition: 'opacity 0.9s',
+              transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
             <SlideThumb slide={s} deck={deck} width={SLIDE_W} />

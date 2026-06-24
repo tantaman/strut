@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@rindle/react'
 import { deckQuery, slidesQuery } from '../../shared/queries'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
+import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
 import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
@@ -15,6 +16,8 @@ interface DeckRow {
   title: string
   background: string
   surface: string
+  canned_transition: string
+  custom_stylesheet: string
 }
 interface FullSlide {
   id: string
@@ -35,7 +38,9 @@ function EditorPage() {
   const { deckId } = Route.useParams()
   return (
     <EditorStateProvider deckId={deckId}>
-      <EditorInner deckId={deckId} />
+      <UndoProvider>
+        <EditorInner deckId={deckId} />
+      </UndoProvider>
     </EditorStateProvider>
   )
 }
@@ -51,7 +56,10 @@ function EditorInner({ deckId }: { deckId: string }) {
       if (editor.activeSlideId) editor.setActiveSlide(null)
       return
     }
-    if (!editor.activeSlideId || !slides.some((s) => s.id === editor.activeSlideId)) {
+    if (
+      !editor.activeSlideId ||
+      !slides.some((s) => s.id === editor.activeSlideId)
+    ) {
       editor.setActiveSlide(slides[0].id)
     }
   }, [slides, editor])
@@ -69,7 +77,9 @@ function EditorInner({ deckId }: { deckId: string }) {
               <Stage slide={activeSlide} deck={deck} />
             ) : (
               <div className="stage">
-                <div className="stage__empty">No slides yet — add one in the well.</div>
+                <div className="stage__empty">
+                  No slides yet — add one in the well.
+                </div>
               </div>
             )}
           </>

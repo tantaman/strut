@@ -13,10 +13,19 @@ import {
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
+import { useHistory } from './UndoProvider'
+import { reinsertComponent } from './componentOps'
 import { useSlideComponents } from './useSlideComponents'
 import { cmpStyle, componentSize, renderInner } from './render'
-import { backgroundImage, resolveBackground, resolveSurface, type AnyComponent } from './types'
+import {
+  backgroundImage,
+  resolveBackground,
+  resolveSurface,
+  type AnyComponent,
+} from './types'
 import { Inspector } from './Inspector'
+import { RichTextToolbar } from './RichTextToolbar'
+import { UserStyle } from './CssEditor'
 
 interface SlideRow {
   id: string
@@ -26,16 +35,24 @@ interface SlideRow {
 interface DeckRow {
   background: string
   surface: string
+  custom_stylesheet?: string
 }
 
-function useFitScale(ref: React.RefObject<HTMLElement | null>, w: number, h: number, pad = 56) {
+function useFitScale(
+  ref: React.RefObject<HTMLElement | null>,
+  w: number,
+  h: number,
+  pad = 56,
+) {
   const [scale, setScale] = useState(0.5)
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const ro = new ResizeObserver(() => {
       const r = el.getBoundingClientRect()
-      setScale(Math.max(0.1, Math.min((r.width - pad) / w, (r.height - pad) / h)))
+      setScale(
+        Math.max(0.1, Math.min((r.width - pad) / w, (r.height - pad) / h)),
+      )
     })
     ro.observe(el)
     return () => ro.disconnect()
@@ -43,14 +60,26 @@ function useFitScale(ref: React.RefObject<HTMLElement | null>, w: number, h: num
   return scale
 }
 
-export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }) {
+export function Stage({
+  slide,
+  deck,
+}: {
+  slide: SlideRow
+  deck: DeckRow | null
+}) {
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
   const components = useSlideComponents(slide.id)
   const mutate = useMutate()
   const editor = useEditor()
+  const history = useHistory()
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [marquee, setMarquee] = useState<null | { x: number; y: number; w: number; h: number }>(null)
+  const [marquee, setMarquee] = useState<null | {
+    x: number
+    y: number
+    w: number
+    h: number
+  }>(null)
 
   const bg = resolveBackground(slide.background, deck?.background)
   const bgImg = backgroundImage(slide.background, deck?.background)
@@ -62,28 +91,54 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
     function onKey(e: KeyboardEvent) {
       if (e.key !== 'Delete' && e.key !== 'Backspace') return
       const t = e.target as HTMLElement | null
-      if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return
+      if (
+        t &&
+        (t.isContentEditable ||
+          t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA')
+      )
+        return
       if (editor.selected.size === 0) return
       e.preventDefault()
-      components
-        .filter((c) => editor.selected.has(c.id))
-        .forEach((c) => mutate.removeComponent({ table: c.table, id: c.id }))
+      const victims = components.filter((c) => editor.selected.has(c.id))
+      deleteComponents(victims)
       editor.clearSelection()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [components, editor, mutate])
 
+  // Remove component(s) as one undoable step (undo reinserts them with full geometry).
+  function deleteComponents(victims: AnyComponent[]) {
+    if (victims.length === 0) return
+    const snapshots = victims.map((c) => ({ ...c }))
+    history.batch(
+      victims.length > 1 ? 'Delete components' : 'Delete component',
+      () => {
+        for (const c of snapshots) {
+          mutate.removeComponent({ table: c.table, id: c.id })
+          history.push({
+            label: 'Delete component',
+            redo: () => mutate.removeComponent({ table: c.table, id: c.id }),
+            undo: () => reinsertComponent(mutate, c),
+          })
+        }
+      },
+    )
+  }
+
   function raise(c: AnyComponent) {
     const maxZ = components.reduce((m, x) => Math.max(m, x.z_order), 0)
-    if (c.z_order < maxZ) mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })
+    if (c.z_order < maxZ)
+      mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })
   }
 
   // ---- gestures ----
-  function dragListen(move: (ev: PointerEvent) => void) {
+  function dragListen(move: (ev: PointerEvent) => void, end?: () => void) {
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      end?.()
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
@@ -97,25 +152,61 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
     else if (!editor.isSelected(c.id)) editor.select(c.id, false)
     raise(c)
 
-    const ids = editor.isSelected(c.id) && editor.selected.size > 0 ? [...editor.selected] : [c.id]
+    const ids =
+      editor.isSelected(c.id) && editor.selected.size > 0
+        ? [...editor.selected]
+        : [c.id]
     const starts = new Map(
-      components.filter((x) => ids.includes(x.id)).map((x) => [x.id, { x: x.x, y: x.y, table: x.table }]),
+      components
+        .filter((x) => ids.includes(x.id))
+        .map((x) => [x.id, { x: x.x, y: x.y, table: x.table }]),
     )
+    const finals = new Map<
+      string,
+      { x: number; y: number; table: AnyComponent['table'] }
+    >()
     const sx = e.clientX
     const sy = e.clientY
-    dragListen((ev) => {
-      const dx = (ev.clientX - sx) / scale
-      const dy = (ev.clientY - sy) / scale
-      starts.forEach((s, id) => {
-        let nx = s.x + dx
-        let ny = s.y + dy
-        if (ev.shiftKey) {
-          nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
-          ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
-        }
-        mutate.moveComponent.folded({ key: id }, { table: s.table, id, x: Math.round(nx), y: Math.round(ny) })
-      })
-    })
+    dragListen(
+      (ev) => {
+        const dx = (ev.clientX - sx) / scale
+        const dy = (ev.clientY - sy) / scale
+        starts.forEach((s, id) => {
+          let nx = s.x + dx
+          let ny = s.y + dy
+          if (ev.shiftKey) {
+            nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
+            ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
+          }
+          const pos = { x: Math.round(nx), y: Math.round(ny), table: s.table }
+          finals.set(id, pos)
+          mutate.moveComponent.folded(
+            { key: id },
+            { table: s.table, id, x: pos.x, y: pos.y },
+          )
+        })
+      },
+      () => {
+        // One undoable step for the whole (possibly multi-) drag.
+        const moved = [...finals].filter(([id, f]) => {
+          const s = starts.get(id)!
+          return s.x !== f.x || s.y !== f.y
+        })
+        if (moved.length === 0) return
+        history.push({
+          label: 'Move',
+          redo: () =>
+            moved.forEach(([id, f]) =>
+              mutate.moveComponent({ table: f.table, id, x: f.x, y: f.y }),
+            ),
+          undo: () =>
+            moved.forEach(([id]) => {
+              const s = starts.get(id)!
+              mutate.moveComponent({ table: s.table, id, x: s.x, y: s.y })
+            }),
+        })
+      },
+    )
   }
 
   function beginResize(c: AnyComponent, e: RPointerEvent) {
@@ -124,25 +215,94 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
     const sy = e.clientY
     if (c.kind === 'text') {
       const startSize = c.size ?? 72
-      dragListen((ev) => {
-        const ns = Math.max(8, Math.round(startSize + (ev.clientY - sy) / scale))
-        mutate.setText.folded(
-          { key: c.id },
-          { id: c.id, text: c.text ?? '', size: ns, color: c.color ?? '111111', font_family: c.font_family ?? 'Lato' },
-        )
-      })
+      let lastSize = startSize
+      const text = c.text ?? ''
+      const color = c.color ?? '111111'
+      const font = c.font_family ?? 'Lato'
+      dragListen(
+        (ev) => {
+          lastSize = Math.max(
+            8,
+            Math.round(startSize + (ev.clientY - sy) / scale),
+          )
+          mutate.setText.folded(
+            { key: c.id },
+            { id: c.id, text, size: lastSize, color, font_family: font },
+          )
+        },
+        () => {
+          if (lastSize === startSize) return
+          history.push({
+            label: 'Resize text',
+            redo: () =>
+              mutate.setText({
+                id: c.id,
+                text,
+                size: lastSize,
+                color,
+                font_family: font,
+              }),
+            undo: () =>
+              mutate.setText({
+                id: c.id,
+                text,
+                size: startSize,
+                color,
+                font_family: font,
+              }),
+          })
+        },
+      )
       return
     }
     const { w, h } = componentSize(c)
     const ratio = h / w
-    dragListen((ev) => {
-      const nw = Math.max(20, Math.round(w + (ev.clientX - sx) / scale))
-      const nh = ev.shiftKey ? Math.max(20, Math.round(h + (ev.clientY - sy) / scale)) : Math.round(nw * ratio)
-      mutate.transformComponent.folded(
-        { key: c.id },
-        { table: c.table, id: c.id, scale_x: 1, scale_y: 1, scale_w: nw, scale_h: nh, rotate: c.rotate, skew_x: c.skew_x, skew_y: c.skew_y },
-      )
-    })
+    const before = { scale_w: c.scale_w, scale_h: c.scale_h }
+    let last = { scale_w: c.scale_w, scale_h: c.scale_h }
+    dragListen(
+      (ev) => {
+        const nw = Math.max(20, Math.round(w + (ev.clientX - sx) / scale))
+        const nh = ev.shiftKey
+          ? Math.max(20, Math.round(h + (ev.clientY - sy) / scale))
+          : Math.round(nw * ratio)
+        last = { scale_w: nw, scale_h: nh }
+        mutate.transformComponent.folded(
+          { key: c.id },
+          {
+            table: c.table,
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: nw,
+            scale_h: nh,
+            rotate: c.rotate,
+            skew_x: c.skew_x,
+            skew_y: c.skew_y,
+          },
+        )
+      },
+      () => {
+        if (last.scale_w === before.scale_w && last.scale_h === before.scale_h)
+          return
+        const apply = (s: { scale_w: number; scale_h: number }) =>
+          mutate.transformComponent({
+            table: c.table,
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: s.scale_w,
+            scale_h: s.scale_h,
+            rotate: c.rotate,
+            skew_x: c.skew_x,
+            skew_y: c.skew_y,
+          })
+        history.push({
+          label: 'Resize',
+          redo: () => apply(last),
+          undo: () => apply(before),
+        })
+      },
+    )
   }
 
   function beginRotate(c: AnyComponent, e: RPointerEvent) {
@@ -154,21 +314,73 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
     const cy = r.top + r.height / 2
     const start = Math.atan2(e.clientY - cy, e.clientX - cx)
     const startRot = c.rotate
-    dragListen((ev) => {
-      let a = Math.atan2(ev.clientY - cy, ev.clientX - cx) - start + startRot
-      if (ev.shiftKey) a = Math.round(a / ROTATE_SNAP) * ROTATE_SNAP
-      mutate.transformComponent.folded(
-        { key: c.id },
-        { table: c.table, id: c.id, scale_x: 1, scale_y: 1, scale_w: c.scale_w, scale_h: c.scale_h, rotate: a, skew_x: c.skew_x, skew_y: c.skew_y },
-      )
-    })
+    let lastRot = startRot
+    dragListen(
+      (ev) => {
+        let a = Math.atan2(ev.clientY - cy, ev.clientX - cx) - start + startRot
+        if (ev.shiftKey) a = Math.round(a / ROTATE_SNAP) * ROTATE_SNAP
+        lastRot = a
+        mutate.transformComponent.folded(
+          { key: c.id },
+          {
+            table: c.table,
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: c.scale_w,
+            scale_h: c.scale_h,
+            rotate: a,
+            skew_x: c.skew_x,
+            skew_y: c.skew_y,
+          },
+        )
+      },
+      () => {
+        if (lastRot === startRot) return
+        const apply = (rot: number) =>
+          mutate.transformComponent({
+            table: c.table,
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: c.scale_w,
+            scale_h: c.scale_h,
+            rotate: rot,
+            skew_x: c.skew_x,
+            skew_y: c.skew_y,
+          })
+        history.push({
+          label: 'Rotate',
+          redo: () => apply(lastRot),
+          undo: () => apply(startRot),
+        })
+      },
+    )
   }
 
   function commitText(c: AnyComponent, html: string) {
     setEditingId(null)
-    const plain = html.replace(/<[^>]*>/g, '').trim()
-    if (plain.length === 0) mutate.removeComponent({ table: c.table, id: c.id })
-    else mutate.setText({ id: c.id, text: html, size: c.size ?? 72, color: c.color ?? '111111', font_family: c.font_family ?? 'Lato' })
+    const plain = html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim()
+    if (plain.length === 0) {
+      deleteComponents([c]) // empty box is deleted (undoable — reinserts it)
+      return
+    }
+    if (html === (c.text ?? '')) return // no change
+    const before = c.text ?? ''
+    const size = c.size ?? 72
+    const color = c.color ?? '111111'
+    const font = c.font_family ?? 'Lato'
+    const apply = (text: string) =>
+      mutate.setText({ id: c.id, text, size, color, font_family: font })
+    apply(html)
+    history.push({
+      label: 'Edit text',
+      redo: () => apply(html),
+      undo: () => apply(before),
+    })
   }
 
   // ---- marquee on empty canvas ----
@@ -194,13 +406,25 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
         editor.clearSelection()
         return
       }
-      const box = { left: Math.min(sx, ev.clientX), top: Math.min(sy, ev.clientY), right: Math.max(sx, ev.clientX), bottom: Math.max(sy, ev.clientY) }
+      const box = {
+        left: Math.min(sx, ev.clientX),
+        top: Math.min(sy, ev.clientY),
+        right: Math.max(sx, ev.clientX),
+        bottom: Math.max(sy, ev.clientY),
+      }
       const hit: string[] = []
-      stageRef.current?.querySelectorAll<HTMLElement>('.cmp[data-id]').forEach((el) => {
-        const r = el.getBoundingClientRect()
-        if (r.left < box.right && r.right > box.left && r.top < box.bottom && r.bottom > box.top)
-          hit.push(el.dataset.id!)
-      })
+      stageRef.current
+        ?.querySelectorAll<HTMLElement>('.cmp[data-id]')
+        .forEach((el) => {
+          const r = el.getBoundingClientRect()
+          if (
+            r.left < box.right &&
+            r.right > box.left &&
+            r.top < box.bottom &&
+            r.bottom > box.top
+          )
+            hit.push(el.dataset.id!)
+        })
       editor.selectMany(hit)
     }
     window.addEventListener('pointermove', move)
@@ -211,12 +435,21 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
     <div
       className="stage"
       ref={stageRef}
-      style={{ background: surf, backgroundImage: surfImg, backgroundSize: 'cover', backgroundPosition: 'center' }}
+      style={{
+        background: surf,
+        backgroundImage: surfImg,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
+      <UserStyle css={deck?.custom_stylesheet} />
       <Inspector components={components} />
-      <div className="slide-surface" style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}>
+      <div
+        className="slide-surface"
+        style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
+      >
         <div
-          className="slide-canvas"
+          className="slide-canvas strut-surface"
           onPointerDown={beginMarquee}
           style={{
             width: SLIDE_W,
@@ -233,12 +466,14 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
               c={c}
               scale={scale}
               selected={editor.isSelected(c.id)}
-              soleSelected={editor.selected.size <= 1 && editor.isSelected(c.id)}
+              soleSelected={
+                editor.selected.size <= 1 && editor.isSelected(c.id)
+              }
               editing={editingId === c.id}
               onPointerDownBody={(e) => beginMove(c, e)}
               onResize={(e) => beginResize(c, e)}
               onRotate={(e) => beginRotate(c, e)}
-              onDelete={() => mutate.removeComponent({ table: c.table, id: c.id })}
+              onDelete={() => deleteComponents([c])}
               onStartEdit={() => c.kind === 'text' && setEditingId(c.id)}
               onCommitEdit={(html) => commitText(c, html)}
             />
@@ -248,7 +483,13 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
       {marquee && (
         <div
           className="marquee"
-          style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h, position: 'fixed' }}
+          style={{
+            left: marquee.x,
+            top: marquee.y,
+            width: marquee.w,
+            height: marquee.h,
+            position: 'fixed',
+          }}
         />
       )}
     </div>
@@ -289,29 +530,60 @@ function ComponentView({
       onPointerDown={onPointerDownBody}
       onDoubleClick={onStartEdit}
     >
-      {editing && c.kind === 'text' ? <TextEditor c={c} onCommit={onCommitEdit} /> : renderInner(c)}
+      {editing && c.kind === 'text' ? (
+        <TextEditor c={c} scale={scale} onCommit={onCommitEdit} />
+      ) : (
+        renderInner(c)
+      )}
       {selected && (
-        <button className="handle__del" style={counter} onPointerDown={(e) => e.stopPropagation()} onClick={onDelete}>
+        <button
+          className="handle__del"
+          style={counter}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={onDelete}
+        >
           ×
         </button>
       )}
       {soleSelected && !editing && (
         <>
-          <div className="handle handle--se" style={counter} onPointerDown={onResize} />
-          <div className="handle handle--rotate" style={counter} onPointerDown={onRotate} />
+          <div
+            className="handle handle--se"
+            style={counter}
+            onPointerDown={onResize}
+          />
+          <div
+            className="handle handle--rotate"
+            style={counter}
+            onPointerDown={onRotate}
+          />
         </>
       )}
     </div>
   )
 }
 
-function TextEditor({ c, onCommit }: { c: AnyComponent; onCommit: (html: string) => void }) {
+function TextEditor({
+  c,
+  scale,
+  onCommit,
+}: {
+  c: AnyComponent
+  scale: number
+  onCommit: (html: string) => void
+}) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = ref.current
     if (!el) return
     el.innerHTML = c.text && c.text.length ? c.text : ''
     el.focus()
+    // Legacy tags (<b>/<i>/<font>) so text serializes the way the renderer reads it (spec §6.3).
+    try {
+      document.execCommand('styleWithCSS', false, 'false')
+    } catch {
+      /* not supported everywhere — harmless */
+    }
     const range = document.createRange()
     range.selectNodeContents(el)
     range.collapse(false)
@@ -321,19 +593,28 @@ function TextEditor({ c, onCommit }: { c: AnyComponent; onCommit: (html: string)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
-    <div
-      ref={ref}
-      className="cmp__textbody"
-      contentEditable
-      suppressContentEditableWarning
-      onPointerDown={(e) => e.stopPropagation()}
-      onBlur={() => onCommit(ref.current?.innerHTML ?? '')}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
+    <>
+      <RichTextToolbar scale={scale} />
+      <div
+        ref={ref}
+        className="cmp__textbody"
+        contentEditable
+        suppressContentEditableWarning
+        onPointerDown={(e) => e.stopPropagation()}
+        onBlur={() => onCommit(ref.current?.innerHTML ?? '')}
+        // Paste plain text only (spec §6.3).
+        onPaste={(e) => {
           e.preventDefault()
-          ref.current?.blur()
-        }
-      }}
-    />
+          const text = e.clipboardData.getData('text/plain')
+          document.execCommand('insertText', false, text)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault()
+            ref.current?.blur()
+          }
+        }}
+      />
+    </>
   )
 }

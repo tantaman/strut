@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
+import { useHistory } from './UndoProvider'
 import { COLOR_SWATCHES, cssHex, type AnyComponent } from './types'
 
 const RECENTS_KEY = 'strut.colorChooser'
@@ -27,7 +28,13 @@ function pushRecent(hex: string) {
 }
 
 /** Swatch grid + native picker + recents. `value`/`onChange` use bare hex (no leading `#`). */
-function ColorField({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
+function ColorField({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (hex: string) => void
+}) {
   const [recents, setRecents] = useState<string[]>(readRecents)
   const current = cssHex(value, '111111')
   const pick = (hex: string) => {
@@ -42,7 +49,10 @@ function ColorField({ value, onChange }: { value: string; onChange: (hex: string
         {COLOR_SWATCHES.map((h) => (
           <button
             key={h}
-            className={'swatch' + (h === value.replace(/^#+/, '').toLowerCase() ? ' is-active' : '')}
+            className={
+              'swatch' +
+              (h === value.replace(/^#+/, '').toLowerCase() ? ' is-active' : '')
+            }
             style={{ background: '#' + h }}
             title={'#' + h}
             onClick={() => pick(h)}
@@ -52,34 +62,103 @@ function ColorField({ value, onChange }: { value: string; onChange: (hex: string
       {recents.length > 0 && (
         <div className="swatches swatches--sm">
           {recents.map((h) => (
-            <button key={h} className="swatch" style={{ background: '#' + h }} title={'#' + h} onClick={() => pick(h)} />
+            <button
+              key={h}
+              className="swatch"
+              style={{ background: '#' + h }}
+              title={'#' + h}
+              onClick={() => pick(h)}
+            />
           ))}
         </div>
       )}
       <label className="insp__custom">
-        <input type="color" value={current} onChange={(e) => pick(e.target.value)} />
+        <input
+          type="color"
+          value={current}
+          onChange={(e) => pick(e.target.value)}
+        />
         <span>{current}</span>
       </label>
     </div>
   )
 }
 
-export function Inspector({ components }: { components: readonly AnyComponent[] }) {
+export function Inspector({
+  components,
+}: {
+  components: readonly AnyComponent[]
+}) {
   const editor = useEditor()
   const mutate = useMutate()
+  const history = useHistory()
 
   if (editor.selected.size !== 1) return null
   const c = components.find((x) => editor.selected.has(x.id))
   if (!c) return null
 
-  const editText = (patch: Partial<Pick<AnyComponent, 'size' | 'color' | 'font_family' | 'text'>>) =>
-    mutate.setText({
-      id: c.id,
-      text: patch.text ?? c.text ?? '',
-      size: patch.size ?? c.size ?? 72,
-      color: patch.color ?? c.color ?? '111111',
-      font_family: patch.font_family ?? c.font_family ?? 'Lato',
+  const editText = (
+    patch: Partial<
+      Pick<AnyComponent, 'size' | 'color' | 'font_family' | 'text'>
+    >,
+    label = 'Edit text',
+  ) => {
+    const before = {
+      text: c.text ?? '',
+      size: c.size ?? 72,
+      color: c.color ?? '111111',
+      font_family: c.font_family ?? 'Lato',
+    }
+    const after = {
+      text: patch.text ?? before.text,
+      size: patch.size ?? before.size,
+      color: patch.color ?? before.color,
+      font_family: patch.font_family ?? before.font_family,
+    }
+    const apply = (v: typeof before) => mutate.setText({ id: c.id, ...v })
+    apply(after)
+    history.push({ label, redo: () => apply(after), undo: () => apply(before) })
+  }
+
+  const setFill = (fill: string) => {
+    const before = c.fill ?? '3498db'
+    if (before === fill) return
+    mutate.setShapeFill({ id: c.id, fill })
+    history.push({
+      label: 'Fill',
+      redo: () => mutate.setShapeFill({ id: c.id, fill }),
+      undo: () => mutate.setShapeFill({ id: c.id, fill: before }),
     })
+  }
+
+  const setClasses = (next: string) => {
+    const before = c.custom_classes ?? ''
+    if (before === next) return
+    const apply = (v: string) =>
+      mutate.setComponentClasses({
+        table: c.table,
+        id: c.id,
+        custom_classes: v,
+      })
+    apply(next)
+    history.push({
+      label: 'Classes',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
+  }
+
+  const setZ = (z: number) => {
+    const before = c.z_order
+    mutate.setComponentZ({ table: c.table, id: c.id, z_order: z })
+    history.push({
+      label: 'Order',
+      redo: () =>
+        mutate.setComponentZ({ table: c.table, id: c.id, z_order: z }),
+      undo: () =>
+        mutate.setComponentZ({ table: c.table, id: c.id, z_order: before }),
+    })
+  }
 
   const maxZ = components.reduce((m, x) => Math.max(m, x.z_order), 0)
   const minZ = components.reduce((m, x) => Math.min(m, x.z_order), 0)
@@ -92,7 +171,10 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
         <>
           <label className="insp__row">
             <span>Font</span>
-            <select value={c.font_family || 'Lato'} onChange={(e) => editText({ font_family: e.target.value })}>
+            <select
+              value={c.font_family || 'Lato'}
+              onChange={(e) => editText({ font_family: e.target.value })}
+            >
               {FONT_FAMILIES.map((f) => (
                 <option key={f} value={f}>
                   {f}
@@ -107,7 +189,9 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
               min={8}
               max={400}
               value={c.size ?? 72}
-              onChange={(e) => editText({ size: Math.max(8, Number(e.target.value) || 72) })}
+              onChange={(e) =>
+                editText({ size: Math.max(8, Number(e.target.value) || 72) })
+              }
               list="strut-font-sizes"
             />
             <datalist id="strut-font-sizes">
@@ -118,7 +202,10 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
           </label>
           <div className="insp__row insp__row--stack">
             <span>Color</span>
-            <ColorField value={c.color ?? '111111'} onChange={(hex) => editText({ color: hex })} />
+            <ColorField
+              value={c.color ?? '111111'}
+              onChange={(hex) => editText({ color: hex })}
+            />
           </div>
         </>
       )}
@@ -126,7 +213,7 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
       {c.kind === 'shape' && (
         <div className="insp__row insp__row--stack">
           <span>Fill</span>
-          <ColorField value={c.fill ?? '3498db'} onChange={(hex) => mutate.setShapeFill({ id: c.id, fill: hex })} />
+          <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
         </div>
       )}
 
@@ -136,7 +223,7 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
           type="text"
           placeholder="css-class…"
           defaultValue={c.custom_classes ?? ''}
-          onBlur={(e) => mutate.setComponentClasses({ table: c.table, id: c.id, custom_classes: e.target.value.trim() })}
+          onBlur={(e) => setClasses(e.target.value.trim())}
         />
       </label>
 
@@ -145,14 +232,14 @@ export function Inspector({ components }: { components: readonly AnyComponent[] 
         <button
           className="btn btn--ghost"
           disabled={c.z_order >= maxZ}
-          onClick={() => mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })}
+          onClick={() => setZ(maxZ + 1)}
         >
           Front
         </button>
         <button
           className="btn btn--ghost"
           disabled={c.z_order <= minZ}
-          onClick={() => mutate.setComponentZ({ table: c.table, id: c.id, z_order: minZ - 1 })}
+          onClick={() => setZ(minZ - 1)}
         >
           Back
         </button>

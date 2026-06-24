@@ -15,7 +15,12 @@ import {
   videoComponentsQuery,
   webframeComponentsQuery,
 } from '../../shared/queries'
-import { mergeComponents, SHAPES, type SpatialBase } from './types'
+import {
+  mergeComponents,
+  SHAPES,
+  type AnyComponent,
+  type SpatialBase,
+} from './types'
 import {
   deserializeDeck,
   serializeDeck,
@@ -32,8 +37,16 @@ type Mutate = StrutApp['mutate']
 
 /** Materialize a named query, wait until it's server-authoritative, read it once, then release it.
  *  (Verified: `materialize` drives the lease without a subscriber — see RINDLE_NOTES #11.) */
-async function readOnce<T>(store: Store, query: unknown, timeoutMs = 5000): Promise<T> {
-  const view = store.materialize(query as never) as { data: T; resultType: string; destroy(): void }
+async function readOnce<T>(
+  store: Store,
+  query: unknown,
+  timeoutMs = 5000,
+): Promise<T> {
+  const view = store.materialize(query as never) as {
+    data: T
+    resultType: string
+    destroy(): void
+  }
   const start = Date.now()
   while (view.resultType !== 'complete' && Date.now() - start < timeoutMs) {
     await new Promise((r) => setTimeout(r, 30))
@@ -43,11 +56,17 @@ async function readOnce<T>(store: Store, query: unknown, timeoutMs = 5000): Prom
   return data
 }
 
-export async function gatherDeckBundle(store: Store, deckId: string): Promise<DeckBundle | null> {
+export async function gatherDeckBundle(
+  store: Store,
+  deckId: string,
+): Promise<DeckBundle | null> {
   const deck = await readOnce<DeckRowLike | null>(store, deckQuery({ deckId }))
   if (!deck) return null
   const slides = await readOnce<SlideRowLike[]>(store, slidesQuery({ deckId }))
-  const customBackgrounds = await readOnce<{ klass: string; style: string }[]>(store, customBackgroundsQuery({ deckId }))
+  const customBackgrounds = await readOnce<{ klass: string; style: string }[]>(
+    store,
+    customBackgroundsQuery({ deckId }),
+  )
 
   const componentsBySlide: DeckBundle['componentsBySlide'] = {}
   for (const s of slides) {
@@ -56,14 +75,43 @@ export async function gatherDeckBundle(store: Store, deckId: string): Promise<De
       readOnce<SpatialBase[]>(store, imageComponentsQuery({ slideId: s.id })),
       readOnce<SpatialBase[]>(store, shapeComponentsQuery({ slideId: s.id })),
       readOnce<SpatialBase[]>(store, videoComponentsQuery({ slideId: s.id })),
-      readOnce<SpatialBase[]>(store, webframeComponentsQuery({ slideId: s.id })),
+      readOnce<SpatialBase[]>(
+        store,
+        webframeComponentsQuery({ slideId: s.id }),
+      ),
     ])
-    componentsBySlide[s.id] = mergeComponents(texts, images, shapes, videos, webframes)
+    componentsBySlide[s.id] = mergeComponents(
+      texts,
+      images,
+      shapes,
+      videos,
+      webframes,
+    )
   }
   return { deck, slides, componentsBySlide, customBackgrounds }
 }
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'deck'
+/** One-shot read of every component on a slide (merged + z-ordered). Used by undo to snapshot a
+ *  slide before deletion (the server cascades its components, so undo must restore them). */
+export async function readSlideComponents(
+  store: Store,
+  slideId: string,
+): Promise<AnyComponent[]> {
+  const [texts, images, shapes, videos, webframes] = await Promise.all([
+    readOnce<SpatialBase[]>(store, textComponentsQuery({ slideId })),
+    readOnce<SpatialBase[]>(store, imageComponentsQuery({ slideId })),
+    readOnce<SpatialBase[]>(store, shapeComponentsQuery({ slideId })),
+    readOnce<SpatialBase[]>(store, videoComponentsQuery({ slideId })),
+    readOnce<SpatialBase[]>(store, webframeComponentsQuery({ slideId })),
+  ])
+  return mergeComponents(texts, images, shapes, videos, webframes)
+}
+
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'deck'
 
 function triggerDownload(name: string, content: string, mime: string) {
   const blob = new Blob([content], { type: mime })
@@ -77,17 +125,31 @@ function triggerDownload(name: string, content: string, mime: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
-export async function exportDeckJSON(store: Store, deckId: string): Promise<boolean> {
+export async function exportDeckJSON(
+  store: Store,
+  deckId: string,
+): Promise<boolean> {
   const bundle = await gatherDeckBundle(store, deckId)
   if (!bundle) return false
-  triggerDownload(`${slug(bundle.deck.title)}.strut`, JSON.stringify(serializeDeck(bundle), null, 2), 'application/json')
+  triggerDownload(
+    `${slug(bundle.deck.title)}.strut`,
+    JSON.stringify(serializeDeck(bundle), null, 2),
+    'application/json',
+  )
   return true
 }
 
-export async function exportDeckHTML(store: Store, deckId: string): Promise<boolean> {
+export async function exportDeckHTML(
+  store: Store,
+  deckId: string,
+): Promise<boolean> {
   const bundle = await gatherDeckBundle(store, deckId)
   if (!bundle) return false
-  triggerDownload(`${slug(bundle.deck.title)}.html`, toImpressHTML(bundle), 'text/html')
+  triggerDownload(
+    `${slug(bundle.deck.title)}.html`,
+    toImpressHTML(bundle),
+    'text/html',
+  )
   return true
 }
 
@@ -96,23 +158,54 @@ function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
   const common = { id, slideId, x: c.x, y: c.y, z_order: c.z_order }
   switch (c.kind) {
     case 'text':
-      mutate.addText({ ...common, text: c.text ?? 'Text', size: c.size ?? 72, color: c.color ?? '111111', font_family: c.font_family ?? 'Lato' })
+      mutate.addText({
+        ...common,
+        text: c.text ?? 'Text',
+        size: c.size ?? 72,
+        color: c.color ?? '111111',
+        font_family: c.font_family ?? 'Lato',
+      })
       break
     case 'image':
-      mutate.addImage({ ...common, src: c.src ?? '', image_type: c.image_type ?? '', scale_w: c.scale_w || 400, scale_h: c.scale_h || 300 })
+      mutate.addImage({
+        ...common,
+        src: c.src ?? '',
+        image_type: c.image_type ?? '',
+        scale_w: c.scale_w || 400,
+        scale_h: c.scale_h || 300,
+      })
       break
     case 'shape':
-      mutate.addShape({ ...common, shape: c.shape ?? 'square', markup: c.markup || SHAPES[c.shape ?? 'square'] || '', fill: c.fill ?? '3498db' })
+      mutate.addShape({
+        ...common,
+        shape: c.shape ?? 'square',
+        markup: c.markup || SHAPES[c.shape ?? 'square'] || '',
+        fill: c.fill ?? '3498db',
+      })
       break
     case 'video':
-      mutate.addVideo({ ...common, src: c.src ?? '', video_type: c.video_type ?? 'html5', src_type: c.src_type ?? '', short_src: c.short_src ?? '' })
+      mutate.addVideo({
+        ...common,
+        src: c.src ?? '',
+        video_type: c.video_type ?? 'html5',
+        src_type: c.src_type ?? '',
+        short_src: c.short_src ?? '',
+      })
       break
     case 'webframe':
       mutate.addWebframe({ ...common, src: c.src ?? '' })
       break
   }
   // Restore non-default geometry + classes (the add* mutators only take position + type fields).
-  if (c.rotate || c.skew_x || c.skew_y || c.scale_w || c.scale_h || c.scale_x !== 1 || c.scale_y !== 1) {
+  if (
+    c.rotate ||
+    c.skew_x ||
+    c.skew_y ||
+    c.scale_w ||
+    c.scale_h ||
+    c.scale_x !== 1 ||
+    c.scale_y !== 1
+  ) {
     mutate.transformComponent({
       table: c.table,
       id,
@@ -125,7 +218,12 @@ function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
       skew_y: c.skew_y || 0,
     })
   }
-  if (c.custom_classes) mutate.setComponentClasses({ table: c.table, id, custom_classes: c.custom_classes })
+  if (c.custom_classes)
+    mutate.setComponentClasses({
+      table: c.table,
+      id,
+      custom_classes: c.custom_classes,
+    })
 }
 
 /** Rebuild a deck from a parsed import. Returns the new deck id. */
@@ -141,7 +239,13 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
     canned_transition: imported.canned_transition,
     now,
   })
-  for (const b of imported.customBackgrounds) mutate.mintCustomColor({ id: newId(), deckId, klass: b.klass, style: b.style })
+  for (const b of imported.customBackgrounds)
+    mutate.mintCustomColor({
+      id: newId(),
+      deckId,
+      klass: b.klass,
+      style: b.style,
+    })
 
   let prevSort: string | null = null
   for (const s of imported.slides) {
@@ -160,7 +264,13 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
       imp_scale: s.imp_scale,
       now,
     })
-    if (s.background || s.surface) mutate.setSlideTheme({ id: slideId, background: s.background, surface: s.surface, now })
+    if (s.background || s.surface)
+      mutate.setSlideTheme({
+        id: slideId,
+        background: s.background,
+        surface: s.surface,
+        now,
+      })
     for (const c of s.components) addComponent(mutate, slideId, c)
   }
   return deckId

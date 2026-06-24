@@ -4,7 +4,14 @@
 
 import { SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
-import { cssHex, resolveBackground, resolveSurface, type AnyComponent } from './types'
+import {
+  cssHex,
+  resolveBackground,
+  resolveSurface,
+  type AnyComponent,
+} from './types'
+import { flightFor } from './transitions'
+import { scopeCss } from './css'
 import type { DeckBundle } from './serialize'
 
 // Overview (x,y) are in 240px "card" units; the world places full 1280px slides (matches play route).
@@ -12,7 +19,11 @@ const WORLD = SLIDE_W / 240
 const deg = (rad: number) => (rad * 180) / Math.PI
 
 const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 
 function componentHTML(c: AnyComponent): string {
   const { w, h } = componentSize(c)
@@ -25,7 +36,9 @@ function componentHTML(c: AnyComponent): string {
       body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
       break
     case 'image':
-      body = c.src ? `<img src="${esc(c.src)}" style="width:100%;height:100%;object-fit:contain" alt="">` : ''
+      body = c.src
+        ? `<img src="${esc(c.src)}" style="width:100%;height:100%;object-fit:contain" alt="">`
+        : ''
       break
     case 'shape':
       extra = `color:${cssHex(c.fill, '3498db')};`
@@ -34,7 +47,8 @@ function componentHTML(c: AnyComponent): string {
     case 'video':
       if (c.video_type === 'youtube' && c.short_src)
         body = `<iframe src="https://www.youtube.com/embed/${esc(c.short_src)}" style="width:100%;height:100%;border:0" allowfullscreen></iframe>`
-      else body = `<video src="${esc(c.src || '')}" controls style="width:100%;height:100%"></video>`
+      else
+        body = `<video src="${esc(c.src || '')}" controls style="width:100%;height:100%"></video>`
       break
     case 'webframe':
       body = `<iframe src="${esc(c.src || '')}" style="width:100%;height:100%;border:0"></iframe>`
@@ -55,16 +69,19 @@ function stepHTML(
     `data-y="${Math.round(slide.y * WORLD)}"`,
   ]
   if (slide.z) attrs.push(`data-z="${Math.round(slide.z)}"`)
-  if (slide.rotate_x) attrs.push(`data-rotate-x="${deg(slide.rotate_x).toFixed(2)}"`)
-  if (slide.rotate_y) attrs.push(`data-rotate-y="${deg(slide.rotate_y).toFixed(2)}"`)
-  if (slide.rotate_z) attrs.push(`data-rotate-z="${deg(slide.rotate_z).toFixed(2)}"`)
+  if (slide.rotate_x)
+    attrs.push(`data-rotate-x="${deg(slide.rotate_x).toFixed(2)}"`)
+  if (slide.rotate_y)
+    attrs.push(`data-rotate-y="${deg(slide.rotate_y).toFixed(2)}"`)
+  if (slide.rotate_z)
+    attrs.push(`data-rotate-z="${deg(slide.rotate_z).toFixed(2)}"`)
   const scale = (slide.imp_scale || 3) / 3
   if (scale !== 1) attrs.push(`data-scale="${scale}"`)
 
   const bg = resolveBackground(slide.background, deck.background)
   const sorted = [...components].sort((a, b) => a.z_order - b.z_order)
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
-    <div class="slideContainer" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative">
 ${sorted.map((c) => '      ' + componentHTML(c)).join('\n')}
     </div>
   </div>`
@@ -73,8 +90,17 @@ ${sorted.map((c) => '      ' + componentHTML(c)).join('\n')}
 export function toImpressHTML(bundle: DeckBundle): string {
   const { deck, slides, componentsBySlide, customBackgrounds } = bundle
   const surface = resolveSurface(undefined, deck.surface)
-  const steps = slides.map((s, i) => stepHTML(s, componentsBySlide[s.id] ?? [], deck, i)).join('\n')
-  const customCss = customBackgrounds.map((b) => `.${b.klass}{background:${b.style}}`).join('\n')
+  const steps = slides
+    .map((s, i) => stepHTML(s, componentsBySlide[s.id] ?? [], deck, i))
+    .join('\n')
+  const customCss = customBackgrounds
+    .map((b) => `.${b.klass}{background:${b.style}}`)
+    .join('\n')
+  // Canned transition (spec §7.2): impress reads data-transition-duration; we also emit the chosen
+  // name as a class for fidelity (a Bespoke generator would consume it; impress ignores it).
+  const transition = deck.canned_transition || 'none'
+  const duration = flightFor(transition).duration || 900
+  const userCss = scopeCss(deck.custom_stylesheet || '')
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -93,12 +119,12 @@ export function toImpressHTML(bundle: DeckBundle): string {
   .impress-supported .fallback{display:none;}
   .hint{position:fixed;bottom:10px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:13px;}
 ${customCss}
-${deck.custom_stylesheet || ''}
+${userCss}
 </style>
 </head>
 <body class="impress-not-supported">
 <div class="fallback">Your browser doesn't support CSS 3D transforms — open this in a modern browser.</div>
-<div id="impress" data-transition-duration="900">
+<div id="impress" class="strut-transition-${transition}" data-transition-duration="${duration}">
 ${steps}
   <div id="overview" class="step" data-x="0" data-y="0" data-scale="10"></div>
 </div>

@@ -6,6 +6,8 @@ import { useRef } from 'react'
 import { GRID_SNAP } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
+import { useHistory } from './UndoProvider'
+import { CANNED_TRANSITIONS } from './transitions'
 import { SlideThumb } from './SlideThumb'
 
 export interface OverviewSlide {
@@ -24,14 +26,25 @@ export interface OverviewSlide {
 const CARD_W = 240
 const DEG = 180 / Math.PI
 
-export function Overview({ slides, deck }: { slides: OverviewSlide[]; deck: { background: string } | null }) {
+export function Overview({
+  slides,
+  deck,
+}: {
+  slides: OverviewSlide[]
+  deck: { id: string; background: string; canned_transition: string } | null
+}) {
   const editor = useEditor()
   const mutate = useMutate()
+  const history = useHistory()
   const worldRef = useRef<HTMLDivElement>(null)
 
   const active = slides.find((s) => s.id === editor.activeSlideId) ?? null
 
-  function setTransform(s: OverviewSlide, patch: Partial<OverviewSlide>, folded = false) {
+  function setTransform(
+    s: OverviewSlide,
+    patch: Partial<OverviewSlide>,
+    folded = false,
+  ) {
     const args = {
       id: s.id,
       x: patch.x ?? s.x,
@@ -54,6 +67,7 @@ export function Overview({ slides, deck }: { slides: OverviewSlide[]; deck: { ba
     const sy = e.clientY
     const x0 = s.x
     const y0 = s.y
+    let last = { x: x0, y: y0 }
     const move = (ev: PointerEvent) => {
       let nx = x0 + (ev.clientX - sx)
       let ny = y0 + (ev.clientY - sy)
@@ -61,23 +75,46 @@ export function Overview({ slides, deck }: { slides: OverviewSlide[]; deck: { ba
         nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
         ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
       }
-      setTransform(s, { x: Math.round(nx), y: Math.round(ny) }, true)
+      last = { x: Math.round(nx), y: Math.round(ny) }
+      setTransform(s, last, true)
     }
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      if (last.x === x0 && last.y === y0) return
+      const finalPos = last
+      history.push({
+        label: 'Move slide',
+        redo: () => setTransform(s, finalPos),
+        undo: () => setTransform(s, { x: x0, y: y0 }),
+      })
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
   }
 
+  function setTransition(name: string) {
+    if (!deck) return
+    mutate.setDeckTheme({
+      id: deck.id,
+      canned_transition: name,
+      now: Date.now(),
+    })
+  }
+
   return (
     <div className="overview">
-      <div className="overview__world" ref={worldRef} style={{ width: 6000, height: 4000 }}>
+      <div
+        className="overview__world"
+        ref={worldRef}
+        style={{ width: 6000, height: 4000 }}
+      >
         {slides.map((s, i) => (
           <div
             key={s.id}
-            className={'ov-card' + (editor.activeSlideId === s.id ? ' is-active' : '')}
+            className={
+              'ov-card' + (editor.activeSlideId === s.id ? ' is-active' : '')
+            }
             style={{
               left: s.x,
               top: s.y,
@@ -96,16 +133,56 @@ export function Overview({ slides, deck }: { slides: OverviewSlide[]; deck: { ba
         ))}
       </div>
 
-      <div className="ov-hint">Drag cards to arrange the camera path · the number is the slide order</div>
+      <div className="ov-hint">
+        Drag cards to arrange the camera path · the number is the slide order
+      </div>
+
+      <div className="ov-transitions">
+        <span className="ov-transitions__label">Transition</span>
+        {CANNED_TRANSITIONS.map((name) => (
+          <button
+            key={name}
+            className={
+              'ov-transitions__btn' +
+              ((deck?.canned_transition ?? 'none') === name ? ' is-active' : '')
+            }
+            onClick={() => setTransition(name)}
+            title={`Camera transition: ${name}`}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
 
       {active && (
         <div className="popover" style={{ top: 12, right: 12, width: 180 }}>
           <strong style={{ fontSize: 12 }}>Slide transform</strong>
-          <NumRow label="z" value={Math.round(active.z)} onChange={(v) => setTransform(active, { z: v })} />
-          <NumRow label="scale" value={Math.round((active.imp_scale ?? 3) * 100) / 100} step={0.1} onChange={(v) => setTransform(active, { imp_scale: v })} />
-          <NumRow label="rotX°" value={Math.round(active.rotate_x * DEG)} onChange={(v) => setTransform(active, { rotate_x: v / DEG })} />
-          <NumRow label="rotY°" value={Math.round(active.rotate_y * DEG)} onChange={(v) => setTransform(active, { rotate_y: v / DEG })} />
-          <NumRow label="rotZ°" value={Math.round(active.rotate_z * DEG)} onChange={(v) => setTransform(active, { rotate_z: v / DEG })} />
+          <NumRow
+            label="z"
+            value={Math.round(active.z)}
+            onChange={(v) => setTransform(active, { z: v })}
+          />
+          <NumRow
+            label="scale"
+            value={Math.round((active.imp_scale ?? 3) * 100) / 100}
+            step={0.1}
+            onChange={(v) => setTransform(active, { imp_scale: v })}
+          />
+          <NumRow
+            label="rotX°"
+            value={Math.round(active.rotate_x * DEG)}
+            onChange={(v) => setTransform(active, { rotate_x: v / DEG })}
+          />
+          <NumRow
+            label="rotY°"
+            value={Math.round(active.rotate_y * DEG)}
+            onChange={(v) => setTransform(active, { rotate_y: v / DEG })}
+          />
+          <NumRow
+            label="rotZ°"
+            value={Math.round(active.rotate_z * DEG)}
+            onChange={(v) => setTransform(active, { rotate_z: v / DEG })}
+          />
         </div>
       )}
     </div>
@@ -124,9 +201,17 @@ function NumRow({
   onChange: (v: number) => void
 }) {
   return (
-    <label className="field" style={{ justifyContent: 'space-between', marginTop: 6 }}>
+    <label
+      className="field"
+      style={{ justifyContent: 'space-between', marginTop: 6 }}
+    >
       {label}
-      <input type="number" step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <input
+        type="number"
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
     </label>
   )
 }
