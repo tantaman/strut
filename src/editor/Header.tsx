@@ -231,119 +231,168 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         }
       />
 
-      {canInsert && (
-        <>
-          <div className="hdr__sep" />
-          <div className="hdr__group">
-            <button className="btn" onClick={addText} title="Text">
-              <Type size={16} /> Text
-            </button>
-            <button
-              className="btn"
-              onClick={() => setMenu('media-image')}
-              title="Image"
-            >
-              <ImageIcon size={16} />
-            </button>
-            <button
-              className="btn"
-              onClick={() => setMenu('media-video')}
-              title="Video"
-            >
-              <Video size={16} />
-            </button>
-            <button
-              className="btn"
-              onClick={() => setMenu('media-web')}
-              title="Web frame"
-            >
-              <Globe size={16} />
-            </button>
-            <div style={{ position: 'relative' }}>
+      {/* Secondary tools: a single cluster so it can collapse to icons and then drop to a
+          second row on narrow screens (see .hdr__tools media queries in strut.css). */}
+      <div className="hdr__tools">
+        {canInsert && (
+          <>
+            <div className="hdr__sep" />
+            <div className="hdr__group">
+              <button className="btn" onClick={addText} title="Text">
+                <Type size={16} /> <span className="lbl">Text</span>
+              </button>
               <button
                 className="btn"
-                onClick={() => setMenu(menu === 'shapes' ? null : 'shapes')}
-                title="Shapes"
+                onClick={() => setMenu('media-image')}
+                title="Image"
               >
-                <Shapes size={16} />
+                <ImageIcon size={16} />
               </button>
-              {menu === 'shapes' && (
-                <div className="popover" style={{ top: '110%', left: 0 }}>
-                  <div
-                    className="swatches"
-                    style={{ gridTemplateColumns: 'repeat(4, 30px)' }}
-                  >
-                    {SHAPE_NAMES.map((n) => (
-                      <button
-                        key={n}
-                        className="swatch"
-                        title={n}
-                        style={{
-                          width: 30,
-                          height: 30,
-                          color: '#3498db',
-                          padding: 3,
-                        }}
-                        onClick={() => addShape(n)}
-                        dangerouslySetInnerHTML={{ __html: SHAPES[n] }}
-                      />
-                    ))}
+              <button
+                className="btn"
+                onClick={() => setMenu('media-video')}
+                title="Video"
+              >
+                <Video size={16} />
+              </button>
+              <button
+                className="btn"
+                onClick={() => setMenu('media-web')}
+                title="Web frame"
+              >
+                <Globe size={16} />
+              </button>
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="btn"
+                  onClick={() => setMenu(menu === 'shapes' ? null : 'shapes')}
+                  title="Shapes"
+                >
+                  <Shapes size={16} />
+                </button>
+                {menu === 'shapes' && (
+                  <div className="popover" style={{ top: '110%', left: 0 }}>
+                    <div
+                      className="swatches"
+                      style={{ gridTemplateColumns: 'repeat(4, 30px)' }}
+                    >
+                      {SHAPE_NAMES.map((n) => (
+                        <button
+                          key={n}
+                          className="swatch"
+                          title={n}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            color: '#3498db',
+                            padding: 3,
+                          }}
+                          onClick={() => addShape(n)}
+                          dangerouslySetInnerHTML={{ __html: SHAPES[n] }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {editor.canEdit && (
-        <>
-          <div className="hdr__sep" />
-          <div className="hdr__group">
-            <button
-              className="btn"
-              disabled={!hist.canUndo}
-              onClick={() => history.undo()}
-              title={hist.undoLabel ? `Undo ${hist.undoLabel}` : 'Undo (⌘Z)'}
-            >
-              <Undo2 size={16} />
-            </button>
-            <button
-              className="btn"
-              disabled={!hist.canRedo}
-              onClick={() => history.redo()}
-              title={hist.redoLabel ? `Redo ${hist.redoLabel}` : 'Redo (⇧⌘Z)'}
-            >
-              <Redo2 size={16} />
-            </button>
-          </div>
+        {editor.canEdit && (
+          <>
+            <div className="hdr__sep" />
+            <div className="hdr__group">
+              <button
+                className="btn"
+                disabled={!hist.canUndo}
+                onClick={() => history.undo()}
+                title={hist.undoLabel ? `Undo ${hist.undoLabel}` : 'Undo (⌘Z)'}
+              >
+                <Undo2 size={16} />
+              </button>
+              <button
+                className="btn"
+                disabled={!hist.canRedo}
+                onClick={() => history.redo()}
+                title={hist.redoLabel ? `Redo ${hist.redoLabel}` : 'Redo (⇧⌘Z)'}
+              >
+                <Redo2 size={16} />
+              </button>
+            </div>
 
-          <div className="hdr__sep" />
-          <div className="hdr__group">
-            <BgButton
-              label="Bg"
-              current={deck?.background}
-              swatches={BACKGROUND_SWATCHES}
-              resolve={(v) => resolveBackground(v, v)}
-              open={menu === 'bg'}
-              onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
-              onPick={(v) => setBg('bg', v)}
-              onCustom={(hex) => setCustom('bg', hex)}
-              allowTransparent
-            />
-            <BgButton
-              label="Surface"
-              current={deck?.surface}
-              swatches={SURFACE_SWATCHES}
-              resolve={(v) => resolveSurface(v, v)}
-              open={menu === 'surface'}
-              onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
-              onPick={(v) => setBg('surface', v)}
-              onCustom={(hex) => setCustom('surface', hex)}
-            />
-          </div>
-        </>
-      )}
+            <div className="hdr__sep" />
+            <div className="hdr__group">
+              <BgButton
+                label="Bg"
+                current={deck?.background}
+                swatches={BACKGROUND_SWATCHES}
+                resolve={(v) => resolveBackground(v, v)}
+                open={menu === 'bg'}
+                onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
+                onPick={(v) => setBg('bg', v)}
+                onCustom={(hex) => setCustom('bg', hex)}
+                allowTransparent
+              />
+              <BgButton
+                label="Surface"
+                current={deck?.surface}
+                swatches={SURFACE_SWATCHES}
+                resolve={(v) => resolveSurface(v, v)}
+                open={menu === 'surface'}
+                onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
+                onPick={(v) => setBg('surface', v)}
+                onCustom={(hex) => setCustom('surface', hex)}
+              />
+            </div>
+          </>
+        )}
+
+        {editor.canEdit && (
+          <button
+            className="btn"
+            onClick={() => setCssOpen(true)}
+            title="Custom CSS"
+            disabled={!deck}
+          >
+            <Code2 size={16} /> <span className="lbl">CSS</span>
+          </button>
+        )}
+
+        <div style={{ position: 'relative' }}>
+          <button
+            className="btn"
+            onClick={() => setMenu(menu === 'export' ? null : 'export')}
+            title="Export"
+            disabled={!deck || exporting}
+          >
+            <Download size={16} />{' '}
+            <span className="lbl">{exporting ? 'Exporting…' : 'Export'}</span>
+          </button>
+          {menu === 'export' && (
+            <div
+              className="popover popover--menu"
+              style={{ top: '110%', right: 0 }}
+            >
+              <button className="menu-item" onClick={() => doExport('json')}>
+                Strut JSON (.strut)
+              </button>
+              <button className="menu-item" onClick={() => doExport('html')}>
+                Standalone HTML (impress.js)
+              </button>
+            </div>
+          )}
+        </div>
+
+        <button
+          className="btn"
+          onClick={() => setShareOpen(true)}
+          title="Share"
+          disabled={!deck}
+        >
+          <Share2 size={16} /> <span className="lbl">Share</span>
+        </button>
+      </div>
 
       <div className="hdr__spacer" />
 
@@ -361,50 +410,6 @@ export function Header({ deck }: { deck: DeckRow | null }) {
           Overview
         </button>
       </div>
-
-      {editor.canEdit && (
-        <button
-          className="btn"
-          onClick={() => setCssOpen(true)}
-          title="Custom CSS"
-          disabled={!deck}
-        >
-          <Code2 size={16} /> CSS
-        </button>
-      )}
-
-      <div style={{ position: 'relative' }}>
-        <button
-          className="btn"
-          onClick={() => setMenu(menu === 'export' ? null : 'export')}
-          title="Export"
-          disabled={!deck || exporting}
-        >
-          <Download size={16} /> {exporting ? 'Exporting…' : 'Export'}
-        </button>
-        {menu === 'export' && (
-          <div
-            className="popover popover--menu"
-            style={{ top: '110%', right: 0 }}
-          >
-            <button className="menu-item" onClick={() => doExport('json')}>
-              Strut JSON (.strut)
-            </button>
-            <button className="menu-item" onClick={() => doExport('html')}>
-              Standalone HTML (impress.js)
-            </button>
-          </div>
-        )}
-      </div>
-
-      <button
-        className="btn"
-        onClick={() => setShareOpen(true)}
-        title="Share"
-        disabled={!deck}
-      >
-        <Share2 size={16} /> Share
-      </button>
 
       <button
         className="btn btn--primary"
@@ -484,7 +489,8 @@ function BgButton({
   return (
     <div style={{ position: 'relative' }}>
       <button className="btn" onClick={onToggle} title={label}>
-        <Square size={14} fill={current ? resolve(current) : 'none'} /> {label}
+        <Square size={14} fill={current ? resolve(current) : 'none'} />{' '}
+        <span className="lbl">{label}</span>
       </button>
       {open && (
         <div className="popover" style={{ top: '110%', left: 0 }}>

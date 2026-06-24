@@ -330,6 +330,14 @@ button {
   align-items: center;
   gap: 6px;
 }
+/* All secondary tools live in one cluster so the header can shed labels, then drop the
+   whole cluster to a second row, as the viewport narrows (responsive rules at the bottom). */
+.hdr__tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
 .hdr__sep {
   width: 1px;
   align-self: stretch;
@@ -359,6 +367,7 @@ button {
 }
 .seg {
   display: inline-flex;
+  flex: 0 0 auto; /* never shrink/clip the mode toggle (it has overflow:hidden) */
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   overflow: hidden;
@@ -390,6 +399,44 @@ button {
   flex: 1;
   display: flex;
   min-height: 0;
+}
+
+/* ---- responsive header (spec §4.2) ----
+   The full toolbar is wide, so it collapses in two steps as the viewport shrinks:
+   1) labels drop to icon-only (titles still tooltip them),
+   2) the tool cluster drops to its own row, leaving title + mode toggle + Present on top. */
+@media (max-width: 1499px) {
+  .hdr .lbl {
+    display: none;
+  }
+}
+@media (max-width: 1080px) {
+  .hdr {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .hdr__spacer {
+    display: none;
+  }
+  .hdr__title {
+    flex: 1 1 auto;
+    min-width: 0; /* shrink/clip the title instead of pushing controls off-screen */
+  }
+  .hdr__tools {
+    order: 5; /* below the title + mode toggle + Present row */
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .hdr__tools .hdr__sep:first-child {
+    display: none; /* no dangling divider at the start of the tools row */
+  }
+}
+@media (max-width: 420px) {
+  /* very small: let the mode toggle breathe by tightening its padding */
+  .seg button {
+    padding: 5px 10px;
+  }
 }
 
 /* ---- slide well ---- */
