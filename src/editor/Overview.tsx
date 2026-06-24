@@ -342,7 +342,14 @@ export function Overview({
           <SlideXform
             s={soleSlide}
             inv={inv}
-            onChange={(patch) => setTransform(soleSlide, patch)}
+            apply={(patch, folded) => setTransform(soleSlide, patch, folded)}
+            pushHistory={(label, before, after) =>
+              history.push({
+                label,
+                undo: () => setTransform(soleSlide, before),
+                redo: () => setTransform(soleSlide, after),
+              })
+            }
           />
         )}
       </div>
@@ -404,17 +411,34 @@ export function Overview({
 
 // Inline transform controls mounted on the selected card's edges (spec §7.1). The frame is flat
 // (no 3-D) and sized to the card footprint; each chip counter-scales by `inv` to stay readable at
-// any zoom. Rotations edit in degrees (converted to radians at the edge).
+// any zoom. Rotations edit in degrees (converted to radians at the edge). Every field is a scrub:
+// drag its label (or the number) to change the value; a single drag is one undo entry.
 function SlideXform({
   s,
   inv,
-  onChange,
+  apply,
+  pushHistory,
 }: {
   s: OverviewSlide
   inv: number
-  onChange: (patch: Partial<OverviewSlide>) => void
+  apply: (patch: Partial<OverviewSlide>, folded: boolean) => void
+  pushHistory: (
+    label: string,
+    before: Partial<OverviewSlide>,
+    after: Partial<OverviewSlide>,
+  ) => void
 }) {
   const sf = (s.imp_scale || 3) / 3
+  // disp = value shown/scrubbed; toModel converts it back to the stored field.
+  const rot = (
+    key: 'rotate_x' | 'rotate_y' | 'rotate_z',
+  ): Omit<ScrubProps, 'label' | 'inv'> => ({
+    value: Math.round(s[key] * DEG),
+    step: 1,
+    sens: 1,
+    onLive: (d, folded) => apply({ [key]: d / DEG }, folded),
+    onCommit: (a, b) => pushHistory('Rotate slide', { [key]: a / DEG }, { [key]: b / DEG }),
+  })
   return (
     <div
       className="ov-xform"
@@ -427,70 +451,55 @@ function SlideXform({
       }}
     >
       <div className="ov-xform__a ov-xform__a--top">
-        <Chip
-          label="⟲Y"
-          inv={inv}
-          value={Math.round(s.rotate_y * DEG)}
-          onChange={(v) => onChange({ rotate_y: v / DEG })}
-        />
+        <Chip inv={inv}>
+          <ScrubField label="⟲Y" inv={inv} {...rot('rotate_y')} />
+        </Chip>
       </div>
       <div className="ov-xform__a ov-xform__a--left">
-        <Chip
-          label="⟲X"
-          inv={inv}
-          value={Math.round(s.rotate_x * DEG)}
-          onChange={(v) => onChange({ rotate_x: v / DEG })}
-        />
+        <Chip inv={inv}>
+          <ScrubField label="⟲X" inv={inv} {...rot('rotate_x')} />
+        </Chip>
       </div>
       <div className="ov-xform__a ov-xform__a--right">
-        <Chip
-          label="⟲Z"
-          inv={inv}
-          value={Math.round(s.rotate_z * DEG)}
-          onChange={(v) => onChange({ rotate_z: v / DEG })}
-        />
+        <Chip inv={inv}>
+          <ScrubField label="⟲Z" inv={inv} {...rot('rotate_z')} />
+        </Chip>
       </div>
       <div className="ov-xform__a ov-xform__a--bot">
-        <div
-          className="ov-xform__chip"
-          style={{ transform: `scale(${inv})` }}
-          onPointerDown={stop}
-        >
-          <span className="ov-xform__lbl">z</span>
-          <input
-            className="ov-xform__in"
-            type="number"
+        <Chip inv={inv}>
+          <ScrubField
+            label="z"
+            inv={inv}
             value={Math.round(s.z)}
-            onChange={(e) => onChange({ z: Number(e.target.value) })}
+            step={1}
+            sens={3}
+            onLive={(d, folded) => apply({ z: d }, folded)}
+            onCommit={(a, b) => pushHistory('Slide depth', { z: a }, { z: b })}
           />
-          <span className="ov-xform__lbl" title="Scale (impress)">
-            ⤢
-          </span>
-          <input
-            className="ov-xform__in"
-            type="number"
-            step={0.1}
+          <ScrubField
+            label="⤢"
+            title="Scale (impress)"
+            inv={inv}
             value={Math.round((s.imp_scale ?? 3) * 100) / 100}
-            onChange={(e) => onChange({ imp_scale: Number(e.target.value) })}
+            step={0.1}
+            sens={0.03}
+            onLive={(d, folded) => apply({ imp_scale: d }, folded)}
+            onCommit={(a, b) =>
+              pushHistory('Slide scale', { imp_scale: a }, { imp_scale: b })
+            }
           />
-        </div>
+        </Chip>
       </div>
     </div>
   )
 }
 
 function Chip({
-  label,
   inv,
-  value,
-  step = 1,
-  onChange,
+  children,
 }: {
-  label: string
   inv: number
-  value: number
-  step?: number
-  onChange: (v: number) => void
+  children: React.ReactNode
 }) {
   return (
     <div
@@ -498,14 +507,88 @@ function Chip({
       style={{ transform: `scale(${inv})` }}
       onPointerDown={stop}
     >
-      <span className="ov-xform__lbl">{label}</span>
+      {children}
+    </div>
+  )
+}
+
+interface ScrubProps {
+  label: string
+  title?: string
+  inv: number
+  value: number
+  step?: number
+  sens?: number // value units per pixel dragged
+  onLive: (disp: number, folded: boolean) => void
+  onCommit: (start: number, end: number) => void
+}
+
+// A draggable number field. Dragging the label scrubs immediately; dragging the number scrubs once
+// the pointer moves past a small threshold (so a plain click still focuses it for typing). Hold
+// Shift for fine control. `inv` undoes the zoom so the value is added in screen pixels, not world px.
+function ScrubField({
+  label,
+  title,
+  inv,
+  value,
+  step = 1,
+  sens = 1,
+  onLive,
+  onCommit,
+}: ScrubProps) {
+  const roundStep = (v: number) =>
+    Number((Math.round(v / step) * step).toFixed(4))
+
+  function startScrub(e: React.PointerEvent, threshold: number) {
+    e.stopPropagation()
+    const startX = e.clientX
+    const startVal = value
+    let scrubbing = threshold === 0
+    let last = startVal
+    if (scrubbing) e.preventDefault()
+    const move = (ev: PointerEvent) => {
+      const dxScreen = (ev.clientX - startX) * inv
+      if (!scrubbing) {
+        if (Math.abs(ev.clientX - startX) <= threshold) return
+        scrubbing = true
+      }
+      ev.preventDefault()
+      const fine = ev.shiftKey ? 0.2 : 1
+      const nv = roundStep(startVal + dxScreen * sens * fine)
+      if (nv !== last) {
+        last = nv
+        onLive(nv, true)
+      }
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      if (scrubbing && last !== startVal) {
+        onLive(last, false)
+        onCommit(startVal, last)
+      }
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  return (
+    <>
+      <span
+        className="ov-xform__lbl ov-xform__lbl--scrub"
+        title={title ?? 'Drag to change'}
+        onPointerDown={(e) => startScrub(e, 0)}
+      >
+        {label}
+      </span>
       <input
         className="ov-xform__in"
         type="number"
         step={step}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onLive(Number(e.target.value), false)}
+        onPointerDown={(e) => startScrub(e, 3)}
       />
-    </div>
+    </>
   )
 }

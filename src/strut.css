@@ -763,6 +763,13 @@ button {
   color: var(--muted, #888);
   user-select: none;
 }
+.ov-xform__lbl--scrub {
+  cursor: ew-resize;
+  touch-action: none;
+}
+.ov-xform__lbl--scrub:hover {
+  color: var(--coral);
+}
 .ov-xform__in {
   width: 38px;
   border: 1px solid var(--line);
