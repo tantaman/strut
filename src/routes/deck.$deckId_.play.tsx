@@ -8,7 +8,7 @@ import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { SLIDE_H, SLIDE_W } from '../config'
 
-export const Route = createFileRoute('/deck/$deckId/play')({ component: Play })
+export const Route = createFileRoute('/deck/$deckId_/play')({ component: Play })
 
 // Overview (x,y) are in "card" units (240px wide); the world places full 1280px slides, so scale up.
 const WORLD = SLIDE_W / 240
