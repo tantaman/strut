@@ -89,21 +89,27 @@ MyRow[]` rather than importing the inferred type. Likely my own ergonomics gap �
 "export this query's row type" recipe (e.g. `type Row = QueryData<typeof slidesQuery>[number]`) would
 remove the casts.
 
-### 🔴 9. `@rindle/wasm` won't initialize under Node 24 (blocks headless client testing)
-I tried to exercise the REAL optimistic client headlessly (Node has global `WebSocket` + `WebAssembly`,
-and `initWasm` reads the wasm from disk in Node). `createRindleClient` got as far as `initWasm()` then
-threw:
+### 🔴 9. `@rindle/wasm@0.1.1` `rindle_bg.wasm` is broken: `__wbindgen_externrefs` exports the WRONG table
+The published wasm fails to initialize in **every** engine (my Node smoke test AND the browser),
+throwing on `createRindleClient` → `initWasm()`:
 ```
 RangeError: WebAssembly.Table.grow(): failed to grow table by 4
-  at __wbindgen_init_externref_table (@rindle/wasm/pkg/rindle.js)
+  at __wbindgen_init_externref_table (@rindle/wasm/pkg/rindle.js:656)   // wasm.__wbindgen_externrefs.grow(4)
 ```
-This is a wasm-bindgen externref-table-growth incompatibility with Node's WASM engine (browsers handle
-it). WASM is browser-only in this app (the API server uses `HttpRindleDaemonClient`, SSR uses the
-`read` endpoint — neither touches wasm), so it doesn't affect the running app, but it does mean the
-optimistic client path can't be smoke-tested outside a browser.
-- **Ask:** if Rindle wants Node-side testability (or Node/SSR use of the optimistic store), the wasm
-  build likely needs the externref table emitted with a `maximum`, or a documented Node init path. At
-  minimum, document "the optimistic client is browser-only; here's how to test it."
+**Confirmed root cause** by parsing `rindle_bg.wasm` directly:
+- The module defines two tables: `table[0]` = **funcref** (`min=max=307`, NOT growable — the
+  call_indirect table) and `table[1]` = **externref** (`min=1024`, no max → growable).
+- But the export `__wbindgen_externrefs` → **table index 0** (the funcref table). So the glue grows the
+  non-growable funcref table instead of the growable externref table → deterministic RangeError.
+- Browsers don't "handle it" (my earlier guess was wrong) — it fails identically in the browser. The
+  reason rindle.sh works is that it must serve a **different/correctly-built** wasm than npm 0.1.1.
+- Only `0.1.0-rc.5/rc.6/0.1.1` are on npm; nothing newer to upgrade to. This is a build/packaging bug
+  in the published artifact (looks like a wasm-bindgen/wasm-opt table-export indexing issue).
+- **This fully blocks the browser app** — the editor reaches "Connecting…" then throws. Everything
+  ELSE (data layer, queries, mutators, API, SSR, build) is verified independently of wasm.
+- **Ask / fix:** republish `@rindle/wasm` built so `__wbindgen_externrefs` points at the externref
+  table (or matching the build that rindle.sh serves). Repro: `node` parse of the Table + Export
+  sections (script in scratchpad) shows the index-0 mismatch.
 
 ### ⚠️ 10. Browser runtime (WASM + WS sync) therefore unverified end-to-end here
 Verified: data layer over HTTP (curl), client+SSR production build, SSR shell render, and the full
