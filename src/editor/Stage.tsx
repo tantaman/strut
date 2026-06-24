@@ -89,6 +89,7 @@ export function Stage({
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (!editor.canEdit) return
       if (e.key !== 'Delete' && e.key !== 'Backspace') return
       const t = e.target as HTMLElement | null
       if (
@@ -145,7 +146,7 @@ export function Stage({
   }
 
   function beginMove(c: AnyComponent, e: RPointerEvent) {
-    if (editingId === c.id) return
+    if (editingId === c.id || !editor.canEdit) return
     e.stopPropagation()
     const additive = e.shiftKey || e.metaKey || e.ctrlKey
     if (additive) editor.select(c.id, true)
@@ -210,6 +211,7 @@ export function Stage({
   }
 
   function beginResize(c: AnyComponent, e: RPointerEvent) {
+    if (!editor.canEdit) return
     e.stopPropagation()
     const sx = e.clientX
     const sy = e.clientY
@@ -306,6 +308,7 @@ export function Stage({
   }
 
   function beginRotate(c: AnyComponent, e: RPointerEvent) {
+    if (!editor.canEdit) return
     e.stopPropagation()
     const el = stageRef.current?.querySelector(`.cmp[data-id="${c.id}"]`)
     if (!el) return
@@ -385,6 +388,7 @@ export function Stage({
 
   // ---- marquee on empty canvas ----
   function beginMarquee(e: RPointerEvent) {
+    if (!editor.canEdit) return
     if (e.target !== e.currentTarget) return // only when clicking bare canvas
     const sx = e.clientX
     const sy = e.clientY
@@ -465,6 +469,7 @@ export function Stage({
               key={c.id}
               c={c}
               scale={scale}
+              canEdit={editor.canEdit}
               selected={editor.isSelected(c.id)}
               soleSelected={
                 editor.selected.size <= 1 && editor.isSelected(c.id)
@@ -474,7 +479,9 @@ export function Stage({
               onResize={(e) => beginResize(c, e)}
               onRotate={(e) => beginRotate(c, e)}
               onDelete={() => deleteComponents([c])}
-              onStartEdit={() => c.kind === 'text' && setEditingId(c.id)}
+              onStartEdit={() =>
+                c.kind === 'text' && editor.canEdit && setEditingId(c.id)
+              }
               onCommitEdit={(html) => commitText(c, html)}
             />
           ))}
@@ -499,6 +506,7 @@ export function Stage({
 function ComponentView({
   c,
   scale,
+  canEdit,
   selected,
   soleSelected,
   editing,
@@ -511,6 +519,7 @@ function ComponentView({
 }: {
   c: AnyComponent
   scale: number
+  canEdit: boolean
   selected: boolean
   soleSelected: boolean
   editing: boolean
@@ -535,7 +544,7 @@ function ComponentView({
       ) : (
         renderInner(c)
       )}
-      {selected && (
+      {selected && canEdit && (
         <button
           className="handle__del"
           style={counter}
@@ -545,7 +554,7 @@ function ComponentView({
           ×
         </button>
       )}
-      {soleSelected && !editing && (
+      {soleSelected && !editing && canEdit && (
         <>
           <div
             className="handle handle--se"

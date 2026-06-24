@@ -41,6 +41,7 @@ import type {
   SetComponentClassesArgs,
   SetComponentZArgs,
   SetDeckThemeArgs,
+  SetDeckVisibilityArgs,
   SetDisplayNameArgs,
   SetShapeFillArgs,
   SetSlideThemeArgs,
@@ -481,6 +482,21 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     tx.exec(
       'DELETE FROM deck_share WHERE id = ? AND deck_id IN (SELECT id FROM deck WHERE owner_id = ?)',
       [a.id, ctx.user],
+    ),
+
+  // Public link: owner-only flip of visibility + share token (the gate is on deck ownership).
+  setDeckVisibility: (tx, a: SetDeckVisibilityArgs, ctx) =>
+    updateIf(
+      tx,
+      'deck',
+      a.id,
+      {
+        visibility: a.visibility,
+        share_token: a.share_token,
+        modified: a.now,
+      },
+      `owner_id = ?`,
+      [ctx.user],
     ),
 
   // Profile: upsert keyed to the authenticated principal (never the client-supplied a.id).

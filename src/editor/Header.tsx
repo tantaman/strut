@@ -15,6 +15,7 @@ import {
   Undo2,
   Video,
   Globe,
+  Share2,
 } from 'lucide-react'
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
@@ -22,6 +23,7 @@ import { exportDeckHTML, exportDeckJSON } from './deckIO'
 import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
+import { ShareModal } from './ShareModal'
 import type { ComponentTable } from '../../shared/app-def'
 import {
   BACKGROUND_SWATCHES,
@@ -40,6 +42,9 @@ interface DeckRow {
   surface: string
   canned_transition: string
   custom_stylesheet: string
+  owner_id: string
+  visibility: string
+  share_token: string
 }
 
 // new components sort above existing ones; a coarse monotonic z is fine (z is just an ordering)
@@ -68,8 +73,9 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   >(null)
   const [exporting, setExporting] = useState(false)
   const [cssOpen, setCssOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const active = editor.activeSlideId
-  const canInsert = active != null && editor.mode === 'slide'
+  const canInsert = active != null && editor.mode === 'slide' && editor.canEdit
 
   // Insert a component as one undoable step (undo removes it; redo re-adds with the same id).
   function recordInsert(
@@ -212,8 +218,10 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         className="hdr__title"
         value={deck?.title ?? ''}
         placeholder="Untitled"
+        readOnly={!editor.canEdit}
         onChange={(e) =>
           deck &&
+          editor.canEdit &&
           mutate.renameDeck({
             id: deck.id,
             title: e.target.value,
@@ -287,50 +295,54 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         </>
       )}
 
-      <div className="hdr__sep" />
-      <div className="hdr__group">
-        <button
-          className="btn"
-          disabled={!hist.canUndo}
-          onClick={() => history.undo()}
-          title={hist.undoLabel ? `Undo ${hist.undoLabel}` : 'Undo (⌘Z)'}
-        >
-          <Undo2 size={16} />
-        </button>
-        <button
-          className="btn"
-          disabled={!hist.canRedo}
-          onClick={() => history.redo()}
-          title={hist.redoLabel ? `Redo ${hist.redoLabel}` : 'Redo (⇧⌘Z)'}
-        >
-          <Redo2 size={16} />
-        </button>
-      </div>
+      {editor.canEdit && (
+        <>
+          <div className="hdr__sep" />
+          <div className="hdr__group">
+            <button
+              className="btn"
+              disabled={!hist.canUndo}
+              onClick={() => history.undo()}
+              title={hist.undoLabel ? `Undo ${hist.undoLabel}` : 'Undo (⌘Z)'}
+            >
+              <Undo2 size={16} />
+            </button>
+            <button
+              className="btn"
+              disabled={!hist.canRedo}
+              onClick={() => history.redo()}
+              title={hist.redoLabel ? `Redo ${hist.redoLabel}` : 'Redo (⇧⌘Z)'}
+            >
+              <Redo2 size={16} />
+            </button>
+          </div>
 
-      <div className="hdr__sep" />
-      <div className="hdr__group">
-        <BgButton
-          label="Bg"
-          current={deck?.background}
-          swatches={BACKGROUND_SWATCHES}
-          resolve={(v) => resolveBackground(v, v)}
-          open={menu === 'bg'}
-          onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
-          onPick={(v) => setBg('bg', v)}
-          onCustom={(hex) => setCustom('bg', hex)}
-          allowTransparent
-        />
-        <BgButton
-          label="Surface"
-          current={deck?.surface}
-          swatches={SURFACE_SWATCHES}
-          resolve={(v) => resolveSurface(v, v)}
-          open={menu === 'surface'}
-          onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
-          onPick={(v) => setBg('surface', v)}
-          onCustom={(hex) => setCustom('surface', hex)}
-        />
-      </div>
+          <div className="hdr__sep" />
+          <div className="hdr__group">
+            <BgButton
+              label="Bg"
+              current={deck?.background}
+              swatches={BACKGROUND_SWATCHES}
+              resolve={(v) => resolveBackground(v, v)}
+              open={menu === 'bg'}
+              onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
+              onPick={(v) => setBg('bg', v)}
+              onCustom={(hex) => setCustom('bg', hex)}
+              allowTransparent
+            />
+            <BgButton
+              label="Surface"
+              current={deck?.surface}
+              swatches={SURFACE_SWATCHES}
+              resolve={(v) => resolveSurface(v, v)}
+              open={menu === 'surface'}
+              onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
+              onPick={(v) => setBg('surface', v)}
+              onCustom={(hex) => setCustom('surface', hex)}
+            />
+          </div>
+        </>
+      )}
 
       <div className="hdr__spacer" />
 
@@ -349,14 +361,16 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         </button>
       </div>
 
-      <button
-        className="btn"
-        onClick={() => setCssOpen(true)}
-        title="Custom CSS"
-        disabled={!deck}
-      >
-        <Code2 size={16} /> CSS
-      </button>
+      {editor.canEdit && (
+        <button
+          className="btn"
+          onClick={() => setCssOpen(true)}
+          title="Custom CSS"
+          disabled={!deck}
+        >
+          <Code2 size={16} /> CSS
+        </button>
+      )}
 
       <div style={{ position: 'relative' }}>
         <button
@@ -381,6 +395,15 @@ export function Header({ deck }: { deck: DeckRow | null }) {
           </div>
         )}
       </div>
+
+      <button
+        className="btn"
+        onClick={() => setShareOpen(true)}
+        title="Share"
+        disabled={!deck}
+      >
+        <Share2 size={16} /> Share
+      </button>
 
       <button
         className="btn btn--primary"
@@ -420,6 +443,9 @@ export function Header({ deck }: { deck: DeckRow | null }) {
           initial={deck.custom_stylesheet ?? ''}
           onClose={() => setCssOpen(false)}
         />
+      )}
+      {shareOpen && deck && (
+        <ShareModal deck={deck} onClose={() => setShareOpen(false)} />
       )}
     </div>
   )

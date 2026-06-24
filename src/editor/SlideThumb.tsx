@@ -16,12 +16,15 @@ export function SlideThumb({
   slide,
   deck,
   width,
+  token,
 }: {
   slide: SlideRow
   deck: { background: string } | null
   width: number
+  // When present, load components via the public read-only link queries (the /share viewer).
+  token?: string
 }) {
-  const components = useSlideComponents(slide.id)
+  const components = useSlideComponents(slide.id, token)
   const scale = width / SLIDE_W
   return (
     <div

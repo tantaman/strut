@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useQuery } from '@rindle/react'
-import { deckQuery, slidesQuery } from '../../shared/queries'
+import { deckQuery, deckSharesQuery, slidesQuery } from '../../shared/queries'
+import { currentUser } from '../rindle/user'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
 import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
@@ -18,6 +19,14 @@ interface DeckRow {
   surface: string
   canned_transition: string
   custom_stylesheet: string
+  owner_id: string
+  visibility: string
+  share_token: string
+}
+interface ShareRow {
+  id: string
+  user_id: string
+  role: string
 }
 interface FullSlide {
   id: string
@@ -36,8 +45,19 @@ interface FullSlide {
 
 function EditorPage() {
   const { deckId } = Route.useParams()
+  const deck = useQuery(deckQuery({ deckId })) as unknown as DeckRow | null
+  const shares = useQuery(
+    deckSharesQuery({ deckId }),
+  ) as unknown as ShareRow[]
+  // Owner or 'editor' collaborator → editable; everyone else (incl. a 'viewer') → read-only. While
+  // the deck row is still syncing we assume read-only so editing chrome doesn't flash for viewers.
+  const me = currentUser()
+  const canEdit =
+    !!deck &&
+    (deck.owner_id === me ||
+      shares.some((s) => s.user_id === me && s.role === 'editor'))
   return (
-    <EditorStateProvider deckId={deckId}>
+    <EditorStateProvider deckId={deckId} canEdit={canEdit}>
       <UndoProvider>
         <EditorInner deckId={deckId} />
       </UndoProvider>
@@ -69,6 +89,11 @@ function EditorInner({ deckId }: { deckId: string }) {
   return (
     <div className="editor">
       <Header deck={deck} />
+      {!editor.canEdit && (
+        <div className="ro-banner">
+          👁 Read-only — you’re viewing this shared deck. Changes are disabled.
+        </div>
+      )}
       <div className="editor__body">
         {editor.mode === 'slide' ? (
           <>

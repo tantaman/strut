@@ -63,6 +63,7 @@ export function Overview({
   function beginDrag(s: OverviewSlide, e: React.PointerEvent) {
     e.stopPropagation()
     editor.setActiveSlide(s.id)
+    if (!editor.canEdit) return
     const sx = e.clientX
     const sy = e.clientY
     const x0 = s.x
@@ -134,27 +135,33 @@ export function Overview({
       </div>
 
       <div className="ov-hint">
-        Drag cards to arrange the camera path · the number is the slide order
+        {editor.canEdit
+          ? 'Drag cards to arrange the camera path · the number is the slide order'
+          : 'The number is the slide order · read-only'}
       </div>
 
-      <div className="ov-transitions">
-        <span className="ov-transitions__label">Transition</span>
-        {CANNED_TRANSITIONS.map((name) => (
-          <button
-            key={name}
-            className={
-              'ov-transitions__btn' +
-              ((deck?.canned_transition ?? 'none') === name ? ' is-active' : '')
-            }
-            onClick={() => setTransition(name)}
-            title={`Camera transition: ${name}`}
-          >
-            {name}
-          </button>
-        ))}
-      </div>
+      {editor.canEdit && (
+        <div className="ov-transitions">
+          <span className="ov-transitions__label">Transition</span>
+          {CANNED_TRANSITIONS.map((name) => (
+            <button
+              key={name}
+              className={
+                'ov-transitions__btn' +
+                ((deck?.canned_transition ?? 'none') === name
+                  ? ' is-active'
+                  : '')
+              }
+              onClick={() => setTransition(name)}
+              title={`Camera transition: ${name}`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {active && (
+      {active && editor.canEdit && (
         <div className="popover" style={{ top: 12, right: 12, width: 180 }}>
           <strong style={{ fontSize: 12 }}>Slide transform</strong>
           <NumRow

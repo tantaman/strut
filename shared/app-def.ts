@@ -218,6 +218,14 @@ export type AddCollaboratorArgs = {
   now: number
 }
 export type RemoveCollaboratorArgs = { id: string }
+// Public read-only link. visibility = 'private' | 'public-read'; share_token is the link secret
+// (a fresh random token when turning sharing on, '' when turning it off). Owner-only (server-gated).
+export type SetDeckVisibilityArgs = {
+  id: string
+  visibility: string
+  share_token: string
+  now: number
+}
 // id = the profile's user id (the server overrides it with the authenticated principal).
 export type SetDisplayNameArgs = {
   id: string
@@ -432,6 +440,16 @@ export const mutators = {
 
   removeCollaborator: (tx: MutationTx, a: RemoveCollaboratorArgs) =>
     tx.delete('deck_share', { id: a.id }),
+
+  // Public link: flip visibility + (re)mint or clear the share token. The server twin gates this on
+  // deck ownership, so a non-owner's optimistic update snaps back.
+  setDeckVisibility: (tx: MutationTx, a: SetDeckVisibilityArgs) =>
+    tx.update('deck', {
+      id: a.id,
+      visibility: a.visibility,
+      share_token: a.share_token,
+      modified: a.now,
+    }),
 
   // Profile display name. The client predicts an update (a no-op the first time, before the row
   // exists); the server upserts keyed to the authenticated principal and syncs the row back.

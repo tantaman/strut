@@ -158,41 +158,46 @@ export function SlideWell({
             (editor.isSelected(s.id) ? ' is-selected' : '') +
             (dropIdx === i ? ' is-drop-target' : '')
           }
-          draggable
-          onDragStart={() => setDragId(s.id)}
+          draggable={editor.canEdit}
+          onDragStart={() => editor.canEdit && setDragId(s.id)}
           onDragOver={(e) => {
+            if (!editor.canEdit) return
             e.preventDefault()
             setDropIdx(i)
           }}
-          onDrop={() => drop(i)}
+          onDrop={() => editor.canEdit && drop(i)}
           onClick={() => editor.setActiveSlide(s.id)}
         >
           <div className="well__thumb">
             <SlideThumb slide={s} deck={deck} width={148} />
           </div>
           <span className="well__badge">{i + 1}</span>
-          <button
-            className="well__del"
-            onClick={(e) => {
-              e.stopPropagation()
-              deleteSlide(s, i)
-            }}
-          >
-            ×
-          </button>
+          {editor.canEdit && (
+            <button
+              className="well__del"
+              onClick={(e) => {
+                e.stopPropagation()
+                deleteSlide(s, i)
+              }}
+            >
+              ×
+            </button>
+          )}
         </div>
       ))}
-      <button
-        className="well__add"
-        onClick={addSlide}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDropIdx(slides.length)
-        }}
-        onDrop={() => drop(slides.length)}
-      >
-        <Plus size={16} /> Slide
-      </button>
+      {editor.canEdit && (
+        <button
+          className="well__add"
+          onClick={addSlide}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDropIdx(slides.length)
+          }}
+          onDrop={() => drop(slides.length)}
+        >
+          <Plus size={16} /> Slide
+        </button>
+      )}
     </div>
   )
 }

@@ -7,6 +7,10 @@ export type EditorMode = 'slide' | 'overview'
 
 interface EditorState {
   deckId: string
+  // Whether the current principal may mutate this deck (owner or 'editor' collaborator). A 'viewer'
+  // collaborator gets a read-only editor — editing affordances are hidden and the server rejects
+  // writes anyway (defense in depth).
+  canEdit: boolean
   activeSlideId: string | null
   setActiveSlide: (id: string | null) => void
 
@@ -28,7 +32,15 @@ export function useEditor(): EditorState {
   return v
 }
 
-export function EditorStateProvider({ deckId, children }: { deckId: string; children: ReactNode }) {
+export function EditorStateProvider({
+  deckId,
+  canEdit,
+  children,
+}: {
+  deckId: string
+  canEdit: boolean
+  children: ReactNode
+}) {
   const [activeSlideId, setActiveSlideId] = useState<string | null>(null)
   const [mode, setMode] = useState<EditorMode>('slide')
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -56,6 +68,7 @@ export function EditorStateProvider({ deckId, children }: { deckId: string; chil
   const value = useMemo<EditorState>(
     () => ({
       deckId,
+      canEdit,
       activeSlideId,
       setActiveSlide,
       mode,
@@ -66,7 +79,7 @@ export function EditorStateProvider({ deckId, children }: { deckId: string; chil
       selectMany,
       clearSelection,
     }),
-    [deckId, activeSlideId, setActiveSlide, mode, selected, isSelected, select, selectMany, clearSelection],
+    [deckId, canEdit, activeSlideId, setActiveSlide, mode, selected, isSelected, select, selectMany, clearSelection],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

@@ -104,6 +104,75 @@ export const profileQuery = defineQuery(
   ({ userId }: { userId: string }) => q.user_profile.where.id(userId).one(),
 )
 
+// ---- public read-only link queries -------------------------------------------------------------
+// These mirror the deck/slides/components queries but carry the link `token` in their subscription
+// identity, so the SERVER twin (server/queries.ts) can sync a deck the principal doesn't own/share
+// when its visibility is 'public-read' and its share_token matches. The client copies stay UN-GATED
+// (they just read the already-scoped local store — see the header note above). The token is required
+// + non-empty so an empty share_token on a private deck can never be matched.
+
+export const publicDeckQuery = defineQuery(
+  'publicDeck',
+  (raw): { deckId: string; token: string } => ({
+    deckId: reqString(raw, 'deckId'),
+    token: reqString(raw, 'token'),
+  }),
+  ({ deckId }: { deckId: string; token: string }) =>
+    q.deck.where.id(deckId).one(),
+)
+
+export const publicSlidesQuery = defineQuery(
+  'publicSlides',
+  (raw): { deckId: string; token: string } => ({
+    deckId: reqString(raw, 'deckId'),
+    token: reqString(raw, 'token'),
+  }),
+  ({ deckId }: { deckId: string; token: string }) =>
+    q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
+)
+
+const publicComponentQuery = (name: string, table: any) =>
+  defineQuery(
+    name,
+    (raw): { slideId: string; token: string } => ({
+      slideId: reqString(raw, 'slideId'),
+      token: reqString(raw, 'token'),
+    }),
+    ({ slideId }: { slideId: string; token: string }) =>
+      table.where.slide_id(slideId).orderBy('z_order', 'asc'),
+  )
+
+export const publicTextComponentsQuery = publicComponentQuery(
+  'publicTextComponents',
+  q.text_component,
+)
+export const publicImageComponentsQuery = publicComponentQuery(
+  'publicImageComponents',
+  q.image_component,
+)
+export const publicShapeComponentsQuery = publicComponentQuery(
+  'publicShapeComponents',
+  q.shape_component,
+)
+export const publicVideoComponentsQuery = publicComponentQuery(
+  'publicVideoComponents',
+  q.video_component,
+)
+export const publicWebframeComponentsQuery = publicComponentQuery(
+  'publicWebframeComponents',
+  q.webframe_component,
+)
+
+export const publicCustomBackgroundsQuery = defineQuery(
+  'publicCustomBackgrounds',
+  (raw): { deckId: string; token: string } => ({
+    deckId: reqString(raw, 'deckId'),
+    token: reqString(raw, 'token'),
+  }),
+  ({ deckId }: { deckId: string; token: string }) =>
+    q.custom_background.where.deck_id(deckId),
+)
+
 export const allQueries = [
   decksQuery,
   deckQuery,
@@ -116,4 +185,12 @@ export const allQueries = [
   customBackgroundsQuery,
   deckSharesQuery,
   profileQuery,
+  publicDeckQuery,
+  publicSlidesQuery,
+  publicTextComponentsQuery,
+  publicImageComponentsQuery,
+  publicShapeComponentsQuery,
+  publicVideoComponentsQuery,
+  publicWebframeComponentsQuery,
+  publicCustomBackgroundsQuery,
 ]

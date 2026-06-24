@@ -245,3 +245,22 @@ the mutation (no rejection), so the actor's optimistic overlay lingers until a r
 snapping back. Fine here because the editor UI gates editing by role (a viewer never fires writes), so
 the guards are defense-in-depth. A `tx.exec`-with-rowcount (reject when 0 rows touched) or a way to
 signal "forbidden" from a guarded write would let the client snap back immediately.
+
+### ✅ 17. Public (bearer-token) read links: gate on a row field, not the principal
+The public read-only share link (`/share/:deckId?t=<token>`) reuses the split-twin pattern from #15,
+but the *gate* is a bearer credential rather than the principal. The server twins
+(`publicDeck`/`publicSlides`/`public<Type>Components`) take the token as a **query arg** and gate with a
+plain field match on the deck — `and(fieldCondition('visibility','public-read'), fieldCondition('share_token', token))`
+— climbing child→deck via `existsNoSync` for slides/components exactly like the owner/collab twins. No
+`ctx.user` appears in these queries at all, so a stranger (any non-empty principal) syncs the deck subtree
+purely by holding the link. Three things that made it safe + clean:
+- **Required, non-empty token** in the arg parser (both tiers) so a private deck's empty `share_token`
+  can never be matched, and both clauses must hold so flipping visibility back to `private` (token `''`)
+  instantly kills every outstanding link.
+- **The token rides in the subscription identity.** `defineQuery('publicSlides', {deckId, token})` makes
+  the public subscription a *distinct* wire identity from the authenticated `slides` one — same daemon
+  materialization machinery, no special-casing.
+- **One render path.** Threading an optional `token` through `useSlideComponents`/`SlideThumb` (it just
+  picks the `public*` query variant) let the existing present-mode renderer serve the public viewer with
+  zero duplication. Verified end-to-end with two isolated browser principals: stranger views via link,
+  is denied the normal deck route until added as a collaborator, then gets a live read-only editor.
