@@ -12,6 +12,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
+import { LAYOUTS, type LayoutDef } from './layouts'
 import { SlideThumb } from './SlideThumb'
 
 export interface OverviewSlide {
@@ -69,21 +70,26 @@ export function Overview({
   )
 
   const soleId = selIds.size === 1 ? [...selIds][0] : null
-  const soleSlide = soleId ? (slides.find((s) => s.id === soleId) ?? null) : null
+  const soleSlide = soleId
+    ? (slides.find((s) => s.id === soleId) ?? null)
+    : null
 
   // Frame all slide cards (centers ± card extents) into the viewport. Cards are positioned
   // at world (x,y); the world transform is `translate(x,y) scale(s)` about origin 0,0, so a
   // world point w maps to screen `view.{x,y} + s*w`. Pick s + offset to center the bbox.
-  function fit() {
+  // `pts` overrides the slide positions — used to frame a freshly-applied layout before the
+  // mutation round-trips back into props (we already know where the cards will land).
+  function fit(pts?: { x: number; y: number }[]) {
     const el = stageRef.current
-    if (!el || slides.length === 0) return
+    const items = pts ?? slides
+    if (!el || items.length === 0) return
     const cw = el.clientWidth
     const ch = el.clientHeight
     let minX = Infinity
     let minY = Infinity
     let maxX = -Infinity
     let maxY = -Infinity
-    for (const s of slides) {
+    for (const s of items) {
       minX = Math.min(minX, s.x)
       maxX = Math.max(maxX, s.x)
       minY = Math.min(minY, s.y)
@@ -158,7 +164,11 @@ export function Overview({
     const v0 = view
     setPanning(true)
     const move = (ev: PointerEvent) =>
-      setView({ ...v0, x: v0.x + (ev.clientX - sx), y: v0.y + (ev.clientY - sy) })
+      setView({
+        ...v0,
+        x: v0.x + (ev.clientX - sx),
+        y: v0.y + (ev.clientY - sy),
+      })
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
@@ -299,6 +309,35 @@ export function Overview({
     })
   }
 
+  // Arrange every slide into the chosen layout in one undoable step, then frame the result. The
+  // layout is computed in camera order (= slide order), so result[i] is for slides[i].
+  function applyLayout(def: LayoutDef) {
+    if (!editor.canEdit || slides.length === 0) return
+    const placed = def.arrange(slides.length)
+    const steps = slides.map((s, i) => ({
+      s,
+      before: {
+        x: s.x,
+        y: s.y,
+        z: s.z,
+        rotate_x: s.rotate_x,
+        rotate_y: s.rotate_y,
+        rotate_z: s.rotate_z,
+        imp_scale: s.imp_scale,
+      },
+      after: placed[i],
+    }))
+    const applyAll = (which: 'before' | 'after') =>
+      steps.forEach((t) => setTransform(t.s, t[which]))
+    applyAll('after')
+    history.push({
+      label: `Arrange · ${def.label}`,
+      redo: () => applyAll('after'),
+      undo: () => applyAll('before'),
+    })
+    fit(placed)
+  }
+
   const inv = 1 / (view.scale || 1)
 
   return (
@@ -373,17 +412,41 @@ export function Overview({
       </div>
 
       <div className="ov-controls" onPointerDown={stop}>
-        <button className="ov-ctl" onClick={() => zoomBy(1 / 1.2)} title="Zoom out">
+        <button
+          className="ov-ctl"
+          onClick={() => zoomBy(1 / 1.2)}
+          title="Zoom out"
+        >
           −
         </button>
         <span className="ov-ctl__pct">{Math.round(view.scale * 100)}%</span>
         <button className="ov-ctl" onClick={() => zoomBy(1.2)} title="Zoom in">
           +
         </button>
-        <button className="ov-ctl ov-ctl--fit" onClick={fit} title="Fit all slides">
+        <button
+          className="ov-ctl ov-ctl--fit"
+          onClick={() => fit()}
+          title="Fit all slides"
+        >
           Fit
         </button>
       </div>
+
+      {editor.canEdit && slides.length > 1 && (
+        <div className="ov-layouts" onPointerDown={stop}>
+          <span className="ov-layouts__label">Arrange</span>
+          {LAYOUTS.map((def) => (
+            <button
+              key={def.id}
+              className="ov-layouts__btn"
+              onClick={() => applyLayout(def)}
+              title={`Arrange all slides: ${def.label}`}
+            >
+              {def.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {editor.canEdit && (
         <div className="ov-transitions" onPointerDown={stop}>
@@ -437,7 +500,8 @@ function SlideXform({
     step: 1,
     sens: 1,
     onLive: (d, folded) => apply({ [key]: d / DEG }, folded),
-    onCommit: (a, b) => pushHistory('Rotate slide', { [key]: a / DEG }, { [key]: b / DEG }),
+    onCommit: (a, b) =>
+      pushHistory('Rotate slide', { [key]: a / DEG }, { [key]: b / DEG }),
   })
   return (
     <div
@@ -494,13 +558,7 @@ function SlideXform({
   )
 }
 
-function Chip({
-  inv,
-  children,
-}: {
-  inv: number
-  children: React.ReactNode
-}) {
+function Chip({ inv, children }: { inv: number; children: React.ReactNode }) {
   return (
     <div
       className="ov-xform__chip"

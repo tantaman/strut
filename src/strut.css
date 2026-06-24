@@ -1190,6 +1190,50 @@ button {
 }
 
 /* ---- canned transitions picker (spec §7.2) ---- */
+/* Arrange (layout) picker — primary overview control, top-center; the Transition picker
+   below is the secondary one. Both share the floating-toolbar look. */
+.ov-layouts {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 90vw;
+  padding: 9px 13px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  z-index: 40;
+}
+.ov-layouts__label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.ov-layouts__btn {
+  border: 1px solid var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+.ov-layouts__btn:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
 .ov-transitions {
   position: absolute;
   bottom: 14px;

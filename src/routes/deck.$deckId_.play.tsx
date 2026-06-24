@@ -97,7 +97,13 @@ function Play() {
           top: 0,
           transformStyle: 'preserve-3d',
           transition: camTransition,
-          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotate(${-active.rotate_z}rad) scale(${zoom}) translate(${-acx}px, ${-acy}px)`,
+          // Counter the active slide's full 3-D orientation (inverse rotation, reversed order) so it
+          // flies to dead-centre and face-on regardless of layout; other cards keep their relative
+          // tilt (the impress parallax). For flat layouts rotate_x/y are 0 → same as before.
+          // The zoom MUST be a uniform 3-D scale (scale3d, not scale): a 2-D scale sitting between the
+          // camera's inverse rotation and a card's rotation doesn't commute, leaving the active slide
+          // partly tilted. Uniform scale commutes with rotation, so the rotations cancel exactly.
+          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotateZ(${-active.rotate_z}rad) rotateY(${-active.rotate_y}rad) rotateX(${-active.rotate_x}rad) scale3d(${zoom}, ${zoom}, ${zoom}) translate(${-acx}px, ${-acy}px)`,
         }}
       >
         {slides.map((s) => (
@@ -112,7 +118,7 @@ function Play() {
               height: SLIDE_H,
               overflow: 'hidden',
               boxShadow: '0 10px 60px rgba(0,0,0,.6)',
-              transform: `translate(-50%, -50%) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale(${(s.imp_scale || 3) / 3})`,
+              transform: `translate(-50%, -50%) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale3d(${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3})`,
               opacity: s.id === active.id ? 1 : 0.55,
               transition: `opacity ${flight.duration || 400}ms`,
             }}
