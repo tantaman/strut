@@ -471,11 +471,16 @@ button {
   background: var(--danger);
 }
 .well__add {
+  /* Match the 16:9 slide cards so the "add" placeholder reads as an empty slide. */
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1.5px dashed var(--line-strong);
   border-radius: 9px;
   background: transparent;
   color: var(--muted);
-  padding: 12px;
   font-weight: 500;
   transition:
     border-color 0.12s,
