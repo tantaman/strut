@@ -25,8 +25,7 @@
   --danger: #e5534b;
 
   --shadow-sm: 0 1px 2px rgba(24, 26, 33, 0.06);
-  --shadow:
-    0 1px 2px rgba(24, 26, 33, 0.06), 0 8px 24px rgba(24, 26, 33, 0.1);
+  --shadow: 0 1px 2px rgba(24, 26, 33, 0.06), 0 8px 24px rgba(24, 26, 33, 0.1);
   --shadow-lg:
     0 2px 4px rgba(24, 26, 33, 0.06), 0 18px 48px rgba(24, 26, 33, 0.18);
 
@@ -128,7 +127,8 @@ button {
   border-color: transparent;
   color: #fff;
   box-shadow:
-    0 1px 2px rgba(224, 67, 46, 0.25), 0 6px 16px rgba(224, 67, 46, 0.28);
+    0 1px 2px rgba(224, 67, 46, 0.25),
+    0 6px 16px rgba(224, 67, 46, 0.28);
 }
 .btn--primary:hover {
   background-image: var(--grad);
@@ -401,7 +401,8 @@ button {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  /* No flex gap — the .well__ins elements between slides own the spacing so each gap doubles as an
+     insert affordance and a drag drop target. */
 }
 .well__slide {
   position: relative;
@@ -492,8 +493,63 @@ button {
   color: var(--coral);
   background: var(--coral-soft);
 }
-.well__slide.is-drop-target {
-  box-shadow: 0 -2px 0 0 var(--coral);
+.well__slide.is-dragging {
+  opacity: 0.35;
+}
+
+/* gap affordance: hover "+" to insert a slide, drop indicator while dragging */
+.well__ins {
+  position: relative;
+  flex: 0 0 auto;
+  height: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.well__ins-line {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--coral);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.well__ins-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--panel);
+  background: var(--coral);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.12s,
+    transform 0.12s;
+  z-index: 6;
+}
+.well__ins:hover .well__ins-line {
+  opacity: 1;
+}
+.well__ins:hover .well__ins-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+/* mid-drag the gap is a drop target, not an add button */
+.well__ins.is-dragging .well__ins-btn {
+  display: none;
+}
+.well__ins.is-drop-target .well__ins-line {
+  opacity: 1;
+  height: 3px;
 }
 
 /* ---- stage (operating table) ---- */
@@ -593,18 +649,25 @@ button {
   background: var(--coral);
 }
 .handle__del {
+  /* Anchored to the component's top-right corner; the inline counter-transform
+     (translate(-50%,-50%) scale) centers it there at screen-constant size, the
+     same way the resize/rotate handles sit on their corners. */
   position: absolute;
-  top: -12px;
-  right: -12px;
+  top: 0;
+  left: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   border-radius: 50%;
   border: none;
   background: var(--danger);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
   z-index: 11;
 }
 

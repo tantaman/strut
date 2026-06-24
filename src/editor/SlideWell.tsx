@@ -1,10 +1,11 @@
 // The slide well (spec §5.1): live thumbnails, click to make active, ctrl/shift-click to multi-select,
-// drag to reorder (fractional index), × to delete, + to add a blank slide.
+// drag to reorder (fractional index), × to delete, + to add a blank slide. Hovering the gap between
+// two slides reveals a + to insert a slide there; while dragging, the gap shows a drop indicator.
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
-import { keyAfter, keyBetween } from '../lib/order'
+import { keyBetween } from '../lib/order'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
@@ -42,15 +43,31 @@ export function SlideWell({
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
 
-  function addSlide() {
-    const last = slides[slides.length - 1]
+  // Insert a blank slide so it lands at index `at` (0 = before the first slide, slides.length =
+  // append). The fractional sort key falls between the neighbors; the 3-D overview position is
+  // placed near them too (midpoint when inserting between, one gap past the end when appending).
+  function addSlideAt(at: number) {
+    const before = slides[at - 1]
+    const after = slides[at]
     const id = newId()
+    const between = (
+      b: number | undefined,
+      a: number | undefined,
+      fallback: number,
+    ) =>
+      b != null && a != null
+        ? Math.round((b + a) / 2)
+        : b != null
+          ? b + OVERVIEW_CARD_GAP
+          : a != null
+            ? a - OVERVIEW_CARD_GAP
+            : fallback
     const args = {
       id,
       deckId: editor.deckId,
-      sort: keyAfter(last?.sort),
-      x: slides.length * OVERVIEW_CARD_GAP,
-      y: 0,
+      sort: keyBetween(before?.sort, after?.sort),
+      x: between(before?.x, after?.x, 0),
+      y: between(before?.y, after?.y, 0),
       now: Date.now(),
     }
     mutate.addSlide(args)
@@ -69,6 +86,8 @@ export function SlideWell({
         }),
     })
   }
+
+  const addSlide = () => addSlideAt(slides.length)
 
   // Restore a deleted slide (row + transform + theme + all its components).
   function restoreSlide(s: SlideRow, comps: AnyComponent[]) {
@@ -126,16 +145,26 @@ export function SlideWell({
     }
   }
 
-  function drop(targetIdx: number) {
-    if (!dragId) return
-    const moving = slides.find((s) => s.id === dragId)
+  function endDrag() {
+    setDragId(null)
+    setDropIdx(null)
+  }
+
+  // `at` is an insertion index into the current `slides` array (0 = before first, n = end).
+  function drop(at: number) {
+    if (!dragId) return endDrag()
+    const fromIdx = slides.findIndex((s) => s.id === dragId)
+    // Dropping into its own slot (just before or just after itself) is a no-op.
+    if (fromIdx === -1 || at === fromIdx || at === fromIdx + 1) return endDrag()
+    const moving = slides[fromIdx]
     const without = slides.filter((s) => s.id !== dragId)
-    const before = without[targetIdx - 1]
-    const after = without[targetIdx]
+    const insIdx = at > fromIdx ? at - 1 : at
+    const before = without[insIdx - 1]
+    const after = without[insIdx]
     const sort = keyBetween(before?.sort, after?.sort)
-    const fromSort = moving?.sort
+    const fromSort = moving.sort
     mutate.reorderSlide({ id: dragId, sort })
-    if (fromSort !== undefined && fromSort !== sort) {
+    if (fromSort !== sort) {
       const id = dragId
       history.push({
         label: 'Reorder slide',
@@ -143,53 +172,95 @@ export function SlideWell({
         undo: () => mutate.reorderSlide({ id, sort: fromSort }),
       })
     }
-    setDragId(null)
-    setDropIdx(null)
+    endDrag()
+  }
+
+  // The gap affordance at insertion index `at`: a hover "+" to add a slide there, and — while a drag
+  // is in progress — a drop target that lights up when it's where the slide would land.
+  function inserter(at: number) {
+    if (!editor.canEdit) return null
+    const dragging = dragId !== null
+    return (
+      <div
+        key={`ins-${at}`}
+        className={
+          'well__ins' +
+          (dragging ? ' is-dragging' : '') +
+          (dragging && dropIdx === at ? ' is-drop-target' : '')
+        }
+        onDragOver={(e) => {
+          if (!dragging) return
+          e.preventDefault()
+          setDropIdx(at)
+        }}
+        onDrop={() => drop(at)}
+      >
+        <span className="well__ins-line" />
+        <button
+          className="well__ins-btn"
+          title="Add a slide here"
+          onClick={(e) => {
+            e.stopPropagation()
+            addSlideAt(at)
+          }}
+        >
+          <Plus size={14} />
+        </button>
+      </div>
+    )
   }
 
   return (
     <div className="well">
       {slides.map((s, i) => (
-        <div
-          key={s.id}
-          className={
-            'well__slide' +
-            (editor.activeSlideId === s.id ? ' is-active' : '') +
-            (editor.isSelected(s.id) ? ' is-selected' : '') +
-            (dropIdx === i ? ' is-drop-target' : '')
-          }
-          draggable={editor.canEdit}
-          onDragStart={() => editor.canEdit && setDragId(s.id)}
-          onDragOver={(e) => {
-            if (!editor.canEdit) return
-            e.preventDefault()
-            setDropIdx(i)
-          }}
-          onDrop={() => editor.canEdit && drop(i)}
-          onClick={() => editor.setActiveSlide(s.id)}
-        >
-          <div className="well__thumb">
-            <SlideThumb slide={s} deck={deck} width={148} />
+        <Fragment key={s.id}>
+          {inserter(i)}
+          <div
+            className={
+              'well__slide' +
+              (editor.activeSlideId === s.id ? ' is-active' : '') +
+              (editor.isSelected(s.id) ? ' is-selected' : '') +
+              (dragId === s.id ? ' is-dragging' : '')
+            }
+            draggable={editor.canEdit}
+            onDragStart={() => editor.canEdit && setDragId(s.id)}
+            onDragEnd={endDrag}
+            onDragOver={(e) => {
+              if (!editor.canEdit || !dragId) return
+              e.preventDefault()
+              // Top half drops before this slide, bottom half after it.
+              const r = e.currentTarget.getBoundingClientRect()
+              setDropIdx(e.clientY > r.top + r.height / 2 ? i + 1 : i)
+            }}
+            onDrop={() => editor.canEdit && drop(dropIdx ?? i)}
+            onClick={() => editor.setActiveSlide(s.id)}
+          >
+            <div className="well__thumb">
+              <SlideThumb slide={s} deck={deck} width={148} />
+            </div>
+            <span className="well__badge">{i + 1}</span>
+            {editor.canEdit && (
+              <button
+                className="well__del"
+                title="Delete slide"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteSlide(s, i)
+                }}
+              >
+                ×
+              </button>
+            )}
           </div>
-          <span className="well__badge">{i + 1}</span>
-          {editor.canEdit && (
-            <button
-              className="well__del"
-              onClick={(e) => {
-                e.stopPropagation()
-                deleteSlide(s, i)
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
+        </Fragment>
       ))}
+      {inserter(slides.length)}
       {editor.canEdit && (
         <button
           className="well__add"
           onClick={addSlide}
           onDragOver={(e) => {
+            if (!dragId) return
             e.preventDefault()
             setDropIdx(slides.length)
           }}
