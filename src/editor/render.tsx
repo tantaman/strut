@@ -2,7 +2,7 @@
 // selection + handles) and the read-only thumbnails/overview cards.
 
 import type { CSSProperties, ReactNode } from 'react'
-import type { AnyComponent, ComponentKind } from './types'
+import { cssHex, type AnyComponent, type ComponentKind } from './types'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -36,7 +36,7 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
     return {
       ...base,
       fontSize: c.size ?? 72,
-      color: '#' + (c.color || '111111'),
+      color: cssHex(c.color, '111111'),
       fontFamily: c.font_family || 'Lato',
       whiteSpace: 'pre-wrap',
       lineHeight: 1.1,
@@ -44,7 +44,7 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
     }
   }
   const { w, h } = componentSize(c)
-  return { ...base, width: w, height: h, color: '#' + (c.fill || '3498db') }
+  return { ...base, width: w, height: h, color: cssHex(c.fill, '3498db') }
 }
 
 export function renderInner(c: AnyComponent): ReactNode {

@@ -15,7 +15,8 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useSlideComponents } from './useSlideComponents'
 import { cmpStyle, componentSize, renderInner } from './render'
-import { backgroundImage, resolveBackground, type AnyComponent } from './types'
+import { backgroundImage, resolveBackground, resolveSurface, type AnyComponent } from './types'
+import { Inspector } from './Inspector'
 
 interface SlideRow {
   id: string
@@ -53,6 +54,8 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
 
   const bg = resolveBackground(slide.background, deck?.background)
   const bgImg = backgroundImage(slide.background, deck?.background)
+  const surf = resolveSurface(slide.surface, deck?.surface)
+  const surfImg = backgroundImage(slide.surface, deck?.surface)
 
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {
@@ -205,7 +208,12 @@ export function Stage({ slide, deck }: { slide: SlideRow; deck: DeckRow | null }
   }
 
   return (
-    <div className="stage" ref={stageRef}>
+    <div
+      className="stage"
+      ref={stageRef}
+      style={{ background: surf, backgroundImage: surfImg, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
+      <Inspector components={components} />
       <div className="slide-surface" style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}>
         <div
           className="slide-canvas"

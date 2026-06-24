@@ -581,3 +581,113 @@ button {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* ---- custom color swatch (in bg/surface pickers) ---- */
+.swatch--custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: var(--panel-2);
+  font-size: 14px;
+  overflow: hidden;
+}
+.swatch--custom input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+.swatch.is-active {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---- selection inspector (spec §6.2/§6.3/§8.5) ---- */
+.insp {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 224px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.insp__head {
+  text-transform: capitalize;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.insp__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.insp__row > span {
+  width: 52px;
+  flex: none;
+  color: var(--muted);
+}
+.insp__row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+.insp__row--stack > span {
+  width: auto;
+}
+.insp__row select,
+.insp__row input[type="number"],
+.insp__row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 5px 8px;
+}
+.insp__zrow .btn {
+  flex: 1;
+}
+.insp__color {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.swatches--sm {
+  grid-template-columns: repeat(7, 20px);
+  gap: 5px;
+}
+.swatches--sm .swatch {
+  width: 20px;
+  height: 20px;
+}
+.insp__custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.insp__custom input[type="color"] {
+  width: 28px;
+  height: 22px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--panel-2);
+  padding: 0;
+  cursor: pointer;
+}
+.insp__custom span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

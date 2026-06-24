@@ -7,7 +7,14 @@ import { Image as ImageIcon, Play, Shapes, Square, Type, Video, Globe } from 'lu
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
-import { BACKGROUND_SWATCHES, resolveBackground, SHAPE_NAMES, SHAPES } from './types'
+import {
+  BACKGROUND_SWATCHES,
+  resolveBackground,
+  resolveSurface,
+  SHAPE_NAMES,
+  SHAPES,
+  SURFACE_SWATCHES,
+} from './types'
 import { parseVideo } from './render'
 
 interface DeckRow {
@@ -75,6 +82,15 @@ export function Header({ deck }: { deck: DeckRow | null }) {
     setMenu(null)
   }
 
+  // Custom color: mint a `bg-custom-<hex>` class recorded on the deck (spec §8.3), then assign it.
+  function setCustom(scope: 'bg' | 'surface', hex: string) {
+    if (!deck) return
+    const bare = hex.replace(/^#+/, '').toLowerCase()
+    const klass = `bg-custom-${bare}`
+    mutate.mintCustomColor({ id: newId(), deckId: deck.id, klass, style: `.${klass}{background:#${bare}}` })
+    setBg(scope, klass)
+  }
+
   return (
     <div className="hdr">
       <Link to="/" className="btn btn--ghost" title="All decks">
@@ -130,8 +146,27 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 
       <div className="hdr__sep" />
       <div className="hdr__group">
-        <BgButton label="Bg" current={deck?.background} open={menu === 'bg'} onToggle={() => setMenu(menu === 'bg' ? null : 'bg')} onPick={(v) => setBg('bg', v)} allowTransparent />
-        <BgButton label="Surface" current={deck?.surface} open={menu === 'surface'} onToggle={() => setMenu(menu === 'surface' ? null : 'surface')} onPick={(v) => setBg('surface', v)} />
+        <BgButton
+          label="Bg"
+          current={deck?.background}
+          swatches={BACKGROUND_SWATCHES}
+          resolve={(v) => resolveBackground(v, v)}
+          open={menu === 'bg'}
+          onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
+          onPick={(v) => setBg('bg', v)}
+          onCustom={(hex) => setCustom('bg', hex)}
+          allowTransparent
+        />
+        <BgButton
+          label="Surface"
+          current={deck?.surface}
+          swatches={SURFACE_SWATCHES}
+          resolve={(v) => resolveSurface(v, v)}
+          open={menu === 'surface'}
+          onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
+          onPick={(v) => setBg('surface', v)}
+          onCustom={(hex) => setCustom('surface', hex)}
+        />
       </div>
 
       <div className="hdr__spacer" />
@@ -163,27 +198,33 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 function BgButton({
   label,
   current,
+  swatches,
+  resolve,
   open,
   onToggle,
   onPick,
+  onCustom,
   allowTransparent,
 }: {
   label: string
   current?: string
+  swatches: string[]
+  resolve: (value: string) => string
   open: boolean
   onToggle: () => void
   onPick: (value: string) => void
+  onCustom: (hex: string) => void
   allowTransparent?: boolean
 }) {
   return (
     <div style={{ position: 'relative' }}>
       <button className="btn" onClick={onToggle} title={label}>
-        <Square size={14} fill={current ? resolveBackground(current, current) : 'none'} /> {label}
+        <Square size={14} fill={current ? resolve(current) : 'none'} /> {label}
       </button>
       {open && (
         <div className="popover" style={{ top: '110%', left: 0 }}>
           <div className="swatches">
-            <button className="swatch" title="default" style={{ background: '#fff' }} onClick={() => onPick('bg-default')} />
+            <button className="swatch" title="default" style={{ background: resolve('bg-default') }} onClick={() => onPick('bg-default')} />
             {allowTransparent && (
               <button
                 className="swatch"
@@ -192,9 +233,13 @@ function BgButton({
                 onClick={() => onPick('bg-transparent')}
               />
             )}
-            {BACKGROUND_SWATCHES.map((k) => (
-              <button key={k} className="swatch" title={k} style={{ background: resolveBackground(k, k) }} onClick={() => onPick(k)} />
+            {swatches.map((k) => (
+              <button key={k} className="swatch" title={k} style={{ background: resolve(k) }} onClick={() => onPick(k)} />
             ))}
+            <label className="swatch swatch--custom" title="custom color">
+              +
+              <input type="color" onChange={(e) => onCustom(e.target.value)} />
+            </label>
           </div>
         </div>
       )}

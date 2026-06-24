@@ -138,3 +138,21 @@ server-side.)
 `DEFAULT_RINDLE_API_ROUTES` (`/api/rindle/{query,read,mutate}`) is exported from `@rindle/api-server`
 and mirrored privately in the client — handy, but see #2: the client `url`+`routes` composition is
 the actual contract and it's only discoverable by reading the compiled JS.
+
+### ✅ 11. Adding new mutators + headless verification: smooth
+Building the selection inspector (text font/size/color, shape fill, z-order, css classes) added no new
+friction — the predicted/authoritative twin pattern is mechanical once the shapes click, and a
+client↔server twin parity check is just `grep` (every client mutator name must have a server twin or
+the mutation is silently rejected → optimistic snap-back; a missing twin is the #1 footgun, so a
+`rindle check` that diffs client `ClientRegistry` keys vs `defineApiMutators` keys would be a great
+lint).
+- **Recipe worth documenting:** the whole optimistic runtime can be exercised **headlessly in Node**
+  (Node ≥22 has global `WebSocket`+`fetch`): `createRindleClient({api:{url:"http://127.0.0.1:7700"},
+  daemon:{wsUrl:"ws://127.0.0.1:7601"}})` against a live daemon+API, then
+  `store.materialize(namedQuery(args))`, `view.subscribe(()=>{})`, poll `view.resultType` to
+  `"complete"`, fire `mutate.*`, and assert on `view.data` after a short sleep. This caught nothing
+  broken this round (good) and is how #9/#10 were verified. A `@rindle/testing` harness wrapping this
+  would make app authors' integration tests trivial. (Verified: `store.materialize(q)` drives the
+  remote lease on its own — it reaches `resultType="complete"` with data even with no `.subscribe()`
+  listener, so a one-shot script read is just materialize + poll. `subscribe` is only needed to react
+  to later changes.)

@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { useQuery } from '@rindle/react'
 import { deckQuery, slidesQuery } from '../../shared/queries'
 import { SlideThumb } from '../editor/SlideThumb'
+import { resolveSurface } from '../editor/types'
 import { SLIDE_H, SLIDE_W } from '../config'
 
 export const Route = createFileRoute('/deck/$deckId/play')({ component: Play })
@@ -25,7 +26,7 @@ interface PlaySlide {
 
 function Play() {
   const { deckId } = Route.useParams()
-  const deck = useQuery(deckQuery({ deckId })) as unknown as { background: string } | null
+  const deck = useQuery(deckQuery({ deckId })) as unknown as { background: string; surface: string } | null
   const slides = useQuery(slidesQuery({ deckId })) as unknown as PlaySlide[]
   const navigate = useNavigate()
   const [i, setI] = useState(0)
@@ -54,12 +55,14 @@ function Play() {
   const zoom = (Math.min(vp.w / SLIDE_W, vp.h / SLIDE_H) * 0.92) / ((active.imp_scale || 3) / 3)
   const acx = active.x * WORLD
   const acy = active.y * WORLD
+  // The presentation surface (deck-wide "table") shows behind the flying slide cards.
+  const surf = resolveSurface(active.surface, deck?.surface)
 
   return (
     <div
       className="play"
       onClick={() => setI((n) => Math.min(slides.length - 1, n + 1))}
-      style={{ position: 'fixed', inset: 0, background: '#000', overflow: 'hidden', perspective: 1000 }}
+      style={{ position: 'fixed', inset: 0, background: surf, overflow: 'hidden', perspective: 1000 }}
     >
       <div
         className="play__cam"

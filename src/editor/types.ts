@@ -104,6 +104,34 @@ const BG_COLORS: Record<string, string> = {
 
 export const BACKGROUND_SWATCHES = Object.keys(BG_COLORS).filter((k) => k !== 'bg-default')
 
+// Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Flat (gradients shipped
+// flat in old-master). No transparent (surfaces are the bottom layer).
+const SURFACE_COLORS: Record<string, string> = {
+  'bg-surf-grad-black': '#333333',
+  'bg-surf-grad-light': '#ffffff',
+  'bg-surf-grad-smoke': '#eeeeee',
+  'bg-surf-grad-orange': '#945353',
+  'bg-surf-grad-yellow': '#cfb98c',
+  'bg-surf-grad-grass': '#6c855d',
+  'bg-surf-grad-darkgreen': '#4a939e',
+  'bg-surf-grad-sky': '#5e699c',
+  'bg-surf-grad-lavender': '#554b61',
+  'bg-surf-grad-purple': '#775796',
+  'bg-surf-grad-salmon': '#cfa2a2',
+}
+
+export const SURFACE_SWATCHES = Object.keys(SURFACE_COLORS)
+
+// The default surface "table": a subtle radial gray (old-master `bg-default`).
+const SURFACE_DEFAULT = 'radial-gradient(circle at 50% 28%, #3a3a40, #18181b)'
+
+/** Normalize a stored hex (with or without a leading `#`) to a valid CSS color. Stored values are
+ *  bare hex (`111111`), but a color picker may hand back `#111111` — tolerate both. */
+export function cssHex(value: string | undefined, fallback: string): string {
+  const h = (value && value.length ? value : fallback).replace(/^#+/, '')
+  return '#' + (h.length ? h : fallback.replace(/^#+/, ''))
+}
+
 /** Resolve a slide-card background to a CSS color (or transparent). `bg-custom-<hex>` and `img:` are
  *  handled too. Per-slide value wins, else deck value. */
 export function resolveBackground(
@@ -117,10 +145,29 @@ export function resolveBackground(
   return BG_COLORS[v] ?? '#ffffff'
 }
 
-export function backgroundImage(slideBg: string | undefined, deckBg: string | undefined): string | undefined {
-  const v = slideBg && slideBg !== '' ? slideBg : (deckBg ?? 'bg-default')
+/** Resolve the deck/slide surface (the table behind the card) to a CSS background. Per-slide value
+ *  wins, else deck value; `bg-default` is the radial gray table; `bg-custom-<hex>`/`img:` handled. */
+export function resolveSurface(
+  slideSurface: string | undefined,
+  deckSurface: string | undefined,
+): string {
+  const v = slideSurface && slideSurface !== '' ? slideSurface : (deckSurface ?? 'bg-default')
+  if (v === 'bg-default' || v === '' || v === 'bg-transparent') return SURFACE_DEFAULT
+  if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
+  if (v.startsWith('img:')) return '#222222'
+  return SURFACE_COLORS[v] ?? SURFACE_DEFAULT
+}
+
+export function backgroundImage(bg: string | undefined, fallback: string | undefined): string | undefined {
+  const v = bg && bg !== '' ? bg : (fallback ?? 'bg-default')
   return v.startsWith('img:') ? `url(${v.slice(4)})` : undefined
 }
+
+// A compact swatch palette for text color & shape fill custom pickers (Open Color-ish), spec §8.5.
+export const COLOR_SWATCHES = [
+  '111111', 'ffffff', '868e96', 'e03131', 'd6336c', '9c36b5', '6741d9',
+  '3b5bdb', '1971c2', '0c8599', '099268', '2f9e44', '66a80f', 'e8590c',
+]
 
 export function nextZ(components: readonly AnyComponent[]): number {
   return components.reduce((m, c) => Math.max(m, c.z_order), 0) + 1
