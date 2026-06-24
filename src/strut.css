@@ -586,6 +586,10 @@ button {
 .cmp {
   position: absolute;
   transform-origin: center center;
+  /* Drags (move/resize/rotate) must not start a native text selection over the
+     component — re-enabled only on the contenteditable while editing (below). */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .cmp.is-selected {
   outline: 1px solid var(--coral);
@@ -600,6 +604,9 @@ button {
 }
 .cmp--text [contenteditable] {
   outline: none;
+  /* While editing, text is selectable again so the caret/selection works. */
+  user-select: text;
+  -webkit-user-select: text;
 }
 .cmp img,
 .cmp svg,
