@@ -683,11 +683,94 @@ button {
   cursor: move;
   overflow: hidden;
 }
+/* is-selected = a member of a multi-selection (accent); is-active = the sole/primary card (coral).
+   is-active is listed last so a single selection (both classes) reads coral. */
+.ov-card.is-selected {
+  border-color: var(--accent-2);
+}
 .ov-card.is-active {
   border-color: var(--coral);
 }
-.ov-card.is-selected {
-  border-color: var(--accent-2);
+
+/* Rubber-band selection rectangle (screen space). */
+.ov-marquee {
+  position: absolute;
+  border: 1.5px solid var(--coral);
+  background: rgba(224, 82, 58, 0.1);
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* ---- on-card transform chips (selected slide) ---- */
+.ov-xform {
+  position: absolute;
+  border: 1.5px dashed var(--coral);
+  box-sizing: border-box;
+  pointer-events: none; /* let the card underneath still receive drags */
+  z-index: 20;
+}
+.ov-xform__a {
+  position: absolute;
+}
+.ov-xform__a--top {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%);
+}
+.ov-xform__a--top .ov-xform__chip {
+  transform-origin: center bottom;
+}
+.ov-xform__a--bot {
+  left: 0;
+  top: 100%;
+  transform: translate(0, 4px);
+}
+.ov-xform__a--bot .ov-xform__chip {
+  transform-origin: left top;
+}
+.ov-xform__a--left {
+  left: 0;
+  top: 50%;
+  transform: translate(-100%, -50%);
+}
+.ov-xform__a--left .ov-xform__chip {
+  transform-origin: right center;
+}
+.ov-xform__a--right {
+  left: 100%;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+.ov-xform__a--right .ov-xform__chip {
+  transform-origin: left center;
+}
+.ov-xform__chip {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  cursor: default;
+}
+.ov-xform__lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted, #888);
+  user-select: none;
+}
+.ov-xform__in {
+  width: 38px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 4px;
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 .ov-card__num {
   position: absolute;
