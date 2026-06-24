@@ -4,7 +4,11 @@
 // Dev: `node server/rindle-api.ts` (or `tsx server/rindle-api.ts`) on :7700; the web dev server
 // proxies /api/rindle/* here. The daemon control plane is :7600.
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http'
 import {
   createRindleApiServer,
   defineApiMutators,
@@ -13,10 +17,10 @@ import {
   type ApiContext,
   type ApiMutators,
   type SqlMutationTx,
-} from "@rindle/api-server";
-import { HttpRindleDaemonClient, type WireValue } from "@rindle/daemon-client";
-import { allQueries } from "../shared/queries.ts";
-import { isComponentTable } from "../shared/app-def.ts";
+} from '@rindle/api-server'
+import { HttpRindleDaemonClient, type WireValue } from '@rindle/daemon-client'
+import { allQueries } from '../shared/queries.ts'
+import { isComponentTable } from '../shared/app-def.ts'
 import type {
   AddImageArgs,
   AddShapeArgs,
@@ -41,45 +45,64 @@ import type {
   SetTextArgs,
   TouchDeckArgs,
   TransformComponentArgs,
-} from "../shared/app-def.ts";
+} from '../shared/app-def.ts'
 
-type User = string;
-const PORT = Number(process.env.STRUT_API_PORT ?? 7700);
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? "http://127.0.0.1:7600";
+type User = string
+const PORT = Number(process.env.STRUT_API_PORT ?? 7700)
+const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
 
 // ---- small SQL helpers so server twins mirror the client row-shapes 1:1 -------------------------
 
 const COMPONENT_TABLES = [
-  "text_component",
-  "image_component",
-  "shape_component",
-  "video_component",
-  "webframe_component",
-] as const;
+  'text_component',
+  'image_component',
+  'shape_component',
+  'video_component',
+  'webframe_component',
+] as const
 
-function insert(tx: SqlMutationTx, table: string, row: Record<string, WireValue>) {
-  const cols = Object.keys(row);
+function insert(
+  tx: SqlMutationTx,
+  table: string,
+  row: Record<string, WireValue>,
+) {
+  const cols = Object.keys(row)
   tx.exec(
-    `INSERT INTO ${table} (${cols.join(", ")}) VALUES (${cols.map(() => "?").join(", ")})`,
+    `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`,
     cols.map((c) => row[c]),
-  );
+  )
 }
 
-function update(tx: SqlMutationTx, table: string, id: string, row: Record<string, WireValue>) {
-  const cols = Object.keys(row);
-  if (cols.length === 0) return;
+function update(
+  tx: SqlMutationTx,
+  table: string,
+  id: string,
+  row: Record<string, WireValue>,
+) {
+  const cols = Object.keys(row)
+  if (cols.length === 0) return
   tx.exec(
-    `UPDATE ${table} SET ${cols.map((c) => `${c} = ?`).join(", ")} WHERE id = ?`,
+    `UPDATE ${table} SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`,
     [...cols.map((c) => row[c]), id],
-  );
+  )
 }
 
 function compTable(t: string): string {
-  if (!isComponentTable(t)) throw new RindleApiError("bad-request", `unknown component table: ${t}`, 400);
-  return t;
+  if (!isComponentTable(t))
+    throw new RindleApiError(
+      'bad-request',
+      `unknown component table: ${t}`,
+      400,
+    )
+  return t
 }
 
-const spatialBase = (a: { slideId: string; z_order: number; x: number; y: number }) => ({
+const spatialBase = (a: {
+  slideId: string
+  z_order: number
+  x: number
+  y: number
+}) => ({
   slide_id: a.slideId,
   z_order: a.z_order,
   x: a.x,
@@ -91,51 +114,62 @@ const spatialBase = (a: { slideId: string; z_order: number; x: number; y: number
   rotate: 0,
   skew_x: 0,
   skew_y: 0,
-  custom_classes: "",
-});
+  custom_classes: '',
+})
 
 // ---- authoritative mutators ---------------------------------------------------------------------
 
 const mutators = defineApiMutators<User, ApiMutators<User>>({
-  createDeck: (tx, a: CreateDeckArgs) =>
-    insert(tx, "deck", {
+  createDeck: (tx, a: CreateDeckArgs, ctx) =>
+    insert(tx, 'deck', {
       id: a.id,
       title: a.title,
       created: a.now,
       modified: a.now,
-      background: "bg-default",
-      surface: "bg-default",
-      chosen_presenter: "impress",
-      canned_transition: "none",
-      custom_stylesheet: "",
-      deck_version: "1.0",
+      background: 'bg-default',
+      surface: 'bg-default',
+      chosen_presenter: 'impress',
+      canned_transition: 'none',
+      custom_stylesheet: '',
+      deck_version: '1.0',
+      // Authoritative ownership: trust the request principal, never the client-supplied a.ownerId.
+      owner_id: ctx.user,
+      visibility: 'private',
+      share_token: '',
     }),
 
   renameDeck: (tx, a: RenameDeckArgs) =>
-    update(tx, "deck", a.id, { title: a.title, modified: a.now }),
+    update(tx, 'deck', a.id, { title: a.title, modified: a.now }),
 
-  touchDeck: (tx, a: TouchDeckArgs) => update(tx, "deck", a.id, { modified: a.now }),
+  touchDeck: (tx, a: TouchDeckArgs) =>
+    update(tx, 'deck', a.id, { modified: a.now }),
 
   deleteDeck: (tx, a: DeleteDeckArgs) => {
     for (const t of COMPONENT_TABLES)
-      tx.exec(`DELETE FROM ${t} WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?)`, [a.id]);
-    tx.exec("DELETE FROM custom_background WHERE deck_id = ?", [a.id]);
-    tx.exec("DELETE FROM slide WHERE deck_id = ?", [a.id]);
-    tx.exec("DELETE FROM deck WHERE id = ?", [a.id]);
+      tx.exec(
+        `DELETE FROM ${t} WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?)`,
+        [a.id],
+      )
+    tx.exec('DELETE FROM custom_background WHERE deck_id = ?', [a.id])
+    tx.exec('DELETE FROM slide WHERE deck_id = ?', [a.id])
+    tx.exec('DELETE FROM deck WHERE id = ?', [a.id])
   },
 
   setDeckTheme: (tx, a: SetDeckThemeArgs) => {
-    const row: Record<string, WireValue> = { modified: a.now };
-    if (a.background !== undefined) row.background = a.background;
-    if (a.surface !== undefined) row.surface = a.surface;
-    if (a.custom_stylesheet !== undefined) row.custom_stylesheet = a.custom_stylesheet;
-    if (a.chosen_presenter !== undefined) row.chosen_presenter = a.chosen_presenter;
-    if (a.canned_transition !== undefined) row.canned_transition = a.canned_transition;
-    update(tx, "deck", a.id, row);
+    const row: Record<string, WireValue> = { modified: a.now }
+    if (a.background !== undefined) row.background = a.background
+    if (a.surface !== undefined) row.surface = a.surface
+    if (a.custom_stylesheet !== undefined)
+      row.custom_stylesheet = a.custom_stylesheet
+    if (a.chosen_presenter !== undefined)
+      row.chosen_presenter = a.chosen_presenter
+    if (a.canned_transition !== undefined)
+      row.canned_transition = a.canned_transition
+    update(tx, 'deck', a.id, row)
   },
 
   addSlide: (tx, a: AddSlideArgs) =>
-    insert(tx, "slide", {
+    insert(tx, 'slide', {
       id: a.id,
       deck_id: a.deckId,
       sort: a.sort,
@@ -146,22 +180,24 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
       rotate_y: 0,
       rotate_z: 0,
       imp_scale: 3,
-      background: "",
-      surface: "",
+      background: '',
+      surface: '',
       created: a.now,
       modified: a.now,
     }),
 
   // Authoritative cascade by slide_id (more robust than trusting the client's id lists).
   deleteSlide: (tx, a: DeleteSlideArgs) => {
-    for (const t of COMPONENT_TABLES) tx.exec(`DELETE FROM ${t} WHERE slide_id = ?`, [a.id]);
-    tx.exec("DELETE FROM slide WHERE id = ?", [a.id]);
+    for (const t of COMPONENT_TABLES)
+      tx.exec(`DELETE FROM ${t} WHERE slide_id = ?`, [a.id])
+    tx.exec('DELETE FROM slide WHERE id = ?', [a.id])
   },
 
-  reorderSlide: (tx, a: ReorderSlideArgs) => update(tx, "slide", a.id, { sort: a.sort }),
+  reorderSlide: (tx, a: ReorderSlideArgs) =>
+    update(tx, 'slide', a.id, { sort: a.sort }),
 
   setSlideTransform: (tx, a: SetSlideTransformArgs) =>
-    update(tx, "slide", a.id, {
+    update(tx, 'slide', a.id, {
       x: a.x,
       y: a.y,
       z: a.z,
@@ -173,14 +209,14 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   setSlideTheme: (tx, a: SetSlideThemeArgs) => {
-    const row: Record<string, WireValue> = { modified: a.now };
-    if (a.background !== undefined) row.background = a.background;
-    if (a.surface !== undefined) row.surface = a.surface;
-    update(tx, "slide", a.id, row);
+    const row: Record<string, WireValue> = { modified: a.now }
+    if (a.background !== undefined) row.background = a.background
+    if (a.surface !== undefined) row.surface = a.surface
+    update(tx, 'slide', a.id, row)
   },
 
   addText: (tx, a: AddTextArgs) =>
-    insert(tx, "text_component", {
+    insert(tx, 'text_component', {
       id: a.id,
       ...spatialBase(a),
       text: a.text,
@@ -190,7 +226,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   addImage: (tx, a: AddImageArgs) =>
-    insert(tx, "image_component", {
+    insert(tx, 'image_component', {
       id: a.id,
       ...spatialBase(a),
       scale_w: a.scale_w,
@@ -200,7 +236,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   addShape: (tx, a: AddShapeArgs) =>
-    insert(tx, "shape_component", {
+    insert(tx, 'shape_component', {
       id: a.id,
       ...spatialBase(a),
       shape: a.shape,
@@ -209,7 +245,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   addVideo: (tx, a: AddVideoArgs) =>
-    insert(tx, "video_component", {
+    insert(tx, 'video_component', {
       id: a.id,
       ...spatialBase(a),
       src: a.src,
@@ -219,7 +255,11 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   addWebframe: (tx, a: AddWebframeArgs) =>
-    insert(tx, "webframe_component", { id: a.id, ...spatialBase(a), src: a.src }),
+    insert(tx, 'webframe_component', {
+      id: a.id,
+      ...spatialBase(a),
+      src: a.src,
+    }),
 
   moveComponent: (tx, a: MoveComponentArgs) =>
     update(tx, compTable(a.table), a.id, { x: a.x, y: a.y }),
@@ -245,7 +285,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     tx.exec(`DELETE FROM ${compTable(a.table)} WHERE id = ?`, [a.id]),
 
   setText: (tx, a: SetTextArgs) =>
-    update(tx, "text_component", a.id, {
+    update(tx, 'text_component', a.id, {
       text: a.text,
       size: a.size,
       color: a.color,
@@ -253,65 +293,83 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     }),
 
   setShapeFill: (tx, a: SetShapeFillArgs) =>
-    update(tx, "shape_component", a.id, { fill: a.fill }),
+    update(tx, 'shape_component', a.id, { fill: a.fill }),
 
   mintCustomColor: (tx, a: MintCustomColorArgs) =>
-    insert(tx, "custom_background", {
+    insert(tx, 'custom_background', {
       id: a.id,
       deck_id: a.deckId,
       klass: a.klass,
       style: a.style,
     }),
-});
+})
 
 // ---- server wiring ------------------------------------------------------------------------------
 
 const api = createRindleApiServer<User>({
   daemon: new HttpRindleDaemonClient({
     baseUrl: DAEMON_URL,
-    headers: { authorization: `Bearer ${process.env.RINDLE_DAEMON_TOKEN ?? ""}` },
+    headers: {
+      authorization: `Bearer ${process.env.RINDLE_DAEMON_TOKEN ?? ''}`,
+    },
   }),
   queries: registerQueries<User>(allQueries),
   mutators,
   // Single-user/local for now: any non-empty user id is allowed. Real auth/ownership is future work.
-  authorizeQuery: ({ user }) => typeof user === "string" && user.length > 0,
-  authorizeMutation: ({ user }) => typeof user === "string" && user.length > 0,
-});
+  authorizeQuery: ({ user }) => typeof user === 'string' && user.length > 0,
+  authorizeMutation: ({ user }) => typeof user === 'string' && user.length > 0,
+})
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (c) => (data += c));
-    req.on("end", () => resolve(data));
-    req.on("error", reject);
-  });
+    let data = ''
+    req.on('data', (c) => (data += c))
+    req.on('end', () => resolve(data))
+    req.on('error', reject)
+  })
 }
 
 createServer((req: IncomingMessage, res: ServerResponse) => {
   void (async () => {
     try {
-      if (req.method !== "POST") {
-        res.writeHead(405).end("method not allowed");
-        return;
+      if (req.method !== 'POST') {
+        res.writeHead(405).end('method not allowed')
+        return
       }
-      const body = JSON.parse((await readBody(req)) || "{}");
-      const ctx: ApiContext<User> = { user: (req.headers["x-user"] as string) ?? "", request: req };
-      let out: unknown;
-      if (req.url === api.routes.query) out = await api.handleQueryJson(body, ctx);
-      else if (req.url === api.routes.read) out = await api.handleReadJson(body, ctx);
-      else if (req.url === api.routes.mutate) out = await api.handleMutateJson(body, ctx);
+      const body = JSON.parse((await readBody(req)) || '{}')
+      const ctx: ApiContext<User> = {
+        user: (req.headers['x-user'] as string) ?? '',
+        request: req,
+      }
+      let out: unknown
+      if (req.url === api.routes.query)
+        out = await api.handleQueryJson(body, ctx)
+      else if (req.url === api.routes.read)
+        out = await api.handleReadJson(body, ctx)
+      else if (req.url === api.routes.mutate)
+        out = await api.handleMutateJson(body, ctx)
       else {
-        res.writeHead(404, { "content-type": "application/json" }).end(JSON.stringify({ error: "not found" }));
-        return;
+        res
+          .writeHead(404, { 'content-type': 'application/json' })
+          .end(JSON.stringify({ error: 'not found' }))
+        return
       }
-      res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(out));
+      res
+        .writeHead(200, { 'content-type': 'application/json' })
+        .end(JSON.stringify(out))
     } catch (err) {
-      const status = err instanceof RindleApiError ? err.status : 500;
-      const message = err instanceof Error ? err.message : "internal error";
-      res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify({ error: message }));
+      const status = err instanceof RindleApiError ? err.status : 500
+      const message = err instanceof Error ? err.message : 'internal error'
+      res
+        .writeHead(status, { 'content-type': 'application/json' })
+        .end(JSON.stringify({ error: message }))
     }
-  })();
+  })()
 }).listen(PORT, () => {
-  console.log(`[strut-api] listening on http://127.0.0.1:${PORT} → daemon ${DAEMON_URL}`);
-  console.log(`[strut-api] routes: ${api.routes.query} | ${api.routes.read} | ${api.routes.mutate}`);
-});
+  console.log(
+    `[strut-api] listening on http://127.0.0.1:${PORT} → daemon ${DAEMON_URL}`,
+  )
+  console.log(
+    `[strut-api] routes: ${api.routes.query} | ${api.routes.read} | ${api.routes.mutate}`,
+  )
+})

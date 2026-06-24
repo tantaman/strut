@@ -29,6 +29,19 @@ export const deck = table("deck")
     canned_transition: string(),
     custom_stylesheet: string(),
     deck_version: string(),
+    owner_id: string(),
+    visibility: string(),
+    share_token: string(),
+  })
+  .primaryKey("id");
+
+export const deck_share = table("deck_share")
+  .columns({
+    id: string(),
+    deck_id: string(),
+    user_id: string(),
+    role: string(),
+    created: number(),
   })
   .primaryKey("id");
 
@@ -155,4 +168,4 @@ export const webframe_component = table("webframe_component")
   })
   .primaryKey("id");
 
-export const schema = createSchema({ tables: [custom_background, deck, image_component, shape_component, slide, text_component, video_component, webframe_component] });
+export const schema = createSchema({ tables: [custom_background, deck, deck_share, image_component, shape_component, slide, text_component, video_component, webframe_component] });

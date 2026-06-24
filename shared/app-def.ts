@@ -7,9 +7,9 @@
 // Rule (Rindle): predicted mutators must be deterministic + replayable — no Date.now(), no random,
 // no I/O. Pass ids and timestamps in as args.
 
-import { defineRelationships, newQueryBuilder, rel } from "@rindle/client";
-import type { WireValue } from "@rindle/client";
-import type { ClientRegistry, MutationTx } from "@rindle/optimistic";
+import { defineRelationships, newQueryBuilder, rel } from '@rindle/client'
+import type { WireValue } from '@rindle/client'
+import type { ClientRegistry, MutationTx } from '@rindle/optimistic'
 import {
   schema,
   deck,
@@ -20,7 +20,8 @@ import {
   video_component,
   webframe_component,
   custom_background,
-} from "./schema.ts";
+  deck_share,
+} from './schema.ts'
 
 export {
   schema,
@@ -32,156 +33,167 @@ export {
   video_component,
   webframe_component,
   custom_background,
-};
+  deck_share,
+}
 
-export const q = newQueryBuilder(schema);
+export const q = newQueryBuilder(schema)
 
 export const rels = defineRelationships({
-  deckSlides: rel(deck, slide, { id: "deck_id" }),
-  deckCustomBackgrounds: rel(deck, custom_background, { id: "deck_id" }),
-  slideTexts: rel(slide, text_component, { id: "slide_id" }),
-  slideImages: rel(slide, image_component, { id: "slide_id" }),
-  slideShapes: rel(slide, shape_component, { id: "slide_id" }),
-  slideVideos: rel(slide, video_component, { id: "slide_id" }),
-  slideWebframes: rel(slide, webframe_component, { id: "slide_id" }),
-});
+  deckSlides: rel(deck, slide, { id: 'deck_id' }),
+  deckCustomBackgrounds: rel(deck, custom_background, { id: 'deck_id' }),
+  deckShares: rel(deck, deck_share, { id: 'deck_id' }),
+  slideTexts: rel(slide, text_component, { id: 'slide_id' }),
+  slideImages: rel(slide, image_component, { id: 'slide_id' }),
+  slideShapes: rel(slide, shape_component, { id: 'slide_id' }),
+  slideVideos: rel(slide, video_component, { id: 'slide_id' }),
+  slideWebframes: rel(slide, webframe_component, { id: 'slide_id' }),
+})
 
 // The five component tables that share the spatial base. Server raw-SQL mutators whitelist against
 // this set so a `table` arg can never inject SQL.
 export const COMPONENT_TABLES = [
-  "text_component",
-  "image_component",
-  "shape_component",
-  "video_component",
-  "webframe_component",
-] as const;
-export type ComponentTable = (typeof COMPONENT_TABLES)[number];
+  'text_component',
+  'image_component',
+  'shape_component',
+  'video_component',
+  'webframe_component',
+] as const
+export type ComponentTable = (typeof COMPONENT_TABLES)[number]
 
 export function isComponentTable(t: string): t is ComponentTable {
-  return (COMPONENT_TABLES as readonly string[]).includes(t);
+  return (COMPONENT_TABLES as readonly string[]).includes(t)
 }
 
 // ---- argument types (the single source of shape for both tiers + the UI) -------------------------
 
-export type CreateDeckArgs = { id: string; title: string; now: number };
-export type RenameDeckArgs = { id: string; title: string; now: number };
-export type TouchDeckArgs = { id: string; now: number };
-export type DeleteDeckArgs = { id: string };
+export type CreateDeckArgs = {
+  id: string
+  title: string
+  ownerId: string
+  now: number
+}
+export type RenameDeckArgs = { id: string; title: string; now: number }
+export type TouchDeckArgs = { id: string; now: number }
+export type DeleteDeckArgs = { id: string }
 export type SetDeckThemeArgs = {
-  id: string;
-  background?: string;
-  surface?: string;
-  custom_stylesheet?: string;
-  chosen_presenter?: string;
-  canned_transition?: string;
-  now: number;
-};
+  id: string
+  background?: string
+  surface?: string
+  custom_stylesheet?: string
+  chosen_presenter?: string
+  canned_transition?: string
+  now: number
+}
 
 export type AddSlideArgs = {
-  id: string;
-  deckId: string;
-  sort: string;
-  x: number;
-  y: number;
-  now: number;
-};
+  id: string
+  deckId: string
+  sort: string
+  x: number
+  y: number
+  now: number
+}
 export type DeleteSlideArgs = {
-  id: string;
-  textIds: string[];
-  imageIds: string[];
-  shapeIds: string[];
-  videoIds: string[];
-  webframeIds: string[];
-};
-export type ReorderSlideArgs = { id: string; sort: string };
+  id: string
+  textIds: string[]
+  imageIds: string[]
+  shapeIds: string[]
+  videoIds: string[]
+  webframeIds: string[]
+}
+export type ReorderSlideArgs = { id: string; sort: string }
 export type SetSlideTransformArgs = {
-  id: string;
-  x: number;
-  y: number;
-  z: number;
-  rotate_x: number;
-  rotate_y: number;
-  rotate_z: number;
-  imp_scale: number;
-  now: number;
-};
+  id: string
+  x: number
+  y: number
+  z: number
+  rotate_x: number
+  rotate_y: number
+  rotate_z: number
+  imp_scale: number
+  now: number
+}
 export type SetSlideThemeArgs = {
-  id: string;
-  background?: string;
-  surface?: string;
-  now: number;
-};
+  id: string
+  background?: string
+  surface?: string
+  now: number
+}
 
 type SpatialArgs = {
-  id: string;
-  slideId: string;
-  x: number;
-  y: number;
-  z_order: number;
-};
+  id: string
+  slideId: string
+  x: number
+  y: number
+  z_order: number
+}
 export type AddTextArgs = SpatialArgs & {
-  text: string;
-  size: number;
-  color: string;
-  font_family: string;
-};
+  text: string
+  size: number
+  color: string
+  font_family: string
+}
 export type AddImageArgs = SpatialArgs & {
-  src: string;
-  image_type: string;
-  scale_w: number;
-  scale_h: number;
-};
+  src: string
+  image_type: string
+  scale_w: number
+  scale_h: number
+}
 export type AddShapeArgs = SpatialArgs & {
-  shape: string;
-  markup: string;
-  fill: string;
-};
+  shape: string
+  markup: string
+  fill: string
+}
 export type AddVideoArgs = SpatialArgs & {
-  src: string;
-  video_type: string;
-  src_type: string;
-  short_src: string;
-};
-export type AddWebframeArgs = SpatialArgs & { src: string };
+  src: string
+  video_type: string
+  src_type: string
+  short_src: string
+}
+export type AddWebframeArgs = SpatialArgs & { src: string }
 
 export type MoveComponentArgs = {
-  table: ComponentTable;
-  id: string;
-  x: number;
-  y: number;
-};
+  table: ComponentTable
+  id: string
+  x: number
+  y: number
+}
 export type TransformComponentArgs = {
-  table: ComponentTable;
-  id: string;
-  scale_x: number;
-  scale_y: number;
-  scale_w: number;
-  scale_h: number;
-  rotate: number;
-  skew_x: number;
-  skew_y: number;
-};
-export type SetComponentZArgs = { table: ComponentTable; id: string; z_order: number };
+  table: ComponentTable
+  id: string
+  scale_x: number
+  scale_y: number
+  scale_w: number
+  scale_h: number
+  rotate: number
+  skew_x: number
+  skew_y: number
+}
+export type SetComponentZArgs = {
+  table: ComponentTable
+  id: string
+  z_order: number
+}
 export type SetComponentClassesArgs = {
-  table: ComponentTable;
-  id: string;
-  custom_classes: string;
-};
-export type RemoveComponentArgs = { table: ComponentTable; id: string };
+  table: ComponentTable
+  id: string
+  custom_classes: string
+}
+export type RemoveComponentArgs = { table: ComponentTable; id: string }
 export type SetTextArgs = {
-  id: string;
-  text: string;
-  size: number;
-  color: string;
-  font_family: string;
-};
-export type SetShapeFillArgs = { id: string; fill: string };
+  id: string
+  text: string
+  size: number
+  color: string
+  font_family: string
+}
+export type SetShapeFillArgs = { id: string; fill: string }
 export type MintCustomColorArgs = {
-  id: string;
-  deckId: string;
-  klass: string;
-  style: string;
-};
+  id: string
+  deckId: string
+  klass: string
+  style: string
+}
 
 // ---- predicted (optimistic) client mutators -----------------------------------------------------
 
@@ -198,46 +210,55 @@ const spatialBase = (a: SpatialArgs) => ({
   rotate: 0,
   skew_x: 0,
   skew_y: 0,
-  custom_classes: "",
-});
+  custom_classes: '',
+})
 
 export const mutators = {
   createDeck: (tx: MutationTx, a: CreateDeckArgs) =>
-    tx.insert("deck", {
+    tx.insert('deck', {
       id: a.id,
       title: a.title,
       created: a.now,
       modified: a.now,
-      background: "bg-default",
-      surface: "bg-default",
-      chosen_presenter: "impress",
-      canned_transition: "none",
-      custom_stylesheet: "",
-      deck_version: "1.0",
+      background: 'bg-default',
+      surface: 'bg-default',
+      chosen_presenter: 'impress',
+      canned_transition: 'none',
+      custom_stylesheet: '',
+      deck_version: '1.0',
+      // The server overrides owner_id with the authenticated principal (can't be spoofed); the client
+      // predicts it so the optimistic row passes the owner-scoped decksQuery filter immediately.
+      owner_id: a.ownerId,
+      visibility: 'private',
+      share_token: '',
     }),
 
   renameDeck: (tx: MutationTx, a: RenameDeckArgs) =>
-    tx.update("deck", { id: a.id, title: a.title, modified: a.now }),
+    tx.update('deck', { id: a.id, title: a.title, modified: a.now }),
 
   touchDeck: (tx: MutationTx, a: TouchDeckArgs) =>
-    tx.update("deck", { id: a.id, modified: a.now }),
+    tx.update('deck', { id: a.id, modified: a.now }),
 
   // Client predicts the deck row removal; the server twin cascades slides + components, and those
   // deletions arrive via sync. (Rindle has no FK cascade / no "delete where" in a predicted tx.)
-  deleteDeck: (tx: MutationTx, a: DeleteDeckArgs) => tx.delete("deck", { id: a.id }),
+  deleteDeck: (tx: MutationTx, a: DeleteDeckArgs) =>
+    tx.delete('deck', { id: a.id }),
 
   setDeckTheme: (tx: MutationTx, a: SetDeckThemeArgs) => {
-    const row: Record<string, WireValue> = { id: a.id, modified: a.now };
-    if (a.background !== undefined) row.background = a.background;
-    if (a.surface !== undefined) row.surface = a.surface;
-    if (a.custom_stylesheet !== undefined) row.custom_stylesheet = a.custom_stylesheet;
-    if (a.chosen_presenter !== undefined) row.chosen_presenter = a.chosen_presenter;
-    if (a.canned_transition !== undefined) row.canned_transition = a.canned_transition;
-    tx.update("deck", row);
+    const row: Record<string, WireValue> = { id: a.id, modified: a.now }
+    if (a.background !== undefined) row.background = a.background
+    if (a.surface !== undefined) row.surface = a.surface
+    if (a.custom_stylesheet !== undefined)
+      row.custom_stylesheet = a.custom_stylesheet
+    if (a.chosen_presenter !== undefined)
+      row.chosen_presenter = a.chosen_presenter
+    if (a.canned_transition !== undefined)
+      row.canned_transition = a.canned_transition
+    tx.update('deck', row)
   },
 
   addSlide: (tx: MutationTx, a: AddSlideArgs) =>
-    tx.insert("slide", {
+    tx.insert('slide', {
       id: a.id,
       deck_id: a.deckId,
       sort: a.sort,
@@ -248,26 +269,26 @@ export const mutators = {
       rotate_y: 0,
       rotate_z: 0,
       imp_scale: 3,
-      background: "",
-      surface: "",
+      background: '',
+      surface: '',
       created: a.now,
       modified: a.now,
     }),
 
   deleteSlide: (tx: MutationTx, a: DeleteSlideArgs) => {
-    for (const id of a.textIds) tx.delete("text_component", { id });
-    for (const id of a.imageIds) tx.delete("image_component", { id });
-    for (const id of a.shapeIds) tx.delete("shape_component", { id });
-    for (const id of a.videoIds) tx.delete("video_component", { id });
-    for (const id of a.webframeIds) tx.delete("webframe_component", { id });
-    tx.delete("slide", { id: a.id });
+    for (const id of a.textIds) tx.delete('text_component', { id })
+    for (const id of a.imageIds) tx.delete('image_component', { id })
+    for (const id of a.shapeIds) tx.delete('shape_component', { id })
+    for (const id of a.videoIds) tx.delete('video_component', { id })
+    for (const id of a.webframeIds) tx.delete('webframe_component', { id })
+    tx.delete('slide', { id: a.id })
   },
 
   reorderSlide: (tx: MutationTx, a: ReorderSlideArgs) =>
-    tx.update("slide", { id: a.id, sort: a.sort }),
+    tx.update('slide', { id: a.id, sort: a.sort }),
 
   setSlideTransform: (tx: MutationTx, a: SetSlideTransformArgs) =>
-    tx.update("slide", {
+    tx.update('slide', {
       id: a.id,
       x: a.x,
       y: a.y,
@@ -280,14 +301,14 @@ export const mutators = {
     }),
 
   setSlideTheme: (tx: MutationTx, a: SetSlideThemeArgs) => {
-    const row: Record<string, WireValue> = { id: a.id, modified: a.now };
-    if (a.background !== undefined) row.background = a.background;
-    if (a.surface !== undefined) row.surface = a.surface;
-    tx.update("slide", row);
+    const row: Record<string, WireValue> = { id: a.id, modified: a.now }
+    if (a.background !== undefined) row.background = a.background
+    if (a.surface !== undefined) row.surface = a.surface
+    tx.update('slide', row)
   },
 
   addText: (tx: MutationTx, a: AddTextArgs) =>
-    tx.insert("text_component", {
+    tx.insert('text_component', {
       ...spatialBase(a),
       text: a.text,
       size: a.size,
@@ -296,7 +317,7 @@ export const mutators = {
     }),
 
   addImage: (tx: MutationTx, a: AddImageArgs) =>
-    tx.insert("image_component", {
+    tx.insert('image_component', {
       ...spatialBase(a),
       scale_w: a.scale_w,
       scale_h: a.scale_h,
@@ -305,7 +326,7 @@ export const mutators = {
     }),
 
   addShape: (tx: MutationTx, a: AddShapeArgs) =>
-    tx.insert("shape_component", {
+    tx.insert('shape_component', {
       ...spatialBase(a),
       shape: a.shape,
       markup: a.markup,
@@ -313,7 +334,7 @@ export const mutators = {
     }),
 
   addVideo: (tx: MutationTx, a: AddVideoArgs) =>
-    tx.insert("video_component", {
+    tx.insert('video_component', {
       ...spatialBase(a),
       src: a.src,
       video_type: a.video_type,
@@ -322,7 +343,7 @@ export const mutators = {
     }),
 
   addWebframe: (tx: MutationTx, a: AddWebframeArgs) =>
-    tx.insert("webframe_component", { ...spatialBase(a), src: a.src }),
+    tx.insert('webframe_component', { ...spatialBase(a), src: a.src }),
 
   moveComponent: (tx: MutationTx, a: MoveComponentArgs) =>
     tx.update(a.table, { id: a.id, x: a.x, y: a.y }),
@@ -349,7 +370,7 @@ export const mutators = {
     tx.delete(a.table, { id: a.id }),
 
   setText: (tx: MutationTx, a: SetTextArgs) =>
-    tx.update("text_component", {
+    tx.update('text_component', {
       id: a.id,
       text: a.text,
       size: a.size,
@@ -358,13 +379,13 @@ export const mutators = {
     }),
 
   setShapeFill: (tx: MutationTx, a: SetShapeFillArgs) =>
-    tx.update("shape_component", { id: a.id, fill: a.fill }),
+    tx.update('shape_component', { id: a.id, fill: a.fill }),
 
   mintCustomColor: (tx: MutationTx, a: MintCustomColorArgs) =>
-    tx.insert("custom_background", {
+    tx.insert('custom_background', {
       id: a.id,
       deck_id: a.deckId,
       klass: a.klass,
       style: a.style,
     }),
-} satisfies ClientRegistry;
+} satisfies ClientRegistry

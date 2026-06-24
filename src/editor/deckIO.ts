@@ -4,6 +4,7 @@
 
 import { generateKeyBetween } from 'fractional-indexing'
 import { newId } from '../config'
+import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import {
   customBackgroundsQuery,
@@ -230,7 +231,12 @@ function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
 export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
   const now = Date.now()
   const deckId = newId()
-  mutate.createDeck({ id: deckId, title: imported.title, now })
+  mutate.createDeck({
+    id: deckId,
+    title: imported.title,
+    ownerId: currentUser(),
+    now,
+  })
   mutate.setDeckTheme({
     id: deckId,
     background: imported.background,
