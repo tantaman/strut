@@ -24,6 +24,12 @@ export const Route = createRootRoute({
         rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap',
       },
+      // Slide text fonts (config.ts FONT_FAMILIES) — without these, the font chooser
+      // silently falls back to the browser default and appears to do nothing.
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Droid+Sans+Mono&family=Fredoka+One&family=Gorditas&family=Hammersmith+One&family=Lato:wght@400;700&family=League+Gothic&family=Press+Start+2P&family=Ubuntu:wght@400;700&display=swap',
+      },
       { rel: 'stylesheet', href: appCss },
       { rel: 'stylesheet', href: strutCss },
     ],

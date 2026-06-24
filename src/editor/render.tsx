@@ -19,6 +19,13 @@ const DEFAULT_H: Record<ComponentKind, number> = {
   webframe: 480,
 }
 
+/** A CSS `font-family` value safe for inline styles: quoted (so digit-leading names like
+ *  "Press Start 2P" are valid) with a generic fallback for when the web font hasn't loaded. */
+export function cssFontFamily(name: string | undefined): string {
+  const fam = (name || 'Lato').replace(/"/g, '')
+  return `"${fam}", sans-serif`
+}
+
 export function componentSize(c: AnyComponent): { w: number; h: number } {
   return {
     w: c.scale_w || DEFAULT_W[c.kind],
@@ -37,7 +44,10 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
       ...base,
       fontSize: c.size ?? 72,
       color: cssHex(c.color, '111111'),
-      fontFamily: c.font_family || 'Lato',
+      // Quote the family: an unquoted CSS font-family token can't start with a digit, so a name
+      // like "Press Start 2P" is invalid unquoted and the browser drops the whole declaration.
+      // (The impress export already quotes it the same way.)
+      fontFamily: cssFontFamily(c.font_family),
       whiteSpace: 'pre-wrap',
       lineHeight: 1.1,
       maxWidth: 1100,

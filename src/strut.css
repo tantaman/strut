@@ -617,12 +617,62 @@ button {
   position: relative;
   overflow: hidden;
   background: radial-gradient(circle at 35% 18%, #eef0f3 0%, #d7dae0 100%);
+  cursor: grab;
+  touch-action: none;
+}
+.overview.is-panning {
+  cursor: grabbing;
+  user-select: none;
 }
 .overview__world {
   position: absolute;
   top: 0;
   left: 0;
+  width: 0;
+  height: 0;
   transform-origin: 0 0;
+}
+.ov-controls {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(20, 22, 30, 0.5);
+  backdrop-filter: blur(6px);
+  padding: 4px 6px;
+  border-radius: 10px;
+}
+.ov-ctl {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.ov-ctl:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+.ov-ctl--fit {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ov-ctl__pct {
+  min-width: 42px;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 .ov-card {
   position: absolute;
