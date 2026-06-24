@@ -14,11 +14,21 @@ import {
 import { mergeComponents, type AnyComponent, type SpatialBase } from './types'
 
 export function useSlideComponents(slideId: string): AnyComponent[] {
-  const texts = useQuery(textComponentsQuery({ slideId })) as unknown as SpatialBase[]
-  const images = useQuery(imageComponentsQuery({ slideId })) as unknown as SpatialBase[]
-  const shapes = useQuery(shapeComponentsQuery({ slideId })) as unknown as SpatialBase[]
-  const videos = useQuery(videoComponentsQuery({ slideId })) as unknown as SpatialBase[]
-  const webframes = useQuery(webframeComponentsQuery({ slideId })) as unknown as SpatialBase[]
+  const texts = useQuery(
+    textComponentsQuery({ slideId }),
+  ) as unknown as SpatialBase[]
+  const images = useQuery(
+    imageComponentsQuery({ slideId }),
+  ) as unknown as SpatialBase[]
+  const shapes = useQuery(
+    shapeComponentsQuery({ slideId }),
+  ) as unknown as SpatialBase[]
+  const videos = useQuery(
+    videoComponentsQuery({ slideId }),
+  ) as unknown as SpatialBase[]
+  const webframes = useQuery(
+    webframeComponentsQuery({ slideId }),
+  ) as unknown as SpatialBase[]
   return useMemo(
     () => mergeComponents(texts, images, shapes, videos, webframes),
     [texts, images, shapes, videos, webframes],

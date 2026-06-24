@@ -21,6 +21,7 @@ import {
   webframe_component,
   custom_background,
   deck_share,
+  user_profile,
 } from './schema.ts'
 
 export {
@@ -34,6 +35,7 @@ export {
   webframe_component,
   custom_background,
   deck_share,
+  user_profile,
 }
 
 export const q = newQueryBuilder(schema)
@@ -47,6 +49,16 @@ export const rels = defineRelationships({
   slideShapes: rel(slide, shape_component, { id: 'slide_id' }),
   slideVideos: rel(slide, video_component, { id: 'slide_id' }),
   slideWebframes: rel(slide, webframe_component, { id: 'slide_id' }),
+  // Reverse (child → parent) relationships used by server-only `existsNoSync` permission gates:
+  // a slide/component is visible only if its owning deck is owned-by or shared-with the principal.
+  slideDeck: rel(slide, deck, { deck_id: 'id' }),
+  textDeckSlide: rel(text_component, slide, { slide_id: 'id' }),
+  imageDeckSlide: rel(image_component, slide, { slide_id: 'id' }),
+  shapeDeckSlide: rel(shape_component, slide, { slide_id: 'id' }),
+  videoDeckSlide: rel(video_component, slide, { slide_id: 'id' }),
+  webframeDeckSlide: rel(webframe_component, slide, { slide_id: 'id' }),
+  customBgDeck: rel(custom_background, deck, { deck_id: 'id' }),
+  shareDeck: rel(deck_share, deck, { deck_id: 'id' }),
 })
 
 // The five component tables that share the spatial base. Server raw-SQL mutators whitelist against
@@ -193,6 +205,24 @@ export type MintCustomColorArgs = {
   deckId: string
   klass: string
   style: string
+}
+
+// ---- sharing + profile -------------------------------------------------------------------------
+export type CollaboratorRole = 'editor' | 'viewer'
+// id = the deck_share row id; userId = the collaborator's Strut id; role = editor|viewer.
+export type AddCollaboratorArgs = {
+  id: string
+  deckId: string
+  userId: string
+  role: CollaboratorRole
+  now: number
+}
+export type RemoveCollaboratorArgs = { id: string }
+// id = the profile's user id (the server overrides it with the authenticated principal).
+export type SetDisplayNameArgs = {
+  id: string
+  display_name: string
+  now: number
 }
 
 // ---- predicted (optimistic) client mutators -----------------------------------------------------
@@ -387,5 +417,28 @@ export const mutators = {
       deck_id: a.deckId,
       klass: a.klass,
       style: a.style,
+    }),
+
+  // Sharing: the server twins enforce that only the deck OWNER may add/remove collaborators (a
+  // conditional write — the optimistic insert/delete snaps back if the actor isn't the owner).
+  addCollaborator: (tx: MutationTx, a: AddCollaboratorArgs) =>
+    tx.insert('deck_share', {
+      id: a.id,
+      deck_id: a.deckId,
+      user_id: a.userId,
+      role: a.role,
+      created: a.now,
+    }),
+
+  removeCollaborator: (tx: MutationTx, a: RemoveCollaboratorArgs) =>
+    tx.delete('deck_share', { id: a.id }),
+
+  // Profile display name. The client predicts an update (a no-op the first time, before the row
+  // exists); the server upserts keyed to the authenticated principal and syncs the row back.
+  setDisplayName: (tx: MutationTx, a: SetDisplayNameArgs) =>
+    tx.update('user_profile', {
+      id: a.id,
+      display_name: a.display_name,
+      updated: a.now,
     }),
 } satisfies ClientRegistry

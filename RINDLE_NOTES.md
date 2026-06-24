@@ -208,3 +208,40 @@ surfaced while wiring it:
   `existsNoSync` permission gates — server-only, pruned from the client footprint), so you never read
   in `authorizeQuery`; writes are enforced inside the mutator (which has `ctx.daemon` + `tx`). The two
   asks above would mainly help when you *want* a symmetric authorize-hook policy layer.
+
+### 🔴 15. `existsNoSync` in a SHARED `defineQuery` returns empty on the client — you must split client/server twins
+Cost real time. Implementing read-gating, I scoped each deck-subtree query with `existsNoSync` inside
+the ONE `defineQuery` that both tiers import. Result: every gated query returned **empty on the client**
+— even for the owner, even for their own rows. The deck/dashboard queries *appeared* to work only
+because their gate was `or(fieldCondition('owner_id', user), existsNoSync(deckShares…))` and the owner
+matched the plain `fieldCondition` branch; the pure-`existsNoSync` child queries (slides/components)
+returned 0 for everyone.
+- **Root cause:** `existsNoSync` is a *server-only* gate — its witness rows are pruned from the client
+  footprint, so the client can't evaluate it (it has no witnesses) and the predicate collapses to false.
+  The d.ts even says "use this when building the **server's** query; the client holds its own un-gated
+  query." The trap: a `defineQuery` is used by BOTH tiers by default, so "the client holds its own
+  un-gated query" actually means **define the query TWICE** — an un-gated client version and a gated
+  server version under the SAME `queryName` — not once-and-shared. That's not obvious from the API shape.
+- **Fix that works (verified):** `shared/queries.ts` = un-gated client queries (the local store only ever
+  holds what the server synced, so reading it un-gated is correct + safe); `server/queries.ts` = gated
+  twins (same names, `existsNoSync` + `ctx.user`) registered via `registerQueries`. The daemon
+  materializes the server twin, so a client can't widen its scope. Verified end-to-end: owner/editor/
+  viewer see a shared deck + its slides/components; a stranger sees nothing; `existsNoSync` nests fine
+  server-side (component → slide → deck, 3 levels deep).
+- **Asks:** (a) make the split a first-class concept — e.g. `defineQuery(name, validate, clientBuild,
+  { serverBuild })` or `clientQuery.gated(serverBuild)` — so the wire name can't drift and the intent is
+  legible; (b) have `existsNoSync` THROW (or warn) if it's ever evaluated on the client/optimistic store
+  instead of silently returning empty — the silent-empty cost the most time; (c) one worked example in
+  the docs of "un-gated client query + gated server twin under the same name".
+
+### FYI 16. Write-enforcement via conditional SQL is clean; silent 0-row drop is the caveat
+Role-based write-enforcement (owner/editor may write, viewer/stranger may not) is done entirely with
+access-guarded SQL in the mutators: `INSERT … SELECT … WHERE <deck/slide is editable by ctx.user>` and
+`UPDATE/DELETE … WHERE id = ? AND <editable>` (helpers `EDITABLE_DECKS`/`EDITABLE_SLIDES`,
+`insertIf`/`updateIf`). No daemon read needed (cross-ref #14). Verified: an editor's edit persists; a
+viewer's / stranger's identical edit changes 0 rows; a stranger can't inject a component or self-add as
+a collaborator. **Caveat:** an unauthorized write is a silent 0-row no-op — the server still "accepts"
+the mutation (no rejection), so the actor's optimistic overlay lingers until a rebase rather than
+snapping back. Fine here because the editor UI gates editing by role (a viewer never fires writes), so
+the guards are defense-in-depth. A `tx.exec`-with-rowcount (reject when 0 rows touched) or a way to
+signal "forbidden" from a guarded write would let the client snap back immediately.

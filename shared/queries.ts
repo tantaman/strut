@@ -1,6 +1,13 @@
-// Co-located named queries. Each is callable on the client (it stamps its subscription identity so
-// `useQuery` syncs) and registerable on the server via `registerQueries([...])`. The `validate` step
-// runs on BOTH tiers to build a byte-identical AST from untrusted args.
+// Co-located named queries — the CLIENT definitions. Each is callable on the client (it stamps its
+// subscription identity so `useQuery` syncs) and shares a wire `queryName` with a server twin.
+//
+// Access control: these client queries are intentionally UN-GATED. The browser's local store only ever
+// contains rows the server chose to sync, and what syncs is decided by the SERVER's gated twin
+// (server/queries.ts) — which scopes every deck subtree to "owned or shared" via `existsNoSync`
+// permission gates. `existsNoSync` is a server-only construct (the client can't evaluate it — it has no
+// witness rows), so the client queries must stay un-gated and simply read the already-scoped local
+// store. The daemon leases/materializes the server twin, so a client can't widen its scope. (We learned
+// this the hard way — a shared gated query returns empty on the client. See RINDLE_NOTES #15.)
 
 import { defineQuery } from '@rindle/client'
 import { q, rels } from './app-def.ts'
@@ -18,32 +25,23 @@ function reqLimit(raw: unknown, field = 'limit'): number {
   return v
 }
 
-// Authoritative principal injected by the API server (via registerQueries' ApiContext) on the server
-// tier, and passed explicitly by the client. The wire NEVER carries it, so a client can't widen its
-// own scope by lying — the daemon materializes the server-resolved (trusted) query. See RINDLE_NOTES.
-export type QueryCtx = { user: string }
-
-// Dashboard: the current user's most-recently-modified decks, with a live slide count badge.
-// Scoped by owner_id = ctx.user (Phase 1 ownership). Shared-with-me decks come later (Phase 3).
+// Dashboard: the principal's decks (the local store already holds only owned + shared), newest first.
 export const decksQuery = defineQuery(
   'decks',
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
-  ({ limit }: { limit: number }, ctx: QueryCtx) =>
-    q.deck.where
-      .owner_id(ctx.user)
+  ({ limit }: { limit: number }) =>
+    q.deck
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
 )
 
-// A single deck (its settings/theme).
 export const deckQuery = defineQuery(
   'deck',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }) => q.deck.where.id(deckId).one(),
 )
 
-// All slides of a deck in camera-path order.
 export const slidesQuery = defineQuery(
   'slides',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
@@ -51,7 +49,6 @@ export const slidesQuery = defineQuery(
     q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
 )
 
-// Components of one slide, per type, in z-order.
 export const textComponentsQuery = defineQuery(
   'textComponents',
   (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
@@ -93,6 +90,20 @@ export const customBackgroundsQuery = defineQuery(
   ({ deckId }: { deckId: string }) => q.custom_background.where.deck_id(deckId),
 )
 
+// Collaborators on a deck (role = 'editor' | 'viewer').
+export const deckSharesQuery = defineQuery(
+  'deckShares',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }) => q.deck_share.where.deck_id(deckId),
+)
+
+// A user's profile (display name). World-readable to any authenticated principal — names aren't secret.
+export const profileQuery = defineQuery(
+  'profile',
+  (raw): { userId: string } => ({ userId: reqString(raw, 'userId') }),
+  ({ userId }: { userId: string }) => q.user_profile.where.id(userId).one(),
+)
+
 export const allQueries = [
   decksQuery,
   deckQuery,
@@ -103,4 +114,6 @@ export const allQueries = [
   videoComponentsQuery,
   webframeComponentsQuery,
   customBackgroundsQuery,
+  deckSharesQuery,
+  profileQuery,
 ]

@@ -127,6 +127,14 @@ export const text_component = table("text_component")
   })
   .primaryKey("id");
 
+export const user_profile = table("user_profile")
+  .columns({
+    id: string(),
+    display_name: string(),
+    updated: number(),
+  })
+  .primaryKey("id");
+
 export const video_component = table("video_component")
   .columns({
     id: string(),
@@ -168,4 +176,4 @@ export const webframe_component = table("webframe_component")
   })
   .primaryKey("id");
 
-export const schema = createSchema({ tables: [custom_background, deck, deck_share, image_component, shape_component, slide, text_component, video_component, webframe_component] });
+export const schema = createSchema({ tables: [custom_background, deck, deck_share, image_component, shape_component, slide, text_component, user_profile, video_component, webframe_component] });

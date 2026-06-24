@@ -11,7 +11,7 @@ import { importDeck, readDeckFile } from '../editor/deckIO'
 export const Route = createFileRoute('/')({ component: Dashboard })
 
 function Dashboard() {
-  const decks = useQuery(decksQuery({ limit: 200 }, { user: currentUser() }))
+  const decks = useQuery(decksQuery({ limit: 200 }))
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
