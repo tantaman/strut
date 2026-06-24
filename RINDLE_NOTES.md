@@ -184,3 +184,27 @@ deck/slides/customBackgrounds). The `materialize → poll resultType → read �
 (no subscriber) made this clean and it's fast locally, but a `store.readOnce(query): Promise<data>`
 convenience (or a documented subtree/batch read) would remove the boilerplate and the N-query
 amplification. Cross-ref #6 (no polymorphic/UNION set query).
+
+### FYI 14. Server-side authorization can't read the DB *from the authorize hook* — two gaps
+Adding per-user ownership + sharing (decks scoped by `owner_id`, `deck_share` collaborators) meant
+figuring out where row-level checks live. The authorize hooks turn out to be coarse-grained by design,
+and the right enforcement points are query-scoping (reads) and mutators (writes). Two ergonomic gaps
+surfaced while wiring it:
+- **The authorize input has no daemon / no `read(query)` helper.** `authorizeQuery` gets
+  `{user, name, args, context}` and `authorizeMutation` gets `{user, envelope, context}`, where
+  `context = ApiContext = {user, request}` — no DB handle. Mutators, by contrast, get
+  `MutationContext = {user, envelope, daemon, request}`. So a *self-contained, unit-testable*
+  authorizer can't look anything up; you'd have to close over the module-scope `HttpRindleDaemonClient`
+  we construct (works, since `Authorizer` may be async, but it's not a first-class affordance).
+  **Ask:** pass `daemon` (or a `read(namedQuery)` helper) into `AuthorizeQueryInput`/`AuthorizeMutationInput`
+  for symmetry with `MutationContext`.
+- **No raw-SQL read-with-rows from server code.** The only daemon read is AST-based —
+  `daemon.query({ast}): {rows}` — so checking one column's value (e.g. `deck.owner_id`) means building
+  a whole query AST (`q.deck.where.id(deckId).select('owner_id').one()` → extract AST → `daemon.query`).
+  Raw SQL only exists as `tx.exec` (void, write-side) inside a mutation and `executeSqlTxn` (returns
+  apply metadata — `cv`/`lmid` — not SELECT rows). **Ask:** a `daemon.selectSql(sql, params): rows`
+  (or a way for a mutator to read back through `tx`) would turn an ownership check into a one-liner.
+- **Net (not a blocker):** reads are best secured by *scoping the query itself* (context injection +
+  `existsNoSync` permission gates — server-only, pruned from the client footprint), so you never read
+  in `authorizeQuery`; writes are enforced inside the mutator (which has `ctx.daemon` + `tx`). The two
+  asks above would mainly help when you *want* a symmetric authorize-hook policy layer.
