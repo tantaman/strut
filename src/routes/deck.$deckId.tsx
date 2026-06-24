@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { useQuery } from '@rindle/react'
+import { useQuery, useQueryStatus } from '@rindle/react'
 import { deckQuery, deckSharesQuery, slidesQuery } from '../../shared/queries'
 import { currentUser } from '../rindle/user'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
@@ -82,6 +82,11 @@ function EditorInner({ deckId }: { deckId: string }) {
   const deck = useQuery(deckQuery({ deckId })) as unknown as DeckRow | null
   const slides = useQuery(slidesQuery({ deckId })) as unknown as FullSlide[]
   const editor = useEditor()
+  // Don't judge access until both the deck row and its shares are authoritative — otherwise canEdit is
+  // momentarily false on open and the read-only banner flashes before ownership/role is known.
+  const deckStatus = useQueryStatus(deckQuery({ deckId }))
+  const sharesStatus = useQueryStatus(deckSharesQuery({ deckId }))
+  const accessResolved = deckStatus !== 'unknown' && sharesStatus !== 'unknown'
 
   // Keep exactly one active slide (spec §3.2). While slides are still loading (empty) we leave the
   // URL's `?slide=` untouched so a deep-linked / Present-restored slide isn't clobbered before it
@@ -104,7 +109,7 @@ function EditorInner({ deckId }: { deckId: string }) {
   return (
     <div className="editor">
       <Header deck={deck} />
-      {!editor.canEdit && (
+      {accessResolved && !editor.canEdit && (
         <div className="ro-banner">
           👁 Read-only — you’re viewing this shared deck. Changes are disabled.
         </div>
