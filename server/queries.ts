@@ -65,12 +65,6 @@ function slideAccess(user: string): Cond<unknown> {
     d.where(deckAccess(user) as never),
   ) as Cond<unknown>
 }
-// Condition on a COMPONENT row (via its component→slide rel): its slide's deck is accessible.
-function componentAccess(compSlideRel: any, user: string): Cond<unknown> {
-  return existsNoSync(compSlideRel, (s: any) =>
-    s.where(slideAccess(user) as never),
-  ) as Cond<unknown>
-}
 
 const decksQuery = defineQuery(
   'decks',
@@ -95,9 +89,8 @@ const deckQuery = defineQuery(
 
 // Composed deck subtree (deck + slides + components + custom backgrounds), gated ONCE at the deck
 // root: because the whole tree hangs off this deck via correlated `sub` edges, scoping the root to
-// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed (contrast the
-// five componentQuery gates below). Same wire name + fragment as the client `deckDetail`, so the only
-// difference is this root `where`.
+// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed. Same wire
+// name + fragment as the client `deckDetail`, so the only difference is this root `where`.
 const deckDetailQuery = defineQuery(
   'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
@@ -120,43 +113,6 @@ const slidesQuery = defineQuery(
       .deck_id(deckId)
       .where(slideAccess(ctx.user) as never)
       .orderBy('sort', 'asc'),
-)
-
-const componentQuery = (name: string, table: any, compSlideRel: any) =>
-  defineQuery(
-    name,
-    (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-    ({ slideId }: { slideId: string }, ctx: Ctx) =>
-      table.where
-        .slide_id(slideId)
-        .where(componentAccess(compSlideRel, ctx.user) as never)
-        .orderBy('z_order', 'asc'),
-  )
-
-const textComponentsQuery = componentQuery(
-  'textComponents',
-  q.text_component,
-  rels.textDeckSlide,
-)
-const imageComponentsQuery = componentQuery(
-  'imageComponents',
-  q.image_component,
-  rels.imageDeckSlide,
-)
-const shapeComponentsQuery = componentQuery(
-  'shapeComponents',
-  q.shape_component,
-  rels.shapeDeckSlide,
-)
-const videoComponentsQuery = componentQuery(
-  'videoComponents',
-  q.video_component,
-  rels.videoDeckSlide,
-)
-const webframeComponentsQuery = componentQuery(
-  'webframeComponents',
-  q.webframe_component,
-  rels.webframeDeckSlide,
 )
 
 const customBackgroundsQuery = defineQuery(
@@ -238,50 +194,6 @@ const publicDeckDetailQuery = defineQuery(
       .one(),
 )
 
-const publicComponentQuery = (name: string, table: any, compSlideRel: any) =>
-  defineQuery(
-    name,
-    (raw): { slideId: string; token: string } => ({
-      slideId: reqString(raw, 'slideId'),
-      token: reqString(raw, 'token'),
-    }),
-    ({ slideId, token }: { slideId: string; token: string }) =>
-      table.where
-        .slide_id(slideId)
-        .where(
-          existsNoSync(compSlideRel, (s: any) =>
-            s.where(publicSlideAccess(token) as never),
-          ) as never,
-        )
-        .orderBy('z_order', 'asc'),
-  )
-
-const publicTextComponentsQuery = publicComponentQuery(
-  'publicTextComponents',
-  q.text_component,
-  rels.textDeckSlide,
-)
-const publicImageComponentsQuery = publicComponentQuery(
-  'publicImageComponents',
-  q.image_component,
-  rels.imageDeckSlide,
-)
-const publicShapeComponentsQuery = publicComponentQuery(
-  'publicShapeComponents',
-  q.shape_component,
-  rels.shapeDeckSlide,
-)
-const publicVideoComponentsQuery = publicComponentQuery(
-  'publicVideoComponents',
-  q.video_component,
-  rels.videoDeckSlide,
-)
-const publicWebframeComponentsQuery = publicComponentQuery(
-  'publicWebframeComponents',
-  q.webframe_component,
-  rels.webframeDeckSlide,
-)
-
 const publicCustomBackgroundsQuery = defineQuery(
   'publicCustomBackgrounds',
   (raw): { deckId: string; token: string } => ({
@@ -305,20 +217,10 @@ export const serverQueries = [
   slidesQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
-  textComponentsQuery,
-  imageComponentsQuery,
-  shapeComponentsQuery,
-  videoComponentsQuery,
-  webframeComponentsQuery,
   customBackgroundsQuery,
   deckSharesQuery,
   profileQuery,
   publicDeckQuery,
   publicSlidesQuery,
-  publicTextComponentsQuery,
-  publicImageComponentsQuery,
-  publicShapeComponentsQuery,
-  publicVideoComponentsQuery,
-  publicWebframeComponentsQuery,
   publicCustomBackgroundsQuery,
 ]
