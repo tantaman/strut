@@ -9,16 +9,10 @@
 // deck root — the correlated `sub` edges scope every descendant, so no per-child existsNoSync climb
 // is needed.
 
-import {
-  and,
-  defineQuery,
-  existsNoSync,
-  fieldCondition,
-  or,
-} from '@rindle/client'
-import type { Cond } from '@rindle/client'
+import { and, defineQuery, existsNoSync, or } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels } from '../shared/app-def.ts'
+import { deck, deck_share } from '../shared/schema.ts'
 import { deckDetailBody, profileQuery } from '../shared/queries.ts'
 
 type User = string
@@ -32,11 +26,8 @@ function reqString(raw: unknown, field: string): string {
 
 // Condition on a DECK row: it is publicly shared under THIS token. Bearer-credential gate — no
 // principal needed. Both clauses must hold, so a private deck (token '') can never be matched.
-function publicAccess(token: string): Cond<unknown> {
-  return and(
-    fieldCondition('visibility', 'public-read') as Cond<unknown>,
-    fieldCondition('share_token', token) as Cond<unknown>,
-  )
+function publicAccess(token: string) {
+  return and(deck.visibility('public-read'), deck.share_token(token))
 }
 function reqLimit(raw: unknown): number {
   const v = (raw as Record<string, unknown>)?.limit
@@ -46,12 +37,10 @@ function reqLimit(raw: unknown): number {
 }
 
 // Condition on a DECK row: principal owns it OR collaborates on it.
-function deckAccess(user: string): Cond<unknown> {
+function deckAccess(user: string) {
   return or(
-    fieldCondition('owner_id', user) as Cond<unknown>,
-    existsNoSync(rels.deckShares, (s: any) =>
-      s.where.user_id(user),
-    ) as Cond<unknown>,
+    deck.owner_id(user),
+    existsNoSync(rels.deckShares, (s) => s.where.user_id(user)),
   )
 }
 const decksQuery = defineQuery(
@@ -59,7 +48,7 @@ const decksQuery = defineQuery(
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
   ({ limit }: { limit: number }, ctx: Ctx) =>
     q.deck
-      .where(deckAccess(ctx.user) as never)
+      .where(deckAccess(ctx.user))
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
@@ -73,9 +62,7 @@ const deckDetailQuery = defineQuery(
   'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    deckDetailBody(
-      q.deck.where.id(deckId).where(deckAccess(ctx.user) as never),
-    ),
+    deckDetailBody(q.deck.where.id(deckId).where(deckAccess(ctx.user))),
 )
 
 // Collaborators on a deck — visible to the OWNER (manages the list) and to each collaborator (their own row).
@@ -83,16 +70,12 @@ const deckSharesQuery = defineQuery(
   'deckShares',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.deck_share.where
-      .deck_id(deckId)
-      .where(
-        or(
-          fieldCondition('user_id', ctx.user) as Cond<unknown>,
-          existsNoSync(rels.shareDeck, (d: any) =>
-            d.where.owner_id(ctx.user),
-          ) as Cond<unknown>,
-        ) as never,
+    q.deck_share.where.deck_id(deckId).where(
+      or(
+        deck_share.user_id(ctx.user),
+        existsNoSync(rels.shareDeck, (d) => d.where.owner_id(ctx.user)),
       ),
+    ),
 )
 
 // ---- public read-only link twins ---------------------------------------------------------------
@@ -108,7 +91,7 @@ const publicDeckDetailQuery = defineQuery(
     token: reqString(raw, 'token'),
   }),
   ({ deckId, token }: { deckId: string; token: string }) =>
-    deckDetailBody(q.deck.where.id(deckId).where(publicAccess(token) as never)),
+    deckDetailBody(q.deck.where.id(deckId).where(publicAccess(token))),
 )
 
 // profile is world-readable — reuse the un-gated client definition.
