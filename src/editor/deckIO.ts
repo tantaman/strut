@@ -7,15 +7,14 @@ import { newId } from '../config'
 import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import { deckDetailQuery } from '../../shared/queries'
-import { mergeComponents, SHAPES, type SpatialBase } from './types'
+import { mergeComponents, SHAPES } from './types'
+import type { DeckDetail } from './DeckData'
 import {
   deserializeDeck,
   serializeDeck,
   type DeckBundle,
-  type DeckRowLike,
   type ImportedComponent,
   type ImportedDeck,
-  type SlideRowLike,
 } from './serialize'
 import { toImpressHTML } from './impressExport'
 
@@ -43,25 +42,12 @@ async function readOnce<T>(
   return data
 }
 
-/** A slide as it arrives nested in the composed deckDetail read (full rows under per-type aliases). */
-type SlideSubtreeRow = SlideRowLike & {
-  texts: SpatialBase[]
-  images: SpatialBase[]
-  shapes: SpatialBase[]
-  videos: SpatialBase[]
-  webframes: SpatialBase[]
-}
-type DeckDetailRow = DeckRowLike & {
-  slides: SlideSubtreeRow[]
-  customBackgrounds: { klass: string; style: string }[]
-}
-
 export async function gatherDeckBundle(
   store: Store,
   deckId: string,
 ): Promise<DeckBundle | null> {
   // One composed read of the whole deck subtree (was deck + slides + 5×N component reads — #12).
-  const detail = await readOnce<DeckDetailRow | null>(
+  const detail = await readOnce<DeckDetail | null>(
     store,
     deckDetailQuery({ deckId }),
   )

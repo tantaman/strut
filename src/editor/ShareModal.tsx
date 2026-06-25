@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy, Link2, Trash2, X } from 'lucide-react'
 import { useQuery } from '@rindle/react'
+import type { QueryData } from '@rindle/react'
 import { deckSharesQuery, profileQuery } from '../../shared/queries'
 import { useMutate } from '../rindle/RindleProvider'
 import { currentUser } from '../rindle/user'
@@ -19,11 +20,8 @@ interface ShareDeck {
   visibility: string
   share_token: string
 }
-interface ShareRow {
-  id: string
-  user_id: string
-  role: string
-}
+// Derived from the query — a `deck_share` row, no hand-written interface (see RINDLE_NOTES #8).
+type ShareRow = QueryData<ReturnType<typeof deckSharesQuery>>[number]
 
 function useCopy(): [boolean, (text: string) => void] {
   const [copied, setCopied] = useState(false)
@@ -69,9 +67,7 @@ export function ShareModal({
   const isOwner = deck.owner_id === me
   const isPublic = deck.visibility === 'public-read' && !!deck.share_token
 
-  const myProfile = useQuery(profileQuery({ userId: me })) as unknown as {
-    display_name: string
-  } | null
+  const myProfile = useQuery(profileQuery({ userId: me }))
   const [name, setName] = useState('')
   useEffect(() => {
     setName(myProfile?.display_name ?? '')
@@ -83,9 +79,7 @@ export function ShareModal({
     mutate.setDisplayName({ id: me, display_name: v, now: Date.now() })
   }
 
-  const shares = useQuery(
-    deckSharesQuery({ deckId: deck.id }),
-  ) as unknown as ShareRow[]
+  const shares = useQuery(deckSharesQuery({ deckId: deck.id }))
   const myShare = shares.find((s) => s.user_id === me)
 
   function togglePublic(on: boolean) {
@@ -102,10 +96,7 @@ export function ShareModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal modal--share"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="modal modal--share" onClick={(e) => e.stopPropagation()}>
         <div className="share__head">
           <h3>Share</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
@@ -180,9 +171,7 @@ export function ShareModal({
                     <CollaboratorRow
                       key={s.id}
                       share={s}
-                      onRemove={() =>
-                        mutate.removeCollaborator({ id: s.id })
-                      }
+                      onRemove={() => mutate.removeCollaborator({ id: s.id })}
                     />
                   ))}
                 </ul>
@@ -213,9 +202,7 @@ function CollaboratorRow({
   share: ShareRow
   onRemove: () => void
 }) {
-  const profile = useQuery(
-    profileQuery({ userId: share.user_id }),
-  ) as unknown as { display_name: string } | null
+  const profile = useQuery(profileQuery({ userId: share.user_id }))
   const name = profile?.display_name?.trim()
   return (
     <li className="share__collab">
@@ -271,7 +258,11 @@ function AddCollaborator({
         <option value="viewer">viewer</option>
         <option value="editor">editor</option>
       </select>
-      <button className="btn btn--primary" disabled={!id.trim()} onClick={submit}>
+      <button
+        className="btn btn--primary"
+        disabled={!id.trim()}
+        onClick={submit}
+      >
         Add
       </button>
     </div>

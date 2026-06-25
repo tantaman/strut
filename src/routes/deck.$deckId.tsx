@@ -28,12 +28,6 @@ export const Route = createFileRoute('/deck/$deckId')({
   }),
 })
 
-interface ShareRow {
-  id: string
-  user_id: string
-  role: string
-}
-
 function EditorPage() {
   const { deckId } = Route.useParams()
   // One subscription for the whole deck subtree (deck + slides + components + backgrounds).
@@ -46,7 +40,7 @@ function EditorPage() {
 
 function EditorAccess({ deckId }: { deckId: string }) {
   const { deck } = useDeckData()
-  const shares = useQuery(deckSharesQuery({ deckId })) as unknown as ShareRow[]
+  const shares = useQuery(deckSharesQuery({ deckId }))
   // Owner or 'editor' collaborator → editable; everyone else (incl. a 'viewer') → read-only. While
   // the deck row is still syncing we assume read-only so editing chrome doesn't flash for viewers.
   const me = currentUser()
