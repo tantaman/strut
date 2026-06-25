@@ -11,6 +11,7 @@
 
 import { defineQuery } from '@rindle/client'
 import { q, rels } from './app-def.ts'
+import { SlideSubtree } from './fragments.ts'
 
 function reqString(raw: unknown, field: string): string {
   const v = (raw as Record<string, unknown>)?.[field]
@@ -47,6 +48,23 @@ export const slidesQuery = defineQuery(
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }) =>
     q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
+)
+
+// ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
+// slide (the SlideSubtree fragment) + custom backgrounds — a single subscription that replaces the
+// deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
+// (see shared/fragments.ts). The editor, presenter, export and undo-snapshot all read from this.
+export const deckDetailQuery = defineQuery(
+  'deckDetail',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }) =>
+    q.deck.where
+      .id(deckId)
+      .sub('slides', rels.deckSlides, (s) =>
+        s.orderBy('sort', 'asc').include(SlideSubtree),
+      )
+      .sub('customBackgrounds', rels.deckCustomBackgrounds)
+      .one(),
 )
 
 export const textComponentsQuery = defineQuery(
@@ -142,6 +160,25 @@ const publicComponentQuery = (name: string, table: any) =>
       table.where.slide_id(slideId).orderBy('z_order', 'asc'),
   )
 
+// Composed public twin — same shape as deckDetailQuery, but its subscription identity carries the
+// link `token` so the SERVER twin can sync a deck the principal doesn't own/share (the token is the
+// bearer credential). The client copy stays un-gated (reads the already-scoped local store).
+export const publicDeckDetailQuery = defineQuery(
+  'publicDeckDetail',
+  (raw): { deckId: string; token: string } => ({
+    deckId: reqString(raw, 'deckId'),
+    token: reqString(raw, 'token'),
+  }),
+  ({ deckId }: { deckId: string; token: string }) =>
+    q.deck.where
+      .id(deckId)
+      .sub('slides', rels.deckSlides, (s) =>
+        s.orderBy('sort', 'asc').include(SlideSubtree),
+      )
+      .sub('customBackgrounds', rels.deckCustomBackgrounds)
+      .one(),
+)
+
 export const publicTextComponentsQuery = publicComponentQuery(
   'publicTextComponents',
   q.text_component,
@@ -177,6 +214,8 @@ export const allQueries = [
   decksQuery,
   deckQuery,
   slidesQuery,
+  deckDetailQuery,
+  publicDeckDetailQuery,
   textComponentsQuery,
   imageComponentsQuery,
   shapeComponentsQuery,

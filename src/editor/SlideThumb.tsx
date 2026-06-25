@@ -4,7 +4,7 @@
 import { SLIDE_W } from '../config'
 import { cmpStyle, renderInner } from './render'
 import { backgroundImage, resolveBackground } from './types'
-import { useSlideComponents } from './useSlideComponents'
+import { useSlideComponents } from './DeckData'
 
 interface SlideRow {
   id: string
@@ -16,15 +16,14 @@ export function SlideThumb({
   slide,
   deck,
   width,
-  token,
 }: {
   slide: SlideRow
   deck: { background: string } | null
   width: number
-  // When present, load components via the public read-only link queries (the /share viewer).
-  token?: string
 }) {
-  const components = useSlideComponents(slide.id, token)
+  // Components come from the deck's single composed view (DeckDataProvider) — including the /share
+  // viewer, where the provider already reads through the token-gated public query.
+  const components = useSlideComponents(slide.id)
   const scale = width / SLIDE_W
   return (
     <div
@@ -41,7 +40,9 @@ export function SlideThumb({
       {components.map((c) => (
         <div key={c.id} className={`cmp cmp--${c.kind}`} style={cmpStyle(c)}>
           {c.kind === 'video' || c.kind === 'webframe' ? (
-            <div style={{ width: '100%', height: '100%', background: '#000' }} />
+            <div
+              style={{ width: '100%', height: '100%', background: '#000' }}
+            />
           ) : (
             renderInner(c)
           )}

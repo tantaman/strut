@@ -1,12 +1,11 @@
 // Public read-only viewer (spec §12 sharing): anyone with the link `/share/:deckId?t=<token>` can
-// watch the deck. It reuses the present-mode camera flight, but reads through the token-gated public
-// queries (publicDeck / publicSlides / public components via SlideThumb's `token`) so no ownership or
-// collaborator membership is required — the share token is the bearer credential.
+// watch the deck. It reuses the present-mode camera flight, but reads through the ONE token-gated
+// public composed query (publicDeckDetail, via DeckDataProvider) so no ownership or collaborator
+// membership is required — the share token is the bearer credential.
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { useQuery } from '@rindle/react'
-import { publicDeckQuery, publicSlidesQuery } from '../../shared/queries'
+import { DeckDataProvider, useDeckData } from '../editor/DeckData'
 import { SlideThumb } from '../editor/SlideThumb'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
@@ -46,20 +45,16 @@ function Share() {
         <p>This share link is missing its access token.</p>
       </div>
     )
-  return <ShareViewer deckId={deckId} token={token} />
+  return (
+    <DeckDataProvider deckId={deckId} token={token}>
+      <ShareViewer />
+    </DeckDataProvider>
+  )
 }
 
-function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
-  const deck = useQuery(publicDeckQuery({ deckId, token })) as unknown as {
-    title: string
-    background: string
-    surface: string
-    custom_stylesheet: string
-    canned_transition: string
-  } | null
-  const slides = useQuery(
-    publicSlidesQuery({ deckId, token }),
-  ) as unknown as PlaySlide[]
+function ShareViewer() {
+  const { deck, slides: detailSlides } = useDeckData()
+  const slides = detailSlides as unknown as PlaySlide[]
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
   const [ready, setReady] = useState(false)
@@ -155,7 +150,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideThumb slide={s} deck={deck} width={SLIDE_W} token={token} />
+            <SlideThumb slide={s} deck={deck} width={SLIDE_W} />
           </div>
         ))}
       </div>

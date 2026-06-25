@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
-import { deckQuery, deckSharesQuery, slidesQuery } from '../../shared/queries'
+import { deckSharesQuery } from '../../shared/queries'
+import { DeckDataProvider, useDeckData } from '../editor/DeckData'
 import { currentUser } from '../rindle/user'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
 import { UndoProvider } from '../editor/UndoProvider'
@@ -27,40 +28,24 @@ export const Route = createFileRoute('/deck/$deckId')({
   }),
 })
 
-interface DeckRow {
-  id: string
-  title: string
-  background: string
-  surface: string
-  canned_transition: string
-  custom_stylesheet: string
-  owner_id: string
-  visibility: string
-  share_token: string
-}
 interface ShareRow {
   id: string
   user_id: string
   role: string
 }
-interface FullSlide {
-  id: string
-  deck_id: string
-  sort: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-}
 
 function EditorPage() {
   const { deckId } = Route.useParams()
-  const deck = useQuery(deckQuery({ deckId })) as unknown as DeckRow | null
+  // One subscription for the whole deck subtree (deck + slides + components + backgrounds).
+  return (
+    <DeckDataProvider deckId={deckId}>
+      <EditorAccess deckId={deckId} />
+    </DeckDataProvider>
+  )
+}
+
+function EditorAccess({ deckId }: { deckId: string }) {
+  const { deck } = useDeckData()
   const shares = useQuery(deckSharesQuery({ deckId })) as unknown as ShareRow[]
   // Owner or 'editor' collaborator → editable; everyone else (incl. a 'viewer') → read-only. While
   // the deck row is still syncing we assume read-only so editing chrome doesn't flash for viewers.
@@ -79,12 +64,10 @@ function EditorPage() {
 }
 
 function EditorInner({ deckId }: { deckId: string }) {
-  const deck = useQuery(deckQuery({ deckId })) as unknown as DeckRow | null
-  const slides = useQuery(slidesQuery({ deckId })) as unknown as FullSlide[]
+  const { deck, slides, status: deckStatus } = useDeckData()
   const editor = useEditor()
   // Don't judge access until both the deck row and its shares are authoritative — otherwise canEdit is
   // momentarily false on open and the read-only banner flashes before ownership/role is known.
-  const deckStatus = useQueryStatus(deckQuery({ deckId }))
   const sharesStatus = useQueryStatus(deckSharesQuery({ deckId }))
   const accessResolved = deckStatus !== 'unknown' && sharesStatus !== 'unknown'
 

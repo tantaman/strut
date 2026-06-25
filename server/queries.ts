@@ -17,6 +17,7 @@ import {
 import type { Cond } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels } from '../shared/app-def.ts'
+import { SlideSubtree } from '../shared/fragments.ts'
 import { profileQuery } from '../shared/queries.ts'
 
 type User = string
@@ -89,6 +90,25 @@ const deckQuery = defineQuery(
     q.deck.where
       .id(deckId)
       .where(deckAccess(ctx.user) as never)
+      .one(),
+)
+
+// Composed deck subtree (deck + slides + components + custom backgrounds), gated ONCE at the deck
+// root: because the whole tree hangs off this deck via correlated `sub` edges, scoping the root to
+// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed (contrast the
+// five componentQuery gates below). Same wire name + fragment as the client `deckDetail`, so the only
+// difference is this root `where`.
+const deckDetailQuery = defineQuery(
+  'deckDetail',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }, ctx: Ctx) =>
+    q.deck.where
+      .id(deckId)
+      .where(deckAccess(ctx.user) as never)
+      .sub('slides', rels.deckSlides, (s: any) =>
+        s.orderBy('sort', 'asc').include(SlideSubtree),
+      )
+      .sub('customBackgrounds', rels.deckCustomBackgrounds)
       .one(),
 )
 
@@ -199,6 +219,25 @@ const publicSlidesQuery = defineQuery(
       .orderBy('sort', 'asc'),
 )
 
+// Composed public twin — gated purely on the bearer token at the deck root (publicAccess), which
+// scopes the whole correlated subtree. Mirrors deckDetailQuery for the share viewer / SSR.
+const publicDeckDetailQuery = defineQuery(
+  'publicDeckDetail',
+  (raw): { deckId: string; token: string } => ({
+    deckId: reqString(raw, 'deckId'),
+    token: reqString(raw, 'token'),
+  }),
+  ({ deckId, token }: { deckId: string; token: string }) =>
+    q.deck.where
+      .id(deckId)
+      .where(publicAccess(token) as never)
+      .sub('slides', rels.deckSlides, (s: any) =>
+        s.orderBy('sort', 'asc').include(SlideSubtree),
+      )
+      .sub('customBackgrounds', rels.deckCustomBackgrounds)
+      .one(),
+)
+
 const publicComponentQuery = (name: string, table: any, compSlideRel: any) =>
   defineQuery(
     name,
@@ -264,6 +303,8 @@ export const serverQueries = [
   decksQuery,
   deckQuery,
   slidesQuery,
+  deckDetailQuery,
+  publicDeckDetailQuery,
   textComponentsQuery,
   imageComponentsQuery,
   shapeComponentsQuery,

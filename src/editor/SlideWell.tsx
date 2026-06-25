@@ -6,11 +6,11 @@ import { Fragment, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
-import { useApp, useMutate } from '../rindle/RindleProvider'
+import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { readSlideComponents } from './deckIO'
+import { useDeckData } from './DeckData'
 import type { AnyComponent } from './types'
 import { SlideThumb } from './SlideThumb'
 
@@ -38,8 +38,8 @@ export function SlideWell({
 }) {
   const editor = useEditor()
   const mutate = useMutate()
-  const app = useApp()
   const history = useHistory()
+  const { componentsBySlide } = useDeckData()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
 
@@ -121,10 +121,11 @@ export function SlideWell({
     for (const c of comps) reinsertComponent(mutate, c)
   }
 
-  async function deleteSlide(s: SlideRow, idx: number) {
+  function deleteSlide(s: SlideRow, idx: number) {
     // Snapshot components first so undo can restore them — the server cascades component rows by
-    // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them.
-    const comps = await readSlideComponents(app.store, s.id)
+    // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them. The
+    // snapshot reads the deck's live composed view (no extra one-shot query needed).
+    const comps = componentsBySlide.get(s.id) ?? []
     const ids = {
       textIds: comps.filter((c) => c.kind === 'text').map((c) => c.id),
       imageIds: comps.filter((c) => c.kind === 'image').map((c) => c.id),

@@ -15,7 +15,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { useSlideComponents } from './useSlideComponents'
+import { useSlideComponents } from './DeckData'
 import { cmpStyle, componentSize, renderInner } from './render'
 import {
   backgroundImage,

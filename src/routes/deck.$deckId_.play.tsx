@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useQuery } from '@rindle/react'
-import { deckQuery, slidesQuery } from '../../shared/queries'
+import { DeckDataProvider, useDeckData } from '../editor/DeckData'
 import { SlideThumb } from '../editor/SlideThumb'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
@@ -43,13 +42,16 @@ interface PlaySlide {
 
 function Play() {
   const { deckId } = Route.useParams()
-  const deck = useQuery(deckQuery({ deckId })) as unknown as {
-    background: string
-    surface: string
-    custom_stylesheet: string
-    canned_transition: string
-  } | null
-  const slides = useQuery(slidesQuery({ deckId })) as unknown as PlaySlide[]
+  return (
+    <DeckDataProvider deckId={deckId}>
+      <PlayInner deckId={deckId} />
+    </DeckDataProvider>
+  )
+}
+
+function PlayInner({ deckId }: { deckId: string }) {
+  const { deck, slides: detailSlides } = useDeckData()
+  const slides = detailSlides as unknown as PlaySlide[]
   const { view, slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)
