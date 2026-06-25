@@ -2,15 +2,11 @@
 // and the app itself (for `app.mutate.*`). Renders a loading state until connected — which also keeps
 // SSR happy (the effect never runs on the server, so both tiers first render "Connecting…").
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Rindle } from '@rindle/react'
-import { getApp, type StrutApp } from './client.ts'
+import { getApp } from './client.ts'
+import type { StrutApp } from './client.ts'
 
 const AppContext = createContext<StrutApp | null>(null)
 
@@ -47,8 +43,7 @@ export function RindleProvider({ children }: { children: ReactNode }) {
         <p>Couldn’t connect to Rindle.</p>
         <pre>{error}</pre>
         <p className="strut-boot__hint">
-          Is the daemon (<code>rindle up</code>) running? (<code>pnpm dev</code>{' '}
-          starts it.)
+          Is <code>pnpm dev</code> or <code>pnpm daemon</code> running?
         </p>
       </div>
     )

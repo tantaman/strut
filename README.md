@@ -38,24 +38,23 @@ client mutators (imported by both browser and server). App code is in `src/` (`r
 ```bash
 pnpm install
 
-# Terminal 1 — daemon + web (via concurrently; the API is served by the web app):
-pnpm dev                  # web on http://localhost:3000
-
-# Terminal 2 — first run only, while the daemon is up: apply migrations + regen schema
-pnpm setup
+# Daemon + web (via concurrently; the API is served by the web app):
+pnpm dev                  # applies migrations, regenerates schema, watches on http://localhost:3000
 ```
 
 Then open http://localhost:3000. Other scripts:
 
 ```bash
 pnpm build            # production build (client + SSR + API routes)
-pnpm daemon           # just the rindled daemon
+pnpm daemon           # rindled daemon + migration/schema watcher
 pnpm dev:web          # just vite (web + API routes)
 pnpm generate-routes  # regenerate src/routeTree.gen.ts
+pnpm setup            # one-shot migrate + schema regen against a running daemon
 pnpm test             # vitest
 ```
 
-After editing `migrations/`, re-run `pnpm setup` to apply + regenerate `shared/schema.ts`.
+While `pnpm dev` or `pnpm daemon` is running, edits to `migrations/` are applied and
+`shared/schema.ts` is regenerated automatically.
 
 ## History
 
