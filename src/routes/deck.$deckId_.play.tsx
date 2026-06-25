@@ -27,19 +27,6 @@ export const Route = createFileRoute('/deck/$deckId_/play')({
 // Overview (x,y) are in "card" units (240px wide); the world places full 1280px slides, so scale up.
 const WORLD = SLIDE_W / 240
 
-interface PlaySlide {
-  id: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-}
-
 function Play() {
   const { deckId } = Route.useParams()
   return (
@@ -50,8 +37,7 @@ function Play() {
 }
 
 function PlayInner({ deckId }: { deckId: string }) {
-  const { deck, slides: detailSlides } = useDeckData()
-  const slides = detailSlides as unknown as PlaySlide[]
+  const { deck, slides } = useDeckData()
   const { view, slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)

@@ -25,35 +25,43 @@ section. "FYI" = minor; "🔴" = cost real time / would block a newcomer.
 ## Friction encountered
 
 ### 🔴 1. Migration applier chokes on inline `-- comments`
+
 `rindle migrate apply` failed with `daemon error 400: sqlite error during exec_ddl: incomplete
 input` — no line number, no offending statement echoed. Cause: I had inline trailing comments after
 column defs, e.g. `id TEXT, -- the id`. The "one statement per ';'" splitter evidently mishandles
 inline `--` comments. Removing them (full-line comments only) fixed it.
+
 - **Ask:** either support inline comments, or have the applier report WHICH statement failed (echo
   the statement text / index). "incomplete input" with no locator is very hard to debug on a 9-table
   migration.
 
 ### 🔴 2. Quickstart's `api.url: "/api"` double-prefixes the route → 404
+
 The browser client builds request URLs as `api.url + routes.query`, and `routes.query` defaults to
 the **absolute** `/api/rindle/query`. So the quickstart's `api: { url: "/api" }` resolves to
 `/api/api/rindle/query`. Correct value is `api: { url: "" }` (same origin) — or set `routes` to
 relative suffixes. Found by reading `@rindle/optimistic/dist/client.js`.
+
 - **Ask:** fix the quickstart example, and/or make the client detect/normalize the double prefix, or
   document the `url`+`routes` join rule explicitly (it's `base.replace(/\/$/,"") + path`).
 
 ### FYI 3. `defineQuery` / `.where` API not shown in the quickstart
+
 The quickstart query example only used `.orderBy().limit().countAs()`. I needed `.where` (filter
 slides by `deck_id`, components by `slide_id`) — found `q.t.where.col(value)` (proxy, bare value =
 `eq`) and operators `eq/ne/gt/.../inList` + `and/or` by reading `query.d.ts`/`operators.d.ts`. Worth
 a `.where` example in the quickstart (filtering is table stakes for any real app).
 
 ### FYI 4. Codegen header is genuinely helpful
+
 `rindle schema gen` emits a header explaining the TEXT→string()/INTEGER|REAL→number() mapping and
 that `json<T>()`/literal-union refinements must be re-applied after each regen. Good DX.
 
 ### ✅ Verified end-to-end (data layer)
+
 Before any UI: started daemon (`rindle up`) + API server (`tsx server/rindle-api.ts`) and exercised
 the raw HTTP contract with curl. All worked first try once #1/#2 were fixed:
+
 - `query` (decks) → returns a lease (`materializationId`, `leaseToken`, `queryKey`) ⇒ daemon
   materialized the AST.
 - `authorizeQuery` rejects a missing `x-user` (`forbidden`).
@@ -61,35 +69,61 @@ the raw HTTP contract with curl. All worked first try once #1/#2 were fixed:
 - `read` (decks) → the deck row WITH `slideCount: 1` — the `countAs(rels.deckSlides)` relationship
   aggregate computed correctly through the daemon.
 - `mutate` deleteDeck → authoritative cascade emptied slides+deck.
-The split predicted/authoritative mutator model + named queries are pleasant once the shapes click.
+  The split predicted/authoritative mutator model + named queries are pleasant once the shapes click.
 
 ### ✅ `.folded` mutations are a perfect fit for drag
+
 `mutate.foo.folded({ key: id }, args)` (debounced, last-value-wins) maps exactly onto the spec's
 "high-frequency drags should fold to the last value" (§13.3). Move/resize/rotate on the canvas and
 card drags in the overview all use it with `key` = component/slide id. No custom throttling needed.
 This is a genuinely nice piece of the API.
 
 ### FYI 6. Polymorphic "all components on a slide" = N subscriptions
+
 Strut components are 5 per-type tables (typed, per spec §13.1). To render one slide I run 5 live
 queries (`useSlideComponents`) and merge by `z_order` in JS — and each live thumbnail/overview card
 does the same, so a 12-slide deck opens ~60+ subscriptions. There's no UNION / polymorphic-set query
 in the builder I could find, so the cost is inherent to the normalized choice.
+
 - **Ask:** a documented pattern for "fetch a heterogeneous child set" (UNION view, or a recommended
   single polymorphic table with a typed `json<T>()` payload column) would help. Also: guidance on the
   practical ceiling for concurrent `useQuery` subscriptions.
 
 ### FYI 7. `.one()` → `useQuery` returns `R | null` — clean
+
 `q.deck.where.id(x).one()` makes `useQuery(deckQuery(...))` return a single row or null, no array
 unwrapping. Worked as hoped.
 
-### FYI 8. Had to cast `useQuery` rows to hand-written interfaces in a couple spots
+### ✅ RESOLVED (no Rindle change needed) — FYI 8. Casting `useQuery` rows to hand-written interfaces
+
 The inferred row type from a `defineQuery` value is great inside the file that builds it, but passing
 results across module boundaries into presentational components I ended up using `as unknown as
 MyRow[]` rather than importing the inferred type. Likely my own ergonomics gap — a documented
 "export this query's row type" recipe (e.g. `type Row = QueryData<typeof slidesQuery>[number]`) would
 remove the casts.
 
+**Update (0.1.6): the casts were never necessary — the extraction works cross-module, no Rindle fix
+needed.** The recipe guessed above is _almost_ right; the exact form is:
+
+```ts
+import type { QueryData } from '@rindle/react'
+type DeckDetail = NonNullable<QueryData<ReturnType<typeof deckDetailQuery>>>
+type DeckDetailSlide = DeckDetail['slides'][number] // nested `.sub`/`.include` shapes included
+```
+
+Note `ReturnType<…>`: a `defineQuery` value is a CALLABLE `NamedQuery`, not a `Query`, so you extract
+the `Query` from its return type, then `QueryData<Q>` (= `ReturnType<Q['materialize']>['data']`). The
+FULL composed shape survives — deck row → `slides[]` → `texts[]/images[]/…` → columns — typed straight
+off the schema + fragment composition, and `const d: DeckDetail | null = useQuery(query)` needs **no
+cast** (works even for the `private | public` union the provider passes). Verified real (not silently
+`any`) with negative type probes: assigning `string`→`number`, reading a non-existent column, etc. all
+fail to compile as they should. `src/editor/DeckData.tsx` now uses derived types; the per-route
+hand-written row interfaces (DeckRow/FullSlide/PlaySlide/…) are the same pattern and can be deleted the
+same way. Net: delete the manual interfaces and the `as unknown as` casts; keep the schema as the one
+source of truth.
+
 ### ✅ RESOLVED in 0.1.2 — 🔴 9. `@rindle/wasm@0.1.1` `rindle_bg.wasm` was broken: `__wbindgen_externrefs` exported the WRONG table
+
 **Fixed in `@rindle/wasm@0.1.2`** (whole `@rindle/*` suite bumped to 0.1.2). Verified at the artifact
 level (parsed `rindle_bg.wasm`): `__wbindgen_externrefs` now exports **table index 1 (externref,
 growable=YES)** instead of index 0 (the non-growable funcref table). New wasm hash `06afe628…` ≠ broken
@@ -105,14 +139,18 @@ listed 0.1.1 as latest; a cache-busted `curl` (`?<nonce>` + `Cache-Control: no-c
 surfaced it. Lesson: don't trust a first 404 as "not published" — re-probe with a cache-buster.
 
 ---
+
 _Original 0.1.1 diagnosis (for the record):_
 The published wasm fails to initialize in **every** engine (my Node smoke test AND the browser),
 throwing on `createRindleClient` → `initWasm()`:
+
 ```
 RangeError: WebAssembly.Table.grow(): failed to grow table by 4
   at __wbindgen_init_externref_table (@rindle/wasm/pkg/rindle.js:656)   // wasm.__wbindgen_externrefs.grow(4)
 ```
+
 **Confirmed root cause** by parsing `rindle_bg.wasm` directly:
+
 - The module defines two tables: `table[0]` = **funcref** (`min=max=307`, NOT growable — the
   call_indirect table) and `table[1]` = **externref** (`min=1024`, no max → growable).
 - But the export `__wbindgen_externrefs` → **table index 0** (the funcref table). So the glue grows the
@@ -128,6 +166,7 @@ RangeError: WebAssembly.Table.grow(): failed to grow table by 4
   sections (script in scratchpad) shows the index-0 mismatch.
 
 ### ✅ RESOLVED in 0.1.2 — 10. Browser runtime (WASM + WS sync) now verified end-to-end
+
 Previously blocked by #9. With 0.1.2 the full optimistic runtime is verified (see #9): wasm engine +
 WS sync + optimistic apply + server rebase, driven through the real `@rindle/optimistic` client. This
 is the same code path the browser runs, so the in-browser editor is unblocked. (SSR remains safe by
@@ -135,20 +174,23 @@ construction: the client is lazy + dynamic-imported, and the SSR build confirms 
 server-side.)
 
 ### FYI 5. Routes constant is exported but the join rule isn't documented
+
 `DEFAULT_RINDLE_API_ROUTES` (`/api/rindle/{query,read,mutate}`) is exported from `@rindle/api-server`
 and mirrored privately in the client — handy, but see #2: the client `url`+`routes` composition is
 the actual contract and it's only discoverable by reading the compiled JS.
 
 ### ✅ 11. Adding new mutators + headless verification: smooth
+
 Building the selection inspector (text font/size/color, shape fill, z-order, css classes) added no new
 friction — the predicted/authoritative twin pattern is mechanical once the shapes click, and a
 client↔server twin parity check is just `grep` (every client mutator name must have a server twin or
 the mutation is silently rejected → optimistic snap-back; a missing twin is the #1 footgun, so a
 `rindle check` that diffs client `ClientRegistry` keys vs `defineApiMutators` keys would be a great
 lint).
+
 - **Recipe worth documenting:** the whole optimistic runtime can be exercised **headlessly in Node**
   (Node ≥22 has global `WebSocket`+`fetch`): `createRindleClient({api:{url:"http://127.0.0.1:7700"},
-  daemon:{wsUrl:"ws://127.0.0.1:7601"}})` against a live daemon+API, then
+daemon:{wsUrl:"ws://127.0.0.1:7601"}})` against a live daemon+API, then
   `store.materialize(namedQuery(args))`, `view.subscribe(()=>{})`, poll `view.resultType` to
   `"complete"`, fire `mutate.*`, and assert on `view.data` after a short sleep. This caught nothing
   broken this round (good) and is how #9/#10 were verified. A `@rindle/testing` harness wrapping this
@@ -158,12 +200,14 @@ lint).
   to later changes.)
 
 ### ✅ 13. Undo/redo is clean as a pure client-side command stack — two small frictions
+
 Implemented spec §3.7 (bounded-20 `{label,undo,redo}` history, atomic `batch()`) entirely on the
 client: every editor op records an inverse built from the SAME named mutators (move↔move,
 add↔removeComponent, delete↔reinsert, edit↔edit-with-old-value). No Rindle primitive needed, and it
 composes with optimistic sync for free — undo just fires another optimistic mutation. Verified in real
 headless Chrome (Cmd+Z removes an added component, Cmd+Shift+Z restores it). Two friction points:
-- **Re-inserting a deleted row needs add* + transformComponent + setComponentClasses (3 mutators).**
+
+- **Re-inserting a deleted row needs add\* + transformComponent + setComponentClasses (3 mutators).**
   The `add*` mutators only take position + type fields and reset the spatial base (scale/rotate/skew/
   z) via `spatialBase`, so restoring a moved/rotated/resized component on undo (or on import/duplicate)
   is a 3-call dance. An `upsert(table, fullRow)` or an add that accepts the whole spatial base would
@@ -173,27 +217,30 @@ headless Chrome (Cmd+Z removes an added component, Cmd+Shift+Z restores it). Two
 - **Undo of a slide delete must snapshot the slide's components first** (the server cascades component
   rows by slide_id, so they're gone after delete). That's the polymorphic 5-query read again (#6/#12)
   on a hot path (every slide delete now does a `readSlideComponents` before deleting). A
-  `store.readOnce(query)` (#12) plus a cascade that's *reversible* (or a delete that returns the
+  `store.readOnce(query)` (#12) plus a cascade that's _reversible_ (or a delete that returns the
   deleted subtree) would remove the snapshot boilerplate. Net: undo/redo didn't need anything FROM
   Rindle, but a full-row upsert + a one-shot subtree read would make the surrounding code much smaller.
 
 ### FYI 12. Export amplifies the polymorphic-component cost (#6)
-JSON / standalone-HTML export needs a one-shot read of the *whole* deck subtree. With 5 per-type
+
+JSON / standalone-HTML export needs a one-shot read of the _whole_ deck subtree. With 5 per-type
 component tables that's `slides × 5 + 3` materializations (one per component query per slide, plus
 deck/slides/customBackgrounds). The `materialize → poll resultType → read → destroy` one-shot pattern
 (no subscriber) made this clean and it's fast locally, but a `store.readOnce(query): Promise<data>`
 convenience (or a documented subtree/batch read) would remove the boilerplate and the N-query
 amplification. Cross-ref #6 (no polymorphic/UNION set query).
 
-### FYI 14. Server-side authorization can't read the DB *from the authorize hook* — two gaps
+### FYI 14. Server-side authorization can't read the DB _from the authorize hook_ — two gaps
+
 Adding per-user ownership + sharing (decks scoped by `owner_id`, `deck_share` collaborators) meant
 figuring out where row-level checks live. The authorize hooks turn out to be coarse-grained by design,
 and the right enforcement points are query-scoping (reads) and mutators (writes). Two ergonomic gaps
 surfaced while wiring it:
+
 - **The authorize input has no daemon / no `read(query)` helper.** `authorizeQuery` gets
   `{user, name, args, context}` and `authorizeMutation` gets `{user, envelope, context}`, where
   `context = ApiContext = {user, request}` — no DB handle. Mutators, by contrast, get
-  `MutationContext = {user, envelope, daemon, request}`. So a *self-contained, unit-testable*
+  `MutationContext = {user, envelope, daemon, request}`. So a _self-contained, unit-testable_
   authorizer can't look anything up; you'd have to close over the module-scope `HttpRindleDaemonClient`
   we construct (works, since `Authorizer` may be async, but it's not a first-class affordance).
   **Ask:** pass `daemon` (or a `read(namedQuery)` helper) into `AuthorizeQueryInput`/`AuthorizeMutationInput`
@@ -204,19 +251,21 @@ surfaced while wiring it:
   Raw SQL only exists as `tx.exec` (void, write-side) inside a mutation and `executeSqlTxn` (returns
   apply metadata — `cv`/`lmid` — not SELECT rows). **Ask:** a `daemon.selectSql(sql, params): rows`
   (or a way for a mutator to read back through `tx`) would turn an ownership check into a one-liner.
-- **Net (not a blocker):** reads are best secured by *scoping the query itself* (context injection +
+- **Net (not a blocker):** reads are best secured by _scoping the query itself_ (context injection +
   `existsNoSync` permission gates — server-only, pruned from the client footprint), so you never read
   in `authorizeQuery`; writes are enforced inside the mutator (which has `ctx.daemon` + `tx`). The two
-  asks above would mainly help when you *want* a symmetric authorize-hook policy layer.
+  asks above would mainly help when you _want_ a symmetric authorize-hook policy layer.
 
 ### 🔴 15. `existsNoSync` in a SHARED `defineQuery` returns empty on the client — you must split client/server twins
+
 Cost real time. Implementing read-gating, I scoped each deck-subtree query with `existsNoSync` inside
 the ONE `defineQuery` that both tiers import. Result: every gated query returned **empty on the client**
-— even for the owner, even for their own rows. The deck/dashboard queries *appeared* to work only
+— even for the owner, even for their own rows. The deck/dashboard queries _appeared_ to work only
 because their gate was `or(fieldCondition('owner_id', user), existsNoSync(deckShares…))` and the owner
 matched the plain `fieldCondition` branch; the pure-`existsNoSync` child queries (slides/components)
 returned 0 for everyone.
-- **Root cause:** `existsNoSync` is a *server-only* gate — its witness rows are pruned from the client
+
+- **Root cause:** `existsNoSync` is a _server-only_ gate — its witness rows are pruned from the client
   footprint, so the client can't evaluate it (it has no witnesses) and the predicate collapses to false.
   The d.ts even says "use this when building the **server's** query; the client holds its own un-gated
   query." The trap: a `defineQuery` is used by BOTH tiers by default, so "the client holds its own
@@ -229,12 +278,13 @@ returned 0 for everyone.
   viewer see a shared deck + its slides/components; a stranger sees nothing; `existsNoSync` nests fine
   server-side (component → slide → deck, 3 levels deep).
 - **Asks:** (a) make the split a first-class concept — e.g. `defineQuery(name, validate, clientBuild,
-  { serverBuild })` or `clientQuery.gated(serverBuild)` — so the wire name can't drift and the intent is
+{ serverBuild })` or `clientQuery.gated(serverBuild)` — so the wire name can't drift and the intent is
   legible; (b) have `existsNoSync` THROW (or warn) if it's ever evaluated on the client/optimistic store
   instead of silently returning empty — the silent-empty cost the most time; (c) one worked example in
   the docs of "un-gated client query + gated server twin under the same name".
 
 ### FYI 16. Write-enforcement via conditional SQL is clean; silent 0-row drop is the caveat
+
 Role-based write-enforcement (owner/editor may write, viewer/stranger may not) is done entirely with
 access-guarded SQL in the mutators: `INSERT … SELECT … WHERE <deck/slide is editable by ctx.user>` and
 `UPDATE/DELETE … WHERE id = ? AND <editable>` (helpers `EDITABLE_DECKS`/`EDITABLE_SLIDES`,
@@ -247,18 +297,20 @@ the guards are defense-in-depth. A `tx.exec`-with-rowcount (reject when 0 rows t
 signal "forbidden" from a guarded write would let the client snap back immediately.
 
 ### ✅ 17. Public (bearer-token) read links: gate on a row field, not the principal
+
 The public read-only share link (`/share/:deckId?t=<token>`) reuses the split-twin pattern from #15,
-but the *gate* is a bearer credential rather than the principal. The server twins
+but the _gate_ is a bearer credential rather than the principal. The server twins
 (`publicDeck`/`publicSlides`/`public<Type>Components`) take the token as a **query arg** and gate with a
 plain field match on the deck — `and(fieldCondition('visibility','public-read'), fieldCondition('share_token', token))`
 — climbing child→deck via `existsNoSync` for slides/components exactly like the owner/collab twins. No
 `ctx.user` appears in these queries at all, so a stranger (any non-empty principal) syncs the deck subtree
 purely by holding the link. Three things that made it safe + clean:
+
 - **Required, non-empty token** in the arg parser (both tiers) so a private deck's empty `share_token`
   can never be matched, and both clauses must hold so flipping visibility back to `private` (token `''`)
   instantly kills every outstanding link.
 - **The token rides in the subscription identity.** `defineQuery('publicSlides', {deckId, token})` makes
-  the public subscription a *distinct* wire identity from the authenticated `slides` one — same daemon
+  the public subscription a _distinct_ wire identity from the authenticated `slides` one — same daemon
   materialization machinery, no special-casing.
 - **One render path.** Threading an optional `token` through `useSlideComponents`/`SlideThumb` (it just
   picks the `public*` query variant) let the existing present-mode renderer serve the public viewer with

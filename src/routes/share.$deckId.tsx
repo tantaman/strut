@@ -31,19 +31,6 @@ export const Route = createFileRoute('/share/$deckId')({
 
 const WORLD = SLIDE_W / 240
 
-interface PlaySlide {
-  id: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-}
-
 function Share() {
   const { deckId } = Route.useParams()
   const { t: token } = Route.useSearch()
@@ -63,8 +50,7 @@ function Share() {
 }
 
 function ShareViewer() {
-  const { deck, slides: detailSlides } = useDeckData()
-  const slides = detailSlides as unknown as PlaySlide[]
+  const { deck, slides } = useDeckData()
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
   const [ready, setReady] = useState(false)

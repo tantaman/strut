@@ -15,55 +15,18 @@
 import { createContext, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
-import type { ResultType } from '@rindle/react'
+import type { QueryData, ResultType } from '@rindle/react'
 import { deckDetailQuery, publicDeckDetailQuery } from '../../shared/queries'
-import { mergeComponents, type AnyComponent, type SpatialBase } from './types'
+import { mergeComponents, type AnyComponent } from './types'
 
-/** A component row as it arrives nested under a slide (full row — spatial base + type fields). */
-type ComponentRow = SpatialBase & Record<string, unknown>
-
-export interface DeckDetailSlide {
-  id: string
-  deck_id: string
-  sort: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-  texts: ComponentRow[]
-  images: ComponentRow[]
-  shapes: ComponentRow[]
-  videos: ComponentRow[]
-  webframes: ComponentRow[]
-}
-
-export interface DeckDetail {
-  id: string
-  title: string
-  background: string
-  surface: string
-  chosen_presenter: string
-  canned_transition: string
-  custom_stylesheet: string
-  deck_version: string
-  owner_id: string
-  visibility: string
-  share_token: string
-  created: number
-  modified: number
-  slides: DeckDetailSlide[]
-  customBackgrounds: {
-    id: string
-    deck_id: string
-    klass: string
-    style: string
-  }[]
-}
+// Derived straight from the composed query — no hand-written interface to drift from the schema or the
+// fragment composition, and `useQuery` returns it WITHOUT a cast. `QueryData<Q>` is the data a query's
+// view yields; the NamedQuery is callable, so `ReturnType<typeof …>` is the Query `Q`. (Verified that
+// this cross-module extraction is real, not `any`, with negative type probes — see RINDLE_NOTES #8.)
+export type DeckDetail = NonNullable<
+  QueryData<ReturnType<typeof deckDetailQuery>>
+>
+export type DeckDetailSlide = DeckDetail['slides'][number]
 
 interface DeckDataValue {
   deck: DeckDetail | null
@@ -91,7 +54,7 @@ export function DeckDataProvider({
   const query = token
     ? publicDeckDetailQuery({ deckId, token })
     : deckDetailQuery({ deckId })
-  const detail = useQuery(query) as unknown as DeckDetail | null
+  const detail: DeckDetail | null = useQuery(query)
   const status = useQueryStatus(query)
 
   const componentsBySlide = useMemo(() => {
