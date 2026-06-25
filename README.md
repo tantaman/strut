@@ -1,5 +1,8 @@
 # Strut
 
+<img width="3024" height="1728" alt="CleanShot 2026-06-25 at 08 58 27@2x" src="https://github.com/user-attachments/assets/3a7acaa1-f2b5-4ba7-8282-dfd9e360d7f0" />
+
+
 An HTML5 GUI authoring tool for **spatial presentations** — build a deck of slides, place rich
 content on each, arrange the slides in 3-D space, and play the deck as a camera flight through that
 world (the impress.js model, made visual and editable).
