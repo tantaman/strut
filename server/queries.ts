@@ -17,7 +17,7 @@ import {
 import type { Cond } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels } from '../shared/app-def.ts'
-import { SlideSubtree } from '../shared/fragments.ts'
+import { SlideFragment } from '../shared/fragments.ts'
 import { profileQuery } from '../shared/queries.ts'
 
 type User = string
@@ -106,7 +106,7 @@ const deckDetailQuery = defineQuery(
       .id(deckId)
       .where(deckAccess(ctx.user) as never)
       .sub('slides', rels.deckSlides, (s: any) =>
-        s.orderBy('sort', 'asc').include(SlideSubtree),
+        s.orderBy('sort', 'asc').include(SlideFragment),
       )
       .sub('customBackgrounds', rels.deckCustomBackgrounds)
       .one(),
@@ -232,7 +232,7 @@ const publicDeckDetailQuery = defineQuery(
       .id(deckId)
       .where(publicAccess(token) as never)
       .sub('slides', rels.deckSlides, (s: any) =>
-        s.orderBy('sort', 'asc').include(SlideSubtree),
+        s.orderBy('sort', 'asc').include(SlideFragment),
       )
       .sub('customBackgrounds', rels.deckCustomBackgrounds)
       .one(),

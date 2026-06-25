@@ -8,7 +8,7 @@ import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import { deckDetailQuery } from '../../shared/queries'
 import { mergeComponents, SHAPES } from './types'
-import type { DeckDetail } from './DeckData'
+import type { DeckDetail } from './deckDetail'
 import {
   deserializeDeck,
   serializeDeck,

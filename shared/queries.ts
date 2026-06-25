@@ -11,7 +11,7 @@
 
 import { defineQuery } from '@rindle/client'
 import { q, rels } from './app-def.ts'
-import { SlideSubtree } from './fragments.ts'
+import { SlideFragment } from './fragments.ts'
 
 function reqString(raw: unknown, field: string): string {
   const v = (raw as Record<string, unknown>)?.[field]
@@ -51,7 +51,7 @@ export const slidesQuery = defineQuery(
 )
 
 // ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
-// slide (the SlideSubtree fragment) + custom backgrounds — a single subscription that replaces the
+// slide (the SlideFragment fragment) + custom backgrounds — a single subscription that replaces the
 // deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
 // (see shared/fragments.ts). The editor, presenter, export and undo-snapshot all read from this.
 export const deckDetailQuery = defineQuery(
@@ -61,7 +61,7 @@ export const deckDetailQuery = defineQuery(
     q.deck.where
       .id(deckId)
       .sub('slides', rels.deckSlides, (s) =>
-        s.orderBy('sort', 'asc').include(SlideSubtree),
+        s.orderBy('sort', 'asc').include(SlideFragment),
       )
       .sub('customBackgrounds', rels.deckCustomBackgrounds)
       .one(),
@@ -173,7 +173,7 @@ export const publicDeckDetailQuery = defineQuery(
     q.deck.where
       .id(deckId)
       .sub('slides', rels.deckSlides, (s) =>
-        s.orderBy('sort', 'asc').include(SlideSubtree),
+        s.orderBy('sort', 'asc').include(SlideFragment),
       )
       .sub('customBackgrounds', rels.deckCustomBackgrounds)
       .one(),

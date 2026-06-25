@@ -6,32 +6,31 @@
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type PointerEvent as RPointerEvent,
 } from 'react'
+import { useFragment } from '@rindle/react'
+import { SlideFragment } from '../../shared/fragments'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { useSlideComponents } from './DeckData'
 import { cmpStyle, componentSize, renderInner } from './render'
 import {
   backgroundImage,
+  mergeComponents,
   resolveBackground,
   resolveSurface,
   type AnyComponent,
 } from './types'
+import type { DeckDetailSlide } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
 import { UserStyle } from './CssEditor'
 
-interface SlideRow {
-  id: string
-  background: string
-  surface: string
-}
 interface DeckRow {
   background: string
   surface: string
@@ -64,12 +63,19 @@ export function Stage({
   slide,
   deck,
 }: {
-  slide: SlideRow
+  slide: DeckDetailSlide
   deck: DeckRow | null
 }) {
+  // The relay read: useFragment the slide node, then merge its five typed component arrays into the
+  // single z-ordered AnyComponent[] the editor's cross-type interaction (select/marquee/z-order/
+  // inspector) operates on. This local merge is the one place the editor denormalizes — by design.
+  const s = useFragment(SlideFragment, slide)
+  const components = useMemo(
+    () => mergeComponents(s.texts, s.images, s.shapes, s.videos, s.webframes),
+    [s],
+  )
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
-  const components = useSlideComponents(slide.id)
   const mutate = useMutate()
   const editor = useEditor()
   const history = useHistory()
@@ -81,10 +87,10 @@ export function Stage({
     h: number
   }>(null)
 
-  const bg = resolveBackground(slide.background, deck?.background)
-  const bgImg = backgroundImage(slide.background, deck?.background)
-  const surf = resolveSurface(slide.surface, deck?.surface)
-  const surfImg = backgroundImage(slide.surface, deck?.surface)
+  const bg = resolveBackground(s.background, deck?.background)
+  const bgImg = backgroundImage(s.background, deck?.background)
+  const surf = resolveSurface(s.surface, deck?.surface)
+  const surfImg = backgroundImage(s.surface, deck?.surface)
 
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {

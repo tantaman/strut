@@ -1,12 +1,13 @@
 // Public read-only viewer (spec §12 sharing): anyone with the link `/share/:deckId?t=<token>` can
 // watch the deck. It reuses the present-mode camera flight, but reads through the ONE token-gated
-// public composed query (publicDeckDetail, via DeckDataProvider) so no ownership or collaborator
+// public composed query (publicDeckDetail, one useQuery) so no ownership or collaborator
 // membership is required — the share token is the bearer credential.
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { DeckDataProvider, useDeckData } from '../editor/DeckData'
-import { SlideThumb } from '../editor/SlideThumb'
+import { useQuery } from '@rindle/react'
+import { publicDeckDetailQuery } from '../../shared/queries'
+import { SlideView } from '../editor/ComponentViews'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
@@ -42,15 +43,13 @@ function Share() {
         <p>This share link is missing its access token.</p>
       </div>
     )
-  return (
-    <DeckDataProvider deckId={deckId} token={token}>
-      <ShareViewer />
-    </DeckDataProvider>
-  )
+  return <ShareViewer deckId={deckId} token={token} />
 }
 
-function ShareViewer() {
-  const { deck, slides } = useDeckData()
+function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
+  // Relay root: ONE token-gated useQuery; slides flow to <SlideView> as fragment refs.
+  const deck = useQuery(publicDeckDetailQuery({ deckId, token }))
+  const slides = deck?.slides ?? []
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
   const [ready, setReady] = useState(false)
@@ -146,7 +145,7 @@ function ShareViewer() {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideThumb slide={s} deck={deck} width={SLIDE_W} />
+            <SlideView slide={s} deck={deck} width={SLIDE_W} />
           </div>
         ))}
       </div>

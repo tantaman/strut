@@ -1,16 +1,14 @@
-// Composable Rindle FRAGMENTS — reusable, co-located selections over a table (rindle.sh/docs/fragments).
+// Composable Rindle FRAGMENTS — reusable, co-located, PROJECTED selections over a table
+// (rindle.sh/docs/fragments). The relay design: a root query spreads these, and each leaf component
+// reads its own fragment with `useFragment` (a pure, typed, masked read — no extra subscription).
 //
-// Why: a slide's components live in five per-type tables (text/image/shape/video/webframe), so the
-// old `useSlideComponents` opened FIVE live queries PER slide and merged them in JS — a 12-slide deck
-// meant ~60 subscriptions, multiplied again by every thumbnail/overview card that re-ran the same
-// hook (RINDLE_NOTES #6/#12). Fragments fix that at the root: spreading these into ONE deck query
-// assembles a single Ast → a single materialization → a single `/query` for the whole deck subtree
-// (no per-component request fan-out). Components then READ the already-materialized node instead of
-// each opening their own subscription.
+// `.select(...)` does two things: (1) MASKING — `useFragment(TextFragment, ref)` types the node to
+// exactly these columns, so a component can't read a column it didn't declare; (2) FOOTPRINT — only
+// these columns sync, trimming the wire payload for the high-volume component rows.
 //
-// These leaf fragments don't `.select(...)` yet (omitting it selects all columns — the full row the
-// renderer needs). A later pass can narrow each to exactly the columns its component reads to trim
-// wire size; the composition below doesn't change when that happens.
+// The five component tables share a spatial base (position/scale/rotate/skew/z + custom_classes) and
+// add their own type fields. The slide fragment nests all five, z-ordered, under stable aliases — so
+// `deck → slides → components` materializes from ONE query (one Ast, one materialization, one /query).
 
 import { defineFragment } from '@rindle/client'
 import {
@@ -23,17 +21,115 @@ import {
 } from './schema.ts'
 import { rels } from './app-def.ts'
 
-// One reusable selection per component table — the unit a leaf component renders from.
-export const TextFragment = defineFragment(text_component, (f) => f)
-export const ImageFragment = defineFragment(image_component, (f) => f)
-export const ShapeFragment = defineFragment(shape_component, (f) => f)
-export const VideoFragment = defineFragment(video_component, (f) => f)
-export const WebframeFragment = defineFragment(webframe_component, (f) => f)
+// The spatial columns every component leaf selects, plus its own type fields.
+export const TextFragment = defineFragment(text_component, (f) =>
+  f.select(
+    'id',
+    'slide_id',
+    'z_order',
+    'x',
+    'y',
+    'scale_x',
+    'scale_y',
+    'scale_w',
+    'scale_h',
+    'rotate',
+    'skew_x',
+    'skew_y',
+    'custom_classes',
+    'text',
+    'size',
+    'color',
+    'font_family',
+  ),
+)
 
-// One slide plus all five of its component sets, each z-ordered and nested under a stable alias
-// (`texts`/`images`/`shapes`/`videos`/`webframes`). Spread this under a deck's `slides` edge and the
-// whole deck → slides → components tree materializes from ONE query.
-export const SlideSubtree = defineFragment(slide, (f) =>
+export const ImageFragment = defineFragment(image_component, (f) =>
+  f.select(
+    'id',
+    'slide_id',
+    'z_order',
+    'x',
+    'y',
+    'scale_x',
+    'scale_y',
+    'scale_w',
+    'scale_h',
+    'rotate',
+    'skew_x',
+    'skew_y',
+    'custom_classes',
+    'src',
+    'image_type',
+  ),
+)
+
+export const ShapeFragment = defineFragment(shape_component, (f) =>
+  f.select(
+    'id',
+    'slide_id',
+    'z_order',
+    'x',
+    'y',
+    'scale_x',
+    'scale_y',
+    'scale_w',
+    'scale_h',
+    'rotate',
+    'skew_x',
+    'skew_y',
+    'custom_classes',
+    'shape',
+    'markup',
+    'fill',
+  ),
+)
+
+export const VideoFragment = defineFragment(video_component, (f) =>
+  f.select(
+    'id',
+    'slide_id',
+    'z_order',
+    'x',
+    'y',
+    'scale_x',
+    'scale_y',
+    'scale_w',
+    'scale_h',
+    'rotate',
+    'skew_x',
+    'skew_y',
+    'custom_classes',
+    'src',
+    'video_type',
+    'src_type',
+    'short_src',
+  ),
+)
+
+export const WebframeFragment = defineFragment(webframe_component, (f) =>
+  f.select(
+    'id',
+    'slide_id',
+    'z_order',
+    'x',
+    'y',
+    'scale_x',
+    'scale_y',
+    'scale_w',
+    'scale_h',
+    'rotate',
+    'skew_x',
+    'skew_y',
+    'custom_classes',
+    'src',
+  ),
+)
+
+// One slide + all five of its component sets, each z-ordered under a stable alias. Spread into a deck
+// query's `slides` edge and the whole subtree materializes from one query. (The slide row itself is
+// left unprojected — it's a single small row per slide; projection pays off on the component rows.)
+export const SlideFragment = defineFragment(slide, (f) =>
   f
     .sub('texts', rels.slideTexts, (t) =>
       t.orderBy('z_order', 'asc').include(TextFragment),

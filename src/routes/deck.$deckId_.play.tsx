@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { DeckDataProvider, useDeckData } from '../editor/DeckData'
-import { SlideThumb } from '../editor/SlideThumb'
+import { useQuery } from '@rindle/react'
+import { deckDetailQuery } from '../../shared/queries'
+import { SlideView } from '../editor/ComponentViews'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
@@ -29,15 +30,9 @@ const WORLD = SLIDE_W / 240
 
 function Play() {
   const { deckId } = Route.useParams()
-  return (
-    <DeckDataProvider deckId={deckId}>
-      <PlayInner deckId={deckId} />
-    </DeckDataProvider>
-  )
-}
-
-function PlayInner({ deckId }: { deckId: string }) {
-  const { deck, slides } = useDeckData()
+  // Relay root: ONE useQuery; each slide flows to <SlideView> as a fragment ref.
+  const deck = useQuery(deckDetailQuery({ deckId }))
+  const slides = deck?.slides ?? []
   const { view, slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)
@@ -143,7 +138,7 @@ function PlayInner({ deckId }: { deckId: string }) {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideThumb slide={s} deck={deck} width={SLIDE_W} />
+            <SlideView slide={s} deck={deck} width={SLIDE_W} />
           </div>
         ))}
       </div>
