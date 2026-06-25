@@ -10,12 +10,22 @@ import { SlideThumb } from '../editor/SlideThumb'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
+import { preloadShareDeck } from '../rindle/shareSsr'
 import { SLIDE_H, SLIDE_W } from '../config'
 
 export const Route = createFileRoute('/share/$deckId')({
   component: Share,
   validateSearch: (s: Record<string, unknown>): { t: string } => ({
     t: typeof s.t === 'string' ? s.t : '',
+  }),
+  // SSR seed: preload the deck on the server so the share link first-paints with content (and is
+  // crawlable). `RindleProvider` picks up `loaderData.rindle` and renders against it until the live
+  // client connects. Best-effort — a null seed just falls back to the live query.
+  loaderDeps: ({ search }) => ({ token: search.t }),
+  loader: async ({ params, deps }) => ({
+    rindle: await preloadShareDeck({
+      data: { deckId: params.deckId, token: deps.token },
+    }),
   }),
 })
 
