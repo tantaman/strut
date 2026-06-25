@@ -35,26 +35,50 @@ client mutators (imported by both browser and server). App code is in `src/` (`r
 
 ## Getting started
 
+The normal local run path is a single command:
+
 ```bash
 pnpm install
 
-# Daemon + web (via concurrently; the API is served by the web app):
-pnpm dev                  # applies migrations, regenerates schema, watches on http://localhost:3000
+pnpm dev
 ```
 
-Then open http://localhost:3000. Other scripts:
+Then open http://localhost:3000.
+
+`pnpm dev` runs two processes with `concurrently`:
+
+- `rindle up --migrate --gen shared/schema.ts --watch` — starts the daemon from `daemon.json`, applies
+  migrations, regenerates `shared/schema.ts`, and keeps watching `migrations/`.
+- `vite dev --port 3000` — starts the TanStack Start app on http://localhost:3000. The Rindle API and
+  image upload endpoints are served by this same web process under `/api/rindle/*`; there is no
+  separate API server to start.
+
+Local state lives in `rindle.db` and `.uploads/`. Image uploads work with no config by using the local
+fallback; copy `.env.example` to `.env` only if you want uploads stored in Cloudflare R2. `vite.config.ts`
+loads `.env` for server-side values during `vite dev`.
+
+If you need to run the processes separately:
 
 ```bash
-pnpm build            # production build (client + SSR + API routes)
-pnpm daemon           # rindled daemon + migration/schema watcher
-pnpm dev:web          # just vite (web + API routes)
+pnpm daemon   # daemon + migration/schema watcher
+pnpm dev:web  # web app + same-origin API routes; expects the daemon to already be running
+```
+
+By default the daemon control plane is `http://127.0.0.1:7600` and the live-query WebSocket is
+`ws://127.0.0.1:7601`. Override them with `RINDLE_DAEMON_URL` for the server/API side and
+`VITE_RINDLE_WS` for the browser side.
+
+Other scripts:
+
+```bash
+pnpm build            # production build (client + SSR + API routes); does not start the daemon
+pnpm preview          # preview the built app; expects a reachable daemon
 pnpm generate-routes  # regenerate src/routeTree.gen.ts
 pnpm setup            # one-shot migrate + schema regen against a running daemon
 pnpm test             # vitest
+pnpm lint             # eslint
+pnpm check            # prettier check
 ```
-
-While `pnpm dev` or `pnpm daemon` is running, edits to `migrations/` are applied and
-`shared/schema.ts` is regenerated automatically.
 
 ## History
 
