@@ -37,6 +37,24 @@ export const decksQuery = defineQuery(
       .countAs('slideCount', rels.deckSlides),
 )
 
+// The shared deck-detail SUBTREE: slides (sorted, each carrying its SlideFragment components) + custom
+// backgrounds, collapsed to the single deck row. Every deck-detail query — the client copies here and
+// the gated server twins (server/queries.ts) — is this same body; the ONLY thing that varies per tier
+// / variant is the access gate applied to `root` BEFORE it's handed in (none on the client, since the
+// local store is already server-scoped; `deckAccess`/`publicAccess` on the server twins). Keeping the
+// gate outside this builder is exactly why it can be shared: the gate uses server-only `existsNoSync`,
+// which the client must never evaluate (RINDLE_NOTES #15). The client call site below preserves full
+// typing, so `QueryData<typeof deckDetailQuery>` still derives the real `DeckDetail` shape (no casts).
+type DeckRoot = ReturnType<typeof q.deck.where.id>
+export function deckDetailBody(root: DeckRoot) {
+  return root
+    .sub('slides', rels.deckSlides, (s) =>
+      s.orderBy('sort', 'asc').include(SlideFragment),
+    )
+    .sub('customBackgrounds', rels.deckCustomBackgrounds)
+    .one()
+}
+
 // ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
 // slide (the SlideFragment fragment) + custom backgrounds — a single subscription that replaces the
 // deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
@@ -44,14 +62,7 @@ export const decksQuery = defineQuery(
 export const deckDetailQuery = defineQuery(
   'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) =>
-    q.deck.where
-      .id(deckId)
-      .sub('slides', rels.deckSlides, (s) =>
-        s.orderBy('sort', 'asc').include(SlideFragment),
-      )
-      .sub('customBackgrounds', rels.deckCustomBackgrounds)
-      .one(),
+  ({ deckId }: { deckId: string }) => deckDetailBody(q.deck.where.id(deckId)),
 )
 
 // Collaborators on a deck (role = 'editor' | 'viewer').
@@ -85,13 +96,7 @@ export const publicDeckDetailQuery = defineQuery(
     token: reqString(raw, 'token'),
   }),
   ({ deckId }: { deckId: string; token: string }) =>
-    q.deck.where
-      .id(deckId)
-      .sub('slides', rels.deckSlides, (s) =>
-        s.orderBy('sort', 'asc').include(SlideFragment),
-      )
-      .sub('customBackgrounds', rels.deckCustomBackgrounds)
-      .one(),
+    deckDetailBody(q.deck.where.id(deckId)),
 )
 
 export const allQueries = [

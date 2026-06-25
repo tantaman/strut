@@ -19,8 +19,7 @@ import {
 import type { Cond } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels } from '../shared/app-def.ts'
-import { SlideFragment } from '../shared/fragments.ts'
-import { profileQuery } from '../shared/queries.ts'
+import { deckDetailBody, profileQuery } from '../shared/queries.ts'
 
 type User = string
 type Ctx = ApiContext<User>
@@ -68,20 +67,15 @@ const decksQuery = defineQuery(
 
 // Composed deck subtree (deck + slides + components + custom backgrounds), gated ONCE at the deck
 // root: because the whole tree hangs off this deck via correlated `sub` edges, scoping the root to
-// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed. Same wire
-// name + fragment as the client `deckDetail`, so the only difference is this root `where`.
+// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed. The subtree
+// shape itself is the shared `deckDetailBody`; the only thing this twin adds is the root `where` gate.
 const deckDetailQuery = defineQuery(
   'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.deck.where
-      .id(deckId)
-      .where(deckAccess(ctx.user) as never)
-      .sub('slides', rels.deckSlides, (s: any) =>
-        s.orderBy('sort', 'asc').include(SlideFragment),
-      )
-      .sub('customBackgrounds', rels.deckCustomBackgrounds)
-      .one(),
+    deckDetailBody(
+      q.deck.where.id(deckId).where(deckAccess(ctx.user) as never),
+    ),
 )
 
 // Collaborators on a deck — visible to the OWNER (manages the list) and to each collaborator (their own row).
@@ -114,14 +108,7 @@ const publicDeckDetailQuery = defineQuery(
     token: reqString(raw, 'token'),
   }),
   ({ deckId, token }: { deckId: string; token: string }) =>
-    q.deck.where
-      .id(deckId)
-      .where(publicAccess(token) as never)
-      .sub('slides', rels.deckSlides, (s: any) =>
-        s.orderBy('sort', 'asc').include(SlideFragment),
-      )
-      .sub('customBackgrounds', rels.deckCustomBackgrounds)
-      .one(),
+    deckDetailBody(q.deck.where.id(deckId).where(publicAccess(token) as never)),
 )
 
 // profile is world-readable — reuse the un-gated client definition.
