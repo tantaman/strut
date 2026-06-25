@@ -13,7 +13,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS, type LayoutDef } from './layouts'
-import { SlideView } from './ComponentViews'
+import { SlideView } from './SlideView'
 import type { DeckDetailSlide } from './deckDetail'
 
 export interface OverviewSlide {

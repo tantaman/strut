@@ -11,7 +11,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import { mergeComponents, type AnyComponent } from './types'
-import { SlideView } from './ComponentViews'
+import { SlideView } from './SlideView'
 import type { DeckDetailSlide } from './deckDetail'
 
 export function SlideWell({

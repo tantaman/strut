@@ -66,9 +66,11 @@ export function Stage({
   slide: DeckDetailSlide
   deck: DeckRow | null
 }) {
-  // The relay read: useFragment the slide node, then merge its five typed component arrays into the
-  // single z-ordered AnyComponent[] the editor's cross-type interaction (select/marquee/z-order/
-  // inspector) operates on. This local merge is the one place the editor denormalizes — by design.
+  // Read the slide through the fragment (unmasking the five component arrays the composed deck query
+  // already materialized), then `mergeComponents` flattens them into the single z-ordered
+  // AnyComponent[] the editor's cross-type interaction (select / marquee / z-order / inspector)
+  // operates on. This is the SAME data path <SlideView> uses for read-only thumbnails — the Stage
+  // just additionally wraps each component with selection + resize handles.
   const s = useFragment(SlideFragment, slide)
   const components = useMemo(
     () => mergeComponents(s.texts, s.images, s.shapes, s.videos, s.webframes),
