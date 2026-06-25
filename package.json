@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@rindle/cli": "^0.1.6",
+    "@rindle/react-devtools": "^0.1.6",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/eslint-config": "latest",

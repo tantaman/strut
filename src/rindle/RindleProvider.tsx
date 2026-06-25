@@ -10,6 +10,8 @@ import type { StrutApp } from './client.ts'
 
 const AppContext = createContext<StrutApp | null>(null)
 
+type RindleDevtoolsComponent = (props: { defaultOpen?: boolean }) => ReactNode
+
 export function useApp(): StrutApp {
   const app = useContext(AppContext)
   if (!app) throw new Error('useApp() used outside <RindleProvider>')
@@ -52,7 +54,32 @@ export function RindleProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={app}>
-      <Rindle store={app.store}>{children}</Rindle>
+      <Rindle store={app.store}>
+        {children}
+        {import.meta.env.DEV ? <RindleDevtoolsMount /> : null}
+      </Rindle>
     </AppContext.Provider>
   )
+}
+
+function RindleDevtoolsMount() {
+  const [Devtools, setDevtools] = useState<RindleDevtoolsComponent | null>(null)
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+
+    let live = true
+    void import('@rindle/react-devtools')
+      .then(({ RindleDevtools }) => {
+        if (live) setDevtools(() => RindleDevtools)
+      })
+      .catch((e) => console.error('[rindle] failed to load devtools:', e))
+
+    return () => {
+      live = false
+    }
+  }, [])
+
+  if (!Devtools) return null
+  return <Devtools />
 }

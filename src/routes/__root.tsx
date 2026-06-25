@@ -49,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <RindleProvider>{children}</RindleProvider>
         <TanStackDevtools
-          config={{ position: 'bottom-right' }}
+          config={{ position: 'bottom-left' }}
           plugins={[
             {
               name: 'Tanstack Router',
