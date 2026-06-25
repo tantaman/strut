@@ -316,3 +316,39 @@ purely by holding the link. Three things that made it safe + clean:
   picks the `public*` query variant) let the existing present-mode renderer serve the public viewer with
   zero duplication. Verified end-to-end with two isolated browser principals: stranger views via link,
   is denied the normal deck route until added as a collaborator, then gets a live read-only editor.
+
+### ✅ 18. The server access gates can be CAST-FREE — the `Cond<unknown>`/`as never` was self-inflicted
+
+Earlier critique was wrong and is retracted here: the predicate API is NOT weakly typed. The
+`Cond<unknown>` / `as never` / `(s: any)` cascade in `server/queries.ts` came entirely from reaching for
+`fieldCondition(field: string, arg: unknown)` on **static** field names.
+
+- **Root cause:** `Cond<R>` is `Condition & { readonly __row?: R }` — phantom-**branded** to the row it
+  filters, which is what lets `.where(cond: Cond<RowOf<C>>)` reject a condition meant for another table.
+  `fieldCondition` takes a bare string field, so it _cannot_ recover `R` and returns an **unbranded**
+  `Condition`. One of those inside `or()`/`and()` poisons the inference → the whole gate widens to
+  `Cond<unknown>` → not assignable to `.where(Cond<RowOf<deck>>)` → forced `as never`.
+- **The typed path was there all along.** A `TableDef` doubles as a standalone, row-branded condition
+  builder: `deck.owner_id(user)` ⇒ `Cond<RowOf<deckCols>>` (the value is typed via `Arg<ColT>`), and
+  `existsNoSync`/`and`/`or` already preserve the brand. Rewriting the static names to it
+  (`deck.visibility('public-read')`, `deck_share.user_id(user)`, …) made `deckAccess`/`publicAccess`
+  infer the right `Cond<RowOf<…>>` and every gate `.where(...)` typecheck with **zero casts**; the
+  `existsNoSync` callbacks also drop their gratuitous `(s: any)` (`s` is already `Query<CC>`).
+  Behavior-identical — a bare value is `eq` sugar, the same simple condition `fieldCondition` built.
+- **Takeaway:** use `fieldCondition` ONLY for genuinely dynamic (runtime-string) field names; for static
+  columns use the table-def builder and the security-critical file stays cast-free. (Verified: `tsc`
+  clean, client+SSR build green, eslint on the file 4→2 — the 2 left are unrelated `reqString`/`reqLimit`
+  baseline.)
+
+### FYI 19. `useFragment` masks; the raw `QueryData` node type does NOT — they're different reads
+
+When deriving types from a composed query (`DeckDetail = NonNullable<QueryData<ReturnType<typeof
+deckDetailQuery>>>`, then `DeckDetail['slides'][number]['texts'][number]`), the nested component node is
+typed to the **full** included columns, not the fragment's `.select()` mask. A throwaway probe confirmed
+`texts[0].image_type` (an image column) is **accepted** on a text node from the raw query data, while
+`images[0].text` and `shapes[0].nonsense` are correctly rejected — so the type is concrete (not `any`),
+just not masked. The strict projection mask only applies through `useFragment(TextFragment, node)`, which
+returns `Pick<RowOf, Sel>`. Practical rule: lean on `useFragment` (the read path) when you want masking
+enforced; don't assume `QueryData` of an `.include()`d subtree gives you the same narrowing. Not
+necessarily a bug — `Pick` only ever removes fields, so a wider node type is still sound against the
+runtime row — but worth knowing before you treat a raw query-data node as if it were masked.
