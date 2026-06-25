@@ -37,19 +37,6 @@ export const decksQuery = defineQuery(
       .countAs('slideCount', rels.deckSlides),
 )
 
-export const deckQuery = defineQuery(
-  'deck',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) => q.deck.where.id(deckId).one(),
-)
-
-export const slidesQuery = defineQuery(
-  'slides',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) =>
-    q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
-)
-
 // ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
 // slide (the SlideFragment fragment) + custom backgrounds — a single subscription that replaces the
 // deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
@@ -67,12 +54,6 @@ export const deckDetailQuery = defineQuery(
       .one(),
 )
 
-export const customBackgroundsQuery = defineQuery(
-  'customBackgrounds',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) => q.custom_background.where.deck_id(deckId),
-)
-
 // Collaborators on a deck (role = 'editor' | 'viewer').
 export const deckSharesQuery = defineQuery(
   'deckShares',
@@ -88,31 +69,11 @@ export const profileQuery = defineQuery(
 )
 
 // ---- public read-only link queries -------------------------------------------------------------
-// These mirror the deck/slides/components queries but carry the link `token` in their subscription
-// identity, so the SERVER twin (server/queries.ts) can sync a deck the principal doesn't own/share
-// when its visibility is 'public-read' and its share_token matches. The client copies stay UN-GATED
-// (they just read the already-scoped local store — see the header note above). The token is required
-// + non-empty so an empty share_token on a private deck can never be matched.
-
-export const publicDeckQuery = defineQuery(
-  'publicDeck',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId }: { deckId: string; token: string }) =>
-    q.deck.where.id(deckId).one(),
-)
-
-export const publicSlidesQuery = defineQuery(
-  'publicSlides',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId }: { deckId: string; token: string }) =>
-    q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
-)
+// The composed public twin carries the link `token` in its subscription identity, so the SERVER twin
+// (server/queries.ts) can sync a deck the principal doesn't own/share when its visibility is
+// 'public-read' and its share_token matches. The client copy stays UN-GATED (it just reads the
+// already-scoped local store — see the header note above). The token is required + non-empty so an
+// empty share_token on a private deck can never be matched.
 
 // Composed public twin — same shape as deckDetailQuery, but its subscription identity carries the
 // link `token` so the SERVER twin can sync a deck the principal doesn't own/share (the token is the
@@ -133,26 +94,10 @@ export const publicDeckDetailQuery = defineQuery(
       .one(),
 )
 
-export const publicCustomBackgroundsQuery = defineQuery(
-  'publicCustomBackgrounds',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId }: { deckId: string; token: string }) =>
-    q.custom_background.where.deck_id(deckId),
-)
-
 export const allQueries = [
   decksQuery,
-  deckQuery,
-  slidesQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
-  customBackgroundsQuery,
   deckSharesQuery,
   profileQuery,
-  publicDeckQuery,
-  publicSlidesQuery,
-  publicCustomBackgroundsQuery,
 ]
