@@ -1,16 +1,17 @@
 // Public read-only viewer (spec §12 sharing): anyone with the link `/share/:deckId?t=<token>` can
-// watch the deck. It reuses the present-mode camera flight, but reads through the token-gated public
-// queries (publicDeck / publicSlides / public components via SlideThumb's `token`) so no ownership or
-// collaborator membership is required — the share token is the bearer credential.
+// watch the deck. It reuses the present-mode camera flight, but reads through the ONE token-gated
+// public composed query (publicDeckDetail, one useQuery) so no ownership or collaborator
+// membership is required — the share token is the bearer credential.
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useQuery } from '@rindle/react'
-import { publicDeckQuery, publicSlidesQuery } from '../../shared/queries'
-import { SlideThumb } from '../editor/SlideThumb'
+import { publicDeckDetailQuery } from '../../shared/queries'
+import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
+import { preloadShareDeck } from '../rindle/shareSsr'
 import { SLIDE_H, SLIDE_W } from '../config'
 
 export const Route = createFileRoute('/share/$deckId')({
@@ -18,22 +19,18 @@ export const Route = createFileRoute('/share/$deckId')({
   validateSearch: (s: Record<string, unknown>): { t: string } => ({
     t: typeof s.t === 'string' ? s.t : '',
   }),
+  // SSR seed: preload the deck on the server so the share link first-paints with content (and is
+  // crawlable). `RindleProvider` picks up `loaderData.rindle` and renders against it until the live
+  // client connects. Best-effort — a null seed just falls back to the live query.
+  loaderDeps: ({ search }) => ({ token: search.t }),
+  loader: async ({ params, deps }) => ({
+    rindle: await preloadShareDeck({
+      data: { deckId: params.deckId, token: deps.token },
+    }),
+  }),
 })
 
 const WORLD = SLIDE_W / 240
-
-interface PlaySlide {
-  id: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-}
 
 function Share() {
   const { deckId } = Route.useParams()
@@ -50,16 +47,9 @@ function Share() {
 }
 
 function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
-  const deck = useQuery(publicDeckQuery({ deckId, token })) as unknown as {
-    title: string
-    background: string
-    surface: string
-    custom_stylesheet: string
-    canned_transition: string
-  } | null
-  const slides = useQuery(
-    publicSlidesQuery({ deckId, token }),
-  ) as unknown as PlaySlide[]
+  // Relay root: ONE token-gated useQuery; slides flow to <SlideView> as fragment refs.
+  const deck = useQuery(publicDeckDetailQuery({ deckId, token }))
+  const slides = deck?.slides ?? []
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
   const [ready, setReady] = useState(false)
@@ -155,7 +145,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideThumb slide={s} deck={deck} width={SLIDE_W} token={token} />
+            <SlideView slide={s} deck={deck} width={SLIDE_W} />
           </div>
         ))}
       </div>

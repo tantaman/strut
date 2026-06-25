@@ -6,30 +6,15 @@ import { generateKeyBetween } from 'fractional-indexing'
 import { newId } from '../config'
 import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
-import {
-  customBackgroundsQuery,
-  deckQuery,
-  imageComponentsQuery,
-  shapeComponentsQuery,
-  slidesQuery,
-  textComponentsQuery,
-  videoComponentsQuery,
-  webframeComponentsQuery,
-} from '../../shared/queries'
-import {
-  mergeComponents,
-  SHAPES,
-  type AnyComponent,
-  type SpatialBase,
-} from './types'
+import { deckDetailQuery } from '../../shared/queries'
+import { mergeComponents, SHAPES } from './types'
+import type { DeckDetail } from './deckDetail'
 import {
   deserializeDeck,
   serializeDeck,
   type DeckBundle,
-  type DeckRowLike,
   type ImportedComponent,
   type ImportedDeck,
-  type SlideRowLike,
 } from './serialize'
 import { toImpressHTML } from './impressExport'
 
@@ -61,51 +46,29 @@ export async function gatherDeckBundle(
   store: Store,
   deckId: string,
 ): Promise<DeckBundle | null> {
-  const deck = await readOnce<DeckRowLike | null>(store, deckQuery({ deckId }))
-  if (!deck) return null
-  const slides = await readOnce<SlideRowLike[]>(store, slidesQuery({ deckId }))
-  const customBackgrounds = await readOnce<{ klass: string; style: string }[]>(
+  // One composed read of the whole deck subtree (was deck + slides + 5×N component reads — #12).
+  const detail = await readOnce<DeckDetail | null>(
     store,
-    customBackgroundsQuery({ deckId }),
+    deckDetailQuery({ deckId }),
   )
+  if (!detail) return null
 
   const componentsBySlide: DeckBundle['componentsBySlide'] = {}
-  for (const s of slides) {
-    const [texts, images, shapes, videos, webframes] = await Promise.all([
-      readOnce<SpatialBase[]>(store, textComponentsQuery({ slideId: s.id })),
-      readOnce<SpatialBase[]>(store, imageComponentsQuery({ slideId: s.id })),
-      readOnce<SpatialBase[]>(store, shapeComponentsQuery({ slideId: s.id })),
-      readOnce<SpatialBase[]>(store, videoComponentsQuery({ slideId: s.id })),
-      readOnce<SpatialBase[]>(
-        store,
-        webframeComponentsQuery({ slideId: s.id }),
-      ),
-    ])
+  for (const s of detail.slides) {
     componentsBySlide[s.id] = mergeComponents(
-      texts,
-      images,
-      shapes,
-      videos,
-      webframes,
+      s.texts,
+      s.images,
+      s.shapes,
+      s.videos,
+      s.webframes,
     )
   }
-  return { deck, slides, componentsBySlide, customBackgrounds }
-}
-
-/** One-shot read of every component on a slide (merged + z-ordered). Used by undo to snapshot a
- *  slide before deletion (the server cascades its components, so undo must restore them). */
-export async function readSlideComponents(
-  store: Store,
-  slideId: string,
-): Promise<AnyComponent[]> {
-  const [texts, images, shapes, videos, webframes] = await Promise.all([
-    readOnce<SpatialBase[]>(store, textComponentsQuery({ slideId })),
-    readOnce<SpatialBase[]>(store, imageComponentsQuery({ slideId })),
-    readOnce<SpatialBase[]>(store, shapeComponentsQuery({ slideId })),
-    readOnce<SpatialBase[]>(store, videoComponentsQuery({ slideId })),
-    readOnce<SpatialBase[]>(store, webframeComponentsQuery({ slideId })),
-  ])
-  return mergeComponents(texts, images, shapes, videos, webframes)
+  return {
+    deck: detail,
+    slides: detail.slides,
+    componentsBySlide,
+    customBackgrounds: detail.customBackgrounds,
+  }
 }
 
 const slug = (s: string) =>

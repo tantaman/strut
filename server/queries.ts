@@ -4,20 +4,16 @@
 // footprint and the client never re-evaluates them — which is why the *client* twins stay un-gated;
 // see shared/queries.ts and RINDLE_NOTES #15). The principal comes from the authoritative ApiContext.
 //
-// A deck is accessible if the principal OWNS it or is a COLLABORATOR (a deck_share row). Slides /
-// components / custom backgrounds inherit that by climbing child → deck via existsNoSync.
+// A deck is accessible if the principal OWNS it or is a COLLABORATOR (a deck_share row). The composed
+// deckDetail subtree (slides / components / custom backgrounds) inherits that by gating ONCE at its
+// deck root — the correlated `sub` edges scope every descendant, so no per-child existsNoSync climb
+// is needed.
 
-import {
-  and,
-  defineQuery,
-  existsNoSync,
-  fieldCondition,
-  or,
-} from '@rindle/client'
-import type { Cond } from '@rindle/client'
+import { and, defineQuery, existsNoSync, or } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels } from '../shared/app-def.ts'
-import { profileQuery } from '../shared/queries.ts'
+import { deck, deck_share } from '../shared/schema.ts'
+import { deckDetailBody, profileQuery } from '../shared/queries.ts'
 
 type User = string
 type Ctx = ApiContext<User>
@@ -30,17 +26,8 @@ function reqString(raw: unknown, field: string): string {
 
 // Condition on a DECK row: it is publicly shared under THIS token. Bearer-credential gate — no
 // principal needed. Both clauses must hold, so a private deck (token '') can never be matched.
-function publicAccess(token: string): Cond<unknown> {
-  return and(
-    fieldCondition('visibility', 'public-read') as Cond<unknown>,
-    fieldCondition('share_token', token) as Cond<unknown>,
-  )
-}
-// Condition on a SLIDE row: its owning deck is publicly shared under this token.
-function publicSlideAccess(token: string): Cond<unknown> {
-  return existsNoSync(rels.slideDeck, (d: any) =>
-    d.where(publicAccess(token) as never),
-  ) as Cond<unknown>
+function publicAccess(token: string) {
+  return and(deck.visibility('public-read'), deck.share_token(token))
 }
 function reqLimit(raw: unknown): number {
   const v = (raw as Record<string, unknown>)?.limit
@@ -50,106 +37,32 @@ function reqLimit(raw: unknown): number {
 }
 
 // Condition on a DECK row: principal owns it OR collaborates on it.
-function deckAccess(user: string): Cond<unknown> {
+function deckAccess(user: string) {
   return or(
-    fieldCondition('owner_id', user) as Cond<unknown>,
-    existsNoSync(rels.deckShares, (s: any) =>
-      s.where.user_id(user),
-    ) as Cond<unknown>,
+    deck.owner_id(user),
+    existsNoSync(rels.deckShares, (s) => s.where.user_id(user)),
   )
 }
-// Condition on a SLIDE row: its owning deck is accessible.
-function slideAccess(user: string): Cond<unknown> {
-  return existsNoSync(rels.slideDeck, (d: any) =>
-    d.where(deckAccess(user) as never),
-  ) as Cond<unknown>
-}
-// Condition on a COMPONENT row (via its component→slide rel): its slide's deck is accessible.
-function componentAccess(compSlideRel: any, user: string): Cond<unknown> {
-  return existsNoSync(compSlideRel, (s: any) =>
-    s.where(slideAccess(user) as never),
-  ) as Cond<unknown>
-}
-
 const decksQuery = defineQuery(
   'decks',
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
   ({ limit }: { limit: number }, ctx: Ctx) =>
     q.deck
-      .where(deckAccess(ctx.user) as never)
+      .where(deckAccess(ctx.user))
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
 )
 
-const deckQuery = defineQuery(
-  'deck',
+// Composed deck subtree (deck + slides + components + custom backgrounds), gated ONCE at the deck
+// root: because the whole tree hangs off this deck via correlated `sub` edges, scoping the root to
+// "owned or shared" scopes every descendant — no per-table `existsNoSync` climb needed. The subtree
+// shape itself is the shared `deckDetailBody`; the only thing this twin adds is the root `where` gate.
+const deckDetailQuery = defineQuery(
+  'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.deck.where
-      .id(deckId)
-      .where(deckAccess(ctx.user) as never)
-      .one(),
-)
-
-const slidesQuery = defineQuery(
-  'slides',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.slide.where
-      .deck_id(deckId)
-      .where(slideAccess(ctx.user) as never)
-      .orderBy('sort', 'asc'),
-)
-
-const componentQuery = (name: string, table: any, compSlideRel: any) =>
-  defineQuery(
-    name,
-    (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-    ({ slideId }: { slideId: string }, ctx: Ctx) =>
-      table.where
-        .slide_id(slideId)
-        .where(componentAccess(compSlideRel, ctx.user) as never)
-        .orderBy('z_order', 'asc'),
-  )
-
-const textComponentsQuery = componentQuery(
-  'textComponents',
-  q.text_component,
-  rels.textDeckSlide,
-)
-const imageComponentsQuery = componentQuery(
-  'imageComponents',
-  q.image_component,
-  rels.imageDeckSlide,
-)
-const shapeComponentsQuery = componentQuery(
-  'shapeComponents',
-  q.shape_component,
-  rels.shapeDeckSlide,
-)
-const videoComponentsQuery = componentQuery(
-  'videoComponents',
-  q.video_component,
-  rels.videoDeckSlide,
-)
-const webframeComponentsQuery = componentQuery(
-  'webframeComponents',
-  q.webframe_component,
-  rels.webframeDeckSlide,
-)
-
-const customBackgroundsQuery = defineQuery(
-  'customBackgrounds',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.custom_background.where
-      .deck_id(deckId)
-      .where(
-        existsNoSync(rels.customBgDeck, (d: any) =>
-          d.where(deckAccess(ctx.user) as never),
-        ) as never,
-      ),
+    deckDetailBody(q.deck.where.id(deckId).where(deckAccess(ctx.user))),
 )
 
 // Collaborators on a deck — visible to the OWNER (manages the list) and to each collaborator (their own row).
@@ -157,127 +70,35 @@ const deckSharesQuery = defineQuery(
   'deckShares',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
-    q.deck_share.where
-      .deck_id(deckId)
-      .where(
-        or(
-          fieldCondition('user_id', ctx.user) as Cond<unknown>,
-          existsNoSync(rels.shareDeck, (d: any) =>
-            d.where.owner_id(ctx.user),
-          ) as Cond<unknown>,
-        ) as never,
+    q.deck_share.where.deck_id(deckId).where(
+      or(
+        deck_share.user_id(ctx.user),
+        existsNoSync(rels.shareDeck, (d) => d.where.owner_id(ctx.user)),
       ),
+    ),
 )
 
 // ---- public read-only link twins ---------------------------------------------------------------
 // Same wire names as the client public queries, gated purely on the bearer token (publicAccess) so a
 // stranger with the link syncs the deck subtree even though they don't own/collaborate on it.
 
-const publicDeckQuery = defineQuery(
-  'publicDeck',
+// Composed public twin — gated purely on the bearer token at the deck root (publicAccess), which
+// scopes the whole correlated subtree. Mirrors deckDetailQuery for the share viewer / SSR.
+const publicDeckDetailQuery = defineQuery(
+  'publicDeckDetail',
   (raw): { deckId: string; token: string } => ({
     deckId: reqString(raw, 'deckId'),
     token: reqString(raw, 'token'),
   }),
   ({ deckId, token }: { deckId: string; token: string }) =>
-    q.deck.where
-      .id(deckId)
-      .where(publicAccess(token) as never)
-      .one(),
-)
-
-const publicSlidesQuery = defineQuery(
-  'publicSlides',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId, token }: { deckId: string; token: string }) =>
-    q.slide.where
-      .deck_id(deckId)
-      .where(publicSlideAccess(token) as never)
-      .orderBy('sort', 'asc'),
-)
-
-const publicComponentQuery = (name: string, table: any, compSlideRel: any) =>
-  defineQuery(
-    name,
-    (raw): { slideId: string; token: string } => ({
-      slideId: reqString(raw, 'slideId'),
-      token: reqString(raw, 'token'),
-    }),
-    ({ slideId, token }: { slideId: string; token: string }) =>
-      table.where
-        .slide_id(slideId)
-        .where(
-          existsNoSync(compSlideRel, (s: any) =>
-            s.where(publicSlideAccess(token) as never),
-          ) as never,
-        )
-        .orderBy('z_order', 'asc'),
-  )
-
-const publicTextComponentsQuery = publicComponentQuery(
-  'publicTextComponents',
-  q.text_component,
-  rels.textDeckSlide,
-)
-const publicImageComponentsQuery = publicComponentQuery(
-  'publicImageComponents',
-  q.image_component,
-  rels.imageDeckSlide,
-)
-const publicShapeComponentsQuery = publicComponentQuery(
-  'publicShapeComponents',
-  q.shape_component,
-  rels.shapeDeckSlide,
-)
-const publicVideoComponentsQuery = publicComponentQuery(
-  'publicVideoComponents',
-  q.video_component,
-  rels.videoDeckSlide,
-)
-const publicWebframeComponentsQuery = publicComponentQuery(
-  'publicWebframeComponents',
-  q.webframe_component,
-  rels.webframeDeckSlide,
-)
-
-const publicCustomBackgroundsQuery = defineQuery(
-  'publicCustomBackgrounds',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId, token }: { deckId: string; token: string }) =>
-    q.custom_background.where
-      .deck_id(deckId)
-      .where(
-        existsNoSync(rels.customBgDeck, (d: any) =>
-          d.where(publicAccess(token) as never),
-        ) as never,
-      ),
+    deckDetailBody(q.deck.where.id(deckId).where(publicAccess(token))),
 )
 
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
-  deckQuery,
-  slidesQuery,
-  textComponentsQuery,
-  imageComponentsQuery,
-  shapeComponentsQuery,
-  videoComponentsQuery,
-  webframeComponentsQuery,
-  customBackgroundsQuery,
+  deckDetailQuery,
+  publicDeckDetailQuery,
   deckSharesQuery,
   profileQuery,
-  publicDeckQuery,
-  publicSlidesQuery,
-  publicTextComponentsQuery,
-  publicImageComponentsQuery,
-  publicShapeComponentsQuery,
-  publicVideoComponentsQuery,
-  publicWebframeComponentsQuery,
-  publicCustomBackgroundsQuery,
 ]

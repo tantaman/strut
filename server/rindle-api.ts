@@ -546,3 +546,22 @@ export async function handleRindleJson(
     return Response.json({ error: message }, { status })
   }
 }
+
+// One-shot SSR read of a named query (SSR-DESIGN.md §6): the server-side `ServerStore.preload` calls
+// this to seed a route's first paint. Same authority path as the /api/rindle/read route — the query
+// name resolves to its AUTHORITATIVE (gated) AST, so the SSR snapshot is scoped exactly like the live
+// subscription. `user` need only be a non-empty principal for the coarse `authorizeQuery`; the public
+// share query is token-gated (bearer) and ignores it.
+export async function readNamedQuery(
+  name: string,
+  args: unknown,
+  user: string,
+  request?: Request,
+): Promise<{ rows: { cols: Record<string, unknown> }[]; cvMin?: number }> {
+  const ctx: ApiContext<User> = {
+    user,
+    request: request ?? new Request('http://localhost/api/rindle/read'),
+  }
+  const out = await api.handleReadJson({ name, args }, ctx)
+  return { rows: out.rows, cvMin: out.cvMin }
+}

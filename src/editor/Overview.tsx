@@ -13,7 +13,8 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS, type LayoutDef } from './layouts'
-import { SlideThumb } from './SlideThumb'
+import { SlideView } from './SlideView'
+import type { DeckDetailSlide } from './deckDetail'
 
 export interface OverviewSlide {
   id: string
@@ -54,7 +55,7 @@ export function Overview({
   slides,
   deck,
 }: {
-  slides: OverviewSlide[]
+  slides: DeckDetailSlide[]
   deck: { id: string; background: string; canned_transition: string } | null
 }) {
   const editor = useEditor()
@@ -261,7 +262,7 @@ export function Overview({
     const ids = group ? [...selIds] : [s.id]
     const starts = ids
       .map((id) => slides.find((x) => x.id === id))
-      .filter((m): m is OverviewSlide => !!m)
+      .filter((m): m is DeckDetailSlide => !!m)
       .map((m) => ({ m, x0: m.x, y0: m.y }))
 
     const sx = e.clientX
@@ -372,7 +373,7 @@ export function Overview({
           >
             <span className="ov-card__num">{i + 1}</span>
             <div className="well__thumb">
-              <SlideThumb slide={s} deck={deck} width={CARD_W} />
+              <SlideView slide={s} deck={deck} width={CARD_W} />
             </div>
           </div>
         ))}

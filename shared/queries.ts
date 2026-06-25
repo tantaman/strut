@@ -11,6 +11,7 @@
 
 import { defineQuery } from '@rindle/client'
 import { q, rels } from './app-def.ts'
+import { SlideFragment } from './fragments.ts'
 
 function reqString(raw: unknown, field: string): string {
   const v = (raw as Record<string, unknown>)?.[field]
@@ -36,58 +37,32 @@ export const decksQuery = defineQuery(
       .countAs('slideCount', rels.deckSlides),
 )
 
-export const deckQuery = defineQuery(
-  'deck',
+// The shared deck-detail SUBTREE: slides (sorted, each carrying its SlideFragment components) + custom
+// backgrounds, collapsed to the single deck row. Every deck-detail query — the client copies here and
+// the gated server twins (server/queries.ts) — is this same body; the ONLY thing that varies per tier
+// / variant is the access gate applied to `root` BEFORE it's handed in (none on the client, since the
+// local store is already server-scoped; `deckAccess`/`publicAccess` on the server twins). Keeping the
+// gate outside this builder is exactly why it can be shared: the gate uses server-only `existsNoSync`,
+// which the client must never evaluate (RINDLE_NOTES #15). The client call site below preserves full
+// typing, so `QueryData<typeof deckDetailQuery>` still derives the real `DeckDetail` shape (no casts).
+type DeckRoot = ReturnType<typeof q.deck.where.id>
+export function deckDetailBody(root: DeckRoot) {
+  return root
+    .sub('slides', rels.deckSlides, (s) =>
+      s.orderBy('sort', 'asc').include(SlideFragment),
+    )
+    .sub('customBackgrounds', rels.deckCustomBackgrounds)
+    .one()
+}
+
+// ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
+// slide (the SlideFragment fragment) + custom backgrounds — a single subscription that replaces the
+// deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
+// (see shared/fragments.ts). The editor, presenter, export and undo-snapshot all read from this.
+export const deckDetailQuery = defineQuery(
+  'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) => q.deck.where.id(deckId).one(),
-)
-
-export const slidesQuery = defineQuery(
-  'slides',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) =>
-    q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
-)
-
-export const textComponentsQuery = defineQuery(
-  'textComponents',
-  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-  ({ slideId }: { slideId: string }) =>
-    q.text_component.where.slide_id(slideId).orderBy('z_order', 'asc'),
-)
-
-export const imageComponentsQuery = defineQuery(
-  'imageComponents',
-  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-  ({ slideId }: { slideId: string }) =>
-    q.image_component.where.slide_id(slideId).orderBy('z_order', 'asc'),
-)
-
-export const shapeComponentsQuery = defineQuery(
-  'shapeComponents',
-  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-  ({ slideId }: { slideId: string }) =>
-    q.shape_component.where.slide_id(slideId).orderBy('z_order', 'asc'),
-)
-
-export const videoComponentsQuery = defineQuery(
-  'videoComponents',
-  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-  ({ slideId }: { slideId: string }) =>
-    q.video_component.where.slide_id(slideId).orderBy('z_order', 'asc'),
-)
-
-export const webframeComponentsQuery = defineQuery(
-  'webframeComponents',
-  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
-  ({ slideId }: { slideId: string }) =>
-    q.webframe_component.where.slide_id(slideId).orderBy('z_order', 'asc'),
-)
-
-export const customBackgroundsQuery = defineQuery(
-  'customBackgrounds',
-  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
-  ({ deckId }: { deckId: string }) => q.custom_background.where.deck_id(deckId),
+  ({ deckId }: { deckId: string }) => deckDetailBody(q.deck.where.id(deckId)),
 )
 
 // Collaborators on a deck (role = 'editor' | 'viewer').
@@ -105,92 +80,29 @@ export const profileQuery = defineQuery(
 )
 
 // ---- public read-only link queries -------------------------------------------------------------
-// These mirror the deck/slides/components queries but carry the link `token` in their subscription
-// identity, so the SERVER twin (server/queries.ts) can sync a deck the principal doesn't own/share
-// when its visibility is 'public-read' and its share_token matches. The client copies stay UN-GATED
-// (they just read the already-scoped local store — see the header note above). The token is required
-// + non-empty so an empty share_token on a private deck can never be matched.
+// The composed public twin carries the link `token` in its subscription identity, so the SERVER twin
+// (server/queries.ts) can sync a deck the principal doesn't own/share when its visibility is
+// 'public-read' and its share_token matches. The client copy stays UN-GATED (it just reads the
+// already-scoped local store — see the header note above). The token is required + non-empty so an
+// empty share_token on a private deck can never be matched.
 
-export const publicDeckQuery = defineQuery(
-  'publicDeck',
+// Composed public twin — same shape as deckDetailQuery, but its subscription identity carries the
+// link `token` so the SERVER twin can sync a deck the principal doesn't own/share (the token is the
+// bearer credential). The client copy stays un-gated (reads the already-scoped local store).
+export const publicDeckDetailQuery = defineQuery(
+  'publicDeckDetail',
   (raw): { deckId: string; token: string } => ({
     deckId: reqString(raw, 'deckId'),
     token: reqString(raw, 'token'),
   }),
   ({ deckId }: { deckId: string; token: string }) =>
-    q.deck.where.id(deckId).one(),
-)
-
-export const publicSlidesQuery = defineQuery(
-  'publicSlides',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId }: { deckId: string; token: string }) =>
-    q.slide.where.deck_id(deckId).orderBy('sort', 'asc'),
-)
-
-const publicComponentQuery = (name: string, table: any) =>
-  defineQuery(
-    name,
-    (raw): { slideId: string; token: string } => ({
-      slideId: reqString(raw, 'slideId'),
-      token: reqString(raw, 'token'),
-    }),
-    ({ slideId }: { slideId: string; token: string }) =>
-      table.where.slide_id(slideId).orderBy('z_order', 'asc'),
-  )
-
-export const publicTextComponentsQuery = publicComponentQuery(
-  'publicTextComponents',
-  q.text_component,
-)
-export const publicImageComponentsQuery = publicComponentQuery(
-  'publicImageComponents',
-  q.image_component,
-)
-export const publicShapeComponentsQuery = publicComponentQuery(
-  'publicShapeComponents',
-  q.shape_component,
-)
-export const publicVideoComponentsQuery = publicComponentQuery(
-  'publicVideoComponents',
-  q.video_component,
-)
-export const publicWebframeComponentsQuery = publicComponentQuery(
-  'publicWebframeComponents',
-  q.webframe_component,
-)
-
-export const publicCustomBackgroundsQuery = defineQuery(
-  'publicCustomBackgrounds',
-  (raw): { deckId: string; token: string } => ({
-    deckId: reqString(raw, 'deckId'),
-    token: reqString(raw, 'token'),
-  }),
-  ({ deckId }: { deckId: string; token: string }) =>
-    q.custom_background.where.deck_id(deckId),
+    deckDetailBody(q.deck.where.id(deckId)),
 )
 
 export const allQueries = [
   decksQuery,
-  deckQuery,
-  slidesQuery,
-  textComponentsQuery,
-  imageComponentsQuery,
-  shapeComponentsQuery,
-  videoComponentsQuery,
-  webframeComponentsQuery,
-  customBackgroundsQuery,
+  deckDetailQuery,
+  publicDeckDetailQuery,
   deckSharesQuery,
   profileQuery,
-  publicDeckQuery,
-  publicSlidesQuery,
-  publicTextComponentsQuery,
-  publicImageComponentsQuery,
-  publicShapeComponentsQuery,
-  publicVideoComponentsQuery,
-  publicWebframeComponentsQuery,
-  publicCustomBackgroundsQuery,
 ]

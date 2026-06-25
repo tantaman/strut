@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useQuery } from '@rindle/react'
-import { deckQuery, slidesQuery } from '../../shared/queries'
-import { SlideThumb } from '../editor/SlideThumb'
+import { deckDetailQuery } from '../../shared/queries'
+import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
@@ -28,28 +28,11 @@ export const Route = createFileRoute('/deck/$deckId_/play')({
 // Overview (x,y) are in "card" units (240px wide); the world places full 1280px slides, so scale up.
 const WORLD = SLIDE_W / 240
 
-interface PlaySlide {
-  id: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  background: string
-  surface: string
-}
-
 function Play() {
   const { deckId } = Route.useParams()
-  const deck = useQuery(deckQuery({ deckId })) as unknown as {
-    background: string
-    surface: string
-    custom_stylesheet: string
-    canned_transition: string
-  } | null
-  const slides = useQuery(slidesQuery({ deckId })) as unknown as PlaySlide[]
+  // Relay root: ONE useQuery; each slide flows to <SlideView> as a fragment ref.
+  const deck = useQuery(deckDetailQuery({ deckId }))
+  const slides = deck?.slides ?? []
   const { view, slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)
@@ -155,7 +138,7 @@ function Play() {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideThumb slide={s} deck={deck} width={SLIDE_W} />
+            <SlideView slide={s} deck={deck} width={SLIDE_W} />
           </div>
         ))}
       </div>
