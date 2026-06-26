@@ -13,6 +13,7 @@ import { cmpStyle, renderInner } from './render'
 import { backgroundImage, resolveBackground } from './types'
 import type { AnyComponent } from './types'
 import type { SlideDetail } from './deckDetail'
+import type { ReactNode } from 'react'
 import {
   ComponentDataReader,
   componentRefKey,
@@ -33,6 +34,35 @@ function StaticComponent({ c }: { c: AnyComponent }) {
   )
 }
 
+function SlideFrame({
+  slide,
+  deck,
+  width,
+  children,
+}: {
+  slide: SlideDetail
+  deck: { background: string } | null
+  width: number
+  children: ReactNode
+}) {
+  const scale = width / SLIDE_W
+  return (
+    <div
+      className="well__thumb-inner"
+      style={{
+        width: SLIDE_W,
+        height: (SLIDE_W * 9) / 16,
+        transform: `scale(${scale})`,
+        background: resolveBackground(slide.background, deck?.background),
+        backgroundImage: backgroundImage(slide.background, deck?.background),
+        backgroundSize: 'cover',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function SlideView({
   slide,
   deck,
@@ -47,19 +77,8 @@ export function SlideView({
   onComponentRemove?: (id: string) => void
 }) {
   const components = mergeComponentRefs(slide)
-  const scale = width / SLIDE_W
   return (
-    <div
-      className="well__thumb-inner"
-      style={{
-        width: SLIDE_W,
-        height: (SLIDE_W * 9) / 16,
-        transform: `scale(${scale})`,
-        background: resolveBackground(slide.background, deck?.background),
-        backgroundImage: backgroundImage(slide.background, deck?.background),
-        backgroundSize: 'cover',
-      }}
-    >
+    <SlideFrame slide={slide} deck={deck} width={width}>
       {components.map((component) => (
         <ComponentDataReader
           key={componentRefKey(component)}
@@ -70,6 +89,26 @@ export function SlideView({
           {(c) => <StaticComponent c={c} />}
         </ComponentDataReader>
       ))}
-    </div>
+    </SlideFrame>
+  )
+}
+
+export function SlideSnapshotView({
+  slide,
+  deck,
+  width,
+  components,
+}: {
+  slide: SlideDetail
+  deck: { background: string } | null
+  width: number
+  components: readonly AnyComponent[]
+}) {
+  return (
+    <SlideFrame slide={slide} deck={deck} width={width}>
+      {components.map((c) => (
+        <StaticComponent key={c.id} c={c} />
+      ))}
+    </SlideFrame>
   )
 }

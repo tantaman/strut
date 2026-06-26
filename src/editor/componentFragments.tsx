@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { fragmentKey, useFragment } from '@rindle/react'
 import type { FragmentRef } from '@rindle/react'
@@ -80,12 +80,15 @@ function ComponentData({
   onRemove?: (id: string) => void
   children: (component: AnyComponent) => ReactNode
 }) {
-  const component = toAnyComponent(data, kind)
+  const component = useMemo(() => toAnyComponent(data, kind), [data, kind])
 
   useEffect(() => {
     onData?.(component)
+  }, [component, onData])
+
+  useEffect(() => {
     return () => onRemove?.(component.id)
-  }, [component, onData, onRemove])
+  }, [component.id, onRemove])
 
   return <>{children(component)}</>
 }

@@ -1,6 +1,7 @@
 // Pure visual rendering of a component (no interaction). Shared by the stage (which wraps it with
 // selection + handles) and the read-only thumbnails/overview cards.
 
+import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { cssHex } from './types'
 import type { AnyComponent, ComponentKind } from './types'
@@ -59,17 +60,35 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
   return { ...base, width: w, height: h, color: cssHex(c.fill, '3498db') }
 }
 
+const FULL_SIZE_STYLE: CSSProperties = { width: '100%', height: '100%' }
+
+const TextBody = memo(function TextBody({ html }: { html: string }) {
+  const dangerouslySetInnerHTML = useMemo(() => ({ __html: html }), [html])
+  return (
+    <div
+      className="cmp__textbody"
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+    />
+  )
+})
+
+const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
+  const dangerouslySetInnerHTML = useMemo(
+    () => ({ __html: markup }),
+    [markup],
+  )
+  return (
+    <div
+      style={FULL_SIZE_STYLE}
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+    />
+  )
+})
+
 export function renderInner(c: AnyComponent): ReactNode {
   switch (c.kind) {
     case 'text':
-      return (
-        <div
-          className="cmp__textbody"
-          dangerouslySetInnerHTML={{
-            __html: c.text && c.text.length ? c.text : 'Text',
-          }}
-        />
-      )
+      return <TextBody html={c.text && c.text.length ? c.text : 'Text'} />
     case 'image':
       return c.src ? (
         <img src={c.src} alt="" draggable={false} />
@@ -77,12 +96,7 @@ export function renderInner(c: AnyComponent): ReactNode {
         <div className="cmp__ph">image</div>
       )
     case 'shape':
-      return (
-        <div
-          style={{ width: '100%', height: '100%' }}
-          dangerouslySetInnerHTML={{ __html: c.markup || '' }}
-        />
-      )
+      return <MarkupBody markup={c.markup || ''} />
     case 'video':
       if (c.video_type === 'youtube' && c.short_src)
         return (

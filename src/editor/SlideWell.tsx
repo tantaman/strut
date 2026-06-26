@@ -11,7 +11,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import type { AnyComponent } from './types'
-import { SlideView } from './SlideView'
+import { SlideSnapshotView, SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 
 export function SlideWell({
@@ -26,9 +26,11 @@ export function SlideWell({
   const history = useHistory()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
+  const freezingThumbnailsRef = useRef(false)
   const componentsBySlideRef = useRef(
     new Map<string, Map<string, AnyComponent>>(),
   )
+  freezingThumbnailsRef.current = editor.draggingComponentId !== null
   const rememberSlideComponent = useCallback(
     (slideId: string, component: AnyComponent) => {
       let components = componentsBySlideRef.current.get(slideId)
@@ -41,6 +43,7 @@ export function SlideWell({
     [],
   )
   const forgetSlideComponent = useCallback((slideId: string, id: string) => {
+    if (freezingThumbnailsRef.current) return
     const components = componentsBySlideRef.current.get(slideId)
     components?.delete(id)
     if (components?.size === 0) componentsBySlideRef.current.delete(slideId)
@@ -52,6 +55,34 @@ export function SlideWell({
   }, [])
   const slideAt = (index: number): SlideDetail | undefined =>
     index >= 0 && index < slides.length ? slides[index] : undefined
+
+  function thumbnailForSlide(s: SlideDetail) {
+    const freeze =
+      editor.draggingComponentId !== null &&
+      editor.activeSlideId === s.id &&
+      componentsBySlideRef.current.has(s.id)
+
+    if (freeze) {
+      return (
+        <SlideSnapshotView
+          slide={s}
+          deck={deck}
+          width={148}
+          components={componentsForSlide(s.id)}
+        />
+      )
+    }
+
+    return (
+      <SlideView
+        slide={s}
+        deck={deck}
+        width={148}
+        onComponentData={(component) => rememberSlideComponent(s.id, component)}
+        onComponentRemove={(id) => forgetSlideComponent(s.id, id)}
+      />
+    )
+  }
 
   // Insert a blank slide so it lands at index `at` (0 = before the first slide, slides.length =
   // append). The fractional sort key falls between the neighbors; the 3-D overview position is
@@ -250,17 +281,7 @@ export function SlideWell({
             onDrop={() => editor.canEdit && drop(dropIdx ?? i)}
             onClick={() => editor.setActiveSlide(s.id)}
           >
-            <div className="well__thumb">
-              <SlideView
-                slide={s}
-                deck={deck}
-                width={148}
-                onComponentData={(component) =>
-                  rememberSlideComponent(s.id, component)
-                }
-                onComponentRemove={(id) => forgetSlideComponent(s.id, id)}
-              />
-            </div>
+            <div className="well__thumb">{thumbnailForSlide(s)}</div>
             <span className="well__badge">{i + 1}</span>
             {editor.canEdit && (
               <button

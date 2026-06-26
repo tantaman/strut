@@ -2,7 +2,7 @@
 // stage, offer property controls — text font/size/color, shape fill, z-order, and CSS classes. All
 // edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -99,6 +99,14 @@ export function Inspector({
   if (editor.selected.size !== 1) return null
   const selectedId = [...editor.selected][0]
 
+  if (editor.draggingComponentId === selectedId) {
+    const components = getComponents()
+    const selected = components.find((c) => c.id === selectedId)
+    return selected ? (
+      <InspectorPanel c={selected} components={components} />
+    ) : null
+  }
+
   return (
     <>
       {componentRefs.map((component) => (
@@ -117,13 +125,15 @@ export function Inspector({
   )
 }
 
-function InspectorPanel({
-  c,
-  components,
-}: {
+interface InspectorPanelProps {
   c: AnyComponent
   components: readonly AnyComponent[]
-}) {
+}
+
+const InspectorPanel = memo(function InspectorPanel({
+  c,
+  components,
+}: InspectorPanelProps) {
   const mutate = useMutate()
   const history = useHistory()
   const allComponents = components.some((x) => x.id === c.id)
@@ -279,4 +289,62 @@ function InspectorPanel({
       </div>
     </div>
   )
+}, sameInspectorPanelProps)
+
+function sameInspectorPanelProps(
+  prev: InspectorPanelProps,
+  next: InspectorPanelProps,
+): boolean {
+  return (
+    sameInspectorComponent(prev.c, next.c) &&
+    sameZBounds(prev.components, next.components)
+  )
+}
+
+function sameInspectorComponent(a: AnyComponent, b: AnyComponent): boolean {
+  if (
+    a.id !== b.id ||
+    a.kind !== b.kind ||
+    a.table !== b.table ||
+    a.z_order !== b.z_order ||
+    a.custom_classes !== b.custom_classes
+  )
+    return false
+
+  switch (a.kind) {
+    case 'text':
+      return (
+        a.text === b.text &&
+        a.size === b.size &&
+        a.color === b.color &&
+        a.font_family === b.font_family
+      )
+    case 'shape':
+      return a.fill === b.fill
+    default:
+      return true
+  }
+}
+
+function sameZBounds(
+  a: readonly AnyComponent[],
+  b: readonly AnyComponent[],
+): boolean {
+  if (a.length !== b.length) return false
+  const boundsA = zBounds(a)
+  const boundsB = zBounds(b)
+  return boundsA.min === boundsB.min && boundsA.max === boundsB.max
+}
+
+function zBounds(components: readonly AnyComponent[]): {
+  min: number
+  max: number
+} {
+  let min = Infinity
+  let max = -Infinity
+  for (const c of components) {
+    min = Math.min(min, c.z_order)
+    max = Math.max(max, c.z_order)
+  }
+  return { min, max }
 }

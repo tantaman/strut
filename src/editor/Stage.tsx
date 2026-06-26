@@ -189,6 +189,7 @@ export function Stage({
     >()
     const sx = e.clientX
     const sy = e.clientY
+    editor.setDraggingComponentId(c.id)
     dragListen(
       (ev) => {
         const dx = (ev.clientX - sx) / scale
@@ -209,6 +210,7 @@ export function Stage({
         })
       },
       () => {
+        editor.setDraggingComponentId(null)
         // One undoable step for the whole (possibly multi-) drag.
         const moved = [...finals].filter(([id, f]) => {
           const s = starts.get(id)!
@@ -242,6 +244,7 @@ export function Stage({
       const text = c.text ?? ''
       const color = c.color ?? '111111'
       const font = c.font_family ?? 'Lato'
+      editor.setDraggingComponentId(c.id)
       dragListen(
         (ev) => {
           lastSize = Math.max(
@@ -254,6 +257,7 @@ export function Stage({
           )
         },
         () => {
+          editor.setDraggingComponentId(null)
           if (lastSize === startSize) return
           history.push({
             label: 'Resize text',
@@ -282,6 +286,7 @@ export function Stage({
     const ratio = h / w
     const before = { scale_w: c.scale_w, scale_h: c.scale_h }
     let last = { scale_w: c.scale_w, scale_h: c.scale_h }
+    editor.setDraggingComponentId(c.id)
     dragListen(
       (ev) => {
         const nw = Math.max(20, Math.round(w + (ev.clientX - sx) / scale))
@@ -305,6 +310,7 @@ export function Stage({
         )
       },
       () => {
+        editor.setDraggingComponentId(null)
         if (last.scale_w === before.scale_w && last.scale_h === before.scale_h)
           return
         const apply = (s: { scale_w: number; scale_h: number }) =>
@@ -339,6 +345,7 @@ export function Stage({
     const start = Math.atan2(e.clientY - cy, e.clientX - cx)
     const startRot = c.rotate
     let lastRot = startRot
+    editor.setDraggingComponentId(c.id)
     dragListen(
       (ev) => {
         let a = Math.atan2(ev.clientY - cy, ev.clientX - cx) - start + startRot
@@ -360,6 +367,7 @@ export function Stage({
         )
       },
       () => {
+        editor.setDraggingComponentId(null)
         if (lastRot === startRot) return
         const apply = (rot: number) =>
           mutate.transformComponent({
