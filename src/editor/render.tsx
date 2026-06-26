@@ -2,7 +2,8 @@
 // selection + handles) and the read-only thumbnails/overview cards.
 
 import type { CSSProperties, ReactNode } from 'react'
-import { cssHex, type AnyComponent, type ComponentKind } from './types'
+import { cssHex } from './types'
+import type { AnyComponent, ComponentKind } from './types'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -37,6 +38,7 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
   const base: CSSProperties = {
     left: c.x,
     top: c.y,
+    zIndex: c.z_order,
     transform: `rotate(${c.rotate}rad) skewX(${c.skew_x}rad) skewY(${c.skew_y}rad)`,
   }
   if (c.kind === 'text') {
@@ -63,38 +65,67 @@ export function renderInner(c: AnyComponent): ReactNode {
       return (
         <div
           className="cmp__textbody"
-          dangerouslySetInnerHTML={{ __html: c.text && c.text.length ? c.text : 'Text' }}
+          dangerouslySetInnerHTML={{
+            __html: c.text && c.text.length ? c.text : 'Text',
+          }}
         />
       )
     case 'image':
-      return c.src ? <img src={c.src} alt="" draggable={false} /> : <div className="cmp__ph">image</div>
+      return c.src ? (
+        <img src={c.src} alt="" draggable={false} />
+      ) : (
+        <div className="cmp__ph">image</div>
+      )
     case 'shape':
-      return <div style={{ width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: c.markup || '' }} />
+      return (
+        <div
+          style={{ width: '100%', height: '100%' }}
+          dangerouslySetInnerHTML={{ __html: c.markup || '' }}
+        />
+      )
     case 'video':
       if (c.video_type === 'youtube' && c.short_src)
         return (
           <iframe
             src={`https://www.youtube.com/embed/${c.short_src}`}
             title="video"
-            style={{ width: '100%', height: '100%', border: 0, pointerEvents: 'none' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 0,
+              pointerEvents: 'none',
+            }}
             allowFullScreen
           />
         )
-      return <video src={c.src} controls style={{ width: '100%', height: '100%' }} />
+      return (
+        <video src={c.src} controls style={{ width: '100%', height: '100%' }} />
+      )
     case 'webframe':
       return (
         <iframe
           src={c.src}
           title="web frame"
-          style={{ width: '100%', height: '100%', border: 0, pointerEvents: 'none' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 0,
+            pointerEvents: 'none',
+          }}
         />
       )
   }
 }
 
 /** Parse a video URL into the stored video fields (spec §3.4). */
-export function parseVideo(url: string): { video_type: string; src_type: string; short_src: string } {
-  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/)
+export function parseVideo(url: string): {
+  video_type: string
+  src_type: string
+  short_src: string
+} {
+  const yt = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/,
+  )
   if (yt) return { video_type: 'youtube', src_type: 'yt', short_src: yt[1] }
   return { video_type: 'html5', src_type: '', short_src: '' }
 }

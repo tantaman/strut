@@ -2,7 +2,7 @@
 // drag to reorder (fractional index), × to delete, + to add a blank slide. Hovering the gap between
 // two slides reveals a + to insert a slide there; while dragging, the gap shows a drop indicator.
 
-import { Fragment, useState } from 'react'
+import { Fragment, useCallback, useRef, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
@@ -10,15 +10,15 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { mergeComponents, type AnyComponent } from './types'
+import type { AnyComponent } from './types'
 import { SlideView } from './SlideView'
-import type { DeckDetailSlide } from './deckDetail'
+import type { SlideDetail } from './deckDetail'
 
 export function SlideWell({
   slides,
   deck,
 }: {
-  slides: DeckDetailSlide[]
+  slides: SlideDetail[]
   deck: { background: string } | null
 }) {
   const editor = useEditor()
@@ -26,13 +26,39 @@ export function SlideWell({
   const history = useHistory()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
+  const componentsBySlideRef = useRef(
+    new Map<string, Map<string, AnyComponent>>(),
+  )
+  const rememberSlideComponent = useCallback(
+    (slideId: string, component: AnyComponent) => {
+      let components = componentsBySlideRef.current.get(slideId)
+      if (!components) {
+        components = new Map()
+        componentsBySlideRef.current.set(slideId, components)
+      }
+      components.set(component.id, component)
+    },
+    [],
+  )
+  const forgetSlideComponent = useCallback((slideId: string, id: string) => {
+    const components = componentsBySlideRef.current.get(slideId)
+    components?.delete(id)
+    if (components?.size === 0) componentsBySlideRef.current.delete(slideId)
+  }, [])
+  const componentsForSlide = useCallback((slideId: string) => {
+    return [
+      ...(componentsBySlideRef.current.get(slideId)?.values() ?? []),
+    ].sort((a, b) => a.z_order - b.z_order)
+  }, [])
+  const slideAt = (index: number): SlideDetail | undefined =>
+    index >= 0 && index < slides.length ? slides[index] : undefined
 
   // Insert a blank slide so it lands at index `at` (0 = before the first slide, slides.length =
   // append). The fractional sort key falls between the neighbors; the 3-D overview position is
   // placed near them too (midpoint when inserting between, one gap past the end when appending).
   function addSlideAt(at: number) {
-    const before = slides[at - 1]
-    const after = slides[at]
+    const before = slideAt(at - 1)
+    const after = slideAt(at)
     const id = newId()
     const between = (
       b: number | undefined,
@@ -74,7 +100,7 @@ export function SlideWell({
   const addSlide = () => addSlideAt(slides.length)
 
   // Restore a deleted slide (row + transform + theme + all its components).
-  function restoreSlide(s: DeckDetailSlide, comps: AnyComponent[]) {
+  function restoreSlide(s: SlideDetail, comps: AnyComponent[]) {
     const now = Date.now()
     mutate.addSlide({
       id: s.id,
@@ -105,17 +131,11 @@ export function SlideWell({
     for (const c of comps) reinsertComponent(mutate, c)
   }
 
-  function deleteSlide(s: DeckDetailSlide, idx: number) {
+  function deleteSlide(s: SlideDetail, idx: number) {
     // Snapshot components first so undo can restore them — the server cascades component rows by
     // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them. The
-    // snapshot merges the slide's own fragment arrays (already materialized — no extra read).
-    const comps = mergeComponents(
-      s.texts,
-      s.images,
-      s.shapes,
-      s.videos,
-      s.webframes,
-    )
+    // snapshot uses the latest leaf fragment data registered by the thumbnail component readers.
+    const comps = componentsForSlide(s.id)
     const ids = {
       textIds: comps.filter((c) => c.kind === 'text').map((c) => c.id),
       imageIds: comps.filter((c) => c.kind === 'image').map((c) => c.id),
@@ -131,8 +151,8 @@ export function SlideWell({
       undo: () => restoreSlide(s, comps),
     })
     if (editor.activeSlideId === s.id) {
-      const neighbor = slides[idx + 1] ?? slides[idx - 1] ?? null
-      editor.setActiveSlide(neighbor?.id ?? null)
+      const neighbor = slideAt(idx + 1) ?? slideAt(idx - 1)
+      editor.setActiveSlide(neighbor ? neighbor.id : null)
     }
   }
 
@@ -150,8 +170,12 @@ export function SlideWell({
     const moving = slides[fromIdx]
     const without = slides.filter((s) => s.id !== dragId)
     const insIdx = at > fromIdx ? at - 1 : at
-    const before = without[insIdx - 1]
-    const after = without[insIdx]
+    const before =
+      insIdx - 1 >= 0 && insIdx - 1 < without.length
+        ? without[insIdx - 1]
+        : undefined
+    const after =
+      insIdx >= 0 && insIdx < without.length ? without[insIdx] : undefined
     const sort = keyBetween(before?.sort, after?.sort)
     const fromSort = moving.sort
     mutate.reorderSlide({ id: dragId, sort })
@@ -227,7 +251,15 @@ export function SlideWell({
             onClick={() => editor.setActiveSlide(s.id)}
           >
             <div className="well__thumb">
-              <SlideView slide={s} deck={deck} width={148} />
+              <SlideView
+                slide={s}
+                deck={deck}
+                width={148}
+                onComponentData={(component) =>
+                  rememberSlideComponent(s.id, component)
+                }
+                onComponentRemove={(id) => forgetSlideComponent(s.id, id)}
+              />
             </div>
             <span className="well__badge">{i + 1}</span>
             {editor.canEdit && (

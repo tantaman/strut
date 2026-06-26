@@ -126,24 +126,24 @@ export const WebframeFragment = defineFragment(webframe_component, (f) =>
   ),
 )
 
-// One slide + all five of its component sets, each z-ordered under a stable alias. Spread into a deck
-// query's `slides` edge and the whole subtree materializes from one query. (The slide row itself is
-// left unprojected — it's a single small row per slide; projection pays off on the component rows.)
+// One slide + all five of its component sets, each z-ordered under a stable alias. The child component
+// edges use fragment refs, so React readers can subscribe at the individual component boundary while
+// the root deck query still syncs the whole subtree.
 export const SlideFragment = defineFragment(slide, (f) =>
   f
-    .sub('texts', rels.slideTexts, (t) =>
-      t.orderBy('z_order', 'asc').include(TextFragment),
+    .sub('texts', rels.slideTexts, TextFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
     )
-    .sub('images', rels.slideImages, (t) =>
-      t.orderBy('z_order', 'asc').include(ImageFragment),
+    .sub('images', rels.slideImages, ImageFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
     )
-    .sub('shapes', rels.slideShapes, (t) =>
-      t.orderBy('z_order', 'asc').include(ShapeFragment),
+    .sub('shapes', rels.slideShapes, ShapeFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
     )
-    .sub('videos', rels.slideVideos, (t) =>
-      t.orderBy('z_order', 'asc').include(VideoFragment),
+    .sub('videos', rels.slideVideos, VideoFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
     )
-    .sub('webframes', rels.slideWebframes, (t) =>
-      t.orderBy('z_order', 'asc').include(WebframeFragment),
+    .sub('webframes', rels.slideWebframes, WebframeFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
     ),
 )

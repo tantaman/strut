@@ -12,9 +12,10 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
-import { LAYOUTS, type LayoutDef } from './layouts'
+import { LAYOUTS } from './layouts'
+import type { LayoutDef } from './layouts'
 import { SlideView } from './SlideView'
-import type { DeckDetailSlide } from './deckDetail'
+import type { SlideDetail } from './deckDetail'
 
 export interface OverviewSlide {
   id: string
@@ -55,7 +56,7 @@ export function Overview({
   slides,
   deck,
 }: {
-  slides: DeckDetailSlide[]
+  slides: SlideDetail[]
   deck: { id: string; background: string; canned_transition: string } | null
 }) {
   const editor = useEditor()
@@ -114,7 +115,6 @@ export function Overview({
   // Re-frame whenever the set of slides changes (mount, add, remove) — but NOT on drags,
   // which only move existing ids. Keyed on the id list so position edits don't snap the view.
   const idsKey = slides.map((s) => s.id).join(',')
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(fit, [idsKey])
 
   // Zoom around a world point under the cursor (keeps that point fixed on screen).
@@ -262,7 +262,7 @@ export function Overview({
     const ids = group ? [...selIds] : [s.id]
     const starts = ids
       .map((id) => slides.find((x) => x.id === id))
-      .filter((m): m is DeckDetailSlide => !!m)
+      .filter((m): m is SlideDetail => !!m)
       .map((m) => ({ m, x0: m.x, y0: m.y }))
 
     const sx = e.clientX
@@ -545,7 +545,7 @@ function SlideXform({
             label="⤢"
             title="Scale (impress)"
             inv={inv}
-            value={Math.round((s.imp_scale ?? 3) * 100) / 100}
+            value={Math.round(s.imp_scale * 100) / 100}
             step={0.1}
             sens={0.03}
             onLive={(d, folded) => apply({ imp_scale: d }, folded)}

@@ -4,32 +4,31 @@
 // marquee selection. High-frequency drags use Rindle's `.folded` (debounced last-value-wins) writes.
 
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type PointerEvent as RPointerEvent,
 } from 'react'
-import { useFragment } from '@rindle/react'
-import { SlideFragment } from '../../shared/fragments'
+import type { PointerEvent as RPointerEvent } from 'react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import { cmpStyle, componentSize, renderInner } from './render'
-import {
-  backgroundImage,
-  mergeComponents,
-  resolveBackground,
-  resolveSurface,
-  type AnyComponent,
-} from './types'
-import type { DeckDetailSlide } from './deckDetail'
+import { backgroundImage, resolveBackground, resolveSurface } from './types'
+import type { AnyComponent } from './types'
+import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
 import { UserStyle } from './CssEditor'
+import {
+  ComponentDataReader,
+  componentRefKey,
+  mergeComponentRefs,
+} from './componentFragments'
 
 interface DeckRow {
   background: string
@@ -63,18 +62,32 @@ export function Stage({
   slide,
   deck,
 }: {
-  slide: DeckDetailSlide
+  slide: SlideDetail
   deck: DeckRow | null
 }) {
-  // Read the slide through the fragment (unmasking the five component arrays the composed deck query
-  // already materialized), then `mergeComponents` flattens them into the single z-ordered
-  // AnyComponent[] the editor's cross-type interaction (select / marquee / z-order / inspector)
-  // operates on. This is the SAME data path <SlideView> uses for read-only thumbnails — the Stage
-  // just additionally wraps each component with selection + resize handles.
-  const s = useFragment(SlideFragment, slide)
-  const components = useMemo(
-    () => mergeComponents(s.texts, s.images, s.shapes, s.videos, s.webframes),
-    [s],
+  const slideData = slide
+  const componentRefs = useMemo(
+    () => mergeComponentRefs(slideData),
+    [slideData],
+  )
+  const componentDataRef = useRef(new Map<string, AnyComponent>())
+  const lastSlideIdRef = useRef(slideData.id)
+  if (lastSlideIdRef.current !== slideData.id) {
+    componentDataRef.current.clear()
+    lastSlideIdRef.current = slideData.id
+  }
+  const rememberComponent = useCallback((component: AnyComponent) => {
+    componentDataRef.current.set(component.id, component)
+  }, [])
+  const forgetComponent = useCallback((id: string) => {
+    componentDataRef.current.delete(id)
+  }, [])
+  const getComponents = useCallback(
+    () =>
+      [...componentDataRef.current.values()].sort(
+        (a, b) => a.z_order - b.z_order,
+      ),
+    [],
   )
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
@@ -89,10 +102,10 @@ export function Stage({
     h: number
   }>(null)
 
-  const bg = resolveBackground(s.background, deck?.background)
-  const bgImg = backgroundImage(s.background, deck?.background)
-  const surf = resolveSurface(s.surface, deck?.surface)
-  const surfImg = backgroundImage(s.surface, deck?.surface)
+  const bg = resolveBackground(slideData.background, deck?.background)
+  const bgImg = backgroundImage(slideData.background, deck?.background)
+  const surf = resolveSurface(slideData.surface, deck?.surface)
+  const surfImg = backgroundImage(slideData.surface, deck?.surface)
 
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {
@@ -109,13 +122,13 @@ export function Stage({
         return
       if (editor.selected.size === 0) return
       e.preventDefault()
-      const victims = components.filter((c) => editor.selected.has(c.id))
+      const victims = getComponents().filter((c) => editor.selected.has(c.id))
       deleteComponents(victims)
       editor.clearSelection()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [components, editor, mutate])
+  }, [editor, getComponents, mutate])
 
   // Remove component(s) as one undoable step (undo reinserts them with full geometry).
   function deleteComponents(victims: AnyComponent[]) {
@@ -137,7 +150,7 @@ export function Stage({
   }
 
   function raise(c: AnyComponent) {
-    const maxZ = components.reduce((m, x) => Math.max(m, x.z_order), 0)
+    const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
     if (c.z_order < maxZ)
       mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })
   }
@@ -166,7 +179,7 @@ export function Stage({
         ? [...editor.selected]
         : [c.id]
     const starts = new Map(
-      components
+      getComponents()
         .filter((x) => ids.includes(x.id))
         .map((x) => [x.id, { x: x.x, y: x.y, table: x.table }]),
     )
@@ -455,7 +468,7 @@ export function Stage({
       }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
-      <Inspector components={components} />
+      <Inspector componentRefs={componentRefs} getComponents={getComponents} />
       <div
         className="slide-surface"
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
@@ -472,26 +485,34 @@ export function Stage({
             backgroundSize: 'cover',
           }}
         >
-          {components.map((c) => (
-            <ComponentView
-              key={c.id}
-              c={c}
-              scale={scale}
-              canEdit={editor.canEdit}
-              selected={editor.isSelected(c.id)}
-              soleSelected={
-                editor.selected.size <= 1 && editor.isSelected(c.id)
-              }
-              editing={editingId === c.id}
-              onPointerDownBody={(e) => beginMove(c, e)}
-              onResize={(e) => beginResize(c, e)}
-              onRotate={(e) => beginRotate(c, e)}
-              onDelete={() => deleteComponents([c])}
-              onStartEdit={() =>
-                c.kind === 'text' && editor.canEdit && setEditingId(c.id)
-              }
-              onCommitEdit={(html) => commitText(c, html)}
-            />
+          {componentRefs.map((component) => (
+            <ComponentDataReader
+              key={componentRefKey(component)}
+              component={component}
+              onData={rememberComponent}
+              onRemove={forgetComponent}
+            >
+              {(c) => (
+                <ComponentView
+                  c={c}
+                  scale={scale}
+                  canEdit={editor.canEdit}
+                  selected={editor.isSelected(c.id)}
+                  soleSelected={
+                    editor.selected.size <= 1 && editor.isSelected(c.id)
+                  }
+                  editing={editingId === c.id}
+                  onPointerDownBody={(e) => beginMove(c, e)}
+                  onResize={(e) => beginResize(c, e)}
+                  onRotate={(e) => beginRotate(c, e)}
+                  onDelete={() => deleteComponents([c])}
+                  onStartEdit={() =>
+                    c.kind === 'text' && editor.canEdit && setEditingId(c.id)
+                  }
+                  onCommitEdit={(html) => commitText(c, html)}
+                />
+              )}
+            </ComponentDataReader>
           ))}
         </div>
       </div>
@@ -607,7 +628,6 @@ function TextEditor({
     const sel = window.getSelection()
     sel?.removeAllRanges()
     sel?.addRange(range)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
     <>

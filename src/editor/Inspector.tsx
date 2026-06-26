@@ -7,7 +7,10 @@ import { FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
-import { COLOR_SWATCHES, cssHex, type AnyComponent } from './types'
+import { COLOR_SWATCHES, cssHex } from './types'
+import type { AnyComponent } from './types'
+import { ComponentDataReader, componentRefKey } from './componentFragments'
+import type { ComponentRef } from './componentFragments'
 
 const RECENTS_KEY = 'strut.colorChooser'
 
@@ -85,17 +88,47 @@ function ColorField({
 }
 
 export function Inspector({
-  components,
+  componentRefs,
+  getComponents,
 }: {
-  components: readonly AnyComponent[]
+  componentRefs: readonly ComponentRef[]
+  getComponents: () => AnyComponent[]
 }) {
   const editor = useEditor()
-  const mutate = useMutate()
-  const history = useHistory()
 
   if (editor.selected.size !== 1) return null
-  const c = components.find((x) => editor.selected.has(x.id))
-  if (!c) return null
+  const selectedId = [...editor.selected][0]
+
+  return (
+    <>
+      {componentRefs.map((component) => (
+        <ComponentDataReader
+          key={componentRefKey(component)}
+          component={component}
+        >
+          {(c) =>
+            c.id === selectedId ? (
+              <InspectorPanel c={c} components={getComponents()} />
+            ) : null
+          }
+        </ComponentDataReader>
+      ))}
+    </>
+  )
+}
+
+function InspectorPanel({
+  c,
+  components,
+}: {
+  c: AnyComponent
+  components: readonly AnyComponent[]
+}) {
+  const mutate = useMutate()
+  const history = useHistory()
+  const allComponents = components.some((x) => x.id === c.id)
+    ? components.map((x) => (x.id === c.id ? c : x))
+    : [...components, c]
 
   const editText = (
     patch: Partial<
@@ -132,7 +165,7 @@ export function Inspector({
   }
 
   const setClasses = (next: string) => {
-    const before = c.custom_classes ?? ''
+    const before = c.custom_classes
     if (before === next) return
     const apply = (v: string) =>
       mutate.setComponentClasses({
@@ -160,8 +193,8 @@ export function Inspector({
     })
   }
 
-  const maxZ = components.reduce((m, x) => Math.max(m, x.z_order), 0)
-  const minZ = components.reduce((m, x) => Math.min(m, x.z_order), 0)
+  const maxZ = allComponents.reduce((m, x) => Math.max(m, x.z_order), 0)
+  const minZ = allComponents.reduce((m, x) => Math.min(m, x.z_order), 0)
 
   return (
     <div className="insp" onPointerDown={(e) => e.stopPropagation()}>
@@ -222,7 +255,7 @@ export function Inspector({
         <input
           type="text"
           placeholder="css-class…"
-          defaultValue={c.custom_classes ?? ''}
+          defaultValue={c.custom_classes}
           onBlur={(e) => setClasses(e.target.value.trim())}
         />
       </label>
