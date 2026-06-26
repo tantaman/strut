@@ -4,7 +4,6 @@
 // dynamic-import `@rindle/optimistic` (which pulls in @rindle/wasm) only when first asked — i.e. in
 // the browser, from RindleProvider's effect. `getApp()` memoizes the promise.
 
-import wasmUrl from 'rindle-wasm-bin?url'
 import { mutators, schema } from '../../shared/app-def.ts'
 import { currentUser } from './user.ts'
 
@@ -13,7 +12,7 @@ async function create() {
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
   ])
-  await initWasm(wasmUrl)
+  await initWasm()
   const app = await createRindleClient({
     schema,
     mutators,

@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
@@ -6,9 +5,6 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-
-const require = createRequire(import.meta.url)
-const wasmBin = require.resolve('@rindle/wasm/pkg/rindle_bg.wasm')
 
 // Server-side secrets the Rindle API + upload handlers read via process.env. Vite doesn't expose
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
@@ -30,10 +26,7 @@ const config = defineConfig(({ mode }) => {
   }
 
   return {
-    resolve: {
-      tsconfigPaths: true,
-      alias: [{ find: /^rindle-wasm-bin/, replacement: wasmBin }],
-    },
+    resolve: { tsconfigPaths: true },
     server: {
       port: 3000,
       // The Rindle API + image upload are now TanStack Start server routes (src/routes/api.rindle.*),
