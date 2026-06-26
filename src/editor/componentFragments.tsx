@@ -34,29 +34,6 @@ export type ComponentRef =
       ref: FragmentRef<typeof WebframeFragment>
     }
 
-type ComponentFragmentMap = {
-  text: typeof TextFragment
-  image: typeof ImageFragment
-  shape: typeof ShapeFragment
-  video: typeof VideoFragment
-  webframe: typeof WebframeFragment
-}
-
-type ComponentReaderProps<TKind extends ComponentKind> = {
-  component: Extract<ComponentRef, { kind: TKind }>
-  onData?: (component: AnyComponent) => void
-  onRemove?: (id: string) => void
-  children: (component: AnyComponent) => ReactNode
-}
-
-const COMPONENT_DATA_DISPLAY_NAMES: Record<ComponentKind, string> = {
-  text: 'TextComponentData',
-  image: 'ImageComponentData',
-  shape: 'ShapeComponentData',
-  video: 'VideoComponentData',
-  webframe: 'WebframeComponentData',
-}
-
 export function componentRefKey(component: ComponentRef): string {
   return fragmentKey(component.ref)
 }
@@ -115,49 +92,6 @@ function ComponentData({
 
   return <>{children(component)}</>
 }
-
-function makeComponentDataReader<TKind extends keyof ComponentFragmentMap>(
-  kind: TKind,
-  fragment: ComponentFragmentMap[TKind],
-) {
-  function TypedComponentData({
-    component,
-    onData,
-    onRemove,
-    children,
-  }: ComponentReaderProps<TKind>) {
-    const data = useFragment(
-      fragment,
-      component.ref as FragmentRef<ComponentFragmentMap[TKind]>,
-    )
-    if (!data) return null
-    return (
-      <ComponentData
-        data={data}
-        kind={kind}
-        onData={onData}
-        onRemove={onRemove}
-      >
-        {children}
-      </ComponentData>
-    )
-  }
-
-  Object.assign(TypedComponentData, {
-    displayName: COMPONENT_DATA_DISPLAY_NAMES[kind],
-  })
-
-  return TypedComponentData
-}
-
-const TextComponentData = makeComponentDataReader('text', TextFragment)
-const ImageComponentData = makeComponentDataReader('image', ImageFragment)
-const ShapeComponentData = makeComponentDataReader('shape', ShapeFragment)
-const VideoComponentData = makeComponentDataReader('video', VideoFragment)
-const WebframeComponentData = makeComponentDataReader(
-  'webframe',
-  WebframeFragment,
-)
 
 export function ComponentDataReader({
   component,
@@ -222,4 +156,109 @@ export function ComponentDataReader({
         </WebframeComponentData>
       )
   }
+}
+
+function TextComponentData({
+  component,
+  onData,
+  onRemove,
+  children,
+}: {
+  component: Extract<ComponentRef, { kind: 'text' }>
+  onData?: (component: AnyComponent) => void
+  onRemove?: (id: string) => void
+  children: (component: AnyComponent) => ReactNode
+}) {
+  const data = useFragment(TextFragment, component.ref)
+  if (!data) return null
+  return (
+    <ComponentData data={data} kind="text" onData={onData} onRemove={onRemove}>
+      {children}
+    </ComponentData>
+  )
+}
+
+function ImageComponentData({
+  component,
+  onData,
+  onRemove,
+  children,
+}: {
+  component: Extract<ComponentRef, { kind: 'image' }>
+  onData?: (component: AnyComponent) => void
+  onRemove?: (id: string) => void
+  children: (component: AnyComponent) => ReactNode
+}) {
+  const data = useFragment(ImageFragment, component.ref)
+  if (!data) return null
+  return (
+    <ComponentData data={data} kind="image" onData={onData} onRemove={onRemove}>
+      {children}
+    </ComponentData>
+  )
+}
+
+function ShapeComponentData({
+  component,
+  onData,
+  onRemove,
+  children,
+}: {
+  component: Extract<ComponentRef, { kind: 'shape' }>
+  onData?: (component: AnyComponent) => void
+  onRemove?: (id: string) => void
+  children: (component: AnyComponent) => ReactNode
+}) {
+  const data = useFragment(ShapeFragment, component.ref)
+  if (!data) return null
+  return (
+    <ComponentData data={data} kind="shape" onData={onData} onRemove={onRemove}>
+      {children}
+    </ComponentData>
+  )
+}
+
+function VideoComponentData({
+  component,
+  onData,
+  onRemove,
+  children,
+}: {
+  component: Extract<ComponentRef, { kind: 'video' }>
+  onData?: (component: AnyComponent) => void
+  onRemove?: (id: string) => void
+  children: (component: AnyComponent) => ReactNode
+}) {
+  const data = useFragment(VideoFragment, component.ref)
+  if (!data) return null
+  return (
+    <ComponentData data={data} kind="video" onData={onData} onRemove={onRemove}>
+      {children}
+    </ComponentData>
+  )
+}
+
+function WebframeComponentData({
+  component,
+  onData,
+  onRemove,
+  children,
+}: {
+  component: Extract<ComponentRef, { kind: 'webframe' }>
+  onData?: (component: AnyComponent) => void
+  onRemove?: (id: string) => void
+  children: (component: AnyComponent) => ReactNode
+}) {
+  const data = useFragment(WebframeFragment, component.ref)
+  if (!data) return null
+  return (
+    <ComponentData
+      data={data}
+      kind="webframe"
+      onData={onData}
+      onRemove={onRemove}
+    >
+      {children}
+    </ComponentData>
+  )
 }
