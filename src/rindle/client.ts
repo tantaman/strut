@@ -8,7 +8,11 @@ import { mutators, schema } from '../../shared/app-def.ts'
 import { currentUser } from './user.ts'
 
 async function create() {
-  const { createRindleClient } = await import('@rindle/optimistic')
+  const [{ createRindleClient }, { initWasm }] = await Promise.all([
+    import('@rindle/optimistic'),
+    import('@rindle/wasm'),
+  ])
+  await initWasm()
   const app = await createRindleClient({
     schema,
     mutators,

@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useQuery } from '@rindle/react'
+import { useRoot } from '@rindle/react'
 import { deckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { SLIDE_H, SLIDE_W } from '../config'
+import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId_/play')({
   component: Play,
@@ -30,8 +31,9 @@ const WORLD = SLIDE_W / 240
 
 function Play() {
   const { deckId } = Route.useParams()
-  // Relay root: ONE useQuery; each slide flows to <SlideView> as a fragment ref.
-  const deck = useQuery(deckDetailQuery({ deckId }))
+  // Relay root: one sync query; each slide carries component fragment refs for <SlideView>.
+  const [deckRaw] = useRoot(deckDetailQuery, { deckId })
+  const deck = deckRaw as DeckRoot | null
   const slides = deck?.slides ?? []
   const { view, slide } = Route.useSearch()
   const navigate = useNavigate()

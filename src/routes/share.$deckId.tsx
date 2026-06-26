@@ -1,11 +1,11 @@
 // Public read-only viewer (spec §12 sharing): anyone with the link `/share/:deckId?t=<token>` can
 // watch the deck. It reuses the present-mode camera flight, but reads through the ONE token-gated
-// public composed query (publicDeckDetail, one useQuery) so no ownership or collaborator
+// public composed query (publicDeckDetail, one useRoot) so no ownership or collaborator
 // membership is required — the share token is the bearer credential.
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { useQuery } from '@rindle/react'
+import { useRoot } from '@rindle/react'
 import { publicDeckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
@@ -13,6 +13,7 @@ import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
 import { SLIDE_H, SLIDE_W } from '../config'
+import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/share/$deckId')({
   component: Share,
@@ -47,8 +48,9 @@ function Share() {
 }
 
 function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
-  // Relay root: ONE token-gated useQuery; slides flow to <SlideView> as fragment refs.
-  const deck = useQuery(publicDeckDetailQuery({ deckId, token }))
+  // Relay root: one token-gated sync query; slides carry component fragment refs for <SlideView>.
+  const [deckRaw] = useRoot(publicDeckDetailQuery, { deckId, token })
+  const deck = deckRaw as DeckRoot | null
   const slides = deck?.slides ?? []
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
@@ -98,8 +100,8 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
     ((active.imp_scale || 3) / 3)
   const acx = active.x * WORLD
   const acy = active.y * WORLD
-  const surf = resolveSurface(active.surface, deck?.surface)
-  const flight = flightFor(deck?.canned_transition)
+  const surf = resolveSurface(active.surface, deck.surface)
+  const flight = flightFor(deck.canned_transition)
   const camTransition = flight.duration
     ? `transform ${flight.duration}ms ${flight.easing}`
     : 'none'
@@ -116,7 +118,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         perspective: 1000,
       }}
     >
-      <UserStyle css={deck?.custom_stylesheet} />
+      <UserStyle css={deck.custom_stylesheet} />
       <div
         className="play__cam"
         style={{

@@ -9,8 +9,8 @@ import {
   useContext,
   useMemo,
   useState,
-  type ReactNode,
 } from 'react'
+import type { ReactNode } from 'react'
 import { getRouteApi } from '@tanstack/react-router'
 
 // Reach the editor route's search/navigate by id (no module import → no coupling to the route file).
@@ -35,6 +35,9 @@ interface EditorState {
   select: (id: string, additive?: boolean) => void
   selectMany: (ids: string[]) => void
   clearSelection: () => void
+
+  draggingComponentId: string | null
+  setDraggingComponentId: (id: string | null) => void
 }
 
 const Ctx = createContext<EditorState | null>(null)
@@ -59,6 +62,9 @@ export function EditorStateProvider({
   const mode: EditorMode = search.view ?? 'slide'
   const activeSlideId = search.slide ?? null
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [draggingComponentId, setDraggingComponentId] = useState<string | null>(
+    null,
+  )
 
   const setMode = useCallback(
     (m: EditorMode) => {
@@ -111,6 +117,8 @@ export function EditorStateProvider({
       select,
       selectMany,
       clearSelection,
+      draggingComponentId,
+      setDraggingComponentId,
     }),
     [
       deckId,
@@ -124,6 +132,8 @@ export function EditorStateProvider({
       select,
       selectMany,
       clearSelection,
+      draggingComponentId,
+      setDraggingComponentId,
     ],
   )
 
