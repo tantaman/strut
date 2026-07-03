@@ -7,13 +7,13 @@ import { newId } from '../config'
 import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import { deckDetailQuery } from '../../shared/queries'
-import { componentsFromRows, SHAPES } from './types'
+import { componentsFromRows } from './types'
+import { insertComponent } from './componentOps'
 import type { DeckDetail } from './deckDetail'
 import {
   deserializeDeck,
   serializeDeck,
   type DeckBundle,
-  type ImportedComponent,
   type ImportedDeck,
 } from './serialize'
 import { toImpressHTML } from './impressExport'
@@ -111,77 +111,6 @@ export async function exportDeckHTML(
   return true
 }
 
-function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
-  const id = newId()
-  const common = { id, slideId, x: c.x, y: c.y, z_order: c.z_order }
-  switch (c.kind) {
-    case 'text':
-      mutate.addText({
-        ...common,
-        text: c.text ?? 'Text',
-        size: c.size ?? 72,
-        color: c.color ?? '111111',
-        font_family: c.font_family ?? 'Lato',
-      })
-      break
-    case 'image':
-      mutate.addImage({
-        ...common,
-        src: c.src ?? '',
-        image_type: c.image_type ?? '',
-        scale_w: c.scale_w || 400,
-        scale_h: c.scale_h || 300,
-      })
-      break
-    case 'shape':
-      mutate.addShape({
-        ...common,
-        shape: c.shape ?? 'square',
-        markup: c.markup || SHAPES[c.shape ?? 'square'] || '',
-        fill: c.fill ?? '3498db',
-      })
-      break
-    case 'video':
-      mutate.addVideo({
-        ...common,
-        src: c.src ?? '',
-        video_type: c.video_type ?? 'html5',
-        src_type: c.src_type ?? '',
-        short_src: c.short_src ?? '',
-      })
-      break
-    case 'webframe':
-      mutate.addWebframe({ ...common, src: c.src ?? '' })
-      break
-  }
-  // Restore non-default geometry + classes (the add* mutators only take position + type fields).
-  if (
-    c.rotate ||
-    c.skew_x ||
-    c.skew_y ||
-    c.scale_w ||
-    c.scale_h ||
-    c.scale_x !== 1 ||
-    c.scale_y !== 1
-  ) {
-    mutate.transformComponent({
-      id,
-      scale_x: c.scale_x || 1,
-      scale_y: c.scale_y || 1,
-      scale_w: c.scale_w || 0,
-      scale_h: c.scale_h || 0,
-      rotate: c.rotate || 0,
-      skew_x: c.skew_x || 0,
-      skew_y: c.skew_y || 0,
-    })
-  }
-  if (c.custom_classes)
-    mutate.setComponentClasses({
-      id,
-      custom_classes: c.custom_classes,
-    })
-}
-
 /** Rebuild a deck from a parsed import. Returns the new deck id. */
 export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
   const now = Date.now()
@@ -232,7 +161,8 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
         surface: s.surface,
         now,
       })
-    for (const c of s.components) addComponent(mutate, slideId, c)
+    for (const c of s.components)
+      insertComponent(mutate, { id: newId(), slideId }, c)
   }
   return deckId
 }

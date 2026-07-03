@@ -1,17 +1,27 @@
-// Reinserting a component from a full snapshot — used by undo (restore a deleted component) and
-// could back any "duplicate"/"paste" later. The add* mutators only take position + type fields and
-// reset the spatial transform via spatialBase, so we re-apply geometry + classes afterwards (the same
-// dance deckIO.addComponent does on import, but preserving the ORIGINAL id so redo/undo stay stable).
+// Inserting a component from a full snapshot, via the typed add* mutators. Shared by two callers that
+// used to carry identical per-type switches: undo/duplicate (reinsertComponent, preserving the id) and
+// file import (deckIO.addComponent, minting a fresh id). The add* mutators only take position + type
+// fields (they reset the spatial base), so any non-default geometry + classes are re-applied after —
+// keyed on `target.id` so a freshly-minted or a preserved id both work.
 
 import type { StrutApp } from '../rindle/client'
 import { SHAPES, type AnyComponent } from './types'
 
 type Mutate = StrutApp['mutate']
 
-export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
+/** The fields insertComponent reads: the kind discriminator, the spatial transform + classes, and the
+ *  type-specific leaves. `id`/`slide_id` are supplied separately (import mints, undo preserves), so
+ *  both `AnyComponent` and deckIO's `ImportedComponent` satisfy this. */
+export type ComponentSpec = Omit<AnyComponent, 'id' | 'slide_id'>
+
+export function insertComponent(
+  mutate: Mutate,
+  target: { id: string; slideId: string },
+  c: ComponentSpec,
+): void {
   const common = {
-    id: c.id,
-    slideId: c.slide_id,
+    id: target.id,
+    slideId: target.slideId,
     x: c.x,
     y: c.y,
     z_order: c.z_order,
@@ -66,7 +76,7 @@ export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
     c.scale_y !== 1
   ) {
     mutate.transformComponent({
-      id: c.id,
+      id: target.id,
       scale_x: c.scale_x || 1,
       scale_y: c.scale_y || 1,
       scale_w: c.scale_w || 0,
@@ -78,7 +88,13 @@ export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
   }
   if (c.custom_classes)
     mutate.setComponentClasses({
-      id: c.id,
+      id: target.id,
       custom_classes: c.custom_classes,
     })
+}
+
+/** Undo/duplicate: re-insert a component from a full in-memory snapshot, preserving its ORIGINAL id so
+ *  redo/undo stay stable. */
+export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
+  insertComponent(mutate, { id: c.id, slideId: c.slide_id }, c)
 }
