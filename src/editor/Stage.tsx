@@ -17,9 +17,14 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { cmpStyle, componentSize, renderInner } from './render'
-import { backgroundImage, resolveBackground, resolveSurface } from './types'
-import type { AnyComponent } from './types'
+import { cmpStyle, componentSize, renderInner, themeVars } from './render'
+import {
+  backgroundImage,
+  resolveBackground,
+  resolveSurface,
+  textTypeOf,
+} from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
@@ -30,7 +35,7 @@ import {
   mergeComponentRefs,
 } from './componentFragments'
 
-interface DeckRow {
+interface DeckRow extends DeckThemeFields {
   background: string
   surface: string
   custom_stylesheet?: string
@@ -235,8 +240,10 @@ export function Stage({
       const startSize = c.size ?? 72
       let lastSize = startSize
       const text = c.text ?? ''
-      const color = c.color ?? '111111'
-      const font = c.font_family ?? 'Lato'
+      // '' color/font = theme-inherited — must survive the blob rewrite untouched.
+      const color = c.color ?? ''
+      const font = c.font_family ?? ''
+      const textType = textTypeOf(c)
       editor.setDraggingComponentId(c.id)
       dragListen(
         (ev) => {
@@ -246,30 +253,32 @@ export function Stage({
           )
           mutate.setText.folded(
             { key: c.id },
-            { id: c.id, text, size: lastSize, color, font_family: font },
+            {
+              id: c.id,
+              text,
+              size: lastSize,
+              color,
+              font_family: font,
+              text_type: textType,
+            },
           )
         },
         () => {
           editor.setDraggingComponentId(null)
           if (lastSize === startSize) return
+          const applySize = (size: number) =>
+            mutate.setText({
+              id: c.id,
+              text,
+              size,
+              color,
+              font_family: font,
+              text_type: textType,
+            })
           history.push({
             label: 'Resize text',
-            redo: () =>
-              mutate.setText({
-                id: c.id,
-                text,
-                size: lastSize,
-                color,
-                font_family: font,
-              }),
-            undo: () =>
-              mutate.setText({
-                id: c.id,
-                text,
-                size: startSize,
-                color,
-                font_family: font,
-              }),
+            redo: () => applySize(lastSize),
+            undo: () => applySize(startSize),
           })
         },
       )
@@ -392,10 +401,19 @@ export function Stage({
     if (html === (c.text ?? '')) return // no change
     const before = c.text ?? ''
     const size = c.size ?? 72
-    const color = c.color ?? '111111'
-    const font = c.font_family ?? 'Lato'
+    // '' color/font = theme-inherited — must survive the blob rewrite untouched.
+    const color = c.color ?? ''
+    const font = c.font_family ?? ''
+    const textType = textTypeOf(c)
     const apply = (text: string) =>
-      mutate.setText({ id: c.id, text, size, color, font_family: font })
+      mutate.setText({
+        id: c.id,
+        text,
+        size,
+        color,
+        font_family: font,
+        text_type: textType,
+      })
     apply(html)
     history.push({
       label: 'Edit text',
@@ -465,7 +483,11 @@ export function Stage({
       }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
-      <Inspector componentRefs={componentRefs} getComponents={getComponents} />
+      <Inspector
+        componentRefs={componentRefs}
+        getComponents={getComponents}
+        deck={deck}
+      />
       <div
         className="slide-surface"
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
@@ -480,6 +502,7 @@ export function Stage({
             background: bg,
             backgroundImage: bgImg,
             backgroundSize: 'cover',
+            ...themeVars(deck),
           }}
         >
           {componentRefs.map((component) => (

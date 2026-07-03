@@ -1,5 +1,5 @@
 // Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview),
-// background/surface pickers, the Slides|Overview mode toggle, and Present.
+// the deck Theme picker, the Slides|Overview mode toggle, and Present.
 
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
@@ -7,17 +7,22 @@ import {
   Code2,
   Download,
   Image as ImageIcon,
+  Palette,
   Play,
   Redo2,
   Shapes,
-  Square,
   Type,
   Undo2,
   Video,
   Globe,
   Share2,
 } from 'lucide-react'
-import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
+import {
+  DEFAULT_FONT,
+  DEFAULT_FONT_SIZE,
+  FONT_FAMILIES,
+  newId,
+} from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
@@ -25,6 +30,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { ColorField } from './Inspector'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
@@ -33,13 +39,17 @@ import {
   SHAPES,
   SURFACE_SWATCHES,
 } from './types'
-import { parseVideo } from './render'
+import { cssFontFamily, parseVideo } from './render'
 
 interface DeckRow {
   id: string
   title: string
   background: string
   surface: string
+  heading_font: string | null
+  heading_color: string | null
+  body_font: string | null
+  body_color: string | null
   canned_transition: string
   custom_stylesheet: string
   owner_id: string
@@ -64,8 +74,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const [menu, setMenu] = useState<
     | null
     | 'shapes'
-    | 'bg'
-    | 'surface'
+    | 'theme'
     | 'media-image'
     | 'media-video'
     | 'media-web'
@@ -100,8 +109,10 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       z_order: zNow(),
       text: 'New text',
       size: DEFAULT_FONT_SIZE,
-      color: '111111',
-      font_family: DEFAULT_FONT,
+      // '' color/font = follow the deck theme (body category) until explicitly overridden.
+      color: '',
+      font_family: '',
+      text_type: 'body',
     }
     recordInsert(id, () => mutate.addText(args), 'Add text')
   }
@@ -148,6 +159,8 @@ export function Header({ deck }: { deck: DeckRow | null }) {
     setMenu(null)
   }
 
+  // Theme edits deliberately do NOT close the popover — the user usually tweaks several
+  // defaults (bg, surface, fonts) in one visit.
   function setBg(scope: 'bg' | 'surface', value: string) {
     if (!deck) return
     mutate.setDeckTheme({
@@ -155,7 +168,18 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       [scope === 'bg' ? 'background' : 'surface']: value,
       now: Date.now(),
     })
-    setMenu(null)
+  }
+
+  function setTextTheme(
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) {
+    if (!deck) return
+    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
   }
 
   async function doExport(kind: 'json' | 'html') {
@@ -297,27 +321,26 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 
             <div className="hdr__sep" />
             <div className="hdr__group">
-              <BgButton
-                label="Bg"
-                current={deck?.background}
-                swatches={BACKGROUND_SWATCHES}
-                resolve={(v) => resolveBackground(v, v)}
-                open={menu === 'bg'}
-                onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
-                onPick={(v) => setBg('bg', v)}
-                onCustom={(hex) => setCustom('bg', hex)}
-                allowTransparent
-              />
-              <BgButton
-                label="Surface"
-                current={deck?.surface}
-                swatches={SURFACE_SWATCHES}
-                resolve={(v) => resolveSurface(v, v)}
-                open={menu === 'surface'}
-                onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
-                onPick={(v) => setBg('surface', v)}
-                onCustom={(hex) => setCustom('surface', hex)}
-              />
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="btn"
+                  onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
+                  title="Theme"
+                  disabled={!deck}
+                >
+                  <Palette size={16} /> <span className="lbl">Theme</span>
+                </button>
+                {menu === 'theme' && deck && (
+                  <ThemePopover
+                    deck={deck}
+                    onBackground={(v) => setBg('bg', v)}
+                    onCustomBackground={(hex) => setCustom('bg', hex)}
+                    onSurface={(v) => setBg('surface', v)}
+                    onCustomSurface={(hex) => setCustom('surface', hex)}
+                    onText={setTextTheme}
+                  />
+                )}
+              </div>
             </div>
           </>
         )}
@@ -439,69 +462,167 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   )
 }
 
-function BgButton({
-  label,
+/** One class-swatch row (deck background / surface): default, optional transparent, the named
+ *  swatch classes, and a custom color that mints a `bg-custom-<hex>` class (spec §8.3). */
+function BgSwatches({
   current,
   swatches,
   resolve,
-  open,
-  onToggle,
   onPick,
   onCustom,
   allowTransparent,
 }: {
-  label: string
-  current?: string
+  current?: string | null
   swatches: string[]
   resolve: (value: string) => string
-  open: boolean
-  onToggle: () => void
   onPick: (value: string) => void
   onCustom: (hex: string) => void
   allowTransparent?: boolean
 }) {
+  const active = (k: string) =>
+    'swatch' + (current === k ? ' is-active' : '')
   return (
-    <div style={{ position: 'relative' }}>
-      <button className="btn" onClick={onToggle} title={label}>
-        <Square size={14} fill={current ? resolve(current) : 'none'} />{' '}
-        <span className="lbl">{label}</span>
-      </button>
-      {open && (
-        <div className="popover" style={{ top: '110%', left: 0 }}>
-          <div className="swatches">
-            <button
-              className="swatch"
-              title="default"
-              style={{ background: resolve('bg-default') }}
-              onClick={() => onPick('bg-default')}
-            />
-            {allowTransparent && (
-              <button
-                className="swatch"
-                title="transparent"
-                style={{
-                  background:
-                    'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 10px 10px',
-                }}
-                onClick={() => onPick('bg-transparent')}
-              />
-            )}
-            {swatches.map((k) => (
-              <button
-                key={k}
-                className="swatch"
-                title={k}
-                style={{ background: resolve(k) }}
-                onClick={() => onPick(k)}
-              />
-            ))}
-            <label className="swatch swatch--custom" title="custom color">
-              +
-              <input type="color" onChange={(e) => onCustom(e.target.value)} />
-            </label>
-          </div>
-        </div>
+    <div className="swatches">
+      <button
+        className={active('bg-default')}
+        title="default"
+        style={{ background: resolve('bg-default') }}
+        onClick={() => onPick('bg-default')}
+      />
+      {allowTransparent && (
+        <button
+          className={active('bg-transparent')}
+          title="transparent"
+          style={{
+            background:
+              'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 10px 10px',
+          }}
+          onClick={() => onPick('bg-transparent')}
+        />
       )}
+      {swatches.map((k) => (
+        <button
+          key={k}
+          className={active(k)}
+          title={k}
+          style={{ background: resolve(k) }}
+          onClick={() => onPick(k)}
+        />
+      ))}
+      <label className="swatch swatch--custom" title="custom color">
+        +
+        <input type="color" onChange={(e) => onCustom(e.target.value)} />
+      </label>
+    </div>
+  )
+}
+
+/** Deck text-theme font picker: '' = the built-in default (Lato), otherwise a family name. */
+function ThemeFontSelect({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (family: string) => void
+}) {
+  return (
+    <select
+      value={value || DEFAULT_FONT}
+      style={{ fontFamily: cssFontFamily(value) }}
+      onChange={(e) =>
+        onChange(e.target.value === DEFAULT_FONT ? '' : e.target.value)
+      }
+    >
+      {FONT_FAMILIES.map((f) => (
+        <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
+          {f}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+/** The deck Theme popover: default background + surface colors, and the default font + color for
+ *  each text category (heading | body). Text components with no explicit color/font follow these. */
+function ThemePopover({
+  deck,
+  onBackground,
+  onCustomBackground,
+  onSurface,
+  onCustomSurface,
+  onText,
+}: {
+  deck: DeckRow
+  onBackground: (value: string) => void
+  onCustomBackground: (hex: string) => void
+  onSurface: (value: string) => void
+  onCustomSurface: (hex: string) => void
+  onText: (
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) => void
+}) {
+  return (
+    <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
+      <div className="theme__section">
+        <div className="theme__label">Slide background</div>
+        <BgSwatches
+          current={deck.background}
+          swatches={BACKGROUND_SWATCHES}
+          resolve={(v) => resolveBackground(v, v)}
+          onPick={onBackground}
+          onCustom={onCustomBackground}
+          allowTransparent
+        />
+      </div>
+      <div className="theme__section">
+        <div className="theme__label">Surface</div>
+        <BgSwatches
+          current={deck.surface}
+          swatches={SURFACE_SWATCHES}
+          resolve={(v) => resolveSurface(v, v)}
+          onPick={onSurface}
+          onCustom={onCustomSurface}
+        />
+      </div>
+      <div className="theme__section">
+        <div className="theme__label">Heading text</div>
+        <label className="insp__row">
+          <span>Font</span>
+          <ThemeFontSelect
+            value={deck.heading_font ?? ''}
+            onChange={(f) => onText({ heading_font: f })}
+          />
+        </label>
+        <div className="insp__row insp__row--stack">
+          <span>Color</span>
+          <ColorField
+            value={deck.heading_color ?? ''}
+            onChange={(hex) => onText({ heading_color: hex })}
+          />
+        </div>
+      </div>
+      <div className="theme__section">
+        <div className="theme__label">Body text</div>
+        <label className="insp__row">
+          <span>Font</span>
+          <ThemeFontSelect
+            value={deck.body_font ?? ''}
+            onChange={(f) => onText({ body_font: f })}
+          />
+        </label>
+        <div className="insp__row insp__row--stack">
+          <span>Color</span>
+          <ColorField
+            value={deck.body_color ?? ''}
+            onChange={(hex) => onText({ body_color: hex })}
+          />
+        </div>
+      </div>
     </div>
   )
 }

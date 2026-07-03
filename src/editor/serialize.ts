@@ -9,6 +9,10 @@ export interface DeckRowLike {
   title: string
   background: string
   surface: string
+  heading_font?: string | null
+  heading_color?: string | null
+  body_font?: string | null
+  body_color?: string | null
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -73,8 +77,10 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
     case 'text':
       if (c.size) base.size = c.size
       if (c.text) base.text = c.text
+      // color/fontFamily omitted when '' (theme-inherited); textType only when a heading.
       if (c.color) base.color = c.color
       if (c.font_family) base.fontFamily = c.font_family
+      if (c.text_type && c.text_type !== 'body') base.textType = c.text_type
       break
     case 'image':
       base.src = c.src ?? ''
@@ -109,6 +115,11 @@ export function serializeDeck(
     __genid: genid,
     background: deck.background || 'bg-default',
     surface: deck.surface || 'bg-default',
+    // Text theme defaults ('' = built-in default; see DeckThemeFields).
+    headingFont: deck.heading_font || '',
+    headingColor: deck.heading_color || '',
+    bodyFont: deck.body_font || '',
+    bodyColor: deck.body_color || '',
     cannedTransition: deck.canned_transition || 'none',
     customStylesheet: deck.custom_stylesheet || '',
     customBackgrounds: {
@@ -153,6 +164,7 @@ export interface ImportedComponent {
   size?: number
   color?: string
   font_family?: string
+  text_type?: string
   src?: string
   image_type?: string
   shape?: string
@@ -178,6 +190,10 @@ export interface ImportedDeck {
   title: string
   background: string
   surface: string
+  heading_font: string
+  heading_color: string
+  body_font: string
+  body_color: string
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -214,8 +230,12 @@ function deserializeComponent(
     case 'text':
       c.text = str(raw.text, 'Text')
       c.size = num(raw.size, 72)
-      c.color = str(raw.color, '111111')
-      c.font_family = str(raw.fontFamily, 'Lato')
+      // Missing color/fontFamily = theme-inherited. Legacy files always wrote an explicit color
+      // ('111111') + family ('Lato'), so they round-trip as overrides; only a theme-authored file
+      // omits them. text_type absent = body.
+      c.color = str(raw.color, '')
+      c.font_family = str(raw.fontFamily, '')
+      c.text_type = str(raw.textType, '')
       break
     case 'image':
       // legacy {docKey,attachKey} attachments aren't supported (no bytes in JSON) — keep string srcs.
@@ -253,6 +273,10 @@ export function deserializeDeck(json: unknown): ImportedDeck {
     title: str(o.fileName, 'Imported deck'),
     background: str(o.background, 'bg-default'),
     surface: str(o.surface, 'bg-default'),
+    heading_font: str(o.headingFont),
+    heading_color: str(o.headingColor),
+    body_font: str(o.bodyFont),
+    body_color: str(o.bodyColor),
     canned_transition: str(o.cannedTransition, 'none'),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),

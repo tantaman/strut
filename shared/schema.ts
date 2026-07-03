@@ -53,6 +53,10 @@ export const deck = table("deck")
     owner_id: string(),
     visibility: string(),
     share_token: string(),
+    heading_font: string(),
+    heading_color: string(),
+    body_font: string(),
+    body_color: string(),
   })
   .primaryKey("id");
 

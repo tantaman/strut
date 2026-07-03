@@ -62,6 +62,11 @@ export type SetDeckThemeArgs = {
   id: string
   background?: string
   surface?: string
+  // Text theme defaults ('' = built-in default). Fonts are family names; colors bare hex (no '#').
+  heading_font?: string
+  heading_color?: string
+  body_font?: string
+  body_color?: string
   custom_stylesheet?: string
   chosen_presenter?: string
   canned_transition?: string
@@ -106,11 +111,13 @@ type SpatialArgs = {
   y: number
   z_order: number
 }
+// color/font_family = '' means "inherit the deck theme default for text_type" (heading | body).
 export type AddTextArgs = SpatialArgs & {
   text: string
   size: number
   color: string
   font_family: string
+  text_type: string
 }
 export type AddImageArgs = SpatialArgs & {
   src: string
@@ -161,6 +168,7 @@ export type SetTextArgs = {
   size: number
   color: string
   font_family: string
+  text_type: string
 }
 export type SetShapeFillArgs = { id: string; fill: string }
 export type MintCustomColorArgs = {
@@ -232,6 +240,10 @@ export const mutators = {
       owner_id: a.ownerId,
       visibility: 'private',
       share_token: '',
+      heading_font: '',
+      heading_color: '',
+      body_font: '',
+      body_color: '',
     }),
 
   renameDeck: (tx: MutationTx, a: RenameDeckArgs) =>
@@ -249,6 +261,10 @@ export const mutators = {
     const row: Record<string, WireValue> = { id: a.id, modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
+    if (a.heading_font !== undefined) row.heading_font = a.heading_font
+    if (a.heading_color !== undefined) row.heading_color = a.heading_color
+    if (a.body_font !== undefined) row.body_font = a.body_font
+    if (a.body_color !== undefined) row.body_color = a.body_color
     if (a.custom_stylesheet !== undefined)
       row.custom_stylesheet = a.custom_stylesheet
     if (a.chosen_presenter !== undefined)

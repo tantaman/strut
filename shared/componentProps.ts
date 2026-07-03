@@ -17,11 +17,13 @@ export const COMPONENT_TYPES: readonly ComponentType[] = [
 // The per-type leaf payload. `fill` is intentionally NOT here (it's a column). Fields are optional so
 // a parsed blob spreads cleanly onto the flat in-memory component (see src/editor/types.ts).
 export type ComponentProps = Partial<{
-  // text
+  // text — color/font_family may be '' meaning "inherit the deck theme default for text_type";
+  // text_type is 'heading' | 'body' ('' / absent = body, so legacy rows need no backfill).
   text: string
   size: number
   color: string
   font_family: string
+  text_type: string
   // image
   image_type: string
   // shape
@@ -49,6 +51,7 @@ export function serializeProps(
         size: a.size,
         color: a.color,
         font_family: a.font_family,
+        text_type: a.text_type,
       })
     case 'image':
       return JSON.stringify({ src: a.src, image_type: a.image_type })

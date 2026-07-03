@@ -9,9 +9,9 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { cmpStyle, renderInner } from './render'
+import { cmpStyle, renderInner, themeVars } from './render'
 import { backgroundImage, resolveBackground } from './types'
-import type { AnyComponent } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import type { ReactNode } from 'react'
 import {
@@ -34,6 +34,8 @@ function StaticComponent({ c }: { c: AnyComponent }) {
   )
 }
 
+type DeckThemeRow = ({ background: string } & DeckThemeFields) | null
+
 function SlideFrame({
   slide,
   deck,
@@ -41,7 +43,7 @@ function SlideFrame({
   children,
 }: {
   slide: SlideDetail
-  deck: { background: string } | null
+  deck: DeckThemeRow
   width: number
   children: ReactNode
 }) {
@@ -56,6 +58,7 @@ function SlideFrame({
         background: resolveBackground(slide.background, deck?.background),
         backgroundImage: backgroundImage(slide.background, deck?.background),
         backgroundSize: 'cover',
+        ...themeVars(deck),
       }}
     >
       {children}
@@ -71,7 +74,7 @@ export function SlideView({
   onComponentRemove,
 }: {
   slide: SlideDetail
-  deck: { background: string } | null
+  deck: DeckThemeRow
   width: number
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void

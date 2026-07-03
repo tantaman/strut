@@ -4,12 +4,8 @@
 
 import { SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
-import {
-  cssHex,
-  resolveBackground,
-  resolveSurface,
-  type AnyComponent,
-} from './types'
+import { cssHex, resolveBackground, resolveSurface, textTypeOf } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import { flightFor } from './transitions'
 import { scopeCss } from './css'
 import type { DeckBundle } from './serialize'
@@ -31,10 +27,20 @@ function componentHTML(c: AnyComponent): string {
   let body = ''
   let extra = ''
   switch (c.kind) {
-    case 'text':
-      extra = `font-size:${c.size ?? 72}px;color:${cssHex(c.color, '111111')};font-family:'${esc(c.font_family || 'Lato')}',sans-serif;line-height:1.1;white-space:pre-wrap;max-width:1100px;`
+    case 'text': {
+      // '' color/font = inherit the deck theme default for this category via the CSS vars set on
+      // the slide container (see themeVarsCss / stepHTML).
+      const cat = textTypeOf(c)
+      const color = c.color
+        ? cssHex(c.color, '111111')
+        : `var(--strut-${cat}-color, #111111)`
+      const font = c.font_family
+        ? `'${esc(c.font_family)}',sans-serif`
+        : `var(--strut-${cat}-font, 'Lato',sans-serif)`
+      extra = `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;max-width:1100px;`
       body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
       break
+    }
     case 'image':
       body = c.src
         ? `<img src="${esc(c.src)}" style="width:100%;height:100%;object-fit:contain" alt="">`
@@ -56,6 +62,19 @@ function componentHTML(c: AnyComponent): string {
   }
   const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
   return `<div class="cmp" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
+}
+
+/** The deck text theme as CSS custom-property declarations for the slide container, so a text
+ *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export. */
+function themeVarsCss(theme: DeckThemeFields): string {
+  const font = (f: string | null | undefined) =>
+    `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
+  return (
+    `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
+    `--strut-heading-font:${font(theme.heading_font)};` +
+    `--strut-body-color:${cssHex(theme.body_color ?? '', '111111')};` +
+    `--strut-body-font:${font(theme.body_font)};`
+  )
 }
 
 function stepHTML(
@@ -81,7 +100,7 @@ function stepHTML(
   const bg = resolveBackground(slide.background, deck.background)
   const sorted = [...components].sort((a, b) => a.z_order - b.z_order)
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck)}">
 ${sorted.map((c) => '      ' + componentHTML(c)).join('\n')}
     </div>
   </div>`

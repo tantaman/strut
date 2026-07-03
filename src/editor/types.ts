@@ -36,11 +36,12 @@ export interface ComponentRow extends SpatialBase {
 export type AnyComponent = SpatialBase & {
   kind: ComponentKind
   fill?: string
-  // text
+  // text ('' color/font_family = inherit the deck theme default for text_type; see DeckThemeFields)
   text?: string
   size?: number
   color?: string
   font_family?: string
+  text_type?: string
   // image / video / webframe
   src?: string
   image_type?: string
@@ -97,6 +98,26 @@ export const SHAPES: Record<string, string> = {
 }
 
 export const SHAPE_NAMES = Object.keys(SHAPES)
+
+// ---- deck text theme ------------------------------------------------------------------------------
+
+/** The deck's text-theme default columns ('' / null = built-in default: Lato / 111111). Text
+ *  components fall into two categories — 'heading' | 'body' (`text_type`, '' = body) — and a text
+ *  component with an empty color/font_family inherits the deck default for its category. */
+export interface DeckThemeFields {
+  heading_font?: string | null
+  heading_color?: string | null
+  body_font?: string | null
+  body_color?: string | null
+}
+
+export const TEXT_TYPES = ['body', 'heading'] as const
+export type TextType = (typeof TEXT_TYPES)[number]
+
+/** Normalize a stored `text_type` ('' / absent = body, so legacy rows need no backfill). */
+export function textTypeOf(c: { text_type?: string }): TextType {
+  return c.text_type === 'heading' ? 'heading' : 'body'
+}
 
 // ---- background / surface resolution (spec §8.6, simplified) -------------------------------------
 

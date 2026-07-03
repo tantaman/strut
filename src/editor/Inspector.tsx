@@ -3,12 +3,12 @@
 // edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
 
 import { memo, useState } from 'react'
-import { FONT_FAMILIES, FONT_SIZES } from '../config'
+import { DEFAULT_FONT, FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
-import { COLOR_SWATCHES, cssHex } from './types'
-import type { AnyComponent } from './types'
+import { COLOR_SWATCHES, cssHex, textTypeOf } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
 
@@ -30,16 +30,20 @@ function pushRecent(hex: string) {
   localStorage.setItem(RECENTS_KEY, JSON.stringify(next))
 }
 
-/** Swatch grid + native picker + recents. `value`/`onChange` use bare hex (no leading `#`). */
-function ColorField({
+/** Swatch grid + native picker + recents. `value`/`onChange` use bare hex (no leading `#`).
+ *  With `themeDefault`, a leading "theme" swatch offers '' = inherit the deck theme (shown in the
+ *  theme's resolved color); exported for reuse by the Header's theme popover. */
+export function ColorField({
   value,
   onChange,
+  themeDefault,
 }: {
   value: string
   onChange: (hex: string) => void
+  themeDefault?: { color: string; title: string }
 }) {
   const [recents, setRecents] = useState<string[]>(readRecents)
-  const current = cssHex(value, '111111')
+  const current = cssHex(value, themeDefault ? themeDefault.color : '111111')
   const pick = (hex: string) => {
     const bare = hex.replace(/^#+/, '').toLowerCase()
     pushRecent(bare)
@@ -49,6 +53,18 @@ function ColorField({
   return (
     <div className="insp__color">
       <div className="swatches swatches--sm">
+        {themeDefault && (
+          <button
+            className={
+              'swatch swatch--theme' + (value === '' ? ' is-active' : '')
+            }
+            style={{ background: cssHex(themeDefault.color, '111111') }}
+            title={themeDefault.title}
+            onClick={() => onChange('')}
+          >
+            T
+          </button>
+        )}
         {COLOR_SWATCHES.map((h) => (
           <button
             key={h}
@@ -90,9 +106,11 @@ function ColorField({
 export function Inspector({
   componentRefs,
   getComponents,
+  deck,
 }: {
   componentRefs: readonly ComponentRef[]
   getComponents: () => AnyComponent[]
+  deck?: DeckThemeFields | null
 }) {
   const editor = useEditor()
 
@@ -103,7 +121,7 @@ export function Inspector({
     const components = getComponents()
     const selected = components.find((c) => c.id === selectedId)
     return selected ? (
-      <InspectorPanel c={selected} components={components} />
+      <InspectorPanel c={selected} components={components} deck={deck} />
     ) : null
   }
 
@@ -116,7 +134,7 @@ export function Inspector({
         >
           {(c) =>
             c.id === selectedId ? (
-              <InspectorPanel c={c} components={getComponents()} />
+              <InspectorPanel c={c} components={getComponents()} deck={deck} />
             ) : null
           }
         </ComponentDataReader>
@@ -128,11 +146,13 @@ export function Inspector({
 interface InspectorPanelProps {
   c: AnyComponent
   components: readonly AnyComponent[]
+  deck?: DeckThemeFields | null
 }
 
 const InspectorPanel = memo(function InspectorPanel({
   c,
   components,
+  deck,
 }: InspectorPanelProps) {
   const mutate = useMutate()
   const history = useHistory()
@@ -140,23 +160,30 @@ const InspectorPanel = memo(function InspectorPanel({
     ? components.map((x) => (x.id === c.id ? c : x))
     : [...components, c]
 
+  // '' color/font_family = inherit the deck theme for this component's category — preserved
+  // through edits (defaults here must NOT materialize a concrete override).
   const editText = (
     patch: Partial<
-      Pick<AnyComponent, 'size' | 'color' | 'font_family' | 'text'>
+      Pick<
+        AnyComponent,
+        'size' | 'color' | 'font_family' | 'text' | 'text_type'
+      >
     >,
     label = 'Edit text',
   ) => {
     const before = {
       text: c.text ?? '',
       size: c.size ?? 72,
-      color: c.color ?? '111111',
-      font_family: c.font_family ?? 'Lato',
+      color: c.color ?? '',
+      font_family: c.font_family ?? '',
+      text_type: textTypeOf(c) as string,
     }
     const after = {
       text: patch.text ?? before.text,
       size: patch.size ?? before.size,
       color: patch.color ?? before.color,
       font_family: patch.font_family ?? before.font_family,
+      text_type: patch.text_type ?? before.text_type,
     }
     const apply = (v: typeof before) => mutate.setText({ id: c.id, ...v })
     apply(after)
@@ -207,48 +234,77 @@ const InspectorPanel = memo(function InspectorPanel({
     <div className="insp" onPointerDown={(e) => e.stopPropagation()}>
       <div className="insp__head">{c.kind}</div>
 
-      {c.kind === 'text' && (
-        <>
-          <label className="insp__row">
-            <span>Font</span>
-            <select
-              value={c.font_family || 'Lato'}
-              onChange={(e) => editText({ font_family: e.target.value })}
-            >
-              {FONT_FAMILIES.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="insp__row">
-            <span>Size</span>
-            <input
-              type="number"
-              min={8}
-              max={400}
-              value={c.size ?? 72}
-              onChange={(e) =>
-                editText({ size: Math.max(8, Number(e.target.value) || 72) })
-              }
-              list="strut-font-sizes"
-            />
-            <datalist id="strut-font-sizes">
-              {FONT_SIZES.map((s) => (
-                <option key={s} value={s} />
-              ))}
-            </datalist>
-          </label>
-          <div className="insp__row insp__row--stack">
-            <span>Color</span>
-            <ColorField
-              value={c.color ?? '111111'}
-              onChange={(hex) => editText({ color: hex })}
-            />
-          </div>
-        </>
-      )}
+      {c.kind === 'text' &&
+        (() => {
+          const cat = textTypeOf(c)
+          const themeFont =
+            (cat === 'heading' ? deck?.heading_font : deck?.body_font) ||
+            DEFAULT_FONT
+          const themeColor =
+            (cat === 'heading' ? deck?.heading_color : deck?.body_color) ||
+            '111111'
+          return (
+            <>
+              <label className="insp__row">
+                <span>Type</span>
+                <select
+                  value={cat}
+                  onChange={(e) =>
+                    editText({ text_type: e.target.value }, 'Text type')
+                  }
+                >
+                  <option value="body">Body</option>
+                  <option value="heading">Heading</option>
+                </select>
+              </label>
+              <label className="insp__row">
+                <span>Font</span>
+                <select
+                  value={c.font_family || ''}
+                  onChange={(e) => editText({ font_family: e.target.value })}
+                >
+                  <option value="">Theme · {themeFont}</option>
+                  {FONT_FAMILIES.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="insp__row">
+                <span>Size</span>
+                <input
+                  type="number"
+                  min={8}
+                  max={400}
+                  value={c.size ?? 72}
+                  onChange={(e) =>
+                    editText({
+                      size: Math.max(8, Number(e.target.value) || 72),
+                    })
+                  }
+                  list="strut-font-sizes"
+                />
+                <datalist id="strut-font-sizes">
+                  {FONT_SIZES.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
+              </label>
+              <div className="insp__row insp__row--stack">
+                <span>Color</span>
+                <ColorField
+                  value={c.color ?? ''}
+                  onChange={(hex) => editText({ color: hex })}
+                  themeDefault={{
+                    color: themeColor,
+                    title: `Theme (${cat}) color`,
+                  }}
+                />
+              </div>
+            </>
+          )
+        })()}
 
       {c.kind === 'shape' && (
         <div className="insp__row insp__row--stack">
@@ -294,7 +350,20 @@ function sameInspectorPanelProps(
 ): boolean {
   return (
     sameInspectorComponent(prev.c, next.c) &&
-    sameZBounds(prev.components, next.components)
+    sameZBounds(prev.components, next.components) &&
+    sameDeckTheme(prev.deck, next.deck)
+  )
+}
+
+function sameDeckTheme(
+  a: DeckThemeFields | null | undefined,
+  b: DeckThemeFields | null | undefined,
+): boolean {
+  return (
+    a?.heading_font === b?.heading_font &&
+    a?.heading_color === b?.heading_color &&
+    a?.body_font === b?.body_font &&
+    a?.body_color === b?.body_color
   )
 }
 
@@ -313,7 +382,8 @@ function sameInspectorComponent(a: AnyComponent, b: AnyComponent): boolean {
         a.text === b.text &&
         a.size === b.size &&
         a.color === b.color &&
-        a.font_family === b.font_family
+        a.font_family === b.font_family &&
+        a.text_type === b.text_type
       )
     case 'shape':
       return a.fill === b.fill

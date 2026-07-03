@@ -28,12 +28,14 @@ export function insertComponent(
   }
   switch (c.kind) {
     case 'text':
+      // '' color/font_family = theme-inherited; '' text_type = body — preserve, don't materialize.
       mutate.addText({
         ...common,
         text: c.text ?? 'Text',
         size: c.size ?? 72,
-        color: c.color ?? '111111',
-        font_family: c.font_family ?? 'Lato',
+        color: c.color ?? '',
+        font_family: c.font_family ?? '',
+        text_type: c.text_type ?? '',
       })
       break
     case 'image':

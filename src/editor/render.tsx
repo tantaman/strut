@@ -3,8 +3,8 @@
 
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { cssHex } from './types'
-import type { AnyComponent, ComponentKind } from './types'
+import { cssHex, textTypeOf } from './types'
+import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -28,6 +28,20 @@ export function cssFontFamily(name: string | undefined): string {
   return `"${fam}", sans-serif`
 }
 
+/** The deck text theme as CSS variables. Set on every slide container (stage canvas, thumbnail
+ *  frame, impress export), so a text component with an empty color/font_family can inherit via
+ *  `var(--strut-<category>-…)` no matter which surface renders it. */
+export function themeVars(
+  theme: DeckThemeFields | null | undefined,
+): CSSProperties {
+  return {
+    '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
+    '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
+    '--strut-body-color': cssHex(theme?.body_color ?? '', '111111'),
+    '--strut-body-font': cssFontFamily(theme?.body_font ?? ''),
+  } as CSSProperties
+}
+
 export function componentSize(c: AnyComponent): { w: number; h: number } {
   return {
     w: c.scale_w || DEFAULT_W[c.kind],
@@ -43,14 +57,21 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
     transform: `rotate(${c.rotate}rad) skewX(${c.skew_x}rad) skewY(${c.skew_y}rad)`,
   }
   if (c.kind === 'text') {
+    const cat = textTypeOf(c)
     return {
       ...base,
       fontSize: c.size ?? 72,
-      color: cssHex(c.color, '111111'),
+      // '' = inherit the deck theme default for this component's category (heading | body), read
+      // from the CSS variables every slide container sets (themeVars above).
+      color: c.color
+        ? cssHex(c.color, '111111')
+        : `var(--strut-${cat}-color, #111111)`,
       // Quote the family: an unquoted CSS font-family token can't start with a digit, so a name
       // like "Press Start 2P" is invalid unquoted and the browser drops the whole declaration.
       // (The impress export already quotes it the same way.)
-      fontFamily: cssFontFamily(c.font_family),
+      fontFamily: c.font_family
+        ? cssFontFamily(c.font_family)
+        : `var(--strut-${cat}-font, ${cssFontFamily('')})`,
       whiteSpace: 'pre-wrap',
       lineHeight: 1.1,
       maxWidth: 1100,

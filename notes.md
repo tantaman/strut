@@ -1,3 +1,7 @@
+- incoroprate refineSchema for component types.
+- publish to rindle cloud
+- get rindle-realtime setup for it. only open with > 2 editors.
+
 - theme rather than surface and bg
 - theme has font stuff too
 

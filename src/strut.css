@@ -1052,6 +1052,52 @@ button {
   color: var(--coral-strong);
 }
 
+/* ---- deck theme popover (Header) ---- */
+.popover--theme {
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  font-size: 13px;
+}
+.theme__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.theme__section + .theme__section {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.theme__label {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+.popover--theme select {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 6px 9px;
+}
+
+/* "Theme default" swatch (text color pickers): shows the theme's resolved color with a T glyph. */
+.swatch--theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
 /* ---- custom color swatch (in bg/surface pickers) ---- */
 .swatch--custom {
   position: relative;

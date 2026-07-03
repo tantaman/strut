@@ -10,7 +10,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import type { AnyComponent } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 
@@ -19,7 +19,7 @@ export function SlideWell({
   deck,
 }: {
   slides: SlideDetail[]
-  deck: { background: string } | null
+  deck: ({ background: string } & DeckThemeFields) | null
 }) {
   const editor = useEditor()
   const mutate = useMutate()

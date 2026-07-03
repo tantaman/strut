@@ -141,6 +141,10 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
       owner_id: ctx.user,
       visibility: 'private',
       share_token: '',
+      heading_font: '',
+      heading_color: '',
+      body_font: '',
+      body_color: '',
     }),
 
   renameDeck: (tx, a: RenameDeckArgs, ctx) =>
@@ -188,6 +192,10 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     const row: Record<string, WireValue> = { modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
+    if (a.heading_font !== undefined) row.heading_font = a.heading_font
+    if (a.heading_color !== undefined) row.heading_color = a.heading_color
+    if (a.body_font !== undefined) row.body_font = a.body_font
+    if (a.body_color !== undefined) row.body_color = a.body_color
     if (a.custom_stylesheet !== undefined)
       row.custom_stylesheet = a.custom_stylesheet
     if (a.chosen_presenter !== undefined)
