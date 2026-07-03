@@ -30,7 +30,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
-import { ColorField } from './Inspector'
+import { ColorField, NativeColorInput } from './Inspector'
 import { Popchip } from './Popchip'
 import {
   BACKGROUND_SWATCHES,
@@ -480,14 +480,28 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 // The checkerboard fill used to depict a transparent background.
 const CHECKER =
   'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 8px 8px'
+const HEX6 = /^#[0-9a-f]{6}$/i
 
 /** The trigger swatch color for a background/surface value (checker for transparent). */
 function bgSwatch(value: string, resolve: (v: string) => string): string {
   return value === 'bg-transparent' ? CHECKER : resolve(value || 'bg-default')
 }
 
+/** A valid `#rrggbb` seed for the native custom picker: the current custom hex if the value is one,
+ *  else the resolved class color when that's a plain hex (gradients/transparent fall back to white). */
+function bgInputHex(
+  value: string | null | undefined,
+  resolve: (v: string) => string,
+): string {
+  if (value && value.startsWith('bg-custom-'))
+    return '#' + value.slice('bg-custom-'.length)
+  const r = resolve(value || 'bg-default')
+  return HEX6.test(r) ? r : '#ffffff'
+}
+
 /** One class-swatch grid (deck background / surface): default, optional transparent, the named
- *  swatch classes, and a custom color that mints a `bg-custom-<hex>` class (spec §8.3). */
+ *  swatch classes, then the same native custom-color row the text picker uses (mints a
+ *  `bg-custom-<hex>` class, spec §8.3) — committing once on close, not per drag frame. */
 function BgSwatches({
   current,
   swatches,
@@ -505,35 +519,37 @@ function BgSwatches({
 }) {
   const active = (k: string) => 'swatch' + (current === k ? ' is-active' : '')
   return (
-    <div className="swatches">
-      <button
-        className={active('bg-default')}
-        title="default"
-        style={{ background: resolve('bg-default') }}
-        onClick={() => onPick('bg-default')}
+    <>
+      <div className="swatches">
+        <button
+          className={active('bg-default')}
+          title="default"
+          style={{ background: resolve('bg-default') }}
+          onClick={() => onPick('bg-default')}
+        />
+        {allowTransparent && (
+          <button
+            className={active('bg-transparent')}
+            title="transparent"
+            style={{ background: CHECKER }}
+            onClick={() => onPick('bg-transparent')}
+          />
+        )}
+        {swatches.map((k) => (
+          <button
+            key={k}
+            className={active(k)}
+            title={k}
+            style={{ background: resolve(k) }}
+            onClick={() => onPick(k)}
+          />
+        ))}
+      </div>
+      <NativeColorInput
+        value={bgInputHex(current, resolve)}
+        onCommit={onCustom}
       />
-      {allowTransparent && (
-        <button
-          className={active('bg-transparent')}
-          title="transparent"
-          style={{ background: CHECKER }}
-          onClick={() => onPick('bg-transparent')}
-        />
-      )}
-      {swatches.map((k) => (
-        <button
-          key={k}
-          className={active(k)}
-          title={k}
-          style={{ background: resolve(k) }}
-          onClick={() => onPick(k)}
-        />
-      ))}
-      <label className="swatch swatch--custom" title="custom color">
-        +
-        <input type="color" onChange={(e) => onCustom(e.target.value)} />
-      </label>
-    </div>
+    </>
   )
 }
 

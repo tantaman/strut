@@ -206,6 +206,18 @@ export function backgroundImage(
   return v.startsWith('img:') ? `url(${v.slice(4)})` : undefined
 }
 
+/** Compose a single CSS `background` shorthand from a resolved color/gradient and an optional
+ *  `url(...)` image layer. Emitting ONE shorthand (rather than `background` + `backgroundImage`/
+ *  `backgroundSize` longhands in the same style object) avoids React's shorthand/longhand conflict
+ *  warning on every rerender — which, forwarded by the dev server's console channel, could snowball
+ *  into an OOM. The image is the top layer (cover, centered), the color/gradient the base layer. */
+export function composeBackground(
+  color: string,
+  image: string | undefined,
+): string {
+  return image ? `${image} center / cover no-repeat, ${color}` : color
+}
+
 // A compact swatch palette for text color & shape fill custom pickers (Open Color-ish), spec §8.5.
 export const COLOR_SWATCHES = [
   '111111',

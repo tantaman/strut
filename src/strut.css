@@ -1150,25 +1150,6 @@ button {
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
 }
 
-/* ---- custom color swatch (in bg/surface pickers) ---- */
-.swatch--custom {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  background: var(--panel-2);
-  font-size: 14px;
-  overflow: hidden;
-}
-.swatch--custom input[type='color'] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  border: 0;
-  padding: 0;
-}
 .swatch.is-active {
   outline: 2px solid var(--coral);
   outline-offset: 1px;

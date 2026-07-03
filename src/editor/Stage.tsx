@@ -20,6 +20,7 @@ import { reinsertComponent } from './componentOps'
 import { cmpStyle, componentSize, renderInner, themeVars } from './render'
 import {
   backgroundImage,
+  composeBackground,
   resolveBackground,
   resolveSurface,
   textTypeOf,
@@ -475,12 +476,7 @@ export function Stage({
     <div
       className="stage"
       ref={stageRef}
-      style={{
-        background: surf,
-        backgroundImage: surfImg,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{ background: composeBackground(surf, surfImg) }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
       <Inspector
@@ -499,9 +495,7 @@ export function Stage({
             width: SLIDE_W,
             height: SLIDE_H,
             transform: `scale(${scale})`,
-            background: bg,
-            backgroundImage: bgImg,
-            backgroundSize: 'cover',
+            background: composeBackground(bg, bgImg),
             ...themeVars(deck),
           }}
         >
