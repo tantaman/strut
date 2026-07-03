@@ -1054,21 +1054,24 @@ button {
 
 /* ---- deck theme popover (Header) ---- */
 .popover--theme {
-  width: 236px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  font-size: 13px;
-}
-.theme__section {
+  width: 224px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 12px;
+  font-size: 13px;
 }
-.theme__section + .theme__section {
+/* Wider label column than the inspector's rows — "Background"/"Surface" don't fit 52px. */
+.popover--theme .insp__row > span {
+  width: 76px;
+}
+.theme__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border-top: 1px solid var(--line);
-  padding-top: 12px;
+  padding-top: 10px;
+  margin-top: 2px;
 }
 .theme__label {
   text-transform: uppercase;
@@ -1085,6 +1088,55 @@ button {
   border-radius: 8px;
   color: var(--text);
   padding: 6px 9px;
+}
+
+/* ---- collapsed color/background chip + its sub-popover (Popchip) ---- */
+.popchip {
+  position: relative;
+}
+.popchip__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 4px 9px 4px 5px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+.popchip__trigger:hover,
+.popchip__trigger.is-open {
+  border-color: var(--coral);
+}
+.popchip__sw {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(20, 22, 30, 0.15);
+  flex: none;
+}
+.popchip__val {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+/* The picker panel floats below the chip (over whatever it sits in — theme popover / inspector). */
+.popover--sub {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+}
+/* The inspector hugs the right screen edge — open its picker leftward so it can't clip off-screen. */
+.insp .popover--sub {
+  left: auto;
+  right: 0;
 }
 
 /* "Theme default" swatch (text color pickers): shows the theme's resolved color with a T glyph. */

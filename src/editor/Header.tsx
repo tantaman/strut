@@ -1,7 +1,7 @@
 // Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview),
 // the deck Theme picker, the Slides|Overview mode toggle, and Present.
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   Code2,
@@ -31,6 +31,7 @@ import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
 import { ColorField } from './Inspector'
+import { Popchip } from './Popchip'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
@@ -85,6 +86,20 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const [shareOpen, setShareOpen] = useState(false)
   const active = editor.activeSlideId
   const canInsert = active != null && editor.mode === 'slide' && editor.canEdit
+
+  // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
+  // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep
+  // their toggle-only behavior.
+  const themeRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (menu !== 'theme') return
+    const onDown = (e: PointerEvent) => {
+      if (themeRef.current && !themeRef.current.contains(e.target as Node))
+        setMenu(null)
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [menu])
 
   // Insert a component as one undoable step (undo removes it; redo re-adds with the same id).
   function recordInsert(id: string, doAdd: () => void, label: string) {
@@ -321,7 +336,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 
             <div className="hdr__sep" />
             <div className="hdr__group">
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative' }} ref={themeRef}>
                 <button
                   className="btn"
                   onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
@@ -462,7 +477,16 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   )
 }
 
-/** One class-swatch row (deck background / surface): default, optional transparent, the named
+// The checkerboard fill used to depict a transparent background.
+const CHECKER =
+  'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 8px 8px'
+
+/** The trigger swatch color for a background/surface value (checker for transparent). */
+function bgSwatch(value: string, resolve: (v: string) => string): string {
+  return value === 'bg-transparent' ? CHECKER : resolve(value || 'bg-default')
+}
+
+/** One class-swatch grid (deck background / surface): default, optional transparent, the named
  *  swatch classes, and a custom color that mints a `bg-custom-<hex>` class (spec §8.3). */
 function BgSwatches({
   current,
@@ -479,8 +503,7 @@ function BgSwatches({
   onCustom: (hex: string) => void
   allowTransparent?: boolean
 }) {
-  const active = (k: string) =>
-    'swatch' + (current === k ? ' is-active' : '')
+  const active = (k: string) => 'swatch' + (current === k ? ' is-active' : '')
   return (
     <div className="swatches">
       <button
@@ -493,10 +516,7 @@ function BgSwatches({
         <button
           className={active('bg-transparent')}
           title="transparent"
-          style={{
-            background:
-              'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 10px 10px',
-          }}
+          style={{ background: CHECKER }}
           onClick={() => onPick('bg-transparent')}
         />
       )}
@@ -514,6 +534,28 @@ function BgSwatches({
         <input type="color" onChange={(e) => onCustom(e.target.value)} />
       </label>
     </div>
+  )
+}
+
+/** A background/surface value as a collapsed chip: shows the current color; opens the swatch grid. */
+function BgChip({
+  current,
+  label,
+  resolve,
+  ...rest
+}: {
+  current?: string | null
+  label: string
+  swatches: string[]
+  resolve: (value: string) => string
+  onPick: (value: string) => void
+  onCustom: (hex: string) => void
+  allowTransparent?: boolean
+}) {
+  return (
+    <Popchip swatch={bgSwatch(current || 'bg-default', resolve)} title={label}>
+      <BgSwatches current={current} resolve={resolve} {...rest} />
+    </Popchip>
   )
 }
 
@@ -568,9 +610,10 @@ function ThemePopover({
 }) {
   return (
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
-      <div className="theme__section">
-        <div className="theme__label">Slide background</div>
-        <BgSwatches
+      <div className="insp__row">
+        <span>Background</span>
+        <BgChip
+          label="Slide background"
           current={deck.background}
           swatches={BACKGROUND_SWATCHES}
           resolve={(v) => resolveBackground(v, v)}
@@ -579,9 +622,10 @@ function ThemePopover({
           allowTransparent
         />
       </div>
-      <div className="theme__section">
-        <div className="theme__label">Surface</div>
-        <BgSwatches
+      <div className="insp__row">
+        <span>Surface</span>
+        <BgChip
+          label="Surface"
           current={deck.surface}
           swatches={SURFACE_SWATCHES}
           resolve={(v) => resolveSurface(v, v)}
@@ -589,16 +633,17 @@ function ThemePopover({
           onCustom={onCustomSurface}
         />
       </div>
-      <div className="theme__section">
+
+      <div className="theme__group">
         <div className="theme__label">Heading text</div>
-        <label className="insp__row">
+        <div className="insp__row">
           <span>Font</span>
           <ThemeFontSelect
             value={deck.heading_font ?? ''}
             onChange={(f) => onText({ heading_font: f })}
           />
-        </label>
-        <div className="insp__row insp__row--stack">
+        </div>
+        <div className="insp__row">
           <span>Color</span>
           <ColorField
             value={deck.heading_color ?? ''}
@@ -606,16 +651,17 @@ function ThemePopover({
           />
         </div>
       </div>
-      <div className="theme__section">
+
+      <div className="theme__group">
         <div className="theme__label">Body text</div>
-        <label className="insp__row">
+        <div className="insp__row">
           <span>Font</span>
           <ThemeFontSelect
             value={deck.body_font ?? ''}
             onChange={(f) => onText({ body_font: f })}
           />
-        </label>
-        <div className="insp__row insp__row--stack">
+        </div>
+        <div className="insp__row">
           <span>Color</span>
           <ColorField
             value={deck.body_color ?? ''}

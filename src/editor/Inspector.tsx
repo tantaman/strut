@@ -11,6 +11,7 @@ import { COLOR_SWATCHES, cssHex, textTypeOf } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
+import { Popchip } from './Popchip'
 
 const RECENTS_KEY = 'strut.colorChooser'
 
@@ -30,9 +31,10 @@ function pushRecent(hex: string) {
   localStorage.setItem(RECENTS_KEY, JSON.stringify(next))
 }
 
-/** Swatch grid + native picker + recents. `value`/`onChange` use bare hex (no leading `#`).
- *  With `themeDefault`, a leading "theme" swatch offers '' = inherit the deck theme (shown in the
- *  theme's resolved color); exported for reuse by the Header's theme popover. */
+/** A collapsed color control: the trigger shows only the current swatch + value; the swatch grid,
+ *  recents and native picker live in a click-to-open sub-popover (Figma-style — see Popchip). `value`
+ *  /`onChange` use bare hex (no leading `#`). With `themeDefault`, value '' = inherit the deck theme
+ *  (a leading "T" swatch + a "Theme" chip label). Exported for the Header's theme popover. */
 export function ColorField({
   value,
   onChange,
@@ -43,6 +45,7 @@ export function ColorField({
   themeDefault?: { color: string; title: string }
 }) {
   const [recents, setRecents] = useState<string[]>(readRecents)
+  const inherited = !!themeDefault && !value
   const current = cssHex(value, themeDefault ? themeDefault.color : '111111')
   const pick = (hex: string) => {
     const bare = hex.replace(/^#+/, '').toLowerCase()
@@ -51,12 +54,16 @@ export function ColorField({
     onChange(bare)
   }
   return (
-    <div className="insp__color">
+    <Popchip
+      swatch={current}
+      label={inherited ? 'Theme' : current}
+      title="Color"
+    >
       <div className="swatches swatches--sm">
         {themeDefault && (
           <button
             className={
-              'swatch swatch--theme' + (value === '' ? ' is-active' : '')
+              'swatch swatch--theme' + (inherited ? ' is-active' : '')
             }
             style={{ background: cssHex(themeDefault.color, '111111') }}
             title={themeDefault.title}
@@ -99,7 +106,7 @@ export function ColorField({
         />
         <span>{current}</span>
       </label>
-    </div>
+    </Popchip>
   )
 }
 
@@ -291,7 +298,7 @@ const InspectorPanel = memo(function InspectorPanel({
                   ))}
                 </datalist>
               </label>
-              <div className="insp__row insp__row--stack">
+              <div className="insp__row">
                 <span>Color</span>
                 <ColorField
                   value={c.color ?? ''}
@@ -307,7 +314,7 @@ const InspectorPanel = memo(function InspectorPanel({
         })()}
 
       {c.kind === 'shape' && (
-        <div className="insp__row insp__row--stack">
+        <div className="insp__row">
           <span>Fill</span>
           <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
         </div>
