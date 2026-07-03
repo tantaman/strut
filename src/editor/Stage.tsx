@@ -138,10 +138,10 @@ export function Stage({
       victims.length > 1 ? 'Delete components' : 'Delete component',
       () => {
         for (const c of snapshots) {
-          mutate.removeComponent({ table: c.table, id: c.id })
+          mutate.removeComponent({ id: c.id })
           history.push({
             label: 'Delete component',
-            redo: () => mutate.removeComponent({ table: c.table, id: c.id }),
+            redo: () => mutate.removeComponent({ id: c.id }),
             undo: () => reinsertComponent(mutate, c),
           })
         }
@@ -151,8 +151,7 @@ export function Stage({
 
   function raise(c: AnyComponent) {
     const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
-    if (c.z_order < maxZ)
-      mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })
+    if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
   }
 
   // ---- gestures ----
@@ -181,12 +180,9 @@ export function Stage({
     const starts = new Map(
       getComponents()
         .filter((x) => ids.includes(x.id))
-        .map((x) => [x.id, { x: x.x, y: x.y, table: x.table }]),
+        .map((x) => [x.id, { x: x.x, y: x.y }]),
     )
-    const finals = new Map<
-      string,
-      { x: number; y: number; table: AnyComponent['table'] }
-    >()
+    const finals = new Map<string, { x: number; y: number }>()
     const sx = e.clientX
     const sy = e.clientY
     editor.setDraggingComponentId(c.id)
@@ -201,12 +197,9 @@ export function Stage({
             nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
             ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
           }
-          const pos = { x: Math.round(nx), y: Math.round(ny), table: s.table }
+          const pos = { x: Math.round(nx), y: Math.round(ny) }
           finals.set(id, pos)
-          mutate.moveComponent.folded(
-            { key: id },
-            { table: s.table, id, x: pos.x, y: pos.y },
-          )
+          mutate.moveComponent.folded({ key: id }, { id, x: pos.x, y: pos.y })
         })
       },
       () => {
@@ -221,12 +214,12 @@ export function Stage({
           label: 'Move',
           redo: () =>
             moved.forEach(([id, f]) =>
-              mutate.moveComponent({ table: f.table, id, x: f.x, y: f.y }),
+              mutate.moveComponent({ id, x: f.x, y: f.y }),
             ),
           undo: () =>
             moved.forEach(([id]) => {
               const s = starts.get(id)!
-              mutate.moveComponent({ table: s.table, id, x: s.x, y: s.y })
+              mutate.moveComponent({ id, x: s.x, y: s.y })
             }),
         })
       },
@@ -297,7 +290,6 @@ export function Stage({
         mutate.transformComponent.folded(
           { key: c.id },
           {
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -315,7 +307,6 @@ export function Stage({
           return
         const apply = (s: { scale_w: number; scale_h: number }) =>
           mutate.transformComponent({
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -354,7 +345,6 @@ export function Stage({
         mutate.transformComponent.folded(
           { key: c.id },
           {
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -371,7 +361,6 @@ export function Stage({
         if (lastRot === startRot) return
         const apply = (rot: number) =>
           mutate.transformComponent({
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,

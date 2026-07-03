@@ -14,29 +14,23 @@ import {
   schema,
   deck,
   slide,
-  text_component,
-  image_component,
-  shape_component,
-  video_component,
-  webframe_component,
+  component,
   custom_background,
   deck_share,
   user_profile,
 } from './schema.ts'
+import { serializeProps } from './componentProps.ts'
 
 export {
   schema,
   deck,
   slide,
-  text_component,
-  image_component,
-  shape_component,
-  video_component,
-  webframe_component,
+  component,
   custom_background,
   deck_share,
   user_profile,
 }
+export type { ComponentType } from './componentProps.ts'
 
 export const q = newQueryBuilder(schema)
 
@@ -44,37 +38,14 @@ export const rels = defineRelationships({
   deckSlides: rel(deck, slide, { id: 'deck_id' }),
   deckCustomBackgrounds: rel(deck, custom_background, { id: 'deck_id' }),
   deckShares: rel(deck, deck_share, { id: 'deck_id' }),
-  slideTexts: rel(slide, text_component, { id: 'slide_id' }),
-  slideImages: rel(slide, image_component, { id: 'slide_id' }),
-  slideShapes: rel(slide, shape_component, { id: 'slide_id' }),
-  slideVideos: rel(slide, video_component, { id: 'slide_id' }),
-  slideWebframes: rel(slide, webframe_component, { id: 'slide_id' }),
+  slideComponents: rel(slide, component, { id: 'slide_id' }),
   // Reverse (child → parent) relationships used by server-only `existsNoSync` permission gates:
   // a slide/component is visible only if its owning deck is owned-by or shared-with the principal.
   slideDeck: rel(slide, deck, { deck_id: 'id' }),
-  textDeckSlide: rel(text_component, slide, { slide_id: 'id' }),
-  imageDeckSlide: rel(image_component, slide, { slide_id: 'id' }),
-  shapeDeckSlide: rel(shape_component, slide, { slide_id: 'id' }),
-  videoDeckSlide: rel(video_component, slide, { slide_id: 'id' }),
-  webframeDeckSlide: rel(webframe_component, slide, { slide_id: 'id' }),
+  componentSlide: rel(component, slide, { slide_id: 'id' }),
   customBgDeck: rel(custom_background, deck, { deck_id: 'id' }),
   shareDeck: rel(deck_share, deck, { deck_id: 'id' }),
 })
-
-// The five component tables that share the spatial base. Server raw-SQL mutators whitelist against
-// this set so a `table` arg can never inject SQL.
-export const COMPONENT_TABLES = [
-  'text_component',
-  'image_component',
-  'shape_component',
-  'video_component',
-  'webframe_component',
-] as const
-export type ComponentTable = (typeof COMPONENT_TABLES)[number]
-
-export function isComponentTable(t: string): t is ComponentTable {
-  return (COMPONENT_TABLES as readonly string[]).includes(t)
-}
 
 // ---- argument types (the single source of shape for both tiers + the UI) -------------------------
 
@@ -107,11 +78,7 @@ export type AddSlideArgs = {
 }
 export type DeleteSlideArgs = {
   id: string
-  textIds: string[]
-  imageIds: string[]
-  shapeIds: string[]
-  videoIds: string[]
-  webframeIds: string[]
+  componentIds: string[]
 }
 export type ReorderSlideArgs = { id: string; sort: string }
 export type SetSlideTransformArgs = {
@@ -165,13 +132,11 @@ export type AddVideoArgs = SpatialArgs & {
 export type AddWebframeArgs = SpatialArgs & { src: string }
 
 export type MoveComponentArgs = {
-  table: ComponentTable
   id: string
   x: number
   y: number
 }
 export type TransformComponentArgs = {
-  table: ComponentTable
   id: string
   scale_x: number
   scale_y: number
@@ -182,16 +147,14 @@ export type TransformComponentArgs = {
   skew_y: number
 }
 export type SetComponentZArgs = {
-  table: ComponentTable
   id: string
   z_order: number
 }
 export type SetComponentClassesArgs = {
-  table: ComponentTable
   id: string
   custom_classes: string
 }
-export type RemoveComponentArgs = { table: ComponentTable; id: string }
+export type RemoveComponentArgs = { id: string }
 export type SetTextArgs = {
   id: string
   text: string
@@ -314,11 +277,7 @@ export const mutators = {
     }),
 
   deleteSlide: (tx: MutationTx, a: DeleteSlideArgs) => {
-    for (const id of a.textIds) tx.delete('text_component', { id })
-    for (const id of a.imageIds) tx.delete('image_component', { id })
-    for (const id of a.shapeIds) tx.delete('shape_component', { id })
-    for (const id of a.videoIds) tx.delete('video_component', { id })
-    for (const id of a.webframeIds) tx.delete('webframe_component', { id })
+    for (const id of a.componentIds) tx.delete('component', { id })
     tx.delete('slide', { id: a.id })
   },
 
@@ -345,49 +304,56 @@ export const mutators = {
     tx.update('slide', row)
   },
 
+  // One `component` table now (see shared/schema.ts). Each insert stamps `type`, the shared spatial
+  // base + `fill` column, and the type-specific `props` JSON (serializeProps keeps client + server
+  // byte-identical). `fill` is only meaningful for shapes; '' elsewhere.
   addText: (tx: MutationTx, a: AddTextArgs) =>
-    tx.insert('text_component', {
+    tx.insert('component', {
       ...spatialBase(a),
-      text: a.text,
-      size: a.size,
-      color: a.color,
-      font_family: a.font_family,
+      type: 'text',
+      fill: '',
+      props: serializeProps('text', a),
     }),
 
   addImage: (tx: MutationTx, a: AddImageArgs) =>
-    tx.insert('image_component', {
+    tx.insert('component', {
       ...spatialBase(a),
       scale_w: a.scale_w,
       scale_h: a.scale_h,
-      src: a.src,
-      image_type: a.image_type,
+      type: 'image',
+      fill: '',
+      props: serializeProps('image', a),
     }),
 
   addShape: (tx: MutationTx, a: AddShapeArgs) =>
-    tx.insert('shape_component', {
+    tx.insert('component', {
       ...spatialBase(a),
-      shape: a.shape,
-      markup: a.markup,
+      type: 'shape',
       fill: a.fill,
+      props: serializeProps('shape', a),
     }),
 
   addVideo: (tx: MutationTx, a: AddVideoArgs) =>
-    tx.insert('video_component', {
+    tx.insert('component', {
       ...spatialBase(a),
-      src: a.src,
-      video_type: a.video_type,
-      src_type: a.src_type,
-      short_src: a.short_src,
+      type: 'video',
+      fill: '',
+      props: serializeProps('video', a),
     }),
 
   addWebframe: (tx: MutationTx, a: AddWebframeArgs) =>
-    tx.insert('webframe_component', { ...spatialBase(a), src: a.src }),
+    tx.insert('component', {
+      ...spatialBase(a),
+      type: 'webframe',
+      fill: '',
+      props: serializeProps('webframe', a),
+    }),
 
   moveComponent: (tx: MutationTx, a: MoveComponentArgs) =>
-    tx.update(a.table, { id: a.id, x: a.x, y: a.y }),
+    tx.update('component', { id: a.id, x: a.x, y: a.y }),
 
   transformComponent: (tx: MutationTx, a: TransformComponentArgs) =>
-    tx.update(a.table, {
+    tx.update('component', {
       id: a.id,
       scale_x: a.scale_x,
       scale_y: a.scale_y,
@@ -399,25 +365,22 @@ export const mutators = {
     }),
 
   setComponentZ: (tx: MutationTx, a: SetComponentZArgs) =>
-    tx.update(a.table, { id: a.id, z_order: a.z_order }),
+    tx.update('component', { id: a.id, z_order: a.z_order }),
 
   setComponentClasses: (tx: MutationTx, a: SetComponentClassesArgs) =>
-    tx.update(a.table, { id: a.id, custom_classes: a.custom_classes }),
+    tx.update('component', { id: a.id, custom_classes: a.custom_classes }),
 
   removeComponent: (tx: MutationTx, a: RemoveComponentArgs) =>
-    tx.delete(a.table, { id: a.id }),
+    tx.delete('component', { id: a.id }),
 
+  // Rewrites the whole text `props` blob (it carries all four text fields, so no partial-merge needed).
   setText: (tx: MutationTx, a: SetTextArgs) =>
-    tx.update('text_component', {
-      id: a.id,
-      text: a.text,
-      size: a.size,
-      color: a.color,
-      font_family: a.font_family,
-    }),
+    tx.update('component', { id: a.id, props: serializeProps('text', a) }),
 
+  // `fill` is a column, so this is a plain per-column patch (the optimistic client can't merge into
+  // an opaque props blob) — concurrent fill vs. any other edit both survive.
   setShapeFill: (tx: MutationTx, a: SetShapeFillArgs) =>
-    tx.update('shape_component', { id: a.id, fill: a.fill }),
+    tx.update('component', { id: a.id, fill: a.fill }),
 
   mintCustomColor: (tx: MutationTx, a: MintCustomColorArgs) =>
     tx.insert('custom_background', {

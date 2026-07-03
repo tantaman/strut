@@ -3,7 +3,6 @@
 // indexing + the new deck id). Pure functions; no Rindle/React deps so they can be unit-tested.
 
 import type { AnyComponent, ComponentKind } from './types'
-import { KIND_TO_TABLE } from './types'
 
 export interface DeckRowLike {
   id: string
@@ -60,7 +59,12 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
   const scale: Record<string, number> = { x: c.scale_x || 1, y: c.scale_y || 1 }
   if (c.scale_w) scale.width = c.scale_w
   if (c.scale_h) scale.height = c.scale_h
-  const base: Record<string, unknown> = { type: KIND_TO_TYPE[c.kind], x: c.x, y: c.y, scale }
+  const base: Record<string, unknown> = {
+    type: KIND_TO_TYPE[c.kind],
+    x: c.x,
+    y: c.y,
+    scale,
+  }
   if (c.rotate) base.rotate = c.rotate
   if (c.skew_x) base.skewX = c.skew_x
   if (c.skew_y) base.skewY = c.skew_y
@@ -94,7 +98,10 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
   return base
 }
 
-export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unknown> {
+export function serializeDeck(
+  bundle: DeckBundle,
+  genid = 1,
+): Record<string, unknown> {
   const { deck, slides, componentsBySlide, customBackgrounds } = bundle
   return {
     fileName: deck.title || 'untitled',
@@ -104,7 +111,9 @@ export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unk
     surface: deck.surface || 'bg-default',
     cannedTransition: deck.canned_transition || 'none',
     customStylesheet: deck.custom_stylesheet || '',
-    customBackgrounds: { bgs: customBackgrounds.map((b) => ({ klass: b.klass, style: b.style })) },
+    customBackgrounds: {
+      bgs: customBackgrounds.map((b) => ({ klass: b.klass, style: b.style })),
+    },
     slides: slides.map((s, index) => {
       const slide: Record<string, unknown> = {
         type: 'slide',
@@ -129,7 +138,6 @@ export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unk
 
 export interface ImportedComponent {
   kind: ComponentKind
-  table: AnyComponent['table']
   x: number
   y: number
   z_order: number
@@ -177,16 +185,19 @@ export interface ImportedDeck {
   slides: ImportedSlide[]
 }
 
-const num = (v: unknown, d = 0): number => (typeof v === 'number' && isFinite(v) ? v : d)
+const num = (v: unknown, d = 0): number =>
+  typeof v === 'number' && isFinite(v) ? v : d
 const str = (v: unknown, d = ''): string => (typeof v === 'string' ? v : d)
 
-function deserializeComponent(raw: Record<string, unknown>, z: number): ImportedComponent | null {
+function deserializeComponent(
+  raw: Record<string, unknown>,
+  z: number,
+): ImportedComponent | null {
   const kind = TYPE_TO_KIND[str(raw.type)]
   if (!kind) return null
   const scale = (raw.scale ?? {}) as Record<string, unknown>
   const c: ImportedComponent = {
     kind,
-    table: KIND_TO_TABLE[kind],
     x: num(raw.x),
     y: num(raw.y),
     z_order: z,
@@ -231,10 +242,13 @@ function deserializeComponent(raw: Record<string, unknown>, z: number): Imported
 
 /** Parse a `.strut` JSON object into a normalized deck. Throws if the shape is unrecognizable. */
 export function deserializeDeck(json: unknown): ImportedDeck {
-  if (!json || typeof json !== 'object') throw new Error('Not a Strut file (expected a JSON object)')
+  if (!json || typeof json !== 'object')
+    throw new Error('Not a Strut file (expected a JSON object)')
   const o = json as Record<string, unknown>
-  if (!Array.isArray(o.slides)) throw new Error('Not a Strut file (missing "slides" array)')
-  const bgs = ((o.customBackgrounds as Record<string, unknown> | undefined)?.bgs ?? []) as Array<Record<string, unknown>>
+  if (!Array.isArray(o.slides))
+    throw new Error('Not a Strut file (missing "slides" array)')
+  const bgs = ((o.customBackgrounds as Record<string, unknown> | undefined)
+    ?.bgs ?? []) as Array<Record<string, unknown>>
   return {
     title: str(o.fileName, 'Imported deck'),
     background: str(o.background, 'bg-default'),
@@ -242,7 +256,9 @@ export function deserializeDeck(json: unknown): ImportedDeck {
     canned_transition: str(o.cannedTransition, 'none'),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),
-    customBackgrounds: bgs.map((b) => ({ klass: str(b.klass), style: str(b.style) })).filter((b) => b.klass),
+    customBackgrounds: bgs
+      .map((b) => ({ klass: str(b.klass), style: str(b.style) }))
+      .filter((b) => b.klass),
     slides: (o.slides as Array<Record<string, unknown>>).map((s) => ({
       x: num(s.x),
       y: num(s.y),
@@ -253,7 +269,10 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       imp_scale: num(s.impScale, 3),
       background: str(s.background),
       surface: str(s.surface),
-      components: (Array.isArray(s.components) ? (s.components as Array<Record<string, unknown>>) : [])
+      components: (Array.isArray(s.components)
+        ? (s.components as Array<Record<string, unknown>>)
+        : []
+      )
         .map((c, i) => deserializeComponent(c, i + 1))
         .filter((c): c is ImportedComponent => c !== null),
     })),

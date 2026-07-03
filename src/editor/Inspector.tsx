@@ -179,7 +179,6 @@ const InspectorPanel = memo(function InspectorPanel({
     if (before === next) return
     const apply = (v: string) =>
       mutate.setComponentClasses({
-        table: c.table,
         id: c.id,
         custom_classes: v,
       })
@@ -193,13 +192,11 @@ const InspectorPanel = memo(function InspectorPanel({
 
   const setZ = (z: number) => {
     const before = c.z_order
-    mutate.setComponentZ({ table: c.table, id: c.id, z_order: z })
+    mutate.setComponentZ({ id: c.id, z_order: z })
     history.push({
       label: 'Order',
-      redo: () =>
-        mutate.setComponentZ({ table: c.table, id: c.id, z_order: z }),
-      undo: () =>
-        mutate.setComponentZ({ table: c.table, id: c.id, z_order: before }),
+      redo: () => mutate.setComponentZ({ id: c.id, z_order: z }),
+      undo: () => mutate.setComponentZ({ id: c.id, z_order: before }),
     })
   }
 
@@ -305,7 +302,6 @@ function sameInspectorComponent(a: AnyComponent, b: AnyComponent): boolean {
   if (
     a.id !== b.id ||
     a.kind !== b.kind ||
-    a.table !== b.table ||
     a.z_order !== b.z_order ||
     a.custom_classes !== b.custom_classes
   )

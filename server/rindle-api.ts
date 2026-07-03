@@ -15,7 +15,7 @@ import {
 } from '@rindle/api-server'
 import { HttpRindleDaemonClient, type WireValue } from '@rindle/daemon-client'
 import { serverQueries } from './queries.ts'
-import { isComponentTable } from '../shared/app-def.ts'
+import { serializeProps } from '../shared/componentProps.ts'
 import type {
   AddCollaboratorArgs,
   AddImageArgs,
@@ -50,14 +50,6 @@ export type User = string
 const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
 
 // ---- small SQL helpers so server twins mirror the client row-shapes 1:1 -------------------------
-
-const COMPONENT_TABLES = [
-  'text_component',
-  'image_component',
-  'shape_component',
-  'video_component',
-  'webframe_component',
-] as const
 
 function insert(
   tx: SqlMutationTx,
@@ -108,16 +100,6 @@ function updateIf(
     `UPDATE ${table} SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ? AND ${guard}`,
     [...cols.map((c) => row[c]), id, ...guardParams],
   )
-}
-
-function compTable(t: string): string {
-  if (!isComponentTable(t))
-    throw new RindleApiError(
-      'bad-request',
-      `unknown component table: ${t}`,
-      400,
-    )
-  return t
 }
 
 const spatialBase = (a: {
@@ -180,11 +162,10 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   // Owner-only: cascade is gated on ownership so a non-owner deletes nothing.
   deleteDeck: (tx, a: DeleteDeckArgs, ctx) => {
     const owner = `EXISTS (SELECT 1 FROM deck WHERE id = ? AND owner_id = ?)`
-    for (const t of COMPONENT_TABLES)
-      tx.exec(
-        `DELETE FROM ${t} WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?) AND ${owner}`,
-        [a.id, a.id, ctx.user],
-      )
+    tx.exec(
+      `DELETE FROM component WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?) AND ${owner}`,
+      [a.id, a.id, ctx.user],
+    )
     tx.exec(`DELETE FROM custom_background WHERE deck_id = ? AND ${owner}`, [
       a.id,
       a.id,
@@ -245,11 +226,10 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
 
   // Cascade by slide_id, gated so only editors of the owning deck can delete.
   deleteSlide: (tx, a: DeleteSlideArgs, ctx) => {
-    for (const t of COMPONENT_TABLES)
-      tx.exec(
-        `DELETE FROM ${t} WHERE slide_id = ? AND slide_id IN ${EDITABLE_SLIDES}`,
-        [a.id, ctx.user, ctx.user],
-      )
+    tx.exec(
+      `DELETE FROM component WHERE slide_id = ? AND slide_id IN ${EDITABLE_SLIDES}`,
+      [a.id, ctx.user, ctx.user],
+    )
     tx.exec(`DELETE FROM slide WHERE id = ? AND id IN ${EDITABLE_SLIDES}`, [
       a.id,
       ctx.user,
@@ -296,17 +276,19 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     ])
   },
 
+  // All five inserts collapse to one `component` row: `type` + spatial base + `fill` column + the
+  // type-specific `props` JSON (serializeProps mirrors the client byte-for-byte). `fill` is '' for
+  // non-shapes.
   addText: (tx, a: AddTextArgs, ctx) =>
     insertIf(
       tx,
-      'text_component',
+      'component',
       {
         id: a.id,
         ...spatialBase(a),
-        text: a.text,
-        size: a.size,
-        color: a.color,
-        font_family: a.font_family,
+        type: 'text',
+        fill: '',
+        props: serializeProps('text', a),
       },
       `? IN ${EDITABLE_SLIDES}`,
       [a.slideId, ctx.user, ctx.user],
@@ -315,14 +297,15 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   addImage: (tx, a: AddImageArgs, ctx) =>
     insertIf(
       tx,
-      'image_component',
+      'component',
       {
         id: a.id,
         ...spatialBase(a),
         scale_w: a.scale_w,
         scale_h: a.scale_h,
-        src: a.src,
-        image_type: a.image_type,
+        type: 'image',
+        fill: '',
+        props: serializeProps('image', a),
       },
       `? IN ${EDITABLE_SLIDES}`,
       [a.slideId, ctx.user, ctx.user],
@@ -331,13 +314,13 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   addShape: (tx, a: AddShapeArgs, ctx) =>
     insertIf(
       tx,
-      'shape_component',
+      'component',
       {
         id: a.id,
         ...spatialBase(a),
-        shape: a.shape,
-        markup: a.markup,
+        type: 'shape',
         fill: a.fill,
+        props: serializeProps('shape', a),
       },
       `? IN ${EDITABLE_SLIDES}`,
       [a.slideId, ctx.user, ctx.user],
@@ -346,14 +329,13 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   addVideo: (tx, a: AddVideoArgs, ctx) =>
     insertIf(
       tx,
-      'video_component',
+      'component',
       {
         id: a.id,
         ...spatialBase(a),
-        src: a.src,
-        video_type: a.video_type,
-        src_type: a.src_type,
-        short_src: a.short_src,
+        type: 'video',
+        fill: '',
+        props: serializeProps('video', a),
       },
       `? IN ${EDITABLE_SLIDES}`,
       [a.slideId, ctx.user, ctx.user],
@@ -362,8 +344,14 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   addWebframe: (tx, a: AddWebframeArgs, ctx) =>
     insertIf(
       tx,
-      'webframe_component',
-      { id: a.id, ...spatialBase(a), src: a.src },
+      'component',
+      {
+        id: a.id,
+        ...spatialBase(a),
+        type: 'webframe',
+        fill: '',
+        props: serializeProps('webframe', a),
+      },
       `? IN ${EDITABLE_SLIDES}`,
       [a.slideId, ctx.user, ctx.user],
     ),
@@ -371,7 +359,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   moveComponent: (tx, a: MoveComponentArgs, ctx) =>
     updateIf(
       tx,
-      compTable(a.table),
+      'component',
       a.id,
       { x: a.x, y: a.y },
       `slide_id IN ${EDITABLE_SLIDES}`,
@@ -381,7 +369,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   transformComponent: (tx, a: TransformComponentArgs, ctx) =>
     updateIf(
       tx,
-      compTable(a.table),
+      'component',
       a.id,
       {
         scale_x: a.scale_x,
@@ -399,7 +387,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   setComponentZ: (tx, a: SetComponentZArgs, ctx) =>
     updateIf(
       tx,
-      compTable(a.table),
+      'component',
       a.id,
       { z_order: a.z_order },
       `slide_id IN ${EDITABLE_SLIDES}`,
@@ -409,7 +397,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   setComponentClasses: (tx, a: SetComponentClassesArgs, ctx) =>
     updateIf(
       tx,
-      compTable(a.table),
+      'component',
       a.id,
       { custom_classes: a.custom_classes },
       `slide_id IN ${EDITABLE_SLIDES}`,
@@ -418,21 +406,18 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
 
   removeComponent: (tx, a: RemoveComponentArgs, ctx) =>
     tx.exec(
-      `DELETE FROM ${compTable(a.table)} WHERE id = ? AND slide_id IN ${EDITABLE_SLIDES}`,
+      `DELETE FROM component WHERE id = ? AND slide_id IN ${EDITABLE_SLIDES}`,
       [a.id, ctx.user, ctx.user],
     ),
 
+  // Rewrites the whole text `props` blob (carries all four text fields). Concurrent edits to a shape's
+  // `fill` (a column) and a text's props never touch the same cell, so both survive the rebase.
   setText: (tx, a: SetTextArgs, ctx) =>
     updateIf(
       tx,
-      'text_component',
+      'component',
       a.id,
-      {
-        text: a.text,
-        size: a.size,
-        color: a.color,
-        font_family: a.font_family,
-      },
+      { props: serializeProps('text', a) },
       `slide_id IN ${EDITABLE_SLIDES}`,
       [ctx.user, ctx.user],
     ),
@@ -440,7 +425,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
   setShapeFill: (tx, a: SetShapeFillArgs, ctx) =>
     updateIf(
       tx,
-      'shape_component',
+      'component',
       a.id,
       { fill: a.fill },
       `slide_id IN ${EDITABLE_SLIDES}`,

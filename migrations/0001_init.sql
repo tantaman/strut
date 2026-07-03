@@ -45,14 +45,23 @@ CREATE TABLE IF NOT EXISTS slide (
 );
 CREATE INDEX IF NOT EXISTS slide_deck ON slide (deck_id, sort);
 
--- Component spatial base (repeated per type table; Rindle has no table inheritance):
--- slide_id, z_order, x, y, scale_x, scale_y, scale_w, scale_h, rotate, skew_x, skew_y, custom_classes.
--- scale_w/scale_h: box size in px for media; 0 = unset.
-
--- TextBox: rich text body + font state. size = font px, color = hex without '#'.
-CREATE TABLE IF NOT EXISTS text_component (
+-- Component: one polymorphic table for every on-slide object, discriminated by `type`.
+-- Shared/order-sensitive fields are columns (so z-order is a plain ORDER BY and the spatial base
+-- merges per-column under concurrent drags); type-specific leaves live in the `props` JSON blob.
+--   type: text | image | shape | video | webframe
+--   spatial base: x, y, scale_x, scale_y, scale_w, scale_h, rotate, skew_x, skew_y (scale_w/scale_h
+--     are the media box in px, 0 = unset); custom_classes = space-separated css classes.
+--   fill: shape fill (hex without '#') — a column, not in props, because it's the one type-specific
+--     field edited on its own (setShapeFill) and the optimistic client needs a per-column patch.
+--   props: JSON, discriminated on `type` (see shared/componentProps.ts):
+--     text     {text, size, color, font_family}   image {src, image_type}
+--     shape    {shape, markup}                     video {src, video_type, src_type, short_src}
+--     webframe {src}
+-- (props is TEXT holding JSON today; becomes json<ComponentProps>() once Rindle types JSON columns.)
+CREATE TABLE IF NOT EXISTS component (
   id             TEXT,
   slide_id       TEXT,
+  type           TEXT,
   z_order        INTEGER,
   x              REAL,
   y              REAL,
@@ -64,99 +73,11 @@ CREATE TABLE IF NOT EXISTS text_component (
   skew_x         REAL,
   skew_y         REAL,
   custom_classes TEXT,
-  text           TEXT,
-  size           INTEGER,
-  color          TEXT,
-  font_family    TEXT,
-  PRIMARY KEY (id)
-);
-CREATE INDEX IF NOT EXISTS text_component_slide ON text_component (slide_id, z_order);
-
--- Image: URL/data-URI src; image_type = PNG | JPEG | SVG | ...
-CREATE TABLE IF NOT EXISTS image_component (
-  id             TEXT,
-  slide_id       TEXT,
-  z_order        INTEGER,
-  x              REAL,
-  y              REAL,
-  scale_x        REAL,
-  scale_y        REAL,
-  scale_w        REAL,
-  scale_h        REAL,
-  rotate         REAL,
-  skew_x         REAL,
-  skew_y         REAL,
-  custom_classes TEXT,
-  src            TEXT,
-  image_type     TEXT,
-  PRIMARY KEY (id)
-);
-CREATE INDEX IF NOT EXISTS image_component_slide ON image_component (slide_id, z_order);
-
--- Shape: builtin name + inline SVG markup + fill (hex without '#').
-CREATE TABLE IF NOT EXISTS shape_component (
-  id             TEXT,
-  slide_id       TEXT,
-  z_order        INTEGER,
-  x              REAL,
-  y              REAL,
-  scale_x        REAL,
-  scale_y        REAL,
-  scale_w        REAL,
-  scale_h        REAL,
-  rotate         REAL,
-  skew_x         REAL,
-  skew_y         REAL,
-  custom_classes TEXT,
-  shape          TEXT,
-  markup         TEXT,
   fill           TEXT,
+  props          TEXT,
   PRIMARY KEY (id)
 );
-CREATE INDEX IF NOT EXISTS shape_component_slide ON shape_component (slide_id, z_order);
-
--- Video: youtube | html5. src_type = mime or 'yt'; short_src = youtube id / matched url.
-CREATE TABLE IF NOT EXISTS video_component (
-  id             TEXT,
-  slide_id       TEXT,
-  z_order        INTEGER,
-  x              REAL,
-  y              REAL,
-  scale_x        REAL,
-  scale_y        REAL,
-  scale_w        REAL,
-  scale_h        REAL,
-  rotate         REAL,
-  skew_x         REAL,
-  skew_y         REAL,
-  custom_classes TEXT,
-  src            TEXT,
-  video_type     TEXT,
-  src_type       TEXT,
-  short_src      TEXT,
-  PRIMARY KEY (id)
-);
-CREATE INDEX IF NOT EXISTS video_component_slide ON video_component (slide_id, z_order);
-
--- WebFrame: iframe url.
-CREATE TABLE IF NOT EXISTS webframe_component (
-  id             TEXT,
-  slide_id       TEXT,
-  z_order        INTEGER,
-  x              REAL,
-  y              REAL,
-  scale_x        REAL,
-  scale_y        REAL,
-  scale_w        REAL,
-  scale_h        REAL,
-  rotate         REAL,
-  skew_x         REAL,
-  skew_y         REAL,
-  custom_classes TEXT,
-  src            TEXT,
-  PRIMARY KEY (id)
-);
-CREATE INDEX IF NOT EXISTS webframe_component_slide ON webframe_component (slide_id, z_order);
+CREATE INDEX IF NOT EXISTS component_slide ON component (slide_id, z_order);
 
 -- Custom color classes minted by the user (per deck). klass e.g. bg-custom-ff0000.
 CREATE TABLE IF NOT EXISTS custom_background (

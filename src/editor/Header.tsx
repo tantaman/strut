@@ -25,7 +25,6 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
-import type { ComponentTable } from '../../shared/app-def'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
@@ -79,18 +78,13 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const canInsert = active != null && editor.mode === 'slide' && editor.canEdit
 
   // Insert a component as one undoable step (undo removes it; redo re-adds with the same id).
-  function recordInsert(
-    table: ComponentTable,
-    id: string,
-    doAdd: () => void,
-    label: string,
-  ) {
+  function recordInsert(id: string, doAdd: () => void, label: string) {
     doAdd()
     editor.select(id)
     history.push({
       label,
       redo: doAdd,
-      undo: () => mutate.removeComponent({ table, id }),
+      undo: () => mutate.removeComponent({ id }),
     })
   }
 
@@ -109,7 +103,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       color: '111111',
       font_family: DEFAULT_FONT,
     }
-    recordInsert('text_component', id, () => mutate.addText(args), 'Add text')
+    recordInsert(id, () => mutate.addText(args), 'Add text')
   }
 
   function addShape(name: string) {
@@ -126,12 +120,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       markup: SHAPES[name],
       fill: '3498db',
     }
-    recordInsert(
-      'shape_component',
-      id,
-      () => mutate.addShape(args),
-      'Add shape',
-    )
+    recordInsert(id, () => mutate.addShape(args), 'Add shape')
     setMenu(null)
   }
 
@@ -148,28 +137,13 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         scale_w: 400,
         scale_h: 300,
       }
-      recordInsert(
-        'image_component',
-        id,
-        () => mutate.addImage(args),
-        'Add image',
-      )
+      recordInsert(id, () => mutate.addImage(args), 'Add image')
     } else if (kind === 'video') {
       const args = { ...base, src: url, ...parseVideo(url) }
-      recordInsert(
-        'video_component',
-        id,
-        () => mutate.addVideo(args),
-        'Add video',
-      )
+      recordInsert(id, () => mutate.addVideo(args), 'Add video')
     } else {
       const args = { ...base, src: url }
-      recordInsert(
-        'webframe_component',
-        id,
-        () => mutate.addWebframe(args),
-        'Add web frame',
-      )
+      recordInsert(id, () => mutate.addWebframe(args), 'Add web frame')
     }
     setMenu(null)
   }

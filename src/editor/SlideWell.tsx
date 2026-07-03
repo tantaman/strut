@@ -116,15 +116,7 @@ export function SlideWell({
     history.push({
       label: 'Add slide',
       redo: () => mutate.addSlide(args),
-      undo: () =>
-        mutate.deleteSlide({
-          id,
-          textIds: [],
-          imageIds: [],
-          shapeIds: [],
-          videoIds: [],
-          webframeIds: [],
-        }),
+      undo: () => mutate.deleteSlide({ id, componentIds: [] }),
     })
   }
 
@@ -167,14 +159,8 @@ export function SlideWell({
     // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them. The
     // snapshot uses the latest leaf fragment data registered by the thumbnail component readers.
     const comps = componentsForSlide(s.id)
-    const ids = {
-      textIds: comps.filter((c) => c.kind === 'text').map((c) => c.id),
-      imageIds: comps.filter((c) => c.kind === 'image').map((c) => c.id),
-      shapeIds: comps.filter((c) => c.kind === 'shape').map((c) => c.id),
-      videoIds: comps.filter((c) => c.kind === 'video').map((c) => c.id),
-      webframeIds: comps.filter((c) => c.kind === 'webframe').map((c) => c.id),
-    }
-    const del = () => mutate.deleteSlide({ id: s.id, ...ids })
+    const componentIds = comps.map((c) => c.id)
+    const del = () => mutate.deleteSlide({ id: s.id, componentIds })
     del()
     history.push({
       label: 'Delete slide',

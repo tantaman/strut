@@ -7,7 +7,7 @@ import { newId } from '../config'
 import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import { deckDetailQuery } from '../../shared/queries'
-import { mergeComponents, SHAPES } from './types'
+import { componentsFromRows, SHAPES } from './types'
 import type { DeckDetail } from './deckDetail'
 import {
   deserializeDeck,
@@ -55,13 +55,7 @@ export async function gatherDeckBundle(
 
   const componentsBySlide: DeckBundle['componentsBySlide'] = {}
   for (const s of detail.slides) {
-    componentsBySlide[s.id] = mergeComponents(
-      s.texts,
-      s.images,
-      s.shapes,
-      s.videos,
-      s.webframes,
-    )
+    componentsBySlide[s.id] = componentsFromRows(s.components)
   }
   return {
     deck: detail,
@@ -171,7 +165,6 @@ function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
     c.scale_y !== 1
   ) {
     mutate.transformComponent({
-      table: c.table,
       id,
       scale_x: c.scale_x || 1,
       scale_y: c.scale_y || 1,
@@ -184,7 +177,6 @@ function addComponent(mutate: Mutate, slideId: string, c: ImportedComponent) {
   }
   if (c.custom_classes)
     mutate.setComponentClasses({
-      table: c.table,
       id,
       custom_classes: c.custom_classes,
     })

@@ -1,19 +1,12 @@
-// Shared editor types: a unified "component" view over the five per-type Rindle tables, plus the
-// shape catalog and theme-resolution helpers.
+// Shared editor types: a unified "component" view over the polymorphic Rindle `component` table,
+// plus the shape catalog and theme-resolution helpers.
 
-import type { ComponentTable } from '../../shared/app-def'
+import { parseProps } from '../../shared/componentProps'
+import type { ComponentType } from '../../shared/componentProps'
 
-export type ComponentKind = 'text' | 'image' | 'shape' | 'video' | 'webframe'
+export type ComponentKind = ComponentType
 
-export const KIND_TO_TABLE: Record<ComponentKind, ComponentTable> = {
-  text: 'text_component',
-  image: 'image_component',
-  shape: 'shape_component',
-  video: 'video_component',
-  webframe: 'webframe_component',
-}
-
-/** Spatial base shared by every component table. */
+/** Spatial base — the real columns shared by every component row. */
 export interface SpatialBase {
   id: string
   slide_id: string
@@ -30,45 +23,65 @@ export interface SpatialBase {
   custom_classes: string
 }
 
+/** A raw `component` row as it materializes off a fragment/query: spatial base + `type` discriminator
+ *  + `fill` column + the `props` JSON string. */
+export interface ComponentRow extends SpatialBase {
+  type: string
+  fill: string
+  props: string
+}
+
+/** The flat, in-memory component the editor works with: spatial base + `kind` + `fill` + the decoded
+ *  props fields. There's one table now, so no `table` tag. */
 export type AnyComponent = SpatialBase & {
   kind: ComponentKind
-  table: ComponentTable
+  fill?: string
   // text
   text?: string
   size?: number
   color?: string
   font_family?: string
-  // image
+  // image / video / webframe
   src?: string
   image_type?: string
   // shape
   shape?: string
   markup?: string
-  fill?: string
   // video
   video_type?: string
   src_type?: string
   short_src?: string
 }
 
-function tag<T extends SpatialBase>(rows: readonly T[], kind: ComponentKind): AnyComponent[] {
-  return rows.map((r) => ({ ...r, kind, table: KIND_TO_TABLE[kind] }) as AnyComponent)
+/** Decode one `component` row into the flat in-memory shape: spatial columns + `fill` + the `props`
+ *  blob spread on top, tagged with `kind`. */
+export function componentFromRow(row: ComponentRow): AnyComponent {
+  return {
+    id: row.id,
+    slide_id: row.slide_id,
+    z_order: row.z_order,
+    x: row.x,
+    y: row.y,
+    scale_x: row.scale_x,
+    scale_y: row.scale_y,
+    scale_w: row.scale_w,
+    scale_h: row.scale_h,
+    rotate: row.rotate,
+    skew_x: row.skew_x,
+    skew_y: row.skew_y,
+    custom_classes: row.custom_classes,
+    kind: row.type as ComponentKind,
+    fill: row.fill || undefined,
+    ...parseProps(row.props),
+  }
 }
 
-export function mergeComponents(
-  texts: readonly SpatialBase[],
-  images: readonly SpatialBase[],
-  shapes: readonly SpatialBase[],
-  videos: readonly SpatialBase[],
-  webframes: readonly SpatialBase[],
+/** Decode + z-order a set of component rows (export / one-shot read path; the live query already
+ *  orders by z_order, but a defensive sort keeps snapshots stable). */
+export function componentsFromRows(
+  rows: readonly ComponentRow[],
 ): AnyComponent[] {
-  return [
-    ...tag(texts, 'text'),
-    ...tag(images, 'image'),
-    ...tag(shapes, 'shape'),
-    ...tag(videos, 'video'),
-    ...tag(webframes, 'webframe'),
-  ].sort((a, b) => a.z_order - b.z_order)
+  return rows.map(componentFromRow).sort((a, b) => a.z_order - b.z_order)
 }
 
 // ---- shape catalog (subset of spec §6; currentColor lets `fill` drive the color) ----------------
@@ -102,7 +115,9 @@ const BG_COLORS: Record<string, string> = {
   'bg-salmon': '#c98d8d',
 }
 
-export const BACKGROUND_SWATCHES = Object.keys(BG_COLORS).filter((k) => k !== 'bg-default')
+export const BACKGROUND_SWATCHES = Object.keys(BG_COLORS).filter(
+  (k) => k !== 'bg-default',
+)
 
 // Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Flat (gradients shipped
 // flat in old-master). No transparent (surfaces are the bottom layer).
@@ -151,22 +166,41 @@ export function resolveSurface(
   slideSurface: string | undefined,
   deckSurface: string | undefined,
 ): string {
-  const v = slideSurface && slideSurface !== '' ? slideSurface : (deckSurface ?? 'bg-default')
-  if (v === 'bg-default' || v === '' || v === 'bg-transparent') return SURFACE_DEFAULT
+  const v =
+    slideSurface && slideSurface !== ''
+      ? slideSurface
+      : (deckSurface ?? 'bg-default')
+  if (v === 'bg-default' || v === '' || v === 'bg-transparent')
+    return SURFACE_DEFAULT
   if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
   if (v.startsWith('img:')) return '#222222'
   return SURFACE_COLORS[v] ?? SURFACE_DEFAULT
 }
 
-export function backgroundImage(bg: string | undefined, fallback: string | undefined): string | undefined {
+export function backgroundImage(
+  bg: string | undefined,
+  fallback: string | undefined,
+): string | undefined {
   const v = bg && bg !== '' ? bg : (fallback ?? 'bg-default')
   return v.startsWith('img:') ? `url(${v.slice(4)})` : undefined
 }
 
 // A compact swatch palette for text color & shape fill custom pickers (Open Color-ish), spec §8.5.
 export const COLOR_SWATCHES = [
-  '111111', 'ffffff', '868e96', 'e03131', 'd6336c', '9c36b5', '6741d9',
-  '3b5bdb', '1971c2', '0c8599', '099268', '2f9e44', '66a80f', 'e8590c',
+  '111111',
+  'ffffff',
+  '868e96',
+  'e03131',
+  'd6336c',
+  '9c36b5',
+  '6741d9',
+  '3b5bdb',
+  '1971c2',
+  '0c8599',
+  '099268',
+  '2f9e44',
+  '66a80f',
+  'e8590c',
 ]
 
 export function nextZ(components: readonly AnyComponent[]): number {

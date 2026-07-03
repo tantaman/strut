@@ -66,7 +66,6 @@ export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
     c.scale_y !== 1
   ) {
     mutate.transformComponent({
-      table: c.table,
       id: c.id,
       scale_x: c.scale_x || 1,
       scale_y: c.scale_y || 1,
@@ -79,7 +78,6 @@ export function reinsertComponent(mutate: Mutate, c: AnyComponent): void {
   }
   if (c.custom_classes)
     mutate.setComponentClasses({
-      table: c.table,
       id: c.id,
       custom_classes: c.custom_classes,
     })
