@@ -6,49 +6,9 @@
 // SQL can't carry is a refinement *within* a kind — the element type of json<T>(), or a
 // string/number literal union — so re-apply those few annotations after each regen.
 
-import { createSchema, number, string, table } from '@rindle/client'
+import { createSchema, number, string, table } from "@rindle/client";
 
-export const custom_background = table('custom_background')
-  .columns({
-    id: string(),
-    deck_id: string(),
-    klass: string(),
-    style: string(),
-  })
-  .primaryKey('id')
-
-export const deck = table('deck')
-  .columns({
-    id: string(),
-    title: string(),
-    created: number(),
-    modified: number(),
-    background: string(),
-    surface: string(),
-    chosen_presenter: string(),
-    canned_transition: string(),
-    custom_stylesheet: string(),
-    deck_version: string(),
-    owner_id: string(),
-    visibility: string(),
-    share_token: string(),
-  })
-  .primaryKey('id')
-
-export const deck_share = table('deck_share')
-  .columns({
-    id: string(),
-    deck_id: string(),
-    user_id: string(),
-    role: string(),
-    created: number(),
-  })
-  .primaryKey('id')
-
-// One polymorphic component table (migrations/0001_init.sql). `type` discriminates; `props` is a
-// JSON string typed in app code via shared/componentProps.ts (make it json<ComponentProps>() once
-// Rindle types JSON columns). `fill` stays a column so the optimistic setShapeFill can patch it.
-export const component = table('component')
+export const component = table("component")
   .columns({
     id: string(),
     slide_id: string(),
@@ -67,9 +27,46 @@ export const component = table('component')
     fill: string(),
     props: string(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const slide = table('slide')
+export const custom_background = table("custom_background")
+  .columns({
+    id: string(),
+    deck_id: string(),
+    klass: string(),
+    style: string(),
+  })
+  .primaryKey("id");
+
+export const deck = table("deck")
+  .columns({
+    id: string(),
+    title: string(),
+    created: number(),
+    modified: number(),
+    background: string(),
+    surface: string(),
+    chosen_presenter: string(),
+    canned_transition: string(),
+    custom_stylesheet: string(),
+    deck_version: string(),
+    owner_id: string(),
+    visibility: string(),
+    share_token: string(),
+  })
+  .primaryKey("id");
+
+export const deck_share = table("deck_share")
+  .columns({
+    id: string(),
+    deck_id: string(),
+    user_id: string(),
+    role: string(),
+    created: number(),
+  })
+  .primaryKey("id");
+
+export const slide = table("slide")
   .columns({
     id: string(),
     deck_id: string(),
@@ -86,16 +83,14 @@ export const slide = table('slide')
     created: number(),
     modified: number(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const user_profile = table('user_profile')
+export const user_profile = table("user_profile")
   .columns({
     id: string(),
     display_name: string(),
     updated: number(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const schema = createSchema({
-  tables: [component, custom_background, deck, deck_share, slide, user_profile],
-})
+export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, user_profile] });
