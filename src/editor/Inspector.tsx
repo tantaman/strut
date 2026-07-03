@@ -2,137 +2,16 @@
 // stage, offer property controls — text font/size/color, shape fill, z-order, and CSS classes. All
 // edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
 
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo } from 'react'
 import { DEFAULT_FONT, FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
-import { COLOR_SWATCHES, cssHex, textTypeOf } from './types'
+import { textTypeOf } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
-import { Popchip } from './Popchip'
-
-const RECENTS_KEY = 'strut.colorChooser'
-
-function readRecents(): string[] {
-  if (typeof localStorage === 'undefined') return []
-  try {
-    const v = JSON.parse(localStorage.getItem(RECENTS_KEY) ?? '[]')
-    return Array.isArray(v) ? v.slice(0, 8) : []
-  } catch {
-    return []
-  }
-}
-
-function pushRecent(hex: string) {
-  if (typeof localStorage === 'undefined') return
-  const next = [hex, ...readRecents().filter((h) => h !== hex)].slice(0, 8)
-  localStorage.setItem(RECENTS_KEY, JSON.stringify(next))
-}
-
-/** A native OS color picker that fires `onCommit` ONCE, when the picker is dismissed (the DOM
- *  `change` event) — not on every frame while the user drags. A controlled `<input type=color>`
- *  would call back continuously (React `onChange` is the `input` event), which floods recents /
- *  mints a custom color per frame. So we run it uncontrolled: sync the swatch via a ref when `value`
- *  changes externally, and only read it back on commit. The label shows the hex without a leading `#`. */
-export function NativeColorInput({
-  value,
-  onCommit,
-}: {
-  value: string // '#rrggbb'
-  onCommit: (hex: string) => void
-}) {
-  const ref = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (ref.current) ref.current.value = value
-  }, [value])
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const commit = () => onCommit(el.value)
-    el.addEventListener('change', commit)
-    return () => el.removeEventListener('change', commit)
-  }, [onCommit])
-  return (
-    <label className="insp__custom">
-      <input ref={ref} type="color" defaultValue={value} />
-      <span>{value.replace(/^#/, '')}</span>
-    </label>
-  )
-}
-
-/** A collapsed color control: the trigger shows only the current swatch + value; the swatch grid,
- *  recents and native picker live in a click-to-open sub-popover (Figma-style — see Popchip). `value`
- *  /`onChange` use bare hex (no leading `#`). With `themeDefault`, value '' = inherit the deck theme
- *  (a leading "T" swatch + a "Theme" chip label). Exported for the Header's theme popover. */
-export function ColorField({
-  value,
-  onChange,
-  themeDefault,
-}: {
-  value: string
-  onChange: (hex: string) => void
-  themeDefault?: { color: string; title: string }
-}) {
-  const [recents, setRecents] = useState<string[]>(readRecents)
-  const inherited = !!themeDefault && !value
-  const current = cssHex(value, themeDefault ? themeDefault.color : '111111')
-  const pick = (hex: string) => {
-    const bare = hex.replace(/^#+/, '').toLowerCase()
-    pushRecent(bare)
-    setRecents(readRecents())
-    onChange(bare)
-  }
-  return (
-    <Popchip
-      swatch={current}
-      label={inherited ? 'Theme' : current.replace(/^#/, '')}
-      title="Color"
-    >
-      <div className="swatches swatches--sm">
-        {themeDefault && (
-          <button
-            className={
-              'swatch swatch--theme' + (inherited ? ' is-active' : '')
-            }
-            style={{ background: cssHex(themeDefault.color, '111111') }}
-            title={themeDefault.title}
-            onClick={() => onChange('')}
-          >
-            T
-          </button>
-        )}
-        {COLOR_SWATCHES.map((h) => (
-          <button
-            key={h}
-            className={
-              'swatch' +
-              (h === value.replace(/^#+/, '').toLowerCase() ? ' is-active' : '')
-            }
-            style={{ background: '#' + h }}
-            title={'#' + h}
-            onClick={() => pick(h)}
-          />
-        ))}
-      </div>
-      {recents.length > 0 && (
-        <div className="swatches swatches--sm">
-          {recents.map((h) => (
-            <button
-              key={h}
-              className="swatch"
-              style={{ background: '#' + h }}
-              title={'#' + h}
-              onClick={() => pick(h)}
-            />
-          ))}
-        </div>
-      )}
-      <NativeColorInput value={current} onCommit={pick} />
-    </Popchip>
-  )
-}
+import { ColorField } from './ColorField'
 
 export function Inspector({
   componentRefs,

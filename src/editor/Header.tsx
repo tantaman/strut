@@ -30,8 +30,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
-import { ColorField, NativeColorInput } from './Inspector'
-import { Popchip } from './Popchip'
+import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
@@ -477,104 +476,6 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   )
 }
 
-// The checkerboard fill used to depict a transparent background.
-const CHECKER =
-  'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 8px 8px'
-const HEX6 = /^#[0-9a-f]{6}$/i
-
-/** The trigger swatch color for a background/surface value (checker for transparent). */
-function bgSwatch(value: string, resolve: (v: string) => string): string {
-  return value === 'bg-transparent' ? CHECKER : resolve(value || 'bg-default')
-}
-
-/** A valid `#rrggbb` seed for the native custom picker: the current custom hex if the value is one,
- *  else the resolved class color when that's a plain hex (gradients/transparent fall back to white). */
-function bgInputHex(
-  value: string | null | undefined,
-  resolve: (v: string) => string,
-): string {
-  if (value && value.startsWith('bg-custom-'))
-    return '#' + value.slice('bg-custom-'.length)
-  const r = resolve(value || 'bg-default')
-  return HEX6.test(r) ? r : '#ffffff'
-}
-
-/** One class-swatch grid (deck background / surface): default, optional transparent, the named
- *  swatch classes, then the same native custom-color row the text picker uses (mints a
- *  `bg-custom-<hex>` class, spec §8.3) — committing once on close, not per drag frame. */
-function BgSwatches({
-  current,
-  swatches,
-  resolve,
-  onPick,
-  onCustom,
-  allowTransparent,
-}: {
-  current?: string | null
-  swatches: string[]
-  resolve: (value: string) => string
-  onPick: (value: string) => void
-  onCustom: (hex: string) => void
-  allowTransparent?: boolean
-}) {
-  const active = (k: string) => 'swatch' + (current === k ? ' is-active' : '')
-  return (
-    <>
-      <div className="swatches">
-        <button
-          className={active('bg-default')}
-          title="default"
-          style={{ background: resolve('bg-default') }}
-          onClick={() => onPick('bg-default')}
-        />
-        {allowTransparent && (
-          <button
-            className={active('bg-transparent')}
-            title="transparent"
-            style={{ background: CHECKER }}
-            onClick={() => onPick('bg-transparent')}
-          />
-        )}
-        {swatches.map((k) => (
-          <button
-            key={k}
-            className={active(k)}
-            title={k}
-            style={{ background: resolve(k) }}
-            onClick={() => onPick(k)}
-          />
-        ))}
-      </div>
-      <NativeColorInput
-        value={bgInputHex(current, resolve)}
-        onCommit={onCustom}
-      />
-    </>
-  )
-}
-
-/** A background/surface value as a collapsed chip: shows the current color; opens the swatch grid. */
-function BgChip({
-  current,
-  label,
-  resolve,
-  ...rest
-}: {
-  current?: string | null
-  label: string
-  swatches: string[]
-  resolve: (value: string) => string
-  onPick: (value: string) => void
-  onCustom: (hex: string) => void
-  allowTransparent?: boolean
-}) {
-  return (
-    <Popchip swatch={bgSwatch(current || 'bg-default', resolve)} title={label}>
-      <BgSwatches current={current} resolve={resolve} {...rest} />
-    </Popchip>
-  )
-}
-
 /** Deck text-theme font picker: '' = the built-in default (Lato), otherwise a family name. */
 function ThemeFontSelect({
   value,
@@ -628,7 +529,7 @@ function ThemePopover({
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
       <div className="insp__row">
         <span>Background</span>
-        <BgChip
+        <TokenColorField
           label="Slide background"
           current={deck.background}
           swatches={BACKGROUND_SWATCHES}
@@ -640,7 +541,7 @@ function ThemePopover({
       </div>
       <div className="insp__row">
         <span>Surface</span>
-        <BgChip
+        <TokenColorField
           label="Surface"
           current={deck.surface}
           swatches={SURFACE_SWATCHES}
