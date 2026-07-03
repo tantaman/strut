@@ -222,6 +222,43 @@ export function Header({ deck }: { deck: DeckRow | null }) {
     setBg(scope, klass)
   }
 
+  // ---- live drag preview -------------------------------------------------------------------------
+  // While the native color picker is dragged it streams frames; fold them into one debounced write per
+  // target so the deck updates in real time without flooding history. Custom bg/surface picks assign
+  // `bg-custom-<hex>` WITHOUT minting a class per frame — resolveBackground/resolveSurface read the hex
+  // straight out of the class name, so the editor previews instantly; the `<style>` rule is minted once
+  // on commit (setCustom, fired by the picker's terminating `change`).
+  function setBgLive(scope: 'bg' | 'surface', value: string) {
+    if (!deck) return
+    const patch = scope === 'bg' ? { background: value } : { surface: value }
+    mutate.setDeckTheme.folded(
+      { key: `deck-theme:${scope}` },
+      { id: deck.id, ...patch, now: Date.now() },
+    )
+  }
+
+  function setCustomLive(scope: 'bg' | 'surface', hex: string) {
+    const bare = hex.replace(/^#+/, '').toLowerCase()
+    setBgLive(scope, `bg-custom-${bare}`)
+  }
+
+  function setTextThemeLive(
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) {
+    if (!deck) return
+    // One target per drag (a single color input) → key the fold on that column.
+    const key = Object.keys(patch)[0] ?? 'text'
+    mutate.setDeckTheme.folded(
+      { key: `deck-theme:${key}` },
+      { id: deck.id, ...patch, now: Date.now() },
+    )
+  }
+
   return (
     <div className="hdr">
       <Link to="/" className="hdr__home" title="All decks">
@@ -349,9 +386,12 @@ export function Header({ deck }: { deck: DeckRow | null }) {
                     deck={deck}
                     onBackground={(v) => setBg('bg', v)}
                     onCustomBackground={(hex) => setCustom('bg', hex)}
+                    onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
+                    onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
                     onText={setTextTheme}
+                    onTextLive={setTextThemeLive}
                   />
                 )}
               </div>
@@ -507,16 +547,29 @@ function ThemePopover({
   deck,
   onBackground,
   onCustomBackground,
+  onCustomBackgroundLive,
   onSurface,
   onCustomSurface,
+  onCustomSurfaceLive,
   onText,
+  onTextLive,
 }: {
   deck: DeckRow
   onBackground: (value: string) => void
   onCustomBackground: (hex: string) => void
+  onCustomBackgroundLive: (hex: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
+  onCustomSurfaceLive: (hex: string) => void
   onText: (
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) => void
+  onTextLive: (
     patch: Partial<
       Record<
         'heading_font' | 'heading_color' | 'body_font' | 'body_color',
@@ -536,6 +589,7 @@ function ThemePopover({
           resolve={(v) => resolveBackground(v, v)}
           onPick={onBackground}
           onCustom={onCustomBackground}
+          onCustomLive={onCustomBackgroundLive}
           allowTransparent
         />
       </div>
@@ -548,6 +602,7 @@ function ThemePopover({
           resolve={(v) => resolveSurface(v, v)}
           onPick={onSurface}
           onCustom={onCustomSurface}
+          onCustomLive={onCustomSurfaceLive}
         />
       </div>
 
@@ -565,6 +620,7 @@ function ThemePopover({
           <ColorField
             value={deck.heading_color ?? ''}
             onChange={(hex) => onText({ heading_color: hex })}
+            onLive={(hex) => onTextLive({ heading_color: hex })}
           />
         </div>
       </div>
@@ -583,6 +639,7 @@ function ThemePopover({
           <ColorField
             value={deck.body_color ?? ''}
             onChange={(hex) => onText({ body_color: hex })}
+            onLive={(hex) => onTextLive({ body_color: hex })}
           />
         </div>
       </div>

@@ -1,5 +1,5 @@
 // A collapsed color/background control (Figma-style progressive disclosure): the trigger shows only
-// the CURRENT value as a small swatch (+ optional label); clicking it opens a floating sub-popover
+// the CURRENT value as a small swatch chip; clicking it opens a floating sub-popover
 // holding the full picker (`children`). The panel closes on Escape or a pointer-down outside its own
 // root — the trigger is inside that root, so clicking it just toggles (no close-then-reopen race).
 // Selecting inside the panel does NOT auto-close, so several swatches can be tried in one visit.
@@ -9,12 +9,10 @@ import type { ReactNode } from 'react'
 
 export function Popchip({
   swatch,
-  label,
   title,
   children,
 }: {
   swatch: string
-  label?: string
   title?: string
   children: ReactNode
 }) {
