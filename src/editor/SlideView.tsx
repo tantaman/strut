@@ -93,22 +93,3 @@ export function SlideView({
   )
 }
 
-export function SlideSnapshotView({
-  slide,
-  deck,
-  width,
-  components,
-}: {
-  slide: SlideDetail
-  deck: { background: string } | null
-  width: number
-  components: readonly AnyComponent[]
-}) {
-  return (
-    <SlideFrame slide={slide} deck={deck} width={width}>
-      {components.map((c) => (
-        <StaticComponent key={c.id} c={c} />
-      ))}
-    </SlideFrame>
-  )
-}
