@@ -91,6 +91,7 @@ export const slide = table("slide")
     markdown: string(),
     render_mode: string(),
     text_align: string(),
+    doc: string(),
   })
   .primaryKey("id");
 

@@ -39,6 +39,7 @@ import type {
   SetDeckVisibilityArgs,
   SetDisplayNameArgs,
   SetShapeFillArgs,
+  SetSlideDocArgs,
   SetSlideMarkdownArgs,
   SetSlideModeArgs,
   SetSlideThemeArgs,
@@ -235,6 +236,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
         created: a.now,
         modified: a.now,
         markdown: '',
+        doc: '',
         render_mode: a.render_mode ?? '',
       },
       `? IN ${EDITABLE_DECKS}`,
@@ -300,6 +302,16 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
       'slide',
       a.id,
       { markdown: a.markdown, modified: a.now },
+      `deck_id IN ${EDITABLE_DECKS}`,
+      [ctx.user, ctx.user],
+    ),
+
+  setSlideDoc: (tx, a: SetSlideDocArgs, ctx) =>
+    updateIf(
+      tx,
+      'slide',
+      a.id,
+      { doc: a.doc, modified: a.now },
       `deck_id IN ${EDITABLE_DECKS}`,
       [ctx.user, ctx.user],
     ),

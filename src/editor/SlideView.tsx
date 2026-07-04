@@ -85,7 +85,7 @@ export function SlideView({
   if (slide.render_mode === 'markdown') {
     return (
       <SlideFrame slide={slide} deck={deck} width={width}>
-        <MarkdownSurface markdown={slide.markdown} />
+        <MarkdownSurface doc={slide.doc} />
       </SlideFrame>
     )
   }

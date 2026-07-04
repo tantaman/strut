@@ -4,7 +4,7 @@
 
 import { SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
-import { markdownToHtml } from './markdown'
+import { docToHtml } from './tiptapDoc'
 import {
   cssHex,
   resolveBackground,
@@ -129,10 +129,10 @@ function stepHTML(
 
   const bg = resolveBackground(slide.background, deck.background)
   const align = resolveTextAlign(slide.text_align, deck.text_align)
-  // Markdown mode: one `.strut-md` surface (same converter as the app) in place of components.
+  // Markdown mode: one `.strut-md` surface (same doc→HTML renderer as the app) in place of components.
   const inner =
     slide.render_mode === 'markdown'
-      ? `      <div class="strut-md">${markdownToHtml(slide.markdown ?? '')}</div>`
+      ? `      <div class="strut-md">${docToHtml(slide.doc)}</div>`
       : [...components]
           .sort((a, b) => a.z_order - b.z_order)
           .map((c) => '      ' + componentHTML(c))

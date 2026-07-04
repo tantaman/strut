@@ -176,8 +176,7 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
         text_align: s.text_align,
         now,
       })
-    if (s.markdown)
-      mutate.setSlideMarkdown({ id: slideId, markdown: s.markdown, now })
+    if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })
     for (const c of s.components)
       insertComponent(mutate, { id: newId(), slideId }, c)
   }
