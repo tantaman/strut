@@ -236,6 +236,9 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
         modified: a.now,
         markdown: '',
         render_mode: a.render_mode ?? '',
+        // Match the client predicted twin: stamp text_align = '' (deck-inherit) so the
+        // authoritative row isn't NULL where the client optimistically predicts ''.
+        text_align: '',
       },
       `? IN ${EDITABLE_DECKS}`,
       [a.deckId, ctx.user, ctx.user],

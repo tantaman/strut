@@ -308,6 +308,10 @@ export const mutators = {
       modified: a.now,
       markdown: '',
       render_mode: a.render_mode ?? '',
+      // Rindle inserts carry the WHOLE row (no column defaults), so stamp the deck-inherit
+      // sentinel here too — '' = inherit the deck's text_align. Omitting it throws
+      // "missing column text_align on slide" at insert time.
+      text_align: '',
     }),
 
   deleteSlide: (tx: MutationTx, a: DeleteSlideArgs) => {
