@@ -9,7 +9,6 @@ import {
   AlignRight,
   Code2,
   Download,
-  FileText,
   Image as ImageIcon,
   Palette,
   Play,
@@ -228,21 +227,6 @@ export function Header({
     })
   }
 
-  // Flip the active slide between spatial + markdown mode (non-destructive; components are preserved).
-  function toggleMarkdownMode() {
-    if (!activeSlide) return
-    const before = activeSlide.render_mode === 'markdown' ? 'markdown' : ''
-    const next = before === 'markdown' ? '' : 'markdown'
-    const apply = (m: string) =>
-      mutate.setSlideMode({ id: activeSlide.id, render_mode: m, now: Date.now() })
-    apply(next)
-    history.push({
-      label: next === 'markdown' ? 'Markdown mode' : 'Spatial mode',
-      redo: () => apply(next),
-      undo: () => apply(before),
-    })
-  }
-
   async function doExport(kind: 'json' | 'html') {
     if (!deck || exporting) return
     setMenu(null)
@@ -395,24 +379,7 @@ export function Header({
           </>
         )}
 
-        {canEditSlide && (
-          <>
-            <div className="hdr__sep" />
-            <div className="hdr__group">
-              <button
-                className={'btn' + (isMarkdownSlide ? ' is-active' : '')}
-                onClick={toggleMarkdownMode}
-                title={
-                  isMarkdownSlide
-                    ? 'Switch to spatial components'
-                    : 'Switch to markdown'
-                }
-              >
-                <FileText size={16} /> <span className="lbl">MDown</span>
-              </button>
-            </div>
-          </>
-        )}
+        {/* Per-slide markdown/spatial toggle moved to the on-slide hover toolbar (see Stage). */}
 
         {editor.canEdit && (
           <>

@@ -12,7 +12,7 @@ import {
   useState,
 } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react'
+import { AlignCenter, AlignLeft, AlignRight, FileText } from 'lucide-react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -170,6 +170,21 @@ export function Stage({
   function raise(c: AnyComponent) {
     const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
     if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
+  }
+
+  // Flip this slide between spatial + markdown mode (non-destructive; components are preserved in the
+  // DB, just unrendered). Undoable. Surfaced on the per-slide toolbar rather than the deck header.
+  function toggleMarkdownMode() {
+    const before = slideData.render_mode === 'markdown' ? 'markdown' : ''
+    const next = before === 'markdown' ? '' : 'markdown'
+    const apply = (m: string) =>
+      mutate.setSlideMode({ id: slideData.id, render_mode: m, now: Date.now() })
+    apply(next)
+    history.push({
+      label: next === 'markdown' ? 'Markdown mode' : 'Spatial mode',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
   }
 
   // ---- gestures ----
@@ -495,6 +510,9 @@ export function Stage({
         style={{ background: composeBackground(surf, surfImg) }}
       >
         <UserStyle css={deck?.custom_stylesheet} />
+        {editor.canEdit && (
+          <SlideToolbar markdown onToggleMarkdown={toggleMarkdownMode} />
+        )}
         <div className="md-preview" ref={mdPreviewRef}>
           <div
             className="slide-surface"
@@ -532,6 +550,9 @@ export function Stage({
       style={{ background: composeBackground(surf, surfImg) }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
+      {editor.canEdit && (
+        <SlideToolbar markdown={false} onToggleMarkdown={toggleMarkdownMode} />
+      )}
       <Inspector
         componentRefs={componentRefs}
         getComponents={getComponents}
@@ -720,6 +741,33 @@ function TextEditor({
         }}
       />
     </>
+  )
+}
+
+// Per-slide hover toolbar: a vertical icon strip floating at the operating table's top-right that
+// fades in on stage hover (spec: slide-scoped controls belong on the slide, not the deck header). It
+// anchors to the stage viewport rather than the scaled canvas so it stays put across zoom-to-fit and
+// never lands in exports. Seeded with the markdown/spatial toggle; built to grow (per-slide theme,
+// background, transition, …) — each future control is another button in this strip.
+function SlideToolbar({
+  markdown,
+  onToggleMarkdown,
+}: {
+  markdown: boolean
+  onToggleMarkdown: () => void
+}) {
+  return (
+    <div className="slide-toolbar">
+      <button
+        type="button"
+        className={'slide-toolbar__btn' + (markdown ? ' is-active' : '')}
+        onClick={onToggleMarkdown}
+        title={markdown ? 'Switch to spatial components' : 'Switch to markdown'}
+        aria-pressed={markdown}
+      >
+        <FileText size={16} />
+      </button>
+    </div>
   )
 }
 

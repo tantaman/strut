@@ -1,3 +1,15 @@
+Let AI create images for slide, svgs, etc.
+Author markdown
+Provide input
+Suggest edits
+
+SHow is the main thing tho so start with transitions:w
+
+AI integration is streaming into a local-only table and using the user's OAuth to Claude or whatever.
+
+
+---
+
 - incoroprate refineSchema for component types.
 - publish to rindle cloud
 - get rindle-realtime setup for it. only open with > 2 editors.
