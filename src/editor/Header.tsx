@@ -7,9 +7,11 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  ChevronDown,
   Code2,
   Download,
   Image as ImageIcon,
+  Link2,
   Palette,
   Play,
   Redo2,
@@ -57,7 +59,9 @@ interface DeckRow {
   text_align: string | null
   default_slide_mode: string | null
   canned_transition: string
-  custom_stylesheet: string
+  // Rindle TEXT columns can be NULL, so this is nullable like the other theme fields; the read
+  // sites guard with `?? ''`.
+  custom_stylesheet: string | null
   owner_id: string
   visibility: string
   share_token: string
@@ -90,7 +94,7 @@ export function Header({
     | 'media-image'
     | 'media-video'
     | 'media-web'
-    | 'export'
+    | 'share'
   >(null)
   const [exporting, setExporting] = useState(false)
   const [cssOpen, setCssOpen] = useState(false)
@@ -111,6 +115,19 @@ export function Header({
     if (menu !== 'theme') return
     const onDown = (e: PointerEvent) => {
       if (themeRef.current && !themeRef.current.contains(e.target as Node))
+        setMenu(null)
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [menu])
+
+  // Same dismiss-on-outside-pointer for the Share/export dropdown (it now also launches the
+  // Share modal, so a stray outside click should close the menu, not just a second toggle).
+  const shareRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (menu !== 'share') return
+    const onDown = (e: PointerEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node))
         setMenu(null)
     }
     window.addEventListener('pointerdown', onDown)
@@ -445,39 +462,51 @@ export function Header({
           </button>
         )}
 
-        <div style={{ position: 'relative' }}>
+        {/* Share + Export merged into one "Share" umbrella dropdown: the collaborate/link action
+            up top, the download formats grouped beneath. */}
+        <div style={{ position: 'relative' }} ref={shareRef}>
           <button
             className="btn"
-            onClick={() => setMenu(menu === 'export' ? null : 'export')}
-            title="Export"
-            disabled={!deck || exporting}
+            onClick={() => setMenu(menu === 'share' ? null : 'share')}
+            title="Share & export"
+            disabled={!deck}
           >
-            <Download size={16} />{' '}
-            <span className="lbl">{exporting ? 'Exporting…' : 'Export'}</span>
+            <Share2 size={16} />{' '}
+            <span className="lbl">{exporting ? 'Exporting…' : 'Share'}</span>
+            <ChevronDown size={14} className="btn__caret" />
           </button>
-          {menu === 'export' && (
+          {menu === 'share' && (
             <div
               className="popover popover--menu"
               style={{ top: '110%', right: 0 }}
             >
-              <button className="menu-item" onClick={() => doExport('json')}>
-                Strut JSON (.strut)
+              <button
+                className="menu-item menu-item--icon"
+                onClick={() => {
+                  setMenu(null)
+                  setShareOpen(true)
+                }}
+              >
+                <Link2 size={15} /> Share…
+                <span className="menu-item__hint">link &amp; invite</span>
               </button>
-              <button className="menu-item" onClick={() => doExport('html')}>
-                Standalone HTML (impress.js)
+              <div className="menu-sep" />
+              <div className="menu-label">Download</div>
+              <button
+                className="menu-item menu-item--icon"
+                onClick={() => doExport('json')}
+              >
+                <Download size={15} /> Strut JSON (.strut)
+              </button>
+              <button
+                className="menu-item menu-item--icon"
+                onClick={() => doExport('html')}
+              >
+                <Download size={15} /> Standalone HTML (impress.js)
               </button>
             </div>
           )}
         </div>
-
-        <button
-          className="btn"
-          onClick={() => setShareOpen(true)}
-          title="Share"
-          disabled={!deck}
-        >
-          <Share2 size={16} /> <span className="lbl">Share</span>
-        </button>
       </div>
 
       <div className="hdr__spacer" />
