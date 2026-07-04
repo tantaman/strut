@@ -48,7 +48,6 @@ export function Popchip({
         onClick={() => setOpen((o) => !o)}
       >
         <span className="popchip__sw" style={{ background: swatch }} />
-        {label != null && <span className="popchip__val">{label}</span>}
       </button>
       {open && <div className="popover popover--sub">{children}</div>}
     </div>

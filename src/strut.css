@@ -1118,17 +1118,6 @@ button {
   border: 1px solid rgba(20, 22, 30, 0.15);
   flex: none;
 }
-.popchip__val {
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  /* Fixed width so the label ("Theme" vs a 6-char hex) never resizes the trigger — otherwise the
-     right-anchored inspector sub-popover jumps sideways every time a swatch is clicked. */
-  display: inline-block;
-  width: 6.5ch;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-}
 /* The picker panel floats below the chip (over whatever it sits in — theme popover / inspector). */
 .popover--sub {
   position: absolute;
