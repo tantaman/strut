@@ -2,6 +2,22 @@ import { describe, expect, it } from 'vitest'
 import { deserializeDeck, serializeDeck } from './serialize'
 import type { DeckBundle } from './serialize'
 
+// A representative TipTap/ProseMirror doc (JSON-stringified) — the stored shape of a markdown slide.
+const DOC = JSON.stringify({
+  type: 'doc',
+  content: [
+    { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Hello' }] },
+    {
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'A ' },
+        { type: 'text', marks: [{ type: 'bold' }], text: 'doc' },
+        { type: 'text', text: ' slide.' },
+      ],
+    },
+  ],
+})
+
 function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
   const base: DeckBundle = {
     deck: {
@@ -31,7 +47,7 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
         imp_scale: 3,
         background: '',
         surface: '',
-        markdown: '# Hello\n\nA **markdown** slide.',
+        doc: DOC,
         render_mode: 'markdown',
         text_align: 'right',
       },
@@ -63,12 +79,12 @@ describe('serialize round-trip with markdown + theme', () => {
     expect(back.text_align).toBe('center')
   })
 
-  it('carries a markdown slide (source, mode, alignment) across a round-trip', () => {
+  it('carries a markdown slide (doc, mode, alignment) across a round-trip', () => {
     const json = serializeDeck(bundle())
     const back = deserializeDeck(json)
     const s1 = back.slides[0]
     expect(s1.render_mode).toBe('markdown')
-    expect(s1.markdown).toBe('# Hello\n\nA **markdown** slide.')
+    expect(s1.doc).toBe(DOC)
     expect(s1.text_align).toBe('right')
   })
 
@@ -77,13 +93,13 @@ describe('serialize round-trip with markdown + theme', () => {
     const rawSlides = json.slides as Array<Record<string, unknown>>
     // The spatial slide should not carry markdown-mode keys in the exported JSON.
     expect(rawSlides[1].renderMode).toBeUndefined()
-    expect(rawSlides[1].markdown).toBeUndefined()
+    expect(rawSlides[1].doc).toBeUndefined()
     expect(rawSlides[1].textAlign).toBeUndefined()
 
     const back = deserializeDeck(json)
     const s2 = back.slides[1]
     expect(s2.render_mode).toBe('')
-    expect(s2.markdown).toBe('')
+    expect(s2.doc).toBe('')
     expect(s2.text_align).toBe('')
   })
 
@@ -96,6 +112,6 @@ describe('serialize round-trip with markdown + theme', () => {
     expect(back.default_slide_mode).toBe('')
     expect(back.text_align).toBe('')
     expect(back.slides[0].render_mode).toBe('')
-    expect(back.slides[0].markdown).toBe('')
+    expect(back.slides[0].doc).toBe('')
   })
 })

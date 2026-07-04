@@ -3,16 +3,9 @@
 // aspect-locked unless shift), rotate (shift=22.5° snap), delete, double-click text editing, and
 // marquee selection. High-frequency drags use Rindle's `.folded` (debounced last-value-wins) writes.
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { AlignCenter, AlignLeft, AlignRight, FileText } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -30,13 +23,14 @@ import {
   composeBackground,
   resolveBackground,
   resolveSurface,
-  resolveTextAlign,
   textTypeOf,
 } from './types'
-import type { AnyComponent, DeckThemeFields, TextAlign } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
+import { TipTapSlideEditor } from './TipTapSlideEditor'
+import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
 import {
   ComponentDataReader,
@@ -48,28 +42,6 @@ interface DeckRow extends DeckThemeFields {
   background: string
   surface: string
   custom_stylesheet?: string
-}
-
-function useFitScale(
-  ref: React.RefObject<HTMLElement | null>,
-  w: number,
-  h: number,
-  pad = 56,
-) {
-  const [scale, setScale] = useState(0.5)
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      const r = el.getBoundingClientRect()
-      setScale(
-        Math.max(0.1, Math.min((r.width - pad) / w, (r.height - pad) / h)),
-      )
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [ref, w, h, pad])
-  return scale
 }
 
 export function Stage({
@@ -513,31 +485,34 @@ export function Stage({
         {editor.canEdit && (
           <SlideToolbar markdown onToggleMarkdown={toggleMarkdownMode} />
         )}
-        <div className="md-preview" ref={mdPreviewRef}>
-          <div
-            className="slide-surface"
-            style={{ width: SLIDE_W * mdScale, height: SLIDE_H * mdScale }}
-          >
-            <div
-              className="slide-canvas strut-surface"
-              style={{
-                width: SLIDE_W,
-                height: SLIDE_H,
-                transform: `scale(${mdScale})`,
-                background: composeBackground(bg, bgImg),
-                ...themeVars(deck, slideData),
-              }}
-            >
-              <MarkdownSurface markdown={slideData.markdown} />
-            </div>
-          </div>
-        </div>
-        {editor.canEdit && (
-          <MarkdownEditor
+        {editor.canEdit ? (
+          // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale).
+          <TipTapSlideEditor
             key={slideData.id}
             slide={slideData}
-            deckAlign={deck?.text_align ?? ''}
+            deck={deck}
           />
+        ) : (
+          // Viewer (no edit rights): the read-only rendered surface.
+          <div className="md-preview" ref={mdPreviewRef}>
+            <div
+              className="slide-surface"
+              style={{ width: SLIDE_W * mdScale, height: SLIDE_H * mdScale }}
+            >
+              <div
+                className="slide-canvas strut-surface"
+                style={{
+                  width: SLIDE_W,
+                  height: SLIDE_H,
+                  transform: `scale(${mdScale})`,
+                  background: composeBackground(bg, bgImg),
+                  ...themeVars(deck, slideData),
+                }}
+              >
+                <MarkdownSurface doc={slideData.doc} />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     )
@@ -771,84 +746,4 @@ function SlideToolbar({
   )
 }
 
-// The markdown editing panel (spec: side/overlay textarea, CodeMirror is a later upgrade). Keyed by
-// slide id at the call site so it remounts per slide — the local `draft` is seeded from the row on
-// mount, then streams `.folded` writes for a live preview and records ONE undo step per edit session
-// (on blur). The alignment chips write the per-slide `text_align` override.
-function MarkdownEditor({
-  slide,
-  deckAlign,
-}: {
-  // Narrowed (not the whole SlideDetail): the columns are nullable on legacy rows that predate the
-  // markdown migration, so declare them so at the boundary.
-  slide: { id: string; markdown: string | null; text_align: string | null }
-  deckAlign: string
-}) {
-  const mutate = useMutate()
-  const history = useHistory()
-  const [draft, setDraft] = useState(slide.markdown ?? '')
-  const baselineRef = useRef(slide.markdown ?? '')
-
-  function onChange(value: string) {
-    setDraft(value)
-    mutate.setSlideMarkdown.folded(
-      { key: slide.id },
-      { id: slide.id, markdown: value, now: Date.now() },
-    )
-  }
-
-  // Commit the edit session as one undoable step (undo/redo swap the whole source).
-  function commit() {
-    const before = baselineRef.current
-    if (draft === before) return
-    baselineRef.current = draft
-    const after = draft
-    const apply = (markdown: string) =>
-      mutate.setSlideMarkdown({ id: slide.id, markdown, now: Date.now() })
-    apply(after)
-    history.push({
-      label: 'Edit markdown',
-      redo: () => apply(after),
-      undo: () => apply(before),
-    })
-  }
-
-  const align = resolveTextAlign(slide.text_align, deckAlign)
-  function setAlign(next: TextAlign) {
-    mutate.setSlideTheme({ id: slide.id, text_align: next, now: Date.now() })
-  }
-
-  return (
-    <div className="md-editor">
-      <div className="md-editor__bar">
-        <span className="md-editor__title">Markdown</span>
-        <div className="seg seg--align">
-          {(
-            [
-              ['left', AlignLeft],
-              ['center', AlignCenter],
-              ['right', AlignRight],
-            ] as const
-          ).map(([value, Icon]) => (
-            <button
-              key={value}
-              className={align === value ? 'is-active' : ''}
-              title={`Align ${value}`}
-              onClick={() => setAlign(value)}
-            >
-              <Icon size={15} />
-            </button>
-          ))}
-        </div>
-      </div>
-      <textarea
-        className="md-editor__ta"
-        value={draft}
-        placeholder={'# Slide title\n\nWrite **markdown** here…'}
-        spellCheck={false}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={commit}
-      />
-    </div>
-  )
-}
+// (Markdown-mode editing now lives in TipTapSlideEditor — WYSIWYG on the slide surface.)

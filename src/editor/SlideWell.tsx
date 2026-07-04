@@ -139,8 +139,7 @@ export function SlideWell({
         text_align: s.text_align,
         now,
       })
-    if (s.markdown)
-      mutate.setSlideMarkdown({ id: s.id, markdown: s.markdown, now })
+    if (s.doc) mutate.setSlideDoc({ id: s.id, doc: s.doc, now })
     for (const c of comps) reinsertComponent(mutate, c)
   }
 

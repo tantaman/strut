@@ -113,6 +113,9 @@ export type SetSlideThemeArgs = {
 }
 // Markdown mode is a per-slide switch, non-destructive (hidden components stay in the DB).
 export type SetSlideMarkdownArgs = { id: string; markdown: string; now: number }
+// Markdown-mode content: a TipTap/ProseMirror document, JSON-stringified (the source of truth when
+// render_mode = 'markdown'). Streamed via `.folded` on every keystroke, like setSlideMarkdown was.
+export type SetSlideDocArgs = { id: string; doc: string; now: number }
 export type SetSlideModeArgs = { id: string; render_mode: string; now: number }
 
 type SpatialArgs = {
@@ -307,6 +310,7 @@ export const mutators = {
       created: a.now,
       modified: a.now,
       markdown: '',
+      doc: '',
       render_mode: a.render_mode ?? '',
       // Rindle inserts carry the WHOLE row (no column defaults), so stamp the deck-inherit
       // sentinel here too — '' = inherit the deck's text_align. Omitting it throws
@@ -346,6 +350,10 @@ export const mutators = {
   // Markdown source (per-slide). Non-destructive re. components — a plain column patch.
   setSlideMarkdown: (tx: MutationTx, a: SetSlideMarkdownArgs) =>
     tx.update('slide', { id: a.id, markdown: a.markdown, modified: a.now }),
+
+  // Markdown-mode content as a TipTap doc (JSON string). Plain column patch, streamed via `.folded`.
+  setSlideDoc: (tx: MutationTx, a: SetSlideDocArgs) =>
+    tx.update('slide', { id: a.id, doc: a.doc, modified: a.now }),
 
   // Flip a slide between spatial + markdown mode; hidden components are preserved in the DB.
   setSlideMode: (tx: MutationTx, a: SetSlideModeArgs) =>

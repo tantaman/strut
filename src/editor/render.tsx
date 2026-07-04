@@ -5,7 +5,7 @@ import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { cssHex, resolveTextAlign, textTypeOf } from './types'
 import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
-import { markdownToHtml } from './markdown'
+import { docToHtml } from './tiptapDoc'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -111,17 +111,19 @@ const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
   )
 })
 
-/** A full-slide markdown surface (spec: markdown mode). Renders sanitized markdown inside a
- *  `.strut-md` scope; the theme (fonts/colors/alignment) flows in via the CSS vars the enclosing
- *  slide container sets (themeVars). Used by the editor stage and every read-only surface. */
+/** A read-only full-slide markdown surface (spec: markdown mode). Renders a stored TipTap `doc` (JSON
+ *  string) to sanitized HTML inside a `.strut-md` scope; the theme (fonts/colors/alignment) flows in
+ *  via the CSS vars the enclosing slide container sets (themeVars). Used by every read-only surface —
+ *  thumbnails, overview, presenter, share — and the editor stage's non-editing (viewer) branch. The
+ *  editing branch renders TipTapSlideEditor into the same `.strut-md` scope instead. */
 export const MarkdownSurface = memo(function MarkdownSurface({
-  markdown,
+  doc,
 }: {
-  markdown: string | null | undefined
+  doc: string | null | undefined
 }) {
   const dangerouslySetInnerHTML = useMemo(
-    () => ({ __html: markdownToHtml(markdown) }),
-    [markdown],
+    () => ({ __html: docToHtml(doc) }),
+    [doc],
   )
   return (
     <div className="strut-md" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />

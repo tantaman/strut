@@ -31,6 +31,8 @@ export interface SlideRowLike {
   background: string
   surface: string
   markdown?: string | null
+  // TipTap doc JSON (source of truth for render_mode = 'markdown'); supersedes `markdown`.
+  doc?: string | null
   render_mode?: string | null
   text_align?: string | null
 }
@@ -148,9 +150,9 @@ export function serializeDeck(
         components: (componentsBySlide[s.id] ?? []).map(serializeComponent),
       }
       // Markdown mode + per-slide alignment: emitted only when set, so spatial-only decks are
-      // byte-identical to before.
+      // byte-identical to before. Markdown-mode content travels as the TipTap `doc` JSON.
       if (s.render_mode) slide.renderMode = s.render_mode
-      if (s.markdown) slide.markdown = s.markdown
+      if (s.doc) slide.doc = s.doc
       if (s.text_align) slide.textAlign = s.text_align
       return slide
     }),
@@ -197,6 +199,7 @@ export interface ImportedSlide {
   background: string
   surface: string
   markdown: string
+  doc: string
   render_mode: string
   text_align: string
   components: ImportedComponent[]
@@ -313,6 +316,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       background: str(s.background),
       surface: str(s.surface),
       markdown: str(s.markdown),
+      doc: str(s.doc),
       render_mode: str(s.renderMode),
       text_align: str(s.textAlign),
       components: (Array.isArray(s.components)
