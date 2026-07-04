@@ -1267,6 +1267,40 @@ button {
   background: var(--coral-soft);
   color: var(--coral-strong);
 }
+/* Icon + label rows (Share/export menu): icon, text, then an optional right-aligned hint. */
+.menu-item--icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.menu-item__hint {
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.menu-item--icon:hover .menu-item__hint {
+  color: var(--coral-strong);
+}
+/* Divider + uppercase section heading within a dropdown menu. */
+.menu-sep {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 4px;
+}
+.menu-label {
+  padding: 4px 10px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Subtle caret on dropdown-style header buttons. */
+.btn__caret {
+  margin-left: 2px;
+  opacity: 0.55;
+}
 
 /* ---- deck theme popover (Header) ---- */
 .popover--theme {
