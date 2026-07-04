@@ -10,8 +10,8 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import type { AnyComponent } from './types'
-import { SlideSnapshotView, SlideView } from './SlideView'
+import type { AnyComponent, DeckThemeFields } from './types'
+import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 
 export function SlideWell({
@@ -19,18 +19,16 @@ export function SlideWell({
   deck,
 }: {
   slides: SlideDetail[]
-  deck: { background: string } | null
+  deck: ({ background: string } & DeckThemeFields) | null
 }) {
   const editor = useEditor()
   const mutate = useMutate()
   const history = useHistory()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
-  const freezingThumbnailsRef = useRef(false)
   const componentsBySlideRef = useRef(
     new Map<string, Map<string, AnyComponent>>(),
   )
-  freezingThumbnailsRef.current = editor.draggingComponentId !== null
   const rememberSlideComponent = useCallback(
     (slideId: string, component: AnyComponent) => {
       let components = componentsBySlideRef.current.get(slideId)
@@ -43,7 +41,6 @@ export function SlideWell({
     [],
   )
   const forgetSlideComponent = useCallback((slideId: string, id: string) => {
-    if (freezingThumbnailsRef.current) return
     const components = componentsBySlideRef.current.get(slideId)
     components?.delete(id)
     if (components?.size === 0) componentsBySlideRef.current.delete(slideId)
@@ -57,22 +54,6 @@ export function SlideWell({
     index >= 0 && index < slides.length ? slides[index] : undefined
 
   function thumbnailForSlide(s: SlideDetail) {
-    const freeze =
-      editor.draggingComponentId !== null &&
-      editor.activeSlideId === s.id &&
-      componentsBySlideRef.current.has(s.id)
-
-    if (freeze) {
-      return (
-        <SlideSnapshotView
-          slide={s}
-          deck={deck}
-          width={148}
-          components={componentsForSlide(s.id)}
-        />
-      )
-    }
-
     return (
       <SlideView
         slide={s}
@@ -116,15 +97,7 @@ export function SlideWell({
     history.push({
       label: 'Add slide',
       redo: () => mutate.addSlide(args),
-      undo: () =>
-        mutate.deleteSlide({
-          id,
-          textIds: [],
-          imageIds: [],
-          shapeIds: [],
-          videoIds: [],
-          webframeIds: [],
-        }),
+      undo: () => mutate.deleteSlide({ id, componentIds: [] }),
     })
   }
 
@@ -167,14 +140,8 @@ export function SlideWell({
     // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them. The
     // snapshot uses the latest leaf fragment data registered by the thumbnail component readers.
     const comps = componentsForSlide(s.id)
-    const ids = {
-      textIds: comps.filter((c) => c.kind === 'text').map((c) => c.id),
-      imageIds: comps.filter((c) => c.kind === 'image').map((c) => c.id),
-      shapeIds: comps.filter((c) => c.kind === 'shape').map((c) => c.id),
-      videoIds: comps.filter((c) => c.kind === 'video').map((c) => c.id),
-      webframeIds: comps.filter((c) => c.kind === 'webframe').map((c) => c.id),
-    }
-    const del = () => mutate.deleteSlide({ id: s.id, ...ids })
+    const componentIds = comps.map((c) => c.id)
+    const del = () => mutate.deleteSlide({ id: s.id, componentIds })
     del()
     history.push({
       label: 'Delete slide',

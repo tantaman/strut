@@ -17,9 +17,15 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { cmpStyle, componentSize, renderInner } from './render'
-import { backgroundImage, resolveBackground, resolveSurface } from './types'
-import type { AnyComponent } from './types'
+import { cmpStyle, componentSize, renderInner, themeVars } from './render'
+import {
+  backgroundImage,
+  composeBackground,
+  resolveBackground,
+  resolveSurface,
+  textTypeOf,
+} from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
@@ -30,7 +36,7 @@ import {
   mergeComponentRefs,
 } from './componentFragments'
 
-interface DeckRow {
+interface DeckRow extends DeckThemeFields {
   background: string
   surface: string
   custom_stylesheet?: string
@@ -138,10 +144,10 @@ export function Stage({
       victims.length > 1 ? 'Delete components' : 'Delete component',
       () => {
         for (const c of snapshots) {
-          mutate.removeComponent({ table: c.table, id: c.id })
+          mutate.removeComponent({ id: c.id })
           history.push({
             label: 'Delete component',
-            redo: () => mutate.removeComponent({ table: c.table, id: c.id }),
+            redo: () => mutate.removeComponent({ id: c.id }),
             undo: () => reinsertComponent(mutate, c),
           })
         }
@@ -151,8 +157,7 @@ export function Stage({
 
   function raise(c: AnyComponent) {
     const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
-    if (c.z_order < maxZ)
-      mutate.setComponentZ({ table: c.table, id: c.id, z_order: maxZ + 1 })
+    if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
   }
 
   // ---- gestures ----
@@ -181,12 +186,9 @@ export function Stage({
     const starts = new Map(
       getComponents()
         .filter((x) => ids.includes(x.id))
-        .map((x) => [x.id, { x: x.x, y: x.y, table: x.table }]),
+        .map((x) => [x.id, { x: x.x, y: x.y }]),
     )
-    const finals = new Map<
-      string,
-      { x: number; y: number; table: AnyComponent['table'] }
-    >()
+    const finals = new Map<string, { x: number; y: number }>()
     const sx = e.clientX
     const sy = e.clientY
     editor.setDraggingComponentId(c.id)
@@ -201,12 +203,9 @@ export function Stage({
             nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
             ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
           }
-          const pos = { x: Math.round(nx), y: Math.round(ny), table: s.table }
+          const pos = { x: Math.round(nx), y: Math.round(ny) }
           finals.set(id, pos)
-          mutate.moveComponent.folded(
-            { key: id },
-            { table: s.table, id, x: pos.x, y: pos.y },
-          )
+          mutate.moveComponent.folded({ key: id }, { id, x: pos.x, y: pos.y })
         })
       },
       () => {
@@ -221,12 +220,12 @@ export function Stage({
           label: 'Move',
           redo: () =>
             moved.forEach(([id, f]) =>
-              mutate.moveComponent({ table: f.table, id, x: f.x, y: f.y }),
+              mutate.moveComponent({ id, x: f.x, y: f.y }),
             ),
           undo: () =>
             moved.forEach(([id]) => {
               const s = starts.get(id)!
-              mutate.moveComponent({ table: s.table, id, x: s.x, y: s.y })
+              mutate.moveComponent({ id, x: s.x, y: s.y })
             }),
         })
       },
@@ -242,8 +241,10 @@ export function Stage({
       const startSize = c.size ?? 72
       let lastSize = startSize
       const text = c.text ?? ''
-      const color = c.color ?? '111111'
-      const font = c.font_family ?? 'Lato'
+      // '' color/font = theme-inherited — must survive the blob rewrite untouched.
+      const color = c.color ?? ''
+      const font = c.font_family ?? ''
+      const textType = textTypeOf(c)
       editor.setDraggingComponentId(c.id)
       dragListen(
         (ev) => {
@@ -253,30 +254,32 @@ export function Stage({
           )
           mutate.setText.folded(
             { key: c.id },
-            { id: c.id, text, size: lastSize, color, font_family: font },
+            {
+              id: c.id,
+              text,
+              size: lastSize,
+              color,
+              font_family: font,
+              text_type: textType,
+            },
           )
         },
         () => {
           editor.setDraggingComponentId(null)
           if (lastSize === startSize) return
+          const applySize = (size: number) =>
+            mutate.setText({
+              id: c.id,
+              text,
+              size,
+              color,
+              font_family: font,
+              text_type: textType,
+            })
           history.push({
             label: 'Resize text',
-            redo: () =>
-              mutate.setText({
-                id: c.id,
-                text,
-                size: lastSize,
-                color,
-                font_family: font,
-              }),
-            undo: () =>
-              mutate.setText({
-                id: c.id,
-                text,
-                size: startSize,
-                color,
-                font_family: font,
-              }),
+            redo: () => applySize(lastSize),
+            undo: () => applySize(startSize),
           })
         },
       )
@@ -297,7 +300,6 @@ export function Stage({
         mutate.transformComponent.folded(
           { key: c.id },
           {
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -315,7 +317,6 @@ export function Stage({
           return
         const apply = (s: { scale_w: number; scale_h: number }) =>
           mutate.transformComponent({
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -354,7 +355,6 @@ export function Stage({
         mutate.transformComponent.folded(
           { key: c.id },
           {
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -371,7 +371,6 @@ export function Stage({
         if (lastRot === startRot) return
         const apply = (rot: number) =>
           mutate.transformComponent({
-            table: c.table,
             id: c.id,
             scale_x: 1,
             scale_y: 1,
@@ -403,10 +402,19 @@ export function Stage({
     if (html === (c.text ?? '')) return // no change
     const before = c.text ?? ''
     const size = c.size ?? 72
-    const color = c.color ?? '111111'
-    const font = c.font_family ?? 'Lato'
+    // '' color/font = theme-inherited — must survive the blob rewrite untouched.
+    const color = c.color ?? ''
+    const font = c.font_family ?? ''
+    const textType = textTypeOf(c)
     const apply = (text: string) =>
-      mutate.setText({ id: c.id, text, size, color, font_family: font })
+      mutate.setText({
+        id: c.id,
+        text,
+        size,
+        color,
+        font_family: font,
+        text_type: textType,
+      })
     apply(html)
     history.push({
       label: 'Edit text',
@@ -468,15 +476,14 @@ export function Stage({
     <div
       className="stage"
       ref={stageRef}
-      style={{
-        background: surf,
-        backgroundImage: surfImg,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{ background: composeBackground(surf, surfImg) }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
-      <Inspector componentRefs={componentRefs} getComponents={getComponents} />
+      <Inspector
+        componentRefs={componentRefs}
+        getComponents={getComponents}
+        deck={deck}
+      />
       <div
         className="slide-surface"
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
@@ -488,9 +495,8 @@ export function Stage({
             width: SLIDE_W,
             height: SLIDE_H,
             transform: `scale(${scale})`,
-            background: bg,
-            backgroundImage: bgImg,
-            backgroundSize: 'cover',
+            background: composeBackground(bg, bgImg),
+            ...themeVars(deck),
           }}
         >
           {componentRefs.map((component) => (

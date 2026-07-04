@@ -1,23 +1,28 @@
 // Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview),
-// background/surface pickers, the Slides|Overview mode toggle, and Present.
+// the deck Theme picker, the Slides|Overview mode toggle, and Present.
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   Code2,
   Download,
   Image as ImageIcon,
+  Palette,
   Play,
   Redo2,
   Shapes,
-  Square,
   Type,
   Undo2,
   Video,
   Globe,
   Share2,
 } from 'lucide-react'
-import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
+import {
+  DEFAULT_FONT,
+  DEFAULT_FONT_SIZE,
+  FONT_FAMILIES,
+  newId,
+} from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
@@ -25,7 +30,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
-import type { ComponentTable } from '../../shared/app-def'
+import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
@@ -34,13 +39,17 @@ import {
   SHAPES,
   SURFACE_SWATCHES,
 } from './types'
-import { parseVideo } from './render'
+import { cssFontFamily, parseVideo } from './render'
 
 interface DeckRow {
   id: string
   title: string
   background: string
   surface: string
+  heading_font: string | null
+  heading_color: string | null
+  body_font: string | null
+  body_color: string | null
   canned_transition: string
   custom_stylesheet: string
   owner_id: string
@@ -65,8 +74,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const [menu, setMenu] = useState<
     | null
     | 'shapes'
-    | 'bg'
-    | 'surface'
+    | 'theme'
     | 'media-image'
     | 'media-video'
     | 'media-web'
@@ -78,19 +86,28 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const active = editor.activeSlideId
   const canInsert = active != null && editor.mode === 'slide' && editor.canEdit
 
+  // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
+  // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep
+  // their toggle-only behavior.
+  const themeRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (menu !== 'theme') return
+    const onDown = (e: PointerEvent) => {
+      if (themeRef.current && !themeRef.current.contains(e.target as Node))
+        setMenu(null)
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [menu])
+
   // Insert a component as one undoable step (undo removes it; redo re-adds with the same id).
-  function recordInsert(
-    table: ComponentTable,
-    id: string,
-    doAdd: () => void,
-    label: string,
-  ) {
+  function recordInsert(id: string, doAdd: () => void, label: string) {
     doAdd()
     editor.select(id)
     history.push({
       label,
       redo: doAdd,
-      undo: () => mutate.removeComponent({ table, id }),
+      undo: () => mutate.removeComponent({ id }),
     })
   }
 
@@ -106,10 +123,12 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       z_order: zNow(),
       text: 'New text',
       size: DEFAULT_FONT_SIZE,
-      color: '111111',
-      font_family: DEFAULT_FONT,
+      // '' color/font = follow the deck theme (body category) until explicitly overridden.
+      color: '',
+      font_family: '',
+      text_type: 'body',
     }
-    recordInsert('text_component', id, () => mutate.addText(args), 'Add text')
+    recordInsert(id, () => mutate.addText(args), 'Add text')
   }
 
   function addShape(name: string) {
@@ -126,12 +145,7 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       markup: SHAPES[name],
       fill: '3498db',
     }
-    recordInsert(
-      'shape_component',
-      id,
-      () => mutate.addShape(args),
-      'Add shape',
-    )
+    recordInsert(id, () => mutate.addShape(args), 'Add shape')
     setMenu(null)
   }
 
@@ -148,32 +162,19 @@ export function Header({ deck }: { deck: DeckRow | null }) {
         scale_w: 400,
         scale_h: 300,
       }
-      recordInsert(
-        'image_component',
-        id,
-        () => mutate.addImage(args),
-        'Add image',
-      )
+      recordInsert(id, () => mutate.addImage(args), 'Add image')
     } else if (kind === 'video') {
       const args = { ...base, src: url, ...parseVideo(url) }
-      recordInsert(
-        'video_component',
-        id,
-        () => mutate.addVideo(args),
-        'Add video',
-      )
+      recordInsert(id, () => mutate.addVideo(args), 'Add video')
     } else {
       const args = { ...base, src: url }
-      recordInsert(
-        'webframe_component',
-        id,
-        () => mutate.addWebframe(args),
-        'Add web frame',
-      )
+      recordInsert(id, () => mutate.addWebframe(args), 'Add web frame')
     }
     setMenu(null)
   }
 
+  // Theme edits deliberately do NOT close the popover — the user usually tweaks several
+  // defaults (bg, surface, fonts) in one visit.
   function setBg(scope: 'bg' | 'surface', value: string) {
     if (!deck) return
     mutate.setDeckTheme({
@@ -181,7 +182,18 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       [scope === 'bg' ? 'background' : 'surface']: value,
       now: Date.now(),
     })
-    setMenu(null)
+  }
+
+  function setTextTheme(
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) {
+    if (!deck) return
+    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
   }
 
   async function doExport(kind: 'json' | 'html') {
@@ -208,6 +220,43 @@ export function Header({ deck }: { deck: DeckRow | null }) {
       style: `.${klass}{background:#${bare}}`,
     })
     setBg(scope, klass)
+  }
+
+  // ---- live drag preview -------------------------------------------------------------------------
+  // While the native color picker is dragged it streams frames; fold them into one debounced write per
+  // target so the deck updates in real time without flooding history. Custom bg/surface picks assign
+  // `bg-custom-<hex>` WITHOUT minting a class per frame — resolveBackground/resolveSurface read the hex
+  // straight out of the class name, so the editor previews instantly; the `<style>` rule is minted once
+  // on commit (setCustom, fired by the picker's terminating `change`).
+  function setBgLive(scope: 'bg' | 'surface', value: string) {
+    if (!deck) return
+    const patch = scope === 'bg' ? { background: value } : { surface: value }
+    mutate.setDeckTheme.folded(
+      { key: `deck-theme:${scope}` },
+      { id: deck.id, ...patch, now: Date.now() },
+    )
+  }
+
+  function setCustomLive(scope: 'bg' | 'surface', hex: string) {
+    const bare = hex.replace(/^#+/, '').toLowerCase()
+    setBgLive(scope, `bg-custom-${bare}`)
+  }
+
+  function setTextThemeLive(
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) {
+    if (!deck) return
+    // One target per drag (a single color input) → key the fold on that column.
+    const key = Object.keys(patch)[0] ?? 'text'
+    mutate.setDeckTheme.folded(
+      { key: `deck-theme:${key}` },
+      { id: deck.id, ...patch, now: Date.now() },
+    )
   }
 
   return (
@@ -323,27 +372,29 @@ export function Header({ deck }: { deck: DeckRow | null }) {
 
             <div className="hdr__sep" />
             <div className="hdr__group">
-              <BgButton
-                label="Bg"
-                current={deck?.background}
-                swatches={BACKGROUND_SWATCHES}
-                resolve={(v) => resolveBackground(v, v)}
-                open={menu === 'bg'}
-                onToggle={() => setMenu(menu === 'bg' ? null : 'bg')}
-                onPick={(v) => setBg('bg', v)}
-                onCustom={(hex) => setCustom('bg', hex)}
-                allowTransparent
-              />
-              <BgButton
-                label="Surface"
-                current={deck?.surface}
-                swatches={SURFACE_SWATCHES}
-                resolve={(v) => resolveSurface(v, v)}
-                open={menu === 'surface'}
-                onToggle={() => setMenu(menu === 'surface' ? null : 'surface')}
-                onPick={(v) => setBg('surface', v)}
-                onCustom={(hex) => setCustom('surface', hex)}
-              />
+              <div style={{ position: 'relative' }} ref={themeRef}>
+                <button
+                  className="btn"
+                  onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
+                  title="Theme"
+                  disabled={!deck}
+                >
+                  <Palette size={16} /> <span className="lbl">Theme</span>
+                </button>
+                {menu === 'theme' && deck && (
+                  <ThemePopover
+                    deck={deck}
+                    onBackground={(v) => setBg('bg', v)}
+                    onCustomBackground={(hex) => setCustom('bg', hex)}
+                    onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
+                    onSurface={(v) => setBg('surface', v)}
+                    onCustomSurface={(hex) => setCustom('surface', hex)}
+                    onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
+                    onText={setTextTheme}
+                    onTextLive={setTextThemeLive}
+                  />
+                )}
+              </div>
             </div>
           </>
         )}
@@ -465,69 +516,133 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   )
 }
 
-function BgButton({
-  label,
-  current,
-  swatches,
-  resolve,
-  open,
-  onToggle,
-  onPick,
-  onCustom,
-  allowTransparent,
+/** Deck text-theme font picker: '' = the built-in default (Lato), otherwise a family name. */
+function ThemeFontSelect({
+  value,
+  onChange,
 }: {
-  label: string
-  current?: string
-  swatches: string[]
-  resolve: (value: string) => string
-  open: boolean
-  onToggle: () => void
-  onPick: (value: string) => void
-  onCustom: (hex: string) => void
-  allowTransparent?: boolean
+  value: string
+  onChange: (family: string) => void
 }) {
   return (
-    <div style={{ position: 'relative' }}>
-      <button className="btn" onClick={onToggle} title={label}>
-        <Square size={14} fill={current ? resolve(current) : 'none'} />{' '}
-        <span className="lbl">{label}</span>
-      </button>
-      {open && (
-        <div className="popover" style={{ top: '110%', left: 0 }}>
-          <div className="swatches">
-            <button
-              className="swatch"
-              title="default"
-              style={{ background: resolve('bg-default') }}
-              onClick={() => onPick('bg-default')}
-            />
-            {allowTransparent && (
-              <button
-                className="swatch"
-                title="transparent"
-                style={{
-                  background:
-                    'repeating-conic-gradient(#888 0% 25%, #ccc 0% 50%) 50% / 10px 10px',
-                }}
-                onClick={() => onPick('bg-transparent')}
-              />
-            )}
-            {swatches.map((k) => (
-              <button
-                key={k}
-                className="swatch"
-                title={k}
-                style={{ background: resolve(k) }}
-                onClick={() => onPick(k)}
-              />
-            ))}
-            <label className="swatch swatch--custom" title="custom color">
-              +
-              <input type="color" onChange={(e) => onCustom(e.target.value)} />
-            </label>
-          </div>
+    <select
+      value={value || DEFAULT_FONT}
+      style={{ fontFamily: cssFontFamily(value) }}
+      onChange={(e) =>
+        onChange(e.target.value === DEFAULT_FONT ? '' : e.target.value)
+      }
+    >
+      {FONT_FAMILIES.map((f) => (
+        <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
+          {f}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+/** The deck Theme popover: default background + surface colors, and the default font + color for
+ *  each text category (heading | body). Text components with no explicit color/font follow these. */
+function ThemePopover({
+  deck,
+  onBackground,
+  onCustomBackground,
+  onCustomBackgroundLive,
+  onSurface,
+  onCustomSurface,
+  onCustomSurfaceLive,
+  onText,
+  onTextLive,
+}: {
+  deck: DeckRow
+  onBackground: (value: string) => void
+  onCustomBackground: (hex: string) => void
+  onCustomBackgroundLive: (hex: string) => void
+  onSurface: (value: string) => void
+  onCustomSurface: (hex: string) => void
+  onCustomSurfaceLive: (hex: string) => void
+  onText: (
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) => void
+  onTextLive: (
+    patch: Partial<
+      Record<
+        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
+        string
+      >
+    >,
+  ) => void
+}) {
+  return (
+    <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
+      <div className="insp__row">
+        <span>Background</span>
+        <TokenColorField
+          label="Slide background"
+          current={deck.background}
+          swatches={BACKGROUND_SWATCHES}
+          resolve={(v) => resolveBackground(v, v)}
+          onPick={onBackground}
+          onCustom={onCustomBackground}
+          onCustomLive={onCustomBackgroundLive}
+          allowTransparent
+        />
+      </div>
+      <div className="insp__row">
+        <span>Surface</span>
+        <TokenColorField
+          label="Surface"
+          current={deck.surface}
+          swatches={SURFACE_SWATCHES}
+          resolve={(v) => resolveSurface(v, v)}
+          onPick={onSurface}
+          onCustom={onCustomSurface}
+          onCustomLive={onCustomSurfaceLive}
+        />
+      </div>
+
+      <div className="theme__group">
+        <div className="theme__label">Heading text</div>
+        <div className="insp__row">
+          <span>Font</span>
+          <ThemeFontSelect
+            value={deck.heading_font ?? ''}
+            onChange={(f) => onText({ heading_font: f })}
+          />
         </div>
-      )}
+        <div className="insp__row">
+          <span>Color</span>
+          <ColorField
+            value={deck.heading_color ?? ''}
+            onChange={(hex) => onText({ heading_color: hex })}
+            onLive={(hex) => onTextLive({ heading_color: hex })}
+          />
+        </div>
+      </div>
+
+      <div className="theme__group">
+        <div className="theme__label">Body text</div>
+        <div className="insp__row">
+          <span>Font</span>
+          <ThemeFontSelect
+            value={deck.body_font ?? ''}
+            onChange={(f) => onText({ body_font: f })}
+          />
+        </div>
+        <div className="insp__row">
+          <span>Color</span>
+          <ColorField
+            value={deck.body_color ?? ''}
+            onChange={(hex) => onText({ body_color: hex })}
+            onLive={(hex) => onTextLive({ body_color: hex })}
+          />
+        </div>
+      </div>
     </div>
   )
 }

@@ -8,6 +8,27 @@
 
 import { createSchema, number, string, table } from "@rindle/client";
 
+export const component = table("component")
+  .columns({
+    id: string(),
+    slide_id: string(),
+    type: string(),
+    z_order: number(),
+    x: number(),
+    y: number(),
+    scale_x: number(),
+    scale_y: number(),
+    scale_w: number(),
+    scale_h: number(),
+    rotate: number(),
+    skew_x: number(),
+    skew_y: number(),
+    custom_classes: string(),
+    fill: string(),
+    props: string(),
+  })
+  .primaryKey("id");
+
 export const custom_background = table("custom_background")
   .columns({
     id: string(),
@@ -32,6 +53,10 @@ export const deck = table("deck")
     owner_id: string(),
     visibility: string(),
     share_token: string(),
+    heading_font: string(),
+    heading_color: string(),
+    body_font: string(),
+    body_color: string(),
   })
   .primaryKey("id");
 
@@ -42,47 +67,6 @@ export const deck_share = table("deck_share")
     user_id: string(),
     role: string(),
     created: number(),
-  })
-  .primaryKey("id");
-
-export const image_component = table("image_component")
-  .columns({
-    id: string(),
-    slide_id: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    src: string(),
-    image_type: string(),
-  })
-  .primaryKey("id");
-
-export const shape_component = table("shape_component")
-  .columns({
-    id: string(),
-    slide_id: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    shape: string(),
-    markup: string(),
-    fill: string(),
   })
   .primaryKey("id");
 
@@ -105,28 +89,6 @@ export const slide = table("slide")
   })
   .primaryKey("id");
 
-export const text_component = table("text_component")
-  .columns({
-    id: string(),
-    slide_id: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    text: string(),
-    size: number(),
-    color: string(),
-    font_family: string(),
-  })
-  .primaryKey("id");
-
 export const user_profile = table("user_profile")
   .columns({
     id: string(),
@@ -135,45 +97,4 @@ export const user_profile = table("user_profile")
   })
   .primaryKey("id");
 
-export const video_component = table("video_component")
-  .columns({
-    id: string(),
-    slide_id: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    src: string(),
-    video_type: string(),
-    src_type: string(),
-    short_src: string(),
-  })
-  .primaryKey("id");
-
-export const webframe_component = table("webframe_component")
-  .columns({
-    id: string(),
-    slide_id: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    src: string(),
-  })
-  .primaryKey("id");
-
-export const schema = createSchema({ tables: [custom_background, deck, deck_share, image_component, shape_component, slide, text_component, user_profile, video_component, webframe_component] });
+export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, user_profile] });

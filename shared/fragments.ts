@@ -2,30 +2,26 @@
 // (rindle.sh/docs/fragments). The relay design: a root query spreads these, and each leaf component
 // reads its own fragment with `useFragment` (a pure, typed, masked read — no extra subscription).
 //
-// `.select(...)` does two things: (1) MASKING — `useFragment(TextFragment, ref)` types the node to
-// exactly these columns, so a component can't read a column it didn't declare; (2) FOOTPRINT — only
+// `.select(...)` does two things: (1) MASKING — `useFragment(ComponentFragment, ref)` types the node
+// to exactly these columns, so a reader can't touch a column it didn't declare; (2) FOOTPRINT — only
 // these columns sync, trimming the wire payload for the high-volume component rows.
 //
-// The five component tables share a spatial base (position/scale/rotate/skew/z + custom_classes) and
-// add their own type fields. The slide fragment nests all five, z-ordered, under stable aliases — so
-// `deck → slides → components` materializes from ONE query (one Ast, one materialization, one /query).
+// Every on-slide object is one row of the polymorphic `component` table (shared spatial base + `type`
+// + `fill` + a `props` JSON blob). The slide fragment nests them under a single z-ordered `components`
+// alias — so `deck → slides → components` materializes from ONE query (one Ast, one materialization,
+// one /query), and z-order across mixed types is a plain ORDER BY (no JS merge of five arrays).
 
 import { defineFragment } from '@rindle/client'
-import {
-  image_component,
-  shape_component,
-  slide,
-  text_component,
-  video_component,
-  webframe_component,
-} from './schema.ts'
+import { component, slide } from './schema.ts'
 import { rels } from './app-def.ts'
 
-// The spatial columns every component leaf selects, plus its own type fields.
-export const TextFragment = defineFragment(text_component, (f) =>
+// One leaf fragment for every component. `props` is a JSON string decoded per `type` in app code
+// (src/editor/types.ts). Selecting explicitly keeps the sync footprint tight for these high-volume rows.
+export const ComponentFragment = defineFragment(component, (f) =>
   f.select(
     'id',
     'slide_id',
+    'type',
     'z_order',
     'x',
     'y',
@@ -37,113 +33,16 @@ export const TextFragment = defineFragment(text_component, (f) =>
     'skew_x',
     'skew_y',
     'custom_classes',
-    'text',
-    'size',
-    'color',
-    'font_family',
-  ),
-)
-
-export const ImageFragment = defineFragment(image_component, (f) =>
-  f.select(
-    'id',
-    'slide_id',
-    'z_order',
-    'x',
-    'y',
-    'scale_x',
-    'scale_y',
-    'scale_w',
-    'scale_h',
-    'rotate',
-    'skew_x',
-    'skew_y',
-    'custom_classes',
-    'src',
-    'image_type',
-  ),
-)
-
-export const ShapeFragment = defineFragment(shape_component, (f) =>
-  f.select(
-    'id',
-    'slide_id',
-    'z_order',
-    'x',
-    'y',
-    'scale_x',
-    'scale_y',
-    'scale_w',
-    'scale_h',
-    'rotate',
-    'skew_x',
-    'skew_y',
-    'custom_classes',
-    'shape',
-    'markup',
     'fill',
+    'props',
   ),
 )
 
-export const VideoFragment = defineFragment(video_component, (f) =>
-  f.select(
-    'id',
-    'slide_id',
-    'z_order',
-    'x',
-    'y',
-    'scale_x',
-    'scale_y',
-    'scale_w',
-    'scale_h',
-    'rotate',
-    'skew_x',
-    'skew_y',
-    'custom_classes',
-    'src',
-    'video_type',
-    'src_type',
-    'short_src',
-  ),
-)
-
-export const WebframeFragment = defineFragment(webframe_component, (f) =>
-  f.select(
-    'id',
-    'slide_id',
-    'z_order',
-    'x',
-    'y',
-    'scale_x',
-    'scale_y',
-    'scale_w',
-    'scale_h',
-    'rotate',
-    'skew_x',
-    'skew_y',
-    'custom_classes',
-    'src',
-  ),
-)
-
-// One slide + all five of its component sets, each z-ordered under a stable alias. The child component
-// edges use fragment refs, so React readers can subscribe at the individual component boundary while
-// the root deck query still syncs the whole subtree.
+// One slide + its components, z-ordered under a single alias. The component edges use fragment refs, so
+// React readers can subscribe at the individual component boundary while the root deck query still
+// syncs the whole subtree.
 export const SlideFragment = defineFragment(slide, (f) =>
-  f
-    .sub('texts', rels.slideTexts, TextFragment, (t) =>
-      t.orderBy('z_order', 'asc'),
-    )
-    .sub('images', rels.slideImages, ImageFragment, (t) =>
-      t.orderBy('z_order', 'asc'),
-    )
-    .sub('shapes', rels.slideShapes, ShapeFragment, (t) =>
-      t.orderBy('z_order', 'asc'),
-    )
-    .sub('videos', rels.slideVideos, VideoFragment, (t) =>
-      t.orderBy('z_order', 'asc'),
-    )
-    .sub('webframes', rels.slideWebframes, WebframeFragment, (t) =>
-      t.orderBy('z_order', 'asc'),
-    ),
+  f.sub('components', rels.slideComponents, ComponentFragment, (t) =>
+    t.orderBy('z_order', 'asc'),
+  ),
 )

@@ -33,7 +33,18 @@ const config = defineConfig(({ mode }) => {
       // served same-origin — no separate API process, no proxy. The live-query WebSocket still
       // connects directly to the daemon (:7601).
     },
-    plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+    plugins: [
+      // `consolePiping` cross-forwards console between the SSR server and the browser (server logs →
+      // browser console, client logs → terminal). That bidirectional forwarding echoes: one server
+      // console.error becomes a browser console.error, which pipes back as a server log, re-wrapped
+      // with a `[Server]` prefix each round — a repeated log (e.g. a React warning or a Rindle
+      // fetch-retry) snowballs into a multi-GB HMR-websocket payload and OOM-kills `vite dev`.
+      // Disable the piping (keeps the devtools panel + source injection). See RINDLE/dev notes.
+      devtools({ consolePiping: { enabled: false } }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+    ],
   }
 })
 

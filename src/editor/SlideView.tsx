@@ -9,9 +9,9 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { cmpStyle, renderInner } from './render'
-import { backgroundImage, resolveBackground } from './types'
-import type { AnyComponent } from './types'
+import { cmpStyle, renderInner, themeVars } from './render'
+import { backgroundImage, composeBackground, resolveBackground } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import type { ReactNode } from 'react'
 import {
@@ -34,6 +34,8 @@ function StaticComponent({ c }: { c: AnyComponent }) {
   )
 }
 
+type DeckThemeRow = ({ background: string } & DeckThemeFields) | null
+
 function SlideFrame({
   slide,
   deck,
@@ -41,7 +43,7 @@ function SlideFrame({
   children,
 }: {
   slide: SlideDetail
-  deck: { background: string } | null
+  deck: DeckThemeRow
   width: number
   children: ReactNode
 }) {
@@ -53,9 +55,11 @@ function SlideFrame({
         width: SLIDE_W,
         height: (SLIDE_W * 9) / 16,
         transform: `scale(${scale})`,
-        background: resolveBackground(slide.background, deck?.background),
-        backgroundImage: backgroundImage(slide.background, deck?.background),
-        backgroundSize: 'cover',
+        background: composeBackground(
+          resolveBackground(slide.background, deck?.background),
+          backgroundImage(slide.background, deck?.background),
+        ),
+        ...themeVars(deck),
       }}
     >
       {children}
@@ -71,7 +75,7 @@ export function SlideView({
   onComponentRemove,
 }: {
   slide: SlideDetail
-  deck: { background: string } | null
+  deck: DeckThemeRow
   width: number
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void
@@ -93,22 +97,3 @@ export function SlideView({
   )
 }
 
-export function SlideSnapshotView({
-  slide,
-  deck,
-  width,
-  components,
-}: {
-  slide: SlideDetail
-  deck: { background: string } | null
-  width: number
-  components: readonly AnyComponent[]
-}) {
-  return (
-    <SlideFrame slide={slide} deck={deck} width={width}>
-      {components.map((c) => (
-        <StaticComponent key={c.id} c={c} />
-      ))}
-    </SlideFrame>
-  )
-}

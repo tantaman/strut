@@ -1052,25 +1052,100 @@ button {
   color: var(--coral-strong);
 }
 
-/* ---- custom color swatch (in bg/surface pickers) ---- */
-.swatch--custom {
+/* ---- deck theme popover (Header) ---- */
+.popover--theme {
+  width: 224px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  font-size: 13px;
+}
+/* Wider label column than the inspector's rows — "Background"/"Surface" don't fit 52px. */
+.popover--theme .insp__row > span {
+  width: 76px;
+}
+.theme__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+.theme__label {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+.popover--theme select {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 6px 9px;
+}
+
+/* ---- collapsed color/background chip + its sub-popover (Popchip) ---- */
+.popchip {
   position: relative;
+}
+.popchip__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 4px 9px 4px 5px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+.popchip__trigger:hover,
+.popchip__trigger.is-open {
+  border-color: var(--coral);
+}
+.popchip__sw {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(20, 22, 30, 0.15);
+  flex: none;
+}
+/* The picker panel floats below the chip (over whatever it sits in — theme popover / inspector). */
+.popover--sub {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+}
+/* The inspector hugs the right screen edge — open its picker leftward so it can't clip off-screen. */
+.insp .popover--sub {
+  left: auto;
+  right: 0;
+}
+
+/* "Theme default" swatch (text color pickers): shows the theme's resolved color with a T glyph. */
+.swatch--theme {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
-  background: var(--panel-2);
-  font-size: 14px;
-  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
 }
-.swatch--custom input[type='color'] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  border: 0;
-  padding: 0;
-}
+
 .swatch.is-active {
   outline: 2px solid var(--coral);
   outline-offset: 1px;
@@ -1167,6 +1242,13 @@ button {
 .insp__custom span {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* When the current color is a custom/native pick (matches no preset), the native chip is the
+   selected swatch — outline it like .swatch.is-active so the selection is always visible. */
+.insp__custom.is-active input[type='color'] {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+  border-color: var(--coral);
 }
 
 /* ---- inline rich-text toolbar (spec §6.3) ---- */

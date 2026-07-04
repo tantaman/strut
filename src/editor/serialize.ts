@@ -3,13 +3,16 @@
 // indexing + the new deck id). Pure functions; no Rindle/React deps so they can be unit-tested.
 
 import type { AnyComponent, ComponentKind } from './types'
-import { KIND_TO_TABLE } from './types'
 
 export interface DeckRowLike {
   id: string
   title: string
   background: string
   surface: string
+  heading_font?: string | null
+  heading_color?: string | null
+  body_font?: string | null
+  body_color?: string | null
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -60,7 +63,12 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
   const scale: Record<string, number> = { x: c.scale_x || 1, y: c.scale_y || 1 }
   if (c.scale_w) scale.width = c.scale_w
   if (c.scale_h) scale.height = c.scale_h
-  const base: Record<string, unknown> = { type: KIND_TO_TYPE[c.kind], x: c.x, y: c.y, scale }
+  const base: Record<string, unknown> = {
+    type: KIND_TO_TYPE[c.kind],
+    x: c.x,
+    y: c.y,
+    scale,
+  }
   if (c.rotate) base.rotate = c.rotate
   if (c.skew_x) base.skewX = c.skew_x
   if (c.skew_y) base.skewY = c.skew_y
@@ -69,8 +77,10 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
     case 'text':
       if (c.size) base.size = c.size
       if (c.text) base.text = c.text
+      // color/fontFamily omitted when '' (theme-inherited); textType only when a heading.
       if (c.color) base.color = c.color
       if (c.font_family) base.fontFamily = c.font_family
+      if (c.text_type && c.text_type !== 'body') base.textType = c.text_type
       break
     case 'image':
       base.src = c.src ?? ''
@@ -94,7 +104,10 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
   return base
 }
 
-export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unknown> {
+export function serializeDeck(
+  bundle: DeckBundle,
+  genid = 1,
+): Record<string, unknown> {
   const { deck, slides, componentsBySlide, customBackgrounds } = bundle
   return {
     fileName: deck.title || 'untitled',
@@ -102,9 +115,16 @@ export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unk
     __genid: genid,
     background: deck.background || 'bg-default',
     surface: deck.surface || 'bg-default',
+    // Text theme defaults ('' = built-in default; see DeckThemeFields).
+    headingFont: deck.heading_font || '',
+    headingColor: deck.heading_color || '',
+    bodyFont: deck.body_font || '',
+    bodyColor: deck.body_color || '',
     cannedTransition: deck.canned_transition || 'none',
     customStylesheet: deck.custom_stylesheet || '',
-    customBackgrounds: { bgs: customBackgrounds.map((b) => ({ klass: b.klass, style: b.style })) },
+    customBackgrounds: {
+      bgs: customBackgrounds.map((b) => ({ klass: b.klass, style: b.style })),
+    },
     slides: slides.map((s, index) => {
       const slide: Record<string, unknown> = {
         type: 'slide',
@@ -129,7 +149,6 @@ export function serializeDeck(bundle: DeckBundle, genid = 1): Record<string, unk
 
 export interface ImportedComponent {
   kind: ComponentKind
-  table: AnyComponent['table']
   x: number
   y: number
   z_order: number
@@ -145,6 +164,7 @@ export interface ImportedComponent {
   size?: number
   color?: string
   font_family?: string
+  text_type?: string
   src?: string
   image_type?: string
   shape?: string
@@ -170,6 +190,10 @@ export interface ImportedDeck {
   title: string
   background: string
   surface: string
+  heading_font: string
+  heading_color: string
+  body_font: string
+  body_color: string
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -177,16 +201,19 @@ export interface ImportedDeck {
   slides: ImportedSlide[]
 }
 
-const num = (v: unknown, d = 0): number => (typeof v === 'number' && isFinite(v) ? v : d)
+const num = (v: unknown, d = 0): number =>
+  typeof v === 'number' && isFinite(v) ? v : d
 const str = (v: unknown, d = ''): string => (typeof v === 'string' ? v : d)
 
-function deserializeComponent(raw: Record<string, unknown>, z: number): ImportedComponent | null {
+function deserializeComponent(
+  raw: Record<string, unknown>,
+  z: number,
+): ImportedComponent | null {
   const kind = TYPE_TO_KIND[str(raw.type)]
   if (!kind) return null
   const scale = (raw.scale ?? {}) as Record<string, unknown>
   const c: ImportedComponent = {
     kind,
-    table: KIND_TO_TABLE[kind],
     x: num(raw.x),
     y: num(raw.y),
     z_order: z,
@@ -203,8 +230,12 @@ function deserializeComponent(raw: Record<string, unknown>, z: number): Imported
     case 'text':
       c.text = str(raw.text, 'Text')
       c.size = num(raw.size, 72)
-      c.color = str(raw.color, '111111')
-      c.font_family = str(raw.fontFamily, 'Lato')
+      // Missing color/fontFamily = theme-inherited. Legacy files always wrote an explicit color
+      // ('111111') + family ('Lato'), so they round-trip as overrides; only a theme-authored file
+      // omits them. text_type absent = body.
+      c.color = str(raw.color, '')
+      c.font_family = str(raw.fontFamily, '')
+      c.text_type = str(raw.textType, '')
       break
     case 'image':
       // legacy {docKey,attachKey} attachments aren't supported (no bytes in JSON) — keep string srcs.
@@ -231,18 +262,27 @@ function deserializeComponent(raw: Record<string, unknown>, z: number): Imported
 
 /** Parse a `.strut` JSON object into a normalized deck. Throws if the shape is unrecognizable. */
 export function deserializeDeck(json: unknown): ImportedDeck {
-  if (!json || typeof json !== 'object') throw new Error('Not a Strut file (expected a JSON object)')
+  if (!json || typeof json !== 'object')
+    throw new Error('Not a Strut file (expected a JSON object)')
   const o = json as Record<string, unknown>
-  if (!Array.isArray(o.slides)) throw new Error('Not a Strut file (missing "slides" array)')
-  const bgs = ((o.customBackgrounds as Record<string, unknown> | undefined)?.bgs ?? []) as Array<Record<string, unknown>>
+  if (!Array.isArray(o.slides))
+    throw new Error('Not a Strut file (missing "slides" array)')
+  const bgs = ((o.customBackgrounds as Record<string, unknown> | undefined)
+    ?.bgs ?? []) as Array<Record<string, unknown>>
   return {
     title: str(o.fileName, 'Imported deck'),
     background: str(o.background, 'bg-default'),
     surface: str(o.surface, 'bg-default'),
+    heading_font: str(o.headingFont),
+    heading_color: str(o.headingColor),
+    body_font: str(o.bodyFont),
+    body_color: str(o.bodyColor),
     canned_transition: str(o.cannedTransition, 'none'),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),
-    customBackgrounds: bgs.map((b) => ({ klass: str(b.klass), style: str(b.style) })).filter((b) => b.klass),
+    customBackgrounds: bgs
+      .map((b) => ({ klass: str(b.klass), style: str(b.style) }))
+      .filter((b) => b.klass),
     slides: (o.slides as Array<Record<string, unknown>>).map((s) => ({
       x: num(s.x),
       y: num(s.y),
@@ -253,7 +293,10 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       imp_scale: num(s.impScale, 3),
       background: str(s.background),
       surface: str(s.surface),
-      components: (Array.isArray(s.components) ? (s.components as Array<Record<string, unknown>>) : [])
+      components: (Array.isArray(s.components)
+        ? (s.components as Array<Record<string, unknown>>)
+        : []
+      )
         .map((c, i) => deserializeComponent(c, i + 1))
         .filter((c): c is ImportedComponent => c !== null),
     })),

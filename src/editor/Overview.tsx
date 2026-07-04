@@ -16,6 +16,7 @@ import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
+import type { DeckThemeFields } from './types'
 
 export interface OverviewSlide {
   id: string
@@ -57,7 +58,10 @@ export function Overview({
   deck,
 }: {
   slides: SlideDetail[]
-  deck: { id: string; background: string; canned_transition: string } | null
+  deck:
+    | ({ id: string; background: string; canned_transition: string } &
+        DeckThemeFields)
+    | null
 }) {
   const editor = useEditor()
   const mutate = useMutate()
