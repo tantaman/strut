@@ -129,6 +129,8 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
     heading_color: imported.heading_color,
     body_font: imported.body_font,
     body_color: imported.body_color,
+    text_align: imported.text_align,
+    default_slide_mode: imported.default_slide_mode,
     custom_stylesheet: imported.custom_stylesheet,
     canned_transition: imported.canned_transition,
     now,
@@ -146,7 +148,15 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
     const slideId = newId()
     const sort = generateKeyBetween(prevSort, null)
     prevSort = sort
-    mutate.addSlide({ id: slideId, deckId, sort, x: s.x, y: s.y, now })
+    mutate.addSlide({
+      id: slideId,
+      deckId,
+      sort,
+      x: s.x,
+      y: s.y,
+      render_mode: s.render_mode,
+      now,
+    })
     mutate.setSlideTransform({
       id: slideId,
       x: s.x,
@@ -158,13 +168,16 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
       imp_scale: s.imp_scale,
       now,
     })
-    if (s.background || s.surface)
+    if (s.background || s.surface || s.text_align)
       mutate.setSlideTheme({
         id: slideId,
         background: s.background,
         surface: s.surface,
+        text_align: s.text_align,
         now,
       })
+    if (s.markdown)
+      mutate.setSlideMarkdown({ id: slideId, markdown: s.markdown, now })
     for (const c of s.components)
       insertComponent(mutate, { id: newId(), slideId }, c)
   }

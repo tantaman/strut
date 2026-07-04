@@ -13,6 +13,8 @@ export interface DeckRowLike {
   heading_color?: string | null
   body_font?: string | null
   body_color?: string | null
+  text_align?: string | null
+  default_slide_mode?: string | null
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -28,6 +30,9 @@ export interface SlideRowLike {
   imp_scale: number
   background: string
   surface: string
+  markdown?: string | null
+  render_mode?: string | null
+  text_align?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -120,6 +125,8 @@ export function serializeDeck(
     headingColor: deck.heading_color || '',
     bodyFont: deck.body_font || '',
     bodyColor: deck.body_color || '',
+    textAlign: deck.text_align || '',
+    defaultSlideMode: deck.default_slide_mode || '',
     cannedTransition: deck.canned_transition || 'none',
     customStylesheet: deck.custom_stylesheet || '',
     customBackgrounds: {
@@ -140,6 +147,11 @@ export function serializeDeck(
         surface: s.surface || '',
         components: (componentsBySlide[s.id] ?? []).map(serializeComponent),
       }
+      // Markdown mode + per-slide alignment: emitted only when set, so spatial-only decks are
+      // byte-identical to before.
+      if (s.render_mode) slide.renderMode = s.render_mode
+      if (s.markdown) slide.markdown = s.markdown
+      if (s.text_align) slide.textAlign = s.text_align
       return slide
     }),
   }
@@ -184,6 +196,9 @@ export interface ImportedSlide {
   imp_scale: number
   background: string
   surface: string
+  markdown: string
+  render_mode: string
+  text_align: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -194,6 +209,8 @@ export interface ImportedDeck {
   heading_color: string
   body_font: string
   body_color: string
+  text_align: string
+  default_slide_mode: string
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -277,6 +294,8 @@ export function deserializeDeck(json: unknown): ImportedDeck {
     heading_color: str(o.headingColor),
     body_font: str(o.bodyFont),
     body_color: str(o.bodyColor),
+    text_align: str(o.textAlign),
+    default_slide_mode: str(o.defaultSlideMode),
     canned_transition: str(o.cannedTransition, 'none'),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),
@@ -293,6 +312,9 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       imp_scale: num(s.impScale, 3),
       background: str(s.background),
       surface: str(s.surface),
+      markdown: str(s.markdown),
+      render_mode: str(s.renderMode),
+      text_align: str(s.textAlign),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

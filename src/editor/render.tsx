@@ -3,8 +3,9 @@
 
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { cssHex, textTypeOf } from './types'
+import { cssHex, resolveTextAlign, textTypeOf } from './types'
 import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
+import { markdownToHtml } from './markdown'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -30,15 +31,19 @@ export function cssFontFamily(name: string | undefined): string {
 
 /** The deck text theme as CSS variables. Set on every slide container (stage canvas, thumbnail
  *  frame, impress export), so a text component with an empty color/font_family can inherit via
- *  `var(--strut-<category>-…)` no matter which surface renders it. */
+ *  `var(--strut-<category>-…)` no matter which surface renders it. `--strut-text-align` (slide
+ *  override → deck default → 'left') drives markdown-mode alignment; the optional `slide` supplies
+ *  the per-slide override. */
 export function themeVars(
   theme: DeckThemeFields | null | undefined,
+  slide?: { text_align?: string | null } | null,
 ): CSSProperties {
   return {
     '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
     '--strut-body-color': cssHex(theme?.body_color ?? '', '111111'),
     '--strut-body-font': cssFontFamily(theme?.body_font ?? ''),
+    '--strut-text-align': resolveTextAlign(slide?.text_align, theme?.text_align),
   } as CSSProperties
 }
 
@@ -103,6 +108,23 @@ const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
       style={FULL_SIZE_STYLE}
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
     />
+  )
+})
+
+/** A full-slide markdown surface (spec: markdown mode). Renders sanitized markdown inside a
+ *  `.strut-md` scope; the theme (fonts/colors/alignment) flows in via the CSS vars the enclosing
+ *  slide container sets (themeVars). Used by the editor stage and every read-only surface. */
+export const MarkdownSurface = memo(function MarkdownSurface({
+  markdown,
+}: {
+  markdown: string | null | undefined
+}) {
+  const dangerouslySetInnerHTML = useMemo(
+    () => ({ __html: markdownToHtml(markdown) }),
+    [markdown],
+  )
+  return (
+    <div className="strut-md" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
   )
 })
 

@@ -3,6 +3,7 @@
 
 import { parseProps } from '../../shared/componentProps'
 import type { ComponentType } from '../../shared/componentProps'
+import { DEFAULT_FONT } from '../config'
 
 export type ComponentKind = ComponentType
 
@@ -109,6 +110,9 @@ export interface DeckThemeFields {
   heading_color?: string | null
   body_font?: string | null
   body_color?: string | null
+  // Deck-wide default text alignment ('' / null = built-in 'left'). The one theme axis a slide can
+  // override (slide.text_align); fonts/colors are deck-only.
+  text_align?: string | null
 }
 
 export const TEXT_TYPES = ['body', 'heading'] as const
@@ -117,6 +121,46 @@ export type TextType = (typeof TEXT_TYPES)[number]
 /** Normalize a stored `text_type` ('' / absent = body, so legacy rows need no backfill). */
 export function textTypeOf(c: { text_type?: string }): TextType {
   return c.text_type === 'heading' ? 'heading' : 'body'
+}
+
+// ---- unified theme resolution --------------------------------------------------------------------
+
+export const TEXT_ALIGNS = ['left', 'center', 'right'] as const
+export type TextAlign = (typeof TEXT_ALIGNS)[number]
+export const DEFAULT_TEXT_COLOR = '111111'
+
+/** Resolve the effective text alignment: a per-slide override wins, else the deck default, else the
+ *  built-in 'left'. Empty strings / nulls mean "inherit". */
+export function resolveTextAlign(
+  slideAlign: string | null | undefined,
+  deckAlign: string | null | undefined,
+): TextAlign {
+  const v = (slideAlign && slideAlign !== '' ? slideAlign : deckAlign) || 'left'
+  return v === 'center' || v === 'right' ? v : 'left'
+}
+
+/** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved
+ *  alignment (slide override → deck → default). Fonts are family names; colors are `#rrggbb`. Both
+ *  rendering modes read the same resolved theme. */
+export interface ResolvedTheme {
+  headingFont: string
+  headingColor: string
+  bodyFont: string
+  bodyColor: string
+  textAlign: TextAlign
+}
+
+export function resolveTheme(
+  deck: DeckThemeFields | null | undefined,
+  slide?: { text_align?: string | null } | null,
+): ResolvedTheme {
+  return {
+    headingFont: deck?.heading_font || DEFAULT_FONT,
+    headingColor: cssHex(deck?.heading_color ?? '', DEFAULT_TEXT_COLOR),
+    bodyFont: deck?.body_font || DEFAULT_FONT,
+    bodyColor: cssHex(deck?.body_color ?? '', DEFAULT_TEXT_COLOR),
+    textAlign: resolveTextAlign(slide?.text_align, deck?.text_align),
+  }
 }
 
 // ---- background / surface resolution (spec §8.6, simplified) -------------------------------------

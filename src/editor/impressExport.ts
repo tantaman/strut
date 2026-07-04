@@ -4,7 +4,14 @@
 
 import { SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
-import { cssHex, resolveBackground, resolveSurface, textTypeOf } from './types'
+import { markdownToHtml } from './markdown'
+import {
+  cssHex,
+  resolveBackground,
+  resolveSurface,
+  resolveTextAlign,
+  textTypeOf,
+} from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { flightFor } from './transitions'
 import { scopeCss } from './css'
@@ -13,6 +20,27 @@ import type { DeckBundle } from './serialize'
 // Overview (x,y) are in 240px "card" units; the world places full 1280px slides (matches play route).
 const WORLD = SLIDE_W / 240
 const deg = (rad: number) => (rad * 180) / Math.PI
+
+// Markdown-mode surface styling — mirrors the `.strut-md` scope in src/strut.css so an exported deck
+// renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss).
+const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:64px 88px;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:32px;}
+  .strut-md>*:first-child{margin-top:0;}
+  .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;}
+  .strut-md h1{font-size:88px;}
+  .strut-md h2{font-size:64px;}
+  .strut-md h3{font-size:48px;}
+  .strut-md h4{font-size:38px;}
+  .strut-md p,.strut-md ul,.strut-md ol,.strut-md blockquote,.strut-md pre{margin:0 0 .6em;}
+  .strut-md ul,.strut-md ol{padding-left:1.3em;}
+  .strut-md li{margin:.15em 0;}
+  .strut-md a{color:inherit;text-decoration:underline;}
+  .strut-md code{font-family:'Droid Sans Mono',monospace;font-size:.8em;background:rgba(0,0,0,.06);padding:.1em .3em;border-radius:4px;}
+  .strut-md pre{background:rgba(0,0,0,.06);padding:.7em 1em;border-radius:8px;overflow:auto;}
+  .strut-md pre code{background:none;padding:0;}
+  .strut-md blockquote{border-left:4px solid rgba(0,0,0,.18);padding-left:.8em;opacity:.85;}
+  .strut-md img{max-width:100%;}
+  .strut-md table{border-collapse:collapse;}
+  .strut-md td,.strut-md th{border:1px solid rgba(0,0,0,.2);padding:.3em .6em;}`
 
 const esc = (s: string) =>
   s
@@ -65,15 +93,17 @@ function componentHTML(c: AnyComponent): string {
 }
 
 /** The deck text theme as CSS custom-property declarations for the slide container, so a text
- *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export. */
-function themeVarsCss(theme: DeckThemeFields): string {
+ *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export.
+ *  `align` is the slide-resolved alignment (drives markdown-mode text-align). */
+function themeVarsCss(theme: DeckThemeFields, align: string): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
   return (
     `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
     `--strut-heading-font:${font(theme.heading_font)};` +
     `--strut-body-color:${cssHex(theme.body_color ?? '', '111111')};` +
-    `--strut-body-font:${font(theme.body_font)};`
+    `--strut-body-font:${font(theme.body_font)};` +
+    `--strut-text-align:${align};`
   )
 }
 
@@ -98,10 +128,18 @@ function stepHTML(
   if (scale !== 1) attrs.push(`data-scale="${scale}"`)
 
   const bg = resolveBackground(slide.background, deck.background)
-  const sorted = [...components].sort((a, b) => a.z_order - b.z_order)
+  const align = resolveTextAlign(slide.text_align, deck.text_align)
+  // Markdown mode: one `.strut-md` surface (same converter as the app) in place of components.
+  const inner =
+    slide.render_mode === 'markdown'
+      ? `      <div class="strut-md">${markdownToHtml(slide.markdown ?? '')}</div>`
+      : [...components]
+          .sort((a, b) => a.z_order - b.z_order)
+          .map((c) => '      ' + componentHTML(c))
+          .join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck)}">
-${sorted.map((c) => '      ' + componentHTML(c)).join('\n')}
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
+${inner}
     </div>
   </div>`
 }
@@ -133,6 +171,7 @@ export function toImpressHTML(bundle: DeckBundle): string {
   .step{box-sizing:border-box;}
   .slideContainer{box-shadow:0 10px 60px rgba(0,0,0,.5);}
   .cmp-text{margin:0;}
+${STRUT_MD_CSS}
   .fallback{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:2rem;}
   .impress-not-supported .fallback{display:flex;}
   .impress-supported .fallback{display:none;}

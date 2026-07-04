@@ -57,6 +57,8 @@ export const deck = table("deck")
     heading_color: string(),
     body_font: string(),
     body_color: string(),
+    default_slide_mode: string(),
+    text_align: string(),
   })
   .primaryKey("id");
 
@@ -86,6 +88,9 @@ export const slide = table("slide")
     surface: string(),
     created: number(),
     modified: number(),
+    markdown: string(),
+    render_mode: string(),
+    text_align: string(),
   })
   .primaryKey("id");
 

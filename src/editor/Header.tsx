@@ -4,8 +4,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   Code2,
   Download,
+  FileText,
   Image as ImageIcon,
   Palette,
   Play,
@@ -40,6 +44,7 @@ import {
   SURFACE_SWATCHES,
 } from './types'
 import { cssFontFamily, parseVideo } from './render'
+import type { SlideDetail } from './deckDetail'
 
 interface DeckRow {
   id: string
@@ -50,6 +55,8 @@ interface DeckRow {
   heading_color: string | null
   body_font: string | null
   body_color: string | null
+  text_align: string | null
+  default_slide_mode: string | null
   canned_transition: string
   custom_stylesheet: string
   owner_id: string
@@ -64,7 +71,13 @@ const place = () => ({
   y: 280 + (Date.now() % 3) * 24,
 })
 
-export function Header({ deck }: { deck: DeckRow | null }) {
+export function Header({
+  deck,
+  activeSlide,
+}: {
+  deck: DeckRow | null
+  activeSlide: SlideDetail | null
+}) {
   const editor = useEditor()
   const mutate = useMutate()
   const app = useApp()
@@ -84,7 +97,12 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   const [cssOpen, setCssOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const active = editor.activeSlideId
-  const canInsert = active != null && editor.mode === 'slide' && editor.canEdit
+  const isMarkdownSlide = activeSlide?.render_mode === 'markdown'
+  // Editing a slide (either mode) — gates the MDown toggle. Component inserters additionally require
+  // spatial mode (they don't apply to a markdown slide).
+  const canEditSlide =
+    active != null && editor.mode === 'slide' && editor.canEdit
+  const canInsert = canEditSlide && !isMarkdownSlide
 
   // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
   // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep
@@ -194,6 +212,35 @@ export function Header({ deck }: { deck: DeckRow | null }) {
   ) {
     if (!deck) return
     mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
+  }
+
+  function setDeckAlign(align: string) {
+    if (!deck) return
+    mutate.setDeckTheme({ id: deck.id, text_align: align, now: Date.now() })
+  }
+
+  function setDefaultMarkdown(on: boolean) {
+    if (!deck) return
+    mutate.setDeckTheme({
+      id: deck.id,
+      default_slide_mode: on ? 'markdown' : '',
+      now: Date.now(),
+    })
+  }
+
+  // Flip the active slide between spatial + markdown mode (non-destructive; components are preserved).
+  function toggleMarkdownMode() {
+    if (!activeSlide) return
+    const before = activeSlide.render_mode === 'markdown' ? 'markdown' : ''
+    const next = before === 'markdown' ? '' : 'markdown'
+    const apply = (m: string) =>
+      mutate.setSlideMode({ id: activeSlide.id, render_mode: m, now: Date.now() })
+    apply(next)
+    history.push({
+      label: next === 'markdown' ? 'Markdown mode' : 'Spatial mode',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
   }
 
   async function doExport(kind: 'json' | 'html') {
@@ -348,6 +395,25 @@ export function Header({ deck }: { deck: DeckRow | null }) {
           </>
         )}
 
+        {canEditSlide && (
+          <>
+            <div className="hdr__sep" />
+            <div className="hdr__group">
+              <button
+                className={'btn' + (isMarkdownSlide ? ' is-active' : '')}
+                onClick={toggleMarkdownMode}
+                title={
+                  isMarkdownSlide
+                    ? 'Switch to spatial components'
+                    : 'Switch to markdown'
+                }
+              >
+                <FileText size={16} /> <span className="lbl">MDown</span>
+              </button>
+            </div>
+          </>
+        )}
+
         {editor.canEdit && (
           <>
             <div className="hdr__sep" />
@@ -392,6 +458,8 @@ export function Header({ deck }: { deck: DeckRow | null }) {
                     onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
                     onText={setTextTheme}
                     onTextLive={setTextThemeLive}
+                    onAlign={setDeckAlign}
+                    onDefaultMarkdown={setDefaultMarkdown}
                   />
                 )}
               </div>
@@ -553,6 +621,8 @@ function ThemePopover({
   onCustomSurfaceLive,
   onText,
   onTextLive,
+  onAlign,
+  onDefaultMarkdown,
 }: {
   deck: DeckRow
   onBackground: (value: string) => void
@@ -577,7 +647,10 @@ function ThemePopover({
       >
     >,
   ) => void
+  onAlign: (align: string) => void
+  onDefaultMarkdown: (on: boolean) => void
 }) {
+  const align = deck.text_align || 'left'
   return (
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
       <div className="insp__row">
@@ -642,6 +715,39 @@ function ThemePopover({
             onLive={(hex) => onTextLive({ body_color: hex })}
           />
         </div>
+      </div>
+
+      <div className="theme__group">
+        <div className="theme__label">Layout</div>
+        <div className="insp__row">
+          <span>Align</span>
+          <div className="seg seg--align">
+            {(
+              [
+                ['left', AlignLeft],
+                ['center', AlignCenter],
+                ['right', AlignRight],
+              ] as const
+            ).map(([value, Icon]) => (
+              <button
+                key={value}
+                className={align === value ? 'is-active' : ''}
+                title={`Align ${value}`}
+                onClick={() => onAlign(value)}
+              >
+                <Icon size={15} />
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className="theme__check">
+          <input
+            type="checkbox"
+            checked={deck.default_slide_mode === 'markdown'}
+            onChange={(e) => onDefaultMarkdown(e.target.checked)}
+          />
+          <span>New slides use Markdown</span>
+        </label>
       </div>
     </div>
   )

@@ -394,6 +394,12 @@ button {
   color: var(--coral);
   box-shadow: var(--shadow-sm);
 }
+/* Icon-only alignment segment (theme popover + markdown editor bar). */
+.seg--align button {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+}
 
 .editor__body {
   flex: 1;
@@ -627,6 +633,155 @@ button {
   overflow: hidden;
   background: #fff;
   color: #111;
+}
+
+/* ---- markdown mode (stage preview + editor panel) ---- */
+.stage--md {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+}
+.md-preview {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.md-editor {
+  flex: 0 0 auto;
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+.md-editor__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.md-editor__title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.md-editor__align {
+  display: flex;
+  gap: 2px;
+}
+.md-editor__ta {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+  border: 0;
+  outline: none;
+  padding: 12px 16px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Droid Sans Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+/* The markdown render scope — one place both the app surfaces and the impress export style (the
+   export inlines a mirror of these rules; keep them in sync). Theme flows in via CSS vars set on the
+   enclosing slide container (themeVars). */
+.strut-md {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 64px 88px;
+  overflow: hidden;
+  font-family: var(--strut-body-font, 'Lato', sans-serif);
+  color: var(--strut-body-color, #111);
+  text-align: var(--strut-text-align, left);
+  line-height: 1.35;
+  font-size: 32px;
+}
+.strut-md > *:first-child {
+  margin-top: 0;
+}
+.strut-md h1,
+.strut-md h2,
+.strut-md h3,
+.strut-md h4 {
+  font-family: var(--strut-heading-font, 'Lato', sans-serif);
+  color: var(--strut-heading-color, #111);
+  line-height: 1.1;
+  margin: 0 0 0.4em;
+  font-weight: 700;
+}
+.strut-md h1 {
+  font-size: 88px;
+}
+.strut-md h2 {
+  font-size: 64px;
+}
+.strut-md h3 {
+  font-size: 48px;
+}
+.strut-md h4 {
+  font-size: 38px;
+}
+.strut-md p,
+.strut-md ul,
+.strut-md ol,
+.strut-md blockquote,
+.strut-md pre {
+  margin: 0 0 0.6em;
+}
+.strut-md ul,
+.strut-md ol {
+  padding-left: 1.3em;
+}
+.strut-md li {
+  margin: 0.15em 0;
+}
+.strut-md a {
+  color: inherit;
+  text-decoration: underline;
+}
+.strut-md code {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 0.8em;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+}
+.strut-md pre {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.7em 1em;
+  border-radius: 8px;
+  overflow: auto;
+}
+.strut-md pre code {
+  background: none;
+  padding: 0;
+}
+.strut-md blockquote {
+  border-left: 4px solid rgba(0, 0, 0, 0.18);
+  padding-left: 0.8em;
+  opacity: 0.85;
+}
+.strut-md img {
+  max-width: 100%;
+}
+.strut-md table {
+  border-collapse: collapse;
+}
+.strut-md td,
+.strut-md th {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0.3em 0.6em;
 }
 
 /* component wrapper on the canvas */
@@ -1079,6 +1234,16 @@ button {
   font-size: 11px;
   color: var(--muted);
   letter-spacing: 0.06em;
+}
+.theme__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.theme__check input {
+  accent-color: var(--coral);
 }
 .popover--theme select {
   flex: 1;

@@ -12,20 +12,28 @@ import {
   useState,
 } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
+import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
-import { cmpStyle, componentSize, renderInner, themeVars } from './render'
+import {
+  cmpStyle,
+  componentSize,
+  MarkdownSurface,
+  renderInner,
+  themeVars,
+} from './render'
 import {
   backgroundImage,
   composeBackground,
   resolveBackground,
   resolveSurface,
+  resolveTextAlign,
   textTypeOf,
 } from './types'
-import type { AnyComponent, DeckThemeFields } from './types'
+import type { AnyComponent, DeckThemeFields, TextAlign } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
@@ -97,6 +105,10 @@ export function Stage({
   )
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
+  // Markdown mode measures the preview area (which excludes the editor panel) so the slide fits the
+  // space actually available to it. Both fit hooks run every render to keep hook order stable.
+  const mdPreviewRef = useRef<HTMLDivElement>(null)
+  const mdScale = useFitScale(mdPreviewRef, SLIDE_W, SLIDE_H)
   const mutate = useMutate()
   const editor = useEditor()
   const history = useHistory()
@@ -472,6 +484,47 @@ export function Stage({
     window.addEventListener('pointerup', up)
   }
 
+  // Markdown mode: the operating table shows the rendered full-slide markdown surface (scaled to fit
+  // like the spatial canvas) plus an editing panel. All the spatial hooks above still run — only the
+  // rendered output branches — so hook order stays stable when the active slide flips modes.
+  if (slideData.render_mode === 'markdown') {
+    return (
+      <div
+        className="stage stage--md"
+        ref={stageRef}
+        style={{ background: composeBackground(surf, surfImg) }}
+      >
+        <UserStyle css={deck?.custom_stylesheet} />
+        <div className="md-preview" ref={mdPreviewRef}>
+          <div
+            className="slide-surface"
+            style={{ width: SLIDE_W * mdScale, height: SLIDE_H * mdScale }}
+          >
+            <div
+              className="slide-canvas strut-surface"
+              style={{
+                width: SLIDE_W,
+                height: SLIDE_H,
+                transform: `scale(${mdScale})`,
+                background: composeBackground(bg, bgImg),
+                ...themeVars(deck, slideData),
+              }}
+            >
+              <MarkdownSurface markdown={slideData.markdown} />
+            </div>
+          </div>
+        </div>
+        {editor.canEdit && (
+          <MarkdownEditor
+            key={slideData.id}
+            slide={slideData}
+            deckAlign={deck?.text_align ?? ''}
+          />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div
       className="stage"
@@ -496,7 +549,7 @@ export function Stage({
             height: SLIDE_H,
             transform: `scale(${scale})`,
             background: composeBackground(bg, bgImg),
-            ...themeVars(deck),
+            ...themeVars(deck, slideData),
           }}
         >
           {componentRefs.map((component) => (
@@ -667,5 +720,87 @@ function TextEditor({
         }}
       />
     </>
+  )
+}
+
+// The markdown editing panel (spec: side/overlay textarea, CodeMirror is a later upgrade). Keyed by
+// slide id at the call site so it remounts per slide — the local `draft` is seeded from the row on
+// mount, then streams `.folded` writes for a live preview and records ONE undo step per edit session
+// (on blur). The alignment chips write the per-slide `text_align` override.
+function MarkdownEditor({
+  slide,
+  deckAlign,
+}: {
+  // Narrowed (not the whole SlideDetail): the columns are nullable on legacy rows that predate the
+  // markdown migration, so declare them so at the boundary.
+  slide: { id: string; markdown: string | null; text_align: string | null }
+  deckAlign: string
+}) {
+  const mutate = useMutate()
+  const history = useHistory()
+  const [draft, setDraft] = useState(slide.markdown ?? '')
+  const baselineRef = useRef(slide.markdown ?? '')
+
+  function onChange(value: string) {
+    setDraft(value)
+    mutate.setSlideMarkdown.folded(
+      { key: slide.id },
+      { id: slide.id, markdown: value, now: Date.now() },
+    )
+  }
+
+  // Commit the edit session as one undoable step (undo/redo swap the whole source).
+  function commit() {
+    const before = baselineRef.current
+    if (draft === before) return
+    baselineRef.current = draft
+    const after = draft
+    const apply = (markdown: string) =>
+      mutate.setSlideMarkdown({ id: slide.id, markdown, now: Date.now() })
+    apply(after)
+    history.push({
+      label: 'Edit markdown',
+      redo: () => apply(after),
+      undo: () => apply(before),
+    })
+  }
+
+  const align = resolveTextAlign(slide.text_align, deckAlign)
+  function setAlign(next: TextAlign) {
+    mutate.setSlideTheme({ id: slide.id, text_align: next, now: Date.now() })
+  }
+
+  return (
+    <div className="md-editor">
+      <div className="md-editor__bar">
+        <span className="md-editor__title">Markdown</span>
+        <div className="seg seg--align">
+          {(
+            [
+              ['left', AlignLeft],
+              ['center', AlignCenter],
+              ['right', AlignRight],
+            ] as const
+          ).map(([value, Icon]) => (
+            <button
+              key={value}
+              className={align === value ? 'is-active' : ''}
+              title={`Align ${value}`}
+              onClick={() => setAlign(value)}
+            >
+              <Icon size={15} />
+            </button>
+          ))}
+        </div>
+      </div>
+      <textarea
+        className="md-editor__ta"
+        value={draft}
+        placeholder={'# Slide title\n\nWrite **markdown** here…'}
+        spellCheck={false}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={commit}
+      />
+    </div>
   )
 }

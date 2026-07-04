@@ -19,7 +19,10 @@ export function SlideWell({
   deck,
 }: {
   slides: SlideDetail[]
-  deck: ({ background: string } & DeckThemeFields) | null
+  deck:
+    | ({ background: string; default_slide_mode?: string | null } &
+        DeckThemeFields)
+    | null
 }) {
   const editor = useEditor()
   const mutate = useMutate()
@@ -90,6 +93,8 @@ export function SlideWell({
       sort: keyBetween(before?.sort, after?.sort),
       x: between(before?.x, after?.x, 0),
       y: between(before?.y, after?.y, 0),
+      // New slides inherit the deck's default render mode (spec: deck-level markdown default).
+      render_mode: deck?.default_slide_mode ?? '',
       now: Date.now(),
     }
     mutate.addSlide(args)
@@ -112,6 +117,7 @@ export function SlideWell({
       sort: s.sort,
       x: s.x,
       y: s.y,
+      render_mode: s.render_mode,
       now,
     })
     mutate.setSlideTransform({
@@ -125,13 +131,16 @@ export function SlideWell({
       imp_scale: s.imp_scale,
       now,
     })
-    if (s.background || s.surface)
+    if (s.background || s.surface || s.text_align)
       mutate.setSlideTheme({
         id: s.id,
         background: s.background,
         surface: s.surface,
+        text_align: s.text_align,
         now,
       })
+    if (s.markdown)
+      mutate.setSlideMarkdown({ id: s.id, markdown: s.markdown, now })
     for (const c of comps) reinsertComponent(mutate, c)
   }
 

@@ -9,7 +9,7 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { cmpStyle, renderInner, themeVars } from './render'
+import { cmpStyle, MarkdownSurface, renderInner, themeVars } from './render'
 import { backgroundImage, composeBackground, resolveBackground } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -59,7 +59,7 @@ function SlideFrame({
           resolveBackground(slide.background, deck?.background),
           backgroundImage(slide.background, deck?.background),
         ),
-        ...themeVars(deck),
+        ...themeVars(deck, slide),
       }}
     >
       {children}
@@ -80,6 +80,15 @@ export function SlideView({
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void
 }) {
+  // Markdown mode: one full-slide markdown surface in place of the component canvas (spec: a slide
+  // is either spatial-component mode or markdown mode). Components stay in the DB, just unrendered.
+  if (slide.render_mode === 'markdown') {
+    return (
+      <SlideFrame slide={slide} deck={deck} width={width}>
+        <MarkdownSurface markdown={slide.markdown} />
+      </SlideFrame>
+    )
+  }
   const components = mergeComponentRefs(slide)
   return (
     <SlideFrame slide={slide} deck={deck} width={width}>

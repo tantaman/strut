@@ -39,6 +39,8 @@ import type {
   SetDeckVisibilityArgs,
   SetDisplayNameArgs,
   SetShapeFillArgs,
+  SetSlideMarkdownArgs,
+  SetSlideModeArgs,
   SetSlideThemeArgs,
   SetSlideTransformArgs,
   SetTextArgs,
@@ -145,6 +147,8 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
       heading_color: '',
       body_font: '',
       body_color: '',
+      default_slide_mode: '',
+      text_align: '',
     }),
 
   renameDeck: (tx, a: RenameDeckArgs, ctx) =>
@@ -196,6 +200,9 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     if (a.heading_color !== undefined) row.heading_color = a.heading_color
     if (a.body_font !== undefined) row.body_font = a.body_font
     if (a.body_color !== undefined) row.body_color = a.body_color
+    if (a.text_align !== undefined) row.text_align = a.text_align
+    if (a.default_slide_mode !== undefined)
+      row.default_slide_mode = a.default_slide_mode
     if (a.custom_stylesheet !== undefined)
       row.custom_stylesheet = a.custom_stylesheet
     if (a.chosen_presenter !== undefined)
@@ -227,6 +234,8 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
         surface: '',
         created: a.now,
         modified: a.now,
+        markdown: '',
+        render_mode: a.render_mode ?? '',
       },
       `? IN ${EDITABLE_DECKS}`,
       [a.deckId, ctx.user, ctx.user],
@@ -278,11 +287,32 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
     const row: Record<string, WireValue> = { modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
+    if (a.text_align !== undefined) row.text_align = a.text_align
     updateIf(tx, 'slide', a.id, row, `deck_id IN ${EDITABLE_DECKS}`, [
       ctx.user,
       ctx.user,
     ])
   },
+
+  setSlideMarkdown: (tx, a: SetSlideMarkdownArgs, ctx) =>
+    updateIf(
+      tx,
+      'slide',
+      a.id,
+      { markdown: a.markdown, modified: a.now },
+      `deck_id IN ${EDITABLE_DECKS}`,
+      [ctx.user, ctx.user],
+    ),
+
+  setSlideMode: (tx, a: SetSlideModeArgs, ctx) =>
+    updateIf(
+      tx,
+      'slide',
+      a.id,
+      { render_mode: a.render_mode, modified: a.now },
+      `deck_id IN ${EDITABLE_DECKS}`,
+      [ctx.user, ctx.user],
+    ),
 
   // All five inserts collapse to one `component` row: `type` + spatial base + `fill` column + the
   // type-specific `props` JSON (serializeProps mirrors the client byte-for-byte). `fill` is '' for

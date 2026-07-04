@@ -67,6 +67,10 @@ export type SetDeckThemeArgs = {
   heading_color?: string
   body_font?: string
   body_color?: string
+  // Unified theme: deck-wide default text alignment ('' = built-in 'left') and the render_mode
+  // stamped on newly added slides ('' = spatial | 'markdown').
+  text_align?: string
+  default_slide_mode?: string
   custom_stylesheet?: string
   chosen_presenter?: string
   canned_transition?: string
@@ -79,6 +83,8 @@ export type AddSlideArgs = {
   sort: string
   x: number
   y: number
+  // '' = spatial (default) | 'markdown'. Add-slide inherits the deck's default_slide_mode.
+  render_mode?: string
   now: number
 }
 export type DeleteSlideArgs = {
@@ -101,8 +107,13 @@ export type SetSlideThemeArgs = {
   id: string
   background?: string
   surface?: string
+  // Per-slide alignment override ('' = inherit the deck default).
+  text_align?: string
   now: number
 }
+// Markdown mode is a per-slide switch, non-destructive (hidden components stay in the DB).
+export type SetSlideMarkdownArgs = { id: string; markdown: string; now: number }
+export type SetSlideModeArgs = { id: string; render_mode: string; now: number }
 
 type SpatialArgs = {
   id: string
@@ -244,6 +255,8 @@ export const mutators = {
       heading_color: '',
       body_font: '',
       body_color: '',
+      default_slide_mode: '',
+      text_align: '',
     }),
 
   renameDeck: (tx: MutationTx, a: RenameDeckArgs) =>
@@ -265,6 +278,9 @@ export const mutators = {
     if (a.heading_color !== undefined) row.heading_color = a.heading_color
     if (a.body_font !== undefined) row.body_font = a.body_font
     if (a.body_color !== undefined) row.body_color = a.body_color
+    if (a.text_align !== undefined) row.text_align = a.text_align
+    if (a.default_slide_mode !== undefined)
+      row.default_slide_mode = a.default_slide_mode
     if (a.custom_stylesheet !== undefined)
       row.custom_stylesheet = a.custom_stylesheet
     if (a.chosen_presenter !== undefined)
@@ -290,6 +306,8 @@ export const mutators = {
       surface: '',
       created: a.now,
       modified: a.now,
+      markdown: '',
+      render_mode: a.render_mode ?? '',
     }),
 
   deleteSlide: (tx: MutationTx, a: DeleteSlideArgs) => {
@@ -317,8 +335,17 @@ export const mutators = {
     const row: Record<string, WireValue> = { id: a.id, modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
+    if (a.text_align !== undefined) row.text_align = a.text_align
     tx.update('slide', row)
   },
+
+  // Markdown source (per-slide). Non-destructive re. components — a plain column patch.
+  setSlideMarkdown: (tx: MutationTx, a: SetSlideMarkdownArgs) =>
+    tx.update('slide', { id: a.id, markdown: a.markdown, modified: a.now }),
+
+  // Flip a slide between spatial + markdown mode; hidden components are preserved in the DB.
+  setSlideMode: (tx: MutationTx, a: SetSlideModeArgs) =>
+    tx.update('slide', { id: a.id, render_mode: a.render_mode, modified: a.now }),
 
   // One `component` table now (see shared/schema.ts). Each insert stamps `type`, the shared spatial
   // base + `fill` column, and the type-specific `props` JSON (serializeProps keeps client + server

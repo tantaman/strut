@@ -88,7 +88,7 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   return (
     <div className="editor">
-      <Header deck={deck} />
+      <Header deck={deck} activeSlide={activeSlide} />
       {accessResolved && !editor.canEdit && (
         <div className="ro-banner">
           👁 Read-only — you’re viewing this shared deck. Changes are disabled.
