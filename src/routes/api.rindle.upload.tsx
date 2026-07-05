@@ -6,7 +6,8 @@ export const Route = createFileRoute('/api/rindle/upload')({
     handlers: {
       POST: async ({ request }) => {
         const { uploadFromRequest } = await import('../../server/upload')
-        return uploadFromRequest(request)
+        const { getUploadsBucket } = await import('../../server/cf-env')
+        return uploadFromRequest(request, await getUploadsBucket())
       },
     },
   },

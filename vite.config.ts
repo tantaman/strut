@@ -2,9 +2,16 @@ import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { cloudflare } from '@cloudflare/vite-plugin'
 
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+
+// Cloudflare Workers build is opt-in via CF=1 (see `pnpm build:cf` / `pnpm deploy`). Local `pnpm dev`
+// and the default `pnpm build` stay on the Node runtime so the rindled daemon + local upload
+// fallback keep working unchanged. The `cloudflare()` plugin runs the SSR env in workerd and reads
+// wrangler.jsonc (bindings, nodejs_compat) — only wanted for the actual CF deploy target.
+const CF = process.env.CF === '1'
 
 // Server-side secrets the Rindle API + upload handlers read via process.env. Vite doesn't expose
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
@@ -34,6 +41,7 @@ const config = defineConfig(({ mode }) => {
       // connects directly to the daemon (:7601).
     },
     plugins: [
+      ...(CF ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
       // `consolePiping` cross-forwards console between the SSR server and the browser (server logs →
       // browser console, client logs → terminal). That bidirectional forwarding echoes: one server
       // console.error becomes a browser console.error, which pipes back as a server log, re-wrapped

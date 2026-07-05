@@ -13,6 +13,10 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
+    "build:cf": "CF=1 vite build",
+    "preview:cf": "CF=1 vite build && CF=1 vite preview",
+    "deploy": "CF=1 vite build && wrangler deploy -c dist/server/wrangler.json",
+    "cf-typegen": "wrangler types",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
@@ -46,6 +50,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.43.0",
     "@rindle/cli": "^0.2.0",
     "@rindle/react-devtools": "^0.2.0",
     "@tailwindcss/typography": "^0.5.16",
@@ -65,12 +70,7 @@
     "tsx": "^4.22.4",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
-    "vitest": "^4.1.5"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
+    "vitest": "^4.1.5",
+    "wrangler": "^4.107.0"
   }
 }
