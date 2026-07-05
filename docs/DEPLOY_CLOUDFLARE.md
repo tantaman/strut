@@ -20,7 +20,7 @@ to it over the network:
   browser ─────▶ │  Strut SSR app  +  /api/rindle/* (server routes)  +  R2 binding   │
      │           └───────────────┬──────────────────────────────────────────────────┘
      │                           │  https  (RINDLE_DAEMON_URL, Bearer RINDLE_DAEMON_TOKEN)
-     │  wss (VITE_RINDLE_WS)     ▼
+     │  wss (RINDLE_DAEMON_WS)   ▼
      └────────────────▶ ┌──────────────────────────────┐
                         │  rindled daemon (host it!)   │  SQLite + live-query WebSocket
                         │  :7600 control  :7601 ws     │  needs a persistent volume
@@ -34,13 +34,14 @@ small VM/VPS, Fly.io, Railway, Render, a container platform, etc. Requirements:
 
 - Persistent disk for `rindle.db` (and its `-wal`/`-shm` files).
 - Bind to a reachable interface, not just loopback. `daemon.json` ships with `"bindHost":
-  "127.0.0.1"`; change it (e.g. `0.0.0.0`) **and put it behind a TLS-terminating reverse proxy** so
+"127.0.0.1"`; change it (e.g. `0.0.0.0`) **and put it behind a TLS-terminating reverse proxy** so
   only `https`/`wss` is exposed publicly.
 - Set an auth token so the control plane isn't open to the world (the Worker sends
   `Authorization: Bearer <RINDLE_DAEMON_TOKEN>`; see the rindle daemon docs for enabling token auth).
 - Expose two public endpoints:
-  - the **control plane** (`:7600`) as `https://…` → used by the Worker as `RINDLE_DAEMON_URL`
-  - the **live-query WebSocket** (`:7601`) as `wss://…` → used by the browser as `VITE_RINDLE_WS`
+  - the **control plane** (`:7600`) as `https://…` → the Worker's `RINDLE_DAEMON_URL` (server env)
+  - the **live-query WebSocket** (`:7601`) as `wss://…` → `RINDLE_DAEMON_WS` (server env), which the
+    Worker hands to the browser at runtime via `/api/rindle/config` — so no client rebuild per host
 
 > If you don't want to operate a daemon yet, deploy the Worker anyway — it serves and builds fine —
 > but reads/writes will fail until `RINDLE_DAEMON_URL` points at a running daemon.
@@ -91,10 +92,15 @@ Edit the `vars` block:
 
 ```jsonc
 "vars": {
-  "RINDLE_DAEMON_URL": "https://your-daemon-host.example.com",  // your hosted daemon control plane
+  "RINDLE_DAEMON_URL": "https://your-daemon-host.example.com",  // daemon control plane (server-side)
+  "RINDLE_DAEMON_WS": "wss://your-daemon-host.example.com",     // daemon WebSocket (served to browser)
   "R2_PUBLIC_BASE_URL": ""                                       // "" = serve via Worker; or https://pub-xxxx.r2.dev
 }
 ```
+
+Both are **runtime** config — the browser fetches `RINDLE_DAEMON_WS` from `/api/rindle/config` when it
+boots, so pointing at a different daemon is just a `vars` edit + redeploy, **no client rebuild**. (A
+build-time `VITE_RINDLE_WS` in `.env` still works as a local-dev override; runtime config wins when set.)
 
 ### 3. Set secrets (not stored in the repo)
 
@@ -104,18 +110,6 @@ npx wrangler secret put RINDLE_DAEMON_TOKEN     # matches the token your daemon 
 
 With `nodejs_compat`, both `vars` and secrets are surfaced on `process.env` at runtime, so
 `server/rindle-api.ts` keeps reading `process.env.RINDLE_DAEMON_URL` / `RINDLE_DAEMON_TOKEN` unchanged.
-
-### 4. Point the browser at the daemon WebSocket (build-time)
-
-`VITE_RINDLE_WS` is baked into the **client** bundle at build time (it's a `VITE_`-prefixed var), so it
-must be set when you build for production:
-
-```bash
-VITE_RINDLE_WS="wss://your-daemon-host.example.com/ws" pnpm deploy
-```
-
-or put it in `.env` (loaded by `vite.config.ts`). Without it the client falls back to
-`ws://127.0.0.1:7601`, which won't work in production.
 
 ---
 
@@ -130,7 +124,7 @@ pnpm deploy         # CF=1 vite build && wrangler deploy -c dist/server/wrangler
 `CF=1 vite build` runs the app through `@cloudflare/vite-plugin`, producing the Worker at
 `dist/server/index.js`, static assets at `dist/client/`, and the deployable config at
 `dist/server/wrangler.json` (this is why `deploy` passes `-c dist/server/wrangler.json` — the root
-`wrangler.jsonc` is the plugin's *source* config, not a directly-deployable one).
+`wrangler.jsonc` is the plugin's _source_ config, not a directly-deployable one).
 
 ### Scripts
 

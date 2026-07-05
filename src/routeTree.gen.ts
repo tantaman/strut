@@ -17,6 +17,7 @@ import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
 import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
 import { Route as ApiRindleQueryRouteImport } from './routes/api.rindle.query'
 import { Route as ApiRindleMutateRouteImport } from './routes/api.rindle.mutate'
+import { Route as ApiRindleConfigRouteImport } from './routes/api.rindle.config'
 import { Route as ApiRindleUploadsKeyRouteImport } from './routes/api.rindle.uploads.$key'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const ApiRindleMutateRoute = ApiRindleMutateRouteImport.update({
   path: '/api/rindle/mutate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRindleConfigRoute = ApiRindleConfigRouteImport.update({
+  id: '/api/rindle/config',
+  path: '/api/rindle/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRindleUploadsKeyRoute = ApiRindleUploadsKeyRouteImport.update({
   id: '/api/rindle/uploads/$key',
   path: '/api/rindle/uploads/$key',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/deck/$deckId'
     | '/share/$deckId'
+    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/deck/$deckId'
     | '/share/$deckId'
+    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/deck/$deckId'
     | '/share/$deckId'
+    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
+  ApiRindleConfigRoute: typeof ApiRindleConfigRoute
   ApiRindleMutateRoute: typeof ApiRindleMutateRoute
   ApiRindleQueryRoute: typeof ApiRindleQueryRoute
   ApiRindleReadRoute: typeof ApiRindleReadRoute
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRindleMutateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rindle/config': {
+      id: '/api/rindle/config'
+      path: '/api/rindle/config'
+      fullPath: '/api/rindle/config'
+      preLoaderRoute: typeof ApiRindleConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rindle/uploads/$key': {
       id: '/api/rindle/uploads/$key'
       path: '/api/rindle/uploads/$key'
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
+  ApiRindleConfigRoute: ApiRindleConfigRoute,
   ApiRindleMutateRoute: ApiRindleMutateRoute,
   ApiRindleQueryRoute: ApiRindleQueryRoute,
   ApiRindleReadRoute: ApiRindleReadRoute,
