@@ -15,12 +15,18 @@ export function useFitScale(
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const ro = new ResizeObserver(() => {
+    const measure = () => {
       const r = el.getBoundingClientRect()
       setScale(
         Math.max(0.1, Math.min((r.width - pad) / w, (r.height - pad) / h)),
       )
-    })
+    }
+    // Measure synchronously before the browser paints so a freshly-mounted surface never shows a
+    // frame at the placeholder 0.5 scale. This matters when the active slide flips into markdown mode:
+    // the TipTap editor mounts fresh, and without this its canvas would pop from 0.5 to the fitted
+    // scale on the next frame — the stage flicker. The observer then handles later container resizes.
+    measure()
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
   }, [ref, w, h, pad])

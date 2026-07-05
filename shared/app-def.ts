@@ -236,6 +236,12 @@ const spatialBase = (a: SpatialArgs) => ({
   custom_classes: '',
 })
 
+// The render_mode a brand-new deck (and its seed slide) starts in. Markdown-first: most authoring is
+// content-first, and spatial mode is a non-destructive per-slide/-deck toggle away. Only affects newly
+// created decks — existing decks keep their stored default_slide_mode. Seed slide uses this too (see the
+// deck-create call site) so the first slide matches the deck's default rather than falling back to spatial.
+export const DEFAULT_SLIDE_MODE = 'markdown'
+
 export const mutators = {
   createDeck: (tx: MutationTx, a: CreateDeckArgs) =>
     tx.insert('deck', {
@@ -258,7 +264,7 @@ export const mutators = {
       heading_color: '',
       body_font: '',
       body_color: '',
-      default_slide_mode: '',
+      default_slide_mode: DEFAULT_SLIDE_MODE,
       text_align: '',
     }),
 

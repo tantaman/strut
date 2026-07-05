@@ -48,6 +48,7 @@ import type {
   TouchDeckArgs,
   TransformComponentArgs,
 } from '../shared/app-def.ts'
+import { DEFAULT_SLIDE_MODE } from '../shared/app-def.ts'
 
 export type User = string
 const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
@@ -148,7 +149,7 @@ const mutators = defineApiMutators<User, ApiMutators<User>>({
       heading_color: '',
       body_font: '',
       body_color: '',
-      default_slide_mode: '',
+      default_slide_mode: DEFAULT_SLIDE_MODE,
       text_align: '',
     }),
 
