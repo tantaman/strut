@@ -137,7 +137,7 @@ function NewDeckModal({
   onCancel: () => void
   onCreate: (title: string) => void
 }) {
-  const [title, setTitle] = useState('Untitled')
+  const [title, setTitle] = useState('')
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -145,10 +145,11 @@ function NewDeckModal({
         <input
           type="text"
           autoFocus
+          placeholder="Untitled"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && title.trim()) onCreate(title.trim())
+            if (e.key === 'Enter') onCreate(title.trim() || 'Untitled')
             if (e.key === 'Escape') onCancel()
           }}
         />
@@ -158,8 +159,7 @@ function NewDeckModal({
           </button>
           <button
             className="btn btn--primary"
-            disabled={!title.trim()}
-            onClick={() => onCreate(title.trim())}
+            onClick={() => onCreate(title.trim() || 'Untitled')}
           >
             Create
           </button>
