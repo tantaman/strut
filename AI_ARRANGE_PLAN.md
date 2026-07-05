@@ -94,22 +94,19 @@ apply). Phase 5+ layers on OAuth breadth and richness.
 
 ## Phase 0 — Real authentication (prerequisite)
 
-Today identity is a browser-minted UUID sent as a spoofable `x-user` header (`src/rindle/user.ts`,
-`src/rindle/client.ts:42`), trusted verbatim by the server (`server/rindle-api.ts` `handleRindleJson`,
-~`:572`; gates at ~`:557` only check "non-empty principal"). That is fine for anonymous local editing
-but unacceptable once a real, paid credential is attached to a user.
+Specced separately in **[`AUTH_PLAN.md`](./AUTH_PLAN.md)**: Better-Auth on a new Cloudflare **D1**
+binding, GitHub/Google (+ Apple) social sign-in, and the cutover from the spoofable `x-user` header
+(`src/rindle/user.ts`, `src/rindle/client.ts:42`) to a server-verified session principal in
+`server/rindle-api.ts`. A server-issued session (guest or social-linked) is unforgeable, which is the
+actual security requirement here — you cannot attach paid LLM credentials to a spoofable identity.
 
-- Introduce an authenticated session (provider TBD) that yields a **server-verified** user id.
-- Replace the trusted `x-user` header with the session principal in `handleRindleJson`; keep row-level
-  `deckAccess(user)` / `publicAccess(token)` gates in `server/queries.ts` unchanged.
-- Public share links (`visibility='public-read'` + `share_token`) stay anonymous — arranging requires a
-  logged-in owner/editor.
+Net effect for this plan: an unforgeable per-user id, and a **D1 database now exists** in the Worker
+(reused by Phase 1 below).
 
 ## Phase 1 — Credential store + "Connect your model" (BYOK first)
 
-- **New encrypted per-user token store.** The Worker has no D1/KV today (`dist/server/wrangler.json`
-  bindings are R2-only). Add a **KV namespace** binding (e.g. `MODEL_CREDS`) in `wrangler.jsonc`; store
-  `{ provider, ciphertext }` keyed by user, envelope-encrypted with a new Worker secret
+- **Encrypted per-user token store — a table in the D1 database added by `AUTH_PLAN.md`** (no separate
+  KV needed). Store `{ user_id, provider, ciphertext }`, envelope-encrypted with a new Worker secret
   `MODEL_CRED_KEY` (`wrangler secret put`). **Not** in Rindle, **not** returned to the browser.
 - **Routes** (TanStack Start, mirroring `src/routes/api.rindle.*`):
   - `src/routes/api.model.connect.tsx` — POST: accept a BYOK key (Phase 1) or start OAuth (Phase 5);
@@ -171,9 +168,8 @@ but unacceptable once a real, paid credential is attached to a user.
   plan does both but order-only is a valid smaller Phase 1–4.
 - **OAuth vs. BYOK for v1:** BYOK-first ships in days and works with every provider; committing to OAuth
   up front improves UX but pulls Phase 0 (real auth) + token custody onto the critical path.
-- **Credential store:** Cloudflare KV (recommended, simplest) vs. a D1 table vs. a server-only
-  (never-synced) table in the rindled SQLite. All must be envelope-encrypted and never returned to the
-  browser.
+- **Credential store:** resolved → a table in the D1 database from `AUTH_PLAN.md`, envelope-encrypted,
+  never returned to the browser. (Was: separate KV — dropped now that D1 exists.)
 - **Preview substrate:** React state (recommended) vs. a Rindle local-only table (matches `notes.md`,
   more infra).
 
