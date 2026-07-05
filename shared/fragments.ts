@@ -12,11 +12,10 @@
 // one /query), and z-order across mixed types is a plain ORDER BY (no JS merge of five arrays).
 
 import { defineFragment } from '@rindle/client'
-import { component, slide } from './schema.ts'
-import { rels } from './app-def.ts'
+import { component, rels, slide } from './app-def.ts'
 
-// One leaf fragment for every component. `props` is a JSON string decoded per `type` in app code
-// (src/editor/types.ts). Selecting explicitly keeps the sync footprint tight for these high-volume rows.
+// One leaf fragment for every component. `props` is a typed json<ComponentProps>() object (refined in
+// app-def). Selecting explicitly keeps the sync footprint tight for these high-volume rows.
 export const ComponentFragment = defineFragment(component, (f) =>
   f.select(
     'id',

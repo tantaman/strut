@@ -11,8 +11,7 @@
 
 import { and, defineQuery, existsNoSync, or } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
-import { q, rels } from '../shared/app-def.ts'
-import { deck, deck_share } from '../shared/schema.ts'
+import { q, rels, deck, deck_share } from '../shared/app-def.ts'
 import { deckDetailBody, profileQuery } from '../shared/queries.ts'
 
 type User = string

@@ -6,5 +6,6 @@
 -- (it was never populated — the feature had no users when this landed).
 
 -- slide.doc: the TipTap/ProseMirror document, JSON-stringified, rendered when render_mode = 'markdown'
--- ('' / NULL = an empty document).
-ALTER TABLE slide ADD COLUMN doc TEXT;
+-- ('' = an empty document). Kept as TEXT for now; a future migration can promote it to a typed
+-- json<TipTapDoc>() column (mirrors component.props) once the editor read/write path is adapted.
+ALTER TABLE slide ADD COLUMN doc TEXT NOT NULL DEFAULT '';

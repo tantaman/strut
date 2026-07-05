@@ -5,7 +5,6 @@ import { Plus, Upload, X } from 'lucide-react'
 import { decksQuery } from '../../shared/queries'
 import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
-import { currentUser } from '../rindle/user'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
 
@@ -21,7 +20,7 @@ function Dashboard() {
   function createDeck(title: string) {
     const id = newId()
     const now = Date.now()
-    mutate.createDeck({ id, title, ownerId: currentUser(), now })
+    mutate.createDeck({ id, title, now })
     // Seed the deck with one blank slide so the editor opens onto something. Match the deck's default
     // render mode (markdown-first) so the first slide isn't an odd spatial exception to the deck default.
     mutate.addSlide({

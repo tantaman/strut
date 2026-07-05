@@ -4,8 +4,8 @@
 -- their opaque Strut id. id = the user principal (the same value carried in x-user / owner_id).
 -- World-readable (display names aren't secret); writable only to its own owner (enforced server-side).
 CREATE TABLE IF NOT EXISTS user_profile (
-  id           TEXT,
-  display_name TEXT,
-  updated      REAL,
+  id           TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  updated      REAL NOT NULL,
   PRIMARY KEY (id)
 );

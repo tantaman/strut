@@ -34,6 +34,9 @@ async function create() {
   const app = await createRindleClient({
     schema,
     mutators,
+    // The acting principal for a shared mutator's ctx.user — the local user the optimistic prediction
+    // writes under (the API server injects its OWN authenticated user for the authoritative run).
+    user: () => currentUser(),
     api: {
       // NOTE: request url = api.url + routes.query, and routes.query defaults to the ABSOLUTE
       // "/api/rindle/query". So url MUST be "" here (not "/api", which double-prefixes). See
