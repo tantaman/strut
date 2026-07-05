@@ -51,8 +51,8 @@ function Dashboard() {
         <div>
           <h1 className="dash__title">Your decks</h1>
           <p className="dash__sub">
-            {decks.length} presentation{decks.length === 1 ? '' : 's'}, local-first
-            on Rindle.
+            {decks.length} presentation{decks.length === 1 ? '' : 's'},
+            local-first on Rindle.
           </p>
         </div>
         <div className="dash__actions">

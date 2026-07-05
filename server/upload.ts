@@ -3,20 +3,22 @@
 // Content-Type; we store the object and return its public URL, saved as the component's `src`. This
 // replaces inlining images as base64 data URLs in the deck rows.
 //
-// Storage: Cloudflare R2 (S3-compatible) when the R2_* env vars are set; otherwise a local-disk
-// fallback under .uploads/ (served back by serveUploadByKey) so uploads work in dev with zero
-// config. See .env.example.
+// Storage, in priority order (see docs/DEPLOY_CLOUDFLARE.md):
+//   1. Native Cloudflare R2 binding — when deployed to Workers (env.STRUT_UPLOADS is passed in). No
+//      S3 credentials needed. This is the production path on Cloudflare.
+//   2. R2 over the S3-compatible API — when the R2_* env vars are set on a non-Workers host.
+//   3. Local disk under .uploads/ — the zero-config dev fallback (served back by serveUploadByKey).
 
-import { randomUUID } from 'node:crypto'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import type { S3Client as S3ClientT } from '@aws-sdk/client-s3'
+import type { R2BucketLike } from './cf-env.ts'
 
 // Local-fallback files are served back by serveUploadByKey (Vite/Start won't serve files written at
-// runtime). With R2 configured, URLs point at the bucket instead.
+// runtime). With R2 (binding or S3) configured, URLs point at the bucket / a Worker-served path.
 export const UPLOAD_SERVE_PREFIX = '/api/rindle/uploads/'
-const LOCAL_DIR = join(process.cwd(), '.uploads')
+const LOCAL_DIR_NAME = '.uploads'
 
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB
+const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable'
 
 // Allowed image mimes → file extension (also bounds what we accept).
 const EXT: Record<string, string> = {
@@ -35,6 +37,27 @@ class UploadError extends Error {
     this.status = status
   }
 }
+
+// ---- storage backend 1: native R2 binding (Cloudflare Workers) ----------------------------------
+
+async function putR2Binding(
+  r2: R2BucketLike,
+  key: string,
+  body: Uint8Array,
+  contentType: string,
+): Promise<string> {
+  await r2.put(key, body, {
+    httpMetadata: { contentType, cacheControl: IMMUTABLE_CACHE },
+  })
+  // If a public bucket / custom domain is configured, hand back its CDN URL. Otherwise serve the
+  // object back through the Worker (serveUploadByKey) so a private bucket works with no extra setup.
+  const base = process.env.R2_PUBLIC_BASE_URL
+  return base
+    ? `${base.replace(/\/+$/, '')}/${key}`
+    : `${UPLOAD_SERVE_PREFIX}${key}`
+}
+
+// ---- storage backend 2: R2 over the S3-compatible API (non-Workers host) ------------------------
 
 interface R2Config {
   accountId: string
@@ -55,66 +78,96 @@ function r2Config(): R2Config | null {
   return { accountId, accessKeyId, secretAccessKey, bucket, publicBase }
 }
 
-// Memoized S3 client (AWS SDK imported lazily so the local-fallback path needs nothing at runtime).
-let s3Promise: Promise<{
-  client: import('@aws-sdk/client-s3').S3Client
-  PutObjectCommand: typeof import('@aws-sdk/client-s3').PutObjectCommand
-}> | null = null
-function getS3(cfg: R2Config) {
-  s3Promise ??= (async () => {
-    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
-    const client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: cfg.accessKeyId,
-        secretAccessKey: cfg.secretAccessKey,
-      },
-    })
-    return { client, PutObjectCommand }
-  })()
-  return s3Promise
+// Memoized S3 client (AWS SDK imported lazily so the binding/local paths need nothing at runtime; the
+// dynamic import is ESM-cached, so re-importing PutObjectCommand per call in putS3 is free).
+let s3ClientPromise: Promise<S3ClientT> | null = null
+function getS3Client(cfg: R2Config): Promise<S3ClientT> {
+  s3ClientPromise ??= import('@aws-sdk/client-s3').then(
+    ({ S3Client }) =>
+      new S3Client({
+        region: 'auto',
+        endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: cfg.accessKeyId,
+          secretAccessKey: cfg.secretAccessKey,
+        },
+      }),
+  )
+  return s3ClientPromise
 }
 
-async function putR2(
+async function putS3(
   cfg: R2Config,
   key: string,
-  body: Buffer,
+  body: Uint8Array,
   contentType: string,
 ): Promise<string> {
-  const { client, PutObjectCommand } = await getS3(cfg)
+  const [client, { PutObjectCommand }] = await Promise.all([
+    getS3Client(cfg),
+    import('@aws-sdk/client-s3'),
+  ])
   await client.send(
     new PutObjectCommand({
       Bucket: cfg.bucket,
       Key: key,
       Body: body,
       ContentType: contentType,
-      CacheControl: 'public, max-age=31536000, immutable',
+      CacheControl: IMMUTABLE_CACHE,
     }),
   )
   return `${cfg.publicBase.replace(/\/+$/, '')}/${key}`
 }
 
-async function putLocal(key: string, body: Buffer): Promise<string> {
-  await mkdir(LOCAL_DIR, { recursive: true })
-  await writeFile(join(LOCAL_DIR, key), body)
+// ---- storage backend 3: local disk (dev fallback) -----------------------------------------------
+
+// node:* imported lazily so this module loads clean on the Workers runtime (the local path is never
+// reached there — a binding is always present).
+async function putLocal(key: string, body: Uint8Array): Promise<string> {
+  const { mkdir, writeFile } = await import('node:fs/promises')
+  const { join } = await import('node:path')
+  const dir = join(process.cwd(), LOCAL_DIR_NAME)
+  await mkdir(dir, { recursive: true })
+  await writeFile(join(dir, key), body)
   // Served back by serveUploadByKey() (a Start server route).
   return `${UPLOAD_SERVE_PREFIX}${key}`
 }
 
-// GET /api/rindle/uploads/<key> — stream a locally-stored fallback image.
-export async function serveUploadByKey(key: string): Promise<Response> {
+// ---- serve (GET /api/rindle/uploads/<key>) ------------------------------------------------------
+
+// Streams a stored image back: from the R2 binding when present (private bucket, Workers), else from
+// local disk (dev). With R2_PUBLIC_BASE_URL set, image src URLs point at the bucket and never hit this.
+export async function serveUploadByKey(
+  key: string,
+  r2: R2BucketLike | null,
+): Promise<Response> {
   // Only a bare filename — no path traversal.
   if (!/^[\w-]+\.[a-z0-9]+$/i.test(key))
     return new Response('bad key', { status: 400 })
   const ext = key.split('.').pop()!.toLowerCase()
-  const mime = Object.entries(EXT).find(([, e]) => e === ext)?.[0]
+  const mimeFromExt = Object.entries(EXT).find(([, e]) => e === ext)?.[0]
+
+  if (r2) {
+    const obj = await r2.get(key)
+    if (!obj) return new Response('not found', { status: 404 })
+    return new Response(obj.body, {
+      headers: {
+        'content-type':
+          obj.httpMetadata?.contentType ??
+          mimeFromExt ??
+          'application/octet-stream',
+        'cache-control': IMMUTABLE_CACHE,
+      },
+    })
+  }
+
+  const { readFile } = await import('node:fs/promises')
+  const { join } = await import('node:path')
   try {
-    const body = await readFile(join(LOCAL_DIR, key))
+    const body = await readFile(join(process.cwd(), LOCAL_DIR_NAME, key))
     return new Response(body, {
       headers: {
-        'content-type': mime ?? 'application/octet-stream',
-        'cache-control': 'public, max-age=31536000, immutable',
+        'content-type': mimeFromExt ?? 'application/octet-stream',
+        'cache-control': IMMUTABLE_CACHE,
       },
     })
   } catch {
@@ -122,8 +175,13 @@ export async function serveUploadByKey(key: string): Promise<Response> {
   }
 }
 
-// POST /api/rindle/upload — store the request body image, return { url }.
-export async function uploadFromRequest(request: Request): Promise<Response> {
+// ---- upload (POST /api/rindle/upload) -----------------------------------------------------------
+
+// Store the request body image, return { url }. `r2` is the native binding on Workers, else null.
+export async function uploadFromRequest(
+  request: Request,
+  r2: R2BucketLike | null,
+): Promise<Response> {
   try {
     const user = request.headers.get('x-user') ?? ''
     if (!user) throw new UploadError('unauthorized', 401)
@@ -140,16 +198,19 @@ export async function uploadFromRequest(request: Request): Promise<Response> {
     if (declared > MAX_BYTES)
       throw new UploadError('image must be under 10 MB', 413)
 
-    const body = Buffer.from(await request.arrayBuffer())
-    if (body.length === 0) throw new UploadError('empty upload', 400)
-    if (body.length > MAX_BYTES)
+    const body = new Uint8Array(await request.arrayBuffer())
+    if (body.byteLength === 0) throw new UploadError('empty upload', 400)
+    if (body.byteLength > MAX_BYTES)
       throw new UploadError('image must be under 10 MB', 413)
 
-    const key = `${randomUUID()}.${ext}`
-    const cfg = r2Config()
-    const url = cfg
-      ? await putR2(cfg, key, body, contentType)
-      : await putLocal(key, body)
+    // crypto.randomUUID() is a global in both Node 20+ and the Workers runtime.
+    const key = `${crypto.randomUUID()}.${ext}`
+    const cfg = r2 ? null : r2Config()
+    const url = r2
+      ? await putR2Binding(r2, key, body, contentType)
+      : cfg
+        ? await putS3(cfg, key, body, contentType)
+        : await putLocal(key, body)
 
     return Response.json({ url })
   } catch (err) {

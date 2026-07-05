@@ -1,6 +1,10 @@
 {
   "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
-  
+  // wrangler's generated types pull in workerd runtime globals that shadow the DOM lib and break
+  // browser-side type inference (e.g. Response.json()). The two server files that need R2 types use
+  // a minimal local interface instead. Regenerate with `pnpm cf-typegen` if you want full binding types.
+  "exclude": ["worker-configuration.d.ts"],
+
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

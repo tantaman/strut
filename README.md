@@ -25,9 +25,9 @@ truth; this app implements it.
 - **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7600` control, `:7601` ws).
 - **API** — TanStack Start server routes (`src/routes/api.rindle.*`) host the stateless Rindle API
   (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators, and register the named
-  queries. Same-origin, no separate process. Image uploads (`server/upload.ts`) go to Cloudflare R2
-  when configured, else a local dev fallback. Mirrors the predicted client mutators in
-  `shared/app-def.ts`.
+  queries. Same-origin, no separate process. Image uploads (`server/upload.ts`) go to Cloudflare R2 —
+  a native bucket binding on Workers, the S3 API on other hosts, else a local dev fallback. Mirrors the
+  predicted client mutators in `shared/app-def.ts`.
 - **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
   live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket connects
   directly to the daemon (`:7601`).
@@ -82,6 +82,14 @@ pnpm test             # vitest
 pnpm lint             # eslint
 pnpm check            # prettier check
 ```
+
+## Deploying to Cloudflare
+
+The web app (SSR + `/api/rindle/*` routes) deploys to **Cloudflare Workers**, with image uploads in
+**R2** via a native bucket binding. The `rindled` daemon can't run on Workers and must be hosted
+separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it with `wrangler`. Local
+`pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
+for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
 ## History
 
