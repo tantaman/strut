@@ -18,6 +18,7 @@ const CF = process.env.CF === '1'
 // (In production the host provides real env vars.)
 const SERVER_ENV = [
   'RINDLE_DAEMON_URL',
+  'RINDLE_DAEMON_WS',
   'RINDLE_DAEMON_TOKEN',
   'R2_ACCOUNT_ID',
   'R2_ACCESS_KEY_ID',

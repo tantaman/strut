@@ -7,10 +7,28 @@
 import { mutators, schema } from '../../shared/app-def.ts'
 import { currentUser } from './user.ts'
 
+// The live-query WebSocket URL. Resolved at RUNTIME from the server (/api/rindle/config, backed by the
+// RINDLE_DAEMON_WS host env var) so a single production build can target any daemon host — no rebuild
+// per environment. Falls back to a build-time override (VITE_RINDLE_WS, handy for local dev) and then
+// the local daemon default.
+async function resolveWsUrl(): Promise<string> {
+  try {
+    const res = await fetch('/api/rindle/config')
+    if (res.ok) {
+      const { wsUrl } = (await res.json()) as { wsUrl?: string }
+      if (wsUrl) return wsUrl
+    }
+  } catch {
+    // network/parse error — fall through to the build-time / local defaults
+  }
+  return import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7601'
+}
+
 async function create() {
-  const [{ createRindleClient }, { initWasm }] = await Promise.all([
+  const [{ createRindleClient }, { initWasm }, wsUrl] = await Promise.all([
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
+    resolveWsUrl(),
   ])
   await initWasm()
   const app = await createRindleClient({
@@ -24,7 +42,7 @@ async function create() {
       headers: () => ({ 'x-user': currentUser() }),
     },
     daemon: {
-      wsUrl: import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7601',
+      wsUrl,
     },
     onRejected: (envelope, reason) =>
       console.error(`[rindle] ${envelope.name} rejected:`, reason),
