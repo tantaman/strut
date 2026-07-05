@@ -2,11 +2,14 @@
 // Do not edit by hand — re-run the generator after each migration.
 //
 // Column kinds come from your declared SQL types: TEXT maps to string(), INTEGER/REAL to
-// number(), and a column declared BOOLEAN/BOOL or JSON to boolean()/json(). The only thing the
-// SQL can't carry is a refinement *within* a kind — the element type of json<T>(), or a
-// string/number literal union — so re-apply those few annotations after each regen.
+// number(), and a column declared BOOLEAN/BOOL or JSON to boolean()/json(). Nullability comes from
+// the SQL too: a nullable column is string().nullable() (typed T | null), a NOT NULL column is bare
+// string(), and PK columns are always non-null. The only thing the SQL can't carry is a refinement
+// *within* a kind — the element type of json<T>(), or a string/number literal union — declare those
+// ONCE in a hand-written module (shared/app-def.ts) with refineTable(...) + refineSchema(...); they
+// survive every regen of this file.
 
-import { createSchema, number, string, table } from "@rindle/client";
+import { createSchema, json, number, string, table } from "@rindle/client";
 
 export const component = table("component")
   .columns({
@@ -25,7 +28,7 @@ export const component = table("component")
     skew_y: number(),
     custom_classes: string(),
     fill: string(),
-    props: string(),
+    props: json(),
   })
   .primaryKey("id");
 

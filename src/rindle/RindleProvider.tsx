@@ -1,18 +1,18 @@
 // Boots the Rindle client in the browser, then provides both the @rindle/react store (for useQuery)
-// and the app itself (for `app.mutate.*`). Renders a loading state until connected.
+// and the app itself (for `app.mutate.*`).
 //
-// SSR: the live client is browser-only (WASM + WebSocket), so on the server it never boots. But a
-// route may PRELOAD a dehydrated first-paint snapshot in its loader (see src/rindle/shareSsr.ts) and
-// expose it as `loaderData.rindle`. When present, we render children against a synchronous, WASM-free
-// hydration store (a `createServerStore` over a no-op backend) — so the deck renders in the SSR HTML
-// and the client's first paint matches it — then hand off to the live client once it connects (and
-// hydrate the live store with the same snapshot so the handoff doesn't flash). Routes that preload
-// nothing (editor, dashboard) keep the old behavior: "Connecting…" on the server, live client on boot.
+// SSR: the live client is browser-only (WASM + WebSocket), so on the server it never boots. A route
+// may PRELOAD a dehydrated first-paint snapshot in its loader (see src/rindle/shareSsr.ts) and expose
+// it as `loaderData.rindle`. When present, we hand the whole seed→live handoff to `<RindleSSR>` (from
+// @rindle/react): it renders children against a synchronous, WASM-free seed store on the server and
+// the client's first paint, boots the live client after hydration, re-seeds it (no flash), and swaps
+// the store under the provider with no `useQuery` change. Routes that preload nothing (editor,
+// dashboard) are mutation-driven, so they GATE on the live client instead — "Connecting…" until it's
+// up — and never render against an empty store.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Rindle } from '@rindle/react'
-import { createServerStore } from '@rindle/client'
+import { Rindle, RindleSSR } from '@rindle/react'
 import type { DehydratedState } from '@rindle/client'
 import { useMatches } from '@tanstack/react-router'
 import { schema } from '../../shared/app-def.ts'
@@ -27,8 +27,7 @@ type RindleDevtoolsComponent = (props: { defaultOpen?: boolean }) => ReactNode
 function useRindleSeed(): string | null {
   const matches = useMatches()
   for (let i = matches.length - 1; i >= 0; i--) {
-    const raw = (matches[i].loaderData as { rindle?: string } | undefined)
-      ?.rindle
+    const raw = (matches[i].loaderData as { rindle?: string } | undefined)?.rindle
     if (raw) return raw
   }
   return null
@@ -36,7 +35,7 @@ function useRindleSeed(): string | null {
 
 export function useApp(): StrutApp {
   const app = useContext(AppContext)
-  if (!app) throw new Error('useApp() used outside <RindleProvider>')
+  if (!app) throw new Error('useApp() used outside <RindleProvider> (or before the client booted)')
   return app
 }
 
@@ -50,7 +49,7 @@ export function RindleProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   const seed = useRindleSeed()
-  const dehydrated = useMemo<DehydratedState | null>(() => {
+  const ssrState = useMemo<DehydratedState | null>(() => {
     if (!seed) return null
     try {
       return JSON.parse(seed) as DehydratedState
@@ -59,38 +58,15 @@ export function RindleProvider({ children }: { children: ReactNode }) {
     }
   }, [seed])
 
-  // A synchronous, WASM-free store seeded from the SSR snapshot — used for the server render and the
-  // client's first paint, before the live client connects. `query` is never called (every preloaded
-  // view has a seed); it's only there to satisfy the one-shot store contract.
-  const hydrationStore = useMemo(() => {
-    if (!dehydrated) return null
-    const ss = createServerStore(schema, { query: async () => ({ rows: [] }) })
-    ss.store.hydrate(dehydrated)
-    return ss.store
-  }, [dehydrated])
-
   useEffect(() => {
     let live = true
     getApp()
       .then((a) => live && setApp(a))
-      .catch(
-        (e) => live && setError(e instanceof Error ? e.message : String(e)),
-      )
+      .catch((e) => live && setError(e instanceof Error ? e.message : String(e)))
     return () => {
       live = false
     }
   }, [])
-
-  // Once the live client is up, seed it with any SSR snapshot so the handoff from the hydration store
-  // doesn't blank out before the first WS reconcile. Best-effort — never let it break the boot.
-  useEffect(() => {
-    if (!app || !dehydrated) return
-    try {
-      app.store.hydrate(dehydrated)
-    } catch (e) {
-      console.error('[rindle] failed to hydrate live store from SSR seed:', e)
-    }
-  }, [app, dehydrated])
 
   if (error)
     return (
@@ -103,7 +79,20 @@ export function RindleProvider({ children }: { children: ReactNode }) {
       </div>
     )
 
-  // Live client ready → it's the source of truth for every route.
+  // Seeded route (the /share viewer): first-paint against the SSR snapshot, then RindleSSR boots the
+  // live client and swaps the store under the provider with no flash. Read-only — no mutators fire
+  // here, so it renders before `app` resolves (AppContext lights up once boot completes).
+  if (ssrState) {
+    return (
+      <AppContext.Provider value={app}>
+        <RindleSSR schema={schema} ssrState={ssrState} boot={getApp}>
+          {children}
+        </RindleSSR>
+      </AppContext.Provider>
+    )
+  }
+
+  // Non-seeded routes are mutation-driven → gate on the live client (useMutate needs a booted app).
   if (app)
     return (
       <AppContext.Provider value={app}>
@@ -113,10 +102,6 @@ export function RindleProvider({ children }: { children: ReactNode }) {
         </Rindle>
       </AppContext.Provider>
     )
-
-  // Not booted yet, but this route preloaded an SSR snapshot → render it (read-only; no AppContext, so
-  // mutators aren't available — the preloaded routes are viewers).
-  if (hydrationStore) return <Rindle store={hydrationStore}>{children}</Rindle>
 
   return <div className="strut-boot">Connecting…</div>
 }

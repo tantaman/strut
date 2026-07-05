@@ -1,8 +1,10 @@
-// The `component.props` JSON codec — the single source of truth for the type-specific payload shape,
-// shared by BOTH tiers so the client's optimistic row and the server's authoritative row serialize
-// byte-identically (same key order → no spurious diff on rebase). Geometry, z-order, custom_classes
-// and `fill` are real columns; everything below lives in `props` (a JSON string on the wire today —
-// swap this codec for a `json<ComponentProps>()` column once Rindle types JSON columns).
+// The `component.props` payload — the single source of truth for the type-specific leaf shape.
+// `props` is now a TYPED JSON column (json<ComponentProps>(), refined in shared/app-def.ts): the
+// engine stores/serializes the object on the wire and hands it back parsed on read, so there is no
+// hand-rolled string codec anymore. Because the ISOMORPHIC mutator body runs the SAME code on both
+// tiers, the client's optimistic row and the server's authoritative row are built identically (no
+// byte-order concern — that was the old string codec's job). Geometry, z-order, custom_classes and
+// `fill` are real columns; everything below lives in `props`.
 
 export type ComponentType = 'text' | 'image' | 'shape' | 'video' | 'webframe'
 
@@ -37,46 +39,51 @@ export type ComponentProps = Partial<{
   src: string
 }>
 
-// Serialize the props blob for a given type. Reads only the keys that type owns, in a fixed order, so
-// both tiers produce the same string. Anything the caller doesn't supply is dropped (undefined keys
-// are omitted by JSON.stringify), matching the old per-type INSERTs.
-export function serializeProps(
+// Build the props object for a given type. Reads only the keys that type owns (undefined keys are
+// dropped by the object spread on read), so the stored payload stays minimal — the object twin of the
+// old `serializeProps`, minus the JSON.stringify (the json<ComponentProps>() column serializes it).
+export function componentProps(
   type: ComponentType,
   a: Partial<Record<keyof ComponentProps, unknown>>,
-): string {
+): ComponentProps {
   switch (type) {
     case 'text':
-      return JSON.stringify({
-        text: a.text,
-        size: a.size,
-        color: a.color,
-        font_family: a.font_family,
-        text_type: a.text_type,
-      })
+      return {
+        text: a.text as string | undefined,
+        size: a.size as number | undefined,
+        color: a.color as string | undefined,
+        font_family: a.font_family as string | undefined,
+        text_type: a.text_type as string | undefined,
+      }
     case 'image':
-      return JSON.stringify({ src: a.src, image_type: a.image_type })
+      return { src: a.src as string | undefined, image_type: a.image_type as string | undefined }
     case 'shape':
-      return JSON.stringify({ shape: a.shape, markup: a.markup })
+      return { shape: a.shape as string | undefined, markup: a.markup as string | undefined }
     case 'video':
-      return JSON.stringify({
-        src: a.src,
-        video_type: a.video_type,
-        src_type: a.src_type,
-        short_src: a.short_src,
-      })
+      return {
+        src: a.src as string | undefined,
+        video_type: a.video_type as string | undefined,
+        src_type: a.src_type as string | undefined,
+        short_src: a.short_src as string | undefined,
+      }
     case 'webframe':
-      return JSON.stringify({ src: a.src })
+      return { src: a.src as string | undefined }
   }
 }
 
-/** Parse a stored `props` blob. Tolerates null/empty/garbage (returns `{}`) so a malformed row can't
- *  crash a render. */
-export function parseProps(json: string | null | undefined): ComponentProps {
-  if (!json) return {}
-  try {
-    const v = JSON.parse(json)
-    return v && typeof v === 'object' ? (v as ComponentProps) : {}
-  } catch {
-    return {}
+/** Read a stored `props` value into a ComponentProps. With the json column it's already an object;
+ *  tolerant of a legacy JSON string and null/garbage (returns `{}`) so a malformed row can't crash a
+ *  render. */
+export function parseProps(v: unknown): ComponentProps {
+  if (!v) return {}
+  if (typeof v === 'object') return v as ComponentProps
+  if (typeof v === 'string') {
+    try {
+      const parsed = JSON.parse(v)
+      return parsed && typeof parsed === 'object' ? (parsed as ComponentProps) : {}
+    } catch {
+      return {}
+    }
   }
+  return {}
 }

@@ -1,36 +1,71 @@
 // Shared contract imported by BOTH the browser client and the API server.
+// - refined `schema` / tables: the generated schema.ts narrowed within-kind (json<ComponentProps>()
+//   on component.props, literal unions on type/visibility/role/render_mode) — refineTable/refineSchema.
 // - `q` / `rels`: the query builder + relationships used to build named queries.
-// - arg types: written once, flow to client mutators, server mutators, and the UI call sites.
-// - `mutators`: the PREDICTED (optimistic) client mutators. The API server holds authoritative
-//   twins by the same name (server/rindle-api.ts).
+// - arg schemas (zod): written once; the SERVER parses untrusted wire args through them, and BOTH
+//   tiers derive the arg TYPE via z.infer.
+// - `mutators`: ISOMORPHIC — one generator body per mutator, run on BOTH tiers (the browser drives it
+//   synchronously as the optimistic prediction; the server drives the SAME body asynchronously against
+//   a live daemon txn, rendering each yielded op to SQL). server/rindle-api.ts adds only the authority
+//   the client must NOT predict (row-level access guards) as overrides.
 //
-// Rule (Rindle): predicted mutators must be deterministic + replayable — no Date.now(), no random,
-// no I/O. Pass ids and timestamps in as args.
+// Rule (Rindle): a shared mutator body must be deterministic + replayable — no Date.now(), no random,
+// no I/O — because the client RE-INVOKES it on every rebase. Pass ids and timestamps in as args. The
+// acting principal is ctx.user (never a client-supplied arg), injected per-tier.
 
-import { defineRelationships, newQueryBuilder, rel } from '@rindle/client'
-import type { WireValue } from '@rindle/client'
-import type { ClientRegistry, MutationTx } from '@rindle/optimistic'
 import {
-  schema,
-  deck,
-  slide,
-  component,
+  defineRelationships,
+  json,
+  newQueryBuilder,
+  refineSchema,
+  refineTable,
+  rel,
+  shared,
+  string,
+} from '@rindle/client'
+import type { IsoTx, KeyedRow, MutationGen, MutatorCtx, Row } from '@rindle/client'
+import type { ClientRegistry } from '@rindle/optimistic'
+import { z } from 'zod'
+import {
+  component as componentGen,
   custom_background,
-  deck_share,
+  deck as deckGen,
+  deck_share as deckShareGen,
+  schema as schemaGen,
+  slide as slideGen,
   user_profile,
 } from './schema.ts'
-import { serializeProps } from './componentProps.ts'
+import { componentProps } from './componentProps.ts'
+import type { ComponentProps, ComponentType } from './componentProps.ts'
 
-export {
-  schema,
-  deck,
-  slide,
-  component,
-  custom_background,
-  deck_share,
-  user_profile,
-}
 export type { ComponentType } from './componentProps.ts'
+
+// ---- literal unions the SQL can't carry (refined once here; survive every schema regen) -----------
+export type CollaboratorRole = 'editor' | 'viewer'
+export type Visibility = 'private' | 'public-read'
+// render_mode / default_slide_mode: '' = spatial (components) | 'markdown' = full-slide markdown.
+export type SlideMode = '' | 'markdown'
+
+// refineTable re-types the generated columns within their kind (runtime-validated identity — the wire
+// shape is unchanged). props becomes the typed JSON object; the discriminator + enums become unions.
+export const component = refineTable(componentGen, {
+  type: string<ComponentType>(),
+  props: json<ComponentProps>(),
+})
+export const deck = refineTable(deckGen, {
+  visibility: string<Visibility>(),
+  default_slide_mode: string<SlideMode>(),
+})
+export const deck_share = refineTable(deckShareGen, {
+  role: string<CollaboratorRole>(),
+})
+// slide.render_mode narrowed to SlideMode; text_align stays a bare string (open value set).
+export const slide = refineTable(slideGen, { render_mode: string<SlideMode>() })
+
+export const schema = refineSchema(schemaGen, {
+  tables: [component, deck, deck_share, slide],
+})
+export { custom_background, user_profile }
 
 export const q = newQueryBuilder(schema)
 
@@ -39,188 +74,234 @@ export const rels = defineRelationships({
   deckCustomBackgrounds: rel(deck, custom_background, { id: 'deck_id' }),
   deckShares: rel(deck, deck_share, { id: 'deck_id' }),
   slideComponents: rel(slide, component, { id: 'slide_id' }),
-  // Reverse (child → parent) relationships used by server-only `existsNoSync` permission gates:
-  // a slide/component is visible only if its owning deck is owned-by or shared-with the principal.
+  // Reverse (child → parent) relationships used by server-only `existsNoSync` permission gates and by
+  // the server mutator access guards (server/rindle-api.ts): a slide/component is editable only if its
+  // owning deck is owned-by or editor-shared-with the principal.
   slideDeck: rel(slide, deck, { deck_id: 'id' }),
   componentSlide: rel(component, slide, { slide_id: 'id' }),
   customBgDeck: rel(custom_background, deck, { deck_id: 'id' }),
   shareDeck: rel(deck_share, deck, { deck_id: 'id' }),
 })
 
-// ---- argument types (the single source of shape for both tiers + the UI) -------------------------
+// ---- schema-derived row types -------------------------------------------------------------------
+export type Deck = Row<typeof deck>
+export type Slide = Row<typeof slideRefined>
+export type Component = Row<typeof component>
 
-export type CreateDeckArgs = {
-  id: string
-  title: string
-  ownerId: string
-  now: number
-}
-export type RenameDeckArgs = { id: string; title: string; now: number }
-export type TouchDeckArgs = { id: string; now: number }
-export type DeleteDeckArgs = { id: string }
-export type SetDeckThemeArgs = {
-  id: string
-  background?: string
-  surface?: string
+// The render_mode a brand-new deck (and its seed slide) starts in. Markdown-first: most authoring is
+// content-first, and spatial mode is a non-destructive per-slide/-deck toggle away. Only affects newly
+// created decks — existing decks keep their stored default_slide_mode.
+export const DEFAULT_SLIDE_MODE: SlideMode = 'markdown'
+
+// ---- mutator arg schemas (zod; the single source of shape for both tiers + the UI) ---------------
+
+export const createDeckArgs = z.object({ id: z.string(), title: z.string(), now: z.number() })
+export type CreateDeckArgs = z.infer<typeof createDeckArgs>
+
+export const renameDeckArgs = z.object({ id: z.string(), title: z.string(), now: z.number() })
+export type RenameDeckArgs = z.infer<typeof renameDeckArgs>
+
+export const touchDeckArgs = z.object({ id: z.string(), now: z.number() })
+export type TouchDeckArgs = z.infer<typeof touchDeckArgs>
+
+export const deleteDeckArgs = z.object({ id: z.string() })
+export type DeleteDeckArgs = z.infer<typeof deleteDeckArgs>
+
+export const setDeckThemeArgs = z.object({
+  id: z.string(),
+  now: z.number(),
+  background: z.string().optional(),
+  surface: z.string().optional(),
   // Text theme defaults ('' = built-in default). Fonts are family names; colors bare hex (no '#').
-  heading_font?: string
-  heading_color?: string
-  body_font?: string
-  body_color?: string
+  heading_font: z.string().optional(),
+  heading_color: z.string().optional(),
+  body_font: z.string().optional(),
+  body_color: z.string().optional(),
   // Unified theme: deck-wide default text alignment ('' = built-in 'left') and the render_mode
   // stamped on newly added slides ('' = spatial | 'markdown').
-  text_align?: string
-  default_slide_mode?: string
-  custom_stylesheet?: string
-  chosen_presenter?: string
-  canned_transition?: string
-  now: number
-}
+  text_align: z.string().optional(),
+  default_slide_mode: z.enum(['', 'markdown']).optional(),
+  custom_stylesheet: z.string().optional(),
+  chosen_presenter: z.string().optional(),
+  canned_transition: z.string().optional(),
+})
+export type SetDeckThemeArgs = z.infer<typeof setDeckThemeArgs>
 
-export type AddSlideArgs = {
-  id: string
-  deckId: string
-  sort: string
-  x: number
-  y: number
+// Public read-only link. share_token is the link secret (fresh random when turning sharing on, '' when
+// turning it off). Owner-only (server-gated).
+export const setDeckVisibilityArgs = z.object({
+  id: z.string(),
+  visibility: z.enum(['private', 'public-read']),
+  share_token: z.string(),
+  now: z.number(),
+})
+export type SetDeckVisibilityArgs = z.infer<typeof setDeckVisibilityArgs>
+
+export const addSlideArgs = z.object({
+  id: z.string(),
+  deckId: z.string(),
+  sort: z.string(),
+  x: z.number(),
+  y: z.number(),
   // '' = spatial (default) | 'markdown'. Add-slide inherits the deck's default_slide_mode.
-  render_mode?: string
-  now: number
-}
-export type DeleteSlideArgs = {
-  id: string
-  componentIds: string[]
-}
-export type ReorderSlideArgs = { id: string; sort: string }
-export type SetSlideTransformArgs = {
-  id: string
-  x: number
-  y: number
-  z: number
-  rotate_x: number
-  rotate_y: number
-  rotate_z: number
-  imp_scale: number
-  now: number
-}
-export type SetSlideThemeArgs = {
-  id: string
-  background?: string
-  surface?: string
+  render_mode: z.enum(['', 'markdown']).optional(),
+  now: z.number(),
+})
+export type AddSlideArgs = z.infer<typeof addSlideArgs>
+
+export const deleteSlideArgs = z.object({ id: z.string(), componentIds: z.array(z.string()) })
+export type DeleteSlideArgs = z.infer<typeof deleteSlideArgs>
+
+export const reorderSlideArgs = z.object({ id: z.string(), sort: z.string() })
+export type ReorderSlideArgs = z.infer<typeof reorderSlideArgs>
+
+export const setSlideTransformArgs = z.object({
+  id: z.string(),
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+  rotate_x: z.number(),
+  rotate_y: z.number(),
+  rotate_z: z.number(),
+  imp_scale: z.number(),
+  now: z.number(),
+})
+export type SetSlideTransformArgs = z.infer<typeof setSlideTransformArgs>
+
+export const setSlideThemeArgs = z.object({
+  id: z.string(),
+  now: z.number(),
+  background: z.string().optional(),
+  surface: z.string().optional(),
   // Per-slide alignment override ('' = inherit the deck default).
-  text_align?: string
-  now: number
-}
-// Markdown mode is a per-slide switch, non-destructive (hidden components stay in the DB).
-export type SetSlideMarkdownArgs = { id: string; markdown: string; now: number }
-// Markdown-mode content: a TipTap/ProseMirror document, JSON-stringified (the source of truth when
-// render_mode = 'markdown'). Streamed via `.folded` on every keystroke, like setSlideMarkdown was.
-export type SetSlideDocArgs = { id: string; doc: string; now: number }
-export type SetSlideModeArgs = { id: string; render_mode: string; now: number }
+  text_align: z.string().optional(),
+})
+export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
-type SpatialArgs = {
-  id: string
-  slideId: string
-  x: number
-  y: number
-  z_order: number
-}
+export const setSlideMarkdownArgs = z.object({ id: z.string(), markdown: z.string(), now: z.number() })
+export type SetSlideMarkdownArgs = z.infer<typeof setSlideMarkdownArgs>
+
+// Markdown-mode content: a TipTap/ProseMirror document, JSON-stringified. Streamed via `.folded`.
+export const setSlideDocArgs = z.object({ id: z.string(), doc: z.string(), now: z.number() })
+export type SetSlideDocArgs = z.infer<typeof setSlideDocArgs>
+
+export const setSlideModeArgs = z.object({
+  id: z.string(),
+  render_mode: z.enum(['', 'markdown']),
+  now: z.number(),
+})
+export type SetSlideModeArgs = z.infer<typeof setSlideModeArgs>
+
+// Component spatial base — the fields every add-* carries.
+const spatialArgs = z.object({
+  id: z.string(),
+  slideId: z.string(),
+  x: z.number(),
+  y: z.number(),
+  z_order: z.number(),
+})
+
 // color/font_family = '' means "inherit the deck theme default for text_type" (heading | body).
-export type AddTextArgs = SpatialArgs & {
-  text: string
-  size: number
-  color: string
-  font_family: string
-  text_type: string
-}
-export type AddImageArgs = SpatialArgs & {
-  src: string
-  image_type: string
-  scale_w: number
-  scale_h: number
-}
-export type AddShapeArgs = SpatialArgs & {
-  shape: string
-  markup: string
-  fill: string
-}
-export type AddVideoArgs = SpatialArgs & {
-  src: string
-  video_type: string
-  src_type: string
-  short_src: string
-}
-export type AddWebframeArgs = SpatialArgs & { src: string }
+export const addTextArgs = spatialArgs.extend({
+  text: z.string(),
+  size: z.number(),
+  color: z.string(),
+  font_family: z.string(),
+  text_type: z.string(),
+})
+export type AddTextArgs = z.infer<typeof addTextArgs>
 
-export type MoveComponentArgs = {
-  id: string
-  x: number
-  y: number
-}
-export type TransformComponentArgs = {
-  id: string
-  scale_x: number
-  scale_y: number
-  scale_w: number
-  scale_h: number
-  rotate: number
-  skew_x: number
-  skew_y: number
-}
-export type SetComponentZArgs = {
-  id: string
-  z_order: number
-}
-export type SetComponentClassesArgs = {
-  id: string
-  custom_classes: string
-}
-export type RemoveComponentArgs = { id: string }
-export type SetTextArgs = {
-  id: string
-  text: string
-  size: number
-  color: string
-  font_family: string
-  text_type: string
-}
-export type SetShapeFillArgs = { id: string; fill: string }
-export type MintCustomColorArgs = {
-  id: string
-  deckId: string
-  klass: string
-  style: string
-}
+export const addImageArgs = spatialArgs.extend({
+  src: z.string(),
+  image_type: z.string(),
+  scale_w: z.number(),
+  scale_h: z.number(),
+})
+export type AddImageArgs = z.infer<typeof addImageArgs>
 
-// ---- sharing + profile -------------------------------------------------------------------------
-export type CollaboratorRole = 'editor' | 'viewer'
+export const addShapeArgs = spatialArgs.extend({
+  shape: z.string(),
+  markup: z.string(),
+  fill: z.string(),
+})
+export type AddShapeArgs = z.infer<typeof addShapeArgs>
+
+export const addVideoArgs = spatialArgs.extend({
+  src: z.string(),
+  video_type: z.string(),
+  src_type: z.string(),
+  short_src: z.string(),
+})
+export type AddVideoArgs = z.infer<typeof addVideoArgs>
+
+export const addWebframeArgs = spatialArgs.extend({ src: z.string() })
+export type AddWebframeArgs = z.infer<typeof addWebframeArgs>
+
+export const moveComponentArgs = z.object({ id: z.string(), x: z.number(), y: z.number() })
+export type MoveComponentArgs = z.infer<typeof moveComponentArgs>
+
+export const transformComponentArgs = z.object({
+  id: z.string(),
+  scale_x: z.number(),
+  scale_y: z.number(),
+  scale_w: z.number(),
+  scale_h: z.number(),
+  rotate: z.number(),
+  skew_x: z.number(),
+  skew_y: z.number(),
+})
+export type TransformComponentArgs = z.infer<typeof transformComponentArgs>
+
+export const setComponentZArgs = z.object({ id: z.string(), z_order: z.number() })
+export type SetComponentZArgs = z.infer<typeof setComponentZArgs>
+
+export const setComponentClassesArgs = z.object({ id: z.string(), custom_classes: z.string() })
+export type SetComponentClassesArgs = z.infer<typeof setComponentClassesArgs>
+
+export const removeComponentArgs = z.object({ id: z.string() })
+export type RemoveComponentArgs = z.infer<typeof removeComponentArgs>
+
+export const setTextArgs = z.object({
+  id: z.string(),
+  text: z.string(),
+  size: z.number(),
+  color: z.string(),
+  font_family: z.string(),
+  text_type: z.string(),
+})
+export type SetTextArgs = z.infer<typeof setTextArgs>
+
+export const setShapeFillArgs = z.object({ id: z.string(), fill: z.string() })
+export type SetShapeFillArgs = z.infer<typeof setShapeFillArgs>
+
+export const mintCustomColorArgs = z.object({
+  id: z.string(),
+  deckId: z.string(),
+  klass: z.string(),
+  style: z.string(),
+})
+export type MintCustomColorArgs = z.infer<typeof mintCustomColorArgs>
+
 // id = the deck_share row id; userId = the collaborator's Strut id; role = editor|viewer.
-export type AddCollaboratorArgs = {
-  id: string
-  deckId: string
-  userId: string
-  role: CollaboratorRole
-  now: number
-}
-export type RemoveCollaboratorArgs = { id: string }
-// Public read-only link. visibility = 'private' | 'public-read'; share_token is the link secret
-// (a fresh random token when turning sharing on, '' when turning it off). Owner-only (server-gated).
-export type SetDeckVisibilityArgs = {
-  id: string
-  visibility: string
-  share_token: string
-  now: number
-}
-// id = the profile's user id (the server overrides it with the authenticated principal).
-export type SetDisplayNameArgs = {
-  id: string
-  display_name: string
-  now: number
-}
+export const addCollaboratorArgs = z.object({
+  id: z.string(),
+  deckId: z.string(),
+  userId: z.string(),
+  role: z.enum(['editor', 'viewer']),
+  now: z.number(),
+})
+export type AddCollaboratorArgs = z.infer<typeof addCollaboratorArgs>
 
-// ---- predicted (optimistic) client mutators -----------------------------------------------------
+export const removeCollaboratorArgs = z.object({ id: z.string() })
+export type RemoveCollaboratorArgs = z.infer<typeof removeCollaboratorArgs>
 
-const spatialBase = (a: SpatialArgs) => ({
+// display_name only — the profile id is the acting principal (ctx.user), never a client arg.
+export const setDisplayNameArgs = z.object({ display_name: z.string(), now: z.number() })
+export type SetDisplayNameArgs = z.infer<typeof setDisplayNameArgs>
+
+// ---- isomorphic mutators (one shared body each; run on BOTH tiers) --------------------------------
+
+const spatialBase = (a: z.infer<typeof spatialArgs>) => ({
   id: a.id,
   slide_id: a.slideId,
   z_order: a.z_order,
@@ -236,15 +317,9 @@ const spatialBase = (a: SpatialArgs) => ({
   custom_classes: '',
 })
 
-// The render_mode a brand-new deck (and its seed slide) starts in. Markdown-first: most authoring is
-// content-first, and spatial mode is a non-destructive per-slide/-deck toggle away. Only affects newly
-// created decks — existing decks keep their stored default_slide_mode. Seed slide uses this too (see the
-// deck-create call site) so the first slide matches the deck's default rather than falling back to spatial.
-export const DEFAULT_SLIDE_MODE = 'markdown'
-
 export const mutators = {
-  createDeck: (tx: MutationTx, a: CreateDeckArgs) =>
-    tx.insert('deck', {
+  createDeck: shared(createDeckArgs, function* (tx: IsoTx, a: CreateDeckArgs, ctx: MutatorCtx): MutationGen {
+    yield tx.insert('deck', {
       id: a.id,
       title: a.title,
       created: a.now,
@@ -255,9 +330,9 @@ export const mutators = {
       canned_transition: 'none',
       custom_stylesheet: '',
       deck_version: '1.0',
-      // The server overrides owner_id with the authenticated principal (can't be spoofed); the client
-      // predicts it so the optimistic row passes the owner-scoped decksQuery filter immediately.
-      owner_id: a.ownerId,
+      // Author = the acting principal. The client predicts currentUser() (so the optimistic row passes
+      // the owner-scoped decksQuery immediately); the server injects the AUTHENTICATED principal.
+      owner_id: ctx.user,
       visibility: 'private',
       share_token: '',
       heading_font: '',
@@ -266,21 +341,25 @@ export const mutators = {
       body_color: '',
       default_slide_mode: DEFAULT_SLIDE_MODE,
       text_align: '',
-    }),
+    })
+  }),
 
-  renameDeck: (tx: MutationTx, a: RenameDeckArgs) =>
-    tx.update('deck', { id: a.id, title: a.title, modified: a.now }),
+  renameDeck: shared(renameDeckArgs, function* (tx: IsoTx, a: RenameDeckArgs): MutationGen {
+    yield tx.update('deck', { id: a.id, title: a.title, modified: a.now })
+  }),
 
-  touchDeck: (tx: MutationTx, a: TouchDeckArgs) =>
-    tx.update('deck', { id: a.id, modified: a.now }),
+  touchDeck: shared(touchDeckArgs, function* (tx: IsoTx, a: TouchDeckArgs): MutationGen {
+    yield tx.update('deck', { id: a.id, modified: a.now })
+  }),
 
-  // Client predicts the deck row removal; the server twin cascades slides + components, and those
-  // deletions arrive via sync. (Rindle has no FK cascade / no "delete where" in a predicted tx.)
-  deleteDeck: (tx: MutationTx, a: DeleteDeckArgs) =>
-    tx.delete('deck', { id: a.id }),
+  // Client predicts the deck row removal; the server twin (server/rindle-api.ts) cascades slides +
+  // components under an owner gate, and those deletions arrive via sync.
+  deleteDeck: shared(deleteDeckArgs, function* (tx: IsoTx, a: DeleteDeckArgs): MutationGen {
+    yield tx.delete('deck', { id: a.id })
+  }),
 
-  setDeckTheme: (tx: MutationTx, a: SetDeckThemeArgs) => {
-    const row: Record<string, WireValue> = { id: a.id, modified: a.now }
+  setDeckTheme: shared(setDeckThemeArgs, function* (tx: IsoTx, a: SetDeckThemeArgs): MutationGen {
+    const row: KeyedRow = { id: a.id, modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
     if (a.heading_font !== undefined) row.heading_font = a.heading_font
@@ -288,19 +367,25 @@ export const mutators = {
     if (a.body_font !== undefined) row.body_font = a.body_font
     if (a.body_color !== undefined) row.body_color = a.body_color
     if (a.text_align !== undefined) row.text_align = a.text_align
-    if (a.default_slide_mode !== undefined)
-      row.default_slide_mode = a.default_slide_mode
-    if (a.custom_stylesheet !== undefined)
-      row.custom_stylesheet = a.custom_stylesheet
-    if (a.chosen_presenter !== undefined)
-      row.chosen_presenter = a.chosen_presenter
-    if (a.canned_transition !== undefined)
-      row.canned_transition = a.canned_transition
-    tx.update('deck', row)
-  },
+    if (a.default_slide_mode !== undefined) row.default_slide_mode = a.default_slide_mode
+    if (a.custom_stylesheet !== undefined) row.custom_stylesheet = a.custom_stylesheet
+    if (a.chosen_presenter !== undefined) row.chosen_presenter = a.chosen_presenter
+    if (a.canned_transition !== undefined) row.canned_transition = a.canned_transition
+    yield tx.update('deck', row)
+  }),
 
-  addSlide: (tx: MutationTx, a: AddSlideArgs) =>
-    tx.insert('slide', {
+  // Public link: flip visibility + (re)mint or clear the share token. Owner-gated on the server.
+  setDeckVisibility: shared(setDeckVisibilityArgs, function* (tx: IsoTx, a: SetDeckVisibilityArgs): MutationGen {
+    yield tx.update('deck', {
+      id: a.id,
+      visibility: a.visibility,
+      share_token: a.share_token,
+      modified: a.now,
+    })
+  }),
+
+  addSlide: shared(addSlideArgs, function* (tx: IsoTx, a: AddSlideArgs): MutationGen {
+    yield tx.insert('slide', {
       id: a.id,
       deck_id: a.deckId,
       sort: a.sort,
@@ -318,22 +403,21 @@ export const mutators = {
       markdown: '',
       doc: '',
       render_mode: a.render_mode ?? '',
-      // Rindle inserts carry the WHOLE row (no column defaults), so stamp the deck-inherit
-      // sentinel here too — '' = inherit the deck's text_align. Omitting it throws
-      // "missing column text_align on slide" at insert time.
       text_align: '',
-    }),
+    })
+  }),
 
-  deleteSlide: (tx: MutationTx, a: DeleteSlideArgs) => {
-    for (const id of a.componentIds) tx.delete('component', { id })
-    tx.delete('slide', { id: a.id })
-  },
+  deleteSlide: shared(deleteSlideArgs, function* (tx: IsoTx, a: DeleteSlideArgs): MutationGen {
+    for (const id of a.componentIds) yield tx.delete('component', { id })
+    yield tx.delete('slide', { id: a.id })
+  }),
 
-  reorderSlide: (tx: MutationTx, a: ReorderSlideArgs) =>
-    tx.update('slide', { id: a.id, sort: a.sort }),
+  reorderSlide: shared(reorderSlideArgs, function* (tx: IsoTx, a: ReorderSlideArgs): MutationGen {
+    yield tx.update('slide', { id: a.id, sort: a.sort })
+  }),
 
-  setSlideTransform: (tx: MutationTx, a: SetSlideTransformArgs) =>
-    tx.update('slide', {
+  setSlideTransform: shared(setSlideTransformArgs, function* (tx: IsoTx, a: SetSlideTransformArgs): MutationGen {
+    yield tx.update('slide', {
       id: a.id,
       x: a.x,
       y: a.y,
@@ -343,78 +427,72 @@ export const mutators = {
       rotate_z: a.rotate_z,
       imp_scale: a.imp_scale,
       modified: a.now,
-    }),
+    })
+  }),
 
-  setSlideTheme: (tx: MutationTx, a: SetSlideThemeArgs) => {
-    const row: Record<string, WireValue> = { id: a.id, modified: a.now }
+  setSlideTheme: shared(setSlideThemeArgs, function* (tx: IsoTx, a: SetSlideThemeArgs): MutationGen {
+    const row: KeyedRow = { id: a.id, modified: a.now }
     if (a.background !== undefined) row.background = a.background
     if (a.surface !== undefined) row.surface = a.surface
     if (a.text_align !== undefined) row.text_align = a.text_align
-    tx.update('slide', row)
-  },
+    yield tx.update('slide', row)
+  }),
 
   // Markdown source (per-slide). Non-destructive re. components — a plain column patch.
-  setSlideMarkdown: (tx: MutationTx, a: SetSlideMarkdownArgs) =>
-    tx.update('slide', { id: a.id, markdown: a.markdown, modified: a.now }),
+  setSlideMarkdown: shared(setSlideMarkdownArgs, function* (tx: IsoTx, a: SetSlideMarkdownArgs): MutationGen {
+    yield tx.update('slide', { id: a.id, markdown: a.markdown, modified: a.now })
+  }),
 
   // Markdown-mode content as a TipTap doc (JSON string). Plain column patch, streamed via `.folded`.
-  setSlideDoc: (tx: MutationTx, a: SetSlideDocArgs) =>
-    tx.update('slide', { id: a.id, doc: a.doc, modified: a.now }),
+  setSlideDoc: shared(setSlideDocArgs, function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
+    yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
+  }),
 
   // Flip a slide between spatial + markdown mode; hidden components are preserved in the DB.
-  setSlideMode: (tx: MutationTx, a: SetSlideModeArgs) =>
-    tx.update('slide', { id: a.id, render_mode: a.render_mode, modified: a.now }),
+  setSlideMode: shared(setSlideModeArgs, function* (tx: IsoTx, a: SetSlideModeArgs): MutationGen {
+    yield tx.update('slide', { id: a.id, render_mode: a.render_mode, modified: a.now })
+  }),
 
-  // One `component` table now (see shared/schema.ts). Each insert stamps `type`, the shared spatial
-  // base + `fill` column, and the type-specific `props` JSON (serializeProps keeps client + server
-  // byte-identical). `fill` is only meaningful for shapes; '' elsewhere.
-  addText: (tx: MutationTx, a: AddTextArgs) =>
-    tx.insert('component', {
-      ...spatialBase(a),
-      type: 'text',
-      fill: '',
-      props: serializeProps('text', a),
-    }),
+  // One `component` table: each insert stamps `type`, the shared spatial base + `fill` column, and the
+  // type-specific `props` JSON object. `fill` is only meaningful for shapes; '' elsewhere.
+  addText: shared(addTextArgs, function* (tx: IsoTx, a: AddTextArgs): MutationGen {
+    yield tx.insert('component', { ...spatialBase(a), type: 'text', fill: '', props: componentProps('text', a) })
+  }),
 
-  addImage: (tx: MutationTx, a: AddImageArgs) =>
-    tx.insert('component', {
+  addImage: shared(addImageArgs, function* (tx: IsoTx, a: AddImageArgs): MutationGen {
+    yield tx.insert('component', {
       ...spatialBase(a),
       scale_w: a.scale_w,
       scale_h: a.scale_h,
       type: 'image',
       fill: '',
-      props: serializeProps('image', a),
-    }),
+      props: componentProps('image', a),
+    })
+  }),
 
-  addShape: (tx: MutationTx, a: AddShapeArgs) =>
-    tx.insert('component', {
-      ...spatialBase(a),
-      type: 'shape',
-      fill: a.fill,
-      props: serializeProps('shape', a),
-    }),
+  addShape: shared(addShapeArgs, function* (tx: IsoTx, a: AddShapeArgs): MutationGen {
+    yield tx.insert('component', { ...spatialBase(a), type: 'shape', fill: a.fill, props: componentProps('shape', a) })
+  }),
 
-  addVideo: (tx: MutationTx, a: AddVideoArgs) =>
-    tx.insert('component', {
-      ...spatialBase(a),
-      type: 'video',
-      fill: '',
-      props: serializeProps('video', a),
-    }),
+  addVideo: shared(addVideoArgs, function* (tx: IsoTx, a: AddVideoArgs): MutationGen {
+    yield tx.insert('component', { ...spatialBase(a), type: 'video', fill: '', props: componentProps('video', a) })
+  }),
 
-  addWebframe: (tx: MutationTx, a: AddWebframeArgs) =>
-    tx.insert('component', {
+  addWebframe: shared(addWebframeArgs, function* (tx: IsoTx, a: AddWebframeArgs): MutationGen {
+    yield tx.insert('component', {
       ...spatialBase(a),
       type: 'webframe',
       fill: '',
-      props: serializeProps('webframe', a),
-    }),
+      props: componentProps('webframe', a),
+    })
+  }),
 
-  moveComponent: (tx: MutationTx, a: MoveComponentArgs) =>
-    tx.update('component', { id: a.id, x: a.x, y: a.y }),
+  moveComponent: shared(moveComponentArgs, function* (tx: IsoTx, a: MoveComponentArgs): MutationGen {
+    yield tx.update('component', { id: a.id, x: a.x, y: a.y })
+  }),
 
-  transformComponent: (tx: MutationTx, a: TransformComponentArgs) =>
-    tx.update('component', {
+  transformComponent: shared(transformComponentArgs, function* (tx: IsoTx, a: TransformComponentArgs): MutationGen {
+    yield tx.update('component', {
       id: a.id,
       scale_x: a.scale_x,
       scale_y: a.scale_y,
@@ -423,64 +501,54 @@ export const mutators = {
       rotate: a.rotate,
       skew_x: a.skew_x,
       skew_y: a.skew_y,
-    }),
+    })
+  }),
 
-  setComponentZ: (tx: MutationTx, a: SetComponentZArgs) =>
-    tx.update('component', { id: a.id, z_order: a.z_order }),
+  setComponentZ: shared(setComponentZArgs, function* (tx: IsoTx, a: SetComponentZArgs): MutationGen {
+    yield tx.update('component', { id: a.id, z_order: a.z_order })
+  }),
 
-  setComponentClasses: (tx: MutationTx, a: SetComponentClassesArgs) =>
-    tx.update('component', { id: a.id, custom_classes: a.custom_classes }),
+  setComponentClasses: shared(setComponentClassesArgs, function* (tx: IsoTx, a: SetComponentClassesArgs): MutationGen {
+    yield tx.update('component', { id: a.id, custom_classes: a.custom_classes })
+  }),
 
-  removeComponent: (tx: MutationTx, a: RemoveComponentArgs) =>
-    tx.delete('component', { id: a.id }),
+  removeComponent: shared(removeComponentArgs, function* (tx: IsoTx, a: RemoveComponentArgs): MutationGen {
+    yield tx.delete('component', { id: a.id })
+  }),
 
-  // Rewrites the whole text `props` blob (it carries all four text fields, so no partial-merge needed).
-  setText: (tx: MutationTx, a: SetTextArgs) =>
-    tx.update('component', { id: a.id, props: serializeProps('text', a) }),
+  // Rewrites the whole text `props` object (it carries all text fields, so no partial-merge needed).
+  setText: shared(setTextArgs, function* (tx: IsoTx, a: SetTextArgs): MutationGen {
+    yield tx.update('component', { id: a.id, props: componentProps('text', a) })
+  }),
 
-  // `fill` is a column, so this is a plain per-column patch (the optimistic client can't merge into
-  // an opaque props blob) — concurrent fill vs. any other edit both survive.
-  setShapeFill: (tx: MutationTx, a: SetShapeFillArgs) =>
-    tx.update('component', { id: a.id, fill: a.fill }),
+  // `fill` is a column, so this is a plain per-column patch — concurrent fill vs. any other edit survive.
+  setShapeFill: shared(setShapeFillArgs, function* (tx: IsoTx, a: SetShapeFillArgs): MutationGen {
+    yield tx.update('component', { id: a.id, fill: a.fill })
+  }),
 
-  mintCustomColor: (tx: MutationTx, a: MintCustomColorArgs) =>
-    tx.insert('custom_background', {
-      id: a.id,
-      deck_id: a.deckId,
-      klass: a.klass,
-      style: a.style,
-    }),
+  mintCustomColor: shared(mintCustomColorArgs, function* (tx: IsoTx, a: MintCustomColorArgs): MutationGen {
+    yield tx.insert('custom_background', { id: a.id, deck_id: a.deckId, klass: a.klass, style: a.style })
+  }),
 
-  // Sharing: the server twins enforce that only the deck OWNER may add/remove collaborators (a
-  // conditional write — the optimistic insert/delete snaps back if the actor isn't the owner).
-  addCollaborator: (tx: MutationTx, a: AddCollaboratorArgs) =>
-    tx.insert('deck_share', {
+  // Sharing: only the deck OWNER may add/remove collaborators (server-gated).
+  addCollaborator: shared(addCollaboratorArgs, function* (tx: IsoTx, a: AddCollaboratorArgs): MutationGen {
+    yield tx.insert('deck_share', {
       id: a.id,
       deck_id: a.deckId,
       user_id: a.userId,
       role: a.role,
       created: a.now,
-    }),
+    })
+  }),
 
-  removeCollaborator: (tx: MutationTx, a: RemoveCollaboratorArgs) =>
-    tx.delete('deck_share', { id: a.id }),
+  removeCollaborator: shared(removeCollaboratorArgs, function* (tx: IsoTx, a: RemoveCollaboratorArgs): MutationGen {
+    yield tx.delete('deck_share', { id: a.id })
+  }),
 
-  // Public link: flip visibility + (re)mint or clear the share token. The server twin gates this on
-  // deck ownership, so a non-owner's optimistic update snaps back.
-  setDeckVisibility: (tx: MutationTx, a: SetDeckVisibilityArgs) =>
-    tx.update('deck', {
-      id: a.id,
-      visibility: a.visibility,
-      share_token: a.share_token,
-      modified: a.now,
-    }),
-
-  // Profile display name. The client predicts an update (a no-op the first time, before the row
-  // exists); the server upserts keyed to the authenticated principal and syncs the row back.
-  setDisplayName: (tx: MutationTx, a: SetDisplayNameArgs) =>
-    tx.update('user_profile', {
-      id: a.id,
-      display_name: a.display_name,
-      updated: a.now,
-    }),
+  // Profile display name, keyed to the acting principal. upsert = insert-or-replace on the pk, so the
+  // first write (before the row exists) and every later edit are the same op. The server injects the
+  // AUTHENTICATED principal as ctx.user, so a client can't write another user's profile.
+  setDisplayName: shared(setDisplayNameArgs, function* (tx: IsoTx, a: SetDisplayNameArgs, ctx: MutatorCtx): MutationGen {
+    yield tx.upsert('user_profile', { id: ctx.user, display_name: a.display_name, updated: a.now })
+  }),
 } satisfies ClientRegistry

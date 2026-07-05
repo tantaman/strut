@@ -4,7 +4,6 @@
 
 import { generateKeyBetween } from 'fractional-indexing'
 import { newId } from '../config'
-import { currentUser } from '../rindle/user'
 import type { StrutApp } from '../rindle/client'
 import { deckDetailQuery } from '../../shared/queries'
 import { componentsFromRows } from './types'
@@ -118,7 +117,6 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
   mutate.createDeck({
     id: deckId,
     title: imported.title,
-    ownerId: currentUser(),
     now,
   })
   mutate.setDeckTheme({
@@ -154,7 +152,8 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
       sort,
       x: s.x,
       y: s.y,
-      render_mode: s.render_mode,
+      // Imported render_mode is an open string; coerce to the SlideMode union addSlide expects.
+      render_mode: s.render_mode === 'markdown' ? 'markdown' : '',
       now,
     })
     mutate.setSlideTransform({

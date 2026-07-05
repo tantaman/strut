@@ -76,7 +76,7 @@ export function ShareModal({
   function saveName() {
     const v = name.trim()
     if (v === (myProfile?.display_name ?? '')) return
-    mutate.setDisplayName({ id: me, display_name: v, now: Date.now() })
+    mutate.setDisplayName({ display_name: v, now: Date.now() })
   }
 
   const shares = useQuery(deckSharesQuery({ deckId: deck.id }))
