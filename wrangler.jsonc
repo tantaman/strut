@@ -27,6 +27,24 @@
     },
   ],
 
+  // Better-Auth's SQL store (users / sessions / accounts) + the encrypted per-user model-credential
+  // table (see AUTH_PLAN.md / AI_ARRANGE_PLAN.md). This is SEPARATE from Rindle: auth data must never
+  // sync to the browser. Like R2, a D1 binding is an object binding — read via `cloudflare:workers`
+  // (server/auth.ts), NOT process.env.
+  // Create it, then paste the printed database_id below:
+  //   wrangler d1 create strut-auth
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "strut-auth",
+      "database_id": "REPLACE_WITH_wrangler_d1_create_OUTPUT",
+      // Explicit, auth-ONLY migrations dir. Without this, wrangler defaults D1's migrations_dir to the
+      // repo's `migrations/` — which is RINDLE's schema — so `wrangler d1 migrations apply strut-auth`
+      // would run Rindle's SQL into the auth DB. Keep the two schemas strictly separate.
+      "migrations_dir": "migrations-d1",
+    },
+  ],
+
   // Non-secret config, surfaced on process.env at runtime (nodejs_compat).
   //   RINDLE_DAEMON_URL  — https URL of your hosted rindled control plane (used by the Worker/server).
   //   RINDLE_DAEMON_WS   — wss URL of the daemon's live-query WebSocket. Served to the browser at
@@ -35,13 +53,21 @@
   //   R2_PUBLIC_BASE_URL — OPTIONAL. Public bucket/custom-domain base (e.g. https://pub-xxx.r2.dev).
   //                        If set, uploads return that CDN URL directly. If empty, images are served
   //                        back through the Worker from the bucket (private bucket is fine).
+  //   BETTER_AUTH_URL    — the deployed origin (e.g. https://strut.example.com). Better-Auth uses it for
+  //                        OAuth redirect/callback URLs + trusted origins. Local dev: http://localhost:3000.
   "vars": {
     "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
     "RINDLE_DAEMON_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
     "R2_PUBLIC_BASE_URL": "",
+    "BETTER_AUTH_URL": "http://localhost:3000",
   },
 
   // Secrets are NOT stored here. Set them with wrangler:
   //   wrangler secret put RINDLE_DAEMON_TOKEN
+  //   wrangler secret put BETTER_AUTH_SECRET      # openssl rand -base64 32
+  //   wrangler secret put GITHUB_CLIENT_ID
+  //   wrangler secret put GITHUB_CLIENT_SECRET
+  //   wrangler secret put GOOGLE_CLIENT_ID
+  //   wrangler secret put GOOGLE_CLIENT_SECRET
   // (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY are only needed for the S3 fallback path, not on Workers.)
 }

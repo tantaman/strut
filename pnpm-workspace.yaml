@@ -1,4 +1,6 @@
 allowBuilds:
+  # Needed by auth.cli.ts for offline Better-Auth schema generation (docs/AUTH_SETUP.md).
+  better-sqlite3: true
   esbuild: true
   lightningcss: true
   sharp: false

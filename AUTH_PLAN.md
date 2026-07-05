@@ -98,12 +98,16 @@ Apple; Phase 5 the guest→linked claim flow. Then `AI_ARRANGE_PLAN.md` Phase 1+
 - **Guard editor/dashboard routes** (`src/routes/index.tsx`, `deck.$deckId.tsx`) with a TanStack
   `beforeLoad`/server-fn session check → redirect to sign-in when required. **Do not guard**
   `share.$deckId.tsx` or `deck.$deckId_.play.tsx` (public/presenter stay anonymous).
-- **Live-query channel (open item):** the browser connects directly to the rindled WS
-  (`RINDLE_DAEMON_WS`) for live queries, while gated query *twins* run in the Worker. Confirm how that WS
-  authenticates per-user once real sessions exist — today it appears to rely on the Worker as the gating
-  middle plus a shared `RINDLE_DAEMON_TOKEN`. If the browser↔daemon channel can read data directly, it
-  must carry/verify a session-scoped token (or be proxied through the Worker). **Resolve before relying
-  on auth for data isolation.**
+- **Live-query channel (mostly resolved — it's a lease/capability model).** The browser opens the WS
+  directly to the daemon (`RINDLE_DAEMON_WS`), but reads are two-hop: `POST /api/rindle/query` hits the
+  **gated Worker** (`authorizeQuery` + `deckAccess`/`publicAccess`), which returns a daemon **lease**
+  (`{ materializationId, leaseToken, queryKey }`, RINDLE_NOTES.md:65); the WS then only streams
+  materializations you hold a valid `leaseToken` for. So the WS is **downstream of the HTTP gate** —
+  swapping `x-user` for the session on `/api/rindle/query` (above) secures the WS too; **no separate WS
+  auth to build.** Residuals to confirm against `@rindle/daemon` (not strut code): (1) `leaseToken` is
+  unguessable and can't be tampered to widen scope; (2) leases expire / revoke on access change
+  (un-share, `public-read`→`private`, sign-out) rather than streaming stale rows; (3) the daemon rejects
+  WS subscriptions that don't present a valid lease.
 
 ## Phase 4 — Apple sign-in
 
