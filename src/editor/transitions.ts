@@ -26,8 +26,13 @@ interface Flight {
 }
 
 // Hand-tuned so each preset reads differently when flying between slides.
+// 'none' is the deck DEFAULT (see createDeck) and means "no canned Bespoke feel selected" — NOT "no
+// camera movement". Strut ships the impress camera, where the flight IS the transition, so 'none'
+// must still fly at the base duration; a 0 here teleports between slides and silently disables the
+// app's signature animation for every default deck. (The impress export already forces this via
+// `flightFor(...).duration || 900`.)
 const FLIGHTS: Record<string, Flight> = {
-  none: { duration: 0, easing: 'linear' },
+  none: { duration: 900, easing: 'cubic-bezier(.4,0,.2,1)' },
   classic: { duration: 900, easing: 'cubic-bezier(.4,0,.2,1)' },
   carousel: { duration: 1100, easing: 'cubic-bezier(.4,0,.2,1)' },
   concave: { duration: 1000, easing: 'cubic-bezier(.6,-0.2,.3,1.2)' },
