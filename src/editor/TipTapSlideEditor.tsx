@@ -3,9 +3,9 @@
 // fit-to-slide scale, so what you edit is literally what renders. The stored `doc` (TipTap JSON) is the
 // source of truth; the editor streams it via Rindle's `.folded` (debounced, last-value-wins) on every
 // keystroke for live sync, and commits ONE undo step per edit session on blur — mirroring how the
-// textarea behaved. Per-slide alignment (`text_align`) stays a slide-level override (it aligns the whole
-// surface via `--strut-text-align`), driven by the chips on the format bar — distinct from per-block
-// alignment, which we don't do here.
+// textarea behaved. Formatting is per-selection, like a document: the format bar drives real TipTap
+// commands — marks/blocks, per-block alignment (TextAlign), and font-family/color on the `textStyle`
+// mark — all stored inline in the doc. The deck theme still supplies the defaults these override.
 
 import { useRef } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -24,20 +24,16 @@ import {
   Quote,
   Strikethrough,
 } from 'lucide-react'
-import { SLIDE_H, SLIDE_W } from '../config'
+import { FONT_FAMILIES, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
 import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
-import { themeVars } from './render'
-import {
-  backgroundImage,
-  composeBackground,
-  resolveBackground,
-  resolveTextAlign,
-} from './types'
-import type { DeckThemeFields, TextAlign } from './types'
+import { cssFontFamily, themeVars } from './render'
+import { ColorField } from './ColorField'
+import { backgroundImage, composeBackground, resolveBackground } from './types'
+import type { DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 
 type MdDeck = (DeckThemeFields & { background?: string | null }) | null
@@ -94,11 +90,6 @@ export function TipTapSlideEditor({
     })
   }
 
-  const align = resolveTextAlign(slide.text_align, deck?.text_align)
-  function setAlign(next: TextAlign) {
-    mutate.setSlideTheme({ id: slide.id, text_align: next, now: Date.now() })
-  }
-
   const background = composeBackground(
     resolveBackground(slide.background, deck?.background ?? undefined),
     backgroundImage(slide.background, deck?.background ?? undefined),
@@ -106,7 +97,7 @@ export function TipTapSlideEditor({
 
   return (
     <>
-      <FormatBar editor={editor} align={align} onAlign={setAlign} />
+      <FormatBar editor={editor} deck={deck} />
       <div className="md-preview" ref={previewRef}>
         <div
           className="slide-surface"
@@ -130,18 +121,10 @@ export function TipTapSlideEditor({
   )
 }
 
-// The floating format toolbar. Marks/blocks are driven through the editor's command chain; the three
-// alignment chips write the per-slide `text_align` override (not a TipTap command). Re-renders with the
-// editor on every transaction, so the active-state highlights track the selection.
-function FormatBar({
-  editor,
-  align,
-  onAlign,
-}: {
-  editor: Editor | null
-  align: TextAlign
-  onAlign: (a: TextAlign) => void
-}) {
+// The floating format toolbar. Everything is a TipTap command on the current selection — marks/blocks,
+// per-block alignment, and font-family/color (via the shared font select + ColorField). Re-renders with
+// the editor on every transaction, so the active-state highlights track the selection.
+function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
   if (!editor) return null
 
   const marks: Array<{
@@ -206,17 +189,31 @@ function FormatBar({
     },
   ]
 
-  const aligns: Array<{ value: TextAlign; icon: typeof Bold; title: string }> = [
+  // Per-block alignment via the TextAlign extension (was a slide-wide override). An unaligned block
+  // reports no active alignment, so no chip highlights until you set one — and it keeps inheriting the
+  // deck's `--strut-text-align` default.
+  const aligns: Array<{ value: string; icon: typeof Bold; title: string }> = [
     { value: 'left', icon: AlignLeft, title: 'Align left' },
     { value: 'center', icon: AlignCenter, title: 'Align center' },
     { value: 'right', icon: AlignRight, title: 'Align right' },
   ]
 
+  // Selection-level font + color, stored on the `textStyle` mark. Empty = inherit the deck theme.
+  const activeFont = editor.getAttributes('textStyle').fontFamily as
+    | string
+    | undefined
+  const currentFontName =
+    FONT_FAMILIES.find((f) => cssFontFamily(f) === activeFont) ?? ''
+  const currentColor = (
+    (editor.getAttributes('textStyle').color as string | undefined) ?? ''
+  ).replace(/^#/, '')
+
   return (
     <div
       className="md-format-bar"
       // Keep the editor selection alive when a button is pressed (a click would otherwise blur the
-      // editor and commit the edit before the command runs).
+      // editor and commit the edit before the command runs). The font <select> and the color picker's
+      // native OS input opt out of this (they need real focus) via their own stopPropagation.
       onMouseDown={(e) => e.preventDefault()}
     >
       {marks.map(({ icon: Icon, title, active, run }) => (
@@ -231,12 +228,53 @@ function FormatBar({
         </button>
       ))}
       <span className="md-format-bar__sep" />
+      <select
+        className="md-format-bar__font"
+        title="Font"
+        value={currentFontName}
+        // Let the native select open despite the bar's preventDefault; the ProseMirror selection
+        // survives the blur and chain().focus() restores it before the font is applied.
+        onMouseDown={(e) => e.stopPropagation()}
+        onChange={(e) => {
+          const name = e.target.value
+          if (name)
+            editor.chain().focus().setFontFamily(cssFontFamily(name)).run()
+          else editor.chain().focus().unsetFontFamily().run()
+        }}
+      >
+        <option value="">Theme font</option>
+        {FONT_FAMILIES.map((f) => (
+          <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
+            {f}
+          </option>
+        ))}
+      </select>
+      <ColorField
+        value={currentColor}
+        themeDefault={{
+          color: deck?.body_color ?? '',
+          title: 'Theme text color',
+        }}
+        onChange={(hex) => {
+          if (hex)
+            editor
+              .chain()
+              .focus()
+              .setColor('#' + hex)
+              .run()
+          else editor.chain().focus().unsetColor().run()
+        }}
+      />
+      <span className="md-format-bar__sep" />
       {aligns.map(({ value, icon: Icon, title }) => (
         <button
           key={value}
-          className={'md-format-bar__btn' + (align === value ? ' is-active' : '')}
+          className={
+            'md-format-bar__btn' +
+            (editor.isActive({ textAlign: value }) ? ' is-active' : '')
+          }
           title={title}
-          onClick={() => onAlign(value)}
+          onClick={() => editor.chain().focus().setTextAlign(value).run()}
           type="button"
         >
           <Icon size={16} />

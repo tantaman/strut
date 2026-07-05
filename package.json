@@ -38,6 +38,8 @@
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "@tiptap/core": "^3.27.1",
+    "@tiptap/extension-text-align": "3.27.1",
+    "@tiptap/extension-text-style": "3.27.1",
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "@tiptap/static-renderer": "^3.27.1",

@@ -8,6 +8,8 @@
 // usable from the pure impress export and during SSR. The editor imports `@tiptap/react` separately.
 
 import { StarterKit } from '@tiptap/starter-kit'
+import { Color, FontFamily, TextStyle } from '@tiptap/extension-text-style'
+import { TextAlign } from '@tiptap/extension-text-align'
 import type { Extensions } from '@tiptap/core'
 
 // StarterKit v3 bundles doc/paragraph/text, headings, bold/italic/strike/underline/code, code block,
@@ -24,4 +26,14 @@ export const strutExtensions: Extensions = [
       HTMLAttributes: { rel: 'noopener nofollow', target: '_blank' },
     },
   }),
+  // Per-selection inline formatting so markdown slides author like a document rather than carrying one
+  // slide-wide setting. TextStyle is the base `<span style>` mark that Color + FontFamily hang their
+  // attributes on; TextAlign writes a per-block `text-align` (only for the block types listed, and only
+  // when set — an unaligned block emits no inline style, so it still inherits the deck's
+  // `--strut-text-align` default). All four are pure schema/command defs (no DOM, no React), so the
+  // static renderer emits their inline styles on thumbnails/exports exactly as the editor shows them.
+  TextStyle,
+  Color,
+  FontFamily,
+  TextAlign.configure({ types: ['heading', 'paragraph'] }),
 ]

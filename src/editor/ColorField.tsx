@@ -91,7 +91,13 @@ export function NativeColorInput({
     }
   }, [onCommit, onLive])
   return (
-    <label className={'insp__custom' + (active ? ' is-active' : '')}>
+    // stopPropagation on mousedown so a toolbar that blanket-`preventDefault`s pointer-downs to keep a
+    // text selection alive (the markdown format bar) can't also swallow the click that opens this native
+    // OS picker. A no-op everywhere else — no other host of this control preventDefaults its pointerdowns.
+    <label
+      className={'insp__custom' + (active ? ' is-active' : '')}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <input ref={ref} type="color" defaultValue={value} />
       <span>{value.replace(/^#/, '')}</span>
     </label>

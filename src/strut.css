@@ -757,6 +757,26 @@ button {
   margin: 3px 4px;
   background: var(--line);
 }
+/* Selection font picker (native select, styled to match the icon buttons). */
+.md-format-bar__font {
+  height: 30px;
+  max-width: 128px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 3px);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.md-format-bar__font:hover {
+  border-color: var(--coral);
+}
+/* Selection color picker: the shared Popchip chip, sized to sit inline among the icon buttons. */
+.md-format-bar .popchip__trigger {
+  height: 30px;
+  padding: 0 6px;
+}
 
 /* The editable surface: TipTap mounts its ProseMirror editable here, carrying the .strut-md class so it
    inherits the exact render typography/theme (see .strut-md below). The host fills the scaled canvas. */
