@@ -5,10 +5,18 @@ import { Plus, Upload, X } from 'lucide-react'
 import { decksQuery } from '../../shared/queries'
 import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
+import { preloadDecks } from '../rindle/appSsr'
+import { AccountControl } from '../rindle/AccountControl'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
 
-export const Route = createFileRoute('/')({ component: Dashboard })
+export const Route = createFileRoute('/')({
+  component: Dashboard,
+  // SSR seed: read the viewer's decks on the server so the dashboard first-paints with content instead
+  // of the "Connecting…" splash. RindleProvider renders against `loaderData.rindle` until the live
+  // client boots (then swaps with no flash). Best-effort — a null seed just falls back to the live query.
+  loader: () => preloadDecks(),
+})
 
 function Dashboard() {
   const decks = useQuery(decksQuery({ limit: 200 }))
@@ -55,6 +63,7 @@ function Dashboard() {
       <div className="brandbar">
         <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
         <span className="brandbar__tag">Spatial presentations</span>
+        <AccountControl />
       </div>
       <div className="dash__head">
         <div>

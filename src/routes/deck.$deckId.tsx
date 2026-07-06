@@ -2,7 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useQuery, useQueryStatus, useRoot } from '@rindle/react'
 import { deckDetailQuery, deckSharesQuery } from '../../shared/queries'
-import { currentUser } from '../rindle/user'
+import { authClient } from '../rindle/authClient'
+import { preloadDeck } from '../rindle/appSsr'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
 import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
@@ -26,6 +27,11 @@ export const Route = createFileRoute('/deck/$deckId')({
           : undefined,
     slide: typeof s.slide === 'string' ? s.slide : undefined,
   }),
+  // SSR seed: read the deck subtree + collaborators on the server so a direct load / reload of the
+  // editor first-paints with the deck instead of "Connecting…". Gated to the viewer's session; a deck
+  // they can't see seeds empty. Returns { rindle, userId } — the userId lets canEdit resolve correctly
+  // during SSR (no read-only-banner flash). Best-effort — a null seed falls back to the live query.
+  loader: ({ params }) => preloadDeck({ data: { deckId: params.deckId } }),
 })
 
 const EMPTY_SLIDES: SlideDetail[] = []
@@ -42,7 +48,11 @@ function EditorAccess({ deckId }: { deckId: string }) {
   const shares = useQuery(deckSharesQuery({ deckId }))
   // Owner or 'editor' collaborator → editable; everyone else (incl. a 'viewer') → read-only. While
   // the deck row is still syncing we assume read-only so editing chrome doesn't flash for viewers.
-  const me = currentUser()
+  // `me` is the session principal (matches the server-side owner_id). It comes from the LOADER (resolved
+  // server-side from the cookie) so canEdit is correct during SSR + first paint — no read-only flash;
+  // the live session hook takes over after hydration (and reflects a mid-session guest→account promote).
+  const { userId: ssrUserId } = Route.useLoaderData()
+  const me = authClient.useSession().data?.user.id ?? ssrUserId
   const canEdit =
     !!deck &&
     (deck.owner_id === me ||

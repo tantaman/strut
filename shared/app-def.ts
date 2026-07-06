@@ -370,8 +370,9 @@ export const mutators = {
         canned_transition: 'none',
         custom_stylesheet: '',
         deck_version: '1.0',
-        // Author = the acting principal. The client predicts currentUser() (so the optimistic row passes
-        // the owner-scoped decksQuery immediately); the server injects the AUTHENTICATED principal.
+        // Author = the acting principal (`ctx.user`). The client predicts the session user id (so the
+        // optimistic row passes the owner-scoped decksQuery immediately); the server injects the SAME id
+        // derived from the session cookie for the authoritative run.
         owner_id: ctx.user,
         visibility: 'private',
         share_token: '',

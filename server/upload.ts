@@ -183,7 +183,10 @@ export async function uploadFromRequest(
   r2: R2BucketLike | null,
 ): Promise<Response> {
   try {
-    const user = request.headers.get('x-user') ?? ''
+    // Auth gate = the server-verified session (cookie), not the spoofable `x-user` header. Uploads
+    // aren't user-scoped (random-UUID keys), so we only require SOME authenticated principal.
+    const { resolveSessionUser } = await import('./session.ts')
+    const user = await resolveSessionUser(request)
     if (!user) throw new UploadError('unauthorized', 401)
 
     const contentType = (request.headers.get('content-type') || '')
