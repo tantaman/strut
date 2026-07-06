@@ -85,6 +85,7 @@ function Play() {
     ((active.imp_scale || 3) / 3)
   const acx = active.x * WORLD
   const acy = active.y * WORLD
+  const acz = active.z * WORLD
   // The presentation surface (deck-wide "table") shows behind the flying slide cards.
   const surf = resolveSurface(active.surface, deck?.surface)
   // The chosen canned transition (spec §7.2) drives the camera-flight feel.
@@ -116,11 +117,14 @@ function Play() {
           transition: camTransition,
           // Counter the active slide's full 3-D orientation (inverse rotation, reversed order) so it
           // flies to dead-centre and face-on regardless of layout; other cards keep their relative
-          // tilt (the impress parallax). For flat layouts rotate_x/y are 0 → same as before.
+          // tilt AND depth (the impress parallax). For flat layouts rotate_x/y and z are 0 → same as
+          // before. The final translate3d flies the camera to the active slide's (x,y,z), so a card in
+          // front of/behind it parallaxes for free and the active card lands on the focal plane (z=0),
+          // where the fit zoom below is exact.
           // The zoom MUST be a uniform 3-D scale (scale3d, not scale): a 2-D scale sitting between the
           // camera's inverse rotation and a card's rotation doesn't commute, leaving the active slide
           // partly tilted. Uniform scale commutes with rotation, so the rotations cancel exactly.
-          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotateZ(${-active.rotate_z}rad) rotateY(${-active.rotate_y}rad) rotateX(${-active.rotate_x}rad) scale3d(${zoom}, ${zoom}, ${zoom}) translate(${-acx}px, ${-acy}px)`,
+          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotateZ(${-active.rotate_z}rad) rotateY(${-active.rotate_y}rad) rotateX(${-active.rotate_x}rad) scale3d(${zoom}, ${zoom}, ${zoom}) translate3d(${-acx}px, ${-acy}px, ${-acz}px)`,
         }}
       >
         {slides.map((s) => (
@@ -135,7 +139,9 @@ function Play() {
               height: SLIDE_H,
               overflow: 'hidden',
               boxShadow: '0 10px 60px rgba(0,0,0,.6)',
-              transform: `translate(-50%, -50%) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale3d(${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3})`,
+              // left/top place the card in the z=0 plane; translateZ lifts it to its world depth so it
+              // shares the camera's preserve-3d space (right after centring, before its own rotations).
+              transform: `translate(-50%, -50%) translateZ(${s.z * WORLD}px) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale3d(${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3})`,
               opacity: s.id === active.id ? 1 : 0.55,
               transition: `opacity ${flight.duration || 400}ms`,
             }}

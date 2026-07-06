@@ -117,7 +117,9 @@ function stepHTML(
     `data-x="${Math.round(slide.x * WORLD)}"`,
     `data-y="${Math.round(slide.y * WORLD)}"`,
   ]
-  if (slide.z) attrs.push(`data-z="${Math.round(slide.z)}"`)
+  // z is in the same world units as x/y (a card is 240; WORLD maps that to px), so it must get the same
+  // WORLD scale — otherwise impress.js flies to a different depth than the in-app camera renders.
+  if (slide.z) attrs.push(`data-z="${Math.round(slide.z * WORLD)}"`)
   if (slide.rotate_x)
     attrs.push(`data-rotate-x="${deg(slide.rotate_x).toFixed(2)}"`)
   if (slide.rotate_y)

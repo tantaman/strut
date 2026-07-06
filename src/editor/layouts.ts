@@ -4,8 +4,9 @@
 // slide in camera order; the picker writes them through `setSlideTransform` as one undoable step, and
 // the same camera (Overview + Play + impress export) flies through whatever we lay down.
 //
-// Everything is in overview "card units" (x/y; a card is 240 wide). `z` depth isn't rendered yet, so
-// these layouts use x/y + rotation only; depth-aware layouts (stack/cube) can come once z is wired.
+// Everything is in overview "card units" (x/y/z; a card is 240 wide). `z` is now a real depth axis —
+// the Play + share cameras fly through it (translate3d) and the Overview hints it as shadow elevation —
+// so depth-aware presets (stack/cube) are now possible; these built-ins still use x/y + rotation only.
 
 import { OVERVIEW_CARD_GAP } from '../config'
 
