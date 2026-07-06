@@ -51,6 +51,14 @@
     },
   ],
 
+  // Workers AI — powers "✨ AI Arrange" (server/arrange.ts). The app (not the user) pays for inference:
+  // the arrange task is a small, bounded structured-output call, and login-gating + ARRANGE_LIMITS bound
+  // the cost. Like R2/D1 this is an OBJECT binding — read via `cloudflare:workers` env.AI, NOT
+  // process.env. No account setup beyond this binding; Workers AI has a daily free neuron allotment.
+  "ai": {
+    "binding": "AI",
+  },
+
   // Non-secret config, surfaced on process.env at runtime (nodejs_compat).
   //   RINDLE_DAEMON_URL  — https URL of your hosted rindled control plane (used by the Worker/server).
   //   RINDLE_DAEMON_WS   — wss URL of the daemon's live-query WebSocket. Served to the browser at

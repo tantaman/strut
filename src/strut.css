@@ -1694,6 +1694,110 @@ button {
   color: var(--coral);
 }
 
+/* "✨ Arrange" — the AI arrange row (top, under the Layout presets) and, while a plan is proposed, the
+   Apply/Discard preview bar. Same panel chrome as the layout/transition toolbars. */
+.ov-arrange {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 92vw;
+  padding: 9px 13px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  z-index: 41;
+}
+.ov-arrange__label,
+.ov-arrange__badge {
+  color: var(--coral);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-right: 2px;
+}
+.ov-arrange__input {
+  width: min(46vw, 340px);
+  border: 1px solid var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.ov-arrange__input:focus {
+  outline: none;
+  border-color: var(--coral);
+}
+.ov-arrange__go,
+.ov-arrange__apply {
+  border: 1px solid var(--coral);
+  background: var(--coral);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.ov-arrange__go:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.ov-arrange__gate,
+.ov-arrange__why {
+  color: var(--muted);
+  font-size: 12px;
+}
+.ov-arrange__why {
+  max-width: 44vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ov-arrange__error {
+  color: var(--danger, #d33);
+  font-size: 12px;
+  max-width: 280px;
+}
+.ov-arrange__signin,
+.ov-arrange__discard {
+  border: 1px solid var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+}
+.ov-arrange__signin:hover,
+.ov-arrange__discard:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+/* While previewing an AI plan: cards glide to their proposed spots and aren't interactive. */
+.overview.is-previewing .ov-card {
+  transition:
+    left 0.35s ease,
+    top 0.35s ease,
+    transform 0.35s ease;
+  pointer-events: none;
+}
+.ov-card.is-preview {
+  outline: 2px dashed var(--coral);
+  outline-offset: 2px;
+}
+
 .ov-transitions {
   position: absolute;
   bottom: 14px;
