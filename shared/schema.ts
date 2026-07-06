@@ -9,103 +9,101 @@
 // ONCE in a hand-written module with refineTable(...) + refineSchema(...); they survive every regen
 // of this file.
 
-import { createSchema, json, number, string, table } from '@rindle/client'
+import { createSchema, number, string, table } from "@rindle/client";
 
-export const component = table('component')
+export const component = table("component")
   .columns({
     id: string(),
-    slide_id: string(),
-    type: string(),
-    z_order: number(),
-    x: number(),
-    y: number(),
-    scale_x: number(),
-    scale_y: number(),
-    scale_w: number(),
-    scale_h: number(),
-    rotate: number(),
-    skew_x: number(),
-    skew_y: number(),
-    custom_classes: string(),
-    fill: string(),
-    props: json(),
+    slide_id: string().nullable(),
+    type: string().nullable(),
+    z_order: number().nullable(),
+    x: number().nullable(),
+    y: number().nullable(),
+    scale_x: number().nullable(),
+    scale_y: number().nullable(),
+    scale_w: number().nullable(),
+    scale_h: number().nullable(),
+    rotate: number().nullable(),
+    skew_x: number().nullable(),
+    skew_y: number().nullable(),
+    custom_classes: string().nullable(),
+    fill: string().nullable(),
+    props: string().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const custom_background = table('custom_background')
+export const custom_background = table("custom_background")
   .columns({
     id: string(),
-    deck_id: string(),
-    klass: string(),
-    style: string(),
+    deck_id: string().nullable(),
+    klass: string().nullable(),
+    style: string().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const deck = table('deck')
+export const deck = table("deck")
   .columns({
     id: string(),
-    title: string(),
-    created: number(),
-    modified: number(),
-    background: string(),
-    surface: string(),
-    chosen_presenter: string(),
-    canned_transition: string(),
-    custom_stylesheet: string(),
-    deck_version: string(),
-    owner_id: string(),
-    visibility: string(),
-    share_token: string(),
-    heading_font: string(),
-    heading_color: string(),
-    body_font: string(),
-    body_color: string(),
-    default_slide_mode: string(),
-    text_align: string(),
+    title: string().nullable(),
+    created: number().nullable(),
+    modified: number().nullable(),
+    background: string().nullable(),
+    surface: string().nullable(),
+    chosen_presenter: string().nullable(),
+    canned_transition: string().nullable(),
+    custom_stylesheet: string().nullable(),
+    deck_version: string().nullable(),
+    owner_id: string().nullable(),
+    visibility: string().nullable(),
+    share_token: string().nullable(),
+    heading_font: string().nullable(),
+    heading_color: string().nullable(),
+    body_font: string().nullable(),
+    body_color: string().nullable(),
+    default_slide_mode: string().nullable(),
+    text_align: string().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const deck_share = table('deck_share')
+export const deck_share = table("deck_share")
   .columns({
     id: string(),
-    deck_id: string(),
-    user_id: string(),
-    role: string(),
-    created: number(),
+    deck_id: string().nullable(),
+    user_id: string().nullable(),
+    role: string().nullable(),
+    created: number().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const slide = table('slide')
+export const slide = table("slide")
   .columns({
     id: string(),
-    deck_id: string(),
-    sort: string(),
-    x: number(),
-    y: number(),
-    z: number(),
-    rotate_x: number(),
-    rotate_y: number(),
-    rotate_z: number(),
-    imp_scale: number(),
-    background: string(),
-    surface: string(),
-    created: number(),
-    modified: number(),
-    markdown: string(),
-    render_mode: string(),
-    text_align: string(),
-    doc: string(),
+    deck_id: string().nullable(),
+    sort: string().nullable(),
+    x: number().nullable(),
+    y: number().nullable(),
+    z: number().nullable(),
+    rotate_x: number().nullable(),
+    rotate_y: number().nullable(),
+    rotate_z: number().nullable(),
+    imp_scale: number().nullable(),
+    background: string().nullable(),
+    surface: string().nullable(),
+    created: number().nullable(),
+    modified: number().nullable(),
+    markdown: string().nullable(),
+    render_mode: string().nullable(),
+    text_align: string().nullable(),
+    doc: string().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const user_profile = table('user_profile')
+export const user_profile = table("user_profile")
   .columns({
     id: string(),
-    display_name: string(),
-    updated: number(),
+    display_name: string().nullable(),
+    updated: number().nullable(),
   })
-  .primaryKey('id')
+  .primaryKey("id");
 
-export const schema = createSchema({
-  tables: [component, custom_background, deck, deck_share, slide, user_profile],
-})
+export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, user_profile] });
