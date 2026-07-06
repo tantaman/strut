@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
+import { GRID_SNAP, newId, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
@@ -22,6 +22,7 @@ import {
   composeBackground,
   resolveBackground,
   resolveSurface,
+  SHAPES,
   textTypeOf,
 } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
@@ -44,6 +45,12 @@ interface DeckRow extends DeckThemeFields {
   surface: string
   custom_stylesheet?: string
 }
+
+// A single click (no real drag) with the shape tool armed drops this size, centered on the pointer —
+// matches the renderer's default shape box (render.tsx DEFAULT_W/H['shape']). The 6px slop below is
+// how far the pointer may move and still count as a "click" rather than a size-defining drag.
+const SHAPE_DEFAULT = 200
+const DRAW_SLOP = 6
 
 export function Stage({
   slide,
@@ -92,6 +99,13 @@ export function Stage({
     w: number
     h: number
   }>(null)
+  // Live preview box (slide coords) while sweeping out a shape with the armed shape tool.
+  const [shapeDraft, setShapeDraft] = useState<null | {
+    x: number
+    y: number
+    w: number
+    h: number
+  }>(null)
 
   const bg = resolveBackground(slideData.background, deck?.background)
   const bgImg = backgroundImage(slideData.background, deck?.background)
@@ -120,6 +134,16 @@ export function Stage({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [editor, getComponents, mutate])
+
+  // Esc disarms the shape tool (back to Select), mirroring tldraw/Figma.
+  useEffect(() => {
+    if (!editor.pendingShape) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') editor.setPendingShape(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [editor])
 
   // Remove component(s) as one undoable step (undo reinserts them with full geometry).
   function deleteComponents(victims: AnyComponent[]) {
@@ -158,6 +182,9 @@ export function Stage({
 
   function beginMove(c: AnyComponent, e: RPointerEvent) {
     if (editingId === c.id || !editor.canEdit) return
+    // Shape tool armed: don't select/move — let the pointer-down bubble to the canvas so drawing a new
+    // shape works even when it starts over an existing object (Figma behavior).
+    if (editor.pendingShape) return
     e.stopPropagation()
     const additive = e.shiftKey || e.metaKey || e.ctrlKey
     if (additive) editor.select(c.id, true)
@@ -457,6 +484,118 @@ export function Stage({
     window.addEventListener('pointerup', up)
   }
 
+  // ---- draw-to-place a shape (tldraw/Figma) ----
+  // Insert a shape at an explicit box as ONE undoable step. addShape resets the spatial base to the
+  // default 200×200, so a follow-up transform stamps the drawn size — the same insert-then-transform
+  // the reinsert/import path uses (componentOps.insertComponent).
+  function insertShape(
+    name: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ) {
+    const id = newId()
+    const addArgs = {
+      id,
+      slideId: slideData.id,
+      x,
+      y,
+      z_order: Math.floor(Date.now() / 1000),
+      shape: name,
+      markup: SHAPES[name] ?? '',
+      fill: '3498db',
+    }
+    const size = {
+      id,
+      scale_x: 1,
+      scale_y: 1,
+      scale_w: w,
+      scale_h: h,
+      rotate: 0,
+      skew_x: 0,
+      skew_y: 0,
+    }
+    const doAdd = () => {
+      mutate.addShape(addArgs)
+      mutate.transformComponent(size)
+    }
+    doAdd()
+    editor.select(id)
+    history.push({
+      label: 'Add shape',
+      redo: doAdd,
+      undo: () => mutate.removeComponent({ id }),
+    })
+  }
+
+  // Sweep out the new shape's bounding box (position + size in one gesture). Shift = 1:1 (perfect
+  // square/circle), Alt = grow from the center. A plain click (no real drag) drops a default-sized
+  // shape centered on the pointer. Reverts to Select after committing.
+  function beginDrawShape(e: RPointerEvent) {
+    if (!editor.canEdit) return
+    const name = editor.pendingShape
+    if (!name) return
+    e.stopPropagation()
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const ox = (e.clientX - rect.left) / scale
+    const oy = (e.clientY - rect.top) / scale
+    let box = { x: ox, y: oy, w: 0, h: 0 }
+    let moved = false
+    const move = (ev: PointerEvent) => {
+      let dx = (ev.clientX - rect.left) / scale - ox
+      let dy = (ev.clientY - rect.top) / scale - oy
+      if (ev.shiftKey) {
+        const m = Math.max(Math.abs(dx), Math.abs(dy))
+        dx = (dx < 0 ? -1 : 1) * m
+        dy = (dy < 0 ? -1 : 1) * m
+      }
+      let x: number, y: number, w: number, h: number
+      if (ev.altKey) {
+        w = Math.abs(dx) * 2
+        h = Math.abs(dy) * 2
+        x = ox - Math.abs(dx)
+        y = oy - Math.abs(dy)
+      } else {
+        x = Math.min(ox, ox + dx)
+        y = Math.min(oy, oy + dy)
+        w = Math.abs(dx)
+        h = Math.abs(dy)
+      }
+      if (Math.abs(dx) > DRAW_SLOP || Math.abs(dy) > DRAW_SLOP) moved = true
+      box = { x, y, w, h }
+      setShapeDraft(box)
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setShapeDraft(null)
+      let { x, y, w, h } = box
+      if (!moved || w < 8 || h < 8) {
+        w = SHAPE_DEFAULT
+        h = SHAPE_DEFAULT
+        x = ox - w / 2
+        y = oy - h / 2
+      }
+      insertShape(
+        name,
+        Math.round(x),
+        Math.round(y),
+        Math.round(w),
+        Math.round(h),
+      )
+      editor.setPendingShape(null) // one shape, then back to Select
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  // Bare-canvas pointer-down: draw a shape when the shape tool is armed, else marquee-select.
+  function onCanvasPointerDown(e: RPointerEvent) {
+    if (editor.pendingShape) beginDrawShape(e)
+    else beginMarquee(e)
+  }
+
   // Body-edit layer: the markdown doc is the editable surface (WYSIWYG, scaled to fit) with the
   // slide's Objects composited on top but locked. All the spatial hooks above still run — only the
   // rendered output branches — so hook order stays stable when the active slide flips layers.
@@ -518,8 +657,10 @@ export function Stage({
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
       >
         <div
-          className="slide-canvas strut-surface"
-          onPointerDown={beginMarquee}
+          className={`slide-canvas strut-surface${
+            editor.pendingShape ? ' is-placing' : ''
+          }`}
+          onPointerDown={onCanvasPointerDown}
           style={{
             width: SLIDE_W,
             height: SLIDE_H,
@@ -565,6 +706,21 @@ export function Stage({
               )}
             </ComponentDataReader>
           ))}
+          {shapeDraft && editor.pendingShape && (
+            <div
+              className="shape-draft"
+              style={{
+                left: shapeDraft.x,
+                top: shapeDraft.y,
+                width: shapeDraft.w,
+                height: shapeDraft.h,
+                color: '#3498db',
+              }}
+              dangerouslySetInnerHTML={{
+                __html: SHAPES[editor.pendingShape] ?? '',
+              }}
+            />
+          )}
         </div>
       </div>
       {marquee && (

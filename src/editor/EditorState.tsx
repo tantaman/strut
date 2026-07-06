@@ -38,6 +38,12 @@ interface EditorState {
 
   draggingComponentId: string | null
   setDraggingComponentId: (id: string | null) => void
+
+  // The armed shape tool for draw-to-place (tldraw/Figma style): the picked shape name
+  // (square/circle/…), or null when the Select tool is active. Header arms it on pick; Stage consumes
+  // the draw gesture on the canvas and reverts it to null after one placement.
+  pendingShape: string | null
+  setPendingShape: (name: string | null) => void
 }
 
 const Ctx = createContext<EditorState | null>(null)
@@ -65,6 +71,7 @@ export function EditorStateProvider({
   const [draggingComponentId, setDraggingComponentId] = useState<string | null>(
     null,
   )
+  const [pendingShape, setPendingShape] = useState<string | null>(null)
 
   const setMode = useCallback(
     (m: EditorMode) => {
@@ -119,6 +126,8 @@ export function EditorStateProvider({
       clearSelection,
       draggingComponentId,
       setDraggingComponentId,
+      pendingShape,
+      setPendingShape,
     }),
     [
       deckId,
@@ -134,6 +143,7 @@ export function EditorStateProvider({
       clearSelection,
       draggingComponentId,
       setDraggingComponentId,
+      pendingShape,
     ],
   )
 
