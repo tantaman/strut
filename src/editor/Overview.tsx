@@ -42,6 +42,19 @@ const DEG = 180 / Math.PI
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v))
 
+// The Overview is a flat top-down map, so it can't fly the 3-D camera — but it can HINT a card's depth
+// (z): a card pushed toward the viewer floats higher (a larger, softer, more-offset shadow), one pushed
+// back sinks (a tighter, fainter one). Apparent size stays owned by imp_scale; elevation reads as z.
+// Returns undefined near z≈0 so the default `.ov-card` shadow (var(--shadow)) stands unchanged.
+function depthShadow(z: number): string | undefined {
+  if (Math.round(z) === 0) return undefined
+  const t = clamp(z / 1200, -1, 1) // soft-normalize world-z to [-1, 1]
+  const dy = Math.max(0, Math.round(6 + t * 10))
+  const blur = Math.max(4, Math.round(18 + t * 22))
+  const alpha = (0.14 + ((t + 1) / 2) * 0.2).toFixed(3)
+  return `0 ${dy}px ${blur}px rgba(0, 0, 0, ${alpha})`
+}
+
 const stop = (e: React.PointerEvent) => e.stopPropagation()
 
 interface View {
@@ -410,6 +423,7 @@ export function Overview({
           const pc = previewById?.get(s.id)
           const x = pc ? pc.x : s.x
           const y = pc ? pc.y : s.y
+          const z = pc ? pc.z : s.z
           const rx = pc ? pc.rotate_x : s.rotate_x
           const ry = pc ? pc.rotate_y : s.rotate_y
           const rz = pc ? pc.rotate_z : s.rotate_z
@@ -430,6 +444,8 @@ export function Overview({
                 width: CARD_W,
                 height: CARD_H,
                 transform: `translate(-50%, -50%) perspective(900px) rotateX(${rx}rad) rotateY(${ry}rad) rotateZ(${rz}rad) scale(${sc / 3})`,
+                // Depth cue for a flat map: forward z floats, receded z sinks (undefined ⇒ default shadow).
+                boxShadow: depthShadow(z),
                 zIndex: selIds.has(s.id) ? 10 : 1,
               }}
               onPointerDown={(e) => beginCard(s, e)}

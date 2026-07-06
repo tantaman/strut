@@ -100,6 +100,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
     ((active.imp_scale || 3) / 3)
   const acx = active.x * WORLD
   const acy = active.y * WORLD
+  const acz = active.z * WORLD
   const surf = resolveSurface(active.surface, deck.surface)
   const flight = flightFor(deck.canned_transition)
   const camTransition = flight.duration
@@ -127,7 +128,10 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
           top: 0,
           transformStyle: 'preserve-3d',
           transition: camTransition,
-          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotate(${-active.rotate_z}rad) scale(${zoom}) translate(${-acx}px, ${-acy}px)`,
+          // Full 3-D camera (matches the Play view): counter the active slide's orientation in reverse
+          // order and fly to its (x,y,z) so embeds get the same depth parallax. scale3d (uniform) is what
+          // lets the inverse rotations cancel exactly — see the Play view for the derivation.
+          transform: `translate(${vp.w / 2}px, ${vp.h / 2}px) rotateZ(${-active.rotate_z}rad) rotateY(${-active.rotate_y}rad) rotateX(${-active.rotate_x}rad) scale3d(${zoom}, ${zoom}, ${zoom}) translate3d(${-acx}px, ${-acy}px, ${-acz}px)`,
         }}
       >
         {slides.map((s) => (
@@ -142,7 +146,9 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
               height: SLIDE_H,
               overflow: 'hidden',
               boxShadow: '0 10px 60px rgba(0,0,0,.6)',
-              transform: `translate(-50%, -50%) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale(${(s.imp_scale || 3) / 3})`,
+              // translateZ lifts the card to its world depth; scale3d (uniform) keeps the camera's
+              // inverse rotation exact. Mirrors the Play view.
+              transform: `translate(-50%, -50%) translateZ(${s.z * WORLD}px) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale3d(${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3}, ${(s.imp_scale || 3) / 3})`,
               opacity: s.id === active.id ? 1 : 0.55,
               transition: `opacity ${flight.duration || 400}ms`,
             }}
