@@ -8,6 +8,7 @@
 // mark — all stored inline in the doc. The deck theme still supplies the defaults these override.
 
 import { useRef } from 'react'
+import type { ReactNode } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import {
@@ -41,9 +42,13 @@ type MdDeck = (DeckThemeFields & { background?: string | null }) | null
 export function TipTapSlideEditor({
   slide,
   deck,
+  children,
 }: {
   slide: SlideDetail
   deck: MdDeck
+  // The locked Objects overlay (LockedObjects) — the slide's positioned components, shown on top of
+  // the editable body but inert, so what you see while editing the body matches what renders.
+  children?: ReactNode
 }) {
   const mutate = useMutate()
   const history = useHistory()
@@ -114,6 +119,7 @@ export function TipTapSlideEditor({
             }}
           >
             <EditorContent editor={editor} className="strut-md-host" />
+            {children}
           </div>
         </div>
       </div>

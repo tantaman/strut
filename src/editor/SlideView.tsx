@@ -9,7 +9,7 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { cmpStyle, MarkdownSurface, renderInner, themeVars } from './render'
+import { MarkdownSurface, themeVars } from './render'
 import { backgroundImage, composeBackground, resolveBackground } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -19,20 +19,8 @@ import {
   componentRefKey,
   mergeComponentRefs,
 } from './componentFragments'
-
-// The pure visual box — the same `cmpStyle` + `renderInner` the editor's <ComponentView> wraps, minus
-// interaction. Video / web frames are black placeholders (no live embed in a read-only thumbnail).
-function StaticComponent({ c }: { c: AnyComponent }) {
-  return (
-    <div className={`cmp cmp--${c.kind}`} style={cmpStyle(c)}>
-      {c.kind === 'video' || c.kind === 'webframe' ? (
-        <div style={{ width: '100%', height: '100%', background: '#000' }} />
-      ) : (
-        renderInner(c)
-      )}
-    </div>
-  )
-}
+import { StaticComponent } from './ObjectsLayer'
+import { isDocEmpty } from './tiptapDoc'
 
 type DeckThemeRow = ({ background: string } & DeckThemeFields) | null
 
@@ -80,18 +68,13 @@ export function SlideView({
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void
 }) {
-  // Markdown mode: one full-slide markdown surface in place of the component canvas (spec: a slide
-  // is either spatial-component mode or markdown mode). Components stay in the DB, just unrendered.
-  if (slide.render_mode === 'markdown') {
-    return (
-      <SlideFrame slide={slide} deck={deck} width={width}>
-        <MarkdownSurface doc={slide.doc} />
-      </SlideFrame>
-    )
-  }
+  // Both layers, always composited: the markdown Body underlay + the positioned Objects on top. Each
+  // is emitted only when it has content, so a pure-objects or pure-markdown slide renders exactly as
+  // it did before. `render_mode` now selects the active EDIT layer (editor only), not what renders.
   const components = mergeComponentRefs(slide)
   return (
     <SlideFrame slide={slide} deck={deck} width={width}>
+      {!isDocEmpty(slide.doc) && <MarkdownSurface doc={slide.doc} />}
       {components.map((component) => (
         <ComponentDataReader
           key={componentRefKey(component)}
@@ -99,7 +82,7 @@ export function SlideView({
           onData={onComponentData}
           onRemove={onComponentRemove}
         >
-          {(c) => <StaticComponent c={c} />}
+          {(c) => <StaticComponent c={c} live={false} />}
         </ComponentDataReader>
       ))}
     </SlideFrame>

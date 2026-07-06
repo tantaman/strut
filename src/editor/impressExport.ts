@@ -4,7 +4,7 @@
 
 import { SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
-import { docToHtml } from './tiptapDoc'
+import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
   cssHex,
   resolveBackground,
@@ -129,14 +129,17 @@ function stepHTML(
 
   const bg = resolveBackground(slide.background, deck.background)
   const align = resolveTextAlign(slide.text_align, deck.text_align)
-  // Markdown mode: one `.strut-md` surface (same doc→HTML renderer as the app) in place of components.
-  const inner =
-    slide.render_mode === 'markdown'
-      ? `      <div class="strut-md">${docToHtml(slide.doc)}</div>`
-      : [...components]
-          .sort((a, b) => a.z_order - b.z_order)
-          .map((c) => '      ' + componentHTML(c))
-          .join('\n')
+  // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
+  // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
+  // Each is emitted only when it has content, so single-layer slides export exactly as before.
+  const body = isDocEmpty(slide.doc)
+    ? ''
+    : `      <div class="strut-md">${docToHtml(slide.doc)}</div>`
+  const objects = [...components]
+    .sort((a, b) => a.z_order - b.z_order)
+    .map((c) => '      ' + componentHTML(c))
+    .join('\n')
+  const inner = [body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
     <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
 ${inner}

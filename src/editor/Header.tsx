@@ -100,12 +100,13 @@ export function Header({
   const [cssOpen, setCssOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const active = editor.activeSlideId
-  const isMarkdownSlide = activeSlide?.render_mode === 'markdown'
-  // Editing a slide (either mode) — gates the MDown toggle. Component inserters additionally require
-  // spatial mode (they don't apply to a markdown slide).
+  // The active slide's editable layer: 'markdown' = Body, '' = Objects (both always render; this only
+  // says which one you're editing). The component inserters belong to the Objects layer, so they show
+  // only when it's the one being edited — flip to Objects (slide toolbar) to drop an image on a body slide.
+  const editingBody = activeSlide?.render_mode === 'markdown'
   const canEditSlide =
     active != null && editor.mode === 'slide' && editor.canEdit
-  const canInsert = canEditSlide && !isMarkdownSlide
+  const canInsert = canEditSlide && !editingBody
 
   // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
   // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep

@@ -654,6 +654,18 @@ button {
   color: #111;
 }
 
+/* A visible-but-inert slide layer: the non-active layer in the Body/Objects editor — the markdown
+   Body shown behind editable Objects, or the Objects shown on top of an editable Body. Fills the
+   scaled canvas and passes pointer events through (pointer-events:none) to the active layer, so
+   marquee/canvas clicks and text editing land where they should. It carries no z-index, so its
+   contents keep their natural stacking: a static `.strut-md` underlay stays below the positioned
+   `.cmp` objects, which paint on top. */
+.slide-locked-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 /* ---- per-slide hover toolbar (operating table, top-right) ---- */
 /* Anchors to the stage viewport (not the scaled canvas) so it holds its corner across zoom-to-fit.
    Hidden until the stage is hovered; a vertical strip that grows downward as controls are added. */

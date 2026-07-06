@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { FileText } from 'lucide-react'
+import { FileText, Shapes } from 'lucide-react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -30,6 +30,8 @@ import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
 import { TipTapSlideEditor } from './TipTapSlideEditor'
+import { LockedObjects } from './ObjectsLayer'
+import { isDocEmpty } from './tiptapDoc'
 import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
 import {
@@ -144,16 +146,17 @@ export function Stage({
     if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
   }
 
-  // Flip this slide between spatial + markdown mode (non-destructive; components are preserved in the
-  // DB, just unrendered). Undoable. Surfaced on the per-slide toolbar rather than the deck header.
-  function toggleMarkdownMode() {
+  // Pick which layer of this slide is editable — Objects (positioned components, render_mode '') or
+  // Body (the markdown doc, render_mode 'markdown'). Both layers always render; this only chooses what
+  // you edit and which header controls show. Non-destructive and undoable. Lives on the slide toolbar.
+  function setSlideLayer(next: '' | 'markdown') {
     const before = slideData.render_mode === 'markdown' ? 'markdown' : ''
-    const next = before === 'markdown' ? '' : 'markdown'
+    if (next === before) return
     const apply = (m: '' | 'markdown') =>
       mutate.setSlideMode({ id: slideData.id, render_mode: m, now: Date.now() })
     apply(next)
     history.push({
-      label: next === 'markdown' ? 'Markdown mode' : 'Spatial mode',
+      label: next === 'markdown' ? 'Edit body' : 'Edit objects',
       redo: () => apply(next),
       undo: () => apply(before),
     })
@@ -471,9 +474,9 @@ export function Stage({
     window.addEventListener('pointerup', up)
   }
 
-  // Markdown mode: the operating table shows the rendered full-slide markdown surface (scaled to fit
-  // like the spatial canvas) plus an editing panel. All the spatial hooks above still run — only the
-  // rendered output branches — so hook order stays stable when the active slide flips modes.
+  // Body-edit layer: the markdown doc is the editable surface (WYSIWYG, scaled to fit) with the
+  // slide's Objects composited on top but locked. All the spatial hooks above still run — only the
+  // rendered output branches — so hook order stays stable when the active slide flips layers.
   if (slideData.render_mode === 'markdown') {
     return (
       <div
@@ -483,13 +486,16 @@ export function Stage({
       >
         <UserStyle css={deck?.custom_stylesheet} />
         {editor.canEdit && (
-          <SlideToolbar markdown onToggleMarkdown={toggleMarkdownMode} />
+          <SlideToolbar layer="markdown" onSetLayer={setSlideLayer} />
         )}
         {editor.canEdit ? (
-          // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale).
-          <TipTapSlideEditor key={slideData.id} slide={slideData} deck={deck} />
+          // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale); the
+          // locked Objects overlay rides along on top so you place body text in the real layout.
+          <TipTapSlideEditor key={slideData.id} slide={slideData} deck={deck}>
+            <LockedObjects slide={slideData} />
+          </TipTapSlideEditor>
         ) : (
-          // Viewer (no edit rights): the read-only rendered surface.
+          // Viewer (no edit rights): the read-only body surface + the (locked) objects on top.
           <div className="md-preview" ref={mdPreviewRef}>
             <div
               className="slide-surface"
@@ -506,6 +512,7 @@ export function Stage({
                 }}
               >
                 <MarkdownSurface doc={slideData.doc} />
+                <LockedObjects slide={slideData} />
               </div>
             </div>
           </div>
@@ -522,7 +529,7 @@ export function Stage({
     >
       <UserStyle css={deck?.custom_stylesheet} />
       {editor.canEdit && (
-        <SlideToolbar markdown={false} onToggleMarkdown={toggleMarkdownMode} />
+        <SlideToolbar layer="" onSetLayer={setSlideLayer} />
       )}
       <Inspector
         componentRefs={componentRefs}
@@ -544,6 +551,14 @@ export function Stage({
             ...themeVars(deck, slideData),
           }}
         >
+          {/* Body underlay: the markdown doc, shown behind the editable objects but inert (its layer
+              is pointer-events:none) so marquee/canvas clicks pass through. Skipped when empty, so a
+              pure-objects slide is unchanged. */}
+          {!isDocEmpty(slideData.doc) && (
+            <div className="slide-locked-layer">
+              <MarkdownSurface doc={slideData.doc} />
+            </div>
+          )}
           {componentRefs.map((component) => (
             <ComponentDataReader
               key={componentRefKey(component)}
@@ -718,23 +733,32 @@ function TextEditor({
 // Per-slide hover toolbar: a vertical icon strip floating at the operating table's top-right that
 // fades in on stage hover (spec: slide-scoped controls belong on the slide, not the deck header). It
 // anchors to the stage viewport rather than the scaled canvas so it stays put across zoom-to-fit and
-// never lands in exports. Seeded with the markdown/spatial toggle; built to grow (per-slide theme,
-// background, transition, …) — each future control is another button in this strip.
+// never lands in exports. Seeded with the Body/Objects edit-layer switch (both layers always render;
+// this picks the editable one); built to grow (per-slide theme, background, transition, …).
 function SlideToolbar({
-  markdown,
-  onToggleMarkdown,
+  layer,
+  onSetLayer,
 }: {
-  markdown: boolean
-  onToggleMarkdown: () => void
+  layer: '' | 'markdown'
+  onSetLayer: (next: '' | 'markdown') => void
 }) {
   return (
-    <div className="slide-toolbar">
+    <div className="slide-toolbar slide-toolbar--layers" role="group" aria-label="Edit layer">
       <button
         type="button"
-        className={'slide-toolbar__btn' + (markdown ? ' is-active' : '')}
-        onClick={onToggleMarkdown}
-        title={markdown ? 'Switch to spatial components' : 'Switch to markdown'}
-        aria-pressed={markdown}
+        className={'slide-toolbar__btn' + (layer === '' ? ' is-active' : '')}
+        onClick={() => onSetLayer('')}
+        title="Edit objects (drag & place text, images, shapes)"
+        aria-pressed={layer === ''}
+      >
+        <Shapes size={16} />
+      </button>
+      <button
+        type="button"
+        className={'slide-toolbar__btn' + (layer === 'markdown' ? ' is-active' : '')}
+        onClick={() => onSetLayer('markdown')}
+        title="Edit body (markdown text)"
+        aria-pressed={layer === 'markdown'}
       >
         <FileText size={16} />
       </button>
