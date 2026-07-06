@@ -27,7 +27,8 @@ export function AccountControl({
   useEffect(() => {
     if (!open) return
     function onDown(e: PointerEvent) {
-      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false)
+      if (wrap.current && !wrap.current.contains(e.target as Node))
+        setOpen(false)
     }
     window.addEventListener('pointerdown', onDown)
     return () => window.removeEventListener('pointerdown', onDown)
@@ -92,10 +93,7 @@ export function AccountControl({
               <div className="menu-label">
                 {member ? member.email : 'Signed in'}
               </div>
-              <button
-                className="menu-item menu-item--icon"
-                onClick={signOut}
-              >
+              <button className="menu-item menu-item--icon" onClick={signOut}>
                 <LogOut size={15} /> Sign out
               </button>
             </>

@@ -376,14 +376,20 @@ function GenerateForm({
         <div className="well__gen-signin">
           <button
             onClick={() =>
-              authClient.signIn.social({ provider: 'github', callbackURL: back })
+              authClient.signIn.social({
+                provider: 'github',
+                callbackURL: back,
+              })
             }
           >
             GitHub
           </button>
           <button
             onClick={() =>
-              authClient.signIn.social({ provider: 'google', callbackURL: back })
+              authClient.signIn.social({
+                provider: 'google',
+                callbackURL: back,
+              })
             }
           >
             Google
@@ -471,7 +477,11 @@ function GenerateForm({
             </>
           )}
         </button>
-        <button className="well__gen-close" onClick={onClose} disabled={loading}>
+        <button
+          className="well__gen-close"
+          onClick={onClose}
+          disabled={loading}
+        >
           Cancel
         </button>
       </div>

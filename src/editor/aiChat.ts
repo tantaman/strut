@@ -13,14 +13,10 @@
 //      re-renders at frame rate, not per token. (`edit` wants the full prior row — we hold `prev`; for a
 //      local table the engine keys by PK so an out-of-order flush still converges — RINDLE_NOTES #21.)
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useSyncExternalStore,
-} from 'react'
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react'
 import { newId } from '../config'
 import { buildDigest } from './aiArrange'
+import { track } from '../lib/analytics'
 import { useStore } from '../rindle/RindleProvider'
 import type { StrutStore } from '../rindle/client'
 import type { ChatMessageRow } from '../rindle/localSchema'
@@ -53,7 +49,10 @@ export function parseSseDelta(line: string): SseEvent | null {
   if (payload === '[DONE]') return { done: true, delta: '' }
   try {
     const obj = JSON.parse(payload) as { response?: unknown }
-    return { done: false, delta: typeof obj.response === 'string' ? obj.response : '' }
+    return {
+      done: false,
+      delta: typeof obj.response === 'string' ? obj.response : '',
+    }
   } catch {
     return null
   }
@@ -244,15 +243,16 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
   const view = useMemo(() => {
     if (!store) return null
-    return store.query.chat_message
-      .where.deck_id(deckId)
+    return store.query.chat_message.where
+      .deck_id(deckId)
       .orderBy('created', 'asc')
       .materialize()
   }, [store, deckId])
   useEffect(() => () => view?.destroy(), [view])
 
   const subscribe = useCallback(
-    (onChange: () => void) => (view ? view.subscribe(() => onChange()) : () => {}),
+    (onChange: () => void) =>
+      view ? view.subscribe(() => onChange()) : () => {},
     [view],
   )
   const getSnapshot = useCallback(
@@ -270,6 +270,7 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
       const history: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
+      track('chat:sent', { turn: history.length })
       void sendChat(
         store,
         { deckId, slides: buildDigest(slides), history },

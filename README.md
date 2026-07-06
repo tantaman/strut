@@ -2,12 +2,9 @@
 
 [<img width="3024" height="1656" alt="CleanShot 2026-07-06 at 10 09 49@2x" src="https://github.com/user-attachments/assets/0da40e11-d44d-42fd-ad76-cdfe43749b12" />](https://strut.io/)
 
-
-
 An HTML5 GUI authoring tool for **spatial presentations** — build a deck of slides, place rich
 content on each, arrange the slides in 3-D space, and play the deck as a camera flight through that
 world (the impress.js model, made visual and editable).
-
 
 ## Stack
 
@@ -88,3 +85,15 @@ separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it wit
 `pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
 for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
+## Analytics
+
+Strut ships with **optional**, privacy-first product analytics via [Umami](https://umami.is) —
+cookieless, no personal data, no consent banner. It records only which features get used (slides
+generated, AI arrange applied, present started, exports, sign-ins) — never your deck content, prompts,
+or any PII.
+
+It is **off by default and off in every clone.** Nothing is collected and no script loads unless the
+build sets `VITE_UMAMI_SRC` (+ `VITE_UMAMI_ID`) — so cloning this repo phones home to no one. To enable
+it on your own deployment, set those two build-time vars (see [`.env.example`](.env.example)); point
+`VITE_UMAMI_SRC` at Umami Cloud or your own self-hosted instance. Implementation lives in
+[`src/lib/analytics.ts`](src/lib/analytics.ts).
