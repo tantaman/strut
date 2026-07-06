@@ -39,6 +39,30 @@ function xformOf(s: SlideDetail): Xform {
   }
 }
 
+function xformEq(a: Xform, b: Xform): boolean {
+  return (
+    a.x === b.x &&
+    a.y === b.y &&
+    a.z === b.z &&
+    a.rotate_x === b.rotate_x &&
+    a.rotate_y === b.rotate_y &&
+    a.rotate_z === b.rotate_z &&
+    a.imp_scale === b.imp_scale
+  )
+}
+
+// The model's freeform per-slide overrides, keyed by id. `normalizePlan` already dropped undefined
+// fields and clamped/rad-converted the rest, so each value is a partial transform ready to spread over a
+// base geometry ({...base, ...override} sets only the axes the model actually authored).
+function placementOverrides(plan: ArrangementPlan): Map<string, Partial<Xform>> {
+  const m = new Map<string, Partial<Xform>>()
+  for (const p of plan.placements ?? []) {
+    const { id, ...rest } = p
+    m.set(id, rest)
+  }
+  return m
+}
+
 // Collect the plain text of a TipTap doc (markdown-mode slides store content as doc JSON) by walking
 // text nodes — cheaper and safer than rendering to HTML and stripping tags.
 function docText(raw: string | null | undefined): string {
@@ -111,9 +135,11 @@ export function previewCards(
       ? LAYOUTS.find((l) => l.id === plan.layout)
       : undefined
   const placed = def ? def.arrange(order.length) : null
+  const overrides = placementOverrides(plan)
   return order.map((id, i) => {
     const s = byId.get(id)!
-    return { id, index: i, ...(placed ? placed[i] : xformOf(s)) }
+    // preset (or current transform when 'keep') as the base, then the model's per-slide overrides.
+    return { id, index: i, ...(placed ? placed[i] : xformOf(s)), ...overrides.get(id) }
   })
 }
 
@@ -139,29 +165,34 @@ export function applyPlan(
       mutate.reorderSlide({ id: s.id, sort: beforeSort.get(s.id)! }),
     )
 
-  // Spatial layout — the preset is computed over the NEW order, so placed[i] belongs to order[i].
+  // Spatial layout — the preset is computed over the NEW order, so placed[i] belongs to order[i]. The
+  // model's freeform placements then override per-slide axes on top of that base (or on the slide's
+  // current transform when layout is 'keep'). We mutate ONLY the slides whose transform actually changes,
+  // so a 'keep' + few-placements plan nudges those cards and leaves the rest — and the whole thing is one
+  // undo, restoring each touched slide to the transform captured here.
   const def =
     plan.layout !== 'keep'
       ? LAYOUTS.find((l) => l.id === plan.layout)
       : undefined
   const placed = def ? def.arrange(order.length) : null
+  const overrides = placementOverrides(plan)
   const beforeX = new Map(slides.map((s) => [s.id, xformOf(s)]))
-  const applyXform = () => {
-    if (!placed) return
-    order.forEach((id, i) =>
-      mutate.setSlideTransform({ id, ...placed[i], now: Date.now() }),
+  const finalX = new Map<string, Xform>()
+  order.forEach((id, i) => {
+    const base = placed ? placed[i] : beforeX.get(id)!
+    finalX.set(id, { ...base, ...overrides.get(id) })
+  })
+  const changed = order.filter(
+    (id) => !xformEq(finalX.get(id)!, beforeX.get(id)!),
+  )
+  const applyXform = () =>
+    changed.forEach((id) =>
+      mutate.setSlideTransform({ id, ...finalX.get(id)!, now: Date.now() }),
     )
-  }
-  const undoXform = () => {
-    if (!placed) return
-    slides.forEach((s) =>
-      mutate.setSlideTransform({
-        id: s.id,
-        ...beforeX.get(s.id)!,
-        now: Date.now(),
-      }),
+  const undoXform = () =>
+    changed.forEach((id) =>
+      mutate.setSlideTransform({ id, ...beforeX.get(id)!, now: Date.now() }),
     )
-  }
 
   const redo = () => {
     applyOrder()

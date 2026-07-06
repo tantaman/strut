@@ -610,7 +610,7 @@ function AiArrangeForm({
         : '/'
     return (
       <>
-        <span className="ov-arrange__label">✨ Arrange</span>
+        <span className="ov-arrange__label">✨</span>
         <span className="ov-arrange__gate">
           Sign in to let AI arrange your deck
         </span>
@@ -685,7 +685,7 @@ function AiArrangeForm({
 
   return (
     <>
-      <span className="ov-arrange__label">✨ Arrange</span>
+      <span className="ov-arrange__label">✨</span>
       <input
         ref={inputRef}
         className="ov-arrange__input"
@@ -707,7 +707,7 @@ function AiArrangeForm({
         {loading ? (
           <span className="ov-arrange__spinner" aria-label="Arranging" />
         ) : (
-          'Arrange'
+          'Go'
         )}
       </button>
       {error && <span className="ov-arrange__error">{error}</span>}

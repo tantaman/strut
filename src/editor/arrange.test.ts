@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { ARRANGE_LIMITS, clampRequest, normalizePlan } from '../../shared/arrange'
+import {
+  ARRANGE_LIMITS,
+  PLACEMENT_BOUNDS,
+  clampRequest,
+  normalizePlan,
+} from '../../shared/arrange'
 
 // normalizePlan is the trust boundary between untrusted model output and the apply path: whatever the
 // model returns, `order` must come out a full permutation of the deck's OWN ids and `layout` a known
@@ -46,6 +51,78 @@ describe('normalizePlan', () => {
       deck,
     )
     expect(p.groups).toEqual([{ label: 'ok', slideIds: ['a'] }])
+  })
+})
+
+// Freeform placements are raw model-authored geometry — normalizePlan is the clamp/firewall: only real
+// ids, every axis bounded, rotations degrees→radians, id-only noise dropped. Worst case is a bounded,
+// on-camera, one-undo reposition of the user's own slides.
+describe('normalizePlan · placements', () => {
+  const deck = ['a', 'b', 'c']
+
+  it('passes a valid placement, converting rotation degrees → radians', () => {
+    const p = normalizePlan(
+      { order: deck, placements: [{ id: 'b', x: 100, imp_scale: 5, rotate_z: 90 }] },
+      deck,
+    )
+    expect(p.placements).toEqual([
+      { id: 'b', x: 100, imp_scale: 5, rotate_z: Math.PI / 2 },
+    ])
+  })
+
+  it('only sets the fields the model authored (absent axes stay unset)', () => {
+    const p = normalizePlan({ order: deck, placements: [{ id: 'a', y: 12 }] }, deck)
+    expect(p.placements).toEqual([{ id: 'a', y: 12 }])
+  })
+
+  it('clamps every axis to PLACEMENT_BOUNDS', () => {
+    const B = PLACEMENT_BOUNDS
+    const p = normalizePlan(
+      {
+        order: deck,
+        placements: [
+          { id: 'a', x: 1e9, y: -1e9, z: 1e9, imp_scale: 999, rotate_x: 720, rotate_z: -720 },
+        ],
+      },
+      deck,
+    )
+    expect(p.placements).toEqual([
+      {
+        id: 'a',
+        x: B.pos,
+        y: -B.pos,
+        z: B.pos,
+        imp_scale: B.scaleMax,
+        rotate_x: B.rotateDeg * (Math.PI / 180),
+        rotate_z: -B.rotateDeg * (Math.PI / 180),
+      },
+    ])
+  })
+
+  it('drops unknown ids, duplicate ids, non-number axes, and id-only entries', () => {
+    const p = normalizePlan(
+      {
+        order: deck,
+        placements: [
+          { id: 'ghost', x: 5 }, // unknown id → dropped
+          { id: 'a', x: 10 }, // kept
+          { id: 'a', x: 20 }, // duplicate id → dropped (first wins)
+          { id: 'b', x: 'nope', imp_scale: NaN, z: Infinity }, // all garbage → id-only → dropped
+          { id: 'c' }, // id-only → dropped
+        ],
+      },
+      deck,
+    )
+    expect(p.placements).toEqual([{ id: 'a', x: 10 }])
+  })
+
+  it('leaves placements undefined when none survive', () => {
+    expect(
+      normalizePlan({ order: deck, placements: [{ id: 'ghost' }, { id: 'a' }] }, deck)
+        .placements,
+    ).toBeUndefined()
+    expect(normalizePlan({ order: deck }, deck).placements).toBeUndefined()
+    expect(normalizePlan({ order: deck, placements: 'nope' }, deck).placements).toBeUndefined()
   })
 })
 
