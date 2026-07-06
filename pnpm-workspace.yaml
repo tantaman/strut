@@ -1,6 +1,8 @@
 allowBuilds:
-  # Needed by auth.cli.ts for offline Better-Auth schema generation (docs/AUTH_SETUP.md).
-  '@prisma/client': set this to true or false
+  # Transitive-only, via better-auth's OPTIONAL Prisma adapter peer. Strut uses the better-sqlite3/D1
+  # (Kysely) path, never Prisma — nothing imports @prisma/client — so its postinstall (prisma generate)
+  # must NOT run. `false` silences pnpm's "ignored builds" prompt without building an unused client.
+  '@prisma/client': false
   better-sqlite3: true
   esbuild: true
   lightningcss: true
