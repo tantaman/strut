@@ -9,11 +9,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { GRID_SNAP } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
+import { authClient } from '../rindle/authClient'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
+import { applyPlan, buildDigest, previewCards } from './aiArrange'
+import type { PreviewCard } from './aiArrange'
+import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { DeckThemeFields } from './types'
@@ -59,8 +63,11 @@ export function Overview({
 }: {
   slides: SlideDetail[]
   deck:
-    | ({ id: string; background: string; canned_transition: string } &
-        DeckThemeFields)
+    | ({
+        id: string
+        background: string
+        canned_transition: string
+      } & DeckThemeFields)
     | null
 }) {
   const editor = useEditor()
@@ -78,6 +85,22 @@ export function Overview({
   const soleId = selIds.size === 1 ? [...selIds][0] : null
   const soleSlide = soleId
     ? (slides.find((s) => s.id === soleId) ?? null)
+    : null
+
+  // AI Arrange: a proposed plan is held HERE (plain React state) and previewed as a ghost — nothing
+  // touches Rindle until Apply. `isMember` (a promoted, non-anonymous account) gates the feature: guests
+  // see the control but can't spend the app's inference budget (the /api/arrange route enforces the same
+  // gate server-side). During the initial session resolve we treat the user as a non-member (disabled).
+  const { data: session } = authClient.useSession()
+  const isMember =
+    !!session?.user &&
+    (session.user as { isAnonymous?: boolean }).isAnonymous !== true
+  const [preview, setPreview] = useState<{
+    plan: ArrangementPlan
+    cards: PreviewCard[]
+  } | null>(null)
+  const previewById = preview
+    ? new Map(preview.cards.map((c) => [c.id, c]))
     : null
 
   // Frame all slide cards (centers ± card extents) into the viewport. Cards are positioned
@@ -343,11 +366,32 @@ export function Overview({
     fit(placed)
   }
 
+  // Hold an AI plan as a ghost preview (no mutation) and frame where the cards will land.
+  function previewPlan(plan: ArrangementPlan) {
+    const cards = previewCards(plan, slides)
+    setPreview({ plan, cards })
+    fit(cards)
+  }
+  // Commit the previewed plan as ONE undoable step, then drop the preview.
+  function applyPreview() {
+    if (!preview) return
+    applyPlan(preview.plan, mutate, slides, history)
+    setPreview(null)
+  }
+  function discardPreview() {
+    setPreview(null)
+    fit()
+  }
+
   const inv = 1 / (view.scale || 1)
 
   return (
     <div
-      className={'overview' + (panning ? ' is-panning' : '')}
+      className={
+        'overview' +
+        (panning ? ' is-panning' : '') +
+        (preview ? ' is-previewing' : '')
+      }
       ref={stageRef}
       onPointerDown={beginBg}
     >
@@ -357,32 +401,45 @@ export function Overview({
           transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
         }}
       >
-        {slides.map((s, i) => (
-          <div
-            key={s.id}
-            className={
-              'ov-card' +
-              (selIds.has(s.id) ? ' is-selected' : '') +
-              (soleId === s.id ? ' is-active' : '')
-            }
-            style={{
-              left: s.x,
-              top: s.y,
-              width: CARD_W,
-              height: CARD_H,
-              transform: `translate(-50%, -50%) perspective(900px) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale(${(s.imp_scale || 3) / 3})`,
-              zIndex: selIds.has(s.id) ? 10 : 1,
-            }}
-            onPointerDown={(e) => beginCard(s, e)}
-          >
-            <span className="ov-card__num">{i + 1}</span>
-            <div className="well__thumb">
-              <SlideView slide={s} deck={deck} width={CARD_W} />
+        {slides.map((s, i) => {
+          // While previewing, render each card at its PROPOSED position + reading-order badge (no
+          // mutation); otherwise its live transform + array-order badge.
+          const pc = previewById?.get(s.id)
+          const x = pc ? pc.x : s.x
+          const y = pc ? pc.y : s.y
+          const rx = pc ? pc.rotate_x : s.rotate_x
+          const ry = pc ? pc.rotate_y : s.rotate_y
+          const rz = pc ? pc.rotate_z : s.rotate_z
+          const sc = (pc ? pc.imp_scale : s.imp_scale) || 3
+          const num = pc ? pc.index + 1 : i + 1
+          return (
+            <div
+              key={s.id}
+              className={
+                'ov-card' +
+                (selIds.has(s.id) ? ' is-selected' : '') +
+                (soleId === s.id ? ' is-active' : '') +
+                (pc ? ' is-preview' : '')
+              }
+              style={{
+                left: x,
+                top: y,
+                width: CARD_W,
+                height: CARD_H,
+                transform: `translate(-50%, -50%) perspective(900px) rotateX(${rx}rad) rotateY(${ry}rad) rotateZ(${rz}rad) scale(${sc / 3})`,
+                zIndex: selIds.has(s.id) ? 10 : 1,
+              }}
+              onPointerDown={(e) => beginCard(s, e)}
+            >
+              <span className="ov-card__num">{num}</span>
+              <div className="well__thumb">
+                <SlideView slide={s} deck={deck} width={CARD_W} />
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
 
-        {editor.canEdit && soleSlide && (
+        {editor.canEdit && soleSlide && !preview && (
           <SlideXform
             s={soleSlide}
             inv={inv}
@@ -439,7 +496,7 @@ export function Overview({
 
       {editor.canEdit && slides.length > 1 && (
         <div className="ov-layouts" onPointerDown={stop}>
-          <span className="ov-layouts__label">Arrange</span>
+          <span className="ov-layouts__label">Layout</span>
           {LAYOUTS.map((def) => (
             <button
               key={def.id}
@@ -450,6 +507,34 @@ export function Overview({
               {def.label}
             </button>
           ))}
+        </div>
+      )}
+
+      {editor.canEdit && slides.length > 1 && (
+        <div className="ov-arrange" onPointerDown={stop}>
+          {preview ? (
+            <>
+              <span className="ov-arrange__badge">✨ Proposed</span>
+              {preview.plan.rationale && (
+                <span className="ov-arrange__why">
+                  {preview.plan.rationale}
+                </span>
+              )}
+              <button className="ov-arrange__apply" onClick={applyPreview}>
+                Apply
+              </button>
+              <button className="ov-arrange__discard" onClick={discardPreview}>
+                Discard
+              </button>
+            </>
+          ) : (
+            <AiArrangeForm
+              slides={slides}
+              deckId={deck?.id ?? ''}
+              isMember={isMember}
+              onPreview={previewPlan}
+            />
+          )}
         </div>
       )}
 
@@ -474,6 +559,121 @@ export function Overview({
         </div>
       )}
     </div>
+  )
+}
+
+// The "✨ Arrange" form: a natural-language instruction → POST /api/arrange → hand the returned plan up
+// for preview. For an anonymous (guest) user it renders a sign-in nudge instead — the button is visible
+// to everyone (discoverability) but the feature is member-gated (the route enforces it too). Sign-in
+// returns to the current deck so in-progress work + the guest's decks carry over on promotion.
+function AiArrangeForm({
+  slides,
+  deckId,
+  isMember,
+  onPreview,
+}: {
+  slides: SlideDetail[]
+  deckId: string
+  isMember: boolean
+  onPreview: (plan: ArrangementPlan) => void
+}) {
+  const [instruction, setInstruction] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  if (!isMember) {
+    const back =
+      typeof window !== 'undefined'
+        ? window.location.pathname + window.location.search
+        : '/'
+    return (
+      <>
+        <span className="ov-arrange__label">✨ Arrange</span>
+        <span className="ov-arrange__gate">
+          Sign in to let AI arrange your deck
+        </span>
+        <button
+          className="ov-arrange__signin"
+          onClick={() =>
+            authClient.signIn.social({ provider: 'github', callbackURL: back })
+          }
+        >
+          GitHub
+        </button>
+        <button
+          className="ov-arrange__signin"
+          onClick={() =>
+            authClient.signIn.social({ provider: 'google', callbackURL: back })
+          }
+        >
+          Google
+        </button>
+      </>
+    )
+  }
+
+  async function submit() {
+    if (loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const body: ArrangeRequest = {
+        deckId,
+        instruction,
+        slides: buildDigest(slides),
+      }
+      const res = await fetch('/api/arrange', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const b = (await res.json().catch(() => null)) as {
+          message?: string
+        } | null
+        setError(
+          res.status === 401
+            ? 'Sign in to use AI arrange.'
+            : res.status === 429
+              ? 'Too many requests — wait a moment.'
+              : (b?.message ?? 'AI is unavailable right now.'),
+        )
+        return
+      }
+      const plan = (await res.json()) as ArrangementPlan
+      onPreview(plan)
+      setInstruction('')
+    } catch {
+      setError('Network error — try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <span className="ov-arrange__label">✨ Arrange</span>
+      <input
+        className="ov-arrange__input"
+        placeholder="group by topic · timeline left-to-right · intro first, CTA last"
+        value={instruction}
+        onChange={(e) => setInstruction(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') submit()
+        }}
+        disabled={loading}
+      />
+      <button
+        className="ov-arrange__go"
+        onClick={submit}
+        disabled={loading}
+        title="Ask AI to arrange the slides"
+      >
+        {loading ? 'Arranging…' : 'Arrange'}
+      </button>
+      {error && <span className="ov-arrange__error">{error}</span>}
+    </>
   )
 }
 
