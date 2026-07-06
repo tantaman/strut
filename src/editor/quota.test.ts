@@ -3,9 +3,12 @@ import Database from 'better-sqlite3'
 import { describe, expect, it } from 'vitest'
 import {
   ARRANGE_DAILY_LIMIT,
+  GENERATE_DAILY_LIMIT,
   consumeArrangeQuota,
+  consumeGenerateQuota,
   makeSqliteStore,
   refundArrangeQuota,
+  refundGenerateQuota,
   utcDay,
 } from '../../server/quota'
 
@@ -20,6 +23,18 @@ function memStore() {
   // better-sqlite3's concrete Statement types (`get(p: {})`) don't structurally match makeSqliteStore's
   // deliberately-minimal LocalDb param typing — cast to that param type (the runtime shape is identical).
   return makeSqliteStore(db as unknown as Parameters<typeof makeSqliteStore>[0])
+}
+
+// Same, but for the separate generate_usage bucket (a second table, same store logic + shape).
+function genStore() {
+  const db = new Database(':memory:')
+  db.exec(
+    'create table generate_usage (user_id text not null, day text not null, count integer not null default 0, primary key (user_id, day))',
+  )
+  return makeSqliteStore(
+    db as unknown as Parameters<typeof makeSqliteStore>[0],
+    'generate_usage',
+  )
 }
 
 const T0 = Date.parse('2026-07-06T12:00:00Z') // → day 2026-07-06
@@ -86,5 +101,32 @@ describe('consumeArrangeQuota', () => {
     const other = await consumeArrangeQuota('u2', T0, store)
     expect(other.allowed).toBe(true)
     expect(other.used).toBe(1)
+  })
+})
+
+describe('consumeGenerateQuota', () => {
+  it('enforces its own (smaller) daily limit', async () => {
+    const store = genStore()
+    for (let i = 1; i <= GENERATE_DAILY_LIMIT; i++) {
+      const r = await consumeGenerateQuota('u1', T0, store)
+      expect(r.allowed).toBe(true)
+      expect(r.used).toBe(i)
+      expect(r.limit).toBe(GENERATE_DAILY_LIMIT)
+    }
+    const over = await consumeGenerateQuota('u1', T0, store)
+    expect(over.allowed).toBe(false)
+    expect(over.used).toBe(GENERATE_DAILY_LIMIT + 1)
+  })
+
+  it('refund frees a unit', async () => {
+    const store = genStore()
+    for (let i = 0; i < GENERATE_DAILY_LIMIT; i++) {
+      await consumeGenerateQuota('u1', T0, store)
+    }
+    expect((await consumeGenerateQuota('u1', T0, store)).allowed).toBe(false)
+    await refundGenerateQuota('u1', T0, store)
+    const r = await consumeGenerateQuota('u1', T0, store)
+    expect(r.used).toBe(GENERATE_DAILY_LIMIT + 1)
+    expect(r.allowed).toBe(false)
   })
 })
