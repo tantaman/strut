@@ -6,10 +6,20 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { LogIn, LogOut, User } from 'lucide-react'
+import type { SessionAccount } from '../../server/session'
 import { authClient } from './authClient'
 
-export function AccountControl() {
-  const { data: session, isPending } = authClient.useSession()
+/** `initial` is the account resolved server-side from the session cookie (appSsr.ts), passed down from
+ *  the route loader. It seeds the FIRST paint — server render and the matching client hydration pass
+ *  both use it (loaderData is identical across the boundary), so the pill renders its final label with
+ *  no empty→pill pop-in. Once the live `useSession()` resolves it takes over; for the same user the
+ *  label is unchanged, so there's no visible flip either. */
+export function AccountControl({
+  initial,
+}: {
+  initial?: SessionAccount | null
+}) {
+  const { data: session } = authClient.useSession()
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
 
@@ -22,7 +32,9 @@ export function AccountControl() {
     return () => window.removeEventListener('pointerdown', onDown)
   }, [open])
 
-  const user = session?.user
+  // Prefer the live session once it resolves; until then fall back to the SSR-seeded `initial` account
+  // so the pill first-paints with its final label. Both shapes carry name/email/isAnonymous.
+  const user = session?.user ?? initial ?? null
   // The anonymous plugin flags guest sessions; treat "no session yet" as guest too.
   const isGuest =
     !user || (user as { isAnonymous?: boolean }).isAnonymous === true
@@ -42,9 +54,6 @@ export function AccountControl() {
     // Reload so a fresh anonymous session is minted (reads stay authorized, app keeps working).
     window.location.assign('/')
   }
-
-  // Before the session resolves, reserve the slot without committing to a label (no flip on hydrate).
-  if (isPending && !session) return <div className="acct" aria-hidden />
 
   return (
     <div className="acct" ref={wrap}>
