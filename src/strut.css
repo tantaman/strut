@@ -420,6 +420,15 @@ button {
   padding: 5px 9px;
 }
 
+/* Objects/Body edit-layer segment in the header: icon + a label that collapses to icon-only with the
+   rest of the tools on narrow screens (.hdr .lbl rule below). */
+.seg--layers button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+}
+
 .editor__body {
   flex: 1;
   display: flex;
@@ -664,67 +673,6 @@ button {
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-/* ---- per-slide hover toolbar (operating table, top-right) ---- */
-/* Anchors to the stage viewport (not the scaled canvas) so it holds its corner across zoom-to-fit.
-   Hidden until the stage is hovered; a vertical strip that grows downward as controls are added. */
-.slide-toolbar {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--radius);
-  background: var(--panel);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
-  pointer-events: none;
-}
-.stage:hover .slide-toolbar,
-.slide-toolbar:focus-within {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-/* Touch/pen have no hover — keep the strip visible so the control is reachable. */
-@media (hover: none) {
-  .slide-toolbar {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-}
-.slide-toolbar__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 0;
-  border-radius: calc(var(--radius) - 3px);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  transition:
-    background 0.12s ease,
-    color 0.12s ease;
-}
-.slide-toolbar__btn:hover {
-  background: var(--panel-2);
-}
-.slide-toolbar__btn.is-active {
-  background: var(--coral-soft);
-  color: var(--coral);
 }
 
 /* ---- markdown mode (stage preview + editor panel) ---- */

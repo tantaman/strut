@@ -5,7 +5,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { FileText, Shapes } from 'lucide-react'
 import { GRID_SNAP, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -144,22 +143,6 @@ export function Stage({
   function raise(c: AnyComponent) {
     const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
     if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
-  }
-
-  // Pick which layer of this slide is editable — Objects (positioned components, render_mode '') or
-  // Body (the markdown doc, render_mode 'markdown'). Both layers always render; this only chooses what
-  // you edit and which header controls show. Non-destructive and undoable. Lives on the slide toolbar.
-  function setSlideLayer(next: '' | 'markdown') {
-    const before = slideData.render_mode === 'markdown' ? 'markdown' : ''
-    if (next === before) return
-    const apply = (m: '' | 'markdown') =>
-      mutate.setSlideMode({ id: slideData.id, render_mode: m, now: Date.now() })
-    apply(next)
-    history.push({
-      label: next === 'markdown' ? 'Edit body' : 'Edit objects',
-      redo: () => apply(next),
-      undo: () => apply(before),
-    })
   }
 
   // ---- gestures ----
@@ -485,9 +468,6 @@ export function Stage({
         style={{ background: composeBackground(surf, surfImg) }}
       >
         <UserStyle css={deck?.custom_stylesheet} />
-        {editor.canEdit && (
-          <SlideToolbar layer="markdown" onSetLayer={setSlideLayer} />
-        )}
         {editor.canEdit ? (
           // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale); the
           // locked Objects overlay rides along on top so you place body text in the real layout.
@@ -528,9 +508,6 @@ export function Stage({
       style={{ background: composeBackground(surf, surfImg) }}
     >
       <UserStyle css={deck?.custom_stylesheet} />
-      {editor.canEdit && (
-        <SlideToolbar layer="" onSetLayer={setSlideLayer} />
-      )}
       <Inspector
         componentRefs={componentRefs}
         getComponents={getComponents}
@@ -730,40 +707,5 @@ function TextEditor({
   )
 }
 
-// Per-slide hover toolbar: a vertical icon strip floating at the operating table's top-right that
-// fades in on stage hover (spec: slide-scoped controls belong on the slide, not the deck header). It
-// anchors to the stage viewport rather than the scaled canvas so it stays put across zoom-to-fit and
-// never lands in exports. Seeded with the Body/Objects edit-layer switch (both layers always render;
-// this picks the editable one); built to grow (per-slide theme, background, transition, …).
-function SlideToolbar({
-  layer,
-  onSetLayer,
-}: {
-  layer: '' | 'markdown'
-  onSetLayer: (next: '' | 'markdown') => void
-}) {
-  return (
-    <div className="slide-toolbar slide-toolbar--layers" role="group" aria-label="Edit layer">
-      <button
-        type="button"
-        className={'slide-toolbar__btn' + (layer === '' ? ' is-active' : '')}
-        onClick={() => onSetLayer('')}
-        title="Edit objects (drag & place text, images, shapes)"
-        aria-pressed={layer === ''}
-      >
-        <Shapes size={16} />
-      </button>
-      <button
-        type="button"
-        className={'slide-toolbar__btn' + (layer === 'markdown' ? ' is-active' : '')}
-        onClick={() => onSetLayer('markdown')}
-        title="Edit body (markdown text)"
-        aria-pressed={layer === 'markdown'}
-      >
-        <FileText size={16} />
-      </button>
-    </div>
-  )
-}
-
-// (Markdown-mode editing now lives in TipTapSlideEditor — WYSIWYG on the slide surface.)
+// (The per-slide Objects/Body edit-layer toggle now lives in the deck Header top bar; markdown-mode
+// editing lives in TipTapSlideEditor — WYSIWYG on the slide surface.)
