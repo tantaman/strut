@@ -1,16 +1,13 @@
 # Strut
 
-<img width="3024" height="1728" alt="CleanShot 2026-06-25 at 08 58 27@2x" src="https://github.com/user-attachments/assets/3a7acaa1-f2b5-4ba7-8282-dfd9e360d7f0" />
+[<img width="3024" height="1656" alt="CleanShot 2026-07-06 at 10 09 49@2x" src="https://github.com/user-attachments/assets/0da40e11-d44d-42fd-ad76-cdfe43749b12" />](https://strut.io/)
+
 
 
 An HTML5 GUI authoring tool for **spatial presentations** — build a deck of slides, place rich
 content on each, arrange the slides in 3-D space, and play the deck as a camera flight through that
 world (the impress.js model, made visual and editable).
 
-This repository is a **ground-up rewrite**. The authoritative description of what Strut is and how it
-behaves lives in **[`docs/STRUT_SPEC.md`](docs/STRUT_SPEC.md)** — a framework-agnostic behavior +
-data-model spec reverse-engineered from the feature-complete 2012 build. Treat it as the source of
-truth; this app implements it.
 
 ## Stack
 
@@ -91,8 +88,3 @@ separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it wit
 `pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
 for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
-## History
-
-The prior in-progress React + cr-sqlite (vlcn.io) rewrite is archived at branch
-`archive/cr-sqlite-rewrite` (tag `rewrite-archive-v1`) for reference. The feature-complete original
-lives at `origin/old-master`.
