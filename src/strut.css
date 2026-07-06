@@ -1693,9 +1693,35 @@ button {
   border-color: var(--coral);
   color: var(--coral);
 }
+/* The orange "✨ Arrange" button sits at the end of the Layout row (after a divider) and toggles the
+   prompt panel below. Filled coral so it reads as the one AI action among the plain preset buttons. */
+.ov-layouts__sep {
+  width: 1px;
+  height: 20px;
+  background: var(--line-strong);
+  margin: 0 2px;
+}
+.ov-layouts__ai {
+  border: 1px solid var(--coral);
+  background: var(--coral);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.12s;
+}
+.ov-layouts__ai:hover {
+  filter: brightness(1.07);
+}
+.ov-layouts__ai.is-open {
+  filter: brightness(0.9);
+}
 
-/* "✨ Arrange" — the AI arrange row (top, under the Layout presets) and, while a plan is proposed, the
-   Apply/Discard preview bar. Same panel chrome as the layout/transition toolbars. */
+/* "✨ Arrange" prompt panel — disclosed under the Layout row when the orange button is toggled on, and
+   (while a plan is proposed) the Apply/Discard preview bar. Same panel chrome as the toolbars. */
 .ov-arrange {
   position: absolute;
   top: 62px;
@@ -1712,6 +1738,17 @@ button {
   border-radius: 14px;
   box-shadow: var(--shadow-lg);
   z-index: 41;
+  animation: ov-arrange-in 0.14s ease;
+}
+@keyframes ov-arrange-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 .ov-arrange__label,
 .ov-arrange__badge {
@@ -1736,6 +1773,9 @@ button {
 }
 .ov-arrange__go,
 .ov-arrange__apply {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--coral);
   background: var(--coral);
   color: #fff;
@@ -1746,9 +1786,49 @@ button {
   cursor: pointer;
   transition: opacity 0.12s;
 }
+/* Fixed width so swapping the label for the spinner doesn't make the button jump. */
+.ov-arrange__go {
+  min-width: 74px;
+  height: 27px;
+}
 .ov-arrange__go:disabled {
-  opacity: 0.6;
   cursor: default;
+}
+/* Working indicator: a small spinner replaces the "Arrange" label while the request is in flight. */
+.ov-arrange__spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ov-spin 0.7s linear infinite;
+}
+@keyframes ov-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Small ghost "×" to dismiss the prompt panel. */
+.ov-arrange__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.ov-arrange__close:hover {
+  background: var(--panel-2);
+  color: var(--text);
 }
 .ov-arrange__gate,
 .ov-arrange__why {
