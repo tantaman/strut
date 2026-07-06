@@ -56,9 +56,15 @@ export function componentProps(
         text_type: a.text_type as string | undefined,
       }
     case 'image':
-      return { src: a.src as string | undefined, image_type: a.image_type as string | undefined }
+      return {
+        src: a.src as string | undefined,
+        image_type: a.image_type as string | undefined,
+      }
     case 'shape':
-      return { shape: a.shape as string | undefined, markup: a.markup as string | undefined }
+      return {
+        shape: a.shape as string | undefined,
+        markup: a.markup as string | undefined,
+      }
     case 'video':
       return {
         src: a.src as string | undefined,
@@ -76,11 +82,11 @@ export function componentProps(
  *  render. */
 export function parseProps(v: unknown): ComponentProps {
   if (!v) return {}
-  if (typeof v === 'object') return v as ComponentProps
+  if (typeof v === 'object') return v
   if (typeof v === 'string') {
     try {
-      const parsed = JSON.parse(v)
-      return parsed && typeof parsed === 'object' ? (parsed as ComponentProps) : {}
+      const parsed: unknown = JSON.parse(v)
+      return parsed && typeof parsed === 'object' ? parsed : {}
     } catch {
       return {}
     }

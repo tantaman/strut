@@ -13,6 +13,7 @@ import { reinsertComponent } from './componentOps'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
+import type { AddSlideArgs } from '../../shared/app-def'
 
 export function SlideWell({
   slides,
@@ -20,8 +21,10 @@ export function SlideWell({
 }: {
   slides: SlideDetail[]
   deck:
-    | ({ background: string; default_slide_mode?: string | null } &
-        DeckThemeFields)
+    | ({
+        background: string
+        default_slide_mode?: string | null
+      } & DeckThemeFields)
     | null
 }) {
   const editor = useEditor()
@@ -87,14 +90,14 @@ export function SlideWell({
           : a != null
             ? a - OVERVIEW_CARD_GAP
             : fallback
-    const args = {
+    const args: AddSlideArgs = {
       id,
       deckId: editor.deckId,
       sort: keyBetween(before?.sort, after?.sort),
       x: between(before?.x, after?.x, 0),
       y: between(before?.y, after?.y, 0),
       // New slides inherit the deck's default render mode (spec: deck-level markdown default).
-      render_mode: deck?.default_slide_mode ?? '',
+      render_mode: deck?.default_slide_mode === 'markdown' ? 'markdown' : '',
       now: Date.now(),
     }
     mutate.addSlide(args)

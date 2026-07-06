@@ -66,7 +66,9 @@ function sharedCtx(ctx: ServerCtx): MutatorCtx {
 function deckEditableBy(user: string) {
   return or(
     deck.owner_id(user),
-    exists(rels.deckShares, (s) => s.where(and(deck_share.user_id(user), deck_share.role('editor')))),
+    exists(rels.deckShares, (s) =>
+      s.where(and(deck_share.user_id(user), deck_share.role('editor'))),
+    ),
   )
 }
 
@@ -75,33 +77,49 @@ function deckEditableBy(user: string) {
 // client's optimistic write snaps back) if not, else drive the SAME shared body via runSharedMutation.
 
 /** Generic: authorize via a boolean read against the open txn, then run the shared body. */
-function guarded<A>(
-  gen: SharedMutatorWithArgs<A>,
-  authorized: (tx: ServerMutationTx, a: A, user: string) => Promise<boolean>,
+function guarded<TArgs>(
+  gen: SharedMutatorWithArgs<TArgs>,
+  authorized: (
+    tx: ServerMutationTx,
+    a: TArgs,
+    user: string,
+  ) => Promise<boolean>,
 ): ApiMutator<User, unknown> {
   return async (tx, raw, ctx) => {
     const a = gen.args.parse(raw)
     const user = requireUser(ctx.user)
     if (!(await authorized(tx, a, user))) {
-      throw new RindleApiError('forbidden', 'not permitted to edit this deck', 403)
+      throw new RindleApiError(
+        'forbidden',
+        'not permitted to edit this deck',
+        403,
+      )
     }
     return runSharedMutation(gen, a, sharedCtx(ctx), tx)
   }
 }
 
 /** The target deck (by id) is editable by the principal. */
-const withDeckEditable = <A>(deckIdOf: (a: A) => string, gen: SharedMutatorWithArgs<A>) =>
+const withDeckEditable = <TArgs>(
+  deckIdOf: (a: TArgs) => string,
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
   guarded(gen, async (tx, a, user) => {
-    const row = await tx.query(q.deck.where.id(deckIdOf(a)).where(deckEditableBy(user)).one())
+    const row = await tx.query(
+      q.deck.where.id(deckIdOf(a)).where(deckEditableBy(user)).one(),
+    )
     return row != null
   })
 
 /** The target slide's (by id) owning deck is editable by the principal. */
-const withSlideEditable = <A>(slideIdOf: (a: A) => string, gen: SharedMutatorWithArgs<A>) =>
+const withSlideEditable = <TArgs>(
+  slideIdOf: (a: TArgs) => string,
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
   guarded(gen, async (tx, a, user) => {
     const row = await tx.query(
-      q.slide
-        .where.id(slideIdOf(a))
+      q.slide.where
+        .id(slideIdOf(a))
         .where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))
         .one(),
     )
@@ -109,30 +127,47 @@ const withSlideEditable = <A>(slideIdOf: (a: A) => string, gen: SharedMutatorWit
   })
 
 /** The target component's (by id) owning deck (component → slide → deck) is editable by the principal. */
-const withComponentEditable = <A>(compIdOf: (a: A) => string, gen: SharedMutatorWithArgs<A>) =>
+const withComponentEditable = <TArgs>(
+  compIdOf: (a: TArgs) => string,
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
   guarded(gen, async (tx, a, user) => {
     const row = await tx.query(
-      q.component
-        .where.id(compIdOf(a))
-        .where(exists(rels.componentSlide, (s) => s.where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))))
+      q.component.where
+        .id(compIdOf(a))
+        .where(
+          exists(rels.componentSlide, (s) =>
+            s.where(
+              exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))),
+            ),
+          ),
+        )
         .one(),
     )
     return row != null
   })
 
 /** The target deck (by id) is OWNED by the principal (sharing/visibility are owner-only). */
-const withDeckOwner = <A>(deckIdOf: (a: A) => string, gen: SharedMutatorWithArgs<A>) =>
+const withDeckOwner = <TArgs>(
+  deckIdOf: (a: TArgs) => string,
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
   guarded(gen, async (tx, a, user) => {
-    const row = await tx.query(q.deck.where.id(deckIdOf(a)).where(deck.owner_id(user)).one())
+    const row = await tx.query(
+      q.deck.where.id(deckIdOf(a)).where(deck.owner_id(user)).one(),
+    )
     return row != null
   })
 
 /** The target deck_share row's (by id) deck is OWNED by the principal (only the owner un-shares). */
-const withShareOwner = <A>(shareIdOf: (a: A) => string, gen: SharedMutatorWithArgs<A>) =>
+const withShareOwner = <TArgs>(
+  shareIdOf: (a: TArgs) => string,
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
   guarded(gen, async (tx, a, user) => {
     const row = await tx.query(
-      q.deck_share
-        .where.id(shareIdOf(a))
+      q.deck_share.where
+        .id(shareIdOf(a))
         .where(exists(rels.shareDeck, (d) => d.where(deck.owner_id(user))))
         .one(),
     )
@@ -151,19 +186,37 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   renameDeck: withDeckEditable((a) => a.id, sharedMutators.renameDeck),
   touchDeck: withDeckEditable((a) => a.id, sharedMutators.touchDeck),
   setDeckTheme: withDeckEditable((a) => a.id, sharedMutators.setDeckTheme),
-  mintCustomColor: withDeckEditable((a) => a.deckId, sharedMutators.mintCustomColor),
+  mintCustomColor: withDeckEditable(
+    (a) => a.deckId,
+    sharedMutators.mintCustomColor,
+  ),
   addSlide: withDeckEditable((a) => a.deckId, sharedMutators.addSlide),
 
   // ---- deck admin: owner-only ----
-  setDeckVisibility: withDeckOwner((a) => a.id, sharedMutators.setDeckVisibility),
-  addCollaborator: withDeckOwner((a) => a.deckId, sharedMutators.addCollaborator),
-  removeCollaborator: withShareOwner((a) => a.id, sharedMutators.removeCollaborator),
+  setDeckVisibility: withDeckOwner(
+    (a) => a.id,
+    sharedMutators.setDeckVisibility,
+  ),
+  addCollaborator: withDeckOwner(
+    (a) => a.deckId,
+    sharedMutators.addCollaborator,
+  ),
+  removeCollaborator: withShareOwner(
+    (a) => a.id,
+    sharedMutators.removeCollaborator,
+  ),
 
   // ---- slide edits: the slide's owning deck is editable ----
   reorderSlide: withSlideEditable((a) => a.id, sharedMutators.reorderSlide),
-  setSlideTransform: withSlideEditable((a) => a.id, sharedMutators.setSlideTransform),
+  setSlideTransform: withSlideEditable(
+    (a) => a.id,
+    sharedMutators.setSlideTransform,
+  ),
   setSlideTheme: withSlideEditable((a) => a.id, sharedMutators.setSlideTheme),
-  setSlideMarkdown: withSlideEditable((a) => a.id, sharedMutators.setSlideMarkdown),
+  setSlideMarkdown: withSlideEditable(
+    (a) => a.id,
+    sharedMutators.setSlideMarkdown,
+  ),
   setSlideDoc: withSlideEditable((a) => a.id, sharedMutators.setSlideDoc),
   setSlideMode: withSlideEditable((a) => a.id, sharedMutators.setSlideMode),
 
@@ -175,13 +228,28 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   addWebframe: withSlideEditable((a) => a.slideId, sharedMutators.addWebframe),
 
   // ---- component edits: the target component is editable ----
-  moveComponent: withComponentEditable((a) => a.id, sharedMutators.moveComponent),
-  transformComponent: withComponentEditable((a) => a.id, sharedMutators.transformComponent),
-  setComponentZ: withComponentEditable((a) => a.id, sharedMutators.setComponentZ),
-  setComponentClasses: withComponentEditable((a) => a.id, sharedMutators.setComponentClasses),
+  moveComponent: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.moveComponent,
+  ),
+  transformComponent: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.transformComponent,
+  ),
+  setComponentZ: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.setComponentZ,
+  ),
+  setComponentClasses: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.setComponentClasses,
+  ),
   setText: withComponentEditable((a) => a.id, sharedMutators.setText),
   setShapeFill: withComponentEditable((a) => a.id, sharedMutators.setShapeFill),
-  removeComponent: withComponentEditable((a) => a.id, sharedMutators.removeComponent),
+  removeComponent: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.removeComponent,
+  ),
 
   // ---- multi-table cascades: raw escape hatch, gate IN the SQL (accepted-but-no-op if unauthorized) ----
   // Owner-gated deck cascade. Order matters: the child deletes read the deck's owner_id, so the deck
@@ -190,9 +258,20 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     const { id } = deleteDeckArgs.parse(raw)
     const user = requireUser(ctx.user)
     const owner = 'EXISTS (SELECT 1 FROM deck WHERE id = ? AND owner_id = ?)'
-    tx.exec(`DELETE FROM component WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?) AND ${owner}`, [id, id, user])
-    tx.exec(`DELETE FROM custom_background WHERE deck_id = ? AND ${owner}`, [id, id, user])
-    tx.exec(`DELETE FROM deck_share WHERE deck_id = ? AND ${owner}`, [id, id, user])
+    tx.exec(
+      `DELETE FROM component WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?) AND ${owner}`,
+      [id, id, user],
+    )
+    tx.exec(`DELETE FROM custom_background WHERE deck_id = ? AND ${owner}`, [
+      id,
+      id,
+      user,
+    ])
+    tx.exec(`DELETE FROM deck_share WHERE deck_id = ? AND ${owner}`, [
+      id,
+      id,
+      user,
+    ])
     tx.exec(`DELETE FROM slide WHERE deck_id = ? AND ${owner}`, [id, id, user])
     tx.exec('DELETE FROM deck WHERE id = ? AND owner_id = ?', [id, user])
   },
@@ -203,8 +282,15 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     const user = requireUser(ctx.user)
     const editableSlides =
       "(SELECT id FROM slide WHERE deck_id IN (SELECT id FROM deck WHERE owner_id = ? UNION SELECT deck_id FROM deck_share WHERE user_id = ? AND role = 'editor'))"
-    tx.exec(`DELETE FROM component WHERE slide_id = ? AND slide_id IN ${editableSlides}`, [id, user, user])
-    tx.exec(`DELETE FROM slide WHERE id = ? AND id IN ${editableSlides}`, [id, user, user])
+    tx.exec(
+      `DELETE FROM component WHERE slide_id = ? AND slide_id IN ${editableSlides}`,
+      [id, user, user],
+    )
+    tx.exec(`DELETE FROM slide WHERE id = ? AND id IN ${editableSlides}`, [
+      id,
+      user,
+      user,
+    ])
   },
 })
 
@@ -231,7 +317,10 @@ const api = createRindleApiServer<User>({
 // Web-standard entrypoint used by the TanStack Start server routes (src/routes/api.rindle.*).
 export type RindleRouteKind = 'query' | 'read' | 'mutate'
 
-export async function handleRindleJson(kind: RindleRouteKind, request: Request): Promise<Response> {
+export async function handleRindleJson(
+  kind: RindleRouteKind,
+  request: Request,
+): Promise<Response> {
   try {
     const body = JSON.parse((await request.text()) || '{}')
     const ctx = { user: request.headers.get('x-user') ?? '', request }
@@ -257,7 +346,10 @@ export async function readNamedQuery(
   user: string,
   request?: Request,
 ): Promise<{ rows: { cols: Record<string, unknown> }[]; cvMin?: number }> {
-  const ctx = { user, request: request ?? new Request('http://localhost/api/rindle/read') }
+  const ctx = {
+    user,
+    request: request ?? new Request('http://localhost/api/rindle/read'),
+  }
   const out = await api.handleReadJson({ name, args }, ctx)
   return { rows: out.rows, cvMin: out.cvMin }
 }

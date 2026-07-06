@@ -23,7 +23,13 @@ import {
   shared,
   string,
 } from '@rindle/client'
-import type { IsoTx, KeyedRow, MutationGen, MutatorCtx, Row } from '@rindle/client'
+import type {
+  IsoTx,
+  KeyedRow,
+  MutationGen,
+  MutatorCtx,
+  Row,
+} from '@rindle/client'
 import type { ClientRegistry } from '@rindle/optimistic'
 import { z } from 'zod'
 import {
@@ -85,7 +91,7 @@ export const rels = defineRelationships({
 
 // ---- schema-derived row types -------------------------------------------------------------------
 export type Deck = Row<typeof deck>
-export type Slide = Row<typeof slideRefined>
+export type Slide = Row<typeof slide>
 export type Component = Row<typeof component>
 
 // The render_mode a brand-new deck (and its seed slide) starts in. Markdown-first: most authoring is
@@ -95,10 +101,18 @@ export const DEFAULT_SLIDE_MODE: SlideMode = 'markdown'
 
 // ---- mutator arg schemas (zod; the single source of shape for both tiers + the UI) ---------------
 
-export const createDeckArgs = z.object({ id: z.string(), title: z.string(), now: z.number() })
+export const createDeckArgs = z.object({
+  id: z.string(),
+  title: z.string(),
+  now: z.number(),
+})
 export type CreateDeckArgs = z.infer<typeof createDeckArgs>
 
-export const renameDeckArgs = z.object({ id: z.string(), title: z.string(), now: z.number() })
+export const renameDeckArgs = z.object({
+  id: z.string(),
+  title: z.string(),
+  now: z.number(),
+})
 export type RenameDeckArgs = z.infer<typeof renameDeckArgs>
 
 export const touchDeckArgs = z.object({ id: z.string(), now: z.number() })
@@ -149,7 +163,10 @@ export const addSlideArgs = z.object({
 })
 export type AddSlideArgs = z.infer<typeof addSlideArgs>
 
-export const deleteSlideArgs = z.object({ id: z.string(), componentIds: z.array(z.string()) })
+export const deleteSlideArgs = z.object({
+  id: z.string(),
+  componentIds: z.array(z.string()),
+})
 export type DeleteSlideArgs = z.infer<typeof deleteSlideArgs>
 
 export const reorderSlideArgs = z.object({ id: z.string(), sort: z.string() })
@@ -178,11 +195,19 @@ export const setSlideThemeArgs = z.object({
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
-export const setSlideMarkdownArgs = z.object({ id: z.string(), markdown: z.string(), now: z.number() })
+export const setSlideMarkdownArgs = z.object({
+  id: z.string(),
+  markdown: z.string(),
+  now: z.number(),
+})
 export type SetSlideMarkdownArgs = z.infer<typeof setSlideMarkdownArgs>
 
 // Markdown-mode content: a TipTap/ProseMirror document, JSON-stringified. Streamed via `.folded`.
-export const setSlideDocArgs = z.object({ id: z.string(), doc: z.string(), now: z.number() })
+export const setSlideDocArgs = z.object({
+  id: z.string(),
+  doc: z.string(),
+  now: z.number(),
+})
 export type SetSlideDocArgs = z.infer<typeof setSlideDocArgs>
 
 export const setSlideModeArgs = z.object({
@@ -237,7 +262,11 @@ export type AddVideoArgs = z.infer<typeof addVideoArgs>
 export const addWebframeArgs = spatialArgs.extend({ src: z.string() })
 export type AddWebframeArgs = z.infer<typeof addWebframeArgs>
 
-export const moveComponentArgs = z.object({ id: z.string(), x: z.number(), y: z.number() })
+export const moveComponentArgs = z.object({
+  id: z.string(),
+  x: z.number(),
+  y: z.number(),
+})
 export type MoveComponentArgs = z.infer<typeof moveComponentArgs>
 
 export const transformComponentArgs = z.object({
@@ -252,10 +281,16 @@ export const transformComponentArgs = z.object({
 })
 export type TransformComponentArgs = z.infer<typeof transformComponentArgs>
 
-export const setComponentZArgs = z.object({ id: z.string(), z_order: z.number() })
+export const setComponentZArgs = z.object({
+  id: z.string(),
+  z_order: z.number(),
+})
 export type SetComponentZArgs = z.infer<typeof setComponentZArgs>
 
-export const setComponentClassesArgs = z.object({ id: z.string(), custom_classes: z.string() })
+export const setComponentClassesArgs = z.object({
+  id: z.string(),
+  custom_classes: z.string(),
+})
 export type SetComponentClassesArgs = z.infer<typeof setComponentClassesArgs>
 
 export const removeComponentArgs = z.object({ id: z.string() })
@@ -296,7 +331,10 @@ export const removeCollaboratorArgs = z.object({ id: z.string() })
 export type RemoveCollaboratorArgs = z.infer<typeof removeCollaboratorArgs>
 
 // display_name only — the profile id is the acting principal (ctx.user), never a client arg.
-export const setDisplayNameArgs = z.object({ display_name: z.string(), now: z.number() })
+export const setDisplayNameArgs = z.object({
+  display_name: z.string(),
+  now: z.number(),
+})
 export type SetDisplayNameArgs = z.infer<typeof setDisplayNameArgs>
 
 // ---- isomorphic mutators (one shared body each; run on BOTH tiers) --------------------------------
@@ -318,237 +356,369 @@ const spatialBase = (a: z.infer<typeof spatialArgs>) => ({
 })
 
 export const mutators = {
-  createDeck: shared(createDeckArgs, function* (tx: IsoTx, a: CreateDeckArgs, ctx: MutatorCtx): MutationGen {
-    yield tx.insert('deck', {
-      id: a.id,
-      title: a.title,
-      created: a.now,
-      modified: a.now,
-      background: 'bg-default',
-      surface: 'bg-default',
-      chosen_presenter: 'impress',
-      canned_transition: 'none',
-      custom_stylesheet: '',
-      deck_version: '1.0',
-      // Author = the acting principal. The client predicts currentUser() (so the optimistic row passes
-      // the owner-scoped decksQuery immediately); the server injects the AUTHENTICATED principal.
-      owner_id: ctx.user,
-      visibility: 'private',
-      share_token: '',
-      heading_font: '',
-      heading_color: '',
-      body_font: '',
-      body_color: '',
-      default_slide_mode: DEFAULT_SLIDE_MODE,
-      text_align: '',
-    })
-  }),
+  createDeck: shared(
+    createDeckArgs,
+    function* (tx: IsoTx, a: CreateDeckArgs, ctx: MutatorCtx): MutationGen {
+      yield tx.insert('deck', {
+        id: a.id,
+        title: a.title,
+        created: a.now,
+        modified: a.now,
+        background: 'bg-default',
+        surface: 'bg-default',
+        chosen_presenter: 'impress',
+        canned_transition: 'none',
+        custom_stylesheet: '',
+        deck_version: '1.0',
+        // Author = the acting principal. The client predicts currentUser() (so the optimistic row passes
+        // the owner-scoped decksQuery immediately); the server injects the AUTHENTICATED principal.
+        owner_id: ctx.user,
+        visibility: 'private',
+        share_token: '',
+        heading_font: '',
+        heading_color: '',
+        body_font: '',
+        body_color: '',
+        default_slide_mode: DEFAULT_SLIDE_MODE,
+        text_align: '',
+      })
+    },
+  ),
 
-  renameDeck: shared(renameDeckArgs, function* (tx: IsoTx, a: RenameDeckArgs): MutationGen {
-    yield tx.update('deck', { id: a.id, title: a.title, modified: a.now })
-  }),
+  renameDeck: shared(
+    renameDeckArgs,
+    function* (tx: IsoTx, a: RenameDeckArgs): MutationGen {
+      yield tx.update('deck', { id: a.id, title: a.title, modified: a.now })
+    },
+  ),
 
-  touchDeck: shared(touchDeckArgs, function* (tx: IsoTx, a: TouchDeckArgs): MutationGen {
-    yield tx.update('deck', { id: a.id, modified: a.now })
-  }),
+  touchDeck: shared(
+    touchDeckArgs,
+    function* (tx: IsoTx, a: TouchDeckArgs): MutationGen {
+      yield tx.update('deck', { id: a.id, modified: a.now })
+    },
+  ),
 
   // Client predicts the deck row removal; the server twin (server/rindle-api.ts) cascades slides +
   // components under an owner gate, and those deletions arrive via sync.
-  deleteDeck: shared(deleteDeckArgs, function* (tx: IsoTx, a: DeleteDeckArgs): MutationGen {
-    yield tx.delete('deck', { id: a.id })
-  }),
+  deleteDeck: shared(
+    deleteDeckArgs,
+    function* (tx: IsoTx, a: DeleteDeckArgs): MutationGen {
+      yield tx.delete('deck', { id: a.id })
+    },
+  ),
 
-  setDeckTheme: shared(setDeckThemeArgs, function* (tx: IsoTx, a: SetDeckThemeArgs): MutationGen {
-    const row: KeyedRow = { id: a.id, modified: a.now }
-    if (a.background !== undefined) row.background = a.background
-    if (a.surface !== undefined) row.surface = a.surface
-    if (a.heading_font !== undefined) row.heading_font = a.heading_font
-    if (a.heading_color !== undefined) row.heading_color = a.heading_color
-    if (a.body_font !== undefined) row.body_font = a.body_font
-    if (a.body_color !== undefined) row.body_color = a.body_color
-    if (a.text_align !== undefined) row.text_align = a.text_align
-    if (a.default_slide_mode !== undefined) row.default_slide_mode = a.default_slide_mode
-    if (a.custom_stylesheet !== undefined) row.custom_stylesheet = a.custom_stylesheet
-    if (a.chosen_presenter !== undefined) row.chosen_presenter = a.chosen_presenter
-    if (a.canned_transition !== undefined) row.canned_transition = a.canned_transition
-    yield tx.update('deck', row)
-  }),
+  setDeckTheme: shared(
+    setDeckThemeArgs,
+    function* (tx: IsoTx, a: SetDeckThemeArgs): MutationGen {
+      const row: KeyedRow = { id: a.id, modified: a.now }
+      if (a.background !== undefined) row.background = a.background
+      if (a.surface !== undefined) row.surface = a.surface
+      if (a.heading_font !== undefined) row.heading_font = a.heading_font
+      if (a.heading_color !== undefined) row.heading_color = a.heading_color
+      if (a.body_font !== undefined) row.body_font = a.body_font
+      if (a.body_color !== undefined) row.body_color = a.body_color
+      if (a.text_align !== undefined) row.text_align = a.text_align
+      if (a.default_slide_mode !== undefined)
+        row.default_slide_mode = a.default_slide_mode
+      if (a.custom_stylesheet !== undefined)
+        row.custom_stylesheet = a.custom_stylesheet
+      if (a.chosen_presenter !== undefined)
+        row.chosen_presenter = a.chosen_presenter
+      if (a.canned_transition !== undefined)
+        row.canned_transition = a.canned_transition
+      yield tx.update('deck', row)
+    },
+  ),
 
   // Public link: flip visibility + (re)mint or clear the share token. Owner-gated on the server.
-  setDeckVisibility: shared(setDeckVisibilityArgs, function* (tx: IsoTx, a: SetDeckVisibilityArgs): MutationGen {
-    yield tx.update('deck', {
-      id: a.id,
-      visibility: a.visibility,
-      share_token: a.share_token,
-      modified: a.now,
-    })
-  }),
+  setDeckVisibility: shared(
+    setDeckVisibilityArgs,
+    function* (tx: IsoTx, a: SetDeckVisibilityArgs): MutationGen {
+      yield tx.update('deck', {
+        id: a.id,
+        visibility: a.visibility,
+        share_token: a.share_token,
+        modified: a.now,
+      })
+    },
+  ),
 
-  addSlide: shared(addSlideArgs, function* (tx: IsoTx, a: AddSlideArgs): MutationGen {
-    yield tx.insert('slide', {
-      id: a.id,
-      deck_id: a.deckId,
-      sort: a.sort,
-      x: a.x,
-      y: a.y,
-      z: 0,
-      rotate_x: 0,
-      rotate_y: 0,
-      rotate_z: 0,
-      imp_scale: 3,
-      background: '',
-      surface: '',
-      created: a.now,
-      modified: a.now,
-      markdown: '',
-      doc: '',
-      render_mode: a.render_mode ?? '',
-      text_align: '',
-    })
-  }),
+  addSlide: shared(
+    addSlideArgs,
+    function* (tx: IsoTx, a: AddSlideArgs): MutationGen {
+      yield tx.insert('slide', {
+        id: a.id,
+        deck_id: a.deckId,
+        sort: a.sort,
+        x: a.x,
+        y: a.y,
+        z: 0,
+        rotate_x: 0,
+        rotate_y: 0,
+        rotate_z: 0,
+        imp_scale: 3,
+        background: '',
+        surface: '',
+        created: a.now,
+        modified: a.now,
+        markdown: '',
+        doc: '',
+        render_mode: a.render_mode ?? '',
+        text_align: '',
+      })
+    },
+  ),
 
-  deleteSlide: shared(deleteSlideArgs, function* (tx: IsoTx, a: DeleteSlideArgs): MutationGen {
-    for (const id of a.componentIds) yield tx.delete('component', { id })
-    yield tx.delete('slide', { id: a.id })
-  }),
+  deleteSlide: shared(
+    deleteSlideArgs,
+    function* (tx: IsoTx, a: DeleteSlideArgs): MutationGen {
+      for (const id of a.componentIds) yield tx.delete('component', { id })
+      yield tx.delete('slide', { id: a.id })
+    },
+  ),
 
-  reorderSlide: shared(reorderSlideArgs, function* (tx: IsoTx, a: ReorderSlideArgs): MutationGen {
-    yield tx.update('slide', { id: a.id, sort: a.sort })
-  }),
+  reorderSlide: shared(
+    reorderSlideArgs,
+    function* (tx: IsoTx, a: ReorderSlideArgs): MutationGen {
+      yield tx.update('slide', { id: a.id, sort: a.sort })
+    },
+  ),
 
-  setSlideTransform: shared(setSlideTransformArgs, function* (tx: IsoTx, a: SetSlideTransformArgs): MutationGen {
-    yield tx.update('slide', {
-      id: a.id,
-      x: a.x,
-      y: a.y,
-      z: a.z,
-      rotate_x: a.rotate_x,
-      rotate_y: a.rotate_y,
-      rotate_z: a.rotate_z,
-      imp_scale: a.imp_scale,
-      modified: a.now,
-    })
-  }),
+  setSlideTransform: shared(
+    setSlideTransformArgs,
+    function* (tx: IsoTx, a: SetSlideTransformArgs): MutationGen {
+      yield tx.update('slide', {
+        id: a.id,
+        x: a.x,
+        y: a.y,
+        z: a.z,
+        rotate_x: a.rotate_x,
+        rotate_y: a.rotate_y,
+        rotate_z: a.rotate_z,
+        imp_scale: a.imp_scale,
+        modified: a.now,
+      })
+    },
+  ),
 
-  setSlideTheme: shared(setSlideThemeArgs, function* (tx: IsoTx, a: SetSlideThemeArgs): MutationGen {
-    const row: KeyedRow = { id: a.id, modified: a.now }
-    if (a.background !== undefined) row.background = a.background
-    if (a.surface !== undefined) row.surface = a.surface
-    if (a.text_align !== undefined) row.text_align = a.text_align
-    yield tx.update('slide', row)
-  }),
+  setSlideTheme: shared(
+    setSlideThemeArgs,
+    function* (tx: IsoTx, a: SetSlideThemeArgs): MutationGen {
+      const row: KeyedRow = { id: a.id, modified: a.now }
+      if (a.background !== undefined) row.background = a.background
+      if (a.surface !== undefined) row.surface = a.surface
+      if (a.text_align !== undefined) row.text_align = a.text_align
+      yield tx.update('slide', row)
+    },
+  ),
 
   // Markdown source (per-slide). Non-destructive re. components — a plain column patch.
-  setSlideMarkdown: shared(setSlideMarkdownArgs, function* (tx: IsoTx, a: SetSlideMarkdownArgs): MutationGen {
-    yield tx.update('slide', { id: a.id, markdown: a.markdown, modified: a.now })
-  }),
+  setSlideMarkdown: shared(
+    setSlideMarkdownArgs,
+    function* (tx: IsoTx, a: SetSlideMarkdownArgs): MutationGen {
+      yield tx.update('slide', {
+        id: a.id,
+        markdown: a.markdown,
+        modified: a.now,
+      })
+    },
+  ),
 
   // Markdown-mode content as a TipTap doc (JSON string). Plain column patch, streamed via `.folded`.
-  setSlideDoc: shared(setSlideDocArgs, function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
-    yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
-  }),
+  setSlideDoc: shared(
+    setSlideDocArgs,
+    function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
+      yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
+    },
+  ),
 
   // Flip a slide between spatial + markdown mode; hidden components are preserved in the DB.
-  setSlideMode: shared(setSlideModeArgs, function* (tx: IsoTx, a: SetSlideModeArgs): MutationGen {
-    yield tx.update('slide', { id: a.id, render_mode: a.render_mode, modified: a.now })
-  }),
+  setSlideMode: shared(
+    setSlideModeArgs,
+    function* (tx: IsoTx, a: SetSlideModeArgs): MutationGen {
+      yield tx.update('slide', {
+        id: a.id,
+        render_mode: a.render_mode,
+        modified: a.now,
+      })
+    },
+  ),
 
   // One `component` table: each insert stamps `type`, the shared spatial base + `fill` column, and the
   // type-specific `props` JSON object. `fill` is only meaningful for shapes; '' elsewhere.
-  addText: shared(addTextArgs, function* (tx: IsoTx, a: AddTextArgs): MutationGen {
-    yield tx.insert('component', { ...spatialBase(a), type: 'text', fill: '', props: componentProps('text', a) })
-  }),
+  addText: shared(
+    addTextArgs,
+    function* (tx: IsoTx, a: AddTextArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        type: 'text',
+        fill: '',
+        props: componentProps('text', a),
+      })
+    },
+  ),
 
-  addImage: shared(addImageArgs, function* (tx: IsoTx, a: AddImageArgs): MutationGen {
-    yield tx.insert('component', {
-      ...spatialBase(a),
-      scale_w: a.scale_w,
-      scale_h: a.scale_h,
-      type: 'image',
-      fill: '',
-      props: componentProps('image', a),
-    })
-  }),
+  addImage: shared(
+    addImageArgs,
+    function* (tx: IsoTx, a: AddImageArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        scale_w: a.scale_w,
+        scale_h: a.scale_h,
+        type: 'image',
+        fill: '',
+        props: componentProps('image', a),
+      })
+    },
+  ),
 
-  addShape: shared(addShapeArgs, function* (tx: IsoTx, a: AddShapeArgs): MutationGen {
-    yield tx.insert('component', { ...spatialBase(a), type: 'shape', fill: a.fill, props: componentProps('shape', a) })
-  }),
+  addShape: shared(
+    addShapeArgs,
+    function* (tx: IsoTx, a: AddShapeArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        type: 'shape',
+        fill: a.fill,
+        props: componentProps('shape', a),
+      })
+    },
+  ),
 
-  addVideo: shared(addVideoArgs, function* (tx: IsoTx, a: AddVideoArgs): MutationGen {
-    yield tx.insert('component', { ...spatialBase(a), type: 'video', fill: '', props: componentProps('video', a) })
-  }),
+  addVideo: shared(
+    addVideoArgs,
+    function* (tx: IsoTx, a: AddVideoArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        type: 'video',
+        fill: '',
+        props: componentProps('video', a),
+      })
+    },
+  ),
 
-  addWebframe: shared(addWebframeArgs, function* (tx: IsoTx, a: AddWebframeArgs): MutationGen {
-    yield tx.insert('component', {
-      ...spatialBase(a),
-      type: 'webframe',
-      fill: '',
-      props: componentProps('webframe', a),
-    })
-  }),
+  addWebframe: shared(
+    addWebframeArgs,
+    function* (tx: IsoTx, a: AddWebframeArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        type: 'webframe',
+        fill: '',
+        props: componentProps('webframe', a),
+      })
+    },
+  ),
 
-  moveComponent: shared(moveComponentArgs, function* (tx: IsoTx, a: MoveComponentArgs): MutationGen {
-    yield tx.update('component', { id: a.id, x: a.x, y: a.y })
-  }),
+  moveComponent: shared(
+    moveComponentArgs,
+    function* (tx: IsoTx, a: MoveComponentArgs): MutationGen {
+      yield tx.update('component', { id: a.id, x: a.x, y: a.y })
+    },
+  ),
 
-  transformComponent: shared(transformComponentArgs, function* (tx: IsoTx, a: TransformComponentArgs): MutationGen {
-    yield tx.update('component', {
-      id: a.id,
-      scale_x: a.scale_x,
-      scale_y: a.scale_y,
-      scale_w: a.scale_w,
-      scale_h: a.scale_h,
-      rotate: a.rotate,
-      skew_x: a.skew_x,
-      skew_y: a.skew_y,
-    })
-  }),
+  transformComponent: shared(
+    transformComponentArgs,
+    function* (tx: IsoTx, a: TransformComponentArgs): MutationGen {
+      yield tx.update('component', {
+        id: a.id,
+        scale_x: a.scale_x,
+        scale_y: a.scale_y,
+        scale_w: a.scale_w,
+        scale_h: a.scale_h,
+        rotate: a.rotate,
+        skew_x: a.skew_x,
+        skew_y: a.skew_y,
+      })
+    },
+  ),
 
-  setComponentZ: shared(setComponentZArgs, function* (tx: IsoTx, a: SetComponentZArgs): MutationGen {
-    yield tx.update('component', { id: a.id, z_order: a.z_order })
-  }),
+  setComponentZ: shared(
+    setComponentZArgs,
+    function* (tx: IsoTx, a: SetComponentZArgs): MutationGen {
+      yield tx.update('component', { id: a.id, z_order: a.z_order })
+    },
+  ),
 
-  setComponentClasses: shared(setComponentClassesArgs, function* (tx: IsoTx, a: SetComponentClassesArgs): MutationGen {
-    yield tx.update('component', { id: a.id, custom_classes: a.custom_classes })
-  }),
+  setComponentClasses: shared(
+    setComponentClassesArgs,
+    function* (tx: IsoTx, a: SetComponentClassesArgs): MutationGen {
+      yield tx.update('component', {
+        id: a.id,
+        custom_classes: a.custom_classes,
+      })
+    },
+  ),
 
-  removeComponent: shared(removeComponentArgs, function* (tx: IsoTx, a: RemoveComponentArgs): MutationGen {
-    yield tx.delete('component', { id: a.id })
-  }),
+  removeComponent: shared(
+    removeComponentArgs,
+    function* (tx: IsoTx, a: RemoveComponentArgs): MutationGen {
+      yield tx.delete('component', { id: a.id })
+    },
+  ),
 
   // Rewrites the whole text `props` object (it carries all text fields, so no partial-merge needed).
-  setText: shared(setTextArgs, function* (tx: IsoTx, a: SetTextArgs): MutationGen {
-    yield tx.update('component', { id: a.id, props: componentProps('text', a) })
-  }),
+  setText: shared(
+    setTextArgs,
+    function* (tx: IsoTx, a: SetTextArgs): MutationGen {
+      yield tx.update('component', {
+        id: a.id,
+        props: componentProps('text', a),
+      })
+    },
+  ),
 
   // `fill` is a column, so this is a plain per-column patch — concurrent fill vs. any other edit survive.
-  setShapeFill: shared(setShapeFillArgs, function* (tx: IsoTx, a: SetShapeFillArgs): MutationGen {
-    yield tx.update('component', { id: a.id, fill: a.fill })
-  }),
+  setShapeFill: shared(
+    setShapeFillArgs,
+    function* (tx: IsoTx, a: SetShapeFillArgs): MutationGen {
+      yield tx.update('component', { id: a.id, fill: a.fill })
+    },
+  ),
 
-  mintCustomColor: shared(mintCustomColorArgs, function* (tx: IsoTx, a: MintCustomColorArgs): MutationGen {
-    yield tx.insert('custom_background', { id: a.id, deck_id: a.deckId, klass: a.klass, style: a.style })
-  }),
+  mintCustomColor: shared(
+    mintCustomColorArgs,
+    function* (tx: IsoTx, a: MintCustomColorArgs): MutationGen {
+      yield tx.insert('custom_background', {
+        id: a.id,
+        deck_id: a.deckId,
+        klass: a.klass,
+        style: a.style,
+      })
+    },
+  ),
 
   // Sharing: only the deck OWNER may add/remove collaborators (server-gated).
-  addCollaborator: shared(addCollaboratorArgs, function* (tx: IsoTx, a: AddCollaboratorArgs): MutationGen {
-    yield tx.insert('deck_share', {
-      id: a.id,
-      deck_id: a.deckId,
-      user_id: a.userId,
-      role: a.role,
-      created: a.now,
-    })
-  }),
+  addCollaborator: shared(
+    addCollaboratorArgs,
+    function* (tx: IsoTx, a: AddCollaboratorArgs): MutationGen {
+      yield tx.insert('deck_share', {
+        id: a.id,
+        deck_id: a.deckId,
+        user_id: a.userId,
+        role: a.role,
+        created: a.now,
+      })
+    },
+  ),
 
-  removeCollaborator: shared(removeCollaboratorArgs, function* (tx: IsoTx, a: RemoveCollaboratorArgs): MutationGen {
-    yield tx.delete('deck_share', { id: a.id })
-  }),
+  removeCollaborator: shared(
+    removeCollaboratorArgs,
+    function* (tx: IsoTx, a: RemoveCollaboratorArgs): MutationGen {
+      yield tx.delete('deck_share', { id: a.id })
+    },
+  ),
 
   // Profile display name, keyed to the acting principal. upsert = insert-or-replace on the pk, so the
   // first write (before the row exists) and every later edit are the same op. The server injects the
   // AUTHENTICATED principal as ctx.user, so a client can't write another user's profile.
-  setDisplayName: shared(setDisplayNameArgs, function* (tx: IsoTx, a: SetDisplayNameArgs, ctx: MutatorCtx): MutationGen {
-    yield tx.upsert('user_profile', { id: ctx.user, display_name: a.display_name, updated: a.now })
-  }),
+  setDisplayName: shared(
+    setDisplayNameArgs,
+    function* (tx: IsoTx, a: SetDisplayNameArgs, ctx: MutatorCtx): MutationGen {
+      yield tx.upsert('user_profile', {
+        id: ctx.user,
+        display_name: a.display_name,
+        updated: a.now,
+      })
+    },
+  ),
 } satisfies ClientRegistry

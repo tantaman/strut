@@ -6,12 +6,12 @@
 // the SQL too: a nullable column is string().nullable() (typed T | null), a NOT NULL column is bare
 // string(), and PK columns are always non-null. The only thing the SQL can't carry is a refinement
 // *within* a kind — the element type of json<T>(), or a string/number literal union — declare those
-// ONCE in a hand-written module (shared/app-def.ts) with refineTable(...) + refineSchema(...); they
-// survive every regen of this file.
+// ONCE in a hand-written module with refineTable(...) + refineSchema(...); they survive every regen
+// of this file.
 
-import { createSchema, json, number, string, table } from "@rindle/client";
+import { createSchema, json, number, string, table } from '@rindle/client'
 
-export const component = table("component")
+export const component = table('component')
   .columns({
     id: string(),
     slide_id: string(),
@@ -30,18 +30,18 @@ export const component = table("component")
     fill: string(),
     props: json(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const custom_background = table("custom_background")
+export const custom_background = table('custom_background')
   .columns({
     id: string(),
     deck_id: string(),
     klass: string(),
     style: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const deck = table("deck")
+export const deck = table('deck')
   .columns({
     id: string(),
     title: string(),
@@ -63,9 +63,9 @@ export const deck = table("deck")
     default_slide_mode: string(),
     text_align: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const deck_share = table("deck_share")
+export const deck_share = table('deck_share')
   .columns({
     id: string(),
     deck_id: string(),
@@ -73,9 +73,9 @@ export const deck_share = table("deck_share")
     role: string(),
     created: number(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const slide = table("slide")
+export const slide = table('slide')
   .columns({
     id: string(),
     deck_id: string(),
@@ -96,14 +96,16 @@ export const slide = table("slide")
     text_align: string(),
     doc: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const user_profile = table("user_profile")
+export const user_profile = table('user_profile')
   .columns({
     id: string(),
     display_name: string(),
     updated: number(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, user_profile] });
+export const schema = createSchema({
+  tables: [component, custom_background, deck, deck_share, slide, user_profile],
+})
