@@ -2,18 +2,21 @@
 // drag to reorder (fractional index), × to delete, + to add a blank slide. Hovering the gap between
 // two slides reveals a + to insert a slide there; while dragging, the gap shows a drop indicator.
 
-import { Fragment, useCallback, useRef, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { Plus, Sparkles } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
 import { useMutate } from '../rindle/RindleProvider'
+import { authClient } from '../rindle/authClient'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
+import { applyGenerated } from './aiGenerate'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { AddSlideArgs } from '../../shared/app-def'
+import type { GeneratedDeck, GenerateRequest } from '../../shared/generate'
 
 export function SlideWell({
   slides,
@@ -32,6 +35,15 @@ export function SlideWell({
   const history = useHistory()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
+  // "✨ Generate slides": ask the AI to author N slides from a description and append them. `isMember`
+  // (a promoted, non-anonymous account) gates the feature — guests see a sign-in nudge; the /api/generate
+  // route enforces the same gate server-side (guests can't spend the app's inference budget). During the
+  // initial session resolve we treat the user as a non-member (nudge shown).
+  const { data: session } = authClient.useSession()
+  const isMember =
+    !!session?.user &&
+    (session.user as { isAnonymous?: boolean }).isAnonymous !== true
+  const [genOpen, setGenOpen] = useState(false)
   const componentsBySlideRef = useRef(
     new Map<string, Map<string, AnyComponent>>(),
   )
@@ -110,6 +122,18 @@ export function SlideWell({
   }
 
   const addSlide = () => addSlideAt(slides.length)
+
+  // Append the AI-generated slides (one undo for the whole batch) and jump to the first new one.
+  function handleGenerated(generated: GeneratedDeck) {
+    const firstId = applyGenerated(
+      generated,
+      mutate,
+      { deckId: editor.deckId, slides },
+      history,
+    )
+    if (firstId) editor.setActiveSlide(firstId)
+    setGenOpen(false)
+  }
 
   // Restore a deleted slide (row + transform + theme + all its components).
   function restoreSlide(s: SlideDetail, comps: AnyComponent[]) {
@@ -291,6 +315,164 @@ export function SlideWell({
           <Plus size={16} /> Slide
         </button>
       )}
+      {editor.canEdit && (
+        <div className="well__gen">
+          {genOpen ? (
+            <GenerateForm
+              deckId={editor.deckId}
+              isMember={isMember}
+              onGenerated={handleGenerated}
+              onClose={() => setGenOpen(false)}
+            />
+          ) : (
+            <button
+              className="well__gen-toggle"
+              onClick={() => setGenOpen(true)}
+              title="Ask AI to generate slides from a description"
+            >
+              <Sparkles size={15} /> Generate slides
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// The "✨ Generate slides" form: a natural-language description → POST /api/generate → hand the returned
+// deck up to be appended. For an anonymous (guest) user it renders a sign-in nudge instead — the toggle is
+// visible to everyone (discoverability) but the feature is member-gated (the route enforces it too).
+// Sign-in returns to the current deck so in-progress work + the guest's decks carry over on promotion.
+function GenerateForm({
+  deckId,
+  isMember,
+  onGenerated,
+  onClose,
+}: {
+  deckId: string
+  isMember: boolean
+  onGenerated: (deck: GeneratedDeck) => void
+  onClose: () => void
+}) {
+  const [prompt, setPrompt] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  // Focus the prompt the moment the panel opens so the user can just start typing.
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  if (!isMember) {
+    const back =
+      typeof window !== 'undefined'
+        ? window.location.pathname + window.location.search
+        : '/'
+    return (
+      <div className="well__gen-panel">
+        <div className="well__gen-gate">Sign in to generate slides with AI</div>
+        <div className="well__gen-signin">
+          <button
+            onClick={() =>
+              authClient.signIn.social({ provider: 'github', callbackURL: back })
+            }
+          >
+            GitHub
+          </button>
+          <button
+            onClick={() =>
+              authClient.signIn.social({ provider: 'google', callbackURL: back })
+            }
+          >
+            Google
+          </button>
+        </div>
+        <button className="well__gen-close" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    )
+  }
+
+  async function submit() {
+    if (loading || !prompt.trim()) return
+    setLoading(true)
+    setError(null)
+    try {
+      const body: GenerateRequest = { deckId, prompt }
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const b = (await res.json().catch(() => null)) as {
+          message?: string
+        } | null
+        setError(
+          res.status === 401
+            ? 'Sign in to generate slides.'
+            : // Prefer the server's message (e.g. the daily-quota notice); fall back per status.
+              (b?.message ??
+                (res.status === 429
+                  ? 'Too many requests — wait a moment.'
+                  : 'AI is unavailable right now.')),
+        )
+        return
+      }
+      const deck = (await res.json()) as GeneratedDeck
+      if (!Array.isArray(deck.slides) || deck.slides.length === 0) {
+        setError('No slides came back — try rephrasing.')
+        return
+      }
+      onGenerated(deck)
+      setPrompt('')
+    } catch {
+      setError('Network error — try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="well__gen-panel">
+      <textarea
+        ref={inputRef}
+        className="well__gen-input"
+        rows={3}
+        placeholder="Describe your slides — e.g. “6 slides introducing our Q3 roadmap”"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={(e) => {
+          // Enter alone is a newline in the textarea; ⌘/Ctrl+Enter submits, Escape closes.
+          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault()
+            submit()
+          } else if (e.key === 'Escape') onClose()
+        }}
+        disabled={loading}
+      />
+      {error && <div className="well__gen-error">{error}</div>}
+      <div className="well__gen-actions">
+        <button
+          className="well__gen-go"
+          onClick={submit}
+          disabled={loading || !prompt.trim()}
+          title="Generate slides (⌘/Ctrl+Enter)"
+        >
+          {loading ? (
+            <span className="well__gen-spinner" aria-label="Generating" />
+          ) : (
+            <>
+              <Sparkles size={14} /> Generate
+            </>
+          )}
+        </button>
+        <button className="well__gen-close" onClick={onClose} disabled={loading}>
+          Cancel
+        </button>
+      </div>
     </div>
   )
 }

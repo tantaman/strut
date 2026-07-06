@@ -574,6 +574,135 @@ button {
   color: var(--coral);
   background: var(--coral-soft);
 }
+
+/* "✨ Generate slides" — sits below the add-slide button at the foot of the well. */
+.well__gen {
+  margin-top: 10px;
+}
+.well__gen-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    background 0.12s;
+}
+.well__gen-toggle:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+  background: var(--coral-soft);
+}
+.well__gen-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel);
+}
+.well__gen-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 56px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.well__gen-input:focus {
+  outline: none;
+  border-color: var(--coral);
+}
+.well__gen-actions {
+  display: flex;
+  gap: 6px;
+}
+.well__gen-go {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 7px;
+  background: var(--coral);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+}
+.well__gen-go:disabled {
+  opacity: 0.55;
+}
+.well__gen-close {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.well__gen-close:hover:not(:disabled) {
+  color: var(--text);
+}
+.well__gen-error {
+  color: var(--danger);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.well__gen-gate {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.well__gen-signin {
+  display: flex;
+  gap: 6px;
+}
+.well__gen-signin button {
+  flex: 1 1 0;
+  padding: 6px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.well__gen-signin button:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+.well__gen-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: well-gen-spin 0.7s linear infinite;
+}
+@keyframes well-gen-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .well__slide.is-dragging {
   opacity: 0.35;
 }

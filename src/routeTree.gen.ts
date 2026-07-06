@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
+import { Route as ApiGenerateRouteImport } from './routes/api.generate'
 import { Route as ApiArrangeRouteImport } from './routes/api.arrange'
 import { Route as DeckDeckIdPlayRouteImport } from './routes/deck.$deckId_.play'
 import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
@@ -41,6 +42,11 @@ const ShareDeckIdRoute = ShareDeckIdRouteImport.update({
 const DeckDeckIdRoute = DeckDeckIdRouteImport.update({
   id: '/deck/$deckId',
   path: '/deck/$deckId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGenerateRoute = ApiGenerateRouteImport.update({
+  id: '/api/generate',
+  path: '/api/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiArrangeRoute = ApiArrangeRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SigninRoute: typeof SigninRoute
   ApiArrangeRoute: typeof ApiArrangeRoute
+  ApiGenerateRoute: typeof ApiGenerateRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/deck/$deckId'
       fullPath: '/deck/$deckId'
       preLoaderRoute: typeof DeckDeckIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/generate': {
+      id: '/api/generate'
+      path: '/api/generate'
+      fullPath: '/api/generate'
+      preLoaderRoute: typeof ApiGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/arrange': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SigninRoute: SigninRoute,
   ApiArrangeRoute: ApiArrangeRoute,
+  ApiGenerateRoute: ApiGenerateRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
