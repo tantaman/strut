@@ -37,7 +37,7 @@
     {
       "binding": "DB",
       "database_name": "strut-auth",
-      "database_id": "REPLACE_WITH_wrangler_d1_create_OUTPUT",
+      "database_id": "c6262890-d57d-4d40-b768-fd8b95e7ae85",
       // Explicit, auth-ONLY migrations dir. Without this, wrangler defaults D1's migrations_dir to the
       // repo's `migrations/` — which is RINDLE's schema — so `wrangler d1 migrations apply strut-auth`
       // would run Rindle's SQL into the auth DB. Keep the two schemas strictly separate.

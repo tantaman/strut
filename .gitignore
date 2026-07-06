@@ -20,4 +20,4 @@ todos.json
 *.db-shm
 *.db-wal
 *.db-wal2
-
+.dev.vars
