@@ -31,11 +31,16 @@ Paste the printed `database_id` into `wrangler.jsonc` → `d1_databases[0].datab
 mkdir -p migrations-d1
 npx @better-auth/cli@latest generate --config ./auth.cli.ts --output ./migrations-d1/0001_better_auth.sql
 
-# local D1 (miniflare state, used by preview:cf / wrangler dev):
-wrangler d1 execute strut-auth --local  --file=./migrations-d1/0001_better_auth.sql
-# production D1:
-wrangler d1 execute strut-auth --remote --file=./migrations-d1/0001_better_auth.sql
+# Apply as TRACKED migrations: idempotent (records applied files in a d1_migrations table, so re-runs
+# are safe), and future Better-Auth schema bumps are just new NNNN_*.sql files that `apply` picks up.
+wrangler d1 migrations apply strut-auth --local     # local miniflare D1 (preview:cf / wrangler dev)
+wrangler d1 migrations apply strut-auth --remote    # production D1
 ```
+
+`wrangler d1 migrations list strut-auth --remote` previews what's unapplied. (If `apply` doesn't detect
+the hand-placed file, scaffold it the canonical way instead: `wrangler d1 migrations create strut-auth
+better_auth`, then paste the generated SQL into the file it creates.) Prefer this over `d1 execute
+--file`, which runs raw SQL untracked — fine for a one-shot, but not idempotent.
 
 These are D1-native migrations in `migrations-d1/`, **separate** from the Rindle `migrations/` SQL
 (that's the daemon's schema). The D1 binding's `migrations_dir` in `wrangler.jsonc` is pinned to

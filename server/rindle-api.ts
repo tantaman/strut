@@ -334,6 +334,10 @@ export async function handleRindleJson(
   } catch (err) {
     const status = err instanceof RindleApiError ? err.status : 500
     const message = err instanceof Error ? err.message : 'internal error'
+    // Surface unexpected failures in `wrangler tail`: we catch here, so the Worker outcome stays "Ok"
+    // and a 500 is otherwise invisible in the logs. Skip expected guard rejects (forbidden/400 —
+    // routine optimistic-write snap-backs) to avoid noise.
+    if (!(err instanceof RindleApiError)) console.error(`[rindle] ${kind} failed:`, err)
     return Response.json({ error: message }, { status })
   }
 }
