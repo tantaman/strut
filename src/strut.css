@@ -2284,6 +2284,27 @@ button {
   letter-spacing: 0.04em;
   color: var(--muted);
 }
+/* Inline variant for the app's top chrome (editor header, dashboard brandbar): sheds the floating
+   pill's fixed positioning / frosted background and reads as a quiet brand credit, divided from the
+   Strut lockup the same way `.brandbar__tag` is. */
+.powered-by--inline {
+  position: static;
+  bottom: auto;
+  right: auto;
+  z-index: auto;
+  gap: 7px;
+  padding: 0 0 0 14px;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  opacity: 0.85;
+}
+.powered-by--inline svg {
+  height: 15px;
+  width: 15px;
+}
 .share-gate {
   position: fixed;
   inset: 0;

@@ -39,6 +39,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { PoweredByRindle } from './PoweredByRindle'
 import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
@@ -333,6 +334,7 @@ export function Header({
       <Link to="/" className="hdr__home" title="All decks">
         <img src="/strut-logo.png" alt="Strut" />
       </Link>
+      <PoweredByRindle variant="inline" />
       <input
         className="hdr__title"
         value={deck?.title ?? ''}

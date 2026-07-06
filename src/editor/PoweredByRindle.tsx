@@ -1,13 +1,21 @@
-// "Powered by rindle" attribution badge — a fixed bottom-right pill shown over the full-screen deck
-// viewers (present + public share). Mirrors the top-left `.share-badge` styling. The mark is the
-// rindle brand logo (ink tile + paper outline + orange accent dot) inlined so it needs no asset fetch
-// and stays crisp at any density; the brand colours are fixed on purpose (a logo doesn't recolour with
-// the theme). `stopPropagation` keeps a click on the badge from also advancing the slide, since the
-// `.play` container advances on click.
-export function PoweredByRindle() {
+// "Powered by rindle" credit — Strut is the showcase app for the rindle sync platform, so this links
+// back to rindle.sh from every surface. Two variants:
+//   • 'float'  (default) — a fixed bottom-right pill for the chrome-less full-screen deck viewers
+//                          (present + public share). Mirrors the `.share-badge` styling.
+//   • 'inline'           — a compact credit that sits in the app's top chrome (editor header, dashboard
+//                          brandbar), where a floating pill would collide with the Overview controls.
+// The mark is the rindle brand logo (ink tile + paper outline + orange accent dot) inlined so it needs
+// no asset fetch and stays crisp; its colours are fixed on purpose (a logo doesn't recolour with the
+// theme). `stopPropagation` keeps a click on the badge from also advancing the slide when it sits inside
+// the `.play` container (which advances on click); it's harmless in the header/brandbar.
+export function PoweredByRindle({
+  variant = 'float',
+}: {
+  variant?: 'float' | 'inline'
+}) {
   return (
     <a
-      className="powered-by"
+      className={variant === 'inline' ? 'powered-by powered-by--inline' : 'powered-by'}
       href="https://rindle.sh"
       target="_blank"
       rel="noopener noreferrer"
