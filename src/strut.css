@@ -2251,3 +2251,308 @@ button {
 .share-gate__logo {
   height: 34px;
 }
+
+/* ---- "✨ Chat" advisor rail ----
+   A right-side rail (flex child of .editor__body, after the well/stage/overview) where the user chats
+   with an AI advisor about the deck. Toggled from the header (.btn.is-active below). */
+
+/* Header toggle active state (shared: any .btn used as a toggle). */
+.btn.is-active {
+  background: var(--coral-soft);
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.chat {
+  flex: 0 0 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  box-shadow: -8px 0 24px rgba(24, 26, 33, 0.05);
+  z-index: 20;
+}
+.chat__head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.chat__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--coral);
+}
+.chat__head-actions {
+  display: inline-flex;
+  gap: 2px;
+}
+.chat__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.chat__icon:hover:not(:disabled) {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.chat__icon:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Scrolling thread. Wide content (a fenced code block a model might emit) scrolls inside its own bubble
+   rather than widening the rail. */
+.chat__thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat__empty {
+  margin: auto 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.chat__msg {
+  display: flex;
+  max-width: 100%;
+}
+.chat__msg--user {
+  justify-content: flex-end;
+}
+.chat__msg--assistant {
+  justify-content: flex-start;
+}
+.chat__bubble {
+  max-width: 88%;
+  padding: 8px 11px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.chat__bubble--user {
+  background: var(--coral);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+}
+.chat__bubble--assistant {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+.chat__bubble--error {
+  background: var(--coral-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Rendered Markdown inside an assistant bubble — tight vertical rhythm so a short answer isn't padded. */
+.chat__md > :first-child {
+  margin-top: 0;
+}
+.chat__md > :last-child {
+  margin-bottom: 0;
+}
+.chat__md p {
+  margin: 0 0 8px;
+}
+.chat__md ul,
+.chat__md ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.chat__md li {
+  margin: 2px 0;
+}
+.chat__md h1,
+.chat__md h2,
+.chat__md h3 {
+  font-size: 14px;
+  margin: 10px 0 6px;
+}
+.chat__md pre {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  font-size: 12px;
+}
+.chat__md code {
+  font-size: 12px;
+}
+.chat__md a {
+  color: var(--coral-strong);
+}
+
+/* Streaming affordances: a blinking caret trailing partial content, and a three-dot pulse before the
+   first token arrives. */
+.chat__caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--coral);
+  animation: chat-caret 1s steps(1) infinite;
+}
+@keyframes chat-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.chat__dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 0;
+}
+.chat__dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: chat-dots 1.2s ease-in-out infinite;
+}
+.chat__dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.chat__dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes chat-dots {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* Composer. */
+.chat__composer {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+.chat__input {
+  flex: 1 1 auto;
+  resize: none;
+  min-height: 38px;
+  max-height: 140px;
+  padding: 8px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.chat__input:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.chat__send {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9px;
+  background: var(--coral);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+}
+.chat__send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.chat__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: well-gen-spin 0.7s linear infinite;
+}
+
+/* Guest sign-in gate (mirrors the well's Generate gate). */
+.chat__gate {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
+.chat__gate-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.chat__gate-signin {
+  display: flex;
+  gap: 8px;
+}
+.chat__gate-signin button {
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  font-size: 13px;
+}
+.chat__gate-signin button:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+/* On a narrow viewport the rail would crowd the stage — let it take a roomier share but cap it. */
+@media (max-width: 900px) {
+  .chat {
+    flex-basis: 300px;
+  }
+}

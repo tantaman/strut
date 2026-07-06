@@ -1,3 +1,7 @@
+Maybe just a single chat and actions in it rather than buttons all over...
+
+
+---
 Let AI create images for slide, svgs, etc.
 Author markdown
 Provide input

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LogIn, LogOut, User } from 'lucide-react'
 import type { SessionAccount } from '../../server/session'
 import { authClient } from './authClient'
+import { track } from '../lib/analytics'
 
 /** `initial` is the account resolved server-side from the session cookie (appSsr.ts), passed down from
  *  the route loader. It seeds the FIRST paint — server render and the matching client hydration pass
@@ -46,6 +47,7 @@ export function AccountControl({
     : 'Sign in'
 
   function promote(provider: 'github' | 'google') {
+    track('account:promote', { provider })
     void authClient.signIn.social({ provider, callbackURL: '/' })
   }
   async function signOut() {

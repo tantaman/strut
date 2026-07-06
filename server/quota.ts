@@ -3,9 +3,10 @@
 // (the `DB` binding — same store as Better-Auth, NOT Rindle). The routes' in-memory throttles are only
 // cheap burst pre-filters; THIS survives isolate recycling and spans every isolate.
 //
-// Two features, two independent buckets (two tables, same shape): `arrange_usage` (✨ Arrange) and
-// `generate_usage` (✨ Generate slides — heavier, so a smaller limit). The store logic is identical and
-// table-parameterized; the feature wrappers below pick the table + limit.
+// Three features, three independent buckets (three tables, same shape): `arrange_usage` (✨ Arrange),
+// `generate_usage` (✨ Generate slides — heavier, so a smaller limit), and `chat_usage` (✨ Chat — metered
+// one unit per user turn; turns are cheap but conversations are many, so a larger limit). The store logic
+// is identical and table-parameterized; the feature wrappers below pick the table + limit.
 //
 // Runtime access mirrors server/auth.ts: under workerd the `DB` binding is an OBJECT binding reached via
 // the `cloudflare:workers` module (not process.env); under `pnpm dev` (Node, no D1) we open the same
@@ -14,13 +15,17 @@
 // dynamically imported + @vite-ignore'd (string-indirected) so it never enters the workerd/client build
 // graph.
 
-// The two usage tables (names are internal constants, never user input — safe to interpolate into SQL).
+// The usage tables (names are internal constants, never user input — safe to interpolate into SQL).
 const ARRANGE_TABLE = 'arrange_usage'
 const GENERATE_TABLE = 'generate_usage'
+const CHAT_TABLE = 'chat_usage'
 
 export const ARRANGE_DAILY_LIMIT = 50
 // Generating a whole batch of slides is a bigger call than a single arrange, so it gets a smaller cap.
 export const GENERATE_DAILY_LIMIT = 20
+// Chat is metered ONE unit per user turn — individually cheap, but a conversation is many turns — so it
+// gets the largest daily cap.
+export const CHAT_DAILY_LIMIT = 200
 
 /** UTC calendar-day key (YYYY-MM-DD) for a timestamp — the quota window. */
 export function utcDay(now: number): string {
@@ -114,6 +119,21 @@ export function refundGenerateQuota(
   store?: QuotaStore,
 ): Promise<void> {
   return refundQuota(userId, now, GENERATE_TABLE, store)
+}
+
+export function consumeChatQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<QuotaResult> {
+  return consumeQuota(userId, now, CHAT_DAILY_LIMIT, CHAT_TABLE, store)
+}
+export function refundChatQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<void> {
+  return refundQuota(userId, now, CHAT_TABLE, store)
 }
 
 // ---- store construction ----

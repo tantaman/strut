@@ -16,6 +16,7 @@ import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
 import { applyPlan, buildDigest, previewCards } from './aiArrange'
+import { track } from '../lib/analytics'
 import type { PreviewCard } from './aiArrange'
 import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
 import { SlideView } from './SlideView'
@@ -392,6 +393,10 @@ export function Overview({
   function applyPreview() {
     if (!preview) return
     applyPlan(preview.plan, mutate, slides, history)
+    track('arrange:applied', {
+      layout: preview.plan.layout,
+      count: slides.length,
+    })
     setPreview(null)
   }
   function discardPreview() {

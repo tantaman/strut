@@ -4,7 +4,8 @@
 // dynamic-import `@rindle/optimistic` (which pulls in @rindle/wasm) only when first asked — i.e. in
 // the browser, from RindleProvider's effect. `getApp()` memoizes the promise.
 
-import { mutators, schema } from '../../shared/app-def.ts'
+import { mutators } from '../../shared/app-def.ts'
+import { clientSchema } from './localSchema.ts'
 import { authClient } from './authClient.ts'
 
 // The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
@@ -64,7 +65,11 @@ async function create() {
   ])
   await initWasm()
   const app = await createRindleClient({
-    schema,
+    // The EXTENDED schema — the plain synced `schema` plus the client-only `chat_message` local table
+    // (src/rindle/localSchema.ts). Only the browser engine learns the local table; SSR / server keep the
+    // plain `schema`. `app.store` is now typed with the extended columns, so `store.query.chat_message`
+    // and `store.writeLocal` resolve for the ✨ Chat panel.
+    schema: clientSchema,
     mutators,
     // The acting principal for a shared mutator's ctx.user — the local user the optimistic prediction
     // writes under. The API server derives the SAME id from the session cookie for the authoritative
@@ -97,6 +102,9 @@ async function create() {
 }
 
 export type StrutApp = Awaited<ReturnType<typeof create>>
+/** The browser store, typed with the extended (`clientSchema`) columns — so `store.query.chat_message`
+ *  and `store.writeLocal(...)` resolve for the ✨ Chat local table. */
+export type StrutStore = StrutApp['store']
 
 let _app: Promise<StrutApp> | null = null
 

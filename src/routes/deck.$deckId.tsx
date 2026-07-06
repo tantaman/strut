@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useQueryStatus, useRoot } from '@rindle/react'
 import { deckDetailQuery, deckSharesQuery } from '../../shared/queries'
 import { authClient } from '../rindle/authClient'
@@ -10,6 +10,7 @@ import { Header } from '../editor/Header'
 import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
 import { Overview } from '../editor/Overview'
+import { ChatPanel } from '../editor/ChatPanel'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId')({
@@ -96,9 +97,17 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   const activeSlide = slides.find((s) => s.id === editor.activeSlideId) ?? null
 
+  // The advisor rail is a per-editor, ephemeral toggle (not URL-persisted — a private side conversation).
+  const [chatOpen, setChatOpen] = useState(false)
+
   return (
     <div className="editor">
-      <Header deck={deck} activeSlide={activeSlide} />
+      <Header
+        deck={deck}
+        activeSlide={activeSlide}
+        chatOpen={chatOpen}
+        onToggleChat={() => setChatOpen((o) => !o)}
+      />
       {accessResolved && !editor.canEdit && (
         <div className="ro-banner">
           👁 Read-only — you’re viewing this shared deck. Changes are disabled.
@@ -120,6 +129,13 @@ function EditorInner({ deckId }: { deckId: string }) {
           </>
         ) : (
           <Overview slides={slides} deck={deck} />
+        )}
+        {chatOpen && (
+          <ChatPanel
+            deckId={deckId}
+            slides={slides}
+            onClose={() => setChatOpen(false)}
+          />
         )}
       </div>
     </div>

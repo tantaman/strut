@@ -6,6 +6,7 @@ import appCss from '../styles.css?url'
 import strutCss from '../strut.css?url'
 import { RindleProvider } from '../rindle/RindleProvider'
 import { DecksKeepalive } from '../rindle/DecksKeepalive'
+import { ANALYTICS_ENABLED, UMAMI_ID, UMAMI_SRC } from '../lib/analytics'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -46,6 +47,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Privacy-first, cookieless product analytics (Umami). Rendered ONLY when the build set
+            VITE_UMAMI_SRC — an unconfigured clone omits it entirely and collects nothing. See
+            src/lib/analytics.ts. `defer` keeps it off the critical path. */}
+        {ANALYTICS_ENABLED && (
+          <script defer src={UMAMI_SRC} data-website-id={UMAMI_ID} />
+        )}
       </head>
       <body>
         <RindleProvider>

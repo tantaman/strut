@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
 import { Route as ApiGenerateRouteImport } from './routes/api.generate'
+import { Route as ApiChatRouteImport } from './routes/api.chat'
 import { Route as ApiArrangeRouteImport } from './routes/api.arrange'
 import { Route as DeckDeckIdPlayRouteImport } from './routes/deck.$deckId_.play'
 import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
@@ -47,6 +48,11 @@ const DeckDeckIdRoute = DeckDeckIdRouteImport.update({
 const ApiGenerateRoute = ApiGenerateRouteImport.update({
   id: '/api/generate',
   path: '/api/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiArrangeRoute = ApiArrangeRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/api/arrange'
+    | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
     | '/share/$deckId'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SigninRoute: typeof SigninRoute
   ApiArrangeRoute: typeof ApiArrangeRoute
+  ApiChatRoute: typeof ApiChatRoute
   ApiGenerateRoute: typeof ApiGenerateRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/api/generate'
       fullPath: '/api/generate'
       preLoaderRoute: typeof ApiGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/arrange': {
@@ -319,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SigninRoute: SigninRoute,
   ApiArrangeRoute: ApiArrangeRoute,
+  ApiChatRoute: ApiChatRoute,
   ApiGenerateRoute: ApiGenerateRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,

@@ -7,6 +7,7 @@ import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { SLIDE_H, SLIDE_W } from '../config'
+import { track } from '../lib/analytics'
 import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId_/play')({
@@ -52,6 +53,7 @@ function Play() {
   useEffect(() => {
     if (startedRef.current || slides.length === 0) return
     startedRef.current = true
+    track('play:started', { count: slides.length })
     if (slide) {
       const idx = slides.findIndex((s) => s.id === slide)
       if (idx >= 0) setI(idx)

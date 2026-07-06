@@ -18,6 +18,7 @@ import {
   Play,
   Redo2,
   Shapes,
+  Sparkles,
   Type,
   Undo2,
   Video,
@@ -33,6 +34,7 @@ import {
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
+import { track } from '../lib/analytics'
 import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
@@ -79,9 +81,15 @@ const place = () => ({
 export function Header({
   deck,
   activeSlide,
+  chatOpen,
+  onToggleChat,
 }: {
   deck: DeckRow | null
   activeSlide: SlideDetail | null
+  // "✨ Chat" advisor rail toggle. Visible to everyone (the panel itself gates guests with a sign-in
+  // nudge); state is owned by the editor page so the panel can mount alongside the well/stage.
+  chatOpen: boolean
+  onToggleChat: () => void
 }) {
   const editor = useEditor()
   const mutate = useMutate()
@@ -272,6 +280,7 @@ export function Header({
     try {
       if (kind === 'json') await exportDeckJSON(app.store, deck.id)
       else await exportDeckHTML(app.store, deck.id)
+      track('export', { kind })
     } finally {
       setExporting(false)
     }
@@ -569,6 +578,15 @@ export function Header({
           Overview
         </button>
       </div>
+
+      <button
+        className={chatOpen ? 'btn is-active' : 'btn'}
+        onClick={onToggleChat}
+        title="Chat with an AI advisor about your deck"
+        aria-pressed={chatOpen}
+      >
+        <Sparkles size={16} /> <span className="lbl">Chat</span>
+      </button>
 
       <button
         className="btn btn--primary"

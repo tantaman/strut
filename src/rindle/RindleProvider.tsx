@@ -67,6 +67,13 @@ export function useMutate(): StrutApp['mutate'] {
   return app ? app.mutate : deferredMutate
 }
 
+/** The live browser store (typed with the extended `clientSchema` columns), or `null` before boot. The ✨
+ *  Chat panel reads/writes its `chat_message` LOCAL table through this — `store.query.chat_message` +
+ *  `store.writeLocal`. Null pre-boot; components render an empty thread until the store lands. */
+export function useStore(): StrutApp['store'] | null {
+  return useContext(AppContext)?.store ?? null
+}
+
 export function RindleProvider({ children }: { children: ReactNode }) {
   const [app, setApp] = useState<StrutApp | null>(null)
   const [error, setError] = useState<string | null>(null)
