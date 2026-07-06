@@ -26,6 +26,12 @@ function reqLimit(raw: unknown, field = 'limit'): number {
   return v
 }
 
+// How many decks the dashboard shows (and keeps warm). Kept as one constant so every decksQuery call
+// site — the SSR seed (appSsr.preloadDecks), the dashboard read (routes/index.tsx) and the session
+// keepalive (rindle/DecksKeepalive) — share the SAME query identity/viewKey. If these drift, the seed
+// no longer bridges first paint and the keepalive no longer warms the view the dashboard reads.
+export const DECKS_LIMIT = 10
+
 // Dashboard: the principal's decks (the local store already holds only owned + shared), newest first.
 export const decksQuery = defineQuery(
   'decks',

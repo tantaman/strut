@@ -65,8 +65,8 @@ export const preloadDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<AppSeed> => {
     const ctx = await seedContext()
     if (!ctx) return { rindle: null, userId: '', account: null }
-    const { decksQuery } = await import('../../shared/queries')
-    const state = await ctx.store.preloadAll([decksQuery({ limit: 200 })], {
+    const { decksQuery, DECKS_LIMIT } = await import('../../shared/queries')
+    const state = await ctx.store.preloadAll([decksQuery({ limit: DECKS_LIMIT })], {
       onError: (_q, err) =>
         console.error(
           '[ssr] decks preload failed; first paint without seed:',

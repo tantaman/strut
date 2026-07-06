@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
 import { Plus, Upload, X } from 'lucide-react'
-import { decksQuery } from '../../shared/queries'
+import { decksQuery, DECKS_LIMIT } from '../../shared/queries'
 import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
 import { preloadDecks } from '../rindle/appSsr'
@@ -19,10 +19,16 @@ export const Route = createFileRoute('/')({
 })
 
 function Dashboard() {
-  const liveDecks = useQuery(decksQuery({ limit: 200 }))
-  const decksStatus = useQueryStatus(decksQuery({ limit: 200 }))
-  // Bridge the SSR-seed → live-client handoff. The seed correctly first-paints the decks, but when the
-  // live wasm store swaps in, its decks view resets (schema set) one daemon round-trip BEFORE its first
+  // Server-authoritative read (NOT a local `useRoot` read): `slideCount` is a server-computed `countAs`
+  // aggregate and the decks coverage doesn't sync the underlying slide rows, so a purely-local read would
+  // count them as 0. `<DecksKeepalive>` (mounted at the root) holds this same coverage warm across the
+  // session, so returning from the editor re-materializes against resident rows — no flash — while the
+  // counts stay correct.
+  const liveDecks = useQuery(decksQuery({ limit: DECKS_LIMIT }))
+  const decksStatus = useQueryStatus(decksQuery({ limit: DECKS_LIMIT }))
+  // Bridge the SSR-seed → live-client handoff on INITIAL load (the keepalive covers back-nav, but on a
+  // cold first paint nothing is warm yet). The seed correctly first-paints the decks, but when the live
+  // wasm store swaps in, its decks view resets (schema set) one daemon round-trip BEFORE its first
   // snapshot lands — and the seed can't cover that window (a reset view no longer reads its seed), so
   // `useQuery` transiently reads [] and the grid flashes "No decks". Keep showing the last AUTHORITATIVE
   // ('complete') result — which starts as the SSR seed and is the viewer's real data — through that

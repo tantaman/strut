@@ -5,6 +5,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import appCss from '../styles.css?url'
 import strutCss from '../strut.css?url'
 import { RindleProvider } from '../rindle/RindleProvider'
+import { DecksKeepalive } from '../rindle/DecksKeepalive'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -47,7 +48,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <RindleProvider>{children}</RindleProvider>
+        <RindleProvider>
+          {/* Keep the dashboard's decks coverage warm across the whole session (incl. while a deck is
+              open) so returning to `/` doesn't flash empty for one daemon round-trip. */}
+          <DecksKeepalive />
+          {children}
+        </RindleProvider>
         <TanStackDevtools
           config={{ position: 'bottom-left' }}
           plugins={[
