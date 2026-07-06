@@ -27,7 +27,8 @@ type RindleDevtoolsComponent = (props: { defaultOpen?: boolean }) => ReactNode
 function useRindleSeed(): string | null {
   const matches = useMatches()
   for (let i = matches.length - 1; i >= 0; i--) {
-    const raw = (matches[i].loaderData as { rindle?: string } | undefined)?.rindle
+    const raw = (matches[i].loaderData as { rindle?: string } | undefined)
+      ?.rindle
     if (raw) return raw
   }
   return null
@@ -35,7 +36,10 @@ function useRindleSeed(): string | null {
 
 export function useApp(): StrutApp {
   const app = useContext(AppContext)
-  if (!app) throw new Error('useApp() used outside <RindleProvider> (or before the client booted)')
+  if (!app)
+    throw new Error(
+      'useApp() used outside <RindleProvider> (or before the client booted)',
+    )
   return app
 }
 
@@ -62,7 +66,9 @@ export function RindleProvider({ children }: { children: ReactNode }) {
     let live = true
     getApp()
       .then((a) => live && setApp(a))
-      .catch((e) => live && setError(e instanceof Error ? e.message : String(e)))
+      .catch(
+        (e) => live && setError(e instanceof Error ? e.message : String(e)),
+      )
     return () => {
       live = false
     }

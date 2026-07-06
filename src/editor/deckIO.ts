@@ -128,7 +128,8 @@ export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
     body_font: imported.body_font,
     body_color: imported.body_color,
     text_align: imported.text_align,
-    default_slide_mode: imported.default_slide_mode,
+    default_slide_mode:
+      imported.default_slide_mode === 'markdown' ? 'markdown' : '',
     custom_stylesheet: imported.custom_stylesheet,
     canned_transition: imported.canned_transition,
     now,

@@ -2,7 +2,7 @@
 // plus the shape catalog and theme-resolution helpers.
 
 import { parseProps } from '../../shared/componentProps'
-import type { ComponentType } from '../../shared/componentProps'
+import type { ComponentProps, ComponentType } from '../../shared/componentProps'
 import { DEFAULT_FONT } from '../config'
 
 export type ComponentKind = ComponentType
@@ -25,11 +25,11 @@ export interface SpatialBase {
 }
 
 /** A raw `component` row as it materializes off a fragment/query: spatial base + `type` discriminator
- *  + `fill` column + the `props` JSON string. */
+ *  + `fill` column + the typed `props` JSON object (json<ComponentProps>()). */
 export interface ComponentRow extends SpatialBase {
   type: string
   fill: string
-  props: string
+  props: ComponentProps
 }
 
 /** The flat, in-memory component the editor works with: spatial base + `kind` + `fill` + the decoded

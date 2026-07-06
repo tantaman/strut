@@ -149,7 +149,7 @@ export function Stage({
   function toggleMarkdownMode() {
     const before = slideData.render_mode === 'markdown' ? 'markdown' : ''
     const next = before === 'markdown' ? '' : 'markdown'
-    const apply = (m: string) =>
+    const apply = (m: '' | 'markdown') =>
       mutate.setSlideMode({ id: slideData.id, render_mode: m, now: Date.now() })
     apply(next)
     history.push({
@@ -487,11 +487,7 @@ export function Stage({
         )}
         {editor.canEdit ? (
           // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale).
-          <TipTapSlideEditor
-            key={slideData.id}
-            slide={slideData}
-            deck={deck}
-          />
+          <TipTapSlideEditor key={slideData.id} slide={slideData} deck={deck} />
         ) : (
           // Viewer (no edit rights): the read-only rendered surface.
           <div className="md-preview" ref={mdPreviewRef}>
