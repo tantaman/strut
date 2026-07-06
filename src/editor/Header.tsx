@@ -1,5 +1,6 @@
-// Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview),
-// the deck Theme picker, the Slides|Overview mode toggle, and Present.
+// Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview), the
+// per-slide Objects|Body edit-layer toggle, the deck Theme picker, the Slides|Overview mode toggle,
+// and Present.
 
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
@@ -10,6 +11,7 @@ import {
   ChevronDown,
   Code2,
   Download,
+  FileText,
   Image as ImageIcon,
   Link2,
   Palette,
@@ -107,6 +109,24 @@ export function Header({
   const canEditSlide =
     active != null && editor.mode === 'slide' && editor.canEdit
   const canInsert = canEditSlide && !editingBody
+
+  // Flip the active slide's editable layer (Objects '' ⇄ Body 'markdown'). Both layers always render;
+  // this only picks what you edit (and which inserters show). Non-destructive + one undo. Lives in the
+  // top bar (moved here from the on-slide hover toolbar).
+  function setSlideLayer(next: '' | 'markdown') {
+    const slide = activeSlide
+    if (!slide) return
+    const before = slide.render_mode === 'markdown' ? 'markdown' : ''
+    if (next === before) return
+    const apply = (m: '' | 'markdown') =>
+      mutate.setSlideMode({ id: slide.id, render_mode: m, now: Date.now() })
+    apply(next)
+    history.push({
+      label: next === 'markdown' ? 'Edit body' : 'Edit objects',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
+  }
 
   // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
   // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep
@@ -332,6 +352,31 @@ export function Header({
       {/* Secondary tools: a single cluster so it can collapse to icons and then drop to a
           second row on narrow screens (see .hdr__tools media queries in strut.css). */}
       <div className="hdr__tools">
+        {/* Per-slide edit-layer toggle: Objects (positioned components) vs Body (markdown). Both layers
+            always render; this picks the editable one. Kept FIRST in the cluster so it stays leftmost
+            whether or not the (Objects-only) inserters are showing — no leading divider. */}
+        {canEditSlide && (
+          <div className="seg seg--layers" role="group" aria-label="Edit layer">
+            <button
+              className={editingBody ? '' : 'is-active'}
+              onClick={() => setSlideLayer('')}
+              title="Edit objects (drag & place text, images, shapes)"
+              aria-pressed={!editingBody}
+            >
+              <Shapes size={15} />
+              <span className="lbl">Objects</span>
+            </button>
+            <button
+              className={editingBody ? 'is-active' : ''}
+              onClick={() => setSlideLayer('markdown')}
+              title="Edit body (markdown text)"
+              aria-pressed={editingBody}
+            >
+              <FileText size={15} />
+              <span className="lbl">Body</span>
+            </button>
+          </div>
+        )}
         {canInsert && (
           <>
             <div className="hdr__sep" />
@@ -396,8 +441,6 @@ export function Header({
             </div>
           </>
         )}
-
-        {/* Per-slide markdown/spatial toggle moved to the on-slide hover toolbar (see Stage). */}
 
         {editor.canEdit && (
           <>
