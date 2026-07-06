@@ -17,6 +17,12 @@
     "enabled": true,
   },
 
+  // Serve the Worker on the production domain. Requires strut.io to be an ACTIVE zone on this Cloudflare
+  // account (its nameservers pointed at Cloudflare). On `pnpm deploy`, wrangler provisions the TLS cert
+  // and the DNS record automatically. (Alternative: add the Custom Domain in the dashboard instead —
+  // Workers & Pages → strut → Settings → Domains & Routes.)
+  "routes": [{ "pattern": "strut.io", "custom_domain": true }],
+
   // Native R2 storage. Uploaded images go straight to this bucket via the binding — no S3
   // credentials needed on Workers. server/upload.ts reads it as env.STRUT_UPLOADS.
   // Create the bucket first:  wrangler r2 bucket create strut-uploads
@@ -59,7 +65,7 @@
     "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
     "RINDLE_DAEMON_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
     "R2_PUBLIC_BASE_URL": "",
-    "BETTER_AUTH_URL": "http://localhost:3000",
+    "BETTER_AUTH_URL": "https://strut.io",
   },
 
   // Secrets are NOT stored here. Set them with wrangler:
