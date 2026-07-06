@@ -352,3 +352,40 @@ returns `Pick<RowOf, Sel>`. Practical rule: lean on `useFragment` (the read path
 enforced; don't assume `QueryData` of an `.include()`d subtree gives you the same narrowing. Not
 necessarily a bug — `Pick` only ever removes fields, so a wider node type is still sound against the
 runtime row — but worth knowing before you treat a raw query-data node as if it were masked.
+
+### 🔴 20. SSR seed→live handoff flashes EMPTY for one daemon round-trip — the seed is dropped on `hello`, not `snapshot`
+
+Cost real time (and one wrong first fix). Symptom: a route that SSR-seeds its first paint (dashboard
+`decksQuery`) visibly flashes its empty state ("No decks yet" + "0 presentations") for a beat on load,
+THEN the seeded rows appear — the exact "splash→content" flicker `RindleSSR` is supposed to eliminate.
+
+- **NOT a server/seed bug — the seed is provably correct.** Created a deck via `/api/rindle/mutate` for
+  a fresh anon session, then `GET /`: the first-paint HTML contains the `deck-card__name` AND the
+  dehydrated seed row (matching `owner_id`), `No decks yet` count 0. Also confirmed the SSR read
+  (`readNamedQuery` → daemon :7600) and the live WS (:7601) hit the SAME daemon `rindle.db`, so it isn't
+  staleness. The flash is 100% client-side, in the `@rindle/react` seed→live handoff.
+- **Root cause (traced through the compiled client).** At the swap, `RindleSSR` hydrates the live store's
+  seeds map then flips `store: liveStore ?? seedStore` (`@rindle/react/dist/index.js:71,78`). `useQuery`
+  re-materializes on the wasm store → `store.registerMaterialized` calls `backend.registerQuery`
+  (`@rindle/client/dist/store.js:291`), which fires a `hello` → `view.reset()` sets `_schema` and
+  **NULLS `seeded`** (`view.js:146,149`). The follow-up `view.seed(seed.rows)` (`store.js:303`) is then
+  **INERT**, because `get data()` only returns `seeded` while `_schema === null` (`view.js:197-199`) —
+  after the reset it returns the live projected `top`, which is `[]`. The real rows don't arrive until a
+  LATER `snapshot` event, one daemon round-trip after the `hello` that already cleared the seed. **That
+  gap is the empty frame.** So the "seed the live views so the swap doesn't flash empty" comment at
+  `index.js:71` is not actually true for a wasm backend that resets-on-register: the reset beats the seed.
+- **Why prior verification missed it.** The seed was verified via SSR HTML / curl, which shows the seed
+  is embedded but says nothing about the post-hydration client timing — the flash only exists in the
+  browser, in the swap→first-snapshot window.
+- **App-side workaround (shipped in strut `src/routes/index.tsx`).** Gate on `useQueryStatus(decksQuery)`:
+  hold the last `'complete'` result (which starts as the SSR seed) through the post-swap `'unknown'`
+  window, and only trust the live result once it reports `'complete'`. Degrades cleanly (empty stays
+  empty; daemon-down keeps showing the seed). This is per-component boilerplate that every seeded route
+  would otherwise need (the editor `deck.$deckId.tsx` has the same gap, un-worked-around).
+- **Ask / fix (belongs in `@rindle`):** keep the SSR seed authoritative until the first live **snapshot**,
+  not the `hello`. Concretely: don't null `view.seeded` in `reset()` and have `get data()` fall back to
+  `seeded` while a freshly-reset view is still empty-and-un-hydrated (`resultType === 'unknown'`); retire
+  the seed only when the first snapshot lands (`store.js:324-327` currently deletes it on `hello`). Then
+  `RindleSSR`'s live-store hydrate would actually bridge the gap and NO app would need the `useQueryStatus`
+  dance. (Secondary: if the reset-on-register is intended, the `index.js:71` "doesn't flash empty" comment
+  is misleading and should be corrected.)
