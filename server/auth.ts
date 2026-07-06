@@ -1,20 +1,24 @@
-// The Better-Auth instance, backed by the Cloudflare D1 `DB` binding (wrangler.jsonc). See AUTH_PLAN.md
-// / docs/AUTH_SETUP.md. This is the server-verified identity that will replace the spoofable `x-user`
-// header (AUTH_PLAN.md Phase 3).
+// The Better-Auth instance. On Cloudflare it's backed by the D1 `DB` binding (wrangler.jsonc); under
+// local `pnpm dev` (Node, no D1) it falls back to a local better-sqlite3 file so the guest/session flow
+// works with zero extra setup. See AUTH_PLAN.md / docs/AUTH_SETUP.md. This is the server-verified
+// identity that REPLACES the spoofable `x-user` header — it's the rindle principal (AUTH_PLAN Phase 3).
 //
 // Two runtime facts shape this file:
 //   1. D1 is an OBJECT binding — reachable only via the `cloudflare:workers` module under workerd, NOT
-//      process.env. We resolve it by dynamic import with a Node fallback, exactly like server/cf-env.ts's
-//      R2 loader. (String secrets — BETTER_AUTH_SECRET, GITHUB_*, GOOGLE_* — DO ride process.env via
-//      nodejs_compat, so those come straight off process.env.)
+//      process.env. We resolve it by dynamic import, exactly like server/cf-env.ts's R2 loader. When it
+//      isn't there (Node dev), we open a local better-sqlite3 auth DB instead (auto-migrated from
+//      migrations-d1/). The native module + node:fs are dynamic + @vite-ignore'd so they never enter the
+//      workerd/client build graph. (String secrets — BETTER_AUTH_SECRET, GITHUB_*, GOOGLE_* — DO ride
+//      process.env via nodejs_compat, so those come straight off process.env.)
 //   2. Better-Auth wants a FRESH instance per request on Workers (a shared one causes D1/SQLite lock
-//      contention → 503s), so getAuth() builds one on each call; only the binding lookup is memoized
-//      (the binding object is stable across requests).
-//
-// Local `pnpm dev` runs on Node with no D1 binding, so the auth endpoints require the Workers runtime
-// (`pnpm preview:cf` / `wrangler dev` with a --local D1). See docs/AUTH_SETUP.md.
+//      contention → 503s), so getAuth() builds one on each call; only the db lookup is memoized (both the
+//      D1 binding object and the local better-sqlite3 connection are stable across requests).
 
-import { betterAuth, type BetterAuthOptions } from 'better-auth'
+import { betterAuth } from 'better-auth'
+import type { BetterAuthOptions } from 'better-auth'
+import { anonymous } from 'better-auth/plugins'
+
+import { onGuestPromotion } from './claim.ts'
 
 // Must match the d1_databases[].binding name in wrangler.jsonc.
 const DB_BINDING = 'DB'
@@ -30,14 +34,84 @@ async function loadDb(): Promise<DbOption | null> {
   if (cachedDb !== undefined) return cachedDb
   try {
     // Indirection + @vite-ignore so neither the Node SSR build nor the client bundle resolves this
-    // Workers-only module at build time. Under workerd it resolves; under Node it throws → null.
+    // Workers-only module at build time. Under workerd it resolves; under Node it throws → sqlite.
     const spec = 'cloudflare:workers'
     const mod = (await import(/* @vite-ignore */ spec)) as { env?: Record<string, unknown> }
-    cachedDb = (mod.env?.[DB_BINDING] as DbOption | undefined) ?? null
+    const binding = mod.env?.[DB_BINDING] as DbOption | undefined
+    if (binding) {
+      cachedDb = binding
+      return cachedDb
+    }
   } catch {
-    cachedDb = null
+    // not under workerd — fall through to the local sqlite dev DB
   }
+  cachedDb = await loadLocalSqlite()
   return cachedDb
+}
+
+// The subsets of the better-sqlite3 Database + node fs/path surfaces we touch — typed structurally so
+// we never pull the native module's or node's types into the shared build graph.
+interface LocalDb {
+  exec: (sql: string) => unknown
+  pragma: (source: string) => unknown
+  prepare: (sql: string) => {
+    all: (...params: unknown[]) => Array<Record<string, unknown>>
+    run: (...params: unknown[]) => unknown
+  }
+}
+interface FsLike {
+  readdirSync: (dir: string) => string[]
+  readFileSync: (path: string, encoding: 'utf8') => string
+}
+interface PathLike {
+  join: (...parts: string[]) => string
+}
+
+// A local better-sqlite3 auth DB for `pnpm dev` (Node, no D1). Dynamic + @vite-ignore (with a string
+// indirection so static analysis can't see the specifier) keeps the native module and node:fs out of
+// the workerd/client build graph — this branch only ever runs under Node.
+async function loadLocalSqlite(): Promise<DbOption> {
+  const sqliteSpec = 'better-sqlite3'
+  const fsSpec = 'node:fs'
+  const pathSpec = 'node:path'
+  const { default: Database } = (await import(/* @vite-ignore */ sqliteSpec)) as {
+    default: new (path: string) => LocalDb
+  }
+  const fs = (await import(/* @vite-ignore */ fsSpec)) as FsLike
+  const path = (await import(/* @vite-ignore */ pathSpec)) as PathLike
+
+  const file = process.env.STRUT_AUTH_DB ?? path.join(process.cwd(), 'auth.db')
+  const db = new Database(file)
+  db.pragma('journal_mode = WAL')
+  migrateLocalAuth(db, fs, path)
+  return db as DbOption
+}
+
+// Apply migrations-d1/*.sql to the local dev auth DB once each (tracked in _auth_migrations), so dev
+// stays in lockstep with the SAME schema source of truth D1 uses (`wrangler d1 migrations apply`) — no
+// drift. Idempotent across restarts.
+function migrateLocalAuth(db: LocalDb, fs: FsLike, path: PathLike): void {
+  db.exec(
+    'create table if not exists _auth_migrations (name text primary key, applied_at text not null)',
+  )
+  const dir = path.join(process.cwd(), 'migrations-d1')
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort()
+  const done = new Set(
+    db
+      .prepare('select name from _auth_migrations')
+      .all()
+      .map((r) => String(r.name)),
+  )
+  for (const f of files) {
+    if (done.has(f)) continue
+    db.exec(fs.readFileSync(path.join(dir, f), 'utf8'))
+    db.prepare(
+      'insert into _auth_migrations (name, applied_at) values (?, ?)',
+    ).run(f, new Date().toISOString())
+  }
 }
 
 function req(name: string): string {
@@ -77,5 +151,10 @@ export async function getAuth() {
     socialProviders: resolveSocialProviders(),
     // Rate-limit on the real client IP (Cloudflare edge header), not a spoofable one.
     advanced: { ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] } },
+    // Guest-first identity: the first visit mints a server-signed anonymous session (the rindle
+    // principal), so the SSR loader can seed first paint and there's no sign-in wall. Promoting to a
+    // real GitHub/Google account fires onGuestPromotion, which reassigns the guest's in-progress decks
+    // to the new account so nothing is lost. (See strut-auth-guest-first / AUTH_PLAN Phase 5.)
+    plugins: [anonymous({ onLinkAccount: onGuestPromotion })],
   })
 }

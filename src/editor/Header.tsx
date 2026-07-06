@@ -245,7 +245,7 @@ export function Header({
   }
 
   async function doExport(kind: 'json' | 'html') {
-    if (!deck || exporting) return
+    if (!deck || exporting || !app) return
     setMenu(null)
     setExporting(true)
     try {

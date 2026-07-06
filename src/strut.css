@@ -180,6 +180,25 @@ button {
   border-left: 1px solid var(--line);
   letter-spacing: 0.01em;
 }
+/* ---- account control (guest-first sign-in / promote / sign-out) ---- */
+.acct {
+  position: relative;
+  margin-left: auto;
+}
+.acct__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.acct__label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acct__menu {
+  min-width: 210px;
+}
 .dash__head {
   display: flex;
   align-items: flex-end;

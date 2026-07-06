@@ -5,7 +5,36 @@
 // the browser, from RindleProvider's effect. `getApp()` memoizes the promise.
 
 import { mutators, schema } from '../../shared/app-def.ts'
-import { currentUser } from './user.ts'
+import { authClient } from './authClient.ts'
+
+// The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
+// MUST match what the server derives from the session cookie (server/session.ts), so the optimistic
+// owner_id/author on a predicted row equals the authoritative one — no snap-back. Set once by
+// ensureSession() before the client is constructed; re-read per invoke via `user: () => sessionUserId`.
+let sessionUserId = ''
+
+/** The current session's user id, or '' before boot. Reactive consumers should use
+ *  authClient.useSession() instead; this is the synchronous value the mutator predictions read. */
+export function currentUserId(): string {
+  return sessionUserId
+}
+
+/** Guest-first: ensure this browser has a server session before the engine boots. getSession returns
+ *  the existing (anonymous OR promoted) session; only the very first visit mints an anonymous one. The
+ *  session cookie then rides same-origin on every /api/rindle/* fetch, so the server can derive the
+ *  same principal. */
+async function ensureSession(): Promise<string> {
+  const existing = await authClient.getSession()
+  let user = existing.data?.user
+  if (!user) {
+    const created = await authClient.signIn.anonymous()
+    user = created.data?.user
+  }
+  sessionUserId = user?.id ?? ''
+  if (!sessionUserId)
+    console.error('[rindle] no session user id — API reads will be unauthorized')
+  return sessionUserId
+}
 
 // The live-query WebSocket URL. Resolved at RUNTIME from the server (/api/rindle/config, backed by the
 // RINDLE_DAEMON_WS host env var) so a single production build can target any daemon host — no rebuild
@@ -25,7 +54,10 @@ async function resolveWsUrl(): Promise<string> {
 }
 
 async function create() {
-  const [{ createRindleClient }, { initWasm }, wsUrl] = await Promise.all([
+  // Ensure a server session FIRST, so `sessionUserId` is set before the engine predicts anything and
+  // the session cookie exists for the API fetches below.
+  const [, { createRindleClient }, { initWasm }, wsUrl] = await Promise.all([
+    ensureSession(),
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
     resolveWsUrl(),
@@ -35,14 +67,18 @@ async function create() {
     schema,
     mutators,
     // The acting principal for a shared mutator's ctx.user — the local user the optimistic prediction
-    // writes under (the API server injects its OWN authenticated user for the authoritative run).
-    user: () => currentUser(),
+    // writes under. The API server derives the SAME id from the session cookie for the authoritative
+    // run (server/session.ts), so the prediction matches (no snap-back).
+    user: () => sessionUserId,
     api: {
       // NOTE: request url = api.url + routes.query, and routes.query defaults to the ABSOLUTE
       // "/api/rindle/query". So url MUST be "" here (not "/api", which double-prefixes). See
       // RINDLE_NOTES.md #2.
       url: '',
-      headers: () => ({ 'x-user': currentUser() }),
+      // Identity now rides the session cookie (same-origin), NOT a spoofable header — the server
+      // ignores x-user. `credentials: same-origin` is fetch's default; set explicitly so the cookie is
+      // guaranteed to be sent even if a future default changes.
+      fetch: (input, init) => fetch(input, { ...init, credentials: 'same-origin' }),
     },
     daemon: {
       wsUrl,

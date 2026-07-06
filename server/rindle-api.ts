@@ -323,7 +323,11 @@ export async function handleRindleJson(
 ): Promise<Response> {
   try {
     const body = JSON.parse((await request.text()) || '{}')
-    const ctx = { user: request.headers.get('x-user') ?? '', request }
+    // Principal = the server-verified session (the cookie), NOT the client's `x-user` header. The
+    // browser mints an anonymous session on first touch, so a principal is normally always present; a
+    // missing/invalid session → '' → the coarse authorize* gates reject.
+    const { resolveSessionUser } = await import('./session.ts')
+    const ctx = { user: await resolveSessionUser(request), request }
     const out =
       kind === 'query'
         ? await api.handleQueryJson(body, ctx)

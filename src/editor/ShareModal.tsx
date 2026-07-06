@@ -10,7 +10,7 @@ import { useQuery } from '@rindle/react'
 import type { QueryData } from '@rindle/react'
 import { deckSharesQuery, profileQuery } from '../../shared/queries'
 import { useMutate } from '../rindle/RindleProvider'
-import { currentUser } from '../rindle/user'
+import { authClient } from '../rindle/authClient'
 import { newId } from '../config'
 import type { CollaboratorRole } from '../../shared/app-def'
 
@@ -63,7 +63,8 @@ export function ShareModal({
   onClose: () => void
 }) {
   const mutate = useMutate()
-  const me = currentUser()
+  // The session principal — the same id the server writes as owner_id / share user_id.
+  const me = authClient.useSession().data?.user.id ?? ''
   const isOwner = deck.owner_id === me
   const isPublic = deck.visibility === 'public-read' && !!deck.share_token
 

@@ -11,9 +11,11 @@
 
 import Database from 'better-sqlite3'
 import { betterAuth } from 'better-auth'
+import { anonymous } from 'better-auth/plugins'
 
-// Provider set + emailAndPassword must MATCH server/auth.ts, since they determine which tables/columns
-// Better-Auth emits (e.g. the `account` table for social providers).
+// Provider set + emailAndPassword + plugins must MATCH server/auth.ts, since they determine which
+// tables/columns Better-Auth emits (e.g. the `account` table for social providers, and the anonymous
+// plugin's `isAnonymous` column on `user`).
 export const auth = betterAuth({
   database: new Database(':memory:'),
   emailAndPassword: { enabled: false },
@@ -21,4 +23,7 @@ export const auth = betterAuth({
     github: { clientId: 'x', clientSecret: 'x' },
     google: { clientId: 'x', clientSecret: 'x' },
   },
+  // Guest-first identity: every visitor gets a server-signed anonymous session, later promotable to a
+  // real social account (AUTH_PLAN Phase 5). Adds `user.isAnonymous`.
+  plugins: [anonymous()],
 })

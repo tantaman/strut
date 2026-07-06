@@ -25,6 +25,15 @@ const SERVER_ENV = [
   'R2_SECRET_ACCESS_KEY',
   'R2_BUCKET',
   'R2_PUBLIC_BASE_URL',
+  // Better-Auth (server/auth.ts). Under `pnpm dev` sessions run off a local better-sqlite3 DB, so only
+  // the secret + base URL are needed for the guest flow; the OAuth creds are optional (promotion).
+  'BETTER_AUTH_SECRET',
+  'BETTER_AUTH_URL',
+  'GITHUB_CLIENT_ID',
+  'GITHUB_CLIENT_SECRET',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'STRUT_AUTH_DB',
 ]
 
 const config = defineConfig(({ mode }) => {
