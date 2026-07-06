@@ -102,6 +102,9 @@ export function Overview({
   const previewById = preview
     ? new Map(preview.cards.map((c) => [c.id, c]))
     : null
+  // The prompt input is progressively disclosed: hidden until the ✨ Arrange button in the Layout row is
+  // clicked (kept out of the way since most arranging is the one-click presets).
+  const [arrangeOpen, setArrangeOpen] = useState(false)
 
   // Frame all slide cards (centers ± card extents) into the viewport. Cards are positioned
   // at world (x,y); the world transform is `translate(x,y) scale(s)` about origin 0,0, so a
@@ -507,10 +510,18 @@ export function Overview({
               {def.label}
             </button>
           ))}
+          <span className="ov-layouts__sep" aria-hidden />
+          <button
+            className={'ov-layouts__ai' + (arrangeOpen ? ' is-open' : '')}
+            onClick={() => setArrangeOpen((o) => !o)}
+            title="Ask AI to arrange the slides"
+          >
+            ✨ Arrange
+          </button>
         </div>
       )}
 
-      {editor.canEdit && slides.length > 1 && (
+      {editor.canEdit && slides.length > 1 && (preview || arrangeOpen) && (
         <div className="ov-arrange" onPointerDown={stop}>
           {preview ? (
             <>
@@ -532,7 +543,11 @@ export function Overview({
               slides={slides}
               deckId={deck?.id ?? ''}
               isMember={isMember}
-              onPreview={previewPlan}
+              onPreview={(plan) => {
+                previewPlan(plan)
+                setArrangeOpen(false)
+              }}
+              onClose={() => setArrangeOpen(false)}
             />
           )}
         </div>
@@ -571,15 +586,22 @@ function AiArrangeForm({
   deckId,
   isMember,
   onPreview,
+  onClose,
 }: {
   slides: SlideDetail[]
   deckId: string
   isMember: boolean
   onPreview: (plan: ArrangementPlan) => void
+  onClose: () => void
 }) {
   const [instruction, setInstruction] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Focus the prompt the moment the panel opens so the user can just start typing.
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
   if (!isMember) {
     const back =
@@ -607,6 +629,14 @@ function AiArrangeForm({
           }
         >
           Google
+        </button>
+        <button
+          className="ov-arrange__close"
+          onClick={onClose}
+          title="Close"
+          aria-label="Close"
+        >
+          ×
         </button>
       </>
     )
@@ -657,12 +687,14 @@ function AiArrangeForm({
     <>
       <span className="ov-arrange__label">✨ Arrange</span>
       <input
+        ref={inputRef}
         className="ov-arrange__input"
         placeholder="group by topic · timeline left-to-right · intro first, CTA last"
         value={instruction}
         onChange={(e) => setInstruction(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') submit()
+          else if (e.key === 'Escape') onClose()
         }}
         disabled={loading}
       />
@@ -672,9 +704,21 @@ function AiArrangeForm({
         disabled={loading}
         title="Ask AI to arrange the slides"
       >
-        {loading ? 'Arranging…' : 'Arrange'}
+        {loading ? (
+          <span className="ov-arrange__spinner" aria-label="Arranging" />
+        ) : (
+          'Arrange'
+        )}
       </button>
       {error && <span className="ov-arrange__error">{error}</span>}
+      <button
+        className="ov-arrange__close"
+        onClick={onClose}
+        title="Close"
+        aria-label="Close"
+      >
+        ×
+      </button>
     </>
   )
 }
