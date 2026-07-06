@@ -16,6 +16,7 @@
 // the snapshot's `unknown[]` rows are serializable.
 
 import { createServerFn } from '@tanstack/react-start'
+import type { SessionAccount } from '../../server/session'
 
 /** Load the modules the two preloaders share (server-only; dynamic so they never enter the client
  *  bundle) and resolve the current session principal. Returns null when there's no session. */
@@ -23,7 +24,7 @@ async function seedContext() {
   const [
     { createServerStore },
     { readNamedQuery },
-    { resolveSessionUser },
+    { resolveSessionAccount },
     { schema },
     { getRequest },
   ] = await Promise.all([
@@ -33,15 +34,15 @@ async function seedContext() {
     import('../../shared/app-def'),
     import('@tanstack/react-start/server'),
   ])
-  const user = await resolveSessionUser(getRequest())
-  if (!user) return null
+  const account = await resolveSessionAccount(getRequest())
+  if (!account) return null
   const store = createServerStore(schema, {
     query: async ({ name, args }) => {
-      const { rows, cvMin } = await readNamedQuery(name ?? '', args, user)
+      const { rows, cvMin } = await readNamedQuery(name ?? '', args, account.id)
       return { rows: rows as never, cvMin }
     },
   })
-  return { store, user }
+  return { store, account }
 }
 
 /** What every app preloader returns: the dehydrated first-paint seed (a JSON string, or null when
@@ -51,6 +52,11 @@ async function seedContext() {
 export interface AppSeed {
   rindle: string | null
   userId: string
+  /** The viewer's account (guest or member), resolved server-side from the session cookie, so the
+   *  dashboard's account control first-paints its final label instead of popping in post-hydration.
+   *  null when there's no session yet (a brand-new visitor) — the control falls back to its guest
+   *  default ("Sign in"), which is what that visitor becomes anyway, so still no flip. */
+  account: SessionAccount | null
 }
 
 // Dashboard: the principal's decks (newest first). The server twin (server/queries.ts) scopes `decks`
@@ -58,7 +64,7 @@ export interface AppSeed {
 export const preloadDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<AppSeed> => {
     const ctx = await seedContext()
-    if (!ctx) return { rindle: null, userId: '' }
+    if (!ctx) return { rindle: null, userId: '', account: null }
     const { decksQuery } = await import('../../shared/queries')
     const state = await ctx.store.preloadAll([decksQuery({ limit: 200 })], {
       onError: (_q, err) =>
@@ -67,7 +73,11 @@ export const preloadDecks = createServerFn({ method: 'GET' }).handler(
           err instanceof Error ? err.message : err,
         ),
     })
-    return { rindle: JSON.stringify(state), userId: ctx.user }
+    return {
+      rindle: JSON.stringify(state),
+      userId: ctx.account.id,
+      account: ctx.account,
+    }
   },
 )
 
@@ -78,7 +88,7 @@ export const preloadDeck = createServerFn({ method: 'GET' })
   .validator((input: { deckId: string }) => input)
   .handler(async ({ data }): Promise<AppSeed> => {
     const ctx = await seedContext()
-    if (!ctx) return { rindle: null, userId: '' }
+    if (!ctx) return { rindle: null, userId: '', account: null }
     const { deckDetailQuery, deckSharesQuery } = await import(
       '../../shared/queries'
     )
@@ -95,5 +105,9 @@ export const preloadDeck = createServerFn({ method: 'GET' })
           ),
       },
     )
-    return { rindle: JSON.stringify(state), userId: ctx.user }
+    return {
+      rindle: JSON.stringify(state),
+      userId: ctx.account.id,
+      account: ctx.account,
+    }
   })

@@ -22,3 +22,40 @@ export async function resolveSessionUser(request: Request): Promise<string> {
     return ''
   }
 }
+
+/** The account fields the dashboard's account control first-paints with. Plain primitives so it rides
+ *  the server-fn loader boundary as-is (no JSON-string dance like the rindle rows need). */
+export interface SessionAccount {
+  id: string
+  /** Guest sessions (better-auth's anonymous plugin) show "Sign in"; members show their identity. */
+  isAnonymous: boolean
+  name: string
+  email: string
+}
+
+/** Like {@link resolveSessionUser} but returns the display fields too, or null when there is no valid
+ *  session. Used to SEED AccountControl's first paint from the SAME cookie the decks seed reads, so the
+ *  sign-in pill renders its final label server-side instead of popping in after the client's
+ *  useSession() resolves (the counterpart to seeding `canEdit` for the read-only banner). */
+export async function resolveSessionAccount(
+  request: Request,
+): Promise<SessionAccount | null> {
+  try {
+    const auth = await getAuth()
+    const session = await auth.api.getSession({ headers: request.headers })
+    const user = session?.user
+    if (!user) return null
+    return {
+      id: user.id,
+      isAnonymous: (user as { isAnonymous?: boolean }).isAnonymous === true,
+      name: user.name,
+      email: user.email,
+    }
+  } catch (err) {
+    console.error(
+      '[auth] session account resolution failed:',
+      err instanceof Error ? err.message : err,
+    )
+    return null
+  }
+}

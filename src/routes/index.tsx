@@ -20,6 +20,9 @@ export const Route = createFileRoute('/')({
 
 function Dashboard() {
   const decks = useQuery(decksQuery({ limit: 200 }))
+  // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
+  // pill doesn't pop in after the client's useSession() resolves.
+  const { account } = Route.useLoaderData()
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
@@ -63,7 +66,7 @@ function Dashboard() {
       <div className="brandbar">
         <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
         <span className="brandbar__tag">Spatial presentations</span>
-        <AccountControl />
+        <AccountControl initial={account} />
       </div>
       <div className="dash__head">
         <div>
