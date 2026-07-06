@@ -6,14 +6,18 @@ import type { ArrangeRequest } from '../../shared/arrange'
 //   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can SEE the
 //      Arrange button (the client renders it disabled) but cannot spend the app's inference budget. The
 //      client gate is UX only; THIS is the real one, mirroring server/session.ts's trust posture.
-//   2. COST BOUND — a best-effort per-user throttle + the ARRANGE_LIMITS caps applied in the adapter.
+//   2. COST BOUND — the app pays for inference, so two layers cap it: a cheap per-isolate burst throttle
+//      (below) as a first-line filter, and the AUTHORITATIVE durable daily quota in server/quota.ts (D1),
+//      consumed before the model call and refunded if that call fails. Plus the ARRANGE_LIMITS payload
+//      caps in the adapter.
 // Note we do NOT verify the user owns `deckId`/`slides` here: the returned plan is only reading order +
 // a preset, and APPLYING it flows through the authoritative slide-edit mutations (server/rindle-api.ts
 // `withSlideEditable`), which independently reject edits to slides the user can't touch. So the only
-// thing this endpoint spends is inference, which auth + the throttle gate.
+// thing this endpoint spends is inference, which auth + the quota gate.
 
-// Per-isolate rolling-window throttle. Not a security control (login-gating is) — just a cheap brake on
-// rapid-fire calls. A durable D1/Durable-Object quota is the production hardening (AI_ARRANGE_PLAN.md).
+// Per-isolate rolling-window burst throttle — a cheap brake on rapid-fire calls that also spares the
+// durable quota a D1 write per hammered request. Best-effort (doesn't survive isolate recycling); the
+// durable per-user daily quota (server/quota.ts) is the real cost ceiling.
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 8
 const hits = new Map<string, number[]>()
@@ -67,12 +71,37 @@ export const Route = createFileRoute('/api/arrange')({
           return json({ error: 'bad_request' }, 400)
         }
 
+        // Durable daily quota — consume one unit BEFORE the model call so concurrent calls can't race
+        // past the cap. Fail closed on a store error (unlikely in isolation: it's the same D1 that
+        // resolveSessionAccount just used, so a D1 outage would already have 401'd above).
+        const { consumeArrangeQuota, refundArrangeQuota } =
+          await import('../../server/quota')
+        const now = Date.now()
+        let quota
+        try {
+          quota = await consumeArrangeQuota(account.id, now)
+        } catch (err) {
+          console.error('[arrange] quota check failed:', err)
+          return json({ error: 'internal' }, 500)
+        }
+        if (!quota.allowed) {
+          return json(
+            {
+              error: 'quota_exceeded',
+              message: `Daily AI arrange limit reached (${quota.limit}/day). Try again tomorrow.`,
+            },
+            429,
+          )
+        }
+
         const { arrange, ArrangeUnavailableError } =
           await import('../../server/arrange')
         try {
           const plan = await arrange(b as ArrangeRequest)
           return json(plan, 200)
         } catch (err) {
+          // The work didn't happen — refund the consumed unit so the user isn't charged for a failure.
+          await refundArrangeQuota(account.id, now).catch(() => {})
           if (err instanceof ArrangeUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

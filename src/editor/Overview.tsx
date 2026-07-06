@@ -635,9 +635,11 @@ function AiArrangeForm({
         setError(
           res.status === 401
             ? 'Sign in to use AI arrange.'
-            : res.status === 429
-              ? 'Too many requests — wait a moment.'
-              : (b?.message ?? 'AI is unavailable right now.'),
+            : // Prefer the server's message (e.g. the daily-quota notice); fall back per status.
+              (b?.message ??
+                (res.status === 429
+                  ? 'Too many requests — wait a moment.'
+                  : 'AI is unavailable right now.')),
         )
         return
       }
