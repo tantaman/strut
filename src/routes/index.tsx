@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
-import { useQuery } from '@rindle/react'
+import { useQuery, useQueryStatus } from '@rindle/react'
 import { Plus, Upload, X } from 'lucide-react'
 import { decksQuery } from '../../shared/queries'
 import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
@@ -19,7 +19,18 @@ export const Route = createFileRoute('/')({
 })
 
 function Dashboard() {
-  const decks = useQuery(decksQuery({ limit: 200 }))
+  const liveDecks = useQuery(decksQuery({ limit: 200 }))
+  const decksStatus = useQueryStatus(decksQuery({ limit: 200 }))
+  // Bridge the SSR-seed → live-client handoff. The seed correctly first-paints the decks, but when the
+  // live wasm store swaps in, its decks view resets (schema set) one daemon round-trip BEFORE its first
+  // snapshot lands — and the seed can't cover that window (a reset view no longer reads its seed), so
+  // `useQuery` transiently reads [] and the grid flashes "No decks". Keep showing the last AUTHORITATIVE
+  // ('complete') result — which starts as the SSR seed and is the viewer's real data — through that
+  // `unknown` window; once the live view is hydrated it's the source of truth. (The underlying fix
+  // belongs in @rindle's SSR handoff — keep the seed until the first live snapshot, not just the hello.)
+  const lastComplete = useRef(liveDecks)
+  if (decksStatus === 'complete') lastComplete.current = liveDecks
+  const decks = decksStatus === 'complete' ? liveDecks : lastComplete.current
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
   const { account } = Route.useLoaderData()
