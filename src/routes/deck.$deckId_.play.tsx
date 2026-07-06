@@ -6,6 +6,7 @@ import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
+import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { track } from '../lib/analytics'
 import type { DeckRoot } from '../editor/deckDetail'
@@ -155,6 +156,7 @@ function Play() {
       <div className="ov-hint" style={{ position: 'fixed' }}>
         {i + 1} / {slides.length} · → next · ← back · Esc exit
       </div>
+      <PoweredByRindle />
     </div>
   )
 }

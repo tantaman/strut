@@ -2252,6 +2252,38 @@ button {
   letter-spacing: 0.04em;
   color: var(--muted);
 }
+.powered-by {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: 5px 12px 5px 10px;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 120ms ease;
+}
+.powered-by:hover {
+  opacity: 1;
+}
+.powered-by svg {
+  height: 16px;
+  width: 16px;
+  display: block;
+}
+.powered-by span {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
 .share-gate {
   position: fixed;
   inset: 0;

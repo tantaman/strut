@@ -12,6 +12,7 @@ import { resolveSurface } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
+import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
 import type { DeckRoot } from '../editor/deckDetail'
 
@@ -164,6 +165,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         <img src="/strut-logo.png" alt="Strut" />
         <span>shared read-only</span>
       </div>
+      <PoweredByRindle />
     </div>
   )
 }
