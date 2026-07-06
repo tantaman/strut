@@ -196,19 +196,10 @@ export function Header({
 
   function addShape(name: string) {
     if (!active) return
-    const id = newId()
-    const p = place()
-    const args = {
-      id,
-      slideId: active,
-      x: p.x,
-      y: p.y,
-      z_order: zNow(),
-      shape: name,
-      markup: SHAPES[name],
-      fill: '3498db',
-    }
-    recordInsert(id, () => mutate.addShape(args), 'Add shape')
+    // Arm the shape tool for draw-to-place (tldraw/Figma): nothing is inserted here. The Stage's canvas
+    // draw gesture sweeps the box (or a single click drops a default size), commits the shape, selects
+    // it, and reverts to Select. Esc cancels.
+    editor.setPendingShape(name)
     setMenu(null)
   }
 
@@ -416,9 +407,13 @@ export function Header({
               </button>
               <div style={{ position: 'relative' }}>
                 <button
-                  className="btn"
+                  className={`btn${editor.pendingShape ? ' is-active' : ''}`}
                   onClick={() => setMenu(menu === 'shapes' ? null : 'shapes')}
-                  title="Shapes"
+                  title={
+                    editor.pendingShape
+                      ? 'Drag on the slide to draw the shape (Esc to cancel)'
+                      : 'Shapes'
+                  }
                 >
                   <Shapes size={16} />
                 </button>

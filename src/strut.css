@@ -1097,6 +1097,24 @@ button {
   z-index: 5;
 }
 
+/* draw-to-place shape tool: crosshair over the whole canvas (incl. existing objects) while armed, and
+   a translucent silhouette preview of the shape being swept out. */
+.slide-canvas.is-placing,
+.slide-canvas.is-placing .cmp {
+  cursor: crosshair;
+}
+.shape-draft {
+  position: absolute;
+  z-index: 9;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.shape-draft svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* ---- overview ---- */
 .overview {
   flex: 1;
