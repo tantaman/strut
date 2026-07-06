@@ -389,3 +389,27 @@ THEN the seeded rows appear — the exact "splash→content" flicker `RindleSSR`
   `RindleSSR`'s live-store hydrate would actually bridge the gap and NO app would need the `useQueryStatus`
   dance. (Secondary: if the reset-on-register is intended, the `index.js:71` "doesn't flash empty" comment
   is misleading and should be corrected.)
+
+### FYI 21. `writeLocal`'s `edit` wants the FULL old row — for a streamed local update, let `old` be just the PK
+
+Found spiking a memory-only `chat_message` table (`table(name,{local:true})` + `extendSchema` + a local
+`useQuery`) for an "chat with an LLM about your deck" panel: the streamed assistant turn is one row whose
+`content` column grows per token. `store.writeLocal(tx => …)` (the direct-commit path for local tables,
+`201-LOCAL-ONLY-TABLES-DESIGN.md` §6) is the right primitive — no sync, no rebase, no `.folded` needed —
+but the write shape makes the hot path awkward:
+
+- `WriteTx.edit<N>(table, oldRow: RowOf, newRow: RowOf)` requires the **complete** old row (every column,
+  per the store.d.ts note "they identify an EXISTING row, so every column must be present"). So bumping one
+  column per token means holding/reconstructing the entire previous row every chunk:
+  `tx.edit('chat_message', prev, { ...prev, content: next })` — and threading `prev` through the stream
+  loop purely to satisfy the signature.
+- For a **local** table this is redundant: the row is untracked and already authoritative in the local
+  engine (that's the whole point of `writeLocal` — "moves on its own"), so `edit` could look the current
+  row up internally from the PK. The full-old-row contract exists for the synced/optimistic diff path; the
+  direct-commit local path doesn't need it.
+- **Ask:** for `writeLocal`, let `edit` accept just the primary key on `old` (engine reads the rest), or add
+  a local `update(table, pkPlusPartialCols)` / `upsert(table, fullRow)`. This is the same underlying wish as
+  #13's `upsert(table, fullRow)` ask (re-inserting a moved/rotated component took 3 calls) — a partial/PK-
+  keyed local write would collapse both the undo-restore dance and per-chunk streaming into one call. Net:
+  not a blocker (holding `prev` is trivial for a small chat row), but a per-token `edit` that needs the full
+  prior row reads as accidental friction for the canonical local-table use case (draft/scratch text).
