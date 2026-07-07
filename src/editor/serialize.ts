@@ -55,6 +55,7 @@ const KIND_TO_TYPE: Record<ComponentKind, string> = {
   shape: 'Shape',
   video: 'Video',
   webframe: 'WebFrame',
+  artifact: 'Artifact',
 }
 const TYPE_TO_KIND: Record<string, ComponentKind> = {
   TextBox: 'text',
@@ -62,6 +63,7 @@ const TYPE_TO_KIND: Record<string, ComponentKind> = {
   Shape: 'shape',
   Video: 'video',
   WebFrame: 'webframe',
+  Artifact: 'artifact',
 }
 
 // ---- serialize (export) -------------------------------------------------------------------------
@@ -105,6 +107,12 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
       if (c.src_type) base.srcType = c.src_type
       break
     case 'webframe':
+      base.src = c.src ?? ''
+      break
+    case 'artifact':
+      // `code` is the source of truth; `src` is the built/served URL (re-derivable, but kept so an
+      // imported deck renders without a rebuild round-trip).
+      base.code = c.code ?? ''
       base.src = c.src ?? ''
       break
   }
@@ -187,6 +195,7 @@ export interface ImportedComponent {
   video_type?: string
   src_type?: string
   short_src?: string
+  code?: string
 }
 export interface ImportedSlide {
   x: number
@@ -274,6 +283,10 @@ function deserializeComponent(
       c.short_src = str(raw.shortSrc)
       break
     case 'webframe':
+      c.src = str(raw.src)
+      break
+    case 'artifact':
+      c.code = str(raw.code)
       c.src = str(raw.src)
       break
   }

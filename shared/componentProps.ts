@@ -6,7 +6,13 @@
 // byte-order concern — that was the old string codec's job). Geometry, z-order, custom_classes and
 // `fill` are real columns; everything below lives in `props`.
 
-export type ComponentType = 'text' | 'image' | 'shape' | 'video' | 'webframe'
+export type ComponentType =
+  | 'text'
+  | 'image'
+  | 'shape'
+  | 'video'
+  | 'webframe'
+  | 'artifact'
 
 export const COMPONENT_TYPES: readonly ComponentType[] = [
   'text',
@@ -14,6 +20,7 @@ export const COMPONENT_TYPES: readonly ComponentType[] = [
   'shape',
   'video',
   'webframe',
+  'artifact',
 ]
 
 // The per-type leaf payload. `fill` is intentionally NOT here (it's a column). Fields are optional so
@@ -35,7 +42,10 @@ export type ComponentProps = Partial<{
   video_type: string
   src_type: string
   short_src: string
-  // image / video / webframe
+  // artifact — `code` is the author-written source (deck is the editable source of truth); `src` (below)
+  // is the URL of the built+served, sandboxed HTML the iframe loads.
+  code: string
+  // image / video / webframe / artifact
   src: string
 }>
 
@@ -74,6 +84,11 @@ export function componentProps(
       }
     case 'webframe':
       return { src: a.src as string | undefined }
+    case 'artifact':
+      return {
+        code: a.code as string | undefined,
+        src: a.src as string | undefined,
+      }
   }
 }
 

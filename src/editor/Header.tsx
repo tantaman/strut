@@ -19,6 +19,7 @@ import {
   Redo2,
   Shapes,
   Sparkles,
+  SquareCode,
   Type,
   Undo2,
   Video,
@@ -32,7 +33,7 @@ import {
   newId,
 } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
-import { uploadImage } from './upload'
+import { uploadArtifact, uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
 import { track } from '../lib/analytics'
 import { useEditor } from './EditorState'
@@ -78,6 +79,19 @@ const place = () => ({
   x: 440 + (Date.now() % 4) * 24,
   y: 280 + (Date.now() % 3) * 24,
 })
+
+// Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
+// and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).
+const STARTER_ARTIFACT = `// Runnable artifact — an ES module. Import libraries from esm.sh and render
+// into #root (or document.body). Edit the code in the panel, then press Run.
+import confetti from 'https://esm.sh/canvas-confetti@1'
+
+const root = document.getElementById('root')
+root.style.cssText =
+  'height:100%;display:grid;place-items:center;font:600 22px system-ui;color:#18181b'
+root.textContent = '🎉 Hello from a runnable artifact'
+confetti({ particleCount: 120, spread: 70 })
+`
 
 export function Header({
   deck,
@@ -226,6 +240,24 @@ export function Header({
       recordInsert(id, () => mutate.addWebframe(args), 'Add web frame')
     }
     setMenu(null)
+  }
+
+  // Drop a runnable artifact seeded with the starter snippet. We build it first (so it runs immediately),
+  // but if the build fails — offline, over quota — we still insert with the code and an empty src, which
+  // renders the "press Run" placeholder; the inspector's Run button rebuilds it. One undoable step.
+  async function addArtifact() {
+    if (!active) return
+    const id = newId()
+    const p = place()
+    const base = { id, slideId: active, x: p.x, y: p.y, z_order: zNow() }
+    let src = ''
+    try {
+      src = await uploadArtifact(STARTER_ARTIFACT)
+    } catch {
+      // insert unbuilt; the user can Run from the inspector panel
+    }
+    const args = { ...base, code: STARTER_ARTIFACT, src }
+    recordInsert(id, () => mutate.addArtifact(args), 'Add artifact')
   }
 
   // Theme edits deliberately do NOT close the popover — the user usually tweaks several
@@ -406,6 +438,13 @@ export function Header({
                 title="Web frame"
               >
                 <Globe size={16} />
+              </button>
+              <button
+                className="btn"
+                onClick={() => void addArtifact()}
+                title="Runnable code artifact"
+              >
+                <SquareCode size={16} />
               </button>
               <div style={{ position: 'relative' }}>
                 <button

@@ -43,7 +43,7 @@ export type AnyComponent = SpatialBase & {
   color?: string
   font_family?: string
   text_type?: string
-  // image / video / webframe
+  // image / video / webframe / artifact
   src?: string
   image_type?: string
   // shape
@@ -53,6 +53,8 @@ export type AnyComponent = SpatialBase & {
   video_type?: string
   src_type?: string
   short_src?: string
+  // artifact — author source; `src` (above) is the built+served sandboxed HTML the iframe loads
+  code?: string
 }
 
 /** Decode one `component` row into the flat in-memory shape: spatial columns + `fill` + the `props`

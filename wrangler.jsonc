@@ -12,7 +12,9 @@
   // With this flag, process.env is populated from `vars` + secrets below — so RINDLE_DAEMON_URL etc.
   // keep working unchanged. R2 bucket bindings are the exception: read via `cloudflare:workers`.
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  // Custom entry wraps TanStack Start's default handler (src/worker-entry.ts) so the artifact sandbox
+  // origin (ARTIFACT_ORIGIN) serves ONLY /a/<key> and never the app. On the app host it's a pass-through.
+  "main": "src/worker-entry.ts",
   "observability": {
     "enabled": true,
   },
@@ -21,7 +23,15 @@
   // account (its nameservers pointed at Cloudflare). On `pnpm deploy`, wrangler provisions the TLS cert
   // and the DNS record automatically. (Alternative: add the Custom Domain in the dashboard instead —
   // Workers & Pages → strut → Settings → Domains & Routes.)
-  "routes": [{ "pattern": "strut.io", "custom_domain": true }],
+  //
+  // sandbox.strut.io = a SEPARATE origin for runnable artifacts, served by this SAME Worker (the /a/<key>
+  // route answers on both hosts). Runnable code is framed sandboxed (opaque origin) regardless; serving it
+  // off a distinct origin is defense-in-depth + gives it its own cookie/storage jar. Pair this with
+  // ARTIFACT_ORIGIN below. wrangler provisions its cert/DNS on deploy just like the apex.
+  "routes": [
+    { "pattern": "strut.io", "custom_domain": true },
+    { "pattern": "sandbox.strut.io", "custom_domain": true },
+  ],
 
   // Native R2 storage. Uploaded images go straight to this bucket via the binding — no S3
   // credentials needed on Workers. server/upload.ts reads it as env.STRUT_UPLOADS.
@@ -67,12 +77,19 @@
   //   R2_PUBLIC_BASE_URL — OPTIONAL. Public bucket/custom-domain base (e.g. https://pub-xxx.r2.dev).
   //                        If set, uploads return that CDN URL directly. If empty, images are served
   //                        back through the Worker from the bucket (private bucket is fine).
+  //   ARTIFACT_ORIGIN    — OPTIONAL but RECOMMENDED for prod. A SEPARATE origin that serves runnable
+  //                        artifacts (e.g. https://sandbox.strut.io), for cross-origin isolation of
+  //                        untrusted code. Add it as a second custom domain on THIS Worker (routes above)
+  //                        so /a/<key> answers there. If empty, artifacts are served same-origin at
+  //                        /a/<key> — still sandboxed (opaque origin via the iframe), just without the
+  //                        second, defense-in-depth origin boundary. Dev leaves this empty.
   //   BETTER_AUTH_URL    — the deployed origin (e.g. https://strut.example.com). Better-Auth uses it for
   //                        OAuth redirect/callback URLs + trusted origins. Local dev: http://localhost:3000.
   "vars": {
     "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
     "RINDLE_DAEMON_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
     "R2_PUBLIC_BASE_URL": "",
+    "ARTIFACT_ORIGIN": "https://sandbox.strut.io",
     "BETTER_AUTH_URL": "https://strut.io",
   },
 

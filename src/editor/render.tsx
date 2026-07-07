@@ -13,6 +13,7 @@ const DEFAULT_W: Record<ComponentKind, number> = {
   shape: 200,
   video: 480,
   webframe: 640,
+  artifact: 640,
 }
 const DEFAULT_H: Record<ComponentKind, number> = {
   text: 0,
@@ -20,6 +21,7 @@ const DEFAULT_H: Record<ComponentKind, number> = {
   shape: 200,
   video: 270,
   webframe: 480,
+  artifact: 480,
 }
 
 /** A CSS `font-family` value safe for inline styles: quoted (so digit-leading names like
@@ -130,7 +132,12 @@ export const MarkdownSurface = memo(function MarkdownSurface({
   )
 })
 
-export function renderInner(c: AnyComponent): ReactNode {
+/** `opts.interactive` lets the artifact iframe accept pointer events (Present mode). Everywhere else it
+ *  stays pointer-transparent so the editor can drag/select the box and thumbnails stay inert. */
+export function renderInner(
+  c: AnyComponent,
+  opts?: { interactive?: boolean },
+): ReactNode {
   switch (c.kind) {
     case 'text':
       return <TextBody html={c.text && c.text.length ? c.text : 'Text'} />
@@ -170,6 +177,27 @@ export function renderInner(c: AnyComponent): ReactNode {
             height: '100%',
             border: 0,
             pointerEvents: 'none',
+          }}
+        />
+      )
+    case 'artifact':
+      // Runnable code. NO `allow-same-origin` — with only `allow-scripts` the frame runs in a unique
+      // opaque origin, so it can't reach the app's cookies/storage/DOM even if served same-origin. NO
+      // allow-top-navigation / allow-popups / allow-modals / allow-forms, and no `allow=` feature grants.
+      if (!c.src)
+        return <div className="cmp__ph">▶ runnable — press Run in the panel</div>
+      return (
+        <iframe
+          src={c.src}
+          title="artifact"
+          sandbox="allow-scripts"
+          referrerPolicy="no-referrer"
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 0,
+            background: '#fff',
+            pointerEvents: opts?.interactive ? 'auto' : 'none',
           }}
         />
       )

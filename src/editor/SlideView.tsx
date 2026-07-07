@@ -59,12 +59,17 @@ export function SlideView({
   slide,
   deck,
   width,
+  present = false,
   onComponentData,
   onComponentRemove,
 }: {
   slide: SlideDetail
   deck: DeckThemeRow
   width: number
+  // A presentation surface (Play / share flythrough). Runnable artifacts render live + interactive here;
+  // on the inert read surfaces (thumbnails, overview) they show a poster instead. Set only for the
+  // ACTIVE slide so at most one slide's sandboxes are live at a time.
+  present?: boolean
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void
 }) {
@@ -82,7 +87,7 @@ export function SlideView({
           onData={onComponentData}
           onRemove={onComponentRemove}
         >
-          {(c) => <StaticComponent c={c} live={false} />}
+          {(c) => <StaticComponent c={c} live={false} present={present} />}
         </ComponentDataReader>
       ))}
     </SlideFrame>
