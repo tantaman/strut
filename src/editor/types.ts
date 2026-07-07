@@ -90,12 +90,16 @@ export function componentsFromRows(
 
 // ---- shape catalog (Excalidraw-style set) --------------------------------------------------------
 
-// Box shapes: a fill-driven SVG stretched to the component box (`preserveAspectRatio="none"`), with
-// `currentColor` letting the `fill` field drive the color. Matches Excalidraw's core primitives.
+// Box shapes: an outlined SVG stretched to the component box (`preserveAspectRatio="none"`) — a
+// transparent fill and a `currentColor` stroke, so the `fill` field drives the outline color exactly
+// as it drives the stroke shapes below. `vector-effect:non-scaling-stroke` keeps the outline crisp at
+// any box size (stroke-width matches STROKE_W). Mirrors Excalidraw's defaults: core primitives, no
+// fill, thin ink outline.
+const BOX_STROKE = `fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" vector-effect="non-scaling-stroke"`
 export const SHAPES: Record<string, string> = {
-  rectangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="currentColor"/></svg>`,
-  diamond: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 100,50 50,100 0,50" fill="currentColor"/></svg>`,
-  ellipse: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" fill="currentColor"/></svg>`,
+  rectangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="0" y="0" width="100" height="100" ${BOX_STROKE}/></svg>`,
+  diamond: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 100,50 50,100 0,50" ${BOX_STROKE}/></svg>`,
+  ellipse: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" ${BOX_STROKE}/></svg>`,
 }
 
 export const SHAPE_NAMES = Object.keys(SHAPES)
@@ -119,11 +123,9 @@ export const SHAPE_TOOLS = [
 ] as const
 export type ShapeTool = (typeof SHAPE_TOOLS)[number]
 
-/** Default color for a freshly-drawn shape: box fills stay Strut blue; stroke tools read as dark ink
- *  (Excalidraw's default stroke). Stored bare (no `#`), like every other `fill`. */
-export function defaultShapeFill(name: string): string {
-  return isStrokeShape(name) ? '1e1e1e' : '3498db'
-}
+/** Default color for a freshly-drawn shape — Excalidraw's dark ink, shared by outlined box shapes and
+ *  stroke shapes alike (the `fill` field is the stroke color for both). Stored bare (no `#`). */
+export const DEFAULT_SHAPE_FILL = '1e1e1e'
 
 const STROKE_W = 4
 type Pt = { x: number; y: number }

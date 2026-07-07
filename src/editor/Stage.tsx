@@ -28,7 +28,7 @@ import {
 import {
   backgroundImage,
   composeBackground,
-  defaultShapeFill,
+  DEFAULT_SHAPE_FILL,
   isStrokeShape,
   resolveBackground,
   resolveSurface,
@@ -627,7 +627,7 @@ export function Stage({
   // shape centered on the pointer. Reverts to Select after committing.
   function beginDrawBox(name: string, ox: number, oy: number, rect: DOMRect) {
     const markup = SHAPES[name] ?? ''
-    const fill = defaultShapeFill(name)
+    const fill = DEFAULT_SHAPE_FILL
     let box = { x: ox, y: oy, w: 0, h: 0 }
     let moved = false
     const move = (ev: PointerEvent) => {
@@ -684,7 +684,7 @@ export function Stage({
   // (Shift snaps the angle to 45°); freehand accumulates the pointer path. A plain click drops a short
   // default line/arrow; a click with the draw tool is a no-op. Reverts to Select after committing.
   function beginDrawStroke(name: string, ox: number, oy: number, rect: DOMRect) {
-    const fill = defaultShapeFill(name)
+    const fill = DEFAULT_SHAPE_FILL
     const freehand = name === 'draw'
     const pts: { x: number; y: number }[] = [{ x: ox, y: oy }]
     let moved = false
@@ -874,7 +874,7 @@ export function Stage({
                 top: shapeDraft.y,
                 width: shapeDraft.w,
                 height: shapeDraft.h,
-                color: `#${defaultShapeFill(editor.pendingShape)}`,
+                color: `#${DEFAULT_SHAPE_FILL}`,
               }}
               dangerouslySetInnerHTML={{ __html: shapeDraft.markup }}
             />

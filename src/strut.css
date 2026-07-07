@@ -1137,6 +1137,12 @@ button {
   width: 100%;
   height: 100%;
 }
+/* Shape outlines/strokes sit on the box edge; let the stroke straddle it instead of clipping the
+   outer half (so a rectangle outline reads the same weight as the diamond/ellipse ones). */
+.cmp--shape svg,
+.shape-draft svg {
+  overflow: visible;
+}
 
 /* shape tool picker (rectangle · diamond · ellipse · arrow · line · draw) */
 .shape-menu {
