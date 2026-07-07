@@ -3,6 +3,7 @@
 // two slides reveals a + to insert a slide there; while dragging, the gap shows a drop indicator.
 
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { Plus, Sparkles } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
@@ -36,6 +37,12 @@ export function SlideWell({
   const history = useHistory()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
+  // Touch reorder (mobile filmstrip): HTML5 drag-and-drop never fires on touch, so the strip gets a
+  // long-press pointer drag instead. `touchDragging` drives the drop indicator (the hover `.well__ins`
+  // affordances don't exist without a pointer), and a post-drag click is swallowed so the drop doesn't
+  // also re-activate the slide.
+  const [touchDragging, setTouchDragging] = useState(false)
+  const suppressClickRef = useRef(false)
   // "✨ Generate slides": ask the AI to author N slides from a description and append them. `isMember`
   // (a promoted, non-anonymous account) gates the feature — guests see a sign-in nudge; the /api/generate
   // route enforces the same gate server-side (guests can't spend the app's inference budget). During the
@@ -196,14 +203,16 @@ export function SlideWell({
     setDropIdx(null)
   }
 
-  // `at` is an insertion index into the current `slides` array (0 = before first, n = end).
-  function drop(at: number) {
-    if (!dragId) return endDrag()
-    const fromIdx = slides.findIndex((s) => s.id === dragId)
+  // `at` is an insertion index into the current `slides` array (0 = before first, n = end). `fromId`
+  // is the slide being moved — passed explicitly by the touch path (whose commit fires from a stale
+  // closure where `dragId` state can't be trusted); the HTML5 path defaults it to the drag state.
+  function drop(at: number, fromId: string | null = dragId) {
+    if (!fromId) return endDrag()
+    const fromIdx = slides.findIndex((s) => s.id === fromId)
     // Dropping into its own slot (just before or just after itself) is a no-op.
     if (fromIdx === -1 || at === fromIdx || at === fromIdx + 1) return endDrag()
     const moving = slides[fromIdx]
-    const without = slides.filter((s) => s.id !== dragId)
+    const without = slides.filter((s) => s.id !== fromId)
     const insIdx = at > fromIdx ? at - 1 : at
     const before =
       insIdx - 1 >= 0 && insIdx - 1 < without.length
@@ -213,9 +222,9 @@ export function SlideWell({
       insIdx >= 0 && insIdx < without.length ? without[insIdx] : undefined
     const sort = keyBetween(before?.sort, after?.sort)
     const fromSort = moving.sort
-    mutate.reorderSlide({ id: dragId, sort })
+    mutate.reorderSlide({ id: fromId, sort })
     if (fromSort !== sort) {
-      const id = dragId
+      const id = fromId
       history.push({
         label: 'Reorder slide',
         redo: () => mutate.reorderSlide({ id, sort }),
@@ -223,6 +232,79 @@ export function SlideWell({
       })
     }
     endDrag()
+  }
+
+  // Long-press pointer reorder for the mobile filmstrip (touch only — mouse keeps native HTML5 DnD).
+  // A held press (250ms) picks the slide up; before that a horizontal move is treated as a scroll and
+  // the gesture bows out. While dragging we find the thumb under the finger to pick an insertion index,
+  // then commit through the same `drop()`/`keyBetween` path as desktop. `drop(at, id)` takes the moving
+  // id explicitly because this commit runs from a stale closure where `dragId` state isn't reliable.
+  function beginTouchReorder(s: SlideDetail, e: ReactPointerEvent) {
+    if (e.pointerType !== 'touch' || !editor.canEdit) return
+    const startX = e.clientX
+    const startY = e.clientY
+    const wellEl = (e.currentTarget as HTMLElement).closest('.well')
+    let active = false
+    let curDrop: number | null = null
+
+    const computeDrop = (clientX: number) => {
+      const thumbs = [
+        ...(wellEl?.querySelectorAll<HTMLElement>('.well__slide') ?? []),
+      ]
+      for (let i = 0; i < thumbs.length; i++) {
+        const r = thumbs[i].getBoundingClientRect()
+        if (clientX < r.left + r.width / 2) return i
+      }
+      return thumbs.length
+    }
+
+    // A pointermove can't cancel a scroll, but a non-passive touchmove can — hold it down while the
+    // drag is live so the strip doesn't scroll under the finger.
+    const preventScroll = (ev: TouchEvent) => ev.preventDefault()
+
+    let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+      timer = null
+      active = true
+      setDragId(s.id)
+      setTouchDragging(true)
+      window.addEventListener('touchmove', preventScroll, { passive: false })
+    }, 250)
+
+    const cleanup = () => {
+      if (timer) clearTimeout(timer)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+      window.removeEventListener('touchmove', preventScroll)
+    }
+    const move = (ev: PointerEvent) => {
+      if (!active) {
+        // Moved before the press landed → it's a scroll (or a tap): stand down.
+        if (
+          Math.abs(ev.clientX - startX) > 8 ||
+          Math.abs(ev.clientY - startY) > 8
+        )
+          cleanup()
+        return
+      }
+      ev.preventDefault()
+      curDrop = computeDrop(ev.clientX)
+      setDropIdx(curDrop)
+    }
+    const end = () => {
+      cleanup()
+      if (active) {
+        // Swallow the click the browser fires after the drag so it doesn't re-activate the slide.
+        suppressClickRef.current = true
+        setTimeout(() => (suppressClickRef.current = false), 400)
+        if (curDrop != null) drop(curDrop, s.id)
+        else endDrag()
+        setTouchDragging(false)
+      }
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
   }
 
   // The gap affordance at insertion index `at`: a hover "+" to add a slide there, and — while a drag
@@ -270,7 +352,8 @@ export function SlideWell({
               'well__slide' +
               (editor.activeSlideId === s.id ? ' is-active' : '') +
               (editor.isSelected(s.id) ? ' is-selected' : '') +
-              (dragId === s.id ? ' is-dragging' : '')
+              (dragId === s.id ? ' is-dragging' : '') +
+              (touchDragging && dropIdx === i ? ' is-drop-before' : '')
             }
             draggable={editor.canEdit}
             onDragStart={() => editor.canEdit && setDragId(s.id)}
@@ -283,7 +366,12 @@ export function SlideWell({
               setDropIdx(e.clientY > r.top + r.height / 2 ? i + 1 : i)
             }}
             onDrop={() => editor.canEdit && drop(dropIdx ?? i)}
-            onClick={() => editor.setActiveSlide(s.id)}
+            onPointerDown={(e) => beginTouchReorder(s, e)}
+            onClick={() => {
+              // A press that turned into a touch reorder swallows its trailing click here.
+              if (suppressClickRef.current) return
+              editor.setActiveSlide(s.id)
+            }}
           >
             <div className="well__thumb">{thumbnailForSlide(s)}</div>
             <span className="well__badge">{i + 1}</span>
@@ -305,7 +393,10 @@ export function SlideWell({
       {inserter(slides.length)}
       {editor.canEdit && (
         <button
-          className="well__add"
+          className={
+            'well__add' +
+            (touchDragging && dropIdx === slides.length ? ' is-drop-before' : '')
+          }
           onClick={addSlide}
           onDragOver={(e) => {
             if (!dragId) return
