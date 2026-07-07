@@ -136,6 +136,8 @@ function EditorInner({ deckId }: { deckId: string }) {
           <ChatPanel
             deckId={deckId}
             slides={slides}
+            deck={deck}
+            activeSlide={activeSlide}
             onClose={() => setChatOpen(false)}
           />
         )}

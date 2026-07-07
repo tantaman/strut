@@ -53,14 +53,16 @@ export function applyThemePatch(
   if (keys.length === 0) return
 
   const before: ThemePatch = {}
-  const source = deck as Record<string, unknown>
+  const source = deck as unknown as Record<string, unknown>
   for (const k of keys) {
     const cur = source[k]
     before[k] = typeof cur === 'string' ? cur : ''
   }
 
-  const redo = () => mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
-  const undo = () => mutate.setDeckTheme({ id: deck.id, ...before, now: Date.now() })
+  const redo = () =>
+    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
+  const undo = () =>
+    mutate.setDeckTheme({ id: deck.id, ...before, now: Date.now() })
   redo()
   history.push({ label, redo, undo })
 }
