@@ -14,21 +14,53 @@ import {
 
 /** One component's pure visual box — `cmpStyle` + `renderInner`, minus interaction. `live=false` (read
  *  surfaces) shows video/web frames as black placeholders so a thumbnail never spins up a live embed;
- *  the editor overlay leaves `live` on (default) so a locked object looks identical to when editable. */
+ *  the editor overlay leaves `live` on (default) so a locked object looks identical to when editable.
+ *
+ *  `present` = a presentation surface (Play). Runnable artifacts render LIVE + interactive only when
+ *  presented or in the editor overlay (`live`); on inert thumbnails/overview they show a poster so the
+ *  filmstrip never boots N sandboxes. Video/web frames keep their existing black-placeholder behavior. */
 export function StaticComponent({
   c,
   live = true,
+  present = false,
 }: {
   c: AnyComponent
   live?: boolean
+  present?: boolean
 }) {
   return (
     <div className={`cmp cmp--${c.kind}`} style={cmpStyle(c)}>
-      {!live && (c.kind === 'video' || c.kind === 'webframe') ? (
+      {c.kind === 'artifact' ? (
+        live || present ? (
+          renderInner(c, { interactive: present })
+        ) : (
+          <ArtifactPoster />
+        )
+      ) : !live && (c.kind === 'video' || c.kind === 'webframe') ? (
         <div style={{ width: '100%', height: '100%', background: '#000' }} />
       ) : (
         renderInner(c)
       )}
+    </div>
+  )
+}
+
+/** Inert stand-in for a runnable artifact on non-presentation read surfaces (thumbnails, overview). */
+function ArtifactPoster() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f4f4f5',
+        color: '#71717a',
+        font: '600 14px/1.2 system-ui, sans-serif',
+      }}
+    >
+      ▶ runnable
     </div>
   )
 }

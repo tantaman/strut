@@ -25,6 +25,7 @@ const SERVER_ENV = [
   'R2_SECRET_ACCESS_KEY',
   'R2_BUCKET',
   'R2_PUBLIC_BASE_URL',
+  'ARTIFACT_ORIGIN',
   // Better-Auth (server/auth.ts). Under `pnpm dev` sessions run off a local better-sqlite3 DB, so only
   // the secret + base URL are needed for the guest flow; the OAuth creds are optional (promotion).
   'BETTER_AUTH_SECRET',
@@ -49,6 +50,10 @@ const config = defineConfig(({ mode }) => {
       // The Rindle API + image upload are now TanStack Start server routes (src/routes/api.rindle.*),
       // served same-origin — no separate API process, no proxy. The live-query WebSocket still
       // connects directly to the daemon (:7601).
+      // Don't let runtime-written files under .uploads/ (the local-disk dev fallback for image uploads
+      // and runnable artifacts) trip the HMR watcher — otherwise saving one forces a full page reload
+      // mid-edit (e.g. right after every artifact "Run"). Prod builds on Workers never write here.
+      watch: { ignored: ['**/.uploads/**'] },
     },
     plugins: [
       ...(CF ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),

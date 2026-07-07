@@ -226,6 +226,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   addShape: withSlideEditable((a) => a.slideId, sharedMutators.addShape),
   addVideo: withSlideEditable((a) => a.slideId, sharedMutators.addVideo),
   addWebframe: withSlideEditable((a) => a.slideId, sharedMutators.addWebframe),
+  addArtifact: withSlideEditable((a) => a.slideId, sharedMutators.addArtifact),
 
   // ---- component edits: the target component is editable ----
   moveComponent: withComponentEditable(
@@ -246,6 +247,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   ),
   setText: withComponentEditable((a) => a.id, sharedMutators.setText),
   setShapeFill: withComponentEditable((a) => a.id, sharedMutators.setShapeFill),
+  setArtifact: withComponentEditable((a) => a.id, sharedMutators.setArtifact),
   removeComponent: withComponentEditable(
     (a) => a.id,
     sharedMutators.removeComponent,

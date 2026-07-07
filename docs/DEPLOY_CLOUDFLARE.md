@@ -69,6 +69,28 @@ runtime and returns `null` off-Workers — so the same code runs in all three en
 
 ---
 
+## Runnable artifacts: sandbox origin
+
+Runnable **artifact** blocks store the author's code as a built HTML doc in the same `STRUT_UPLOADS`
+bucket (under an `artifacts/` prefix) and serve it at `GET /a/<hash>.html` with `text/html` + a strict
+CSP + `nosniff` (`server/artifact.ts`). It runs in a `<iframe sandbox="allow-scripts">` — **never** with
+`allow-same-origin` — so the code executes in a unique **opaque origin** and cannot read the app's
+cookies/storage/DOM even if served same-origin.
+
+For defense-in-depth, serve artifacts from a **separate origin** than the app:
+
+1. Add a second custom domain (e.g. `sandbox.strut.io`) to **this same Worker** — append it to the
+   `routes` array in `wrangler.jsonc` (`{ "pattern": "sandbox.strut.io", "custom_domain": true }`), or add
+   it in the dashboard (Workers & Pages → strut → Domains & Routes). The zone must be active.
+2. Set `ARTIFACT_ORIGIN` to that origin (e.g. `https://sandbox.strut.io`). Artifact `src` URLs then point
+   there; `/a/<key>` answers on that host from the same Worker.
+
+If `ARTIFACT_ORIGIN` is empty (the default, and dev), artifacts are served **same-origin** at `/a/<key>` —
+still fully sandboxed (opaque origin), just without the second boundary. Apply the quota migration with
+the others: `wrangler d1 migrations apply strut-auth` (adds `artifact_usage`).
+
+---
+
 ## One-time setup
 
 ### 1. Create the R2 bucket

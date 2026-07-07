@@ -149,7 +149,12 @@ function Play() {
               transition: `opacity ${flight.duration || 400}ms`,
             }}
           >
-            <SlideView slide={s} deck={deck} width={SLIDE_W} />
+            <SlideView
+              slide={s}
+              deck={deck}
+              width={SLIDE_W}
+              present={s.id === active.id}
+            />
           </div>
         ))}
       </div>

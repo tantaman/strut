@@ -15,7 +15,9 @@ import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
 import { Route as ApiGenerateRouteImport } from './routes/api.generate'
 import { Route as ApiChatRouteImport } from './routes/api.chat'
+import { Route as ApiArtifactRouteImport } from './routes/api.artifact'
 import { Route as ApiArrangeRouteImport } from './routes/api.arrange'
+import { Route as AKeyRouteImport } from './routes/a.$key'
 import { Route as DeckDeckIdPlayRouteImport } from './routes/deck.$deckId_.play'
 import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
 import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
@@ -55,9 +57,19 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiArtifactRoute = ApiArtifactRouteImport.update({
+  id: '/api/artifact',
+  path: '/api/artifact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiArrangeRoute = ApiArrangeRouteImport.update({
   id: '/api/arrange',
   path: '/api/arrange',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AKeyRoute = AKeyRouteImport.update({
+  id: '/a/$key',
+  path: '/a/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeckDeckIdPlayRoute = DeckDeckIdPlayRouteImport.update({
@@ -104,7 +116,9 @@ const ApiRindleUploadsKeyRoute = ApiRindleUploadsKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/artifact': typeof ApiArtifactRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -121,7 +135,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/artifact': typeof ApiArtifactRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -139,7 +155,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
+  '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
+  '/api/artifact': typeof ApiArtifactRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -158,7 +176,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/signin'
+    | '/a/$key'
     | '/api/arrange'
+    | '/api/artifact'
     | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
@@ -175,7 +195,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/signin'
+    | '/a/$key'
     | '/api/arrange'
+    | '/api/artifact'
     | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
@@ -192,7 +214,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/signin'
+    | '/a/$key'
     | '/api/arrange'
+    | '/api/artifact'
     | '/api/chat'
     | '/api/generate'
     | '/deck/$deckId'
@@ -210,7 +234,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SigninRoute: typeof SigninRoute
+  AKeyRoute: typeof AKeyRoute
   ApiArrangeRoute: typeof ApiArrangeRoute
+  ApiArtifactRoute: typeof ApiArtifactRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiGenerateRoute: typeof ApiGenerateRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
@@ -269,11 +295,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/artifact': {
+      id: '/api/artifact'
+      path: '/api/artifact'
+      fullPath: '/api/artifact'
+      preLoaderRoute: typeof ApiArtifactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/arrange': {
       id: '/api/arrange'
       path: '/api/arrange'
       fullPath: '/api/arrange'
       preLoaderRoute: typeof ApiArrangeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a/$key': {
+      id: '/a/$key'
+      path: '/a/$key'
+      fullPath: '/a/$key'
+      preLoaderRoute: typeof AKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/deck/$deckId_/play': {
@@ -338,7 +378,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SigninRoute: SigninRoute,
+  AKeyRoute: AKeyRoute,
   ApiArrangeRoute: ApiArrangeRoute,
+  ApiArtifactRoute: ApiArtifactRoute,
   ApiChatRoute: ApiChatRoute,
   ApiGenerateRoute: ApiGenerateRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,

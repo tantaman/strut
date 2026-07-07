@@ -262,6 +262,14 @@ export type AddVideoArgs = z.infer<typeof addVideoArgs>
 export const addWebframeArgs = spatialArgs.extend({ src: z.string() })
 export type AddWebframeArgs = z.infer<typeof addWebframeArgs>
 
+// Runnable code block. `code` = author source; `src` = URL of the built+served sandboxed HTML the
+// iframe loads (empty until the first successful build/upload). Both are stored in `props`.
+export const addArtifactArgs = spatialArgs.extend({
+  code: z.string(),
+  src: z.string(),
+})
+export type AddArtifactArgs = z.infer<typeof addArtifactArgs>
+
 export const moveComponentArgs = z.object({
   id: z.string(),
   x: z.number(),
@@ -308,6 +316,14 @@ export type SetTextArgs = z.infer<typeof setTextArgs>
 
 export const setShapeFillArgs = z.object({ id: z.string(), fill: z.string() })
 export type SetShapeFillArgs = z.infer<typeof setShapeFillArgs>
+
+// Rewrites the artifact `props` (code + built src) after an edit + rebuild.
+export const setArtifactArgs = z.object({
+  id: z.string(),
+  code: z.string(),
+  src: z.string(),
+})
+export type SetArtifactArgs = z.infer<typeof setArtifactArgs>
 
 export const mintCustomColorArgs = z.object({
   id: z.string(),
@@ -610,6 +626,18 @@ export const mutators = {
     },
   ),
 
+  addArtifact: shared(
+    addArtifactArgs,
+    function* (tx: IsoTx, a: AddArtifactArgs): MutationGen {
+      yield tx.insert('component', {
+        ...spatialBase(a),
+        type: 'artifact',
+        fill: '',
+        props: componentProps('artifact', a),
+      })
+    },
+  ),
+
   moveComponent: shared(
     moveComponentArgs,
     function* (tx: IsoTx, a: MoveComponentArgs): MutationGen {
@@ -673,6 +701,17 @@ export const mutators = {
     setShapeFillArgs,
     function* (tx: IsoTx, a: SetShapeFillArgs): MutationGen {
       yield tx.update('component', { id: a.id, fill: a.fill })
+    },
+  ),
+
+  // Rewrites the whole artifact `props` (code + built src) after an edit + rebuild — mirrors setText.
+  setArtifact: shared(
+    setArtifactArgs,
+    function* (tx: IsoTx, a: SetArtifactArgs): MutationGen {
+      yield tx.update('component', {
+        id: a.id,
+        props: componentProps('artifact', a),
+      })
     },
   ),
 

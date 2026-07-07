@@ -19,6 +19,10 @@
 const ARRANGE_TABLE = 'arrange_usage'
 const GENERATE_TABLE = 'generate_usage'
 const CHAT_TABLE = 'chat_usage'
+// Artifacts don't spend inference — the ceiling is R2 storage / abuse, not model cost — so it's a
+// GENEROUS cap: uploads are user-initiated "Run/Update" clicks, and identical code dedupes (content-
+// addressed keys), so this only bites a runaway script.
+const ARTIFACT_TABLE = 'artifact_usage'
 
 export const ARRANGE_DAILY_LIMIT = 50
 // Generating a whole batch of slides is a bigger call than a single arrange, so it gets a smaller cap.
@@ -26,6 +30,7 @@ export const GENERATE_DAILY_LIMIT = 20
 // Chat is metered ONE unit per user turn — individually cheap, but a conversation is many turns — so it
 // gets the largest daily cap.
 export const CHAT_DAILY_LIMIT = 200
+export const ARTIFACT_DAILY_LIMIT = 200
 
 /** UTC calendar-day key (YYYY-MM-DD) for a timestamp — the quota window. */
 export function utcDay(now: number): string {
@@ -134,6 +139,21 @@ export function refundChatQuota(
   store?: QuotaStore,
 ): Promise<void> {
   return refundQuota(userId, now, CHAT_TABLE, store)
+}
+
+export function consumeArtifactQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<QuotaResult> {
+  return consumeQuota(userId, now, ARTIFACT_DAILY_LIMIT, ARTIFACT_TABLE, store)
+}
+export function refundArtifactQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<void> {
+  return refundQuota(userId, now, ARTIFACT_TABLE, store)
 }
 
 // ---- store construction ----

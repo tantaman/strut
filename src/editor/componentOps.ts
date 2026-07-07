@@ -67,6 +67,9 @@ export function insertComponent(
     case 'webframe':
       mutate.addWebframe({ ...common, src: c.src ?? '' })
       break
+    case 'artifact':
+      mutate.addArtifact({ ...common, code: c.code ?? '', src: c.src ?? '' })
+      break
   }
   if (
     c.rotate ||

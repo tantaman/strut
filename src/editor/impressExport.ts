@@ -87,6 +87,13 @@ function componentHTML(c: AnyComponent): string {
     case 'webframe':
       body = `<iframe src="${esc(c.src || '')}" style="width:100%;height:100%;border:0"></iframe>`
       break
+    case 'artifact':
+      // Sandboxed iframe pointing at the built artifact URL (external). Same isolation as the live app:
+      // allow-scripts only — NO allow-same-origin — so it runs in an opaque origin. Empty until built.
+      body = c.src
+        ? `<iframe src="${esc(c.src)}" sandbox="allow-scripts" referrerpolicy="no-referrer" style="width:100%;height:100%;border:0;background:#fff"></iframe>`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f4f4f5;color:#71717a;font:600 14px system-ui">▶ runnable</div>`
+      break
   }
   const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
   return `<div class="cmp" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`

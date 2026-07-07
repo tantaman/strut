@@ -2,7 +2,7 @@
 // stage, offer property controls — text font/size/color, shape fill, z-order, and CSS classes. All
 // edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { DEFAULT_FONT, FONT_FAMILIES, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
@@ -12,6 +12,7 @@ import type { AnyComponent, DeckThemeFields } from './types'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
 import { ColorField } from './ColorField'
+import { uploadArtifact } from './upload'
 
 export function Inspector({
   componentRefs,
@@ -137,6 +138,20 @@ const InspectorPanel = memo(function InspectorPanel({
     })
   }
 
+  // Save an artifact's source + freshly-built URL as one undoable step (undo restores the prior code+src).
+  const setArtifactProps = (code: string, src: string) => {
+    const before = { code: c.code ?? '', src: c.src ?? '' }
+    const after = { code, src }
+    const apply = (v: typeof before) =>
+      mutate.setArtifact({ id: c.id, code: v.code, src: v.src })
+    apply(after)
+    history.push({
+      label: 'Edit artifact',
+      redo: () => apply(after),
+      undo: () => apply(before),
+    })
+  }
+
   const maxZ = allComponents.reduce((m, x) => Math.max(m, x.z_order), 0)
   const minZ = allComponents.reduce((m, x) => Math.min(m, x.z_order), 0)
 
@@ -223,6 +238,10 @@ const InspectorPanel = memo(function InspectorPanel({
         </div>
       )}
 
+      {c.kind === 'artifact' && (
+        <ArtifactControls key={c.id} c={c} onSave={setArtifactProps} />
+      )}
+
       <label className="insp__row">
         <span>Classes</span>
         <input
@@ -253,6 +272,62 @@ const InspectorPanel = memo(function InspectorPanel({
     </div>
   )
 }, sameInspectorPanelProps)
+
+/** Code editor + Run for a runnable artifact. `draft` is a local editing buffer (keyed by component id in
+ *  the parent, so selecting a different artifact remounts with fresh code). Run builds the source via the
+ *  API and saves both the code and the returned URL onto the component (one undoable step). */
+function ArtifactControls({
+  c,
+  onSave,
+}: {
+  c: AnyComponent
+  onSave: (code: string, src: string) => void
+}) {
+  const [draft, setDraft] = useState(c.code ?? '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function run() {
+    setBusy(true)
+    setError(null)
+    try {
+      const url = await uploadArtifact(draft)
+      onSave(draft, url)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Build failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="insp__artifact">
+      <textarea
+        className="insp__code"
+        spellCheck={false}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={12}
+        style={{
+          width: '100%',
+          font: '12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace',
+          whiteSpace: 'pre',
+          resize: 'vertical',
+        }}
+        placeholder={"// ES module — import from https://esm.sh, render into #root"}
+      />
+      {error && <p className="modal__error">{error}</p>}
+      <div className="insp__row insp__zrow">
+        <button className="btn btn--primary" disabled={busy} onClick={run}>
+          {busy ? 'Building…' : 'Run'}
+        </button>
+        <span className="insp__hint" style={{ opacity: 0.6, fontSize: 12 }}>
+          runs sandboxed
+        </span>
+      </div>
+    </div>
+  )
+}
 
 function sameInspectorPanelProps(
   prev: InspectorPanelProps,
@@ -297,6 +372,8 @@ function sameInspectorComponent(a: AnyComponent, b: AnyComponent): boolean {
       )
     case 'shape':
       return a.fill === b.fill
+    case 'artifact':
+      return a.code === b.code && a.src === b.src
     default:
       return true
   }
