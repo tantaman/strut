@@ -42,6 +42,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
@@ -272,14 +273,15 @@ export function Header({
   }
 
   // Theme edits deliberately do NOT close the popover — the user usually tweaks several
-  // defaults (bg, surface, fonts) in one visit.
+  // defaults (bg, surface, fonts) in one visit. Each commit goes through applyThemePatch so it lands on
+  // Cmd/Z as one undo (closing the pre-existing no-undo gap; shared with the AI Edit lane's set_theme).
   function setBg(scope: 'bg' | 'surface', value: string) {
     if (!deck) return
-    mutate.setDeckTheme({
-      id: deck.id,
-      [scope === 'bg' ? 'background' : 'surface']: value,
-      now: Date.now(),
-    })
+    applyThemePatch(
+      scope === 'bg' ? { background: value } : { surface: value },
+      { mutate, history, deck },
+      scope === 'bg' ? 'Background color' : 'Surface color',
+    )
   }
 
   function setTextTheme(
@@ -291,20 +293,36 @@ export function Header({
     >,
   ) {
     if (!deck) return
-    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
+    applyThemePatch(patch, { mutate, history, deck }, 'Text theme')
   }
 
   function setDeckAlign(align: string) {
     if (!deck) return
-    mutate.setDeckTheme({ id: deck.id, text_align: align, now: Date.now() })
+    applyThemePatch(
+      { text_align: align },
+      { mutate, history, deck },
+      'Text alignment',
+    )
   }
 
   function setDefaultMarkdown(on: boolean) {
     if (!deck) return
-    mutate.setDeckTheme({
-      id: deck.id,
-      default_slide_mode: on ? 'markdown' : '',
-      now: Date.now(),
+    // default_slide_mode is an enum column (not covered by applyThemePatch's string patch) — one undo
+    // by hand so this toggle is also reversible.
+    const before = deck.default_slide_mode === 'markdown' ? 'markdown' : ''
+    const next = on ? 'markdown' : ''
+    if (before === next) return
+    const apply = (m: '' | 'markdown') =>
+      mutate.setDeckTheme({
+        id: deck.id,
+        default_slide_mode: m,
+        now: Date.now(),
+      })
+    apply(next)
+    history.push({
+      label: 'Default slide mode',
+      redo: () => apply(next),
+      undo: () => apply(before),
     })
   }
 

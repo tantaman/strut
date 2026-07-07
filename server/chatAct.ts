@@ -14,8 +14,12 @@ import {
   clampChatActRequest,
   normalizeAction,
 } from '../shared/chatAction.ts'
-import type { ChatActRequest, ChatActResult } from '../shared/chatAction.ts'
-import type { ChatActSlide, ChatActTheme } from '../shared/chatAction.ts'
+import type {
+  ChatActRequest,
+  ChatActResult,
+  ChatActSlide,
+  ChatActTheme,
+} from '../shared/chatAction.ts'
 import type { SlideDigest } from '../shared/chat.ts'
 import { callModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice, ModelMessage } from './llm.ts'
@@ -91,7 +95,10 @@ function renderActive(a: ChatActSlide): string {
 
 function buildMessages(req: ChatActRequest, fonts: string[]): ModelMessage[] {
   return [
-    { role: 'system', content: systemPrompt(fonts) + '\n' + renderContext(req) },
+    {
+      role: 'system',
+      content: systemPrompt(fonts) + '\n' + renderContext(req),
+    },
     ...req.messages,
   ]
 }

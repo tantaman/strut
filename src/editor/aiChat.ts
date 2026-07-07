@@ -236,6 +236,129 @@ export async function sendChat(
   })
 }
 
+// ---- Edit lane (actionable turn) -------------------------------------------------------------------
+
+/** The extra grounding an Edit-lane turn carries beyond the advisor's SendContext (see
+ *  shared/chatAction.ts): the deck's resolved theme + the active slide's full text. */
+export interface ActionSendContext {
+  deckId: string
+  slides: ChatActRequest['slides']
+  history: ChatTurn[]
+  theme?: ChatActTheme
+  activeSlide?: ChatActSlide
+}
+
+/** Run ONE Edit-lane turn: append the user turn + a working assistant turn, POST /api/chat/act, then
+ *  DISPATCH the returned action (via the injected `dispatch`, which closes over the live mutators + history)
+ *  and finalize the assistant row with the model's `say`. Unlike the advisor this is NOT a token stream —
+ *  structured output is one-shot. Returns the applied action's undo label (for the Undo chip) or null when
+ *  nothing was applied. Never throws — every failure lands as an error row so the UI stays consistent. */
+export async function sendChatAction(
+  store: StrutStore,
+  ctx: ActionSendContext,
+  userText: string,
+  dispatch: (action: ChatAction) => Promise<DispatchOutcome>,
+): Promise<{ label: string } | null> {
+  const text = userText.trim()
+  if (!text) return null
+  const now = Date.now()
+
+  const userRow: ChatMessageRow = {
+    id: newId(),
+    deck_id: ctx.deckId,
+    role: 'user',
+    content: text,
+    status: 'done',
+    created: now,
+  }
+  // Stamped 1ms later so it always sorts AFTER its prompting user turn. `streaming` shows the thinking
+  // dots while the (non-streamed) request + apply are in flight.
+  const assistantRow: ChatMessageRow = {
+    id: newId(),
+    deck_id: ctx.deckId,
+    role: 'assistant',
+    content: '',
+    status: 'streaming',
+    created: now + 1,
+  }
+  await store.writeLocal((tx) => {
+    tx.add('chat_message', userRow)
+    tx.add('chat_message', assistantRow)
+  })
+
+  let current = assistantRow
+  const commit = (patch: Partial<ChatMessageRow>): Promise<void> => {
+    const prev = current
+    const next = { ...current, ...patch }
+    current = next
+    return store.writeLocal((tx) => tx.edit('chat_message', prev, next))
+  }
+
+  let res: Response
+  try {
+    const body: ChatActRequest = {
+      deckId: ctx.deckId,
+      slides: ctx.slides,
+      messages: [...ctx.history, { role: 'user', content: text }],
+      theme: ctx.theme,
+      activeSlide: ctx.activeSlide,
+    }
+    res = await fetch('/api/chat/act', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body),
+    })
+  } catch {
+    await commit({ status: 'error', content: 'Network error — try again.' })
+    return null
+  }
+
+  if (!res.ok) {
+    await commit({ status: 'error', content: await friendlyError(res) })
+    return null
+  }
+
+  const data = (await res.json().catch(() => null)) as ChatActResult | null
+  if (!data) {
+    await commit({
+      status: 'error',
+      content: 'The AI response was malformed — try again.',
+    })
+    return null
+  }
+  const say = typeof data.say === 'string' ? data.say.trim() : ''
+  const action = data.action ?? null
+
+  // Advice-only turn (no action) — render the answer like the advisor would.
+  if (!action) {
+    await commit({ content: say || '(no change needed)', status: 'done' })
+    return null
+  }
+
+  let outcome: DispatchOutcome
+  try {
+    outcome = await dispatch(action)
+  } catch {
+    outcome = { ok: false, error: 'Could not apply that change.' }
+  }
+
+  if (outcome.ok) {
+    await commit({
+      content: say || `Done — ${outcome.label.toLowerCase()}.`,
+      status: 'done',
+    })
+    return { label: outcome.label }
+  }
+  // The model answered but the apply failed (e.g. a delegated /api/arrange error) — keep the answer,
+  // append the reason, mark it errored.
+  await commit({
+    content: (say ? say + '\n\n' : '') + `⚠️ ${outcome.error}`,
+    status: 'error',
+  })
+  return null
+}
+
 // ---- useChat hook ----------------------------------------------------------------------------------
 
 const EMPTY: readonly ChatMessage[] = []
@@ -243,20 +366,68 @@ const EMPTY: readonly ChatMessage[] = []
 export interface UseChat {
   /** The thread for this deck, in `created` order. Reactive — every `writeLocal` re-renders. */
   messages: readonly ChatMessage[]
-  /** Send a user turn (grounded in the current `slides`). No-op while busy or for empty text. */
+  /** Send an ADVISOR turn (streamed prose, read-only). No-op while busy or for empty text. */
   send: (text: string) => void
-  /** True while an assistant turn is still streaming. */
+  /** Send an EDIT-lane turn: the AI drives ONE deck change (one undo). No-op while busy / empty. */
+  sendEdit: (text: string) => void
+  /** True while an assistant turn is still streaming / an edit is being applied. */
   busy: boolean
   /** Clear the whole thread for this deck (removes every local row). */
   clear: () => void
+  /** After a successful Edit-lane apply, the undo affordance ({ label }); null otherwise. */
+  undoTip: { label: string } | null
+  /** Undo the last Edit-lane change (a shortcut for Cmd/Ctrl+Z) and clear the chip. */
+  undoLast: () => void
+}
+
+/** Extra editor context the Edit lane needs to ground + apply an action: the deck row (for the resolved
+ *  theme + theme before-values) and the currently-active slide (the natural `set_body` target). */
+export interface ChatEditContext {
+  deck?: ThemeDeck | null
+  activeSlide?: SlideDetail | null
+}
+
+/** Build the Edit-lane grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and
+ *  the active slide's FULL body text (so a body rewrite sees the whole slide, not the 240-char digest). */
+function buildActGrounding(
+  deck: ThemeDeck | null,
+  activeSlide: SlideDetail | null,
+): { theme?: ChatActTheme; activeSlide?: ChatActSlide } {
+  const out: { theme?: ChatActTheme; activeSlide?: ChatActSlide } = {}
+  if (deck) {
+    const rt = resolveTheme(deck)
+    out.theme = {
+      background: resolveBackground(undefined, deck.background ?? undefined),
+      surface: resolveSurface(undefined, deck.surface ?? undefined),
+      headingColor: rt.headingColor,
+      bodyColor: rt.bodyColor,
+      headingFont: rt.headingFont,
+      bodyFont: rt.bodyFont,
+    }
+  }
+  if (activeSlide) {
+    out.activeSlide = { id: activeSlide.id, text: slideText(activeSlide) }
+  }
+  return out
 }
 
 /** Read + drive the advisor thread for `deckId`, grounded in the live `slides`. Reads the memory-only
  *  `chat_message` local table off the LIVE store (never the SSR seed store, which doesn't know the table),
  *  so it's empty until the client boots and then fully reactive. `slides` is passed so each `send` rebuilds
  *  a fresh digest — the model always reasons about the CURRENT deck. */
-export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
+export function useChat(
+  deckId: string,
+  slides: SlideDetail[],
+  edit?: ChatEditContext,
+): UseChat {
   const store = useStore()
+  // The Edit lane routes applied actions through the AUTHORITATIVE store (unlike the advisor thread, which
+  // is local-only) — grab the live mutators + undo history the dispatcher needs.
+  const mutate = useMutate()
+  const history = useHistory()
+  const deck = edit?.deck ?? null
+  const activeSlide = edit?.activeSlide ?? null
+  const [undoTip, setUndoTip] = useState<{ label: string } | null>(null)
 
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
   const view = useMemo(() => {
@@ -285,27 +456,64 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
     (text: string) => {
       if (!store || busy || !text.trim()) return
       // History = only settled turns — an in-flight/errored assistant row isn't real model context.
-      const history: ChatTurn[] = messages
+      const convo: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
-      track('chat:sent', { turn: history.length })
+      track('chat:sent', { turn: convo.length })
       void sendChat(
         store,
-        { deckId, slides: buildDigest(slides), history },
+        { deckId, slides: buildDigest(slides), history: convo },
         text,
       )
     },
     [store, busy, messages, deckId, slides],
   )
 
+  const sendEdit = useCallback(
+    (text: string) => {
+      if (!store || busy || !text.trim()) return
+      // History = only settled turns — an in-flight/errored assistant row isn't real model context.
+      const convo: ChatTurn[] = messages
+        .filter((m) => m.status === 'done')
+        .map((m) => ({ role: m.role, content: m.content }))
+      const grounding = buildActGrounding(deck, activeSlide)
+      // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
+      // request carries the trimmed digest.
+      const dctx: DispatchCtx = { deckId, slides, deck, mutate, history }
+      setUndoTip(null)
+      track('chat:edit', { slides: slides.length })
+      void sendChatAction(
+        store,
+        {
+          deckId,
+          slides: buildDigest(slides),
+          history: convo,
+          theme: grounding.theme,
+          activeSlide: grounding.activeSlide,
+        },
+        text,
+        (action) => dispatchAction(action, dctx),
+      ).then((tip) => {
+        if (tip) setUndoTip(tip)
+      })
+    },
+    [store, busy, messages, deckId, slides, deck, activeSlide, mutate, history],
+  )
+
+  const undoLast = useCallback(() => {
+    history.undo()
+    setUndoTip(null)
+  }, [history])
+
   const clear = useCallback(() => {
     if (!store || !view) return
     const rows = view.data
     if (rows.length === 0) return
+    setUndoTip(null)
     void store.writeLocal((tx) => {
       for (const r of rows) tx.remove('chat_message', r)
     })
   }, [store, view])
 
-  return { messages, send, busy, clear }
+  return { messages, send, sendEdit, busy, clear, undoTip, undoLast }
 }

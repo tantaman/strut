@@ -161,27 +161,33 @@ export function chatActionJsonSchema(slideIds: string[], fonts: string[]) {
           // set_theme
           background: {
             type: 'string',
-            description: 'set_theme: new slide-card background color, as hex (e.g. #1e1e24).',
+            description:
+              'set_theme: new slide-card background color, as hex (e.g. #1e1e24).',
           },
           surface: {
             type: 'string',
-            description: 'set_theme: new backdrop/surface color behind the cards, as hex.',
+            description:
+              'set_theme: new backdrop/surface color behind the cards, as hex.',
           },
           heading_color: {
             type: 'string',
-            description: 'set_theme: heading text color as hex (or "" to reset to default).',
+            description:
+              'set_theme: heading text color as hex (or "" to reset to default).',
           },
           body_color: {
             type: 'string',
-            description: 'set_theme: body text color as hex (or "" to reset to default).',
+            description:
+              'set_theme: body text color as hex (or "" to reset to default).',
           },
           heading_font: {
             ...fontSchema,
-            description: 'set_theme: heading font family from the allowed list ("" resets to default).',
+            description:
+              'set_theme: heading font family from the allowed list ("" resets to default).',
           },
           body_font: {
             ...fontSchema,
-            description: 'set_theme: body font family from the allowed list ("" resets to default).',
+            description:
+              'set_theme: body font family from the allowed list ("" resets to default).',
           },
           // set_body
           slideId: {
@@ -203,7 +209,8 @@ export function chatActionJsonSchema(slideIds: string[], fonts: string[]) {
           },
           count: {
             type: 'number',
-            description: 'generate: how many slides to add (optional; capped at 15).',
+            description:
+              'generate: how many slides to add (optional; capped at 15).',
           },
           // arrange
           instruction: {
@@ -268,7 +275,9 @@ function normalizeOneAction(
   const r = (raw ?? {}) as Record<string, unknown>
   switch (r.kind) {
     case 'set_theme': {
-      const out: Extract<ChatAction, { kind: 'set_theme' }> = { kind: 'set_theme' }
+      const out: Extract<ChatAction, { kind: 'set_theme' }> = {
+        kind: 'set_theme',
+      }
       const bg = bareHex(r.background)
       if (bg) out.background = bg
       const surface = bareHex(r.surface)

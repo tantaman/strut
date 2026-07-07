@@ -9,21 +9,27 @@
 // everyone), mirroring AI Arrange / Generate.
 
 import { useEffect, useRef, useState } from 'react'
-import { Sparkles, Trash2, X } from 'lucide-react'
+import { RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
 import { authClient } from '../rindle/authClient'
 import { track } from '../lib/analytics'
 import { markdownToHtml } from './markdown'
 import { useChat } from './aiChat'
 import type { ChatMessage } from './aiChat'
-import type { SlideDetail } from './deckDetail'
+import type { DeckRoot, SlideDetail } from './deckDetail'
 
 export function ChatPanel({
   deckId,
   slides,
+  deck,
+  activeSlide,
   onClose,
 }: {
   deckId: string
   slides: SlideDetail[]
+  // The deck row (resolved theme + theme before-values) and the active slide (the natural body-edit
+  // target) ground + apply the Edit lane. Null until the deck subtree resolves.
+  deck: DeckRoot | null
+  activeSlide: SlideDetail | null
   onClose: () => void
 }) {
   // Membership gate (a promoted, non-anonymous account). During the initial session resolve we treat the
@@ -33,7 +39,15 @@ export function ChatPanel({
     !!session?.user &&
     (session.user as { isAnonymous?: boolean }).isAnonymous !== true
 
-  const { messages, send, busy, clear } = useChat(deckId, slides)
+  const { messages, send, sendEdit, busy, clear, undoTip, undoLast } = useChat(
+    deckId,
+    slides,
+    { deck, activeSlide },
+  )
+  // Two lanes (AI_CHAT_TOOLS_PLAN.md fork A): 'chat' = the streamed advisor (read-only), 'edit' = the AI
+  // drives one deck change. The mode is an explicit affordance so the "AI is about to change my deck"
+  // boundary is visible.
+  const [mode, setMode] = useState<'chat' | 'edit'>('chat')
   const [text, setText] = useState('')
   const threadRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -52,9 +66,14 @@ export function ChatPanel({
   function submit() {
     const t = text.trim()
     if (!t || busy) return
-    send(t)
-    // Interaction-only: how many slides the advisor is grounded on. Never the prompt or slide content.
-    track('chat:sent', { slides: slides.length })
+    if (mode === 'edit') {
+      // sendEdit records its own 'chat:edit' event (and dispatches the applied action).
+      sendEdit(t)
+    } else {
+      send(t)
+      // Interaction-only: how many slides the advisor is grounded on. Never the prompt or slide content.
+      track('chat:sent', { slides: slides.length })
+    }
     setText('')
   }
 
@@ -86,42 +105,81 @@ export function ChatPanel({
           <div className="chat__thread" ref={threadRef}>
             {messages.length === 0 ? (
               <div className="chat__empty">
-                Ask about your deck — does this flow make sense? what’s a
-                stronger closing? what am I missing? The advisor can see your
-                slides.
+                <strong>Chat</strong> to talk it through — does this flow?
+                what’s a stronger closing? Switch to <strong>Edit</strong> and
+                the AI changes your deck: “make the background darker”, “add
+                three slides on pricing”, “tighten this slide”.
               </div>
             ) : (
               messages.map((m) => <ChatBubble key={m.id} message={m} />)
             )}
           </div>
-          <div className="chat__composer">
-            <textarea
-              ref={inputRef}
-              className="chat__input"
-              rows={2}
-              placeholder="Ask your advisor… (⌘/Ctrl+Enter to send)"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => {
-                // Enter alone is a newline; ⌘/Ctrl+Enter sends (matches the Generate composer).
-                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault()
-                  submit()
-                }
-              }}
-            />
-            <button
-              className="chat__send"
-              onClick={submit}
-              disabled={busy || !text.trim()}
-              title="Send (⌘/Ctrl+Enter)"
-            >
-              {busy ? (
-                <span className="chat__spinner" aria-label="Thinking" />
-              ) : (
-                'Send'
+          <div className="chat__foot">
+            <div className="chat__toolbar">
+              <div className="chat__modes" role="group" aria-label="Mode">
+                <button
+                  className={mode === 'chat' ? 'is-active' : ''}
+                  onClick={() => setMode('chat')}
+                  title="Ask for advice (read-only)"
+                  aria-pressed={mode === 'chat'}
+                >
+                  Chat
+                </button>
+                <button
+                  className={mode === 'edit' ? 'is-active' : ''}
+                  onClick={() => setMode('edit')}
+                  title="Tell the AI to change your deck"
+                  aria-pressed={mode === 'edit'}
+                >
+                  <Sparkles size={12} /> Edit
+                </button>
+              </div>
+              {undoTip && (
+                <div className="chat__undo">
+                  <span>Applied</span>
+                  <button onClick={undoLast} title="Undo the change (⌘/Ctrl+Z)">
+                    <RotateCcw size={12} /> Undo
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
+            <div className="chat__composer">
+              <textarea
+                ref={inputRef}
+                className="chat__input"
+                rows={2}
+                placeholder={
+                  mode === 'edit'
+                    ? 'Tell the AI what to change… (⌘/Ctrl+Enter)'
+                    : 'Ask your advisor… (⌘/Ctrl+Enter to send)'
+                }
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  // Enter alone is a newline; ⌘/Ctrl+Enter sends (matches the Generate composer).
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    submit()
+                  }
+                }}
+              />
+              <button
+                className={
+                  'chat__send' + (mode === 'edit' ? ' chat__send--edit' : '')
+                }
+                onClick={submit}
+                disabled={busy || !text.trim()}
+                title="Send (⌘/Ctrl+Enter)"
+              >
+                {busy ? (
+                  <span className="chat__spinner" aria-label="Thinking" />
+                ) : mode === 'edit' ? (
+                  'Edit'
+                ) : (
+                  'Send'
+                )}
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -153,7 +211,9 @@ function ChatBubble({ message }: { message: ChatMessage }) {
           <div
             className="chat__md"
             // Assistant Markdown → sanitized HTML (marked → DOMPurify), the app's only such sink.
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(message.content) }}
+            dangerouslySetInnerHTML={{
+              __html: markdownToHtml(message.content),
+            }}
           />
         ) : streaming ? (
           <span className="chat__dots" aria-label="Thinking">

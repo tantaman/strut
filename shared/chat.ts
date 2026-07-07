@@ -16,11 +16,7 @@
 // chat callers have one import surface.
 
 import type { SlideDigest } from './arrange.ts'
-export type {
-  ChatAction,
-  ChatActRequest,
-  ChatActResult,
-} from './chatAction.ts'
+export type { ChatAction, ChatActRequest, ChatActResult } from './chatAction.ts'
 
 // The deck grounding is EXACTLY AI Arrange's digest (id · title · text), rebuilt client-side per send from
 // the live editor slides — re-export it so chat callers don't reach across into the arrange module.
