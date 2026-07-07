@@ -11,6 +11,7 @@ import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
 import { Overview } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
+import { PoweredByRindle } from '../editor/PoweredByRindle'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId')({
@@ -138,6 +139,9 @@ function EditorInner({ deckId }: { deckId: string }) {
           />
         )}
       </div>
+      {/* Floating "powered by rindle" credit. Only in Slide mode — Overview parks its zoom/Fit
+          controls in the same bottom-right corner, so we'd collide there. */}
+      {editor.mode === 'slide' && <PoweredByRindle />}
     </div>
   )
 }
