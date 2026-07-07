@@ -231,7 +231,7 @@ const InspectorPanel = memo(function InspectorPanel({
 
       {c.kind === 'shape' && (
         <div className="insp__row">
-          <span>Fill</span>
+          <span>Color</span>
           <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
         </div>
       )}

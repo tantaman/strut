@@ -1138,6 +1138,45 @@ button {
   height: 100%;
 }
 
+/* shape tool picker (rectangle · diamond · ellipse · arrow · line · draw) */
+.shape-menu {
+  display: flex;
+  gap: 4px;
+}
+.shape-menu__tool {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+.shape-menu__tool:hover {
+  background: var(--panel-2);
+}
+.shape-menu__tool.is-active {
+  background: var(--coral-soft);
+  border-color: var(--coral);
+  color: var(--coral);
+}
+.shape-menu__key {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 600;
+  opacity: 0.45;
+}
+
 /* ---- overview ---- */
 .overview {
   flex: 1;

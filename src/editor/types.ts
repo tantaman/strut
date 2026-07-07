@@ -88,19 +88,115 @@ export function componentsFromRows(
   return rows.map(componentFromRow).sort((a, b) => a.z_order - b.z_order)
 }
 
-// ---- shape catalog (subset of spec §6; currentColor lets `fill` drive the color) ----------------
+// ---- shape catalog (Excalidraw-style set) --------------------------------------------------------
 
+// Box shapes: a fill-driven SVG stretched to the component box (`preserveAspectRatio="none"`), with
+// `currentColor` letting the `fill` field drive the color. Matches Excalidraw's core primitives.
 export const SHAPES: Record<string, string> = {
-  square: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="currentColor"/></svg>`,
-  circle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" fill="currentColor"/></svg>`,
-  triangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 98,98 2,98" fill="currentColor"/></svg>`,
-  hexagon: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="25,3 75,3 100,50 75,97 25,97 0,50" fill="currentColor"/></svg>`,
-  pentagon: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 98,38 79,97 21,97 2,38" fill="currentColor"/></svg>`,
-  star: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 61,38 98,38 68,60 79,96 50,74 21,96 32,60 2,38 39,38" fill="currentColor"/></svg>`,
-  heart: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50,88 L12,50 A20,20 0 0 1 50,24 A20,20 0 0 1 88,50 Z" fill="currentColor"/></svg>`,
+  rectangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="currentColor"/></svg>`,
+  diamond: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 100,50 50,100 0,50" fill="currentColor"/></svg>`,
+  ellipse: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" fill="currentColor"/></svg>`,
 }
 
 export const SHAPE_NAMES = Object.keys(SHAPES)
+
+// Stroke shapes (line, arrow, freehand draw) can't be static: they're baked at creation from the
+// captured pointer geometry into a real-coordinate SVG. `vector-effect:non-scaling-stroke` keeps the
+// stroke crisp at any box size and `currentColor` lets the `fill` field drive the stroke color (just
+// as it drives the fill of the box shapes above).
+export function isStrokeShape(name: string): boolean {
+  return name === 'arrow' || name === 'line' || name === 'draw'
+}
+
+// The shape-menu order + implicit keyboard shortcut (index 0 → key "2", mirroring Excalidraw's 2–7).
+export const SHAPE_TOOLS = [
+  'rectangle',
+  'diamond',
+  'ellipse',
+  'arrow',
+  'line',
+  'draw',
+] as const
+export type ShapeTool = (typeof SHAPE_TOOLS)[number]
+
+/** Default color for a freshly-drawn shape: box fills stay Strut blue; stroke tools read as dark ink
+ *  (Excalidraw's default stroke). Stored bare (no `#`), like every other `fill`. */
+export function defaultShapeFill(name: string): string {
+  return isStrokeShape(name) ? '1e1e1e' : '3498db'
+}
+
+const STROKE_W = 4
+type Pt = { x: number; y: number }
+const r1 = (n: number) => Math.round(n * 10) / 10
+
+// The inner SVG body for a stroke shape, in the box's local coordinate space (0..w, 0..h).
+function strokeBody(name: string, pts: Pt[], w: number, h: number): string {
+  const stroke = `stroke="currentColor" stroke-width="${STROKE_W}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"`
+  if (name === 'draw') {
+    if (pts.length < 2) {
+      const p = pts[0] ?? { x: w / 2, y: h / 2 }
+      return `<circle cx="${r1(p.x)}" cy="${r1(p.y)}" r="${STROKE_W / 2}" fill="currentColor"/>`
+    }
+    // Quadratic smoothing: each vertex is a control point, midpoints are the on-curve joins.
+    let d = `M ${r1(pts[0].x)} ${r1(pts[0].y)}`
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2
+      const my = (pts[i].y + pts[i + 1].y) / 2
+      d += ` Q ${r1(pts[i].x)} ${r1(pts[i].y)} ${r1(mx)} ${r1(my)}`
+    }
+    const last = pts[pts.length - 1]
+    d += ` L ${r1(last.x)} ${r1(last.y)}`
+    return `<path d="${d}" fill="none" ${stroke}/>`
+  }
+  // line / arrow — the segment from the first to the last captured point.
+  const a = pts[0]
+  const b = pts[pts.length - 1]
+  const line = `<line x1="${r1(a.x)}" y1="${r1(a.y)}" x2="${r1(b.x)}" y2="${r1(b.y)}" ${stroke}/>`
+  if (name === 'line') return line
+  // arrow: an open "V" head at the end point, sized to the segment but clamped.
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len = Math.hypot(dx, dy) || 1
+  const ux = dx / len
+  const uy = dy / len
+  const head = Math.max(10, Math.min(28, len * 0.28))
+  const px = -uy // perpendicular
+  const py = ux
+  const spread = 0.55
+  const baseX = b.x - ux * head
+  const baseY = b.y - uy * head
+  const w1 = `${r1(baseX + px * head * spread)},${r1(baseY + py * head * spread)}`
+  const w2 = `${r1(baseX - px * head * spread)},${r1(baseY - py * head * spread)}`
+  return `${line}<polyline points="${w1} ${r1(b.x)},${r1(b.y)} ${w2}" fill="none" ${stroke}/>`
+}
+
+/** Bake a stroke shape from raw slide-coordinate points into a component box + SVG markup. The box is
+ *  the points' bounding box, padded so a near-axis-aligned line stays grabbable and the viewBox never
+ *  goes degenerate. Local coords are baked into a real-size viewBox so the stroke reads at ~STROKE_W
+ *  px regardless of later scaling. */
+export function strokeGeometry(
+  name: string,
+  pts: Pt[],
+): { x: number; y: number; w: number; h: number; markup: string } {
+  const xs = pts.map((p) => p.x)
+  const ys = pts.map((p) => p.y)
+  let minX = Math.min(...xs)
+  let minY = Math.min(...ys)
+  let w = Math.max(...xs) - minX
+  let h = Math.max(...ys) - minY
+  const PAD = 14
+  if (w < PAD) {
+    minX -= (PAD - w) / 2
+    w = PAD
+  }
+  if (h < PAD) {
+    minY -= (PAD - h) / 2
+    h = PAD
+  }
+  const local = pts.map((p) => ({ x: p.x - minX, y: p.y - minY }))
+  const markup = `<svg viewBox="0 0 ${r1(w)} ${r1(h)}" preserveAspectRatio="none">${strokeBody(name, local, w, h)}</svg>`
+  return { x: minX, y: minY, w, h, markup }
+}
 
 // ---- deck text theme ------------------------------------------------------------------------------
 

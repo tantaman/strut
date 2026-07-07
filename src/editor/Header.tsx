@@ -9,16 +9,22 @@ import {
   AlignLeft,
   AlignRight,
   ChevronDown,
+  Circle,
   Code2,
+  Diamond,
   Download,
   FileText,
   Image as ImageIcon,
   Link2,
+  Minus,
+  MoveRight,
   Palette,
+  Pencil,
   Play,
   Redo2,
   Shapes,
   Sparkles,
+  Square,
   SquareCode,
   Type,
   Undo2,
@@ -26,6 +32,7 @@ import {
   Globe,
   Share2,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadArtifact, uploadImage } from './upload'
@@ -40,12 +47,22 @@ import {
   BACKGROUND_SWATCHES,
   resolveBackground,
   resolveSurface,
-  SHAPE_NAMES,
-  SHAPES,
+  SHAPE_TOOLS,
   SURFACE_SWATCHES,
 } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
+
+// Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
+// keyboard shortcut wired up in Stage.
+const SHAPE_TOOL_ICONS: Record<string, LucideIcon> = {
+  rectangle: Square,
+  diamond: Diamond,
+  ellipse: Circle,
+  arrow: MoveRight,
+  line: Minus,
+  draw: Pencil,
+}
 
 interface DeckRow {
   id: string
@@ -453,25 +470,23 @@ export function Header({
                 </button>
                 {menu === 'shapes' && (
                   <div className="popover" style={{ top: '110%', left: 0 }}>
-                    <div
-                      className="swatches"
-                      style={{ gridTemplateColumns: 'repeat(4, 30px)' }}
-                    >
-                      {SHAPE_NAMES.map((n) => (
-                        <button
-                          key={n}
-                          className="swatch"
-                          title={n}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            color: '#3498db',
-                            padding: 3,
-                          }}
-                          onClick={() => addShape(n)}
-                          dangerouslySetInnerHTML={{ __html: SHAPES[n] }}
-                        />
-                      ))}
+                    <div className="shape-menu">
+                      {SHAPE_TOOLS.map((n, i) => {
+                        const Icon = SHAPE_TOOL_ICONS[n]
+                        return (
+                          <button
+                            key={n}
+                            className={`shape-menu__tool${
+                              editor.pendingShape === n ? ' is-active' : ''
+                            }`}
+                            title={`${n} (${i + 2})`}
+                            onClick={() => addShape(n)}
+                          >
+                            <Icon size={18} />
+                            <span className="shape-menu__key">{i + 2}</span>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
