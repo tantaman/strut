@@ -439,8 +439,13 @@ button {
    The full toolbar is wide, so it collapses in two steps as the viewport shrinks:
    1) labels drop to icon-only (titles still tooltip them),
    2) the tool cluster drops to its own row, leaving title + mode toggle + Present on top. */
-@media (max-width: 1499px) {
+@media (max-width: 1620px) {
   .hdr .lbl {
+    display: none;
+  }
+  /* Once Share goes icon-only, drop its caret too so it reads as a clean icon
+     button — matching the other icon menu-triggers (Design, Shapes). */
+  .hdr .btn__caret {
     display: none;
   }
 }

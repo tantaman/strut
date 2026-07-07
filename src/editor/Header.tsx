@@ -513,10 +513,10 @@ export function Header({
                 <button
                   className="btn"
                   onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
-                  title="Theme"
+                  title="Theme & custom CSS"
                   disabled={!deck}
                 >
-                  <Palette size={16} /> <span className="lbl">Theme</span>
+                  <Palette size={16} /> <span className="lbl">Design</span>
                 </button>
                 {menu === 'theme' && deck && (
                   <ThemePopover
@@ -531,22 +531,15 @@ export function Header({
                     onTextLive={setTextThemeLive}
                     onAlign={setDeckAlign}
                     onDefaultMarkdown={setDefaultMarkdown}
+                    onEditCss={() => {
+                      setMenu(null)
+                      setCssOpen(true)
+                    }}
                   />
                 )}
               </div>
             </div>
           </>
-        )}
-
-        {editor.canEdit && (
-          <button
-            className="btn"
-            onClick={() => setCssOpen(true)}
-            title="Custom CSS"
-            disabled={!deck}
-          >
-            <Code2 size={16} /> <span className="lbl">CSS</span>
-          </button>
         )}
 
         {/* Share + Export merged into one "Share" umbrella dropdown: the collaborate/link action
@@ -717,6 +710,7 @@ function ThemePopover({
   onTextLive,
   onAlign,
   onDefaultMarkdown,
+  onEditCss,
 }: {
   deck: DeckRow
   onBackground: (value: string) => void
@@ -743,6 +737,7 @@ function ThemePopover({
   ) => void
   onAlign: (align: string) => void
   onDefaultMarkdown: (on: boolean) => void
+  onEditCss: () => void
 }) {
   const align = deck.text_align || 'left'
   return (
@@ -843,6 +838,12 @@ function ThemePopover({
           <span>New slides use Markdown</span>
         </label>
       </div>
+
+      {/* Custom CSS lives here rather than as its own header button — theme + CSS are one job. */}
+      <div className="menu-sep" />
+      <button className="menu-item menu-item--icon" onClick={onEditCss}>
+        <Code2 size={15} /> Edit custom CSS…
+      </button>
     </div>
   )
 }
