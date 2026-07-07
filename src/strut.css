@@ -492,6 +492,9 @@ button {
 }
 .well__slide {
   position: relative;
+  /* Don't let the flex column compress cards to fit — keep their natural (aspect-ratio) height so
+     the well scrolls instead of the slides shrinking as more are added. */
+  flex: 0 0 auto;
   border: 2px solid transparent;
   border-radius: 9px;
   background: #fff;
@@ -560,6 +563,7 @@ button {
 .well__add {
   /* Match the 16:9 slide cards so the "add" placeholder reads as an empty slide. */
   aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
