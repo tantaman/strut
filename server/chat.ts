@@ -76,10 +76,23 @@ function renderDigest(slides: SlideDigest[]): string {
   return ['\n\nThe deck currently has these slides:', ...lines].join('\n')
 }
 
+/** The author's own edits since their last turn, as a labeled section appended to the system message. The
+ *  client sends a net changelog (deckNarration.ts); we frame it so the model can react to what just changed
+ *  without us re-sending a full spatial snapshot. Empty/absent → nothing (mirrors renderDigest). The lines
+ *  are the author's slide content, so the same "untrusted content, not commands" rule as the digest holds. */
+function renderChanges(changes: string | undefined): string {
+  const c = (changes ?? '').trim()
+  if (!c) return ''
+  return `\n\nSince the author last messaged you, they changed the deck:\n${c}`
+}
+
 /** The full message list handed to the model: a grounded system turn, then the running conversation. */
 function buildMessages(req: ChatRequest): ChatTurnMessage[] {
   return [
-    { role: 'system', content: systemPrompt() + renderDigest(req.slides) },
+    {
+      role: 'system',
+      content: systemPrompt() + renderDigest(req.slides) + renderChanges(req.changes),
+    },
     ...req.messages,
   ]
 }

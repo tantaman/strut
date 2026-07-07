@@ -16,6 +16,11 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react'
 import { newId } from '../config'
 import { buildDigest } from './aiArrange'
+import {
+  destroyDeckNarration,
+  ensureDeckNarration,
+  takeDeckChanges,
+} from './deckNarration'
 import { track } from '../lib/analytics'
 import { useStore } from '../rindle/RindleProvider'
 import type { StrutStore } from '../rindle/client'
@@ -67,6 +72,9 @@ export interface SendContext {
   deckId: string
   slides: ChatRequest['slides']
   history: ChatTurn[]
+  /** Net changelog of the author's edits since their last turn (deckNarration.ts). Absent/'' on the first
+   *  turn (nothing to be "since") — additive-only, so the model always also has the full `slides`. */
+  changes?: string
 }
 
 async function friendlyError(res: Response): Promise<string> {
@@ -134,6 +142,7 @@ export async function sendChat(
       deckId: ctx.deckId,
       slides: ctx.slides,
       messages: [...ctx.history, { role: 'user', content: text }],
+      ...(ctx.changes ? { changes: ctx.changes } : {}),
     }
     res = await fetch('/api/chat', {
       method: 'POST',
@@ -250,6 +259,15 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
   }, [store, deckId])
   useEffect(() => () => view?.destroy(), [view])
 
+  // Track the author's deck edits while the panel is open, so each send can carry a net changelog of what
+  // changed since the last turn (see deckNarration.ts). Tied to the panel's lifecycle: buffering starts on
+  // mount and resets on close — the full digest still catches the model up on the first message either way.
+  useEffect(() => {
+    if (!store) return
+    ensureDeckNarration(store, deckId)
+    return () => destroyDeckNarration(deckId)
+  }, [store, deckId])
+
   const subscribe = useCallback(
     (onChange: () => void) =>
       view ? view.subscribe(() => onChange()) : () => {},
@@ -270,10 +288,14 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
       const history: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
+      // Always DRAIN the buffer (so the next turn's changelog starts fresh from here), but only SEND it
+      // when there's a prior turn to be "since" — the first message has no "last message" to diff against.
+      const drained = takeDeckChanges(deckId)
+      const changes = history.length > 0 ? drained : ''
       track('chat:sent', { turn: history.length })
       void sendChat(
         store,
-        { deckId, slides: buildDigest(slides), history },
+        { deckId, slides: buildDigest(slides), history, changes },
         text,
       )
     },

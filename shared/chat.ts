@@ -27,12 +27,16 @@ export interface ChatTurn {
 }
 
 /** POST body of `/api/chat`. `messages` is the running conversation (history + the new user turn); `slides`
- *  is the freshly-rebuilt deck digest so the model always reasons about the CURRENT deck. The server caps
- *  every part (CHAT_LIMITS) so a client can't inflate the payload to burn the app's inference budget. */
+ *  is the freshly-rebuilt deck digest so the model always reasons about the CURRENT deck. `changes` is an
+ *  optional pre-rendered changelog of what the author did to the deck SINCE their last turn (a net bullet
+ *  block from src/editor/deckNarration.ts) — additive context so the model can react to edits without us
+ *  re-sending a full spatial snapshot. The server caps every part (CHAT_LIMITS) so a client can't inflate
+ *  the payload to burn the app's inference budget. */
 export interface ChatRequest {
   deckId: string
   messages: ChatTurn[]
   slides: SlideDigest[]
+  changes?: string
 }
 
 // Server-side ceilings. Login-gating already limits callers to real accounts; these bound the per-call cost
@@ -45,6 +49,7 @@ export const CHAT_LIMITS = {
   maxTitle: 120,
   maxSlides: 150,
   maxTextPerSlide: 240,
+  maxChanges: 2000, // the per-turn changelog block; truncated (not rejected) like every other field
 } as const
 
 // Coerce an untrusted value to a string — the request is parsed from JSON, so the declared types are only a
@@ -78,5 +83,11 @@ export function clampChatRequest(req: ChatRequest): ChatRequest {
         text: str(ss.text).slice(0, CHAT_LIMITS.maxTextPerSlide),
       }
     })
-  return { deckId: str(req.deckId), messages, slides }
+  const changes = str(req.changes).slice(0, CHAT_LIMITS.maxChanges)
+  return {
+    deckId: str(req.deckId),
+    messages,
+    slides,
+    ...(changes ? { changes } : {}),
+  }
 }

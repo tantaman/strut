@@ -16,6 +16,7 @@ import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
 import { applyPlan, buildDigest, previewCards } from './aiArrange'
+import { suppressDeckNarration } from './deckNarration'
 import { track } from '../lib/analytics'
 import type { PreviewCard } from './aiArrange'
 import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
@@ -392,6 +393,9 @@ export function Overview({
   // Commit the previewed plan as ONE undoable step, then drop the preview.
   function applyPreview() {
     if (!preview) return
+    // The advisor shouldn't be told the AUTHOR reordered — this is the assistant's own edit. Suppress the
+    // deck-change narration briefly so these mutations don't land in the next turn's changelog.
+    if (deck) suppressDeckNarration(deck.id)
     applyPlan(preview.plan, mutate, slides, history)
     track('arrange:applied', {
       layout: preview.plan.layout,

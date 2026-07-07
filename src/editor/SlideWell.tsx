@@ -12,6 +12,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import { applyGenerated } from './aiGenerate'
+import { suppressDeckNarration } from './deckNarration'
 import { track } from '../lib/analytics'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
@@ -126,6 +127,8 @@ export function SlideWell({
 
   // Append the AI-generated slides (one undo for the whole batch) and jump to the first new one.
   function handleGenerated(generated: GeneratedDeck) {
+    // These new slides are the assistant's, not the author's — keep them out of the next turn's changelog.
+    suppressDeckNarration(editor.deckId)
     const firstId = applyGenerated(
       generated,
       mutate,
