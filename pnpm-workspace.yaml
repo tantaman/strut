@@ -29,3 +29,4 @@ minimumReleaseAgeExclude:
   - '@rindle/react@0.4.3'
   - '@rindle/remote@0.4.3'
   - '@rindle/wasm@0.4.3'
+  - '@rindle/narrator@0.4.3'

@@ -27,6 +27,7 @@
     "@rindle/api-server": "^0.4.3",
     "@rindle/client": "^0.4.3",
     "@rindle/daemon-client": "^0.4.3",
+    "@rindle/narrator": "^0.4.3",
     "@rindle/optimistic": "^0.4.3",
     "@rindle/react": "^0.4.3",
     "@rindle/wasm": "^0.4.3",
