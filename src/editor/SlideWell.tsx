@@ -395,7 +395,9 @@ export function SlideWell({
         <button
           className={
             'well__add' +
-            (touchDragging && dropIdx === slides.length ? ' is-drop-before' : '')
+            (touchDragging && dropIdx === slides.length
+              ? ' is-drop-before'
+              : '')
           }
           onClick={addSlide}
           onDragOver={(e) => {
