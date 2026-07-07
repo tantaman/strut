@@ -33,7 +33,7 @@ import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
 import { cssFontFamily, themeVars } from './render'
 import { ColorField } from './ColorField'
-import { backgroundImage, composeBackground, resolveBackground } from './types'
+import { surfaceStyle } from './types'
 import type { DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 
@@ -95,9 +95,10 @@ export function TipTapSlideEditor({
     })
   }
 
-  const background = composeBackground(
-    resolveBackground(slide.background, deck?.background ?? undefined),
-    backgroundImage(slide.background, deck?.background ?? undefined),
+  const bgStyle = surfaceStyle(
+    slide.background,
+    deck?.background ?? undefined,
+    'bg',
   )
 
   return (
@@ -114,7 +115,7 @@ export function TipTapSlideEditor({
               width: SLIDE_W,
               height: SLIDE_H,
               transform: `scale(${scale})`,
-              background,
+              ...bgStyle,
               ...themeVars(deck, slide),
             }}
           >
@@ -257,6 +258,7 @@ function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
       </select>
       <ColorField
         value={currentColor}
+        solidOnly
         themeDefault={{
           color: deck?.body_color ?? '',
           title: 'Theme text color',

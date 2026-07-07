@@ -17,14 +17,7 @@ import {
   renderInner,
   themeVars,
 } from './render'
-import {
-  backgroundImage,
-  composeBackground,
-  resolveBackground,
-  resolveSurface,
-  SHAPES,
-  textTypeOf,
-} from './types'
+import { SHAPES, surfaceStyle, textTypeOf } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
@@ -107,10 +100,8 @@ export function Stage({
     h: number
   }>(null)
 
-  const bg = resolveBackground(slideData.background, deck?.background)
-  const bgImg = backgroundImage(slideData.background, deck?.background)
-  const surf = resolveSurface(slideData.surface, deck?.surface)
-  const surfImg = backgroundImage(slideData.surface, deck?.surface)
+  const bgStyle = surfaceStyle(slideData.background, deck?.background, 'bg')
+  const surfStyle = surfaceStyle(slideData.surface, deck?.surface, 'surface')
 
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {
@@ -601,11 +592,7 @@ export function Stage({
   // rendered output branches — so hook order stays stable when the active slide flips layers.
   if (slideData.render_mode === 'markdown') {
     return (
-      <div
-        className="stage stage--md"
-        ref={stageRef}
-        style={{ background: composeBackground(surf, surfImg) }}
-      >
+      <div className="stage stage--md" ref={stageRef} style={surfStyle}>
         <UserStyle css={deck?.custom_stylesheet} />
         {editor.canEdit ? (
           // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale); the
@@ -626,7 +613,7 @@ export function Stage({
                   width: SLIDE_W,
                   height: SLIDE_H,
                   transform: `scale(${mdScale})`,
-                  background: composeBackground(bg, bgImg),
+                  ...bgStyle,
                   ...themeVars(deck, slideData),
                 }}
               >
@@ -641,11 +628,7 @@ export function Stage({
   }
 
   return (
-    <div
-      className="stage"
-      ref={stageRef}
-      style={{ background: composeBackground(surf, surfImg) }}
-    >
+    <div className="stage" ref={stageRef} style={surfStyle}>
       <UserStyle css={deck?.custom_stylesheet} />
       <Inspector
         componentRefs={componentRefs}
@@ -665,7 +648,7 @@ export function Stage({
             width: SLIDE_W,
             height: SLIDE_H,
             transform: `scale(${scale})`,
-            background: composeBackground(bg, bgImg),
+            ...bgStyle,
             ...themeVars(deck, slideData),
           }}
         >

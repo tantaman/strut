@@ -917,6 +917,14 @@ button {
   overflow: hidden;
   font-family: var(--strut-body-font, 'Lato', sans-serif);
   color: var(--strut-body-color, #111);
+  /* Deck-body paint contract (themeTextVars). Flat theme → paint:none / clip:border-box /
+     fill:currentColor, i.e. identical to a plain solid color. A gradient/effect theme fills the box
+     with the paint clipped to the body glyphs and turns the glyph fill transparent so it shows. */
+  background: var(--strut-body-paint, none);
+  -webkit-background-clip: var(--strut-body-clip, border-box);
+  background-clip: var(--strut-body-clip, border-box);
+  -webkit-text-fill-color: var(--strut-body-fill, currentColor);
+  animation: var(--strut-body-anim, none);
   text-align: var(--strut-text-align, left);
   line-height: 1.35;
   font-size: 32px;
@@ -930,6 +938,12 @@ button {
 .strut-md h4 {
   font-family: var(--strut-heading-font, 'Lato', sans-serif);
   color: var(--strut-heading-color, #111);
+  /* Deck-heading paint contract — overrides the body paint for heading glyphs. */
+  background: var(--strut-heading-paint, none);
+  -webkit-background-clip: var(--strut-heading-clip, border-box);
+  background-clip: var(--strut-heading-clip, border-box);
+  -webkit-text-fill-color: var(--strut-heading-fill, currentColor);
+  animation: var(--strut-heading-anim, none);
   line-height: 1.1;
   margin: 0 0 0.4em;
   font-weight: 700;
@@ -982,6 +996,12 @@ button {
   background: none;
   padding: 0;
 }
+/* code/pre carry their own chip background (not clipped to text), so under a deck-body paint restore an
+   opaque glyph fill (the representative solid) instead of inheriting the transparent paint fill. */
+.strut-md code,
+.strut-md pre {
+  -webkit-text-fill-color: currentColor;
+}
 .strut-md blockquote {
   border-left: 4px solid rgba(0, 0, 0, 0.18);
   padding-left: 0.8em;
@@ -997,6 +1017,57 @@ button {
 .strut-md th {
   border: 1px solid rgba(0, 0, 0, 0.2);
   padding: 0.3em 0.6em;
+}
+
+/* Animated paint effects (see src/editor/paint.ts). A `fx:` token carries only the `animation`
+   shorthand naming one of these keyframes; the matching `background` (sized so background-position has
+   room to travel) rides inline. The impress export inlines a mirror of this block — keep in sync. */
+@keyframes strut-shimmer {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -220% 0;
+  }
+}
+@keyframes strut-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: -200% 50%;
+  }
+}
+@keyframes strut-holo {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+@keyframes strut-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.35);
+  }
+}
+/* Respect prefers-reduced-motion: neutralize paint animations on deck content (slide surfaces and
+   components) while leaving the fill itself rendered — it just sits static. */
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .play,
+  .strut-surface,
+  .strut-surface *,
+  .cmp,
+  .cmp * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+  }
 }
 
 /* component wrapper on the canvas */
@@ -1681,6 +1752,148 @@ button {
   outline: 2px solid var(--coral);
   outline-offset: 2px;
   border-color: var(--coral);
+}
+
+/* ---- paint picker: Solid / Gradient / Effect tabs + builders (see src/editor/paint.ts) ---- */
+.paint-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+}
+.paint-tab {
+  flex: 1;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.paint-tab:hover {
+  color: var(--text);
+}
+.paint-tab.is-active {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+.paint-build {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 188px;
+}
+/* Segmented control (gradient type / effect name). */
+.paint-seg {
+  display: flex;
+  gap: 4px;
+}
+.paint-seg--wrap {
+  flex-wrap: wrap;
+}
+.paint-seg__btn {
+  flex: 1;
+  min-width: 42px;
+  padding: 4px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.paint-seg__btn:hover {
+  color: var(--text);
+}
+.paint-seg__btn.is-active {
+  border-color: var(--coral);
+  color: var(--text);
+  background: var(--coral-soft);
+}
+.paint-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.paint-range > span:first-child {
+  width: 40px;
+  flex: none;
+}
+.paint-range input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--coral);
+}
+.paint-range__val {
+  width: 30px;
+  flex: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.paint-stops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.paint-stop {
+  position: relative;
+}
+.paint-stop input[type='color'] {
+  width: 30px;
+  height: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+  padding: 0;
+  cursor: pointer;
+}
+/* Remove-stop pip, tucked into the swatch corner so a row of stops stays compact. */
+.paint-stop__x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: none;
+}
+.paint-stop:hover .paint-stop__x {
+  display: block;
+}
+.paint-add {
+  width: 30px;
+  height: 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.paint-add:hover {
+  color: var(--text);
+  border-color: var(--coral);
+}
+.paint-preview {
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
 }
 
 /* ---- inline rich-text toolbar (spec §6.3) ---- */

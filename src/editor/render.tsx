@@ -4,7 +4,21 @@
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { cssHex, resolveTextAlign, textTypeOf } from './types'
-import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
+import type {
+  AnyComponent,
+  ComponentKind,
+  DeckThemeFields,
+  TextType,
+} from './types'
+import {
+  isPaintToken,
+  paintAnimation,
+  paintBackground,
+  paintPrimaryColor,
+  paintStyleFor,
+  parsePaint,
+  styleToProps,
+} from './paint'
 import { docToHtml } from './tiptapDoc'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
@@ -36,16 +50,47 @@ export function cssFontFamily(name: string | undefined): string {
  *  `var(--strut-<category>-…)` no matter which surface renders it. `--strut-text-align` (slide
  *  override → deck default → 'left') drives markdown-mode alignment; the optional `slide` supplies
  *  the per-slide override. */
+/** The CSS-var contract for one text category (heading | body). A flat color drives just `--…-color`;
+ *  a paint token additionally exposes the gradient/effect `background` (`--…-paint`), switches
+ *  background-clip to `text` (`--…-clip`), makes the glyph fill transparent (`--…-fill`) so the paint
+ *  shows through, and carries the effect animation (`--…-anim`). Both markdown text (static rules in
+ *  strut.css reference these vars) and inheriting text components (cmpStyle sets the same vars inline)
+ *  read this one contract, so a deck-wide gradient/shimmer heading paints identically in both modes. */
+export function themeTextVars(
+  cat: TextType,
+  color: string | null | undefined,
+): Record<string, string> {
+  const p = `--strut-${cat}`
+  if (isPaintToken(color))
+    return {
+      [`${p}-color`]: paintPrimaryColor(color),
+      [`${p}-paint`]: paintBackground(color!),
+      [`${p}-clip`]: 'text',
+      [`${p}-fill`]: 'transparent',
+      [`${p}-anim`]: paintAnimation(color) ?? 'none',
+    }
+  return {
+    [`${p}-color`]: cssHex(color ?? '', '111111'),
+    [`${p}-paint`]: 'none',
+    [`${p}-clip`]: 'border-box',
+    [`${p}-fill`]: 'currentColor',
+    [`${p}-anim`]: 'none',
+  }
+}
+
 export function themeVars(
   theme: DeckThemeFields | null | undefined,
   slide?: { text_align?: string | null } | null,
 ): CSSProperties {
   return {
-    '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
+    ...themeTextVars('heading', theme?.heading_color),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
-    '--strut-body-color': cssHex(theme?.body_color ?? '', '111111'),
+    ...themeTextVars('body', theme?.body_color),
     '--strut-body-font': cssFontFamily(theme?.body_font ?? ''),
-    '--strut-text-align': resolveTextAlign(slide?.text_align, theme?.text_align),
+    '--strut-text-align': resolveTextAlign(
+      slide?.text_align,
+      theme?.text_align,
+    ),
   } as CSSProperties
 }
 
@@ -53,6 +98,26 @@ export function componentSize(c: AnyComponent): { w: number; h: number } {
   return {
     w: c.scale_w || DEFAULT_W[c.kind],
     h: c.scale_h || DEFAULT_H[c.kind],
+  }
+}
+
+/** The color-related props for a text component: an explicit paint token clips a gradient/effect to the
+ *  glyphs; an explicit flat color sets `color`; an empty color inherits the deck theme via the var
+ *  contract (which itself may be flat or a paint — see themeTextVars). */
+function textPaintProps(
+  cat: TextType,
+  color: string | undefined,
+): CSSProperties {
+  if (color && isPaintToken(color))
+    return styleToProps(paintStyleFor(parsePaint(color)!, 'text'))
+  if (color) return { color: cssHex(color, '111111') }
+  return {
+    background: `var(--strut-${cat}-paint, none)`,
+    WebkitBackgroundClip: `var(--strut-${cat}-clip, border-box)`,
+    backgroundClip: `var(--strut-${cat}-clip, border-box)`,
+    WebkitTextFillColor: `var(--strut-${cat}-fill, currentColor)`,
+    color: `var(--strut-${cat}-color, #111111)`,
+    animation: `var(--strut-${cat}-anim, none)`,
   }
 }
 
@@ -70,9 +135,7 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
       fontSize: c.size ?? 72,
       // '' = inherit the deck theme default for this component's category (heading | body), read
       // from the CSS variables every slide container sets (themeVars above).
-      color: c.color
-        ? cssHex(c.color, '111111')
-        : `var(--strut-${cat}-color, #111111)`,
+      ...textPaintProps(cat, c.color),
       // Quote the family: an unquoted CSS font-family token can't start with a digit, so a name
       // like "Press Start 2P" is invalid unquoted and the browser drops the whole declaration.
       // (The impress export already quotes it the same way.)
@@ -101,10 +164,7 @@ const TextBody = memo(function TextBody({ html }: { html: string }) {
 })
 
 const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
-  const dangerouslySetInnerHTML = useMemo(
-    () => ({ __html: markup }),
-    [markup],
-  )
+  const dangerouslySetInnerHTML = useMemo(() => ({ __html: markup }), [markup])
   return (
     <div
       style={FULL_SIZE_STYLE}
@@ -128,7 +188,10 @@ export const MarkdownSurface = memo(function MarkdownSurface({
     [doc],
   )
   return (
-    <div className="strut-md" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+    <div
+      className="strut-md"
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+    />
   )
 })
 
@@ -185,7 +248,9 @@ export function renderInner(
       // opaque origin, so it can't reach the app's cookies/storage/DOM even if served same-origin. NO
       // allow-top-navigation / allow-popups / allow-modals / allow-forms, and no `allow=` feature grants.
       if (!c.src)
-        return <div className="cmp__ph">▶ runnable — press Run in the panel</div>
+        return (
+          <div className="cmp__ph">▶ runnable — press Run in the panel</div>
+        )
       return (
         <iframe
           src={c.src}

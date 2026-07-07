@@ -1,9 +1,11 @@
 // Shared editor types: a unified "component" view over the polymorphic Rindle `component` table,
 // plus the shape catalog and theme-resolution helpers.
 
+import type { CSSProperties } from 'react'
 import { parseProps } from '../../shared/componentProps'
 import type { ComponentProps, ComponentType } from '../../shared/componentProps'
 import { DEFAULT_FONT } from '../config'
+import { isPaintToken, paintAnimation, paintBackground } from './paint'
 
 export type ComponentKind = ComponentType
 
@@ -222,6 +224,7 @@ export function resolveBackground(
 ): string {
   const v = slideBg && slideBg !== '' ? slideBg : (deckBg ?? 'bg-default')
   if (v === 'bg-transparent') return 'transparent'
+  if (isPaintToken(v)) return paintBackground(v)
   if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
   if (v.startsWith('img:')) return '#ffffff'
   return BG_COLORS[v] ?? '#ffffff'
@@ -239,6 +242,7 @@ export function resolveSurface(
       : (deckSurface ?? 'bg-default')
   if (v === 'bg-default' || v === '' || v === 'bg-transparent')
     return SURFACE_DEFAULT
+  if (isPaintToken(v)) return paintBackground(v)
   if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
   if (v.startsWith('img:')) return '#222222'
   return SURFACE_COLORS[v] ?? SURFACE_DEFAULT
@@ -262,6 +266,29 @@ export function composeBackground(
   image: string | undefined,
 ): string {
   return image ? `${image} center / cover no-repeat, ${color}` : color
+}
+
+/** The full inline style for a slide-card background or a surface: the composed `background` plus the
+ *  `animation` when the effective token is an animated `fx:` paint. Call sites spread this so an
+ *  effect fill drives its keyframes (defined statically in strut.css). `kind` selects which resolver
+ *  and per-slide/deck fallback applies. */
+export function surfaceStyle(
+  slideVal: string | undefined,
+  deckVal: string | undefined,
+  kind: 'bg' | 'surface',
+): CSSProperties {
+  const color =
+    kind === 'bg'
+      ? resolveBackground(slideVal, deckVal)
+      : resolveSurface(slideVal, deckVal)
+  const effective =
+    slideVal && slideVal !== '' ? slideVal : (deckVal ?? 'bg-default')
+  const style: CSSProperties = {
+    background: composeBackground(color, backgroundImage(slideVal, deckVal)),
+  }
+  const anim = paintAnimation(effective)
+  if (anim) style.animation = anim
+  return style
 }
 
 // A compact swatch palette for text color & shape fill custom pickers (Open Color-ish), spec §8.5.

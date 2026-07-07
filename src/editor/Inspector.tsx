@@ -234,7 +234,8 @@ const InspectorPanel = memo(function InspectorPanel({
       {c.kind === 'shape' && (
         <div className="insp__row">
           <span>Fill</span>
-          <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
+          {/* Shapes fill via SVG `currentColor`, which can't take a gradient — keep fill flat. */}
+          <ColorField value={c.fill ?? '3498db'} onChange={setFill} solidOnly />
         </div>
       )}
 
@@ -314,7 +315,9 @@ function ArtifactControls({
           whiteSpace: 'pre',
           resize: 'vertical',
         }}
-        placeholder={"// ES module — import from https://esm.sh, render into #root"}
+        placeholder={
+          '// ES module — import from https://esm.sh, render into #root'
+        }
       />
       {error && <p className="modal__error">{error}</p>}
       <div className="insp__row insp__zrow">

@@ -524,9 +524,13 @@ export function Header({
                     onBackground={(v) => setBg('bg', v)}
                     onCustomBackground={(hex) => setCustom('bg', hex)}
                     onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
+                    onPaintBackground={(t) => setBg('bg', t)}
+                    onPaintBackgroundLive={(t) => setBgLive('bg', t)}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
                     onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
+                    onPaintSurface={(t) => setBg('surface', t)}
+                    onPaintSurfaceLive={(t) => setBgLive('surface', t)}
                     onText={setTextTheme}
                     onTextLive={setTextThemeLive}
                     onAlign={setDeckAlign}
@@ -703,9 +707,13 @@ function ThemePopover({
   onBackground,
   onCustomBackground,
   onCustomBackgroundLive,
+  onPaintBackground,
+  onPaintBackgroundLive,
   onSurface,
   onCustomSurface,
   onCustomSurfaceLive,
+  onPaintSurface,
+  onPaintSurfaceLive,
   onText,
   onTextLive,
   onAlign,
@@ -716,9 +724,13 @@ function ThemePopover({
   onBackground: (value: string) => void
   onCustomBackground: (hex: string) => void
   onCustomBackgroundLive: (hex: string) => void
+  onPaintBackground: (token: string) => void
+  onPaintBackgroundLive: (token: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
   onCustomSurfaceLive: (hex: string) => void
+  onPaintSurface: (token: string) => void
+  onPaintSurfaceLive: (token: string) => void
   onText: (
     patch: Partial<
       Record<
@@ -752,6 +764,8 @@ function ThemePopover({
           onPick={onBackground}
           onCustom={onCustomBackground}
           onCustomLive={onCustomBackgroundLive}
+          onPaint={onPaintBackground}
+          onPaintLive={onPaintBackgroundLive}
           allowTransparent
         />
       </div>
@@ -765,6 +779,8 @@ function ThemePopover({
           onPick={onSurface}
           onCustom={onCustomSurface}
           onCustomLive={onCustomSurfaceLive}
+          onPaint={onPaintSurface}
+          onPaintLive={onPaintSurfaceLive}
         />
       </div>
 

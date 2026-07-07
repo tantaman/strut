@@ -3,7 +3,7 @@
 // plays identically), then impress.js (CDN) reads the data-* attributes and flies the camera.
 
 import { SLIDE_H, SLIDE_W } from '../config'
-import { componentSize } from './render'
+import { componentSize, themeTextVars } from './render'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
   cssHex,
@@ -12,7 +12,14 @@ import {
   resolveTextAlign,
   textTypeOf,
 } from './types'
-import type { AnyComponent, DeckThemeFields } from './types'
+import type { AnyComponent, DeckThemeFields, TextType } from './types'
+import {
+  isPaintToken,
+  paintAnimation,
+  paintStyleFor,
+  parsePaint,
+  styleToDecls,
+} from './paint'
 import { flightFor } from './transitions'
 import { scopeCss } from './css'
 import type { DeckBundle } from './serialize'
@@ -23,9 +30,9 @@ const deg = (rad: number) => (rad * 180) / Math.PI
 
 // Markdown-mode surface styling — mirrors the `.strut-md` scope in src/strut.css so an exported deck
 // renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss).
-const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:64px 88px;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:32px;}
+const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:64px 88px;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);background:var(--strut-body-paint,none);-webkit-background-clip:var(--strut-body-clip,border-box);background-clip:var(--strut-body-clip,border-box);-webkit-text-fill-color:var(--strut-body-fill,currentColor);animation:var(--strut-body-anim,none);text-align:var(--strut-text-align,left);line-height:1.35;font-size:32px;}
   .strut-md>*:first-child{margin-top:0;}
-  .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;}
+  .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);background:var(--strut-heading-paint,none);-webkit-background-clip:var(--strut-heading-clip,border-box);background-clip:var(--strut-heading-clip,border-box);-webkit-text-fill-color:var(--strut-heading-fill,currentColor);animation:var(--strut-heading-anim,none);line-height:1.1;margin:0 0 .4em;font-weight:700;}
   .strut-md h1{font-size:88px;}
   .strut-md h2{font-size:64px;}
   .strut-md h3{font-size:48px;}
@@ -37,10 +44,19 @@ const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;p
   .strut-md code{font-family:'Droid Sans Mono',monospace;font-size:.8em;background:rgba(0,0,0,.06);padding:.1em .3em;border-radius:4px;}
   .strut-md pre{background:rgba(0,0,0,.06);padding:.7em 1em;border-radius:8px;overflow:auto;}
   .strut-md pre code{background:none;padding:0;}
+  .strut-md code,.strut-md pre{-webkit-text-fill-color:currentColor;}
   .strut-md blockquote{border-left:4px solid rgba(0,0,0,.18);padding-left:.8em;opacity:.85;}
   .strut-md img{max-width:100%;}
   .strut-md table{border-collapse:collapse;}
   .strut-md td,.strut-md th{border:1px solid rgba(0,0,0,.2);padding:.3em .6em;}`
+
+// Animated-paint keyframes + reduced-motion guard — a mirror of the block in src/strut.css so an
+// exported deck plays effects identically. Keep in sync.
+const PAINT_FX_CSS = `  @keyframes strut-shimmer{from{background-position:0 0}to{background-position:-220% 0}}
+  @keyframes strut-flow{from{background-position:0% 50%}to{background-position:-200% 50%}}
+  @keyframes strut-holo{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+  @keyframes strut-pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+  @media (prefers-reduced-motion:reduce){.strut-surface,.strut-surface *,.slideContainer,.cmp,.cmp *,body{animation-duration:.001ms!important;animation-iteration-count:1!important}}`
 
 const esc = (s: string) =>
   s
@@ -49,6 +65,23 @@ const esc = (s: string) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
+/** Inline color declarations for an exported text component — the string mirror of render.textPaintProps:
+ *  an explicit `grad:`/`fx:` color clips the paint to the glyphs, a flat hex sets `color`, and an empty
+ *  color inherits the deck theme (flat or paint) via the CSS-var contract on the slide container. */
+function textStyleDecls(cat: TextType, color: string | undefined): string {
+  if (color && isPaintToken(color))
+    return styleToDecls(paintStyleFor(parsePaint(color)!, 'text'))
+  if (color) return `color:${cssHex(color, '111111')}`
+  return (
+    `background:var(--strut-${cat}-paint,none);` +
+    `-webkit-background-clip:var(--strut-${cat}-clip,border-box);` +
+    `background-clip:var(--strut-${cat}-clip,border-box);` +
+    `-webkit-text-fill-color:var(--strut-${cat}-fill,currentColor);` +
+    `color:var(--strut-${cat}-color,#111111);` +
+    `animation:var(--strut-${cat}-anim,none)`
+  )
+}
+
 function componentHTML(c: AnyComponent): string {
   const { w, h } = componentSize(c)
   const transform = `rotate(${c.rotate || 0}rad) skewX(${c.skew_x || 0}rad) skewY(${c.skew_y || 0}rad)`
@@ -56,16 +89,13 @@ function componentHTML(c: AnyComponent): string {
   let extra = ''
   switch (c.kind) {
     case 'text': {
-      // '' color/font = inherit the deck theme default for this category via the CSS vars set on
-      // the slide container (see themeVarsCss / stepHTML).
+      // '' color = inherit the deck theme (flat or paint) via the CSS-var contract on the slide
+      // container (see themeVarsCss). Mirrors render.textPaintProps via textStyleDecls.
       const cat = textTypeOf(c)
-      const color = c.color
-        ? cssHex(c.color, '111111')
-        : `var(--strut-${cat}-color, #111111)`
       const font = c.font_family
         ? `'${esc(c.font_family)}',sans-serif`
         : `var(--strut-${cat}-font, 'Lato',sans-serif)`
-      extra = `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;max-width:1100px;`
+      extra = `font-size:${c.size ?? 72}px;${textStyleDecls(cat, c.color)};font-family:${font};line-height:1.1;white-space:pre-wrap;max-width:1100px;`
       body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
       break
     }
@@ -105,10 +135,18 @@ function componentHTML(c: AnyComponent): string {
 function themeVarsCss(theme: DeckThemeFields, align: string): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
+  // The full paint var contract (color + paint/clip/fill/anim per category), shared with the live app
+  // via themeTextVars so a gradient/effect deck theme paints identically in the export.
+  const vars = {
+    ...themeTextVars('heading', theme.heading_color),
+    ...themeTextVars('body', theme.body_color),
+  }
+  const decls = Object.entries(vars)
+    .map(([k, v]) => `${k}:${v};`)
+    .join('')
   return (
-    `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
+    decls +
     `--strut-heading-font:${font(theme.heading_font)};` +
-    `--strut-body-color:${cssHex(theme.body_color ?? '', '111111')};` +
     `--strut-body-font:${font(theme.body_font)};` +
     `--strut-text-align:${align};`
   )
@@ -137,6 +175,11 @@ function stepHTML(
   if (scale !== 1) attrs.push(`data-scale="${scale}"`)
 
   const bg = resolveBackground(slide.background, deck.background)
+  const bgAnim = paintAnimation(
+    slide.background && slide.background !== ''
+      ? slide.background
+      : deck.background,
+  )
   const align = resolveTextAlign(slide.text_align, deck.text_align)
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
@@ -150,7 +193,7 @@ function stepHTML(
     .join('\n')
   const inner = [body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};${bgAnim ? `animation:${bgAnim};` : ''}overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
 ${inner}
     </div>
   </div>`
@@ -159,12 +202,13 @@ ${inner}
 export function toImpressHTML(bundle: DeckBundle): string {
   const { deck, slides, componentsBySlide, customBackgrounds } = bundle
   const surface = resolveSurface(undefined, deck.surface)
+  const surfAnim = paintAnimation(deck.surface)
   const steps = slides
     .map((s, i) => stepHTML(s, componentsBySlide[s.id] ?? [], deck, i))
     .join('\n')
-  const customCss = customBackgrounds
-    .map((b) => `.${b.klass}{background:${b.style}}`)
-    .join('\n')
+  // `b.style` is already a full CSS rule (`.bg-custom-<hex>{background:#…}`) minted on the deck, so
+  // emit it verbatim — wrapping it in another `.klass{…}` (as before) produced invalid nested CSS.
+  const customCss = customBackgrounds.map((b) => b.style).join('\n')
   // Canned transition (spec §7.2): impress reads data-transition-duration; we also emit the chosen
   // name as a class for fidelity (a Bespoke generator would consume it; impress ignores it).
   const transition = deck.canned_transition || 'none'
@@ -178,12 +222,13 @@ export function toImpressHTML(bundle: DeckBundle): string {
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>${esc(deck.title || 'Strut presentation')}</title>
 <style>
-  html,body{margin:0;height:100%;background:${surface};font-family:'Lato',sans-serif;}
+  html,body{margin:0;height:100%;background:${surface};${surfAnim ? `animation:${surfAnim};` : ''}font-family:'Lato',sans-serif;}
   #impress{}
   .step{box-sizing:border-box;}
   .slideContainer{box-shadow:0 10px 60px rgba(0,0,0,.5);}
   .cmp-text{margin:0;}
 ${STRUT_MD_CSS}
+${PAINT_FX_CSS}
   .fallback{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:2rem;}
   .impress-not-supported .fallback{display:flex;}
   .impress-supported .fallback{display:none;}

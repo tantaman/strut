@@ -10,7 +10,7 @@
 
 import { SLIDE_W } from '../config'
 import { MarkdownSurface, themeVars } from './render'
-import { backgroundImage, composeBackground, resolveBackground } from './types'
+import { surfaceStyle } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import type { ReactNode } from 'react'
@@ -43,10 +43,7 @@ function SlideFrame({
         width: SLIDE_W,
         height: (SLIDE_W * 9) / 16,
         transform: `scale(${scale})`,
-        background: composeBackground(
-          resolveBackground(slide.background, deck?.background),
-          backgroundImage(slide.background, deck?.background),
-        ),
+        ...surfaceStyle(slide.background, deck?.background, 'bg'),
         ...themeVars(deck, slide),
       }}
     >
@@ -93,4 +90,3 @@ export function SlideView({
     </SlideFrame>
   )
 }
-
