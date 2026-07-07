@@ -23,6 +23,7 @@ import {
   List,
   ListOrdered,
   Quote,
+  SquareCode,
   Strikethrough,
 } from 'lucide-react'
 import { FONT_FAMILIES, SLIDE_H, SLIDE_W } from '../config'
@@ -162,6 +163,12 @@ function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
       title: 'Inline code',
       active: editor.isActive('code'),
       run: () => editor.chain().focus().toggleCode().run(),
+    },
+    {
+      icon: SquareCode,
+      title: 'Code block',
+      active: editor.isActive('codeBlock'),
+      run: () => editor.chain().focus().toggleCodeBlock().run(),
     },
     {
       icon: Heading1,
