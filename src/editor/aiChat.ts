@@ -13,15 +13,33 @@
 //      re-renders at frame rate, not per token. (`edit` wants the full prior row — we hold `prev`; for a
 //      local table the engine keys by PK so an out-of-order flush still converges — RINDLE_NOTES #21.)
 
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { newId } from '../config'
-import { buildDigest } from './aiArrange'
+import { buildDigest, slideText } from './aiArrange'
+import { dispatchAction } from './aiChatActions'
+import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
+import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
-import { useStore } from '../rindle/RindleProvider'
+import { useMutate, useStore } from '../rindle/RindleProvider'
+import { useHistory } from './UndoProvider'
 import type { StrutStore } from '../rindle/client'
 import type { ChatMessageRow } from '../rindle/localSchema'
+import type { ThemeDeck } from './aiTheme'
 import type { SlideDetail } from './deckDetail'
 import type { ChatRequest, ChatTurn } from '../../shared/chat'
+import type {
+  ChatAction,
+  ChatActRequest,
+  ChatActResult,
+  ChatActSlide,
+  ChatActTheme,
+} from '../../shared/chatAction'
 
 /** A thread row as the UI reads it (a full `chat_message` row). */
 export type ChatMessage = ChatMessageRow

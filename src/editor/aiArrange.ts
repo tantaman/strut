@@ -80,7 +80,7 @@ function docText(raw: string | null | undefined): string {
 // (Spatial slides carry their text in component fragment refs, which need a React `useFragment` to read;
 // pulling that into the digest is a follow-up — see AI_ARRANGE_PLAN.md. Markdown is the default, so the
 // model still has content to reason about for typical decks.)
-function slideText(s: SlideDetail): string {
+export function slideText(s: SlideDetail): string {
   const fromDoc = docText(s.doc)
   if (fromDoc) return fromDoc
   const md = s.markdown

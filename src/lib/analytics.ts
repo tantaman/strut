@@ -36,6 +36,7 @@ export type StrutEvent =
   | 'slides:generated' // ✨ AI authored N slides from a description (SlideWell)
   | 'arrange:applied' //  ✨ AI Arrange plan committed to the deck (Overview)
   | 'chat:sent' //        ✨ Chat — a user turn sent to the advisor (ChatPanel)
+  | 'chat:edit' //        ✨ Chat — an Edit-lane turn (the AI drives one deck change; ChatPanel)
   | 'play:started' //     entered Play / present mode
   | 'export' //           downloaded a deck (json | html)
   | 'account:promote' //  guest chose to promote to a real account (github | google)
