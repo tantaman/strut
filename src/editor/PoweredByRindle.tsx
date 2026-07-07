@@ -1,9 +1,11 @@
 // "Powered by rindle" credit — Strut is the showcase app for the rindle sync platform, so this links
 // back to rindle.sh from every surface. Two variants:
-//   • 'float'  (default) — a fixed bottom-right pill for the chrome-less full-screen deck viewers
-//                          (present + public share). Mirrors the `.share-badge` styling.
-//   • 'inline'           — a compact credit that sits in the app's top chrome (editor header, dashboard
-//                          brandbar), where a floating pill would collide with the Overview controls.
+//   • 'float'  (default) — a fixed bottom-right pill. Used by the chrome-less full-screen deck viewers
+//                          (present + public share) and the editor's Slide mode. Mirrors `.share-badge`.
+//                          Callers must keep it out of surfaces that already own the bottom-right corner
+//                          (e.g. Overview, whose zoom/Fit controls live there).
+//   • 'inline'           — a compact credit that sits in the app's top chrome (dashboard brandbar),
+//                          divided from the Strut lockup instead of floating.
 // The mark is the rindle brand logo (ink tile + paper outline + orange accent dot) inlined so it needs
 // no asset fetch and stays crisp; its colours are fixed on purpose (a logo doesn't recolour with the
 // theme). `stopPropagation` keeps a click on the badge from also advancing the slide when it sits inside
