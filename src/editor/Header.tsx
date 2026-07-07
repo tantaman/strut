@@ -598,7 +598,9 @@ export function Header({
 
       <div className="hdr__spacer" />
 
-      <div className="seg">
+      {/* Mode toggle, Chat, and Present are marked so the mobile stylesheet can hide them here and
+          hand those actions to the bottom tab bar (thumb reach) — see the @media block in strut.css. */}
+      <div className="seg hdr__mode">
         <button
           className={editor.mode === 'slide' ? 'is-active' : ''}
           onClick={() => editor.setMode('slide')}
@@ -614,7 +616,7 @@ export function Header({
       </div>
 
       <button
-        className={chatOpen ? 'btn is-active' : 'btn'}
+        className={chatOpen ? 'btn hdr__chat is-active' : 'btn hdr__chat'}
         onClick={onToggleChat}
         title="Chat with an AI advisor about your deck"
         aria-pressed={chatOpen}
@@ -623,7 +625,7 @@ export function Header({
       </button>
 
       <button
-        className="btn btn--primary"
+        className="btn btn--primary hdr__present"
         onClick={() =>
           deck &&
           navigate({

@@ -12,6 +12,7 @@ import { Stage } from '../editor/Stage'
 import { Overview } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
+import { MobileTabBar } from '../editor/mobile/MobileTabBar'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId')({
@@ -140,8 +141,16 @@ function EditorInner({ deckId }: { deckId: string }) {
         )}
       </div>
       {/* Floating "powered by rindle" credit. Only in Slide mode — Overview parks its zoom/Fit
-          controls in the same bottom-right corner, so we'd collide there. */}
+          controls in the same bottom-right corner, so we'd collide there. (Hidden on mobile, where
+          the bottom tab bar owns that corner — see strut.css.) */}
       {editor.mode === 'slide' && <PoweredByRindle />}
+      {/* Bottom tab bar — hidden above the mobile breakpoint (strut.css); on phones it owns mode +
+          Advisor + Present, which the header sheds there. Last child so sheets anchor above it. */}
+      <MobileTabBar
+        deck={deck}
+        chatOpen={chatOpen}
+        onToggleChat={() => setChatOpen((o) => !o)}
+      />
     </div>
   )
 }

@@ -2627,3 +2627,301 @@ button {
     flex-basis: 300px;
   }
 }
+
+/* =========================================================================================
+   Mobile editor — touch-first companion (phones & small tablets, ≤768px).
+
+   The desktop DOM is reused wholesale; this block reflows it into a touch shell:
+     • header  → a slim app bar (logo + title) over a horizontally-scrolling tool row; the mode
+                 toggle, Chat and Present are hidden here and handed to the bottom tab bar.
+     • body    → a column (column-reverse so the Stage sits on top of the filmstrip without a
+                 DOM change), with the slide well turned into a horizontal filmstrip.
+     • Inspector, Chat, and header popovers become bottom sheets (they'd otherwise float off-canvas
+       or get clipped by the scrolling tool row).
+     • the .m-tabbar (rendered on every viewport) appears and owns mode / Advisor / Present.
+   No JS width branch drives any of this, so first paint is correct on both desktop and mobile.
+   ========================================================================================= */
+
+/* The bottom tab bar renders everywhere but only shows on mobile. */
+.m-tabbar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --m-tabbar-h: 56px;
+    --m-strip-h: 100px;
+    /* space a bottom sheet must leave for the tab bar (+ the phone's home indicator) */
+    --m-sheet-gap: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom) + 8px);
+  }
+
+  .editor {
+    height: 100dvh; /* exclude the mobile URL bar so the tab bar isn't clipped off-screen */
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .editor button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---- header → app bar --------------------------------------------------------------- */
+  .hdr {
+    padding: 7px 10px;
+    gap: 6px;
+  }
+  /* Handed to the tab bar; these just eat width in the app bar now. */
+  .hdr__mode,
+  .hdr__chat,
+  .hdr__present {
+    display: none;
+  }
+  /* The rindle credit — the inline header pill and the floating bottom-right one — collides with the
+     app bar / tab bar on a phone. Hide it only inside the editor; the chrome-less Present & share
+     viewers live outside .editor and keep their badge. */
+  .editor .powered-by {
+    display: none;
+  }
+  .hdr__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 15px;
+  }
+  /* One scrolling row of tools instead of a wrapping thicket. */
+  .hdr__tools {
+    order: 5;
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1px;
+  }
+  .hdr__tools::-webkit-scrollbar {
+    display: none;
+  }
+  .hdr__tools > *,
+  .hdr__group > * {
+    flex: 0 0 auto;
+  }
+
+  /* Header popovers (Theme / Share / Shapes) can't live inside the scrolling tool row — that
+     clips them — so lift them to bottom sheets. !important beats the inline top/left the JSX sets. */
+  .popover {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: var(--m-sheet-gap) !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 60;
+  }
+
+  /* ---- body → column: Stage on top, filmstrip beneath ---------------------------------- */
+  .editor__body {
+    flex-direction: column-reverse; /* DOM order is [well, stage]; reverse puts the stage up top */
+  }
+  .stage {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  /* ---- slide well → horizontal filmstrip ----------------------------------------------- */
+  .well {
+    flex: 0 0 var(--m-strip-h);
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .well::-webkit-scrollbar {
+    display: none;
+  }
+  .well__slide {
+    flex: 0 0 auto;
+    width: 146px;
+    height: calc(var(--m-strip-h) - 20px);
+  }
+  .well__slide .well__thumb {
+    height: 100%;
+  }
+  .well__slide.is-dragging {
+    opacity: 0.5;
+  }
+  /* Between-slide inserters are a hover affordance (no hover on touch) — drop them; the trailing
+     + tile adds slides, and reordering is the long-press drag. */
+  .well__ins {
+    display: none;
+  }
+  .well__add,
+  .well__gen {
+    flex: 0 0 auto;
+    position: relative;
+    height: calc(var(--m-strip-h) - 20px);
+    margin: 0;
+  }
+  .well__add {
+    width: 64px;
+    flex-direction: column;
+    gap: 2px;
+    white-space: nowrap;
+  }
+  .well__gen-toggle {
+    height: 100%;
+    white-space: nowrap;
+  }
+  /* The generate composer is too big for the strip — float it as a sheet. */
+  .well__gen-panel {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: var(--m-sheet-gap);
+    z-index: 42;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 12px;
+  }
+  /* Coral bar marking where a long-press drag will drop the slide. */
+  .well__slide.is-drop-before::before,
+  .well__add.is-drop-before::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 3px;
+    bottom: 3px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--coral);
+    z-index: 6;
+  }
+
+  /* ---- selection handles → finger-sized ------------------------------------------------ */
+  .handle {
+    width: 20px;
+    height: 20px;
+  }
+  .handle__del {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  /* ---- Inspector → bottom sheet (was a panel floating over the top-right of the canvas) --- */
+  .insp {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: var(--m-sheet-gap);
+    width: auto;
+    max-height: 46vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+  }
+
+  /* ---- Advisor → full sheet above the tab bar (was a 340px right rail) ------------------ */
+  .chat {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom));
+    flex-basis: auto;
+    border-left: none;
+    box-shadow: var(--shadow-lg);
+    z-index: 45;
+  }
+
+  /* ---- Overview: keep the map, tidy the floating control clusters ---------------------- */
+  .ov-hint {
+    display: none; /* the desktop keyboard/scroll hint doesn't apply to touch */
+  }
+  .ov-layouts,
+  .ov-transitions,
+  .ov-arrange {
+    max-width: calc(100vw - 20px);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ov-layouts::-webkit-scrollbar,
+  .ov-transitions::-webkit-scrollbar,
+  .ov-arrange::-webkit-scrollbar {
+    display: none;
+  }
+  .ov-layouts > *,
+  .ov-transitions > * {
+    flex: 0 0 auto;
+  }
+
+  /* ---- the bottom tab bar -------------------------------------------------------------- */
+  .m-tabbar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: stretch;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -1px 3px rgba(24, 26, 33, 0.05);
+    z-index: 35;
+  }
+  .m-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: var(--m-tabbar-h);
+    border: none;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+  }
+  .m-tab__ic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 26px;
+    border-radius: 8px;
+    transition:
+      background 0.12s,
+      color 0.12s;
+  }
+  .m-tab__lbl {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .m-tab.is-active {
+    color: var(--coral);
+  }
+  .m-tab.is-active .m-tab__ic {
+    background: var(--coral-soft);
+  }
+  .m-tab--present {
+    color: var(--coral);
+  }
+  .m-tab--present .m-tab__ic {
+    background: var(--grad);
+    color: #fff;
+  }
+  .m-tab:disabled {
+    opacity: 0.4;
+  }
+}
