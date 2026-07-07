@@ -521,23 +521,25 @@ A single curated hue set — `THEME_HUES` in `editor/types.ts` — is the source
 color stack. Each entry carries a stable `key`, a human `name`, the slide-card `card` color, and the
 deck `surface` color (a lighter sibling of the same hue). The background/surface token records and the
 picker swatch lists all derive from it, so a card and its surface can't drift apart and the picker can
-never offer a hue the resolver doesn't know. Values are Open Color, matching the text/shape swatches
-(§8.5) so the whole palette reads as one system.
+never offer a hue the resolver doesn't know. Because card/surface fill large areas of the screen, the
+values are deliberately **muted** (low-chroma) — at full-bleed, fully-saturated hues read as harsh — and
+sit as dusty siblings of the vivid text/shape swatches (§8.5), which stay punchy since they're small
+accents.
 
 | key | name | card | surface |
 | --- | --- | --- | --- |
-| `ink` | Ink | `#1e1e24` | `#2b2b33` |
-| `white` | White | `#ffffff` | `#f1f3f5` |
-| `smoke` | Smoke | `#dee2e6` | `#f1f3f5` |
-| `red` | Red | `#c92a2a` | `#e03131` |
-| `orange` | Orange | `#e8590c` | `#fd7e14` |
-| `yellow` | Yellow | `#ffd43b` | `#ffe066` |
-| `green` | Green | `#2f9e44` | `#40c057` |
-| `teal` | Teal | `#099268` | `#12b886` |
-| `blue` | Blue | `#1971c2` | `#228be6` |
-| `indigo` | Indigo | `#3b5bdb` | `#4c6ef5` |
-| `violet` | Violet | `#6741d9` | `#7950f2` |
-| `pink` | Pink | `#d6336c` | `#e64980` |
+| `ink` | Ink | `#22222a` | `#2e2e37` |
+| `white` | White | `#ffffff` | `#eef0f2` |
+| `smoke` | Smoke | `#dadde0` | `#eceef0` |
+| `red` | Red | `#b24a45` | `#c67a74` |
+| `orange` | Orange | `#c26a3c` | `#d59463` |
+| `yellow` | Yellow | `#e5c454` | `#efd688` |
+| `green` | Green | `#5a8a52` | `#7ba874` |
+| `teal` | Teal | `#3d8a78` | `#64a897` |
+| `blue` | Blue | `#4a72a0` | `#7295bd` |
+| `indigo` | Indigo | `#5a6bb0` | `#8290c9` |
+| `violet` | Violet | `#7862ad` | `#9a86c4` |
+| `pink` | Pink | `#b25f7d` | `#c98aa1` |
 
 **Backgrounds** are keyed `bg-<key>` (solid slide-card colors), plus special values: `bg-default`
 (white card / "inherit"), `bg-transparent` (show surface through), `img:<url>` (image), `bg-custom-<hex>`

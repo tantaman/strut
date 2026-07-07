@@ -268,8 +268,11 @@ export function resolveTheme(
 // hue carries BOTH the slide-card color and the deck `surface` color (the "table" the card floats
 // on — a lighter sibling of the same hue). The two token records (BG_COLORS / SURFACE_COLORS) and
 // the picker swatch lists all derive from it, so a card color and its surface can't drift apart and
-// the picker can never offer a hue the resolver doesn't know. Values are Open Color, matching the
-// text/shape swatches (COLOR_SWATCHES) so the whole palette reads as one system.
+// the picker can never offer a hue the resolver doesn't know. Card/surface fill large areas of the
+// screen, so these are deliberately MUTED (low-chroma): at full-bleed, saturated hues read as harsh
+// and the two colors fight at the card/surface seam. They're dusty, toned-down siblings of the vivid
+// text/shape swatches (COLOR_SWATCHES), which stay punchy — small accents want saturation, big fills
+// want restraint.
 export interface ThemeHue {
   /** Stable token id: the slide-card class is `bg-<key>`, the surface class `bg-surf-<key>`. */
   key: string
@@ -283,21 +286,21 @@ export interface ThemeHue {
 
 export const THEME_HUES: ThemeHue[] = [
   // Neutrals — the ink/paper anchors
-  { key: 'ink', name: 'Ink', card: '#1e1e24', surface: '#2b2b33' },
-  { key: 'white', name: 'White', card: '#ffffff', surface: '#f1f3f5' },
-  { key: 'smoke', name: 'Smoke', card: '#dee2e6', surface: '#f1f3f5' },
-  // Warm
-  { key: 'red', name: 'Red', card: '#c92a2a', surface: '#e03131' },
-  { key: 'orange', name: 'Orange', card: '#e8590c', surface: '#fd7e14' },
-  { key: 'yellow', name: 'Yellow', card: '#ffd43b', surface: '#ffe066' },
+  { key: 'ink', name: 'Ink', card: '#22222a', surface: '#2e2e37' },
+  { key: 'white', name: 'White', card: '#ffffff', surface: '#eef0f2' },
+  { key: 'smoke', name: 'Smoke', card: '#dadde0', surface: '#eceef0' },
+  // Warm — dusty, not neon
+  { key: 'red', name: 'Red', card: '#b24a45', surface: '#c67a74' },
+  { key: 'orange', name: 'Orange', card: '#c26a3c', surface: '#d59463' },
+  { key: 'yellow', name: 'Yellow', card: '#e5c454', surface: '#efd688' },
   // Green
-  { key: 'green', name: 'Green', card: '#2f9e44', surface: '#40c057' },
-  { key: 'teal', name: 'Teal', card: '#099268', surface: '#12b886' },
+  { key: 'green', name: 'Green', card: '#5a8a52', surface: '#7ba874' },
+  { key: 'teal', name: 'Teal', card: '#3d8a78', surface: '#64a897' },
   // Cool
-  { key: 'blue', name: 'Blue', card: '#1971c2', surface: '#228be6' },
-  { key: 'indigo', name: 'Indigo', card: '#3b5bdb', surface: '#4c6ef5' },
-  { key: 'violet', name: 'Violet', card: '#6741d9', surface: '#7950f2' },
-  { key: 'pink', name: 'Pink', card: '#d6336c', surface: '#e64980' },
+  { key: 'blue', name: 'Blue', card: '#4a72a0', surface: '#7295bd' },
+  { key: 'indigo', name: 'Indigo', card: '#5a6bb0', surface: '#8290c9' },
+  { key: 'violet', name: 'Violet', card: '#7862ad', surface: '#9a86c4' },
+  { key: 'pink', name: 'Pink', card: '#b25f7d', surface: '#c98aa1' },
 ]
 
 // ---- background / surface resolution (spec §8.6, simplified) -------------------------------------
