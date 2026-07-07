@@ -33,14 +33,14 @@ describe('resolveTheme', () => {
 
   it('resolves deck fonts/colors and normalizes bare hex to #rrggbb', () => {
     const t = resolveTheme({
-      heading_font: 'Ubuntu',
+      heading_font: 'Space Grotesk',
       heading_color: 'ff0000',
-      body_font: 'Droid Sans Mono',
+      body_font: 'JetBrains Mono',
       body_color: '#00ff00',
     })
-    expect(t.headingFont).toBe('Ubuntu')
+    expect(t.headingFont).toBe('Space Grotesk')
     expect(t.headingColor).toBe('#ff0000')
-    expect(t.bodyFont).toBe('Droid Sans Mono')
+    expect(t.bodyFont).toBe('JetBrains Mono')
     expect(t.bodyColor).toBe('#00ff00')
   })
 

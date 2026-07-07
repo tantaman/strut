@@ -25,7 +25,7 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
       title: 'Markdown deck',
       background: 'bg-black',
       surface: 'bg-surf-grad-black',
-      heading_font: 'Ubuntu',
+      heading_font: 'Space Grotesk',
       heading_color: 'ffffff',
       body_font: 'Lato',
       body_color: 'dddddd',

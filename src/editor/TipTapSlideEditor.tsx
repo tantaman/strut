@@ -31,7 +31,7 @@ import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
 import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
-import { cssFontFamily, themeVars } from './render'
+import { cssFontFamily, FontOptions, themeVars } from './render'
 import { ColorField } from './ColorField'
 import { backgroundImage, composeBackground, resolveBackground } from './types'
 import type { DeckThemeFields } from './types'
@@ -249,11 +249,7 @@ function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
         }}
       >
         <option value="">Theme font</option>
-        {FONT_FAMILIES.map((f) => (
-          <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
-            {f}
-          </option>
-        ))}
+        <FontOptions />
       </select>
       <ColorField
         value={currentColor}

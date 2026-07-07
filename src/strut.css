@@ -965,7 +965,7 @@ button {
   text-decoration: underline;
 }
 .strut-md code {
-  font-family: 'Droid Sans Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.8em;
   background: rgba(0, 0, 0, 0.06);
   padding: 0.1em 0.3em;
@@ -1738,7 +1738,7 @@ button {
   padding: 12px;
   margin-bottom: 12px;
   font-family:
-    'Droid Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
   line-height: 1.5;
   tab-size: 2;
@@ -2096,7 +2096,7 @@ button {
 .share__code {
   flex: 1;
   min-width: 0;
-  font-family: 'Droid Sans Mono', ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   background: var(--panel-2);
   border: 1px solid var(--line);
@@ -2171,7 +2171,7 @@ button {
 .share__collab-sub {
   font-size: 11px;
   color: var(--muted);
-  font-family: 'Droid Sans Mono', ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
