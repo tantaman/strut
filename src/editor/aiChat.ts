@@ -76,6 +76,66 @@ export function parseSseDelta(line: string): SseEvent | null {
   }
 }
 
+/** One parsed Edit-lane SSE line. The Edit stream reuses the advisor's `{response}` prose frames (typed
+ *  out live) but adds a terminal `{result}` frame carrying the server-validated `{ say, action }` — the
+ *  authoritative value to APPLY. `done` marks the `[DONE]` terminator. */
+export interface ActEvent {
+  done: boolean
+  delta: string
+  result: ChatActResult | null
+}
+
+/** Parse ONE Edit-lane SSE line (src/routes/api.chat.act.tsx). Returns null for a line carrying nothing
+ *  (blank / comment / non-`data:` / garbled). `[DONE]` → `{ done: true }`; a `{"result":…}` frame → its
+ *  validated result; a `{"response":"…"}` frame → its prose delta. Pure — unit-tested in chat.test.ts. */
+export function parseActLine(line: string): ActEvent | null {
+  const trimmed = line.trimEnd()
+  if (!trimmed.startsWith('data:')) return null
+  const payload = trimmed.slice('data:'.length).trim()
+  if (!payload) return null
+  if (payload === '[DONE]') return { done: true, delta: '', result: null }
+  try {
+    const obj = JSON.parse(payload) as { response?: unknown; result?: unknown }
+    if (obj.result && typeof obj.result === 'object') {
+      const r = obj.result as { say?: unknown; action?: unknown }
+      return {
+        done: false,
+        delta: '',
+        result: {
+          say: typeof r.say === 'string' ? r.say : '',
+          action: (r.action ?? null) as ChatActResult['action'],
+        },
+      }
+    }
+    return {
+      done: false,
+      delta: typeof obj.response === 'string' ? obj.response : '',
+      result: null,
+    }
+  } catch {
+    return null
+  }
+}
+
+/** The sub-status shown under the streamed reply while an Edit action is being APPLIED — the other silent
+ *  gap, since `generate`/`arrange` make a second round-trip after the prose finishes. */
+export function applyNote(action: ChatAction): string {
+  switch (action.kind) {
+    case 'set_theme':
+      return 'Applying theme…'
+    case 'set_body':
+      return 'Rewriting the slide…'
+    case 'generate':
+      return action.count
+        ? `Generating ${action.count} slides…`
+        : 'Generating slides…'
+    case 'arrange':
+      return 'Rearranging slides…'
+    default:
+      return 'Applying…'
+  }
+}
+
 // ---- send ------------------------------------------------------------------------------------------
 
 /** The inputs a send needs beyond the user's text: which deck (scopes the thread), the current deck digest
@@ -117,6 +177,7 @@ export async function sendChat(
     role: 'user',
     content: text,
     status: 'done',
+    note: '',
     created: now,
   }
   // The assistant turn is stamped 1ms later so it always sorts AFTER its prompting user turn.
@@ -126,6 +187,7 @@ export async function sendChat(
     role: 'assistant',
     content: '',
     status: 'streaming',
+    note: '',
     created: now + 1,
   }
 
@@ -248,11 +310,12 @@ export interface ActionSendContext {
   activeSlide?: ChatActSlide
 }
 
-/** Run ONE Edit-lane turn: append the user turn + a working assistant turn, POST /api/chat/act, then
- *  DISPATCH the returned action (via the injected `dispatch`, which closes over the live mutators + history)
- *  and finalize the assistant row with the model's `say`. Unlike the advisor this is NOT a token stream —
- *  structured output is one-shot. Returns the applied action's undo label (for the Undo chip) or null when
- *  nothing was applied. Never throws — every failure lands as an error row so the UI stays consistent. */
+/** Run ONE Edit-lane turn: append the user turn + a working assistant turn, POST /api/chat/act, then STREAM
+ *  the reply into the assistant row's `content` (the `{response}` frames — same live typing as the advisor)
+ *  and DISPATCH the terminal `{result}` frame's action (via the injected `dispatch`, which closes over the
+ *  live mutators + history), showing an "Applying…" note on the row while that apply (possibly a second
+ *  round-trip) runs. Returns the applied action's undo label (for the Undo chip) or null when nothing was
+ *  applied. Never throws — every failure lands as an error row so the UI stays consistent. */
 export async function sendChatAction(
   store: StrutStore,
   ctx: ActionSendContext,
@@ -269,16 +332,18 @@ export async function sendChatAction(
     role: 'user',
     content: text,
     status: 'done',
+    note: '',
     created: now,
   }
   // Stamped 1ms later so it always sorts AFTER its prompting user turn. `streaming` shows the thinking
-  // dots while the (non-streamed) request + apply are in flight.
+  // dots until the first token, then the reply types in; `note` carries the apply sub-status.
   const assistantRow: ChatMessageRow = {
     id: newId(),
     deck_id: ctx.deckId,
     role: 'assistant',
     content: '',
     status: 'streaming',
+    note: '',
     created: now + 1,
   }
   await store.writeLocal((tx) => {
@@ -314,28 +379,90 @@ export async function sendChatAction(
     return null
   }
 
-  if (!res.ok) {
+  if (!res.ok || !res.body) {
     await commit({ status: 'error', content: await friendlyError(res) })
     return null
   }
 
-  const data = (await res.json().catch(() => null)) as ChatActResult | null
-  if (!data) {
+  // Fold the reply's `{response}` frames into `content` (throttled to a frame, like the advisor) so it types
+  // out live; capture the terminal `{result}` frame — the validated { say, action } we then apply.
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let acc = ''
+  let result: ChatActResult | null = null
+  let frame: number | null = null
+  const canRaf = typeof requestAnimationFrame === 'function'
+  const flush = () => {
+    frame = null
+    void commit({ content: acc, status: 'streaming' })
+  }
+  const schedule = () => {
+    if (frame !== null) return
+    if (canRaf) frame = requestAnimationFrame(flush)
+    else void commit({ content: acc, status: 'streaming' })
+  }
+  const cancel = () => {
+    if (frame !== null && canRaf) cancelAnimationFrame(frame)
+    frame = null
+  }
+
+  try {
+    let streamedDone = false
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+      for (const line of lines) {
+        const ev = parseActLine(line)
+        if (!ev) continue
+        if (ev.done) {
+          streamedDone = true
+          break
+        }
+        if (ev.result) result = ev.result
+        else if (ev.delta) {
+          acc += ev.delta
+          schedule()
+        }
+      }
+      if (streamedDone) break
+    }
+    if (buffer.trim()) {
+      const ev = parseActLine(buffer)
+      if (ev?.result) result = ev.result
+      else if (ev && !ev.done) acc += ev.delta
+    }
+  } catch {
+    cancel()
     await commit({
+      content: acc || 'The response was interrupted — try again.',
       status: 'error',
-      content: 'The AI response was malformed — try again.',
     })
     return null
   }
-  const say = typeof data.say === 'string' ? data.say.trim() : ''
-  const action = data.action ?? null
+  cancel()
+
+  // The result frame's `say` is authoritative (normalized/clamped server-side); fall back to the streamed
+  // prose if the frame never arrived.
+  const say = (result?.say ?? acc).trim()
+  const action = result?.action ?? null
 
   // Advice-only turn (no action) — render the answer like the advisor would.
   if (!action) {
-    await commit({ content: say || '(no change needed)', status: 'done' })
+    await commit({ content: say || acc || '(no change needed)', status: 'done' })
     return null
   }
 
+  // Apply phase — the reply is already on screen; show what's happening while the apply (for generate /
+  // arrange, a second round-trip) runs, so the turn is never silent.
+  await commit({
+    content: say || acc,
+    note: applyNote(action),
+    status: 'streaming',
+  })
   let outcome: DispatchOutcome
   try {
     outcome = await dispatch(action)
@@ -346,6 +473,7 @@ export async function sendChatAction(
   if (outcome.ok) {
     await commit({
       content: say || `Done — ${outcome.label.toLowerCase()}.`,
+      note: '',
       status: 'done',
     })
     return { label: outcome.label }
@@ -354,6 +482,7 @@ export async function sendChatAction(
   // append the reason, mark it errored.
   await commit({
     content: (say ? say + '\n\n' : '') + `⚠️ ${outcome.error}`,
+    note: '',
     status: 'error',
   })
   return null

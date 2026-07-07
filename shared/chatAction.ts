@@ -10,9 +10,12 @@
 // known family set, and free text is length-capped. The worst a poisoned slide/theme value can do is a
 // bounded change to the user's OWN deck — one undo away.
 //
-// Structured output (json_schema), NOT native tool-calling: this is the exact mechanism Arrange/Generate
-// already run on the default Workers-AI model AND every BYO OpenRouter model (server/llm.ts has no `tools`
-// param). One structured pass per turn.
+// Transport is prose + a fenced ```json action block, NOT native tool-calling and NOT streamed json_schema:
+// the Edit lane STREAMS (server/chatAct.ts) and Workers AI — the default backend — can't stream JSON Mode
+// (developers.cloudflare.com/workers-ai/features/json-mode), so the model writes a friendly reply then a
+// fenced JSON object for the change, which the adapter parses out. `normalizeAction` below is the firewall
+// on that parsed object, exactly as before. (Arrange/Generate keep their one-shot json_schema calls — the
+// streaming constraint is specific to this lane.)
 
 import { clampChatRequest } from './chat.ts'
 import type { ChatTurn, SlideDigest } from './chat.ts'
@@ -125,107 +128,10 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
   return out
 }
 
-// ---- json schema handed to the model --------------------------------------------------------------
-
-/** JSON schema for `response_format: { type: 'json_schema' }`. A flat, permissive shape (all action
- *  fields optional under one object) rather than a strict oneOf: weak models — and OpenRouter models that
- *  ignore response_format entirely — still emit usable output that `normalizeAction` salvages. `enum`s on
- *  slide ids + fonts NUDGE the model toward valid values; normalizeAction is the actual guarantee. */
-export function chatActionJsonSchema(slideIds: string[], fonts: string[]) {
-  const slideIdSchema =
-    slideIds.length > 0
-      ? { type: 'string', enum: slideIds }
-      : { type: 'string' }
-  const fontSchema = { type: 'string', enum: [...fonts, ''] }
-  return {
-    type: 'object',
-    properties: {
-      say: {
-        type: 'string',
-        description:
-          'A short, friendly one- or two-sentence reply to show the user: confirm what you changed, ' +
-          'or (if no change is needed) just answer their question.',
-      },
-      action: {
-        type: 'object',
-        description:
-          'The SINGLE deck change to perform. Omit entirely to only answer in "say" (advice, no change).',
-        properties: {
-          kind: {
-            type: 'string',
-            enum: ['set_theme', 'set_body', 'generate', 'arrange'],
-            description:
-              'set_theme = change deck colors/fonts; set_body = rewrite one slide’s body; ' +
-              'generate = add new slides; arrange = reorder / lay out the slides.',
-          },
-          // set_theme
-          background: {
-            type: 'string',
-            description:
-              'set_theme: new slide-card background color, as hex (e.g. #1e1e24).',
-          },
-          surface: {
-            type: 'string',
-            description:
-              'set_theme: new backdrop/surface color behind the cards, as hex.',
-          },
-          heading_color: {
-            type: 'string',
-            description:
-              'set_theme: heading text color as hex (or "" to reset to default).',
-          },
-          body_color: {
-            type: 'string',
-            description:
-              'set_theme: body text color as hex (or "" to reset to default).',
-          },
-          heading_font: {
-            ...fontSchema,
-            description:
-              'set_theme: heading font family from the allowed list ("" resets to default).',
-          },
-          body_font: {
-            ...fontSchema,
-            description:
-              'set_theme: body font family from the allowed list ("" resets to default).',
-          },
-          // set_body
-          slideId: {
-            ...slideIdSchema,
-            description:
-              'set_body: the id of the slide to rewrite — prefer the currently-active slide, whose ' +
-              'full text you were given.',
-          },
-          markdown: {
-            type: 'string',
-            description:
-              'set_body: the FULL new Markdown body for that slide (a "# Title" line, then a few ' +
-              'bullets or a short paragraph). Replaces the slide’s current content.',
-          },
-          // generate
-          description: {
-            type: 'string',
-            description: 'generate: what the new slides should be about.',
-          },
-          count: {
-            type: 'number',
-            description:
-              'generate: how many slides to add (optional; capped at 15).',
-          },
-          // arrange
-          instruction: {
-            type: 'string',
-            description:
-              'arrange: how to reorder / lay out the slides (e.g. "timeline left to right", ' +
-              '"group by topic", "intro first, CTA last").',
-          },
-        },
-        required: ['kind'],
-      },
-    },
-    required: ['say'],
-  }
-}
+// The model is prompted to emit the action as a fenced ```json object (see server/chatAct.ts systemPrompt);
+// there is no response_format schema handed to the model anymore (Workers AI can't stream JSON Mode). The
+// slide-id + font allowlists that used to `enum`-nudge the schema now live in that prompt, and the firewall
+// below is — as it always was — the actual guarantee.
 
 // ---- the firewall ---------------------------------------------------------------------------------
 

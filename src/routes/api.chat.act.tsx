@@ -2,10 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { FONT_FAMILIES } from '../config'
 import type { ChatActRequest } from '../../shared/chatAction'
 
-// "✨ Chat — Edit lane" endpoint. Takes a conversation + deck grounding and returns ONE structured
-// { say, action } result (server/chatAct.ts → the model seam). The advisor twin (/api/chat) STREAMS prose;
-// this one is a single structured pass (structured output + token-streaming are mutually exclusive), so the
-// OK response is one-shot JSON, exactly like /api/arrange and /api/generate. Same two boundaries as those:
+// "✨ Chat — Edit lane" endpoint. Takes a conversation + deck grounding and STREAMS the turn (server/chatAct.ts
+// chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out, then one terminal
+// `data: {"result":{say,action}}` frame carries the validated change the client applies. Like the advisor
+// twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot JSON so the client can
+// branch BEFORE it reads the stream. Same two boundaries as /api/arrange and /api/generate:
 //   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path;
 //      a BYO OpenRouter caller (they pay) is allowed. Mirrors server/session.ts's trust posture.
 //   2. COST BOUND — the app pays for inference, so a per-isolate burst throttle + the AUTHORITATIVE durable
@@ -103,15 +104,24 @@ export const Route = createFileRoute('/api/chat/act')({
           }
         }
 
-        const { chatAct, ChatActUnavailableError } =
+        const { chatActStream, ChatActUnavailableError } =
           await import('../../server/chatAct')
         try {
-          const result = await chatAct(b as ChatActRequest, choice, {
+          const stream = await chatActStream(b as ChatActRequest, choice, {
             fonts: FONT_FAMILIES,
           })
-          return json(result, 200)
+          // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client: it
+          // types the reply out of `{response}` frames and applies the terminal `{result}` frame.
+          return new Response(stream, {
+            status: 200,
+            headers: {
+              'content-type': 'text/event-stream; charset=utf-8',
+              'cache-control': 'no-cache, no-transform',
+            },
+          })
         } catch (err) {
-          // The work didn't happen — refund the consumed unit (app-paid path only).
+          // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
+          // (app-paid path only).
           if (!byo) {
             const { refundChatQuota } = await import('../../server/quota')
             await refundChatQuota(account.id, now).catch(() => {})

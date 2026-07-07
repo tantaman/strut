@@ -157,10 +157,14 @@ export async function callModel(
   return extractJson(r.response ?? result)
 }
 
-/** Streamed completion (Chat). Returns an SSE byte stream of Workers-AI-shaped `data: {"response":"…"}`
- *  frames + `data: [DONE]` — the shape the client already parses (src/editor/aiChat.ts parseSseDelta).
- *  Workers AI passes through untouched; OpenRouter's OpenAI-style frames are normalized. Throws
- *  ModelUnavailableError if the backend is unreachable / fails before a stream exists. */
+/** Streamed completion (Chat + the Edit lane). Returns an SSE byte stream of Workers-AI-shaped
+ *  `data: {"response":"…"}` frames + `data: [DONE]` — the shape the client already parses (src/editor/
+ *  aiChat.ts parseSseDelta). Workers AI passes through untouched; OpenRouter's OpenAI-style frames are
+ *  normalized. Plain PROSE only — no `response_format`: Workers AI's JSON Mode is mutually exclusive with
+ *  streaming (developers.cloudflare.com/workers-ai/features/json-mode), so a streaming feature that needs
+ *  structure (the Edit lane) prompts for a fenced JSON block in the prose and parses it out (server/
+ *  chatAct.ts) instead of relying on json_schema. Throws ModelUnavailableError if the backend is
+ *  unreachable / fails before a stream exists. */
 export async function streamModel(
   choice: ModelChoice,
   input: { messages: ModelMessage[] },

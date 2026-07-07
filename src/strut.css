@@ -2851,6 +2851,24 @@ button {
   }
 }
 
+/* Edit-lane apply sub-status ("Applying theme…") — a muted row beneath the streamed reply while the change
+   is being applied (for generate／arrange, a second round-trip), so an Edit turn is never silent. */
+.chat__note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.chat__note .chat__dots {
+  padding: 0;
+}
+.chat__note .chat__dots span {
+  width: 4px;
+  height: 4px;
+}
+
 /* Footer: the Chat／Edit mode toggle + Undo chip above the composer, one separator at the top. */
 .chat__foot {
   flex: 0 0 auto;

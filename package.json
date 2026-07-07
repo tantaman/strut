@@ -16,6 +16,8 @@
     "build:cf": "CF=1 vite build",
     "preview:cf": "CF=1 vite build && CF=1 vite preview",
     "deploy": "CF=1 vite build && wrangler deploy -c dist/server/wrangler.json",
+    "migrate:db:local": "wrangler d1 migrations apply strut-auth --local",
+    "migrate:db:remote": "wrangler d1 migrations apply strut-auth --remote",
     "cf-typegen": "wrangler types",
     "test": "vitest run",
     "lint": "eslint",

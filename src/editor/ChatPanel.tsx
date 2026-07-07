@@ -215,14 +215,26 @@ function ChatBubble({ message }: { message: ChatMessage }) {
               __html: markdownToHtml(message.content),
             }}
           />
-        ) : streaming ? (
+        ) : streaming && !message.note ? (
           <span className="chat__dots" aria-label="Thinking">
             <span />
             <span />
             <span />
           </span>
         ) : null}
-        {streaming && message.content ? <span className="chat__caret" /> : null}
+        {streaming && message.content && !message.note ? (
+          <span className="chat__caret" />
+        ) : null}
+        {streaming && message.note ? (
+          <div className="chat__note">
+            <span className="chat__dots" aria-hidden>
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>{message.note}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   )
