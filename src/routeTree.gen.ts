@@ -24,6 +24,9 @@ import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
 import { Route as ApiRindleQueryRouteImport } from './routes/api.rindle.query'
 import { Route as ApiRindleMutateRouteImport } from './routes/api.rindle.mutate'
 import { Route as ApiRindleConfigRouteImport } from './routes/api.rindle.config'
+import { Route as ApiModelStatusRouteImport } from './routes/api.model.status'
+import { Route as ApiModelDisconnectRouteImport } from './routes/api.model.disconnect'
+import { Route as ApiModelConnectRouteImport } from './routes/api.model.connect'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as ApiRindleUploadsKeyRouteImport } from './routes/api.rindle.uploads.$key'
 
@@ -102,6 +105,21 @@ const ApiRindleConfigRoute = ApiRindleConfigRouteImport.update({
   path: '/api/rindle/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiModelStatusRoute = ApiModelStatusRouteImport.update({
+  id: '/api/model/status',
+  path: '/api/model/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiModelDisconnectRoute = ApiModelDisconnectRouteImport.update({
+  id: '/api/model/disconnect',
+  path: '/api/model/disconnect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiModelConnectRoute = ApiModelConnectRouteImport.update({
+  id: '/api/model/connect',
+  path: '/api/model/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -124,6 +142,9 @@ export interface FileRoutesByFullPath {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/model/connect': typeof ApiModelConnectRoute
+  '/api/model/disconnect': typeof ApiModelDisconnectRoute
+  '/api/model/status': typeof ApiModelStatusRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
@@ -143,6 +164,9 @@ export interface FileRoutesByTo {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/model/connect': typeof ApiModelConnectRoute
+  '/api/model/disconnect': typeof ApiModelDisconnectRoute
+  '/api/model/status': typeof ApiModelStatusRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
@@ -163,6 +187,9 @@ export interface FileRoutesById {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/model/connect': typeof ApiModelConnectRoute
+  '/api/model/disconnect': typeof ApiModelDisconnectRoute
+  '/api/model/status': typeof ApiModelStatusRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
@@ -184,6 +211,9 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/model/connect'
+    | '/api/model/disconnect'
+    | '/api/model/status'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
@@ -203,6 +233,9 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/model/connect'
+    | '/api/model/disconnect'
+    | '/api/model/status'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
@@ -222,6 +255,9 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/model/connect'
+    | '/api/model/disconnect'
+    | '/api/model/status'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
@@ -242,6 +278,9 @@ export interface RootRouteChildren {
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiModelConnectRoute: typeof ApiModelConnectRoute
+  ApiModelDisconnectRoute: typeof ApiModelDisconnectRoute
+  ApiModelStatusRoute: typeof ApiModelStatusRoute
   ApiRindleConfigRoute: typeof ApiRindleConfigRoute
   ApiRindleMutateRoute: typeof ApiRindleMutateRoute
   ApiRindleQueryRoute: typeof ApiRindleQueryRoute
@@ -358,6 +397,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRindleConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/model/status': {
+      id: '/api/model/status'
+      path: '/api/model/status'
+      fullPath: '/api/model/status'
+      preLoaderRoute: typeof ApiModelStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/model/disconnect': {
+      id: '/api/model/disconnect'
+      path: '/api/model/disconnect'
+      fullPath: '/api/model/disconnect'
+      preLoaderRoute: typeof ApiModelDisconnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/model/connect': {
+      id: '/api/model/connect'
+      path: '/api/model/connect'
+      fullPath: '/api/model/connect'
+      preLoaderRoute: typeof ApiModelConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -386,6 +446,9 @@ const rootRouteChildren: RootRouteChildren = {
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiModelConnectRoute: ApiModelConnectRoute,
+  ApiModelDisconnectRoute: ApiModelDisconnectRoute,
+  ApiModelStatusRoute: ApiModelStatusRoute,
   ApiRindleConfigRoute: ApiRindleConfigRoute,
   ApiRindleMutateRoute: ApiRindleMutateRoute,
   ApiRindleQueryRoute: ApiRindleQueryRoute,

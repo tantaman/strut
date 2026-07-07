@@ -7,6 +7,7 @@ import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
 import { preloadDecks } from '../rindle/appSsr'
 import { AccountControl } from '../rindle/AccountControl'
+import { ModelControl } from '../rindle/ModelControl'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
@@ -85,6 +86,7 @@ function Dashboard() {
         <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
         <span className="brandbar__tag">Spatial presentations</span>
         <PoweredByRindle variant="inline" />
+        <ModelControl />
         <AccountControl initial={account} />
       </div>
       <div className="dash__head">

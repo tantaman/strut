@@ -1446,7 +1446,8 @@ button {
   margin: 0 0 14px;
 }
 .modal input[type='text'],
-.modal input[type='url'] {
+.modal input[type='url'],
+.modal input[type='password'] {
   width: 100%;
   background: var(--panel-2);
   border: 1px solid var(--line-strong);
@@ -1456,7 +1457,8 @@ button {
   margin-bottom: 12px;
 }
 .modal input[type='text']:focus,
-.modal input[type='url']:focus {
+.modal input[type='url']:focus,
+.modal input[type='password']:focus {
   outline: none;
   border-color: var(--coral);
   box-shadow: 0 0 0 3px var(--coral-soft);
@@ -1475,6 +1477,41 @@ button {
   margin: 4px 0 0;
   font-size: 12px;
   color: var(--danger);
+}
+
+/* "Connect your model" (BYO OpenRouter) — brandbar control + modal (src/rindle/ModelControl.tsx). */
+.model-conn__label {
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-conn__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.model-conn__field {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 12px 0 6px;
+}
+.model-conn__field:first-of-type {
+  margin-top: 6px;
+}
+.model-conn__muted {
+  font-weight: 400;
+}
+.model-conn__status {
+  margin: 12px 0 2px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 
 .dash__actions {
