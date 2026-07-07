@@ -1071,6 +1071,23 @@ button {
   cursor: grab;
   background: var(--coral);
 }
+/* Skew handles: square (vs. the round resize/rotate dots) to signal shearing.
+   skewX rides the top edge and is dragged horizontally; skewY rides the left
+   edge and is dragged vertically. */
+.handle--skewx,
+.handle--skewy {
+  border-radius: 2px;
+}
+.handle--skewx {
+  top: 0;
+  left: 50%;
+  cursor: ew-resize;
+}
+.handle--skewy {
+  top: 50%;
+  left: 0;
+  cursor: ns-resize;
+}
 .handle__del {
   /* Anchored to the component's top-right corner; the inline counter-transform
      (translate(-50%,-50%) scale) centers it there at screen-constant size, the

@@ -7,9 +7,12 @@ export const SLIDE_H = 720;
 // Overview "world" units. The impress exporter scales these up to slide space (§9.2).
 export const OVERVIEW_CARD_GAP = 360;
 
-// Gesture snaps (§11): move snaps to a 20px grid, rotate to 22.5°.
+// Gesture snaps (§11): move snaps to a 20px grid, rotate to 22.5°, skew to 15° (with shift).
 export const GRID_SNAP = 20;
 export const ROTATE_SNAP = Math.PI / 8;
+export const SKEW_SNAP = Math.PI / 12;
+// Skew drag feel: world-px the pointer travels to reach 45° of shear (atan2 baseline).
+export const SKEW_BASE = 100;
 
 // Text font state (§6.3).
 export const DEFAULT_FONT = "Lato";

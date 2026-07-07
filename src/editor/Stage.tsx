@@ -5,7 +5,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import { GRID_SNAP, newId, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
+import {
+  GRID_SNAP,
+  newId,
+  ROTATE_SNAP,
+  SKEW_BASE,
+  SKEW_SNAP,
+  SLIDE_H,
+  SLIDE_W,
+} from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
@@ -401,6 +409,64 @@ export function Stage({
     )
   }
 
+  function beginSkew(c: AnyComponent, e: RPointerEvent, axis: 'x' | 'y') {
+    if (!editor.canEdit) return
+    e.stopPropagation()
+    const sx = e.clientX
+    const sy = e.clientY
+    const start = { skew_x: c.skew_x, skew_y: c.skew_y }
+    let last = { ...start }
+    editor.setDraggingComponentId(c.id)
+    dragListen(
+      (ev) => {
+        // Shear grows with pointer travel; atan2 against a fixed baseline caps near ±90°
+        // so the control can't produce a degenerate (near-flat) skew.
+        const drag =
+          axis === 'x' ? (ev.clientX - sx) / scale : (ev.clientY - sy) / scale
+        let a = (axis === 'x' ? start.skew_x : start.skew_y) +
+          Math.atan2(drag, SKEW_BASE)
+        if (ev.shiftKey) a = Math.round(a / SKEW_SNAP) * SKEW_SNAP
+        last =
+          axis === 'x'
+            ? { skew_x: a, skew_y: start.skew_y }
+            : { skew_x: start.skew_x, skew_y: a }
+        mutate.transformComponent.folded(
+          { key: c.id },
+          {
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: c.scale_w,
+            scale_h: c.scale_h,
+            rotate: c.rotate,
+            skew_x: last.skew_x,
+            skew_y: last.skew_y,
+          },
+        )
+      },
+      () => {
+        editor.setDraggingComponentId(null)
+        if (last.skew_x === start.skew_x && last.skew_y === start.skew_y) return
+        const apply = (s: { skew_x: number; skew_y: number }) =>
+          mutate.transformComponent({
+            id: c.id,
+            scale_x: 1,
+            scale_y: 1,
+            scale_w: c.scale_w,
+            scale_h: c.scale_h,
+            rotate: c.rotate,
+            skew_x: s.skew_x,
+            skew_y: s.skew_y,
+          })
+        history.push({
+          label: 'Skew',
+          redo: () => apply(last),
+          undo: () => apply(start),
+        })
+      },
+    )
+  }
+
   function commitText(c: AnyComponent, html: string) {
     setEditingId(null)
     const plain = html
@@ -697,6 +763,7 @@ export function Stage({
                   onPointerDownBody={(e) => beginMove(c, e)}
                   onResize={(e) => beginResize(c, e)}
                   onRotate={(e) => beginRotate(c, e)}
+                  onSkew={(e, axis) => beginSkew(c, e, axis)}
                   onDelete={() => deleteComponents([c])}
                   onStartEdit={() =>
                     c.kind === 'text' && editor.canEdit && setEditingId(c.id)
@@ -749,6 +816,7 @@ function ComponentView({
   onPointerDownBody,
   onResize,
   onRotate,
+  onSkew,
   onDelete,
   onStartEdit,
   onCommitEdit,
@@ -762,6 +830,7 @@ function ComponentView({
   onPointerDownBody: (e: RPointerEvent) => void
   onResize: (e: RPointerEvent) => void
   onRotate: (e: RPointerEvent) => void
+  onSkew: (e: RPointerEvent, axis: 'x' | 'y') => void
   onDelete: () => void
   onStartEdit: () => void
   onCommitEdit: (html: string) => void
@@ -801,6 +870,16 @@ function ComponentView({
             className="handle handle--rotate"
             style={counter}
             onPointerDown={onRotate}
+          />
+          <div
+            className="handle handle--skewx"
+            style={counter}
+            onPointerDown={(e) => onSkew(e, 'x')}
+          />
+          <div
+            className="handle handle--skewy"
+            style={counter}
+            onPointerDown={(e) => onSkew(e, 'y')}
           />
         </>
       )}
