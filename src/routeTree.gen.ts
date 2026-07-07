@@ -27,6 +27,7 @@ import { Route as ApiRindleConfigRouteImport } from './routes/api.rindle.config'
 import { Route as ApiModelStatusRouteImport } from './routes/api.model.status'
 import { Route as ApiModelDisconnectRouteImport } from './routes/api.model.disconnect'
 import { Route as ApiModelConnectRouteImport } from './routes/api.model.connect'
+import { Route as ApiChatActRouteImport } from './routes/api.chat.act'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as ApiRindleUploadsKeyRouteImport } from './routes/api.rindle.uploads.$key'
 
@@ -120,6 +121,11 @@ const ApiModelConnectRoute = ApiModelConnectRouteImport.update({
   path: '/api/model/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatActRoute = ApiChatActRouteImport.update({
+  id: '/act',
+  path: '/act',
+  getParentRoute: () => ApiChatRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -137,11 +143,12 @@ export interface FileRoutesByFullPath {
   '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
   '/api/artifact': typeof ApiArtifactRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/act': typeof ApiChatActRoute
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
@@ -159,11 +166,12 @@ export interface FileRoutesByTo {
   '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
   '/api/artifact': typeof ApiArtifactRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/act': typeof ApiChatActRoute
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
@@ -182,11 +190,12 @@ export interface FileRoutesById {
   '/a/$key': typeof AKeyRoute
   '/api/arrange': typeof ApiArrangeRoute
   '/api/artifact': typeof ApiArtifactRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
   '/api/generate': typeof ApiGenerateRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/act': typeof ApiChatActRoute
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/chat/act'
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/chat/act'
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
+    | '/api/chat/act'
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
@@ -273,7 +285,7 @@ export interface RootRouteChildren {
   AKeyRoute: typeof AKeyRoute
   ApiArrangeRoute: typeof ApiArrangeRoute
   ApiArtifactRoute: typeof ApiArtifactRoute
-  ApiChatRoute: typeof ApiChatRoute
+  ApiChatRoute: typeof ApiChatRouteWithChildren
   ApiGenerateRoute: typeof ApiGenerateRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
@@ -418,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiModelConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/act': {
+      id: '/api/chat/act'
+      path: '/act'
+      fullPath: '/api/chat/act'
+      preLoaderRoute: typeof ApiChatActRouteImport
+      parentRoute: typeof ApiChatRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -435,13 +454,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiChatRouteChildren {
+  ApiChatActRoute: typeof ApiChatActRoute
+}
+
+const ApiChatRouteChildren: ApiChatRouteChildren = {
+  ApiChatActRoute: ApiChatActRoute,
+}
+
+const ApiChatRouteWithChildren =
+  ApiChatRoute._addFileChildren(ApiChatRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SigninRoute: SigninRoute,
   AKeyRoute: AKeyRoute,
   ApiArrangeRoute: ApiArrangeRoute,
   ApiArtifactRoute: ApiArtifactRoute,
-  ApiChatRoute: ApiChatRoute,
+  ApiChatRoute: ApiChatRouteWithChildren,
   ApiGenerateRoute: ApiGenerateRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
