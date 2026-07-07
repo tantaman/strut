@@ -425,8 +425,10 @@ Each selected component shows handles wired to delta-drag controls:
   (prompt for URL, forces `http://`), **Font family**, **Font size**, **Color** (Spectrum picker),
   **Clear formatting**. Underline / justify-right / H3 heading exist in the library but aren't in the
   default set.
-- **Font families:** Lato (default), League Gothic, Droid Sans Mono, Ubuntu, Abril Fatface, Hammersmith
-  One, Fredoka One, Gorditas, Press Start 2P.
+- **Font families:** a curated set organized by role (defined once in `config.ts` `FONTS`, which also
+  derives the Google Fonts `<link>` and the picker `<optgroup>`s): _sans_ — Inter, Lato (default), DM
+  Sans, Space Grotesk; _serif_ — Fraunces, Playfair Display, Lora; _display_ — Anton, Archivo Black;
+  _mono_ — JetBrains Mono; _playful_ — Fredoka, Press Start 2P.
 - **Font sizes:** 144, 96, 72 (default), 64, 48, 36, 24, 16, 12, 8. (Font size sets the model `size`
   attribute directly, not via execCommand.)
 - Formatting uses legacy `<b>/<i>/<font>` tags (`styleWithCSS` off) so text serializes as the renderer

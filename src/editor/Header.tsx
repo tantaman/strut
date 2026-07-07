@@ -26,12 +26,7 @@ import {
   Globe,
   Share2,
 } from 'lucide-react'
-import {
-  DEFAULT_FONT,
-  DEFAULT_FONT_SIZE,
-  FONT_FAMILIES,
-  newId,
-} from '../config'
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadArtifact, uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
@@ -49,7 +44,7 @@ import {
   SHAPES,
   SURFACE_SWATCHES,
 } from './types'
-import { cssFontFamily, parseVideo } from './render'
+import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 
 interface DeckRow {
@@ -687,11 +682,7 @@ function ThemeFontSelect({
         onChange(e.target.value === DEFAULT_FONT ? '' : e.target.value)
       }
     >
-      {FONT_FAMILIES.map((f) => (
-        <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
-          {f}
-        </option>
-      ))}
+      <FontOptions />
     </select>
   )
 }

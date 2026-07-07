@@ -6,6 +6,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { cssHex, resolveTextAlign, textTypeOf } from './types'
 import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
 import { docToHtml } from './tiptapDoc'
+import { FONTS_BY_CATEGORY } from '../config'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
   text: 0,
@@ -29,6 +30,29 @@ const DEFAULT_H: Record<ComponentKind, number> = {
 export function cssFontFamily(name: string | undefined): string {
   const fam = (name || 'Lato').replace(/"/g, '')
   return `"${fam}", sans-serif`
+}
+
+/** Grouped <optgroup> font choices for a native <select>, shared by every font picker (deck theme,
+ *  inspector, format bar) so they all present the same curated, category-organized list. Each option
+ *  previews itself in its own font; the caller supplies any leading "theme default" option. */
+export function FontOptions() {
+  return (
+    <>
+      {FONTS_BY_CATEGORY.map((group) => (
+        <optgroup key={group.category} label={group.label}>
+          {group.fonts.map((f) => (
+            <option
+              key={f.name}
+              value={f.name}
+              style={{ fontFamily: cssFontFamily(f.name) }}
+            >
+              {f.name}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </>
+  )
 }
 
 /** The deck text theme as CSS variables. Set on every slide container (stage canvas, thumbnail
