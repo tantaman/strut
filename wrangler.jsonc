@@ -100,5 +100,6 @@
   //   wrangler secret put GITHUB_CLIENT_SECRET
   //   wrangler secret put GOOGLE_CLIENT_ID
   //   wrangler secret put GOOGLE_CLIENT_SECRET
+  //   wrangler secret put MODEL_CRED_KEY         # openssl rand -base64 32 — seals BYO LLM keys (OPENROUTER_PLAN.md)
   // (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY are only needed for the S3 fallback path, not on Workers.)
 }
