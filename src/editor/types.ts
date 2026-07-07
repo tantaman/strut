@@ -165,44 +165,68 @@ export function resolveTheme(
   }
 }
 
+// ---- theme palette (spec §8.2) -------------------------------------------------------------------
+// A curated, named hue set is the single source of truth for the deck's default color stack. Each
+// hue carries BOTH the slide-card color and the deck `surface` color (the "table" the card floats
+// on — a lighter sibling of the same hue). The two token records (BG_COLORS / SURFACE_COLORS) and
+// the picker swatch lists all derive from it, so a card color and its surface can't drift apart and
+// the picker can never offer a hue the resolver doesn't know. Values are Open Color, matching the
+// text/shape swatches (COLOR_SWATCHES) so the whole palette reads as one system.
+export interface ThemeHue {
+  /** Stable token id: the slide-card class is `bg-<key>`, the surface class `bg-surf-<key>`. */
+  key: string
+  /** Human label shown in the picker. */
+  name: string
+  /** Slide-card background. */
+  card: string
+  /** Deck surface (the table behind the card) — a lighter step of the same hue. */
+  surface: string
+}
+
+export const THEME_HUES: ThemeHue[] = [
+  // Neutrals — the ink/paper anchors
+  { key: 'ink', name: 'Ink', card: '#1e1e24', surface: '#2b2b33' },
+  { key: 'white', name: 'White', card: '#ffffff', surface: '#f1f3f5' },
+  { key: 'smoke', name: 'Smoke', card: '#dee2e6', surface: '#f1f3f5' },
+  // Warm
+  { key: 'red', name: 'Red', card: '#c92a2a', surface: '#e03131' },
+  { key: 'orange', name: 'Orange', card: '#e8590c', surface: '#fd7e14' },
+  { key: 'yellow', name: 'Yellow', card: '#ffd43b', surface: '#ffe066' },
+  // Green
+  { key: 'green', name: 'Green', card: '#2f9e44', surface: '#40c057' },
+  { key: 'teal', name: 'Teal', card: '#099268', surface: '#12b886' },
+  // Cool
+  { key: 'blue', name: 'Blue', card: '#1971c2', surface: '#228be6' },
+  { key: 'indigo', name: 'Indigo', card: '#3b5bdb', surface: '#4c6ef5' },
+  { key: 'violet', name: 'Violet', card: '#6741d9', surface: '#7950f2' },
+  { key: 'pink', name: 'Pink', card: '#d6336c', surface: '#e64980' },
+]
+
 // ---- background / surface resolution (spec §8.6, simplified) -------------------------------------
 
+/** Slide-card colors: the white default plus one entry per hue, keyed `bg-<key>`. */
 const BG_COLORS: Record<string, string> = {
   'bg-default': '#ffffff',
-  'bg-black': '#222222',
-  'bg-light': '#ffffff',
-  'bg-smoke': '#dddddd',
-  'bg-orange': '#774040',
-  'bg-yellow': '#d1b377',
-  'bg-grass': '#597847',
-  'bg-darkgreen': '#134952',
-  'bg-sky': '#515e99',
-  'bg-lavender': '#443c4d',
-  'bg-purple': '#6c478f',
-  'bg-salmon': '#c98d8d',
+  ...Object.fromEntries(THEME_HUES.map((h) => [`bg-${h.key}`, h.card])),
 }
 
-export const BACKGROUND_SWATCHES = Object.keys(BG_COLORS).filter(
-  (k) => k !== 'bg-default',
+/** Swatch tokens for the slide-background picker (excludes the always-present `bg-default`). */
+export const BACKGROUND_SWATCHES = THEME_HUES.map((h) => ({
+  key: `bg-${h.key}`,
+  name: h.name,
+}))
+
+// Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Keyed `bg-surf-<key>`;
+// no default here (`bg-default` resolves to SURFACE_DEFAULT) and no transparent (surfaces are the
+// bottom layer).
+const SURFACE_COLORS: Record<string, string> = Object.fromEntries(
+  THEME_HUES.map((h) => [`bg-surf-${h.key}`, h.surface]),
 )
 
-// Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Flat (gradients shipped
-// flat in old-master). No transparent (surfaces are the bottom layer).
-const SURFACE_COLORS: Record<string, string> = {
-  'bg-surf-grad-black': '#333333',
-  'bg-surf-grad-light': '#ffffff',
-  'bg-surf-grad-smoke': '#eeeeee',
-  'bg-surf-grad-orange': '#945353',
-  'bg-surf-grad-yellow': '#cfb98c',
-  'bg-surf-grad-grass': '#6c855d',
-  'bg-surf-grad-darkgreen': '#4a939e',
-  'bg-surf-grad-sky': '#5e699c',
-  'bg-surf-grad-lavender': '#554b61',
-  'bg-surf-grad-purple': '#775796',
-  'bg-surf-grad-salmon': '#cfa2a2',
-}
-
-export const SURFACE_SWATCHES = Object.keys(SURFACE_COLORS)
+export const SURFACE_SWATCHES = THEME_HUES.map((h) => ({
+  key: `bg-surf-${h.key}`,
+  name: h.name,
+}))
 
 // The default surface "table": a subtle radial gray (old-master `bg-default`).
 const SURFACE_DEFAULT = 'radial-gradient(circle at 50% 28%, #3a3a40, #18181b)'

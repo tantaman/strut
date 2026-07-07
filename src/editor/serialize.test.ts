@@ -23,8 +23,8 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
     deck: {
       id: 'd1',
       title: 'Markdown deck',
-      background: 'bg-black',
-      surface: 'bg-surf-grad-black',
+      background: 'bg-ink',
+      surface: 'bg-surf-ink',
       heading_font: 'Space Grotesk',
       heading_color: 'ffffff',
       body_font: 'Lato',
