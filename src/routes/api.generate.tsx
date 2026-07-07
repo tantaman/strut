@@ -45,7 +45,18 @@ export const Route = createFileRoute('/api/generate')({
       POST: async ({ request }) => {
         const { resolveSessionAccount } = await import('../../server/session')
         const account = await resolveSessionAccount(request)
-        if (!account || account.isAnonymous) {
+        if (!account) {
+          return json({ error: 'sign_in_required' }, 401)
+        }
+
+        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or app Workers AI.
+        const { resolveModel } = await import('../../server/llm')
+        const choice = await resolveModel(account.id)
+        const byo = choice.kind === 'openrouter'
+
+        // App-paid inference stays member-only (a guest can't spend the app's budget); BYO is open to any
+        // session, guest or member, because the USER pays (OPENROUTER_PLAN.md "Decisions").
+        if (!byo && account.isAnonymous) {
           return json({ error: 'sign_in_required' }, 401)
         }
         if (throttled(account.id)) {
@@ -66,37 +77,41 @@ export const Route = createFileRoute('/api/generate')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — consume one unit BEFORE the model call so concurrent calls can't race
-        // past the cap. Fail closed on a store error (unlikely: it's the same D1 resolveSessionAccount
-        // just used, so a D1 outage would already have 401'd above).
-        const { consumeGenerateQuota, refundGenerateQuota } =
-          await import('../../server/quota')
+        // Durable daily quota — ONLY for the app-paid path. A BYO call spends the user's OWN OpenRouter
+        // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
+        // Consumed BEFORE the model call so concurrent calls can't race past the cap.
         const now = Date.now()
-        let quota
-        try {
-          quota = await consumeGenerateQuota(account.id, now)
-        } catch (err) {
-          console.error('[generate] quota check failed:', err)
-          return json({ error: 'internal' }, 500)
-        }
-        if (!quota.allowed) {
-          return json(
-            {
-              error: 'quota_exceeded',
-              message: `Daily AI slide-generation limit reached (${quota.limit}/day). Try again tomorrow.`,
-            },
-            429,
-          )
+        if (!byo) {
+          const { consumeGenerateQuota } = await import('../../server/quota')
+          let quota
+          try {
+            quota = await consumeGenerateQuota(account.id, now)
+          } catch (err) {
+            console.error('[generate] quota check failed:', err)
+            return json({ error: 'internal' }, 500)
+          }
+          if (!quota.allowed) {
+            return json(
+              {
+                error: 'quota_exceeded',
+                message: `Daily AI slide-generation limit reached (${quota.limit}/day). Try again tomorrow.`,
+              },
+              429,
+            )
+          }
         }
 
         const { generateSlides, GenerateUnavailableError } =
           await import('../../server/generate')
         try {
-          const deck = await generateSlides(b as GenerateRequest)
+          const deck = await generateSlides(b as GenerateRequest, choice)
           return json(deck, 200)
         } catch (err) {
-          // The work didn't happen — refund the consumed unit so the user isn't charged for a failure.
-          await refundGenerateQuota(account.id, now).catch(() => {})
+          // The work didn't happen — refund the consumed unit (app-paid path only).
+          if (!byo) {
+            const { refundGenerateQuota } = await import('../../server/quota')
+            await refundGenerateQuota(account.id, now).catch(() => {})
+          }
           if (err instanceof GenerateUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

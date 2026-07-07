@@ -1,16 +1,12 @@
 // The "✨ AI Arrange" server adapter: turn a deck digest + a natural-language instruction into a
-// validated ArrangementPlan, using Cloudflare Workers AI. The APP pays for inference (see wrangler.jsonc
-// `ai` binding) — the arrange task is a small, bounded, structured-output call, so a Workers AI instruct
-// model is more than enough and there is NO per-user credential to custody (that's the BYOK path we
-// deliberately deferred; AI_ARRANGE_PLAN.md).
+// validated ArrangementPlan. Inference goes through the shared model seam (server/llm.ts), which routes to
+// the caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app pays).
+// This adapter only builds the prompt + schema and validates the output; the ROUTE resolves the ModelChoice
+// (resolveModel) and passes it in. The arrange task is a small, bounded, structured-output call.
 //
-// Two runtime facts, mirrored from server/auth.ts:
-//   1. `AI` is an OBJECT binding — reachable only via the `cloudflare:workers` module under workerd, NOT
-//      process.env. We resolve it by dynamic import (string-indirected + @vite-ignore so it never enters
-//      the Node-SSR / client build graph).
-//   2. Under plain `pnpm dev` (Node, no workerd) there is no AI binding. We throw a clear, catchable
-//      error the route turns into a friendly 503 — except when STRUT_ARRANGE_STUB is set, where a
-//      deterministic local stub lets you iterate on the preview UI without workerd.
+// Dev-without-workerd: when the app-paid Workers AI binding is absent under `pnpm dev`, callModel throws
+// and — if STRUT_ARRANGE_STUB is set — we return a deterministic local stub so the preview UI is
+// exercisable. (BYO OpenRouter needs no binding, so it works under `pnpm dev` directly.)
 
 import {
   arrangeJsonSchema,
@@ -18,40 +14,16 @@ import {
   normalizePlan,
 } from '../shared/arrange.ts'
 import type { ArrangeRequest, ArrangementPlan } from '../shared/arrange.ts'
+import { callModel, ModelUnavailableError } from './llm.ts'
+import type { ModelChoice } from './llm.ts'
 
-// A current Workers AI instruct model with structured JSON output + function calling. Swapping to an
-// app-owned Claude key later (AI Gateway / direct fetch) is a change ONLY to this file — the route and
-// client are model-agnostic.
-const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
-
-/** Thrown when Workers AI can't be reached (no binding, or the model call failed). The route maps it to
- *  a 503 with a user-facing message rather than a 500. */
+/** Thrown when inference can't be reached (no binding / the model call failed). The route maps it to a
+ *  503 with a user-facing message rather than a 500. */
 export class ArrangeUnavailableError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'ArrangeUnavailableError'
   }
-}
-
-// The sliver of the Workers AI binding we call — typed structurally so we don't pull
-// @cloudflare/workers-types (whose globals shadow the DOM lib) into the shared build graph.
-interface AiBinding {
-  run: (model: string, input: unknown) => Promise<unknown>
-}
-
-let cachedAi: AiBinding | null | undefined
-async function loadAi(): Promise<AiBinding | null> {
-  if (cachedAi !== undefined) return cachedAi
-  try {
-    const spec = 'cloudflare:workers'
-    const mod = (await import(/* @vite-ignore */ spec)) as {
-      env?: Record<string, unknown>
-    }
-    cachedAi = (mod.env?.AI as AiBinding | undefined) ?? null
-  } catch {
-    cachedAi = null
-  }
-  return cachedAi
 }
 
 function systemPrompt(): string {
@@ -92,22 +64,6 @@ function userPrompt(req: ArrangeRequest): string {
   ].join('\n')
 }
 
-// Workers AI returns `{ response: <object|string> }` for json_schema output (older/tool paths may hand
-// back a bare string). Be tolerant: prefer a parsed object, JSON.parse a string, else empty.
-function extractJson(result: unknown): unknown {
-  const r = (result ?? {}) as { response?: unknown }
-  const resp = r.response ?? result
-  if (resp && typeof resp === 'object') return resp
-  if (typeof resp === 'string') {
-    try {
-      return JSON.parse(resp)
-    } catch {
-      return {}
-    }
-  }
-  return {}
-}
-
 // Deterministic local stub (STRUT_ARRANGE_STUB) so the preview UI is exercisable under `pnpm dev` with
 // no workerd/AI: keep the order, lay out as a grid, and demonstrate a freeform placement (emphasise +
 // tilt the first slide) so the geometry path is visible locally. Rotations are in DEGREES like the
@@ -127,23 +83,15 @@ function stubPlan(req: ArrangeRequest): ArrangementPlan {
  *  the input slide ids (normalizePlan is the trust boundary — untrusted model output can't escape it). */
 export async function arrange(
   reqRaw: ArrangeRequest,
+  choice: ModelChoice,
 ): Promise<ArrangementPlan> {
   const req = clampRequest(reqRaw)
   const deckIds = req.slides.map((s) => s.id)
   if (deckIds.length === 0) return { order: [], layout: 'keep' }
 
-  const ai = await loadAi()
-  if (!ai) {
-    if (process.env.STRUT_ARRANGE_STUB)
-      return normalizePlan(stubPlan(req), deckIds)
-    throw new ArrangeUnavailableError(
-      'Workers AI is unavailable in this runtime — deploy or run under workerd (pnpm preview:cf).',
-    )
-  }
-
   let result: unknown
   try {
-    result = await ai.run(MODEL, {
+    result = await callModel(choice, {
       messages: [
         { role: 'system', content: systemPrompt() },
         { role: 'user', content: userPrompt(req) },
@@ -155,11 +103,19 @@ export async function arrange(
       max_tokens: 4096,
     })
   } catch (err) {
+    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_ARRANGE_STUB yields a deterministic plan so
+    // the preview UI is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
+    if (
+      choice.kind === 'workers-ai' &&
+      process.env.STRUT_ARRANGE_STUB &&
+      err instanceof ModelUnavailableError
+    ) {
+      return normalizePlan(stubPlan(req), deckIds)
+    }
     throw new ArrangeUnavailableError(
-      'AI request failed: ' +
-        (err instanceof Error ? err.message : String(err)),
+      err instanceof Error ? err.message : String(err),
     )
   }
 
-  return normalizePlan(extractJson(result), deckIds)
+  return normalizePlan(result, deckIds)
 }

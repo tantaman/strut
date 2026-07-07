@@ -1,52 +1,25 @@
 // The "✨ Chat" server adapter: turn a running conversation + a deck digest into a STREAMED prose answer
-// from a presentation advisor, using Cloudflare Workers AI. The APP pays for inference (see wrangler.jsonc
-// `ai` binding) — advisor chat is a bounded, grounded call, so a Workers AI instruct model is enough and
-// there is NO per-user credential to custody. Mirrors server/arrange.ts for the two runtime facts about the
-// `AI` object binding and the dev-without-workerd path; the ONE new thing is the response is a TOKEN STREAM
-// (SSE), not one-shot JSON — so this returns a ReadableStream the route hands straight to the client.
-//
-// Model note (AI_CHAT_PLAN.md): chat is the most visible AI surface — a clumsy sentence shows in a way a
-// slightly-off grid does not — so this is the strongest case for the app-owned Claude key (AI Gateway) that
-// Arrange deferred. Swapping is a change ONLY to this file: the route + client are model-agnostic (they just
-// proxy/parse an SSE token stream).
+// from a presentation advisor. Inference goes through the shared model seam (server/llm.ts), which routes
+// to the caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app
+// pays). This adapter builds the grounded message list; the ROUTE resolves the ModelChoice and passes it
+// in. The response is a TOKEN STREAM (SSE) the route hands straight to the client — streamModel normalizes
+// OpenRouter's OpenAI-style frames to the Workers-AI `{response}` shape the client already parses, so the
+// client stays provider-agnostic.
 
 import { clampChatRequest } from '../shared/chat.ts'
 import type { ChatRequest, SlideDigest } from '../shared/chat.ts'
+import { streamModel, ModelUnavailableError } from './llm.ts'
+import type { ModelChoice } from './llm.ts'
 
-// A current Workers AI instruct model with streaming output. Swapping to an app-owned Claude key later is a
-// change ONLY to this file.
-const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
-
-/** Thrown when Workers AI can't be reached (no binding, or the initial call failed before any token
+/** Thrown when inference can't be reached (no binding / the initial call failed before any token
  *  streamed). The route maps it to a 503 with a user-facing message rather than a 500, and REFUNDS the
- *  quota unit — no inference was spent. A failure AFTER tokens start is NOT this error (the stream just
- *  ends); that unit stays consumed because partial inference was paid for. */
+ *  app-paid quota unit — no inference was spent. A failure AFTER tokens start is NOT this error (the
+ *  stream just ends); that unit stays consumed because partial inference was paid for. */
 export class ChatUnavailableError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'ChatUnavailableError'
   }
-}
-
-// The sliver of the Workers AI binding we call — typed structurally so we don't pull
-// @cloudflare/workers-types (whose globals shadow the DOM lib) into the shared build graph.
-interface AiBinding {
-  run: (model: string, input: unknown) => Promise<unknown>
-}
-
-let cachedAi: AiBinding | null | undefined
-async function loadAi(): Promise<AiBinding | null> {
-  if (cachedAi !== undefined) return cachedAi
-  try {
-    const spec = 'cloudflare:workers'
-    const mod = (await import(/* @vite-ignore */ spec)) as {
-      env?: Record<string, unknown>
-    }
-    cachedAi = (mod.env?.AI as AiBinding | undefined) ?? null
-  } catch {
-    cachedAi = null
-  }
-  return cachedAi
 }
 
 function systemPrompt(): string {
@@ -126,30 +99,24 @@ function stubStream(req: ChatRequest): ReadableStream<Uint8Array> {
  *  stream is returned, any mid-stream failure just ends it. */
 export async function chatStream(
   reqRaw: ChatRequest,
+  choice: ModelChoice,
 ): Promise<ReadableStream<Uint8Array>> {
   const req = clampChatRequest(reqRaw)
 
-  const ai = await loadAi()
-  if (!ai) {
-    if (process.env.STRUT_CHAT_STUB) return stubStream(req)
-    throw new ChatUnavailableError(
-      'Workers AI is unavailable in this runtime — deploy or run under workerd (pnpm preview:cf).',
-    )
-  }
-
-  let result: unknown
   try {
-    result = await ai.run(MODEL, { messages: buildMessages(req), stream: true })
+    return await streamModel(choice, { messages: buildMessages(req) })
   } catch (err) {
+    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_CHAT_STUB emits a fake token stream so the
+    // chat UI is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
+    if (
+      choice.kind === 'workers-ai' &&
+      process.env.STRUT_CHAT_STUB &&
+      err instanceof ModelUnavailableError
+    ) {
+      return stubStream(req)
+    }
     throw new ChatUnavailableError(
-      'AI request failed: ' +
-        (err instanceof Error ? err.message : String(err)),
+      err instanceof Error ? err.message : String(err),
     )
   }
-  // With `stream: true` Workers AI returns a ReadableStream of SSE bytes. Anything else means the model
-  // path misbehaved before streaming — treat it as unavailable so the route refunds + 503s.
-  if (!(result instanceof ReadableStream)) {
-    throw new ChatUnavailableError('AI did not return a token stream.')
-  }
-  return result as ReadableStream<Uint8Array>
 }

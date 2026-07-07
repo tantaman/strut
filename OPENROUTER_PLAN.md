@@ -1,6 +1,9 @@
 # OpenRouter — "Bring your own LLM to the ✨ features" — Implementation Plan
 
-Status: **proposed** (not yet implemented; branch `open-router`). Realizes the deliberately-deferred
+Status: **Phases 1–4 built & verified** on branch `open-router`: credential store, connect UI, the
+`server/llm.ts` seam + adapter refactor, and the routes' pay/guest/quota branching. Remaining: Phase 5+
+(OAuth PKCE, model discovery, cost surfacing) + a live browser click-through. Realizes the
+deliberately-deferred
 **BYOK path** the AI adapters already name — *"there is NO per-user credential to custody (that's the
 BYOK path we deliberately deferred)"* (`server/arrange.ts:3-4`, `server/chat.ts:8-11`) — and
 [`AI_ARRANGE_PLAN.md`](./AI_ARRANGE_PLAN.md) Phase 1 (credential store) + Phase 5 (OpenRouter OAuth,
