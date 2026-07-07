@@ -52,7 +52,18 @@ export const Route = createFileRoute('/api/chat')({
       POST: async ({ request }) => {
         const { resolveSessionAccount } = await import('../../server/session')
         const account = await resolveSessionAccount(request)
-        if (!account || account.isAnonymous) {
+        if (!account) {
+          return json({ error: 'sign_in_required' }, 401)
+        }
+
+        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or app Workers AI.
+        const { resolveModel } = await import('../../server/llm')
+        const choice = await resolveModel(account.id)
+        const byo = choice.kind === 'openrouter'
+
+        // App-paid inference stays member-only (a guest can't spend the app's budget); BYO is open to any
+        // session, guest or member, because the USER pays (OPENROUTER_PLAN.md "Decisions").
+        if (!byo && account.isAnonymous) {
           return json({ error: 'sign_in_required' }, 401)
         }
         if (throttled(account.id)) {
@@ -77,33 +88,34 @@ export const Route = createFileRoute('/api/chat')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — consume one unit (one user turn) BEFORE the model call so concurrent turns
-        // can't race past the cap. Fail closed on a store error (unlikely: it's the same D1
-        // resolveSessionAccount just used, so a D1 outage would already have 401'd above).
-        const { consumeChatQuota, refundChatQuota } =
-          await import('../../server/quota')
+        // Durable daily quota — ONLY for the app-paid path. A BYO turn spends the user's OWN OpenRouter
+        // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
+        // Consumed (one unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
-        let quota
-        try {
-          quota = await consumeChatQuota(account.id, now)
-        } catch (err) {
-          console.error('[chat] quota check failed:', err)
-          return json({ error: 'internal' }, 500)
-        }
-        if (!quota.allowed) {
-          return json(
-            {
-              error: 'quota_exceeded',
-              message: `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
-            },
-            429,
-          )
+        if (!byo) {
+          const { consumeChatQuota } = await import('../../server/quota')
+          let quota
+          try {
+            quota = await consumeChatQuota(account.id, now)
+          } catch (err) {
+            console.error('[chat] quota check failed:', err)
+            return json({ error: 'internal' }, 500)
+          }
+          if (!quota.allowed) {
+            return json(
+              {
+                error: 'quota_exceeded',
+                message: `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
+              },
+              429,
+            )
+          }
         }
 
         const { chatStream, ChatUnavailableError } =
           await import('../../server/chat')
         try {
-          const stream = await chatStream(b as ChatRequest)
+          const stream = await chatStream(b as ChatRequest, choice)
           // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client.
           return new Response(stream, {
             status: 200,
@@ -113,8 +125,12 @@ export const Route = createFileRoute('/api/chat')({
             },
           })
         } catch (err) {
-          // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit.
-          await refundChatQuota(account.id, now).catch(() => {})
+          // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
+          // (app-paid path only).
+          if (!byo) {
+            const { refundChatQuota } = await import('../../server/quota')
+            await refundChatQuota(account.id, now).catch(() => {})
+          }
           if (err instanceof ChatUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }
