@@ -238,7 +238,7 @@ export function TokenColorField({
 }: {
   current?: string | null
   label: string
-  swatches: string[]
+  swatches: { key: string; name: string }[]
   resolve: (value: string) => string
   onPick: (value: string) => void
   onCustom: (hex: string) => void
@@ -260,12 +260,12 @@ export function TokenColorField({
       title: 'transparent',
       onSelect: () => onPick('bg-transparent'),
     })
-  for (const k of swatches)
+  for (const s of swatches)
     items.push({
-      key: k,
-      color: resolve(k),
-      title: k,
-      onSelect: () => onPick(k),
+      key: s.key,
+      color: resolve(s.key),
+      title: s.name,
+      onSelect: () => onPick(s.key),
     })
 
   return (
