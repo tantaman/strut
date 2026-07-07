@@ -956,6 +956,7 @@ button {
 .strut-md ul,
 .strut-md ol {
   padding-left: 1.3em;
+  list-style: revert;
 }
 .strut-md li {
   margin: 0.15em 0;

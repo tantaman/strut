@@ -31,7 +31,7 @@ const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;p
   .strut-md h3{font-size:48px;}
   .strut-md h4{font-size:38px;}
   .strut-md p,.strut-md ul,.strut-md ol,.strut-md blockquote,.strut-md pre{margin:0 0 .6em;}
-  .strut-md ul,.strut-md ol{padding-left:1.3em;}
+  .strut-md ul,.strut-md ol{padding-left:1.3em;list-style:revert;}
   .strut-md li{margin:.15em 0;}
   .strut-md a{color:inherit;text-decoration:underline;}
   .strut-md code{font-family:'Droid Sans Mono',monospace;font-size:.8em;background:rgba(0,0,0,.06);padding:.1em .3em;border-radius:4px;}
