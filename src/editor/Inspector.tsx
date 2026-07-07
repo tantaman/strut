@@ -13,6 +13,7 @@ import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
 import { ColorField } from './ColorField'
 import { uploadArtifact } from './upload'
+import { buildArtifactModule } from './artifactBuild'
 
 export function Inspector({
   componentRefs,
@@ -291,7 +292,10 @@ function ArtifactControls({
     setBusy(true)
     setError(null)
     try {
-      const url = await uploadArtifact(draft)
+      // A raw React component (JSX + bare `react` imports + default export) is transpiled and given a
+      // mount shim here; a plain ES module passes through untouched. See artifactBuild.ts.
+      const built = await buildArtifactModule(draft)
+      const url = await uploadArtifact(built)
       onSave(draft, url)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Build failed')
@@ -314,7 +318,10 @@ function ArtifactControls({
           whiteSpace: 'pre',
           resize: 'vertical',
         }}
-        placeholder={"// ES module — import from https://esm.sh, render into #root"}
+        placeholder={
+          '// Paste a default-exported React component (JSX + Tailwind ok),\n' +
+          '// or an ES module that imports from https://esm.sh and renders into #root'
+        }
       />
       {error && <p className="modal__error">{error}</p>}
       <div className="insp__row insp__zrow">
