@@ -44,6 +44,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { createDeckVariant } from './deckVariant'
 import { UsageMeter } from '../rindle/UsageMeter'
 import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
@@ -91,9 +92,20 @@ interface DeckRow {
   owner_id: string
   visibility: string
   share_token: string
+  source_deck_id: string
+  variant_label: string
+  variant_prompt: string
 }
 
 type BackgroundImageTarget = 'deck' | 'slide' | 'surface' | 'slide-surface'
+
+interface DeckVariantRow {
+  id: string
+  title: string
+  modified: number
+  slideCount: number
+  variant_label: string
+}
 
 // Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
 // and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).
@@ -111,11 +123,15 @@ confetti({ particleCount: 120, spread: 70 })
 export function Header({
   deck,
   activeSlide,
+  variants,
+  makesPublic,
   chatOpen,
   onToggleChat,
 }: {
   deck: DeckRow | null
   activeSlide: SlideDetail | null
+  variants: readonly DeckVariantRow[]
+  makesPublic: boolean
   // "✨ Chat" advisor rail toggle. Visible to everyone (the panel itself gates guests with a sign-in
   // nudge); state is owned by the editor page so the panel can mount alongside the well/stage.
   chatOpen: boolean
@@ -139,6 +155,7 @@ export function Header({
   const [exporting, setExporting] = useState(false)
   const [cssOpen, setCssOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [variantOpen, setVariantOpen] = useState(false)
   const active = editor.activeSlideId
   // The active slide's editable layer: 'markdown' = Body, '' = Objects (both always render; this only
   // says which one you're editing). The component inserters belong to the Objects layer, so they show
@@ -397,6 +414,29 @@ export function Header({
     }
   }
 
+  function newDeckVisibility(): {
+    visibility: 'private' | 'public-read'
+    share_token: string
+  } {
+    return makesPublic
+      ? { visibility: 'public-read', share_token: newId() }
+      : { visibility: 'private', share_token: '' }
+  }
+
+  async function onCreateVariant(audience: string, instructions: string) {
+    if (!deck || !app) throw new Error('Editor is still connecting')
+    const id = await createDeckVariant({
+      app,
+      sourceDeckId: deck.id,
+      audience,
+      instructions,
+      initialVisibility: newDeckVisibility(),
+    })
+    track('variant:create')
+    setVariantOpen(false)
+    navigate({ to: '/deck/$deckId', params: { deckId: id } })
+  }
+
   // Custom color: mint a `bg-custom-<hex>` class recorded on the deck (spec §8.3), then assign it.
   function setCustom(scope: 'bg' | 'surface', hex: string) {
     if (!deck) return
@@ -468,6 +508,16 @@ export function Header({
           })
         }
       />
+      {deck?.source_deck_id && (
+        <Link
+          to="/deck/$deckId"
+          params={{ deckId: deck.source_deck_id }}
+          className="hdr__variant-source"
+          title="Open source deck"
+        >
+          Variant{deck.variant_label ? `: ${deck.variant_label}` : ''}
+        </Link>
+      )}
 
       {/* Secondary tools: a single cluster so it can collapse to icons and then drop to a
           second row on narrow screens (see .hdr__tools media queries in strut.css). */}
@@ -661,6 +711,41 @@ export function Header({
                 <Link2 size={15} /> Share…
                 <span className="menu-item__hint">link &amp; invite</span>
               </button>
+              <button
+                className="menu-item menu-item--icon"
+                onClick={() => {
+                  setMenu(null)
+                  setVariantOpen(true)
+                }}
+              >
+                <Sparkles size={15} /> Create variant…
+                <span className="menu-item__hint">new deck</span>
+              </button>
+              {variants.length > 0 && (
+                <>
+                  <div className="menu-sep" />
+                  <div className="menu-label">Variants</div>
+                  {variants.map((v) => (
+                    <button
+                      key={v.id}
+                      className="menu-item menu-item--icon"
+                      onClick={() => {
+                        setMenu(null)
+                        navigate({
+                          to: '/deck/$deckId',
+                          params: { deckId: v.id },
+                        })
+                      }}
+                    >
+                      <Sparkles size={15} />
+                      {v.title || 'Untitled'}
+                      <span className="menu-item__hint">
+                        {v.slideCount} slide{v.slideCount === 1 ? '' : 's'}
+                      </span>
+                    </button>
+                  ))}
+                </>
+              )}
               <div className="menu-sep" />
               <div className="menu-label">Download</div>
               <button
@@ -768,6 +853,78 @@ export function Header({
       {shareOpen && deck && (
         <ShareModal deck={deck} onClose={() => setShareOpen(false)} />
       )}
+      {variantOpen && deck && (
+        <VariantModal
+          onCancel={() => setVariantOpen(false)}
+          onCreate={onCreateVariant}
+        />
+      )}
+    </div>
+  )
+}
+
+function VariantModal({
+  onCancel,
+  onCreate,
+}: {
+  onCancel: () => void
+  onCreate: (audience: string, instructions: string) => Promise<void>
+}) {
+  const [audience, setAudience] = useState('Executive brief')
+  const [instructions, setInstructions] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit() {
+    if (busy) return
+    setBusy(true)
+    setError(null)
+    try {
+      await onCreate(audience.trim() || 'Variant', instructions.trim())
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={busy ? undefined : onCancel}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h3>Create variant</h3>
+        <label className="modal__field">
+          <span>Audience</span>
+          <input
+            type="text"
+            autoFocus
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void submit()
+              if (e.key === 'Escape' && !busy) onCancel()
+            }}
+          />
+        </label>
+        <label className="modal__field">
+          <span>Instructions</span>
+          <textarea
+            value={instructions}
+            placeholder="6 slides, focus on risks and next steps"
+            onChange={(e) => setInstructions(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' && !busy) onCancel()
+            }}
+          />
+        </label>
+        {error && <p className="modal__error">{error}</p>}
+        <div className="modal__row">
+          <button className="btn btn--ghost" disabled={busy} onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn btn--primary" disabled={busy} onClick={submit}>
+            {busy ? 'Creating…' : 'Create'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

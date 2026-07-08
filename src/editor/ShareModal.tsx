@@ -33,7 +33,7 @@ function useCopy(): [boolean, (text: string) => void] {
   return [
     copied,
     (text: string) => {
-      navigator.clipboard?.writeText(text).then(
+      navigator.clipboard.writeText(text).then(
         () => setCopied(true),
         () => {},
       )
@@ -204,7 +204,7 @@ function CollaboratorRow({
   onRemove: () => void
 }) {
   const profile = useQuery(profileQuery({ userId: share.user_id }))
-  const name = profile?.display_name?.trim()
+  const name = profile ? profile.display_name.trim() : ''
   return (
     <li className="share__collab">
       <div className="share__collab-id">

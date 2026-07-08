@@ -244,6 +244,7 @@ button {
   box-shadow: var(--shadow);
 }
 .deck-card__preview {
+  position: relative;
   aspect-ratio: 16 / 9;
   background:
     radial-gradient(
@@ -260,6 +261,23 @@ button {
   font-weight: 700;
   color: var(--coral);
   border-bottom: 1px solid var(--line);
+}
+.deck-card__badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid rgba(20, 22, 30, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
 }
 .deck-card__meta {
   padding: 13px 15px 15px;
@@ -374,6 +392,24 @@ button {
   padding: 5px 9px;
   color: var(--text);
   min-width: 130px;
+}
+.hdr__variant-source {
+  flex: 0 1 auto;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 9px;
+}
+.hdr__variant-source:hover {
+  color: var(--coral-strong);
+  border-color: var(--coral-soft);
+  background: var(--coral-soft);
 }
 .hdr__title:hover {
   background: var(--panel-2);
@@ -1544,7 +1580,8 @@ button {
 }
 .modal input[type='text'],
 .modal input[type='url'],
-.modal input[type='password'] {
+.modal input[type='password'],
+.modal textarea {
   width: 100%;
   background: var(--panel-2);
   border: 1px solid var(--line-strong);
@@ -1555,10 +1592,25 @@ button {
 }
 .modal input[type='text']:focus,
 .modal input[type='url']:focus,
-.modal input[type='password']:focus {
+.modal input[type='password']:focus,
+.modal textarea:focus {
   outline: none;
   border-color: var(--coral);
   box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.modal textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.modal__field {
+  display: block;
+}
+.modal__field > span {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 .modal__row {
   display: flex;

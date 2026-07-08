@@ -1,7 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryStatus, useRoot } from '@rindle/react'
-import { deckDetailQuery, deckSharesQuery } from '../../shared/queries'
+import {
+  deckDetailQuery,
+  deckSharesQuery,
+  deckVariantsQuery,
+} from '../../shared/queries'
 import { authClient } from '../rindle/authClient'
 import { preloadDeck } from '../rindle/appSsr'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
@@ -83,6 +87,8 @@ function EditorInner({ deckId }: { deckId: string }) {
   // momentarily false on open and the read-only banner flashes before ownership/role is known.
   const sharesStatus = useQueryStatus(deckSharesQuery({ deckId }))
   const accessResolved = deckStatus !== 'unknown' && sharesStatus !== 'unknown'
+  const variants = useQuery(deckVariantsQuery({ deckId, limit: 5 }))
+  const { entitlement } = Route.useLoaderData()
 
   // Keep exactly one active slide (spec §3.2). While slides are still loading (empty) we leave the
   // URL's `?slide=` untouched so a deep-linked / Present-restored slide isn't clobbered before it
@@ -110,6 +116,8 @@ function EditorInner({ deckId }: { deckId: string }) {
       <Header
         deck={deck}
         activeSlide={activeSlide}
+        variants={variants}
+        makesPublic={entitlement?.canKeepPrivate === false}
         chatOpen={chatOpen}
         onToggleChat={() => setChatOpen((o) => !o)}
       />

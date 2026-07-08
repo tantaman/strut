@@ -15,6 +15,7 @@ export interface DeckRowLike {
   body_color?: string | null
   text_align?: string | null
   default_slide_mode?: string | null
+  chosen_presenter: string
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -57,7 +58,7 @@ const KIND_TO_TYPE: Record<ComponentKind, string> = {
   webframe: 'WebFrame',
   artifact: 'Artifact',
 }
-const TYPE_TO_KIND: Record<string, ComponentKind> = {
+const TYPE_TO_KIND: Partial<Record<string, ComponentKind>> = {
   TextBox: 'text',
   Image: 'image',
   Shape: 'shape',

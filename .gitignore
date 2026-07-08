@@ -26,3 +26,5 @@ todos.json
 # its own private repo cloned/symlinked in here, merged into the build via the #commercial seam.
 # See docs/COMMERCIAL_OVERLAY.md.
 commercial/
+!src/commercial/
+!src/commercial/stub.ts

@@ -9,12 +9,8 @@ import { deckDetailQuery } from '../../shared/queries'
 import { componentsFromRows } from './types'
 import { insertComponent } from './componentOps'
 import type { DeckDetail } from './deckDetail'
-import {
-  deserializeDeck,
-  serializeDeck,
-  type DeckBundle,
-  type ImportedDeck,
-} from './serialize'
+import { deserializeDeck, serializeDeck } from './serialize'
+import type { DeckBundle, ImportedDeck } from './serialize'
 import { toImpressHTML } from './impressExport'
 
 type Store = StrutApp['store']
@@ -30,7 +26,7 @@ async function readOnce<T>(
   const view = store.materialize(query as never) as {
     data: T
     resultType: string
-    destroy(): void
+    destroy: () => void
   }
   const start = Date.now()
   while (view.resultType !== 'complete' && Date.now() - start < timeoutMs) {

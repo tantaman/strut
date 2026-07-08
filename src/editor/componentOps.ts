@@ -5,7 +5,8 @@
 // keyed on `target.id` so a freshly-minted or a preserved id both work.
 
 import type { StrutApp } from '../rindle/client'
-import { SHAPES, type AnyComponent } from './types'
+import { SHAPES } from './types'
+import type { AnyComponent } from './types'
 
 type Mutate = StrutApp['mutate']
 

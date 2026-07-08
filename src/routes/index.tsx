@@ -156,6 +156,11 @@ function Dashboard() {
             >
               <div className="deck-card__preview">
                 {(d.title || '?').slice(0, 1).toUpperCase()}
+                {d.source_deck_id && (
+                  <span className="deck-card__badge">
+                    {d.variant_label || 'Variant'}
+                  </span>
+                )}
               </div>
               <div className="deck-card__meta">
                 <p className="deck-card__name">{d.title || 'Untitled'}</p>

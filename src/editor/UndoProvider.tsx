@@ -8,8 +8,8 @@ import {
   useEffect,
   useRef,
   useSyncExternalStore,
-  type ReactNode,
 } from 'react'
+import type { ReactNode } from 'react'
 import { History } from './history'
 
 const Ctx = createContext<History | null>(null)

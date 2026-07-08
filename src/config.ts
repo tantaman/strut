@@ -82,7 +82,8 @@ export function googleFontsHref(): string {
 
 export const FONT_SIZES = [144, 96, 72, 64, 48, 36, 24, 16, 12, 8];
 
+const cryptoLike = globalThis.crypto as Crypto | undefined;
 export const newId = (): string =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
+  typeof cryptoLike?.randomUUID === "function"
+    ? cryptoLike.randomUUID()
     : `id-${Math.floor(performance.now())}-${Math.floor(Math.random() * 1e9)}`;

@@ -6,7 +6,11 @@ import type { DeckBundle } from './serialize'
 const DOC = JSON.stringify({
   type: 'doc',
   content: [
-    { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Hello' }] },
+    {
+      type: 'heading',
+      attrs: { level: 1 },
+      content: [{ type: 'text', text: 'Hello' }],
+    },
     {
       type: 'paragraph',
       content: [
@@ -31,6 +35,7 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
       body_color: 'dddddd',
       text_align: 'center',
       default_slide_mode: 'markdown',
+      chosen_presenter: 'impress',
       canned_transition: 'zoom',
       custom_stylesheet: '',
       deck_version: '1.0',

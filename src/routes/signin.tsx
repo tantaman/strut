@@ -15,8 +15,11 @@ function SignIn() {
   if (session) {
     return (
       <main className="flex flex-col items-start gap-3 p-8">
-        <p>Signed in as {session.user.email ?? session.user.name}</p>
-        <button className="rounded border px-3 py-1" onClick={() => authClient.signOut()}>
+        <p>Signed in as {session.user.email || session.user.name}</p>
+        <button
+          className="rounded border px-3 py-1"
+          onClick={() => authClient.signOut()}
+        >
           Sign out
         </button>
       </main>
@@ -28,13 +31,17 @@ function SignIn() {
       <h1 className="text-xl font-semibold">Sign in to Strut</h1>
       <button
         className="rounded border px-3 py-1"
-        onClick={() => authClient.signIn.social({ provider: 'github', callbackURL: '/' })}
+        onClick={() =>
+          authClient.signIn.social({ provider: 'github', callbackURL: '/' })
+        }
       >
         Continue with GitHub
       </button>
       <button
         className="rounded border px-3 py-1"
-        onClick={() => authClient.signIn.social({ provider: 'google', callbackURL: '/' })}
+        onClick={() =>
+          authClient.signIn.social({ provider: 'google', callbackURL: '/' })
+        }
       >
         Continue with Google
       </button>
