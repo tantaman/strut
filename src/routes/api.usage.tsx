@@ -28,16 +28,32 @@ export const Route = createFileRoute('/api/usage')({
         const ent = await getEntitlements(account.id)
         const now = Date.now()
 
+        // A connected BYO OpenRouter key lifts the app-paid daily cap for the features that HAVE a BYO
+        // path (arrange/generate/chat run on the user's own credits). Image is Workers-AI-only, so it
+        // stays capped even with a key — mirroring the `if (!byo)` gating in the AI routes.
+        const { resolveModel } = await import('../../server/llm')
+        const byo = (await resolveModel(account.id)).kind === 'openrouter'
+        const BYO_UNLIMITED: Record<AiFeature, boolean> = {
+          arrange: true,
+          generate: true,
+          chat: true,
+          image: false,
+          artifact: false,
+        }
+
         const { peekUsage, FEATURE_DEFAULT_LIMIT } =
           await import('../../server/quota')
         const features = await Promise.all(
-          FEATURES.map(async (key) => ({
-            key,
-            used: ent.aiUnlimited ? 0 : await peekUsage(account.id, now, key),
-            limit: ent.aiUnlimited
-              ? null
-              : (ent.aiDailyLimits?.[key] ?? FEATURE_DEFAULT_LIMIT[key]),
-          })),
+          FEATURES.map(async (key) => {
+            const unlimited = ent.aiUnlimited || (byo && BYO_UNLIMITED[key])
+            return {
+              key,
+              used: unlimited ? 0 : await peekUsage(account.id, now, key),
+              limit: unlimited
+                ? null
+                : (ent.aiDailyLimits?.[key] ?? FEATURE_DEFAULT_LIMIT[key]),
+            }
+          }),
         )
 
         let storageUsed = 0
@@ -53,6 +69,7 @@ export const Route = createFileRoute('/api/usage')({
         return json(
           {
             isPro: ent.pro,
+            byo,
             upgradeUrl: entitlementSummary(ent).upgradeUrl,
             resetsAt: reset.toISOString(),
             storage: { used: storageUsed, limit: ent.storageLimitBytes },

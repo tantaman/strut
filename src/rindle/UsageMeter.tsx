@@ -10,6 +10,8 @@ import { USAGE_CHANGED } from '../lib/usage'
 
 interface Usage {
   isPro: boolean
+  /** A connected BYO OpenRouter key — arrange/generate/chat run on the user's own credits (unlimited). */
+  byo: boolean
   upgradeUrl: string | null
   resetsAt: string
   storage: { used: number; limit: number | null }
@@ -198,9 +200,16 @@ export function UsageMeter() {
             )
           })}
 
-          {!usage.ai.unlimited && (
+          {(usage.byo || !usage.ai.unlimited) && (
             <div className="usage__reset">
-              AI limits reset in {fmtReset(usage.resetsAt)}
+              {usage.byo && (
+                <div>
+                  Arrange, Generate and Chat run on your connected model.
+                </div>
+              )}
+              {!usage.ai.unlimited && (
+                <div>AI limits reset in {fmtReset(usage.resetsAt)}</div>
+              )}
             </div>
           )}
 
