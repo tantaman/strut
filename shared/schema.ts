@@ -98,6 +98,15 @@ export const slide = table("slide")
   })
   .primaryKey("id");
 
+export const slide_notes = table("slide_notes")
+  .columns({
+    slide_id: string(),
+    deck_id: string(),
+    doc: string(),
+    modified: number(),
+  })
+  .primaryKey("slide_id");
+
 export const user_profile = table("user_profile")
   .columns({
     id: string(),
@@ -106,4 +115,4 @@ export const user_profile = table("user_profile")
   })
   .primaryKey("id");
 
-export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, user_profile] });
+export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, slide_notes, user_profile] });

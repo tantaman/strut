@@ -634,6 +634,12 @@ export function Header({
         >
           Overview
         </button>
+        <button
+          className={editor.mode === 'research' ? 'is-active' : ''}
+          onClick={() => editor.setMode('research')}
+        >
+          Research
+        </button>
       </div>
 
       <button

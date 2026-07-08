@@ -10,6 +10,7 @@ import { Header } from '../editor/Header'
 import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
 import { Overview } from '../editor/Overview'
+import { ResearchView } from '../editor/ResearchView'
 import { ChatPanel } from '../editor/ChatPanel'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { MobileTabBar } from '../editor/mobile/MobileTabBar'
@@ -21,13 +22,15 @@ export const Route = createFileRoute('/deck/$deckId')({
   // Both optional → existing links (`/deck/:id` with no search) keep working; defaults applied on read.
   validateSearch: (
     s: Record<string, unknown>,
-  ): { view?: 'slide' | 'overview'; slide?: string } => ({
+  ): { view?: 'slide' | 'overview' | 'research'; slide?: string } => ({
     view:
       s.view === 'overview'
         ? 'overview'
-        : s.view === 'slide'
-          ? 'slide'
-          : undefined,
+        : s.view === 'research'
+          ? 'research'
+          : s.view === 'slide'
+            ? 'slide'
+            : undefined,
     slide: typeof s.slide === 'string' ? s.slide : undefined,
   }),
   // SSR seed: read the deck subtree + collaborators on the server so a direct load / reload of the
@@ -129,6 +132,8 @@ function EditorInner({ deckId }: { deckId: string }) {
               </div>
             )}
           </>
+        ) : editor.mode === 'research' ? (
+          <ResearchView slides={slides} deck={deck} />
         ) : (
           <Overview slides={slides} deck={deck} />
         )}

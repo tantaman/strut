@@ -16,7 +16,7 @@ import { getRouteApi } from '@tanstack/react-router'
 // Reach the editor route's search/navigate by id (no module import → no coupling to the route file).
 const editorRoute = getRouteApi('/deck/$deckId')
 
-export type EditorMode = 'slide' | 'overview'
+export type EditorMode = 'slide' | 'overview' | 'research'
 
 interface EditorState {
   deckId: string

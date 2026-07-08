@@ -39,6 +39,7 @@ import {
   deck_share as deckShareGen,
   schema as schemaGen,
   slide as slideGen,
+  slide_notes,
   user_profile,
 } from './schema.ts'
 import { componentProps } from './componentProps.ts'
@@ -71,7 +72,7 @@ export const slide = refineTable(slideGen, { render_mode: string<SlideMode>() })
 export const schema = refineSchema(schemaGen, {
   tables: [component, deck, deck_share, slide],
 })
-export { custom_background, user_profile }
+export { custom_background, slide_notes, user_profile }
 
 export const q = newQueryBuilder(schema)
 
@@ -80,6 +81,9 @@ export const rels = defineRelationships({
   deckCustomBackgrounds: rel(deck, custom_background, { id: 'deck_id' }),
   deckShares: rel(deck, deck_share, { id: 'deck_id' }),
   slideComponents: rel(slide, component, { id: 'slide_id' }),
+  // Research notes hang off the deck (own table + query, NOT the deck-detail subtree — see slide_notes
+  // migration). deckNotes drives the deck-scoped `deckNotes` query; noteDeck is the reverse gate below.
+  deckNotes: rel(deck, slide_notes, { id: 'deck_id' }),
   // Reverse (child → parent) relationships used by server-only `existsNoSync` permission gates and by
   // the server mutator access guards (server/rindle-api.ts): a slide/component is editable only if its
   // owning deck is owned-by or editor-shared-with the principal.
@@ -87,6 +91,7 @@ export const rels = defineRelationships({
   componentSlide: rel(component, slide, { slide_id: 'id' }),
   customBgDeck: rel(custom_background, deck, { deck_id: 'id' }),
   shareDeck: rel(deck_share, deck, { deck_id: 'id' }),
+  noteDeck: rel(slide_notes, deck, { deck_id: 'id' }),
 })
 
 // ---- schema-derived row types -------------------------------------------------------------------
@@ -209,6 +214,17 @@ export const setSlideDocArgs = z.object({
   now: z.number(),
 })
 export type SetSlideDocArgs = z.infer<typeof setSlideDocArgs>
+
+// Per-slide RESEARCH NOTES: a free-form TipTap doc (JSON string) stored in the `slide_notes` side table
+// (loaded on demand via the deckNotes query, NOT with the deck). Upserted by slide_id; carries deck_id
+// so the deck-scoped notes query + its access gate resolve without a join. Streamed via `.folded`.
+export const setSlideNotesArgs = z.object({
+  slideId: z.string(),
+  deckId: z.string(),
+  doc: z.string(),
+  now: z.number(),
+})
+export type SetSlideNotesArgs = z.infer<typeof setSlideNotesArgs>
 
 export const setSlideModeArgs = z.object({
   id: z.string(),
@@ -491,6 +507,10 @@ export const mutators = {
     deleteSlideArgs,
     function* (tx: IsoTx, a: DeleteSlideArgs): MutationGen {
       for (const id of a.componentIds) yield tx.delete('component', { id })
+      // Also drop the slide's research note (PK = slide_id) so the optimistic store holds no orphan when
+      // deleting from the Research surface. No-op if the note row isn't present. The server twin
+      // (rindle-api.ts deleteSlide) cascades the same delete authoritatively.
+      yield tx.delete('slide_notes', { slide_id: a.id })
       yield tx.delete('slide', { id: a.id })
     },
   ),
@@ -547,6 +567,22 @@ export const mutators = {
     setSlideDocArgs,
     function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
       yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
+    },
+  ),
+
+  // Research notes (per-slide) as a TipTap doc (JSON string). UPSERT on the slide_notes side table
+  // (PK = slide_id, mirrors setDisplayName): the first note on a slide and every later edit are the SAME
+  // op — no separate insert. Streamed via `.folded`; deck_id lets the deckNotes query + access gate
+  // scope by deck. Deliberately its own table (off the deck-detail sync) so notes load only on demand.
+  setSlideNotes: shared(
+    setSlideNotesArgs,
+    function* (tx: IsoTx, a: SetSlideNotesArgs): MutationGen {
+      yield tx.upsert('slide_notes', {
+        slide_id: a.slideId,
+        deck_id: a.deckId,
+        doc: a.doc,
+        modified: a.now,
+      })
     },
   ),
 
