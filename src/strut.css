@@ -1694,6 +1694,11 @@ button {
   padding-top: 10px;
   margin-top: 2px;
 }
+.theme__group--first {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
 .theme__label {
   text-transform: uppercase;
   font-weight: 700;

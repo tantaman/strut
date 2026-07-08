@@ -49,9 +49,13 @@ Rindle's schema into the auth DB. Keep the two apart.
 
 ## 4. Secrets & the auth URL
 
-`BETTER_AUTH_URL` is a non-secret `var` in `wrangler.jsonc` (defaults to `http://localhost:3000`). **Set
-it to the origin you actually open** — for `wrangler dev` that's usually `http://localhost:8787` — or the
-OAuth redirect and secure cookies won't line up.
+`pnpm dev` needs no auth env vars: when `server/auth.ts` falls back to the local SQLite auth DB, it uses
+the current request origin as `BETTER_AUTH_URL` and a deterministic dev-only `BETTER_AUTH_SECRET`.
+Anonymous guest sessions work out of the box.
+
+For Workers / D1-backed auth, `BETTER_AUTH_URL` is a non-secret `var` in `wrangler.jsonc`. **Set it to
+the origin you actually open** — for `wrangler dev` that's usually `http://localhost:8787` — or the OAuth
+redirect and secure cookies won't line up.
 
 - **Production:** `wrangler secret put BETTER_AUTH_SECRET` (`openssl rand -base64 32`), plus
   `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` and/or `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
