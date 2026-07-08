@@ -10,6 +10,7 @@
 
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
+import { notifyUsageChanged } from '../lib/usage'
 import { applyPlan, buildDigest } from './aiArrange'
 import { applyGenerated, markdownToDoc } from './aiGenerate'
 import { applyThemePatch } from './aiTheme'
@@ -326,6 +327,7 @@ async function resolveImageSrc(
   const body = (await res.json().catch(() => null)) as { url?: string } | null
   if (!body?.url)
     return { ok: false, error: 'The image didn’t come back — try again.' }
+  notifyUsageChanged() // a generated image spends an AI unit + storage → refresh the usage ring
   return { ok: true, src: body.url }
 }
 

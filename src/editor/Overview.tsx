@@ -17,6 +17,7 @@ import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
 import { applyPlan, buildDigest, previewCards } from './aiArrange'
 import { track } from '../lib/analytics'
+import { notifyUsageChanged } from '../lib/usage'
 import type { PreviewCard } from './aiArrange'
 import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
 import { SlideView } from './SlideView'
@@ -397,6 +398,7 @@ export function Overview({
       layout: preview.plan.layout,
       count: slides.length,
     })
+    notifyUsageChanged() // ✨ Arrange spent an app-paid unit → refresh the usage ring
     setPreview(null)
   }
   function discardPreview() {
