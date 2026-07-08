@@ -8,6 +8,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { preloadDecks } from '../rindle/appSsr'
 import { AccountControl } from '../rindle/AccountControl'
 import { ModelControl } from '../rindle/ModelControl'
+import { UsageMeter } from '../rindle/UsageMeter'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
@@ -104,6 +105,7 @@ function Dashboard() {
         <span className="brandbar__tag">Spatial presentations</span>
         <PoweredByRindle variant="inline" />
         <ModelControl />
+        <UsageMeter />
         <AccountControl initial={account} entitlement={entitlement} />
       </div>
       <div className="dash__head">

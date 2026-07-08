@@ -15,6 +15,8 @@
 // dynamically imported + @vite-ignore'd (string-indirected) so it never enters the workerd/client build
 // graph.
 
+import type { AiFeature } from '../shared/commercial.ts'
+
 // The usage tables (names are internal constants, never user input — safe to interpolate into SQL).
 const ARRANGE_TABLE = 'arrange_usage'
 const GENERATE_TABLE = 'generate_usage'
@@ -42,12 +44,42 @@ export function utcDay(now: number): string {
   return new Date(now).toISOString().slice(0, 10)
 }
 
+// Feature → its usage table + default (free-tier) daily limit, so the usage meter can read every bucket
+// without restating the wiring. peekUsage reads today's count without incrementing.
+const FEATURE_TABLE: Record<AiFeature, string> = {
+  arrange: ARRANGE_TABLE,
+  generate: GENERATE_TABLE,
+  chat: CHAT_TABLE,
+  image: IMAGE_TABLE,
+  artifact: ARTIFACT_TABLE,
+}
+export const FEATURE_DEFAULT_LIMIT: Record<AiFeature, number> = {
+  arrange: ARRANGE_DAILY_LIMIT,
+  generate: GENERATE_DAILY_LIMIT,
+  chat: CHAT_DAILY_LIMIT,
+  image: IMAGE_DAILY_LIMIT,
+  artifact: ARTIFACT_DAILY_LIMIT,
+}
+
+/** Today's consumed count for a feature (no increment) — the read behind /api/usage. */
+export async function peekUsage(
+  userId: string,
+  now: number,
+  feature: AiFeature,
+  store?: QuotaStore,
+): Promise<number> {
+  const s = store ?? (await getStore(FEATURE_TABLE[feature]))
+  return s.peek(userId, utcDay(now))
+}
+
 /** The minimal store the quota needs: atomically bump a (user, day) counter and return the new value,
  *  refund one on a failed call, and sweep stale rows. Backed by D1 (workerd) or better-sqlite3 (dev). */
 export interface QuotaStore {
   bump: (userId: string, day: string) => Promise<number>
   refund: (userId: string, day: string) => Promise<void>
   sweep: (before: string) => Promise<void>
+  /** Read today's count WITHOUT incrementing (for the usage meter). 0 when there's no row. */
+  peek: (userId: string, day: string) => Promise<number>
 }
 
 // One atomic upsert does the enforcement: insert-or-increment and return the NEW count in a single
@@ -59,6 +91,8 @@ const bumpSql = (table: string) =>
 const refundSql = (table: string) =>
   `UPDATE ${table} SET count = count - 1 WHERE user_id = ? AND day = ? AND count > 0`
 const sweepSql = (table: string) => `DELETE FROM ${table} WHERE day < ?`
+const peekSql = (table: string) =>
+  `SELECT count FROM ${table} WHERE user_id = ? AND day = ?`
 
 export interface QuotaResult {
   allowed: boolean
@@ -210,6 +244,13 @@ export function makeD1Store(db: D1Like, table = ARRANGE_TABLE): QuotaStore {
     sweep: async (before) => {
       await db.prepare(sweepSql(table)).bind(before).run()
     },
+    peek: async (userId, day) => {
+      const row = await db
+        .prepare(peekSql(table))
+        .bind(userId, day)
+        .first<{ count: number }>()
+      return row?.count ?? 0
+    },
   }
 }
 
@@ -237,6 +278,12 @@ export function makeSqliteStore(
     },
     sweep: async (before) => {
       db.prepare(sweepSql(table)).run(before)
+    },
+    peek: async (userId, day) => {
+      const row = db.prepare(peekSql(table)).get(userId, day) as
+        | { count?: number }
+        | undefined
+      return typeof row?.count === 'number' ? row.count : 0
     },
   }
 }
