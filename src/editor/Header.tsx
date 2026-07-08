@@ -43,6 +43,7 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { UsageMeter } from '../rindle/UsageMeter'
 import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
 import {
@@ -663,6 +664,10 @@ export function Header({
       >
         <Play size={16} /> Present
       </button>
+
+      {/* Usage ring — this is the point of consumption (AI + uploads), so it lives here too. Hidden on
+          the mobile app-bar (the actions it tracks move to the tab bar). */}
+      <UsageMeter />
 
       {menu === 'media-image' && (
         <MediaModal

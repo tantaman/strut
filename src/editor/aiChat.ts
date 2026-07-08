@@ -26,6 +26,7 @@ import { dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
+import { notifyUsageChanged } from '../lib/usage'
 import { useMutate, useStore } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import type { StrutStore } from '../rindle/client'
@@ -612,6 +613,7 @@ export function useChat(
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
       track('chat:sent', { turn: convo.length })
+      notifyUsageChanged() // a chat turn spends an app-paid unit → refresh the usage ring
       void sendChat(
         store,
         { deckId, slides: buildDigest(slides), history: convo },
@@ -641,6 +643,7 @@ export function useChat(
       }
       setUndoTip(null)
       track('chat:edit', { slides: slides.length })
+      notifyUsageChanged() // a chat-edit turn spends an app-paid unit → refresh the usage ring
       void sendChatAction(
         store,
         {

@@ -4,8 +4,9 @@
 // features (Pro / self-host storage) render as "Unlimited" with no bar. Renders nothing until it loads,
 // so it's inert when there's no session.
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AiFeature } from '../../shared/commercial'
+import { USAGE_CHANGED } from '../lib/usage'
 
 interface Usage {
   isPro: boolean
@@ -61,18 +62,25 @@ export function UsageMeter() {
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    let alive = true
-    fetch('/api/usage')
+  const load = useCallback(() => {
+    fetch('/api/usage', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: (Usage & { error?: string }) | null) => {
-        if (alive && d && !d.error) setUsage(d)
+        if (d && !d.error) setUsage(d)
       })
       .catch(() => {})
-    return () => {
-      alive = false
-    }
   }, [])
+
+  // First paint, whenever the panel opens (always-fresh numbers), and after any quota/storage-consuming
+  // action fires USAGE_CHANGED (the ring ticks up live).
+  useEffect(() => load(), [load])
+  useEffect(() => {
+    if (open) load()
+  }, [open, load])
+  useEffect(() => {
+    window.addEventListener(USAGE_CHANGED, load)
+    return () => window.removeEventListener(USAGE_CHANGED, load)
+  }, [load])
 
   useEffect(() => {
     if (!open) return

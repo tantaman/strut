@@ -3172,7 +3172,8 @@ button {
   /* Handed to the tab bar; these just eat width in the app bar now. */
   .hdr__mode,
   .hdr__chat,
-  .hdr__present {
+  .hdr__present,
+  .hdr .usage {
     display: none;
   }
   /* The rindle credit — the inline header pill and the floating bottom-right one — collides with the

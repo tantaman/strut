@@ -21,6 +21,7 @@ import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import { applyGenerated } from './aiGenerate'
 import { track } from '../lib/analytics'
+import { notifyUsageChanged } from '../lib/usage'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
@@ -216,6 +217,7 @@ export function SlideWell({
     )
     if (firstId) editor.setActiveSlide(firstId)
     track('slides:generated', { count: generated.slides.length })
+    notifyUsageChanged() // ✨ Generate spent an app-paid unit → refresh the usage ring
     setGenOpen(false)
   }
 
