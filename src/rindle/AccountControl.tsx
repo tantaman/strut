@@ -5,8 +5,9 @@
 // (and sign-out) returns to '/', where the resulting session boots and its decks SSR-seed.
 
 import { useEffect, useRef, useState } from 'react'
-import { LogIn, LogOut, User } from 'lucide-react'
+import { LogIn, LogOut, Sparkles, User } from 'lucide-react'
 import type { SessionAccount } from '../../server/session'
+import type { EntitlementSummary } from '../../shared/commercial'
 import { authClient } from './authClient'
 import { track } from '../lib/analytics'
 
@@ -17,12 +18,20 @@ import { track } from '../lib/analytics'
  *  label is unchanged, so there's no visible flip either. */
 export function AccountControl({
   initial,
+  entitlement,
 }: {
   initial?: SessionAccount | null
+  /** The viewer's plan summary (appSsr seed). Drives the Pro badge + Upgrade link. When it's absent or
+   *  `upgradeUrl` is null — the open-source build, which has no commercial overlay — no upgrade UI shows. */
+  entitlement?: EntitlementSummary | null
 }) {
   const { data: session } = authClient.useSession()
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
+
+  const isPro = entitlement?.isPro ?? false
+  // Only an overlay build seeds a non-null upgradeUrl (its pricing page); null → no upgrade affordance.
+  const upgradeUrl = entitlement?.upgradeUrl ?? null
 
   useEffect(() => {
     if (!open) return
@@ -66,6 +75,23 @@ export function AccountControl({
       >
         <User size={15} />
         <span className="acct__label">{label}</span>
+        {isPro && (
+          <span
+            className="acct__pro"
+            style={{
+              marginLeft: 6,
+              padding: '1px 6px',
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 600,
+              lineHeight: 1.4,
+              background: 'linear-gradient(90deg,#7c3aed,#db2777)',
+              color: '#fff',
+            }}
+          >
+            Pro
+          </span>
+        )}
       </button>
       {open && (
         <div
@@ -93,6 +119,15 @@ export function AccountControl({
               <div className="menu-label">
                 {member ? member.email : 'Signed in'}
               </div>
+              {upgradeUrl && !isPro && (
+                <a
+                  className="menu-item menu-item--icon"
+                  href={upgradeUrl}
+                  onClick={() => track('account:upgrade_click')}
+                >
+                  <Sparkles size={15} /> Upgrade to Pro
+                </a>
+              )}
               <button className="menu-item menu-item--icon" onClick={signOut}>
                 <LogOut size={15} /> Sign out
               </button>

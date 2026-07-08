@@ -92,11 +92,15 @@ export const Route = createFileRoute('/api/chat')({
         // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
         // Consumed (one unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
-        if (!byo) {
+        // Pro (like BYO) lifts the app-paid daily cap; `ai.meter === false` means unlimited.
+        const { getEntitlements, aiMetering } =
+          await import('../../server/entitlements')
+        const ai = aiMetering(await getEntitlements(account.id), 'chat')
+        if (!byo && ai.meter) {
           const { consumeChatQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeChatQuota(account.id, now)
+            quota = await consumeChatQuota(account.id, now, undefined, ai.limit)
           } catch (err) {
             console.error('[chat] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -126,8 +130,8 @@ export const Route = createFileRoute('/api/chat')({
           })
         } catch (err) {
           // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
-          // (app-paid path only).
-          if (!byo) {
+          // (only if we metered it).
+          if (!byo && ai.meter) {
             const { refundChatQuota } = await import('../../server/quota')
             await refundChatQuota(account.id, now).catch(() => {})
           }

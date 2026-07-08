@@ -8,7 +8,9 @@
 // server config). When it's unset (dev, or same-origin serving), there's no sandbox host and every request
 // passes straight through.
 
-import defaultEntry, { type ServerEntry } from '@tanstack/react-start/server-entry'
+import defaultEntry from '@tanstack/react-start/server-entry'
+import type { ServerEntry } from '@tanstack/react-start/server-entry'
+import { commercial } from '#commercial'
 
 /** The host component of ARTIFACT_ORIGIN (e.g. "sandbox.strut.io"), or '' when unset/invalid. */
 function sandboxHost(): string {
@@ -27,14 +29,21 @@ const forward = defaultEntry.fetch as (
 ) => Promise<Response>
 
 const entry: ServerEntry = {
-  fetch: ((request: Request, ...rest: unknown[]) => {
+  fetch: async (request: Request, ...rest: unknown[]) => {
     const url = new URL(request.url)
     const host = sandboxHost()
     if (host && url.host === host && !url.pathname.startsWith('/a/')) {
       return new Response('Not found', { status: 404 })
     }
+    // Commercial overlay (private; null in the open-source build). It gets first crack at the marketing
+    // pages (apex host) and owns /api/billing/*, deciding by host/path itself; returning null falls
+    // through to the app. With no overlay this branch is skipped and every host serves the app as before.
+    if (commercial) {
+      const handled = await commercial.fetch(request, ...rest)
+      if (handled) return handled
+    }
     return forward(request, ...rest)
-  }) as ServerEntry['fetch'],
+  },
 }
 
 export default entry

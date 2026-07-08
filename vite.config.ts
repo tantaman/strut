@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
@@ -12,6 +13,14 @@ import tailwindcss from '@tailwindcss/vite'
 // fallback keep working unchanged. The `cloudflare()` plugin runs the SSR env in workerd and reads
 // wrangler.jsonc (bindings, nodejs_compat) — only wanted for the actual CF deploy target.
 const CF = process.env.CF === '1'
+
+// Open-core commercial overlay (private; absent in this repo). When STRUT_COMMERCIAL points at an
+// overlay entry module, we alias `#commercial` to it — overriding the inert src/commercial/stub.ts —
+// so the SAME Worker bundle also serves the marketing site + Stripe billing. WRANGLER_CONFIG lets the
+// overlay supply its own wrangler config (adding the app.strut.io route + host vars) without editing
+// the open-source wrangler.jsonc. Both unset = the plain open-source build. See docs/COMMERCIAL_OVERLAY.md.
+const COMMERCIAL = process.env.STRUT_COMMERCIAL
+const WRANGLER_CONFIG = process.env.WRANGLER_CONFIG
 
 // Server-side secrets the Rindle API + upload handlers read via process.env. Vite doesn't expose
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
@@ -44,7 +53,14 @@ const config = defineConfig(({ mode }) => {
   }
 
   return {
-    resolve: { tsconfigPaths: true },
+    resolve: {
+      tsconfigPaths: true,
+      // An overlay build swaps the `#commercial` stub for the real (private) module. An explicit
+      // resolve.alias wins over the tsconfig `paths` fallback used by the open-source build.
+      ...(COMMERCIAL
+        ? { alias: { '#commercial': resolve(process.cwd(), COMMERCIAL) } }
+        : {}),
+    },
     server: {
       port: 3000,
       // The Rindle API + image upload are now TanStack Start server routes (src/routes/api.rindle.*),
@@ -56,7 +72,16 @@ const config = defineConfig(({ mode }) => {
       watch: { ignored: ['**/.uploads/**'] },
     },
     plugins: [
-      ...(CF ? [cloudflare({ viteEnvironment: { name: 'ssr' } })] : []),
+      ...(CF
+        ? [
+            cloudflare({
+              viteEnvironment: { name: 'ssr' },
+              // Overlay deploys point this at commercial/wrangler.jsonc (extra host route + auth vars);
+              // unset = the open-source wrangler.jsonc.
+              ...(WRANGLER_CONFIG ? { configPath: WRANGLER_CONFIG } : {}),
+            }),
+          ]
+        : []),
       // `consolePiping` cross-forwards console between the SSR server and the browser (server logs →
       // browser console, client logs → terminal). That bidirectional forwarding echoes: one server
       // console.error becomes a browser console.error, which pipes back as a server log, re-wrapped

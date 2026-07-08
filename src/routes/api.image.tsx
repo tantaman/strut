@@ -56,24 +56,35 @@ export const Route = createFileRoute('/api/image')({
         }
 
         // Durable daily quota — consumed BEFORE the model call so concurrent calls can't race past the cap.
+        // Pro accounts are unlimited (`ai.meter === false`) and skip the cap.
         const now = Date.now()
+        const { getEntitlements, aiMetering } =
+          await import('../../server/entitlements')
+        const ai = aiMetering(await getEntitlements(account.id), 'image')
         const { consumeImageQuota, refundImageQuota } =
           await import('../../server/quota')
-        let quota
-        try {
-          quota = await consumeImageQuota(account.id, now)
-        } catch (err) {
-          console.error('[image] quota check failed:', err)
-          return json({ error: 'internal' }, 500)
-        }
-        if (!quota.allowed) {
-          return json(
-            {
-              error: 'quota_exceeded',
-              message: `Daily AI image limit reached (${quota.limit}/day). Try again tomorrow.`,
-            },
-            429,
-          )
+        if (ai.meter) {
+          let quota
+          try {
+            quota = await consumeImageQuota(
+              account.id,
+              now,
+              undefined,
+              ai.limit,
+            )
+          } catch (err) {
+            console.error('[image] quota check failed:', err)
+            return json({ error: 'internal' }, 500)
+          }
+          if (!quota.allowed) {
+            return json(
+              {
+                error: 'quota_exceeded',
+                message: `Daily AI image limit reached (${quota.limit}/day). Try again tomorrow.`,
+              },
+              429,
+            )
+          }
         }
 
         const { generateImage, ImageUnavailableError } =
@@ -83,8 +94,8 @@ export const Route = createFileRoute('/api/image')({
           const url = await generateImage(prompt, await getUploadsBucket())
           return json({ url }, 200)
         } catch (err) {
-          // The work didn't happen — refund the consumed unit.
-          await refundImageQuota(account.id, now).catch(() => {})
+          // The work didn't happen — refund the consumed unit (only if we metered it).
+          if (ai.meter) await refundImageQuota(account.id, now).catch(() => {})
           if (err instanceof ImageUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

@@ -21,3 +21,8 @@ todos.json
 *.db-wal
 *.db-wal2
 .dev.vars
+
+# Private commercial overlay (marketing site + Stripe billing). Kept OUT of the open-source tree; it's
+# its own private repo cloned/symlinked in here, merged into the build via the #commercial seam.
+# See docs/COMMERCIAL_OVERLAY.md.
+commercial/

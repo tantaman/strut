@@ -86,11 +86,21 @@ export const Route = createFileRoute('/api/arrange')({
         // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
         // Consumed BEFORE the model call so concurrent calls can't race past the cap.
         const now = Date.now()
-        if (!byo) {
+        // Pro (like BYO) lifts the app-paid daily cap. Resolve the plan once; `ai.meter === false`
+        // means unlimited → skip the quota, and Pro may also carry a raised `ai.limit`.
+        const { getEntitlements, aiMetering } =
+          await import('../../server/entitlements')
+        const ai = aiMetering(await getEntitlements(account.id), 'arrange')
+        if (!byo && ai.meter) {
           const { consumeArrangeQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeArrangeQuota(account.id, now)
+            quota = await consumeArrangeQuota(
+              account.id,
+              now,
+              undefined,
+              ai.limit,
+            )
           } catch (err) {
             console.error('[arrange] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -112,8 +122,8 @@ export const Route = createFileRoute('/api/arrange')({
           const plan = await arrange(b as ArrangeRequest, choice)
           return json(plan, 200)
         } catch (err) {
-          // The work didn't happen — refund the consumed unit (app-paid path only).
-          if (!byo) {
+          // The work didn't happen — refund the consumed unit (only if we metered it).
+          if (!byo && ai.meter) {
             const { refundArrangeQuota } = await import('../../server/quota')
             await refundArrangeQuota(account.id, now).catch(() => {})
           }

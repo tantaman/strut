@@ -114,7 +114,10 @@ async function readLocal(key: string): Promise<string | null> {
   const { readFile } = await import('node:fs/promises')
   const { join } = await import('node:path')
   try {
-    return await readFile(join(process.cwd(), LOCAL_DIR, ARTIFACT_PREFIX, key), 'utf8')
+    return await readFile(
+      join(process.cwd(), LOCAL_DIR, ARTIFACT_PREFIX, key),
+      'utf8',
+    )
   } catch {
     return null
   }
@@ -144,15 +147,20 @@ export async function uploadArtifactFromRequest(
     if (new TextEncoder().encode(code).byteLength > MAX_CODE_BYTES)
       throw new ArtifactError('artifact source must be under 512 KB', 413)
 
+    // Pro accounts can raise/lift this cap (the overlay decides; `ai.meter === false` = unlimited).
+    const { getEntitlements, aiMetering } = await import('./entitlements.ts')
+    const ai = aiMetering(await getEntitlements(user), 'artifact')
     const { consumeArtifactQuota, refundArtifactQuota } =
       await import('./quota.ts')
     const now = Date.now()
-    const quota = await consumeArtifactQuota(user, now)
-    if (!quota.allowed)
-      throw new ArtifactError(
-        `Daily artifact limit reached (${quota.limit}/day). Try again tomorrow.`,
-        429,
-      )
+    if (ai.meter) {
+      const quota = await consumeArtifactQuota(user, now, undefined, ai.limit)
+      if (!quota.allowed)
+        throw new ArtifactError(
+          `Daily artifact limit reached (${quota.limit}/day). Try again tomorrow.`,
+          429,
+        )
+    }
 
     try {
       const html = artifactHtml(code)
@@ -174,13 +182,15 @@ export async function uploadArtifactFromRequest(
       const url = base ? `${base}/a/${key}` : `/a/${key}`
       return Response.json({ url })
     } catch (err) {
-      // The store failed — refund the consumed quota unit so the user isn't charged for nothing.
-      await refundArtifactQuota(user, now).catch(() => {})
+      // The store failed — refund the consumed quota unit so the user isn't charged for nothing
+      // (only if we metered it).
+      if (ai.meter) await refundArtifactQuota(user, now).catch(() => {})
       throw err
     }
   } catch (err) {
     const status = err instanceof ArtifactError ? err.status : 500
-    const message = err instanceof Error ? err.message : 'artifact upload failed'
+    const message =
+      err instanceof Error ? err.message : 'artifact upload failed'
     return Response.json({ error: message }, { status })
   }
 }

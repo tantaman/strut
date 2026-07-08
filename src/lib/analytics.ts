@@ -40,6 +40,7 @@ export type StrutEvent =
   | 'play:started' //     entered Play / present mode
   | 'export' //           downloaded a deck (json | html)
   | 'account:promote' //  guest chose to promote to a real account (github | google)
+  | 'account:upgrade_click' // clicked "Upgrade to Pro" (commercial overlay only)
   | 'model:connect' //    connected a BYO OpenRouter model (ModelControl); data.model = id | 'auto'
   | 'model:disconnect' // disconnected the BYO model (ModelControl)
 

@@ -1,9 +1,17 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "eslint.config.js",
+    "prettier.config.js",
+    "vite.config.js"
+  ],
   // wrangler's generated types pull in workerd runtime globals that shadow the DOM lib and break
   // browser-side type inference (e.g. Response.json()). The two server files that need R2 types use
   // a minimal local interface instead. Regenerate with `pnpm cf-typegen` if you want full binding types.
-  "exclude": ["worker-configuration.d.ts"],
+  // `commercial/` is the private commercial overlay — a separate build unit (its own tsconfig/checks),
+  // merged in only at build time via the #commercial seam. Keep it out of the open-source type-check.
+  "exclude": ["worker-configuration.d.ts", "commercial"],
 
   "compilerOptions": {
     "target": "ES2022",
@@ -11,7 +19,8 @@
     "module": "ESNext",
     "paths": {
       "#/*": ["./src/*"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#commercial": ["./src/commercial/stub.ts"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "node"],

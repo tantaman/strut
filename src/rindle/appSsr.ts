@@ -17,6 +17,7 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import type { SessionAccount } from '../../server/session'
+import type { EntitlementSummary } from '../../shared/commercial'
 
 /** Load the modules the two preloaders share (server-only; dynamic so they never enter the client
  *  bundle) and resolve the current session principal. Returns null when there's no session. */
@@ -57,6 +58,10 @@ export interface AppSeed {
    *  null when there's no session yet (a brand-new visitor) — the control falls back to its guest
    *  default ("Sign in"), which is what that visitor becomes anyway, so still no flip. */
   account: SessionAccount | null
+  /** The viewer's plan summary for the account UI (Pro badge / Upgrade link). null in the editor seed
+   *  (no account pill there) and when there's no session. With no commercial overlay this is the
+   *  COMMUNITY projection with `upgradeUrl: null`, so no upgrade affordance renders. */
+  entitlement: EntitlementSummary | null
 }
 
 // Dashboard: the principal's decks (newest first). The server twin (server/queries.ts) scopes `decks`
@@ -64,19 +69,31 @@ export interface AppSeed {
 export const preloadDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<AppSeed> => {
     const ctx = await seedContext()
-    if (!ctx) return { rindle: null, userId: '', account: null }
+    if (!ctx)
+      return { rindle: null, userId: '', account: null, entitlement: null }
     const { decksQuery, DECKS_LIMIT } = await import('../../shared/queries')
-    const state = await ctx.store.preloadAll([decksQuery({ limit: DECKS_LIMIT })], {
-      onError: (_q, err) =>
-        console.error(
-          '[ssr] decks preload failed; first paint without seed:',
-          err instanceof Error ? err.message : err,
-        ),
-    })
+    const state = await ctx.store.preloadAll(
+      [decksQuery({ limit: DECKS_LIMIT })],
+      {
+        onError: (_q, err) =>
+          console.error(
+            '[ssr] decks preload failed; first paint without seed:',
+            err instanceof Error ? err.message : err,
+          ),
+      },
+    )
+    // Seed the plan summary so the account control first-paints its Pro badge / Upgrade link (no I/O in
+    // the open-source build — getEntitlements is the COMMUNITY constant with upgradeUrl null).
+    const { getEntitlements, entitlementSummary } =
+      await import('../../server/entitlements')
+    const entitlement = entitlementSummary(
+      await getEntitlements(ctx.account.id),
+    )
     return {
       rindle: JSON.stringify(state),
       userId: ctx.account.id,
       account: ctx.account,
+      entitlement,
     }
   },
 )
@@ -88,10 +105,10 @@ export const preloadDeck = createServerFn({ method: 'GET' })
   .validator((input: { deckId: string }) => input)
   .handler(async ({ data }): Promise<AppSeed> => {
     const ctx = await seedContext()
-    if (!ctx) return { rindle: null, userId: '', account: null }
-    const { deckDetailQuery, deckSharesQuery } = await import(
-      '../../shared/queries'
-    )
+    if (!ctx)
+      return { rindle: null, userId: '', account: null, entitlement: null }
+    const { deckDetailQuery, deckSharesQuery } =
+      await import('../../shared/queries')
     const state = await ctx.store.preloadAll(
       [
         deckDetailQuery({ deckId: data.deckId }),
@@ -109,5 +126,7 @@ export const preloadDeck = createServerFn({ method: 'GET' })
       rindle: JSON.stringify(state),
       userId: ctx.account.id,
       account: ctx.account,
+      // The editor chrome has no account pill, so skip the entitlement read here.
+      entitlement: null,
     }
   })
