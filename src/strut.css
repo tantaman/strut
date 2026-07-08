@@ -800,6 +800,12 @@ button {
   background: #fff;
   color: #111;
 }
+.slide-bg-img {
+  z-index: 0;
+}
+.slide-bg-img__media {
+  will-change: filter;
+}
 
 /* A visible-but-inert slide layer: the non-active layer in the Body/Objects editor — the markdown
    Body shown behind editable Objects, or the Objects shown on top of an editable Body. Fills the
@@ -914,6 +920,8 @@ button {
    export inlines a mirror of these rules; keep them in sync). Theme flows in via CSS vars set on the
    enclosing slide container (themeVars). */
 .strut-md {
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -1665,7 +1673,9 @@ button {
 
 /* ---- deck theme popover (Header) ---- */
 .popover--theme {
-  width: 224px;
+  width: 300px;
+  max-height: min(760px, calc(100vh - 76px));
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1709,6 +1719,72 @@ button {
   border-radius: 8px;
   color: var(--text);
   padding: 6px 9px;
+}
+.theme__bgimg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.theme__bgimg-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.theme__bgimg-line > span {
+  width: 62px;
+  flex: none;
+  color: var(--muted);
+}
+.theme__bgimg-url {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 6px 9px;
+}
+.theme__bgimg-url:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.theme__bgimg-file {
+  color: var(--muted);
+  font-size: 12px;
+}
+.theme__bgimg-actions {
+  display: flex;
+  gap: 6px;
+}
+.theme__bgimg-actions .btn {
+  flex: 1;
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.seg--bgimg {
+  flex: 1;
+}
+.seg--bgimg button {
+  flex: 1;
+  padding: 5px 8px;
+}
+.theme__fx {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.theme__fx label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.theme__fx input {
+  accent-color: var(--coral);
 }
 
 /* ---- collapsed color/background chip + its sub-popover (Popchip) ---- */

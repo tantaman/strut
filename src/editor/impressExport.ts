@@ -7,12 +7,18 @@ import { componentSize } from './render'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
   cssHex,
+  cssUrlValue,
   resolveBackground,
+  resolveBackgroundImage,
   resolveSurface,
   resolveTextAlign,
   textTypeOf,
 } from './types'
-import type { AnyComponent, DeckThemeFields } from './types'
+import type {
+  AnyComponent,
+  BackgroundImageSpec,
+  DeckThemeFields,
+} from './types'
 import { flightFor } from './transitions'
 import { scopeCss } from './css'
 import type { DeckBundle } from './serialize'
@@ -99,6 +105,39 @@ function componentHTML(c: AnyComponent): string {
   return `<div class="cmp" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
 }
 
+function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
+  const outer: string[] = [
+    'position:absolute',
+    'top:0',
+    'bottom:0',
+    'overflow:hidden',
+    'pointer-events:none',
+  ]
+  if (image.fade) outer.push('opacity:.48')
+  if (image.layout === 'left') outer.push('left:0', 'width:50%')
+  else if (image.layout === 'right') outer.push('right:0', 'width:50%')
+  else outer.push('left:0', 'right:0')
+  if (image.mask) {
+    const mask =
+      image.layout === 'left'
+        ? 'linear-gradient(90deg, #000 0%, #000 72%, transparent 100%)'
+        : image.layout === 'right'
+          ? 'linear-gradient(270deg, #000 0%, #000 72%, transparent 100%)'
+          : 'linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%)'
+    outer.push(`mask-image:${mask}`, `-webkit-mask-image:${mask}`)
+  }
+  const inner: string[] = [
+    'position:absolute',
+    `inset:${image.blur ? '-14px' : '0'}`,
+    `background-image:${cssUrlValue(image.src)}`,
+    'background-position:center',
+    'background-size:cover',
+    'background-repeat:no-repeat',
+  ]
+  if (image.blur) inner.push('filter:blur(10px)')
+  return `<div class="slide-bg-img" style="${esc(outer.join(';'))}"><div class="slide-bg-img__media" style="${esc(inner.join(';'))}"></div></div>`
+}
+
 /** The deck text theme as CSS custom-property declarations for the slide container, so a text
  *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export.
  *  `align` is the slide-resolved alignment (drives markdown-mode text-align). */
@@ -137,6 +176,7 @@ function stepHTML(
   if (scale !== 1) attrs.push(`data-scale="${scale}"`)
 
   const bg = resolveBackground(slide.background, deck.background)
+  const bgImage = resolveBackgroundImage(slide.background, deck.background)
   const align = resolveTextAlign(slide.text_align, deck.text_align)
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
@@ -148,7 +188,8 @@ function stepHTML(
     .sort((a, b) => a.z_order - b.z_order)
     .map((c) => '      ' + componentHTML(c))
     .join('\n')
-  const inner = [body, objects].filter(Boolean).join('\n')
+  const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
+  const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
     <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
 ${inner}

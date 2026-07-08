@@ -48,11 +48,16 @@ import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
+  BACKGROUND_IMAGE_LAYOUTS,
+  makeBackgroundImageToken,
+  parseBackgroundImageToken,
   resolveBackground,
+  resolveBackgroundImage,
   resolveSurface,
   SHAPE_TOOLS,
   SURFACE_SWATCHES,
 } from './types'
+import type { BackgroundImageLayout } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 
@@ -277,6 +282,21 @@ export function Header({
       { mutate, history, deck },
       scope === 'bg' ? 'Background color' : 'Surface color',
     )
+  }
+
+  function setSlideBackground(value: string) {
+    const slide = activeSlide
+    if (!slide) return
+    const before = slide.background
+    if (before === value) return
+    const apply = (background: string) =>
+      mutate.setSlideTheme({ id: slide.id, background, now: Date.now() })
+    apply(value)
+    history.push({
+      label: 'Slide background',
+      redo: () => apply(value),
+      undo: () => apply(before),
+    })
   }
 
   function setTextTheme(
@@ -544,9 +564,11 @@ export function Header({
                 {menu === 'theme' && deck && (
                   <ThemePopover
                     deck={deck}
+                    activeSlide={activeSlide}
                     onBackground={(v) => setBg('bg', v)}
                     onCustomBackground={(hex) => setCustom('bg', hex)}
                     onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
+                    onSlideBackground={setSlideBackground}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
                     onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
@@ -729,9 +751,11 @@ function ThemeFontSelect({
  *  each text category (heading | body). Text components with no explicit color/font follow these. */
 function ThemePopover({
   deck,
+  activeSlide,
   onBackground,
   onCustomBackground,
   onCustomBackgroundLive,
+  onSlideBackground,
   onSurface,
   onCustomSurface,
   onCustomSurfaceLive,
@@ -742,9 +766,11 @@ function ThemePopover({
   onEditCss,
 }: {
   deck: DeckRow
+  activeSlide: SlideDetail | null
   onBackground: (value: string) => void
   onCustomBackground: (hex: string) => void
   onCustomBackgroundLive: (hex: string) => void
+  onSlideBackground: (value: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
   onCustomSurfaceLive: (hex: string) => void
@@ -772,7 +798,7 @@ function ThemePopover({
   return (
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
       <div className="insp__row">
-        <span>Background</span>
+        <span>Deck bg</span>
         <TokenColorField
           label="Slide background"
           current={deck.background}
@@ -782,6 +808,14 @@ function ThemePopover({
           onCustom={onCustomBackground}
           onCustomLive={onCustomBackgroundLive}
           allowTransparent
+        />
+      </div>
+      <div className="theme__group">
+        <div className="theme__label">Slide image</div>
+        <BackgroundImageControls
+          deck={deck}
+          activeSlide={activeSlide}
+          onChange={onSlideBackground}
         />
       </div>
       <div className="insp__row">
@@ -873,6 +907,160 @@ function ThemePopover({
       <button className="menu-item menu-item--icon" onClick={onEditCss}>
         <Code2 size={15} /> Edit custom CSS…
       </button>
+    </div>
+  )
+}
+
+function BackgroundImageControls({
+  deck,
+  activeSlide,
+  onChange,
+}: {
+  deck: DeckRow
+  activeSlide: SlideDetail | null
+  onChange: (value: string) => void
+}) {
+  const image = activeSlide
+    ? resolveBackgroundImage(activeSlide.background, deck.background)
+    : undefined
+  const explicitImage = parseBackgroundImageToken(activeSlide?.background)
+  const [url, setUrl] = useState(image?.src ?? '')
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setUrl(image?.src ?? '')
+    setError(null)
+  }, [activeSlide?.id, image?.src])
+
+  if (!activeSlide)
+    return <div className="modal__note">No active slide selected.</div>
+
+  const layout = image?.layout ?? 'full'
+  const hasImage = !!(image?.src || url.trim())
+
+  function writeImage(
+    patch: Partial<{
+      src: string
+      layout: BackgroundImageLayout
+      fade: boolean
+      blur: boolean
+      mask: boolean
+    }>,
+  ) {
+    const src = (patch.src ?? image?.src ?? url).trim()
+    if (!src) return
+    setError(null)
+    setUrl(src)
+    onChange(
+      makeBackgroundImageToken(src, {
+        layout: patch.layout ?? image?.layout ?? 'full',
+        fade: patch.fade ?? image?.fade ?? false,
+        blur: patch.blur ?? image?.blur ?? false,
+        mask: patch.mask ?? image?.mask ?? false,
+      }),
+    )
+  }
+
+  function writeEffect(key: 'fade' | 'blur' | 'mask', checked: boolean) {
+    if (key === 'fade') writeImage({ fade: checked })
+    else if (key === 'blur') writeImage({ blur: checked })
+    else writeImage({ mask: checked })
+  }
+
+  async function pickFile(file: File) {
+    setError(null)
+    setUploading(true)
+    try {
+      writeImage({ src: await uploadImage(file) })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="theme__bgimg">
+      <div className="theme__bgimg-line">
+        <span>Image</span>
+        <input
+          className="theme__bgimg-url"
+          type="url"
+          placeholder="https://..."
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onBlur={() => url.trim() && writeImage({ src: url })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && url.trim()) writeImage({ src: url })
+          }}
+        />
+      </div>
+      <input
+        className="theme__bgimg-file"
+        type="file"
+        accept="image/*"
+        disabled={uploading}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) void pickFile(file)
+        }}
+      />
+      <div className="theme__bgimg-line">
+        <span>Fit</span>
+        <div className="seg seg--bgimg" role="group" aria-label="Image fit">
+          {BACKGROUND_IMAGE_LAYOUTS.map((value) => (
+            <button
+              key={value}
+              className={layout === value ? 'is-active' : ''}
+              disabled={!hasImage}
+              onClick={() => writeImage({ layout: value })}
+            >
+              {value === 'full' ? 'Full' : value === 'left' ? 'Left' : 'Right'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="theme__fx">
+        {(
+          [
+            ['fade', 'Fade'],
+            ['blur', 'Blur'],
+            ['mask', 'Mask'],
+          ] as const
+        ).map(([key, label]) => (
+          <label key={key}>
+            <input
+              type="checkbox"
+              disabled={!hasImage}
+              checked={!!image?.[key]}
+              onChange={(e) => writeEffect(key, e.target.checked)}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </div>
+      <div className="theme__bgimg-actions">
+        <button
+          className="btn btn--ghost"
+          disabled={!activeSlide.background}
+          onClick={() => onChange('')}
+        >
+          Inherit
+        </button>
+        <button
+          className="btn btn--ghost"
+          disabled={!explicitImage && !image}
+          onClick={() => {
+            setUrl('')
+            onChange('bg-default')
+          }}
+        >
+          Remove
+        </button>
+      </div>
+      {uploading && <div className="modal__note">Uploading...</div>}
+      {error && <div className="modal__error">{error}</div>}
     </div>
   )
 }

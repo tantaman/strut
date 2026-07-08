@@ -3,8 +3,13 @@
 
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { cssHex, resolveTextAlign, textTypeOf } from './types'
-import type { AnyComponent, ComponentKind, DeckThemeFields } from './types'
+import { cssHex, cssUrlValue, resolveTextAlign, textTypeOf } from './types'
+import type {
+  AnyComponent,
+  BackgroundImageSpec,
+  ComponentKind,
+  DeckThemeFields,
+} from './types'
 import { docToHtml } from './tiptapDoc'
 import { FONTS_BY_CATEGORY } from '../config'
 
@@ -69,7 +74,10 @@ export function themeVars(
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
     '--strut-body-color': cssHex(theme?.body_color ?? '', '111111'),
     '--strut-body-font': cssFontFamily(theme?.body_font ?? ''),
-    '--strut-text-align': resolveTextAlign(slide?.text_align, theme?.text_align),
+    '--strut-text-align': resolveTextAlign(
+      slide?.text_align,
+      theme?.text_align,
+    ),
   } as CSSProperties
 }
 
@@ -78,6 +86,74 @@ export function componentSize(c: AnyComponent): { w: number; h: number } {
     w: c.scale_w || DEFAULT_W[c.kind],
     h: c.scale_h || DEFAULT_H[c.kind],
   }
+}
+
+export function backgroundImageLayerOuterStyle(
+  image: BackgroundImageSpec,
+): CSSProperties {
+  const style: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    overflow: 'hidden',
+    pointerEvents: 'none',
+    opacity: image.fade ? 0.48 : 1,
+  }
+  if (image.layout === 'left') {
+    style.left = 0
+    style.width = '50%'
+  } else if (image.layout === 'right') {
+    style.right = 0
+    style.width = '50%'
+  } else {
+    style.left = 0
+    style.right = 0
+  }
+  if (image.mask) {
+    const mask =
+      image.layout === 'left'
+        ? 'linear-gradient(90deg, #000 0%, #000 72%, transparent 100%)'
+        : image.layout === 'right'
+          ? 'linear-gradient(270deg, #000 0%, #000 72%, transparent 100%)'
+          : 'linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%)'
+    style.maskImage = mask
+    style.WebkitMaskImage = mask
+  }
+  return style
+}
+
+export function backgroundImageLayerInnerStyle(
+  image: BackgroundImageSpec,
+): CSSProperties {
+  return {
+    position: 'absolute',
+    inset: image.blur ? -14 : 0,
+    backgroundImage: cssUrlValue(image.src),
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    filter: image.blur ? 'blur(10px)' : undefined,
+  }
+}
+
+export function BackgroundImageLayer({
+  image,
+}: {
+  image?: BackgroundImageSpec
+}) {
+  if (!image) return null
+  return (
+    <div
+      className="slide-bg-img"
+      style={backgroundImageLayerOuterStyle(image)}
+      aria-hidden
+    >
+      <div
+        className="slide-bg-img__media"
+        style={backgroundImageLayerInnerStyle(image)}
+      />
+    </div>
+  )
 }
 
 export function cmpStyle(c: AnyComponent): CSSProperties {
@@ -125,10 +201,7 @@ const TextBody = memo(function TextBody({ html }: { html: string }) {
 })
 
 const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
-  const dangerouslySetInnerHTML = useMemo(
-    () => ({ __html: markup }),
-    [markup],
-  )
+  const dangerouslySetInnerHTML = useMemo(() => ({ __html: markup }), [markup])
   return (
     <div
       style={FULL_SIZE_STYLE}
@@ -152,7 +225,10 @@ export const MarkdownSurface = memo(function MarkdownSurface({
     [doc],
   )
   return (
-    <div className="strut-md" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+    <div
+      className="strut-md"
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+    />
   )
 })
 
@@ -209,7 +285,9 @@ export function renderInner(
       // opaque origin, so it can't reach the app's cookies/storage/DOM even if served same-origin. NO
       // allow-top-navigation / allow-popups / allow-modals / allow-forms, and no `allow=` feature grants.
       if (!c.src)
-        return <div className="cmp__ph">▶ runnable — press Run in the panel</div>
+        return (
+          <div className="cmp__ph">▶ runnable — press Run in the panel</div>
+        )
       return (
         <iframe
           src={c.src}
