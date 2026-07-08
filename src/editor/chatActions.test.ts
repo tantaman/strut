@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { History } from './history'
 import { applyThemePatch } from './aiTheme'
 import { applyBodyEdit } from './aiBody'
-import { dispatchAction } from './aiChatActions'
+import { dispatchAction, dispatchActions } from './aiChatActions'
 import type { DispatchCtx } from './aiChatActions'
 import { uploadArtifact } from './upload'
 import type { SetDeckThemeArgs, SetSlideDocArgs } from '../../shared/app-def'
@@ -119,7 +119,11 @@ function makeCtx(
 
 // A minimal fetch Response stand-in (env-independent — we only read .ok/.json/.status).
 function okJson(data: unknown): Response {
-  return { ok: true, status: 200, json: async () => data } as unknown as Response
+  return {
+    ok: true,
+    status: 200,
+    json: async () => data,
+  } as unknown as Response
 }
 
 describe('dispatchAction · add_web', () => {
@@ -138,7 +142,10 @@ describe('dispatchAction · add_web', () => {
     )
     expect(out).toEqual({ ok: true, label: 'Add web frame' })
     expect(added).toHaveLength(1)
-    expect(added[0]).toMatchObject({ slideId: 's1', src: 'https://example.com' })
+    expect(added[0]).toMatchObject({
+      slideId: 's1',
+      src: 'https://example.com',
+    })
     expect(ctx.history.canUndo).toBe(true)
 
     ctx.history.undo()
@@ -272,5 +279,127 @@ describe('dispatchAction · add_image', () => {
     )
     expect(out.ok).toBe(false)
     vi.unstubAllGlobals()
+  })
+})
+
+// ---- dispatchActions: a LIST of actions applied as ONE undo, with create_slide + ref targeting ------
+
+describe('dispatchActions · multi-action turn', () => {
+  it('creates a slide and drops an image ON it — even with no slide open — in one undo', async () => {
+    // No active slide: without create_slide the image would have nowhere to land. The ref routes it onto the
+    // freshly-created slide. This is the exact case the author hit ("new slide + add an image").
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => okJson({ url: 'https://cdn.example/gen.jpg' })),
+    )
+    const slides: Array<{ id: string; slideId: string }> = []
+    const images: Array<{ id: string; slideId: string; src: string }> = []
+    const deleted: Array<{ id: string }> = []
+    const removed: Array<{ id: string }> = []
+    const ctx = makeCtx(
+      {
+        addSlide: (a: { id: string; slideId: string }) => slides.push(a),
+        setSlideDoc: vi.fn(),
+        deleteSlide: (a: { id: string }) => deleted.push(a),
+        addImage: (a: { id: string; slideId: string; src: string }) =>
+          images.push(a),
+        removeComponent: (a: { id: string }) => removed.push(a),
+      },
+      null, // no slide open
+    )
+
+    const out = await dispatchActions(
+      [
+        { kind: 'create_slide', ref: 's1' },
+        {
+          kind: 'add_image',
+          source: 'generate',
+          value: 'a bike',
+          slideId: 's1',
+        },
+      ],
+      ctx,
+    )
+
+    expect(out).toEqual({ ok: true, label: '2 changes' })
+    expect(slides).toHaveLength(1)
+    expect(images).toHaveLength(1)
+    // The image landed on the slide that was just created (ref → real id).
+    expect(images[0].slideId).toBe(slides[0].id)
+    // ONE undo reverses BOTH: the image is removed and the slide is deleted.
+    expect(ctx.history.canUndo).toBe(true)
+    ctx.history.undo()
+    expect(removed).toEqual([{ id: images[0].id }])
+    expect(deleted).toEqual([{ id: slides[0].id, componentIds: [] }])
+  })
+
+  it('defaults a component with no slideId onto the slide created earlier in the turn', async () => {
+    const slides: Array<{ id: string }> = []
+    const webs: Array<{ slideId: string }> = []
+    const ctx = makeCtx(
+      {
+        addSlide: (a: { id: string }) => slides.push(a),
+        setSlideDoc: vi.fn(),
+        deleteSlide: vi.fn(),
+        addWebframe: (a: { slideId: string }) => webs.push(a),
+        removeComponent: vi.fn(),
+      },
+      null,
+    )
+    const out = await dispatchActions(
+      [
+        { kind: 'create_slide' }, // no ref
+        { kind: 'add_web', src: 'https://example.com' }, // no slideId
+      ],
+      ctx,
+    )
+    expect(out.ok).toBe(true)
+    expect(webs[0].slideId).toBe(slides[0].id)
+  })
+
+  it('reports a single applied action with its own label (one action ⇒ its label, not "1 changes")', async () => {
+    const ctx = makeCtx({
+      addWebframe: vi.fn(),
+      removeComponent: vi.fn(),
+    })
+    const out = await dispatchActions(
+      [{ kind: 'add_web', src: 'https://example.com' }],
+      ctx,
+    )
+    expect(out).toEqual({ ok: true, label: 'Add web frame' })
+  })
+
+  it('keeps the changes that landed when one action in the batch fails', async () => {
+    // add_web succeeds on the active slide; a second add_web with a bad (already-filtered) shape can't — but
+    // here we exercise a create + an add that has nowhere to land is not possible, so use a failing image.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => okJson({ results: [] })), // search returns nothing → that action fails
+    )
+    const webs: unknown[] = []
+    const ctx = makeCtx({
+      addWebframe: (a: unknown) => webs.push(a),
+      addImage: vi.fn(),
+      removeComponent: vi.fn(),
+    })
+    const out = await dispatchActions(
+      [
+        { kind: 'add_web', src: 'https://example.com' },
+        { kind: 'add_image', source: 'search', value: 'zzzz' },
+      ],
+      ctx,
+    )
+    // The web frame stands; the failed image is dropped silently. One action applied ⇒ its own label.
+    expect(out).toEqual({ ok: true, label: 'Add web frame' })
+    expect(webs).toHaveLength(1)
+    vi.unstubAllGlobals()
+  })
+
+  it('errors only when NOTHING applied', async () => {
+    const out = await dispatchActions(
+      [{ kind: 'add_web', src: 'https://example.com' }],
+      makeCtx({}, null), // no slide, no create ⇒ nowhere to land
+    )
+    expect(out.ok).toBe(false)
   })
 })

@@ -32,7 +32,7 @@ export interface GenerateRequest {
 // call can never balloon the deck. Text is truncated (not rejected). Sized to stay well under the
 // model's context window (llama-3.3-70b-instruct-fp8-fast ≈ 24k tokens).
 export const GENERATE_LIMITS = {
-  maxSlides: 15,
+  maxSlides: 40,
   maxPrompt: 2000,
   maxMarkdownPerSlide: 4000,
 } as const
@@ -62,7 +62,7 @@ export function generateJsonSchema() {
         maxItems: GENERATE_LIMITS.maxSlides,
         description:
           'The generated slides, in presentation order. Produce the number the author asked for ' +
-          '(never more than 15); if they did not say, choose a sensible number for the topic.',
+          '(never more than 40); if they did not say, choose a sensible number for the topic.',
         items: {
           type: 'object',
           properties: {

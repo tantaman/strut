@@ -22,7 +22,7 @@ import {
 } from 'react'
 import { newId } from '../config'
 import { buildDigest, slideText } from './aiArrange'
-import { dispatchAction } from './aiChatActions'
+import { dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
@@ -97,13 +97,15 @@ export function parseActLine(line: string): ActEvent | null {
   try {
     const obj = JSON.parse(payload) as { response?: unknown; result?: unknown }
     if (obj.result && typeof obj.result === 'object') {
-      const r = obj.result as { say?: unknown; action?: unknown }
+      const r = obj.result as { say?: unknown; actions?: unknown }
       return {
         done: false,
         delta: '',
         result: {
           say: typeof r.say === 'string' ? r.say : '',
-          action: (r.action ?? null) as ChatActResult['action'],
+          actions: Array.isArray(r.actions)
+            ? (r.actions as ChatActResult['actions'])
+            : [],
         },
       }
     }
@@ -117,14 +119,22 @@ export function parseActLine(line: string): ActEvent | null {
   }
 }
 
-/** The sub-status shown under the streamed reply while an Edit action is being APPLIED — the other silent
- *  gap, since `generate`/`arrange` make a second round-trip after the prose finishes. */
-export function applyNote(action: ChatAction): string {
+/** The sub-status shown under the streamed reply while the turn's actions are being APPLIED — the other
+ *  silent gap, since `generate`/`arrange`/`add_image` make a second round-trip after the prose finishes. A
+ *  multi-action turn shows a count; a single action shows what it's doing. */
+export function applyNote(actions: ChatAction[]): string {
+  if (actions.length !== 1)
+    return actions.length > 1
+      ? `Applying ${actions.length} changes…`
+      : 'Applying…'
+  const action = actions[0]
   switch (action.kind) {
     case 'set_theme':
       return 'Applying theme…'
     case 'set_body':
       return 'Rewriting the slide…'
+    case 'create_slide':
+      return 'Adding a slide…'
     case 'generate':
       return action.count
         ? `Generating ${action.count} slides…`
@@ -330,7 +340,7 @@ export async function sendChatAction(
   store: StrutStore,
   ctx: ActionSendContext,
   userText: string,
-  dispatch: (action: ChatAction) => Promise<DispatchOutcome>,
+  dispatch: (actions: ChatAction[]) => Promise<DispatchOutcome>,
 ): Promise<{ label: string } | null> {
   const text = userText.trim()
   if (!text) return null
@@ -458,24 +468,27 @@ export async function sendChatAction(
   // The result frame's `say` is authoritative (normalized/clamped server-side); fall back to the streamed
   // prose if the frame never arrived.
   const say = (result?.say ?? acc).trim()
-  const action = result?.action ?? null
+  const actions = result?.actions ?? []
 
-  // Advice-only turn (no action) — render the answer like the advisor would.
-  if (!action) {
-    await commit({ content: say || acc || '(no change needed)', status: 'done' })
+  // Advice-only turn (no actions) — render the answer like the advisor would.
+  if (actions.length === 0) {
+    await commit({
+      content: say || acc || '(no change needed)',
+      status: 'done',
+    })
     return null
   }
 
   // Apply phase — the reply is already on screen; show what's happening while the apply (for generate /
-  // arrange, a second round-trip) runs, so the turn is never silent.
+  // arrange / add_image, a second round-trip) runs, so the turn is never silent.
   await commit({
     content: say || acc,
-    note: applyNote(action),
+    note: applyNote(actions),
     status: 'streaming',
   })
   let outcome: DispatchOutcome
   try {
-    outcome = await dispatch(action)
+    outcome = await dispatch(actions)
   } catch {
     outcome = { ok: false, error: 'Could not apply that change.' }
   }
@@ -638,7 +651,7 @@ export function useChat(
           activeSlide: grounding.activeSlide,
         },
         text,
-        (action) => dispatchAction(action, dctx),
+        (actions) => dispatchActions(actions, dctx),
       ).then((tip) => {
         if (tip) setUndoTip(tip)
       })

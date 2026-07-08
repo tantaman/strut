@@ -4,7 +4,7 @@ import type { ChatActRequest } from '../../shared/chatAction'
 
 // "✨ Chat — Edit lane" endpoint. Takes a conversation + deck grounding and STREAMS the turn (server/chatAct.ts
 // chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out, then one terminal
-// `data: {"result":{say,action}}` frame carries the validated change the client applies. Like the advisor
+// `data: {"result":{say,actions}}` frame carries the validated changes the client applies. Like the advisor
 // twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot JSON so the client can
 // branch BEFORE it reads the stream. Same two boundaries as /api/arrange and /api/generate:
 //   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path;

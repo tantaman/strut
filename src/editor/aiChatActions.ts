@@ -8,9 +8,10 @@
 // (withSlideEditable/withDeckEditable, server/rindle-api.ts) reject an edit the user can't make regardless
 // of who produced it — an unauthorized action just snaps back. No extra permission checks here.
 
-import { newId } from '../config'
+import { newId, OVERVIEW_CARD_GAP } from '../config'
+import { keyBetween } from '../lib/order'
 import { applyPlan, buildDigest } from './aiArrange'
-import { applyGenerated } from './aiGenerate'
+import { applyGenerated, markdownToDoc } from './aiGenerate'
 import { applyThemePatch } from './aiTheme'
 import type { ThemeDeck, ThemeMutate, ThemePatch } from './aiTheme'
 import { applyBodyEdit } from './aiBody'
@@ -20,7 +21,7 @@ import type { GenerateMutate } from './aiGenerate'
 import { place, zNow } from './componentOps'
 import { buildArtifactModule } from './artifactBuild'
 import { uploadArtifact } from './upload'
-import type { History } from './history'
+import { History } from './history'
 import type { SlideDetail } from './deckDetail'
 import type { ChatAction } from '../../shared/chatAction'
 import type { ArrangementPlan } from '../../shared/arrange'
@@ -28,6 +29,7 @@ import type { GeneratedDeck } from '../../shared/generate'
 import type {
   AddArtifactArgs,
   AddImageArgs,
+  AddSlideArgs,
   AddWebframeArgs,
   MintCustomColorArgs,
   RemoveComponentArgs,
@@ -65,30 +67,181 @@ export type DispatchOutcome =
   | { ok: true; label: string }
   | { ok: false; error: string }
 
-/** Route a normalized action to its apply path. Async because `arrange`/`generate` make a server round-trip
- *  to the existing ✨ endpoints before applying; `set_theme`/`set_body` are synchronous local applies. */
+/** Apply a LIST of actions as ONE undo. Each step runs against a throwaway `History` (the recorder), then
+ *  the whole batch is folded into a single command pushed to the real `ctx.history` — so the model's turn
+ *  (e.g. "new slide + image + rewrite") is one Cmd/Z. `create_slide` actions run FIRST so their turn-local
+ *  `ref`s resolve for any later action that targets them, regardless of the order the model emitted them.
+ *  Returns the combined outcome: ok with a label (the single action's own label, or "N changes"); an error
+ *  only when NOTHING applied. Partial failures are dropped silently — the changes that landed still stand. */
+export async function dispatchActions(
+  actions: ChatAction[],
+  ctx: DispatchCtx,
+): Promise<DispatchOutcome> {
+  if (actions.length === 0) return { ok: false, error: 'Nothing to apply.' }
+
+  const rec = new History() // collects each step; drained into one parent command at the end
+  const recCtx: DispatchCtx = { ...ctx, history: rec }
+  const refMap = new Map<string, string>() // create_slide ref → freshly-minted slide id
+  const applied: string[] = []
+  let firstError: string | null = null
+
+  // create_slide first (populate refMap), then the rest in the order the model gave them.
+  const ordered = [
+    ...actions.filter((a) => a.kind === 'create_slide'),
+    ...actions.filter((a) => a.kind !== 'create_slide'),
+  ]
+
+  // Where the next created slide appends + where the next component lands (fanned out so multiple inserts on
+  // one slide don't stack). Both advance across the batch because ctx.slides is a stale snapshot.
+  const tail = {
+    sort: lastSort(ctx.slides),
+    x: lastX(ctx.slides),
+    y: lastY(ctx.slides),
+  }
+  let insertIdx = 0
+
+  for (const action of ordered) {
+    let out: DispatchOutcome
+    if (action.kind === 'create_slide') {
+      const res = applyCreateSlide(action, recCtx, tail)
+      if (res.ok && action.ref) refMap.set(action.ref, res.id)
+      if (res.ok) {
+        tail.sort = res.sort
+        tail.x = res.x
+        refMap.set(LAST_CREATED, res.id) // implicit target for a component with no slideId
+      }
+      out = res.ok
+        ? { ok: true, label: res.label }
+        : { ok: false, error: res.error }
+    } else {
+      const target = resolveTarget(
+        action,
+        refMap,
+        ctx.slides,
+        ctx.activeSlideId,
+      )
+      const actionCtx: DispatchCtx = { ...recCtx, activeSlideId: target }
+      out = await dispatchOne(action, actionCtx, target, insertIdx)
+      if (isInsert(action)) insertIdx++
+    }
+    if (out.ok) applied.push(out.label)
+    else if (!firstError) firstError = out.error
+  }
+
+  const label = applied.length === 1 ? applied[0] : `${applied.length} changes`
+  const cmd = rec.drain(label)
+  if (cmd) ctx.history.push(cmd)
+  if (applied.length === 0)
+    return { ok: false, error: firstError ?? 'Nothing to apply.' }
+  return { ok: true, label }
+}
+
+/** Apply a SINGLE action (a thin wrapper over dispatchActions — kept for callers/tests that drive one). */
 export async function dispatchAction(
   action: ChatAction,
   ctx: DispatchCtx,
+): Promise<DispatchOutcome> {
+  return dispatchActions([action], ctx)
+}
+
+/** Route one non-batch action to its apply path. `target` is the resolved slide id (for the add_* / set_body
+ *  actions); `offset` fans out repeated component inserts. Async because `arrange`/`generate` round-trip. */
+async function dispatchOne(
+  action: Exclude<ChatAction, { kind: 'create_slide' }>,
+  ctx: DispatchCtx,
+  target: string | null,
+  offset: number,
 ): Promise<DispatchOutcome> {
   switch (action.kind) {
     case 'set_theme':
       return applyTheme(action, ctx)
     case 'set_body':
-      return applyBody(action, ctx)
+      return applyBody({ ...action, slideId: target ?? action.slideId }, ctx)
     case 'generate':
       return runGenerate(action, ctx)
     case 'arrange':
       return runArrange(action, ctx)
     case 'add_image':
-      return runAddImage(action, ctx)
+      return runAddImage(action, ctx, offset)
     case 'add_web':
-      return addWeb(action, ctx)
+      return addWeb(action, ctx, offset)
     case 'add_artifact':
-      return runAddArtifact(action, ctx)
+      return runAddArtifact(action, ctx, offset)
     default:
       return { ok: false, error: 'Unknown action.' }
   }
+}
+
+// A component action lands on a slide, so it consumes a placement slot (advances the fan-out offset).
+function isInsert(a: ChatAction): boolean {
+  return (
+    a.kind === 'add_image' || a.kind === 'add_web' || a.kind === 'add_artifact'
+  )
+}
+
+// The implicit "the slide I just made" target — a reserved refMap key so a component with no explicit
+// slideId lands on the most-recently-created slide this turn (else it falls back to the active slide).
+const LAST_CREATED = '::last-created'
+
+/** Resolve the slide an action targets: an explicit `slideId` (a real deck slide, or a same-turn ref) wins;
+ *  otherwise the last slide created this turn, else the active slide. */
+function resolveTarget(
+  action: Exclude<ChatAction, { kind: 'create_slide' }>,
+  refMap: Map<string, string>,
+  slides: SlideDetail[],
+  activeSlideId: string | null,
+): string | null {
+  const want = 'slideId' in action ? action.slideId : undefined
+  if (want) {
+    const mapped = refMap.get(want)
+    if (mapped) return mapped
+    if (slides.some((s) => s.id === want)) return want
+  }
+  return refMap.get(LAST_CREATED) ?? activeSlideId
+}
+
+// ---- create_slide ----------------------------------------------------------------------------------
+
+const lastSlide = (s: SlideDetail[]): SlideDetail | undefined =>
+  s.length ? s[s.length - 1] : undefined
+const lastSort = (s: SlideDetail[]): string | null => lastSlide(s)?.sort ?? null
+const lastX = (s: SlideDetail[]): number => lastSlide(s)?.x ?? 0
+const lastY = (s: SlideDetail[]): number => lastSlide(s)?.y ?? 0
+
+/** Append ONE blank slide (spatial, so a component dropped on it renders) — or a markdown-mode slide when
+ *  `markdown` seeds a body. Records the add/delete on the recorder history and returns the new id plus the
+ *  advanced tail (sort key + x) so a second create_slide in the same batch lands after it, not on top. */
+function applyCreateSlide(
+  a: Extract<ChatAction, { kind: 'create_slide' }>,
+  ctx: DispatchCtx,
+  tail: { sort: string | null; x: number; y: number },
+):
+  | { ok: true; id: string; label: string; sort: string; x: number }
+  | { ok: false; error: string } {
+  const now = Date.now()
+  const id = newId()
+  const sort = keyBetween(tail.sort, null)
+  const x = tail.x + OVERVIEW_CARD_GAP
+  const args: AddSlideArgs = {
+    id,
+    deckId: ctx.deckId,
+    sort,
+    x,
+    y: tail.y,
+    // A blank slide is SPATIAL ('') so an image/webframe/artifact dropped on it is visible (markdown-mode
+    // slides render from their doc, not components). Only seed markdown-mode when body text was supplied.
+    render_mode: a.markdown ? 'markdown' : '',
+    now,
+  }
+  const doc = a.markdown ? markdownToDoc(a.markdown) : ''
+  const redo = () => {
+    ctx.mutate.addSlide(args)
+    if (doc) ctx.mutate.setSlideDoc({ id, doc, now })
+  }
+  const undo = () => ctx.mutate.deleteSlide({ id, componentIds: [] })
+  redo()
+  ctx.history.push({ label: 'Add slide', redo, undo })
+  return { ok: true, id, label: 'Add slide', sort, x }
 }
 
 // ---- free-form component inserts (add_image / add_web / add_artifact) ------------------------------
@@ -113,12 +266,13 @@ function insertWithUndo(
 async function runAddImage(
   a: Extract<ChatAction, { kind: 'add_image' }>,
   ctx: DispatchCtx,
+  offset = 0,
 ): Promise<DispatchOutcome> {
   if (!ctx.activeSlideId) return { ok: false, error: 'Open a slide first.' }
   const resolved = await resolveImageSrc(a)
   if (!resolved.ok) return resolved
   const id = newId()
-  const p = place()
+  const p = place(offset)
   const args: AddImageArgs = {
     id,
     slideId: ctx.activeSlideId,
@@ -178,10 +332,11 @@ async function resolveImageSrc(
 function addWeb(
   a: Extract<ChatAction, { kind: 'add_web' }>,
   ctx: DispatchCtx,
+  offset = 0,
 ): DispatchOutcome {
   if (!ctx.activeSlideId) return { ok: false, error: 'Open a slide first.' }
   const id = newId()
-  const p = place()
+  const p = place(offset)
   const args: AddWebframeArgs = {
     id,
     slideId: ctx.activeSlideId,
@@ -201,6 +356,7 @@ function addWeb(
 async function runAddArtifact(
   a: Extract<ChatAction, { kind: 'add_artifact' }>,
   ctx: DispatchCtx,
+  offset = 0,
 ): Promise<DispatchOutcome> {
   if (!ctx.activeSlideId) return { ok: false, error: 'Open a slide first.' }
   // Build + upload like Inspector.ArtifactControls.run(). On failure we still insert with the code and an
@@ -212,7 +368,7 @@ async function runAddArtifact(
     // insert unbuilt; the inspector's Run rebuilds it
   }
   const id = newId()
-  const p = place()
+  const p = place(offset)
   const args: AddArtifactArgs = {
     id,
     slideId: ctx.activeSlideId,

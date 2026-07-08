@@ -14,9 +14,11 @@ type Mutate = StrutApp['mutate']
 // A coarse monotonic z (seconds) is fine — z is just an ordering, so new components sort above existing
 // ones; the small Date.now() jitter fans successive drops out instead of stacking them dead-center.
 export const zNow = (): number => Math.floor(Date.now() / 1000)
-export const place = (): { x: number; y: number } => ({
-  x: 440 + (Date.now() % 4) * 24,
-  y: 280 + (Date.now() % 3) * 24,
+// `i` fans successive drops out when one caller inserts SEVERAL components at once (the Edit lane can now
+// place many on one slide in a single turn) so they don't land dead-on-top of each other.
+export const place = (i = 0): { x: number; y: number } => ({
+  x: 440 + (Date.now() % 4) * 24 + i * 48,
+  y: 280 + (Date.now() % 3) * 24 + i * 48,
 })
 
 /** The fields insertComponent reads: the kind discriminator, the spatial transform + classes, and the

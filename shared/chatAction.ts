@@ -1,20 +1,25 @@
 // The client ↔ server contract for "✨ Chat — Edit lane" (AI_CHAT_TOOLS_PLAN.md): the actionable half of
-// chat. Where the advisor (shared/chat.ts) only TALKS, the Edit lane lets the model drive ONE deck change
-// per turn — recolor the theme, rewrite a slide's body, generate slides, or arrange them — through the same
-// isomorphic mutators a human uses (so sync, permission gating, and undo come free).
+// chat. Where the advisor (shared/chat.ts) only TALKS, the Edit lane lets the model drive deck changes —
+// recolor the theme, rewrite a slide's body, create/generate slides, arrange them, or drop components —
+// through the same isomorphic mutators a human uses (so sync, permission gating, and undo come free).
+//
+// A turn may carry SEVERAL actions (a LIST), applied in order and collapsed into ONE undo. That's what lets
+// "make a new slide and put an image on it" happen in a single turn: a `create_slide` (which can declare a
+// turn-local `ref`) followed by an `add_image` targeting that ref. The one safety bound left on the list is
+// `maxActions` — a generous ceiling so a runaway model can't spawn unbounded network/inference work.
 //
 // The load-bearing decision (per the plan): the model NEVER names a mutation or emits geometry/ids it wasn't
 // given. It emits a small, validated `Action` union — semantics only — that the client dispatcher translates
-// to mutators. `normalizeAction` is the firewall (mirrors shared/arrange.ts `normalizePlan`): whatever the
-// model returns, target slide ids must exist in the digest, colors coerce to bare hex, fonts clamp to the
-// known family set, and free text is length-capped. The worst a poisoned slide/theme value can do is a
-// bounded change to the user's OWN deck — one undo away.
+// to mutators. `normalizeActions` is the firewall (mirrors shared/arrange.ts `normalizePlan`): whatever the
+// model returns, a target slide must be a real deck slide OR a `ref` a `create_slide` in the same turn
+// declared, colors coerce to bare hex, fonts clamp to the known family set, and free text is length-capped.
+// The worst a poisoned slide/theme value can do is a bounded change to the user's OWN deck — one undo away.
 //
 // Transport is prose + a fenced ```json action block, NOT native tool-calling and NOT streamed json_schema:
 // the Edit lane STREAMS (server/chatAct.ts) and Workers AI — the default backend — can't stream JSON Mode
 // (developers.cloudflare.com/workers-ai/features/json-mode), so the model writes a friendly reply then a
-// fenced JSON object for the change, which the adapter parses out. `normalizeAction` below is the firewall
-// on that parsed object, exactly as before. (Arrange/Generate keep their one-shot json_schema calls — the
+// fenced JSON array of the changes, which the adapter parses out. `normalizeActions` below is the firewall
+// on that parsed list, exactly as before. (Arrange/Generate keep their one-shot json_schema calls — the
 // streaming constraint is specific to this lane.)
 
 import { clampChatRequest } from './chat.ts'
@@ -38,22 +43,28 @@ export type ChatAction =
   | { kind: 'set_body'; slideId: string; markdown: string } // rewrite ONE slide's body
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
   | { kind: 'arrange'; instruction: string } // reorder / lay out the slides
-  // Author a free-form spatial component onto the ACTIVE slide (the model emits semantics only; the client
-  // dispatcher places it and resolves any URL/build). One per turn, like every other action.
+  // Add ONE blank slide (appended to the deck). `ref` is a turn-local alias later actions in the SAME turn
+  // can target (via their `slideId`) — the id doesn't exist until the client mints it, so a ref is how the
+  // model says "put this on the slide I just made". `markdown` optionally seeds the new slide's body.
+  | { kind: 'create_slide'; ref?: string; markdown?: string }
+  // Author a free-form spatial component onto a slide (the model emits semantics only; the client dispatcher
+  // places it and resolves any URL/build). `slideId` targets a real deck slide OR a same-turn `create_slide`
+  // ref; omitted, it lands on the most-recently-created slide this turn, else the active slide.
   | {
       kind: 'add_image'
       source: 'generate' | 'search' | 'url' // how `value` resolves to an image src (client picks the path)
       value: string // generate: an image DESCRIPTION · search: a photo QUERY · url: a full https URL
       alt?: string
+      slideId?: string
     }
-  | { kind: 'add_web'; src: string } // embed a live website (webframe). `src` is a full http(s) URL.
-  | { kind: 'add_artifact'; code: string; title?: string } // author a runnable component + drop it live
+  | { kind: 'add_web'; src: string; slideId?: string } // embed a live website (webframe). `src` is a full http(s) URL.
+  | { kind: 'add_artifact'; code: string; title?: string; slideId?: string } // author a runnable component + drop it live
 
-/** What the Edit-lane model returns: a short prose confirmation/answer (`say`) plus at most one `action`
- *  (null = advice only, no deck change). Mirrors the Arrange/Generate `{plan}`/`{deck}` result shape. */
+/** What the Edit-lane model returns: a short prose confirmation/answer (`say`) plus the LIST of deck changes
+ *  to apply, in order (empty = advice only, no deck change). Mirrors the Arrange/Generate result shape. */
 export interface ChatActResult {
   say: string
-  action: ChatAction | null
+  actions: ChatAction[]
 }
 
 /** Grounding beyond the digest: the deck's CURRENT resolved theme (so "make it warmer" / "match the
@@ -92,13 +103,18 @@ export const CHAT_ACTION_LIMITS = {
   maxMarkdown: 4000, // one slide's body (mirrors GENERATE_LIMITS.maxMarkdownPerSlide)
   maxInstruction: 600, // mirrors ARRANGE_LIMITS.maxInstruction
   maxDescription: 2000, // mirrors GENERATE_LIMITS.maxPrompt
-  maxCount: 15, // mirrors GENERATE_LIMITS.maxSlides
+  maxCount: 40, // mirrors GENERATE_LIMITS.maxSlides
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
   maxThemeField: 80,
   maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
   maxUrl: 2000, //       any URL: add_web src + add_image url-mode value (URLs run longer than 600)
   maxAlt: 300, //        add_image alt text
   maxArtifactCode: 16000, // add_artifact source — generous, but well under the 512 KB build cap
+  maxRef: 64, //          a create_slide turn-local alias
+  // The one bound on a turn's action LIST. Not a product bound (the author asked for no per-turn ceiling on
+  // components/slides) but a runaway guard: every add_image/generate can fan out to network/inference, so an
+  // unbounded list is a cost/DoS vector. Sized well past any real "build me a slide with a few things" turn.
+  maxActions: 25,
 } as const
 
 // Coerce an untrusted value to a string — the request is parsed from JSON, so declared types are only a
@@ -191,23 +207,54 @@ function clampFont(v: unknown, fonts: string[]): string | undefined {
   return fonts.find((f) => f.toLowerCase() === t.toLowerCase())
 }
 
-/** Validate + normalize a raw model result against the deck's ACTUAL slide ids + font allowlist. This is
- *  the trust boundary between untrusted model output and the apply path (mirrors normalizePlan). Always
- *  total: junk in → `{ say: '', action: null }`. A surviving action can only touch the user's own deck
- *  with in-range values, one undo away. */
-export function normalizeAction(
+/** Validate + normalize a raw model result into the LIST of actions to apply. This is the trust boundary
+ *  between untrusted model output and the apply path (mirrors normalizePlan). Always total: junk in →
+ *  `{ say: '', actions: [] }`. Accepts either `actions: [...]` (the new shape) or a single `action` (a model
+ *  that emitted one). Two passes: first collect every `ref` a `create_slide` declares, so a later action can
+ *  legally target a slide that doesn't exist yet; then normalize each action against `deck slide ids ∪ refs`.
+ *  The list is capped at `maxActions`. A surviving action can only touch the user's own deck (or a slide it
+ *  creates this turn) with in-range values, one undo away. */
+export function normalizeActions(
   raw: unknown,
   opts: { slideIds: string[]; fonts: string[] },
 ): ChatActResult {
   const r = (raw ?? {}) as Record<string, unknown>
   const say =
     typeof r.say === 'string' ? r.say.slice(0, CHAT_ACTION_LIMITS.maxSay) : ''
-  return { say, action: normalizeOneAction(r.action, opts) }
+
+  const list: unknown[] = Array.isArray(r.actions)
+    ? r.actions
+    : r.action != null
+      ? [r.action]
+      : []
+
+  // Pass 1: the ref every create_slide declares — the set a later action may target on top of real ids.
+  const refs = new Set<string>()
+  for (const a of list) {
+    const o = (a ?? {}) as Record<string, unknown>
+    if (o.kind === 'create_slide' && typeof o.ref === 'string' && o.ref.trim())
+      refs.add(o.ref.slice(0, CHAT_ACTION_LIMITS.maxRef).trim())
+  }
+  const allowed = new Set<string>([...opts.slideIds, ...refs])
+
+  const actions: ChatAction[] = []
+  for (const a of list) {
+    if (actions.length >= CHAT_ACTION_LIMITS.maxActions) break
+    const norm = normalizeOneAction(a, { fonts: opts.fonts, allowed })
+    if (norm) actions.push(norm)
+  }
+  return { say, actions }
+}
+
+/** A model-supplied slide target coerced to a valid one: a real deck slide id or a same-turn create_slide
+ *  ref, else undefined (the dispatcher then falls back to the last-created / active slide). */
+function targetSlide(v: unknown, allowed: Set<string>): string | undefined {
+  return typeof v === 'string' && allowed.has(v) ? v : undefined
 }
 
 function normalizeOneAction(
   raw: unknown,
-  opts: { slideIds: string[]; fonts: string[] },
+  opts: { allowed: Set<string>; fonts: string[] },
 ): ChatAction | null {
   const r = (raw ?? {}) as Record<string, unknown>
   switch (r.kind) {
@@ -231,14 +278,27 @@ function normalizeOneAction(
       return Object.keys(out).length > 1 ? out : null
     }
     case 'set_body': {
-      const slideId = typeof r.slideId === 'string' ? r.slideId : ''
-      if (!opts.slideIds.includes(slideId)) return null // must be a real slide of THIS deck
+      // A real slide of THIS deck OR a slide a create_slide declared this turn.
+      const slideId = targetSlide(r.slideId, opts.allowed)
+      if (!slideId) return null
       const markdown =
         typeof r.markdown === 'string'
           ? r.markdown.slice(0, CHAT_ACTION_LIMITS.maxMarkdown).trim()
           : ''
       if (!markdown) return null
       return { kind: 'set_body', slideId, markdown }
+    }
+    case 'create_slide': {
+      const out: Extract<ChatAction, { kind: 'create_slide' }> = {
+        kind: 'create_slide',
+      }
+      if (typeof r.ref === 'string' && r.ref.trim())
+        out.ref = r.ref.slice(0, CHAT_ACTION_LIMITS.maxRef).trim()
+      if (typeof r.markdown === 'string' && r.markdown.trim())
+        out.markdown = r.markdown
+          .slice(0, CHAT_ACTION_LIMITS.maxMarkdown)
+          .trim()
+      return out
     }
     case 'generate': {
       const description =
@@ -287,12 +347,20 @@ function normalizeOneAction(
       }
       if (typeof r.alt === 'string' && r.alt.trim())
         out.alt = r.alt.slice(0, CHAT_ACTION_LIMITS.maxAlt).trim()
+      const tgt = targetSlide(r.slideId, opts.allowed)
+      if (tgt) out.slideId = tgt
       return out
     }
     case 'add_web': {
       const src = httpUrl(r.src)
       if (!src) return null // http(s) only — see httpUrl
-      return { kind: 'add_web', src }
+      const out: Extract<ChatAction, { kind: 'add_web' }> = {
+        kind: 'add_web',
+        src,
+      }
+      const tgt = targetSlide(r.slideId, opts.allowed)
+      if (tgt) out.slideId = tgt
+      return out
     }
     case 'add_artifact': {
       const code =
@@ -306,6 +374,8 @@ function normalizeOneAction(
       }
       if (typeof r.title === 'string' && r.title.trim())
         out.title = r.title.slice(0, 120).trim()
+      const tgt = targetSlide(r.slideId, opts.allowed)
+      if (tgt) out.slideId = tgt
       return out
     }
     default:
