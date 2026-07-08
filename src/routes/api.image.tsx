@@ -60,7 +60,23 @@ export const Route = createFileRoute('/api/image')({
         const now = Date.now()
         const { getEntitlements, aiMetering } =
           await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'image')
+        const ent = await getEntitlements(account.id)
+        const ai = aiMetering(ent, 'image')
+        // Per-plan storage ceiling (free tier). null (self-host / Pro) skips it. Reject before spending
+        // inference when there's no headroom; the generated image's bytes are recorded after a success.
+        if (ent.storageLimitBytes != null) {
+          const { getStorageUsed } = await import('../../server/storage')
+          if ((await getStorageUsed(account.id)) >= ent.storageLimitBytes) {
+            return json(
+              {
+                error: 'storage_exceeded',
+                message:
+                  'Storage limit reached — upgrade to Pro for more storage.',
+              },
+              413,
+            )
+          }
+        }
         const { consumeImageQuota, refundImageQuota } =
           await import('../../server/quota')
         if (ai.meter) {
@@ -91,7 +107,14 @@ export const Route = createFileRoute('/api/image')({
           await import('../../server/image')
         const { getUploadsBucket } = await import('../../server/cf-env')
         try {
-          const url = await generateImage(prompt, await getUploadsBucket())
+          const { url, bytes } = await generateImage(
+            prompt,
+            await getUploadsBucket(),
+          )
+          if (ent.storageLimitBytes != null) {
+            const { recordStorage } = await import('../../server/storage')
+            await recordStorage(account.id, bytes).catch(() => {})
+          }
           return json({ url }, 200)
         } catch (err) {
           // The work didn't happen — refund the consumed unit (only if we metered it).

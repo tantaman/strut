@@ -226,6 +226,20 @@ export async function uploadFromRequest(
     if (body.byteLength > MAX_BYTES)
       throw new UploadError('image must be under 10 MB', 413)
 
+    // Per-plan storage ceiling (free tier). null (self-host / Pro) skips this with no D1 touch. Pre-check
+    // before storing; record after a successful put (R2 objects aren't GC'd → the counter is monotonic).
+    const { getEntitlements } = await import('./entitlements.ts')
+    const limit = (await getEntitlements(user)).storageLimitBytes
+    if (limit != null) {
+      const { checkStorage } = await import('./storage.ts')
+      const { allowed } = await checkStorage(user, body.byteLength, limit)
+      if (!allowed)
+        throw new UploadError(
+          'Storage limit reached — upgrade to Pro for more storage.',
+          413,
+        )
+    }
+
     // crypto.randomUUID() is a global in both Node 20+ and the Workers runtime.
     const key = `${crypto.randomUUID()}.${ext}`
     const cfg = r2 ? null : r2Config()
@@ -235,6 +249,10 @@ export async function uploadFromRequest(
         ? await putS3(cfg, key, body, contentType)
         : await putLocal(key, body)
 
+    if (limit != null) {
+      const { recordStorage } = await import('./storage.ts')
+      await recordStorage(user, body.byteLength).catch(() => {})
+    }
     return Response.json({ url })
   } catch (err) {
     const status = err instanceof UploadError ? err.status : 500
