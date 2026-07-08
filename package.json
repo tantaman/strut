@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#/*": "./src/*"
+    "#/*": "./src/*",
+    "#commercial": "./src/commercial/stub.ts"
   },
   "scripts": {
     "daemon": "rindle up --migrate --gen shared/schema.ts --watch",
@@ -16,6 +17,9 @@
     "build:cf": "CF=1 vite build",
     "preview:cf": "CF=1 vite build && CF=1 vite preview",
     "deploy": "CF=1 vite build && wrangler deploy -c dist/server/wrangler.json",
+    "// deploy:pro": "OFFICIAL deploy — the open-source app + the private commercial overlay (marketing + Stripe) as ONE Worker. Requires the git-ignored commercial/ overlay present. See docs/COMMERCIAL_OVERLAY.md.",
+    "deploy:pro": "wrangler d1 migrations apply strut-auth --remote -c commercial/wrangler.jsonc && STRUT_COMMERCIAL=commercial/index.ts WRANGLER_CONFIG=commercial/wrangler.jsonc CF=1 vite build && wrangler deploy -c dist/server/wrangler.json",
+    "preview:pro": "STRUT_COMMERCIAL=commercial/index.ts WRANGLER_CONFIG=commercial/wrangler.jsonc CF=1 vite build && CF=1 vite preview",
     "migrate:db:local": "wrangler d1 migrations apply strut-auth --local",
     "migrate:db:remote": "wrangler d1 migrations apply strut-auth --remote",
     "cf-typegen": "wrangler types",

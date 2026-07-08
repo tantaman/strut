@@ -84,11 +84,15 @@ export const Route = createFileRoute('/api/chat/act')({
         // Durable daily quota — ONLY for the app-paid path, and the SAME bucket as the advisor (an Edit
         // turn is a chat turn). Consumed BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
-        if (!byo) {
+        // Pro (like BYO) lifts the app-paid daily cap; `ai.meter === false` means unlimited.
+        const { getEntitlements, aiMetering } =
+          await import('../../server/entitlements')
+        const ai = aiMetering(await getEntitlements(account.id), 'chat')
+        if (!byo && ai.meter) {
           const { consumeChatQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeChatQuota(account.id, now)
+            quota = await consumeChatQuota(account.id, now, undefined, ai.limit)
           } catch (err) {
             console.error('[chat/act] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -121,8 +125,8 @@ export const Route = createFileRoute('/api/chat/act')({
           })
         } catch (err) {
           // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
-          // (app-paid path only).
-          if (!byo) {
+          // (only if we metered it).
+          if (!byo && ai.meter) {
             const { refundChatQuota } = await import('../../server/quota')
             await refundChatQuota(account.id, now).catch(() => {})
           }

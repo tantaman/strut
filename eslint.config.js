@@ -15,6 +15,8 @@ export default [
     },
   },
   {
-    ignores: ['eslint.config.js', 'prettier.config.js'],
+    // `commercial/` is the PRIVATE commercial overlay — a separate build unit with its own toolchain,
+    // merged in only at build time via the #commercial seam. Keep it out of the open-source lint surface.
+    ignores: ['eslint.config.js', 'prettier.config.js', 'commercial/**'],
   },
 ]

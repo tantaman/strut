@@ -85,6 +85,19 @@ separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it wit
 `pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
 for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
+## Commercial / hosted (optional)
+
+Strut is fully open source and self-hostable for free. The **official hosted** Strut (marketing page +
+paid **Pro** accounts via Stripe) is a **private overlay** kept out of this repo and merged in only at
+deploy time — so a clone has **no billing, no marketing, and no paywall**, and behaves exactly as it does
+today. This follows the same opt-in posture as the analytics above.
+
+The repo ships the open-core **seam** (`#commercial`) that an overlay plugs into: the app *reads* an
+entitlement (`server/entitlements.ts`) to lift AI caps / the deck cap / publishing, and *renders* an
+optional Upgrade affordance — all inert without an overlay. `pnpm deploy` builds the free app on a single
+host; `pnpm deploy:pro` builds the app **plus** the overlay as one Worker (marketing on `strut.io`, the
+app on `app.strut.io`). See **[`docs/COMMERCIAL_OVERLAY.md`](docs/COMMERCIAL_OVERLAY.md)**.
+
 ## Analytics
 
 Strut ships with **optional**, privacy-first product analytics via [Umami](https://umami.is) —

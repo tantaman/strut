@@ -33,6 +33,7 @@ import type {
 import { HttpRindleDaemonClient } from '@rindle/daemon-client'
 import { and, exists, or } from '@rindle/client'
 import { serverQueries } from './queries.ts'
+import { getEntitlements } from './entitlements.ts'
 import {
   q,
   rels,
@@ -134,7 +135,9 @@ const withSlideEditable = <TArgs>(
  *  public share links. A stranger can't edit the slide's real deck, so the write is rejected. The
  *  deck_id equality also stops a note being stamped with a foreign deck_id. Safe on the FIRST write:
  *  it reads the slide (which exists), not the not-yet-created note row. */
-const withSlideNotesEditable = <TArgs extends { slideId: string; deckId: string }>(
+const withSlideNotesEditable = <
+  TArgs extends { slideId: string; deckId: string },
+>(
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
   guarded(gen, async (tx, a, user) => {
@@ -196,13 +199,77 @@ const withShareOwner = <TArgs>(
     return row != null
   })
 
+// ---- entitlement-gated writes -------------------------------------------------------------------
+// Two writes carry a PLAN gate on top of the access gate: a free-tier deck cap and public publishing.
+// The entitlement lives in the auth D1 (getEntitlements), independent of the rindle txn — and with no
+// commercial overlay it's COMMUNITY (unlimited decks, publishing on), so both are no-ops for a clone.
+
+/** createDeck with the plan's deck cap. deckLimit null (COMMUNITY/Pro) → the fast path skips the count
+ *  entirely; a finite cap counts the principal's OWNED decks and rejects past it. The dashboard also
+ *  pre-checks for a friendly prompt, but THIS is authoritative. */
+const createDeckCapped: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
+  const gen = sharedMutators.createDeck
+  const a = gen.args.parse(raw)
+  const user = requireUser(ctx.user)
+  const ent = await getEntitlements(user)
+  if (ent.deckLimit != null) {
+    const owned = await tx.query(q.deck.where(deck.owner_id(user)))
+    const count = Array.isArray(owned) ? owned.length : 0
+    if (count >= ent.deckLimit) {
+      throw new RindleApiError(
+        'forbidden',
+        `Your plan is limited to ${ent.deckLimit} deck${ent.deckLimit === 1 ? '' : 's'}. Upgrade to Pro for unlimited decks.`,
+        403,
+      )
+    }
+  }
+  return runSharedMutation(gen, a, sharedCtx(ctx), tx)
+}
+
+/** setDeckVisibility: owner-gated (like withDeckOwner) AND flipping to public-read requires the
+ *  `canPublish` entitlement. COMMUNITY/self-host has canPublish = true (no-op); returning to 'private'
+ *  is always allowed. */
+const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
+  tx,
+  raw,
+  ctx,
+) => {
+  const gen = sharedMutators.setDeckVisibility
+  const a = gen.args.parse(raw)
+  const user = requireUser(ctx.user)
+  const owns = await tx.query(
+    q.deck.where.id(a.id).where(deck.owner_id(user)).one(),
+  )
+  if (owns == null) {
+    throw new RindleApiError(
+      'forbidden',
+      'not permitted to edit this deck',
+      403,
+    )
+  }
+  if (a.visibility === 'public-read') {
+    const ent = await getEntitlements(user)
+    if (!ent.canPublish) {
+      throw new RindleApiError(
+        'forbidden',
+        'Publishing is a Pro feature. Upgrade to share your deck with a public link.',
+        403,
+      )
+    }
+  }
+  return runSharedMutation(gen, a, sharedCtx(ctx), tx)
+}
+
 // ---- authoritative mutator registry -------------------------------------------------------------
 
 const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   // Every shared mutator, auto-driven (parse args → inject the authenticated principal → run the SAME
-  // body the client predicts). createDeck / setDisplayName need no override: createDeck writes
-  // owner_id = ctx.user (the authenticated principal), and setDisplayName upserts keyed to ctx.user.
+  // body the client predicts). setDisplayName needs no override (it upserts keyed to ctx.user); createDeck
+  // is overridden below only to add the plan's deck cap (it still writes owner_id = ctx.user).
   ...sharedApiMutators(sharedMutators, sharedCtx),
+
+  // ---- entitlement-gated: free-tier deck cap (see createDeckCapped) ----
+  createDeck: createDeckCapped,
 
   // ---- deck edits: editable (owner or editor) ----
   renameDeck: withDeckEditable((a) => a.id, sharedMutators.renameDeck),
@@ -214,11 +281,8 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   ),
   addSlide: withDeckEditable((a) => a.deckId, sharedMutators.addSlide),
 
-  // ---- deck admin: owner-only ----
-  setDeckVisibility: withDeckOwner(
-    (a) => a.id,
-    sharedMutators.setDeckVisibility,
-  ),
+  // ---- deck admin: owner-only (+ publish entitlement on setDeckVisibility) ----
+  setDeckVisibility: setDeckVisibilityGuarded,
   addCollaborator: withDeckOwner(
     (a) => a.deckId,
     sharedMutators.addCollaborator,
@@ -378,7 +442,8 @@ export async function handleRindleJson(
     // Surface unexpected failures in `wrangler tail`: we catch here, so the Worker outcome stays "Ok"
     // and a 500 is otherwise invisible in the logs. Skip expected guard rejects (forbidden/400 —
     // routine optimistic-write snap-backs) to avoid noise.
-    if (!(err instanceof RindleApiError)) console.error(`[rindle] ${kind} failed:`, err)
+    if (!(err instanceof RindleApiError))
+      console.error(`[rindle] ${kind} failed:`, err)
     return Response.json({ error: message }, { status })
   }
 }

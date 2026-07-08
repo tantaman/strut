@@ -81,11 +81,20 @@ export const Route = createFileRoute('/api/generate')({
         // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
         // Consumed BEFORE the model call so concurrent calls can't race past the cap.
         const now = Date.now()
-        if (!byo) {
+        // Pro (like BYO) lifts the app-paid daily cap; `ai.meter === false` means unlimited.
+        const { getEntitlements, aiMetering } =
+          await import('../../server/entitlements')
+        const ai = aiMetering(await getEntitlements(account.id), 'generate')
+        if (!byo && ai.meter) {
           const { consumeGenerateQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeGenerateQuota(account.id, now)
+            quota = await consumeGenerateQuota(
+              account.id,
+              now,
+              undefined,
+              ai.limit,
+            )
           } catch (err) {
             console.error('[generate] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -107,8 +116,8 @@ export const Route = createFileRoute('/api/generate')({
           const deck = await generateSlides(b as GenerateRequest, choice)
           return json(deck, 200)
         } catch (err) {
-          // The work didn't happen — refund the consumed unit (app-paid path only).
-          if (!byo) {
+          // The work didn't happen — refund the consumed unit (only if we metered it).
+          if (!byo && ai.meter) {
             const { refundGenerateQuota } = await import('../../server/quota')
             await refundGenerateQuota(account.id, now).catch(() => {})
           }

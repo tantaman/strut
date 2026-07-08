@@ -41,7 +41,7 @@ function Dashboard() {
   const decks = decksStatus === 'complete' ? liveDecks : lastComplete.current
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
-  const { account } = Route.useLoaderData()
+  const { account, entitlement } = Route.useLoaderData()
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
@@ -66,6 +66,25 @@ function Dashboard() {
     navigate({ to: '/deck/$deckId', params: { deckId: id } })
   }
 
+  // Client pre-check for the plan's deck cap — a friendly upgrade prompt before the authoritative server
+  // guard (server/rindle-api.ts createDeckCapped) would reject. No cap in the open-source build
+  // (deckLimit null) → this always opens the modal.
+  function onNewDeck() {
+    const limit = entitlement?.deckLimit
+    if (limit != null && decks.length >= limit) {
+      if (
+        entitlement?.upgradeUrl &&
+        confirm(
+          `You've reached your plan's ${limit}-deck limit. Upgrade to Pro for unlimited decks?`,
+        )
+      ) {
+        window.location.assign(entitlement.upgradeUrl)
+      }
+      return
+    }
+    setCreating(true)
+  }
+
   async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = '' // allow re-importing the same file
@@ -87,7 +106,7 @@ function Dashboard() {
         <span className="brandbar__tag">Spatial presentations</span>
         <PoweredByRindle variant="inline" />
         <ModelControl />
-        <AccountControl initial={account} />
+        <AccountControl initial={account} entitlement={entitlement} />
       </div>
       <div className="dash__head">
         <div>
@@ -112,10 +131,7 @@ function Dashboard() {
           >
             <Upload size={16} /> Import
           </button>
-          <button
-            className="btn btn--primary"
-            onClick={() => setCreating(true)}
-          >
+          <button className="btn btn--primary" onClick={onNewDeck}>
             <Plus size={16} /> New deck
           </button>
         </div>

@@ -36,7 +36,9 @@ async function loadDb(): Promise<DbOption | null> {
     // Indirection + @vite-ignore so neither the Node SSR build nor the client bundle resolves this
     // Workers-only module at build time. Under workerd it resolves; under Node it throws → sqlite.
     const spec = 'cloudflare:workers'
-    const mod = (await import(/* @vite-ignore */ spec)) as { env?: Record<string, unknown> }
+    const mod = (await import(/* @vite-ignore */ spec)) as {
+      env?: Record<string, unknown>
+    }
     const binding = mod.env?.[DB_BINDING] as DbOption | undefined
     if (binding) {
       cachedDb = binding
@@ -74,7 +76,9 @@ async function loadLocalSqlite(): Promise<DbOption> {
   const sqliteSpec = 'better-sqlite3'
   const fsSpec = 'node:fs'
   const pathSpec = 'node:path'
-  const { default: Database } = (await import(/* @vite-ignore */ sqliteSpec)) as {
+  const { default: Database } = (await import(
+    /* @vite-ignore */ sqliteSpec
+  )) as {
     default: new (path: string) => LocalDb
   }
   const fs = (await import(/* @vite-ignore */ fsSpec)) as FsLike
@@ -123,11 +127,22 @@ function req(name: string): string {
 // Only wire a provider when its credentials are present, so a spike can run with just one configured.
 function resolveSocialProviders(): BetterAuthOptions['socialProviders'] {
   const p: NonNullable<BetterAuthOptions['socialProviders']> = {}
-  const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env
+  const {
+    GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+  } = process.env
   if (GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET)
-    p.github = { clientId: GITHUB_CLIENT_ID, clientSecret: GITHUB_CLIENT_SECRET }
+    p.github = {
+      clientId: GITHUB_CLIENT_ID,
+      clientSecret: GITHUB_CLIENT_SECRET,
+    }
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET)
-    p.google = { clientId: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET }
+    p.google = {
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+    }
   return p
 }
 
@@ -140,17 +155,33 @@ export async function getAuth() {
     )
   }
   const baseURL = req('BETTER_AUTH_URL')
+  // Host-split support (the commercial overlay runs the app on app.strut.io and marketing on strut.io).
+  // Both are unset by default → single-host behavior, identical to before:
+  //   AUTH_TRUSTED_ORIGINS — extra comma-separated origins to trust (e.g. the marketing apex) beyond baseURL.
+  //   AUTH_COOKIE_DOMAIN   — a parent cookie domain (e.g. ".strut.io") to share the session across
+  //                          subdomains, so a checkout initiated from marketing knows the signed-in user.
+  const extraOrigins = (process.env.AUTH_TRUSTED_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const cookieDomain = process.env.AUTH_COOKIE_DOMAIN?.trim()
   return betterAuth({
     database,
     secret: req('BETTER_AUTH_SECRET'),
     baseURL,
-    trustedOrigins: [baseURL],
+    trustedOrigins: [baseURL, ...extraOrigins],
     basePath: '/api/auth', // default; explicit so the route path stays in sync
     // No passwords — social sign-in only (GitHub / Google; Apple is a fast-follow, AUTH_PLAN.md Phase 4).
     emailAndPassword: { enabled: false },
     socialProviders: resolveSocialProviders(),
-    // Rate-limit on the real client IP (Cloudflare edge header), not a spoofable one.
-    advanced: { ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] } },
+    advanced: {
+      // Rate-limit on the real client IP (Cloudflare edge header), not a spoofable one.
+      ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
+      // Share the session cookie across subdomains only when a parent domain is configured.
+      ...(cookieDomain
+        ? { crossSubDomainCookies: { enabled: true, domain: cookieDomain } }
+        : {}),
+    },
     // Guest-first identity: the first visit mints a server-signed anonymous session (the rindle
     // principal), so the SSR loader can seed first paint and there's no sign-in wall. Promoting to a
     // real GitHub/Google account fires onGuestPromotion, which reassigns the guest's in-progress decks

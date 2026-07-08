@@ -105,8 +105,10 @@ export function consumeArrangeQuota(
   userId: string,
   now: number,
   store?: QuotaStore,
+  // Entitlement override (Pro raises the ceiling); defaults to the app's free-tier cap.
+  limit: number = ARRANGE_DAILY_LIMIT,
 ): Promise<QuotaResult> {
-  return consumeQuota(userId, now, ARRANGE_DAILY_LIMIT, ARRANGE_TABLE, store)
+  return consumeQuota(userId, now, limit, ARRANGE_TABLE, store)
 }
 export function refundArrangeQuota(
   userId: string,
@@ -120,8 +122,9 @@ export function consumeGenerateQuota(
   userId: string,
   now: number,
   store?: QuotaStore,
+  limit: number = GENERATE_DAILY_LIMIT,
 ): Promise<QuotaResult> {
-  return consumeQuota(userId, now, GENERATE_DAILY_LIMIT, GENERATE_TABLE, store)
+  return consumeQuota(userId, now, limit, GENERATE_TABLE, store)
 }
 export function refundGenerateQuota(
   userId: string,
@@ -135,8 +138,9 @@ export function consumeChatQuota(
   userId: string,
   now: number,
   store?: QuotaStore,
+  limit: number = CHAT_DAILY_LIMIT,
 ): Promise<QuotaResult> {
-  return consumeQuota(userId, now, CHAT_DAILY_LIMIT, CHAT_TABLE, store)
+  return consumeQuota(userId, now, limit, CHAT_TABLE, store)
 }
 export function refundChatQuota(
   userId: string,
@@ -150,8 +154,9 @@ export function consumeArtifactQuota(
   userId: string,
   now: number,
   store?: QuotaStore,
+  limit: number = ARTIFACT_DAILY_LIMIT,
 ): Promise<QuotaResult> {
-  return consumeQuota(userId, now, ARTIFACT_DAILY_LIMIT, ARTIFACT_TABLE, store)
+  return consumeQuota(userId, now, limit, ARTIFACT_TABLE, store)
 }
 export function refundArtifactQuota(
   userId: string,
@@ -165,8 +170,9 @@ export function consumeImageQuota(
   userId: string,
   now: number,
   store?: QuotaStore,
+  limit: number = IMAGE_DAILY_LIMIT,
 ): Promise<QuotaResult> {
-  return consumeQuota(userId, now, IMAGE_DAILY_LIMIT, IMAGE_TABLE, store)
+  return consumeQuota(userId, now, limit, IMAGE_TABLE, store)
 }
 export function refundImageQuota(
   userId: string,
@@ -215,7 +221,10 @@ interface LocalDb {
   }
 }
 
-export function makeSqliteStore(db: LocalDb, table = ARRANGE_TABLE): QuotaStore {
+export function makeSqliteStore(
+  db: LocalDb,
+  table = ARRANGE_TABLE,
+): QuotaStore {
   return {
     bump: async (userId, day) => {
       const row = db.prepare(bumpSql(table)).get(userId, day) as
