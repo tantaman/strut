@@ -110,6 +110,10 @@ export const createDeckArgs = z.object({
   id: z.string(),
   title: z.string(),
   now: z.number(),
+  // Initial visibility. Omitted = 'private' (the historical default / self-host / Pro). Free-tier clients
+  // pass 'public-read' + a share_token so a new deck is link-shareable but not private (server enforces).
+  visibility: z.enum(['private', 'public-read']).optional(),
+  share_token: z.string().optional(),
 })
 export type CreateDeckArgs = z.infer<typeof createDeckArgs>
 
@@ -406,8 +410,10 @@ export const mutators = {
         // optimistic row passes the owner-scoped decksQuery immediately); the server injects the SAME id
         // derived from the session cookie for the authoritative run.
         owner_id: ctx.user,
-        visibility: 'private',
-        share_token: '',
+        // Default private (self-host / Pro). A free-tier client passes 'public-read' + a token; the server
+        // (rindle-api createDeckGuarded) forces public for accounts that can't keep decks private.
+        visibility: a.visibility ?? 'private',
+        share_token: a.share_token ?? '',
         heading_font: '',
         heading_color: '',
         body_font: '',

@@ -200,35 +200,29 @@ const withShareOwner = <TArgs>(
   })
 
 // ---- entitlement-gated writes -------------------------------------------------------------------
-// Two writes carry a PLAN gate on top of the access gate: a free-tier deck cap and public publishing.
-// The entitlement lives in the auth D1 (getEntitlements), independent of the rindle txn — and with no
-// commercial overlay it's COMMUNITY (unlimited decks, publishing on), so both are no-ops for a clone.
+// Two writes carry a PLAN gate on top of the access gate — the pricing wedge: PUBLIC (link-shared) decks
+// are free & uncapped, keeping a deck PRIVATE is the paid feature. The entitlement lives in the auth D1
+// (getEntitlements), independent of the rindle txn; with no commercial overlay it's COMMUNITY
+// (canKeepPrivate=true), so both are no-ops for a clone (decks stay private by default, as before).
 
-/** createDeck with the plan's deck cap. deckLimit null (COMMUNITY/Pro) → the fast path skips the count
- *  entirely; a finite cap counts the principal's OWNED decks and rejects past it. The dashboard also
- *  pre-checks for a friendly prompt, but THIS is authoritative. */
-const createDeckCapped: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
+/** createDeck: for an account that can't keep decks private (free tier), FORCE the new deck public and
+ *  ensure a share token — even if a tampered client asked for 'private'. COMMUNITY/Pro (canKeepPrivate)
+ *  pass straight through with the client's chosen visibility (default private). */
+const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   const gen = sharedMutators.createDeck
   const a = gen.args.parse(raw)
   const user = requireUser(ctx.user)
   const ent = await getEntitlements(user)
-  if (ent.deckLimit != null) {
-    const owned = await tx.query(q.deck.where(deck.owner_id(user)))
-    const count = Array.isArray(owned) ? owned.length : 0
-    if (count >= ent.deckLimit) {
-      throw new RindleApiError(
-        'forbidden',
-        `Your plan is limited to ${ent.deckLimit} deck${ent.deckLimit === 1 ? '' : 's'}. Upgrade to Pro for unlimited decks.`,
-        403,
-      )
-    }
+  if (!ent.canKeepPrivate) {
+    a.visibility = 'public-read'
+    if (!a.share_token) a.share_token = crypto.randomUUID()
   }
   return runSharedMutation(gen, a, sharedCtx(ctx), tx)
 }
 
-/** setDeckVisibility: owner-gated (like withDeckOwner) AND flipping to public-read requires the
- *  `canPublish` entitlement. COMMUNITY/self-host has canPublish = true (no-op); returning to 'private'
- *  is always allowed. */
+/** setDeckVisibility: owner-gated (like withDeckOwner) AND setting a deck PRIVATE requires the
+ *  `canKeepPrivate` entitlement. COMMUNITY/Pro can (no-op); a free account is rejected. Making a deck
+ *  public is always allowed. */
 const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
   tx,
   raw,
@@ -247,12 +241,12 @@ const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
       403,
     )
   }
-  if (a.visibility === 'public-read') {
+  if (a.visibility === 'private') {
     const ent = await getEntitlements(user)
-    if (!ent.canPublish) {
+    if (!ent.canKeepPrivate) {
       throw new RindleApiError(
         'forbidden',
-        'Publishing is a Pro feature. Upgrade to share your deck with a public link.',
+        'Private decks are a Pro feature. Upgrade to keep this deck private.',
         403,
       )
     }
@@ -265,11 +259,11 @@ const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
 const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   // Every shared mutator, auto-driven (parse args → inject the authenticated principal → run the SAME
   // body the client predicts). setDisplayName needs no override (it upserts keyed to ctx.user); createDeck
-  // is overridden below only to add the plan's deck cap (it still writes owner_id = ctx.user).
+  // is overridden below only to force free-tier decks public (it still writes owner_id = ctx.user).
   ...sharedApiMutators(sharedMutators, sharedCtx),
 
-  // ---- entitlement-gated: free-tier deck cap (see createDeckCapped) ----
-  createDeck: createDeckCapped,
+  // ---- entitlement-gated: free-tier decks are forced public (see createDeckGuarded) ----
+  createDeck: createDeckGuarded,
 
   // ---- deck edits: editable (owner or editor) ----
   renameDeck: withDeckEditable((a) => a.id, sharedMutators.renameDeck),
