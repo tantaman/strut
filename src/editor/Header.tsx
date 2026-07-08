@@ -36,6 +36,7 @@ import type { LucideIcon } from 'lucide-react'
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadArtifact, uploadImage } from './upload'
+import { place, zNow } from './componentOps'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
 import { track } from '../lib/analytics'
 import { useEditor } from './EditorState'
@@ -84,13 +85,6 @@ interface DeckRow {
   visibility: string
   share_token: string
 }
-
-// new components sort above existing ones; a coarse monotonic z is fine (z is just an ordering)
-const zNow = () => Math.floor(Date.now() / 1000)
-const place = () => ({
-  x: 440 + (Date.now() % 4) * 24,
-  y: 280 + (Date.now() % 3) * 24,
-})
 
 // Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
 // and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).

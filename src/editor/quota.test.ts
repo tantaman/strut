@@ -4,11 +4,14 @@ import { describe, expect, it } from 'vitest'
 import {
   ARRANGE_DAILY_LIMIT,
   GENERATE_DAILY_LIMIT,
+  IMAGE_DAILY_LIMIT,
   consumeArrangeQuota,
   consumeGenerateQuota,
+  consumeImageQuota,
   makeSqliteStore,
   refundArrangeQuota,
   refundGenerateQuota,
+  refundImageQuota,
   utcDay,
 } from '../../server/quota'
 
@@ -34,6 +37,18 @@ function genStore() {
   return makeSqliteStore(
     db as unknown as Parameters<typeof makeSqliteStore>[0],
     'generate_usage',
+  )
+}
+
+// And the image_usage bucket (mirrors migrations-d1/0005_image_usage.sql).
+function imgStore() {
+  const db = new Database(':memory:')
+  db.exec(
+    'create table image_usage (user_id text not null, day text not null, count integer not null default 0, primary key (user_id, day))',
+  )
+  return makeSqliteStore(
+    db as unknown as Parameters<typeof makeSqliteStore>[0],
+    'image_usage',
   )
 }
 
@@ -127,6 +142,22 @@ describe('consumeGenerateQuota', () => {
     await refundGenerateQuota('u1', T0, store)
     const r = await consumeGenerateQuota('u1', T0, store)
     expect(r.used).toBe(GENERATE_DAILY_LIMIT + 1)
+    expect(r.allowed).toBe(false)
+  })
+})
+
+describe('consumeImageQuota', () => {
+  it('enforces its own daily limit and a refund frees a unit', async () => {
+    const store = imgStore()
+    for (let i = 1; i <= IMAGE_DAILY_LIMIT; i++) {
+      const r = await consumeImageQuota('u1', T0, store)
+      expect(r.allowed).toBe(true)
+      expect(r.limit).toBe(IMAGE_DAILY_LIMIT)
+    }
+    expect((await consumeImageQuota('u1', T0, store)).allowed).toBe(false)
+    await refundImageQuota('u1', T0, store)
+    const r = await consumeImageQuota('u1', T0, store)
+    expect(r.used).toBe(IMAGE_DAILY_LIMIT + 1)
     expect(r.allowed).toBe(false)
   })
 })

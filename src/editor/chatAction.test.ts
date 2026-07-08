@@ -115,6 +115,121 @@ describe('normalizeAction · generate & arrange', () => {
   })
 })
 
+describe('normalizeAction · add_image', () => {
+  it('keeps a generate/search description (capped) with optional alt', () => {
+    expect(
+      normalizeAction(
+        {
+          action: {
+            kind: 'add_image',
+            source: 'search',
+            value: '  mountain at dawn  ',
+            alt: '  a peak  ',
+          },
+        },
+        opts,
+      ).action,
+    ).toEqual({
+      kind: 'add_image',
+      source: 'search',
+      value: 'mountain at dawn',
+      alt: 'a peak',
+    })
+  })
+
+  it('accepts an https url in url mode but REJECTS javascript:/relative (security)', () => {
+    expect(
+      normalizeAction(
+        {
+          action: {
+            kind: 'add_image',
+            source: 'url',
+            value: 'https://img.example.com/a.jpg',
+          },
+        },
+        opts,
+      ).action,
+    ).toEqual({
+      kind: 'add_image',
+      source: 'url',
+      value: 'https://img.example.com/a.jpg',
+    })
+    for (const bad of ['javascript:alert(1)', 'data:image/png;base64,x', '/local.jpg', 'not a url']) {
+      expect(
+        normalizeAction(
+          { action: { kind: 'add_image', source: 'url', value: bad } },
+          opts,
+        ).action,
+      ).toBeNull()
+    }
+  })
+
+  it('drops an unknown source or an empty value', () => {
+    expect(
+      normalizeAction(
+        { action: { kind: 'add_image', source: 'nope', value: 'x' } },
+        opts,
+      ).action,
+    ).toBeNull()
+    expect(
+      normalizeAction(
+        { action: { kind: 'add_image', source: 'generate', value: '   ' } },
+        opts,
+      ).action,
+    ).toBeNull()
+  })
+})
+
+describe('normalizeAction · add_web', () => {
+  it('accepts an http(s) url and rejects a javascript: url (unsandboxed iframe = XSS)', () => {
+    expect(
+      normalizeAction(
+        { action: { kind: 'add_web', src: 'https://example.com/x' } },
+        opts,
+      ).action,
+    ).toEqual({ kind: 'add_web', src: 'https://example.com/x' })
+    for (const bad of ['javascript:alert(1)', 'data:text/html,<script>', 'ftp://x', '']) {
+      expect(
+        normalizeAction({ action: { kind: 'add_web', src: bad } }, opts).action,
+      ).toBeNull()
+    }
+  })
+})
+
+describe('normalizeAction · add_artifact', () => {
+  it('keeps non-empty code (capped) with an optional title', () => {
+    const { action } = normalizeAction(
+      {
+        action: {
+          kind: 'add_artifact',
+          code: 'export default () => null',
+          title: 'Chart',
+        },
+      },
+      opts,
+    )
+    expect(action).toEqual({
+      kind: 'add_artifact',
+      code: 'export default () => null',
+      title: 'Chart',
+    })
+  })
+
+  it('caps very long code and rejects whitespace-only code', () => {
+    const big = normalizeAction(
+      { action: { kind: 'add_artifact', code: 'x'.repeat(99_999) } },
+      opts,
+    ).action as { code: string } | null
+    expect(big?.code).toHaveLength(CHAT_ACTION_LIMITS.maxArtifactCode)
+    expect(
+      normalizeAction(
+        { action: { kind: 'add_artifact', code: '   \n  ' } },
+        opts,
+      ).action,
+    ).toBeNull()
+  })
+})
+
 describe('normalizeAction · totality', () => {
   it('caps `say` and is total on garbage', () => {
     const long = normalizeAction({ say: 'x'.repeat(9999) }, opts)

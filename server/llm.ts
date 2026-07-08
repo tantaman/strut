@@ -70,13 +70,14 @@ export async function resolveModel(userId: string): Promise<ModelChoice> {
 // ---- Workers AI binding (single copy; was duplicated in all three adapters) ----
 
 // The sliver of the Workers AI binding we call — typed structurally so we don't pull
-// @cloudflare/workers-types (whose globals shadow the DOM lib) into the build graph.
-interface AiBinding {
+// @cloudflare/workers-types (whose globals shadow the DOM lib) into the build graph. Exported so the
+// image adapter (server/image.ts) reaches the SAME memoized binding for text-to-image runs.
+export interface AiBinding {
   run: (model: string, input: unknown) => Promise<unknown>
 }
 
 let cachedAi: AiBinding | null | undefined
-async function loadAi(): Promise<AiBinding | null> {
+export async function loadAi(): Promise<AiBinding | null> {
   if (cachedAi !== undefined) return cachedAi
   try {
     const spec = 'cloudflare:workers'

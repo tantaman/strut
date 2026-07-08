@@ -38,6 +38,16 @@ export type ChatAction =
   | { kind: 'set_body'; slideId: string; markdown: string } // rewrite ONE slide's body
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
   | { kind: 'arrange'; instruction: string } // reorder / lay out the slides
+  // Author a free-form spatial component onto the ACTIVE slide (the model emits semantics only; the client
+  // dispatcher places it and resolves any URL/build). One per turn, like every other action.
+  | {
+      kind: 'add_image'
+      source: 'generate' | 'search' | 'url' // how `value` resolves to an image src (client picks the path)
+      value: string // generate: an image DESCRIPTION · search: a photo QUERY · url: a full https URL
+      alt?: string
+    }
+  | { kind: 'add_web'; src: string } // embed a live website (webframe). `src` is a full http(s) URL.
+  | { kind: 'add_artifact'; code: string; title?: string } // author a runnable component + drop it live
 
 /** What the Edit-lane model returns: a short prose confirmation/answer (`say`) plus at most one `action`
  *  (null = advice only, no deck change). Mirrors the Arrange/Generate `{plan}`/`{deck}` result shape. */
@@ -85,6 +95,10 @@ export const CHAT_ACTION_LIMITS = {
   maxCount: 15, // mirrors GENERATE_LIMITS.maxSlides
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
   maxThemeField: 80,
+  maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
+  maxUrl: 2000, //       any URL: add_web src + add_image url-mode value (URLs run longer than 600)
+  maxAlt: 300, //        add_image alt text
+  maxArtifactCode: 16000, // add_artifact source — generous, but well under the 512 KB build cap
 } as const
 
 // Coerce an untrusted value to a string — the request is parsed from JSON, so declared types are only a
@@ -148,6 +162,23 @@ function bareHex(v: unknown): string | undefined {
   return h.length === 3 || h.length === 4 || h.length === 6 || h.length === 8
     ? h
     : undefined
+}
+
+/** Coerce an untrusted value to a safe http(s) URL string (trimmed), or undefined. This is a SECURITY
+ *  gate, not cosmetics: `add_web` renders `<iframe src>` UNSANDBOXED in the app origin (render.tsx), so a
+ *  `javascript:`/`data:`/`blob:` URL from a poisoned action would run script in our origin when a shared
+ *  deck is viewed by others. Only http/https survive; the length cap bounds pathological URLs. */
+function httpUrl(v: unknown): string | undefined {
+  if (typeof v !== 'string') return undefined
+  const t = v.trim().slice(0, CHAT_ACTION_LIMITS.maxUrl)
+  if (!t) return undefined
+  let u: URL
+  try {
+    u = new URL(t)
+  } catch {
+    return undefined
+  }
+  return u.protocol === 'http:' || u.protocol === 'https:' ? t : undefined
 }
 
 /** Clamp a font to the editor's known family set (case-insensitive exact match), '' to reset to the theme
@@ -234,6 +265,48 @@ function normalizeOneAction(
           : ''
       // Empty instruction is allowed — /api/arrange treats it as "use your best judgment".
       return { kind: 'arrange', instruction }
+    }
+    case 'add_image': {
+      const source =
+        r.source === 'generate' || r.source === 'search' || r.source === 'url'
+          ? r.source
+          : undefined
+      if (!source) return null
+      // url mode is the only one whose `value` is a URL — gate it through httpUrl (blocks javascript:/data:).
+      const value =
+        source === 'url'
+          ? httpUrl(r.value)
+          : typeof r.value === 'string'
+            ? r.value.slice(0, CHAT_ACTION_LIMITS.maxImageValue).trim()
+            : ''
+      if (!value) return null
+      const out: Extract<ChatAction, { kind: 'add_image' }> = {
+        kind: 'add_image',
+        source,
+        value,
+      }
+      if (typeof r.alt === 'string' && r.alt.trim())
+        out.alt = r.alt.slice(0, CHAT_ACTION_LIMITS.maxAlt).trim()
+      return out
+    }
+    case 'add_web': {
+      const src = httpUrl(r.src)
+      if (!src) return null // http(s) only — see httpUrl
+      return { kind: 'add_web', src }
+    }
+    case 'add_artifact': {
+      const code =
+        typeof r.code === 'string'
+          ? r.code.slice(0, CHAT_ACTION_LIMITS.maxArtifactCode)
+          : ''
+      if (!code.trim()) return null
+      const out: Extract<ChatAction, { kind: 'add_artifact' }> = {
+        kind: 'add_artifact',
+        code,
+      }
+      if (typeof r.title === 'string' && r.title.trim())
+        out.title = r.title.slice(0, 120).trim()
+      return out
     }
     default:
       return null

@@ -175,6 +175,26 @@ export async function serveUploadByKey(
   }
 }
 
+// ---- store in-hand bytes (AI-generated images) --------------------------------------------------
+
+// Store already-decoded image bytes and return the public URL — same three-backend chain as
+// uploadFromRequest, minus the request parsing/auth (the caller owns those). Used by server/image.ts to
+// persist a Workers-AI-generated image so it gets a normal, cacheable src like any uploaded image.
+export async function storeImageBytes(
+  r2: R2BucketLike | null,
+  body: Uint8Array,
+  contentType: string,
+): Promise<string> {
+  const ext = EXT[contentType] ?? 'png'
+  const key = `${crypto.randomUUID()}.${ext}`
+  const cfg = r2 ? null : r2Config()
+  return r2
+    ? putR2Binding(r2, key, body, contentType)
+    : cfg
+      ? putS3(cfg, key, body, contentType)
+      : putLocal(key, body)
+}
+
 // ---- upload (POST /api/rindle/upload) -----------------------------------------------------------
 
 // Store the request body image, return { url }. `r2` is the native binding on Workers, else null.

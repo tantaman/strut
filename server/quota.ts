@@ -23,6 +23,9 @@ const CHAT_TABLE = 'chat_usage'
 // GENEROUS cap: uploads are user-initiated "Run/Update" clicks, and identical code dedupes (content-
 // addressed keys), so this only bites a runaway script.
 const ARTIFACT_TABLE = 'artifact_usage'
+// Text-to-image generation is a heavy Workers AI call (the app pays), so it gets its own small bucket —
+// separate from generate so a batch of images can't drain the slide-generation allowance and vice versa.
+const IMAGE_TABLE = 'image_usage'
 
 export const ARRANGE_DAILY_LIMIT = 50
 // Generating a whole batch of slides is a bigger call than a single arrange, so it gets a smaller cap.
@@ -31,6 +34,8 @@ export const GENERATE_DAILY_LIMIT = 20
 // gets the largest daily cap.
 export const CHAT_DAILY_LIMIT = 200
 export const ARTIFACT_DAILY_LIMIT = 200
+// Generating an image is heavy; keep the daily allowance modest (mirrors generate).
+export const IMAGE_DAILY_LIMIT = 20
 
 /** UTC calendar-day key (YYYY-MM-DD) for a timestamp — the quota window. */
 export function utcDay(now: number): string {
@@ -154,6 +159,21 @@ export function refundArtifactQuota(
   store?: QuotaStore,
 ): Promise<void> {
   return refundQuota(userId, now, ARTIFACT_TABLE, store)
+}
+
+export function consumeImageQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<QuotaResult> {
+  return consumeQuota(userId, now, IMAGE_DAILY_LIMIT, IMAGE_TABLE, store)
+}
+export function refundImageQuota(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<void> {
+  return refundQuota(userId, now, IMAGE_TABLE, store)
 }
 
 // ---- store construction ----

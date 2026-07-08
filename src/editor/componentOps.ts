@@ -9,6 +9,16 @@ import { SHAPES, type AnyComponent } from './types'
 
 type Mutate = StrutApp['mutate']
 
+// Where a freshly-inserted component lands + its z. Shared by the Header toolbar inserters and the ✨ Chat
+// Edit-lane dispatcher (aiChatActions.ts) so "drop a component" places consistently no matter who asks.
+// A coarse monotonic z (seconds) is fine — z is just an ordering, so new components sort above existing
+// ones; the small Date.now() jitter fans successive drops out instead of stacking them dead-center.
+export const zNow = (): number => Math.floor(Date.now() / 1000)
+export const place = (): { x: number; y: number } => ({
+  x: 440 + (Date.now() % 4) * 24,
+  y: 280 + (Date.now() % 3) * 24,
+})
+
 /** The fields insertComponent reads: the kind discriminator, the spatial transform + classes, and the
  *  type-specific leaves. `id`/`slide_id` are supplied separately (import mints, undo preserves), so
  *  both `AnyComponent` and deckIO's `ImportedComponent` satisfy this. */

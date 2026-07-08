@@ -131,6 +131,16 @@ export function applyNote(action: ChatAction): string {
         : 'Generating slides…'
     case 'arrange':
       return 'Rearranging slides…'
+    case 'add_image':
+      return action.source === 'generate'
+        ? 'Generating an image…'
+        : action.source === 'search'
+          ? 'Finding a photo…'
+          : 'Adding the image…'
+    case 'add_web':
+      return 'Embedding the page…'
+    case 'add_artifact':
+      return 'Building the artifact…'
     default:
       return 'Applying…'
   }
@@ -608,7 +618,14 @@ export function useChat(
       const grounding = buildActGrounding(deck, activeSlide)
       // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
       // request carries the trimmed digest.
-      const dctx: DispatchCtx = { deckId, slides, deck, mutate, history }
+      const dctx: DispatchCtx = {
+        deckId,
+        slides,
+        deck,
+        mutate,
+        history,
+        activeSlideId: activeSlide?.id ?? null,
+      }
       setUndoTip(null)
       track('chat:edit', { slides: slides.length })
       void sendChatAction(
