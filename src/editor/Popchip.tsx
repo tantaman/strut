@@ -16,6 +16,8 @@ interface PopchipPosition {
   left: number
 }
 
+type PopchipChildren = ReactNode | ((close: () => void) => ReactNode)
+
 export function Popchip({
   swatch,
   title,
@@ -23,12 +25,13 @@ export function Popchip({
 }: {
   swatch: string
   title?: string
-  children: ReactNode
+  children: PopchipChildren
 }) {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<PopchipPosition | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const close = () => setOpen(false)
 
   function place() {
     const root = ref.current
@@ -121,7 +124,7 @@ export function Popchip({
             }}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {children}
+            {typeof children === 'function' ? children(close) : children}
           </div>,
           document.body,
         )}

@@ -1534,6 +1534,9 @@ button {
   width: 420px;
   box-shadow: var(--shadow-lg);
 }
+.modal--bgimg {
+  width: 430px;
+}
 .modal h3 {
   font-family: var(--font-brand);
   font-weight: 600;
@@ -1769,6 +1772,9 @@ button {
   flex-direction: column;
   gap: 8px;
 }
+.theme__bgimg--modal {
+  gap: 10px;
+}
 .theme__bgimg-line {
   display: flex;
   align-items: center;
@@ -1788,6 +1794,11 @@ button {
   color: var(--text);
   padding: 6px 9px;
 }
+.modal input.theme__bgimg-url {
+  width: auto;
+  margin-bottom: 0;
+  padding: 6px 9px;
+}
 .theme__bgimg-url:focus {
   outline: none;
   border-color: var(--coral);
@@ -1803,13 +1814,18 @@ button {
 }
 .theme__bgimg-actions {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 .theme__bgimg-actions .btn {
-  flex: 1;
+  flex: 0 0 auto;
   justify-content: center;
   padding: 6px 8px;
   font-size: 12px;
+}
+.theme__bgimg-actions-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
 }
 .seg--bgimg {
   flex: 1;
@@ -1866,7 +1882,7 @@ button {
 /* The picker panel is portaled to the document body so scrollable popovers cannot clip it. */
 .popover--sub {
   position: fixed;
-  z-index: 1000;
+  z-index: 90;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1883,6 +1899,16 @@ button {
   font-weight: 700;
   color: #fff;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+.swatch--image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: var(--panel) !important;
+}
+.swatch--image:hover {
+  color: var(--coral);
 }
 
 .swatch.is-active {

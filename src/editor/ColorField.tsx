@@ -18,6 +18,8 @@
 // commit-only — the picker only applies when it's dismissed.
 
 import { useEffect, useRef } from 'react'
+import { Image as ImageIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { COLOR_SWATCHES, cssHex } from './types'
 import { Popchip } from './Popchip'
 
@@ -112,8 +114,9 @@ interface SwatchSpec {
   key: string
   color: string // CSS background for the swatch
   title?: string
-  glyph?: string // rendered inside the swatch (the theme-default "T")
+  glyph?: ReactNode // rendered inside the swatch (the theme-default "T")
   extraClass?: string // e.g. 'swatch--theme'
+  closeOnSelect?: boolean
   onSelect: () => void
 }
 
@@ -141,29 +144,37 @@ function ColorPicker({
 }) {
   return (
     <Popchip swatch={triggerColor} title={title}>
-      <div className="swatches swatches--sm">
-        {swatches.map((s) => (
-          <button
-            key={s.key}
-            className={
-              'swatch' +
-              (s.extraClass ? ' ' + s.extraClass : '') +
-              (activeKey === s.key ? ' is-active' : '')
-            }
-            style={{ background: s.color }}
-            title={s.title}
-            onClick={s.onSelect}
-          >
-            {s.glyph}
-          </button>
-        ))}
-      </div>
-      <NativeColorInput
-        value={custom.value}
-        onCommit={custom.onCommit}
-        onLive={custom.onLive}
-        active={customActive}
-      />
+      {(close) => (
+        <>
+          <div className="swatches swatches--sm">
+            {swatches.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                className={
+                  'swatch' +
+                  (s.extraClass ? ' ' + s.extraClass : '') +
+                  (activeKey === s.key ? ' is-active' : '')
+                }
+                style={{ background: s.color }}
+                title={s.title}
+                onClick={() => {
+                  s.onSelect()
+                  if (s.closeOnSelect) close()
+                }}
+              >
+                {s.glyph}
+              </button>
+            ))}
+          </div>
+          <NativeColorInput
+            value={custom.value}
+            onCommit={custom.onCommit}
+            onLive={custom.onLive}
+            active={customActive}
+          />
+        </>
+      )}
     </Popchip>
   )
 }
@@ -238,6 +249,7 @@ export function TokenColorField({
   onCustom,
   onCustomLive,
   allowTransparent,
+  imageAction,
   defaultToken = 'bg-default',
   defaultTitle = 'default',
   defaultGlyph,
@@ -250,6 +262,7 @@ export function TokenColorField({
   onCustom: (hex: string) => void
   onCustomLive?: (hex: string) => void
   allowTransparent?: boolean
+  imageAction?: { title: string; active?: boolean; onSelect: () => void }
   defaultToken?: string
   defaultTitle?: string
   defaultGlyph?: string
@@ -278,13 +291,29 @@ export function TokenColorField({
       title: s.name,
       onSelect: () => onPick(s.key),
     })
+  if (imageAction)
+    items.push({
+      key: '__image__',
+      color: 'var(--panel)',
+      title: imageAction.title,
+      glyph: <ImageIcon size={14} strokeWidth={2.2} />,
+      extraClass: 'swatch--image',
+      closeOnSelect: true,
+      onSelect: imageAction.onSelect,
+    })
 
   return (
     <ColorPicker
       triggerColor={bgSwatch(active, resolve)}
       title={label}
       swatches={items}
-      activeKey={items.some((i) => i.key === active) ? active : null}
+      activeKey={
+        imageAction?.active
+          ? '__image__'
+          : items.some((i) => i.key === active)
+            ? active
+            : null
+      }
       // A custom (native-picked) color is a `bg-custom-<hex>` class that matches no grid swatch —
       // mark the native chip as the selected swatch so the dynamic pick stays visibly current.
       customActive={!!current && current.startsWith('bg-custom-')}
