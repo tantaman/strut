@@ -3,7 +3,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRoot } from '@rindle/react'
 import { deckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
-import { resolveSurface } from '../editor/types'
+import {
+  backgroundImage,
+  composeBackground,
+  resolveSurface,
+} from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
@@ -93,6 +97,7 @@ function Play() {
   const acz = active.z * WORLD
   // The presentation surface (deck-wide "table") shows behind the flying slide cards.
   const surf = resolveSurface(active.surface, deck?.surface)
+  const surfImg = backgroundImage(active.surface, deck?.surface)
   // The chosen canned transition (spec §7.2) drives the camera-flight feel.
   const flight = flightFor(deck?.canned_transition)
   const camTransition = flight.duration
@@ -106,7 +111,8 @@ function Play() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: surf,
+        background: composeBackground(surf, surfImg),
+        transition: `background ${flight.duration || 400}ms ${flight.easing}`,
         overflow: 'hidden',
         perspective: 1000,
       }}

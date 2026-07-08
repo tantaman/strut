@@ -93,7 +93,7 @@ interface DeckRow {
   share_token: string
 }
 
-type BackgroundImageTarget = 'deck' | 'slide' | 'surface'
+type BackgroundImageTarget = 'deck' | 'slide' | 'surface' | 'slide-surface'
 
 // Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
 // and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).
@@ -301,6 +301,21 @@ export function Header({
     })
   }
 
+  function setSlideSurface(value: string) {
+    const slide = activeSlide
+    if (!slide) return
+    const before = slide.surface
+    if (before === value) return
+    const apply = (surface: string) =>
+      mutate.setSlideTheme({ id: slide.id, surface, now: Date.now() })
+    apply(value)
+    history.push({
+      label: 'Slide surface',
+      redo: () => apply(value),
+      undo: () => apply(before),
+    })
+  }
+
   function setSlideCustomBackground(hex: string) {
     if (!deck || !activeSlide) return
     const bare = hex.replace(/^#+/, '').toLowerCase()
@@ -312,6 +327,19 @@ export function Header({
       style: `.${klass}{background:#${bare}}`,
     })
     setSlideBackground(klass)
+  }
+
+  function setSlideCustomSurface(hex: string) {
+    if (!deck || !activeSlide) return
+    const bare = hex.replace(/^#+/, '').toLowerCase()
+    const klass = `bg-custom-${bare}`
+    mutate.mintCustomColor({
+      id: newId(),
+      deckId: deck.id,
+      klass,
+      style: `.${klass}{background:#${bare}}`,
+    })
+    setSlideSurface(klass)
   }
 
   function setTextTheme(
@@ -585,6 +613,8 @@ export function Header({
                     onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
                     onSlideBackground={setSlideBackground}
                     onSlideCustomBackground={setSlideCustomBackground}
+                    onSlideSurface={setSlideSurface}
+                    onSlideCustomSurface={setSlideCustomSurface}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
                     onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
@@ -773,6 +803,8 @@ function ThemePopover({
   onCustomBackgroundLive,
   onSlideBackground,
   onSlideCustomBackground,
+  onSlideSurface,
+  onSlideCustomSurface,
   onSurface,
   onCustomSurface,
   onCustomSurfaceLive,
@@ -789,6 +821,8 @@ function ThemePopover({
   onCustomBackgroundLive: (hex: string) => void
   onSlideBackground: (value: string) => void
   onSlideCustomBackground: (hex: string) => void
+  onSlideSurface: (value: string) => void
+  onSlideCustomSurface: (hex: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
   onCustomSurfaceLive: (hex: string) => void
@@ -836,13 +870,22 @@ function ThemePopover({
           }
         : imageTarget === 'surface'
           ? {
-              title: 'Surface image',
+              title: 'Deck surface image',
               value: deck.surface,
               fallback: undefined,
               supportsEffects: false,
               onChange: onSurface,
             }
-          : null
+          : imageTarget === 'slide-surface' && activeSlide
+            ? {
+                title: 'View surface image',
+                value: activeSlide.surface,
+                fallback: deck.surface,
+                supportsEffects: false,
+                allowInherit: true,
+                onChange: onSlideSurface,
+              }
+            : null
 
   return (
     <>
@@ -853,7 +896,7 @@ function ThemePopover({
             <div className="theme__bgcell">
               <span>Deck</span>
               <TokenColorField
-                label="Slide background"
+                label="Deck background"
                 current={deck.background}
                 swatches={BACKGROUND_SWATCHES}
                 resolve={(v) => resolveBackground(v, v)}
@@ -893,9 +936,9 @@ function ThemePopover({
               )}
             </div>
             <div className="theme__bgcell">
-              <span>Surface</span>
+              <span title="Default surface behind slides">Surface</span>
               <TokenColorField
-                label="Surface"
+                label="Deck surface"
                 current={deck.surface}
                 swatches={SURFACE_SWATCHES}
                 resolve={(v) => resolveSurface(v, v)}
@@ -908,6 +951,31 @@ function ThemePopover({
                   onSelect: () => setImageTarget('surface'),
                 }}
               />
+            </div>
+            <div className="theme__bgcell">
+              <span title="Surface color while this slide is in view">
+                View
+              </span>
+              {activeSlide ? (
+                <TokenColorField
+                  label="View surface"
+                  current={activeSlide.surface}
+                  swatches={SURFACE_SWATCHES}
+                  resolve={(v) => resolveSurface(v, deck.surface)}
+                  onPick={onSlideSurface}
+                  onCustom={onSlideCustomSurface}
+                  imageAction={{
+                    title: 'Set view surface image',
+                    active: !!parseBackgroundImageToken(activeSlide.surface),
+                    onSelect: () => setImageTarget('slide-surface'),
+                  }}
+                  defaultToken=""
+                  defaultTitle="inherit surface"
+                  defaultGlyph="D"
+                />
+              ) : (
+                <div className="theme__inline-note">No slide</div>
+              )}
             </div>
           </div>
         </div>

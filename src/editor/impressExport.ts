@@ -6,6 +6,8 @@ import { googleFontsHref, SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
+  backgroundImage,
+  composeBackground,
   cssHex,
   cssUrlValue,
   resolveBackground,
@@ -177,6 +179,10 @@ function stepHTML(
 
   const bg = resolveBackground(slide.background, deck.background)
   const bgImage = resolveBackgroundImage(slide.background, deck.background)
+  const surface = composeBackground(
+    resolveSurface(slide.surface, deck.surface),
+    backgroundImage(slide.surface, deck.surface),
+  )
   const align = resolveTextAlign(slide.text_align, deck.text_align)
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
@@ -190,7 +196,7 @@ function stepHTML(
     .join('\n')
   const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
   const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
-  return `  <div class="step" data-state="strut-slide-${index}" ${attrs.join(' ')}>
+  return `  <div class="step" data-state="strut-slide-${index}" data-surface="${esc(surface)}" ${attrs.join(' ')}>
     <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
 ${inner}
     </div>
@@ -199,7 +205,11 @@ ${inner}
 
 export function toImpressHTML(bundle: DeckBundle): string {
   const { deck, slides, componentsBySlide, customBackgrounds } = bundle
-  const surface = resolveSurface(undefined, deck.surface)
+  const surfaceColor = resolveSurface(undefined, deck.surface)
+  const surface = composeBackground(
+    surfaceColor,
+    backgroundImage(undefined, deck.surface),
+  )
   const steps = slides
     .map((s, i) => stepHTML(s, componentsBySlide[s.id] ?? [], deck, i))
     .join('\n')
@@ -222,7 +232,7 @@ export function toImpressHTML(bundle: DeckBundle): string {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${googleFontsHref()}">
 <style>
-  html,body{margin:0;height:100%;background:${surface};font-family:'Lato',sans-serif;}
+  html,body{margin:0;height:100%;background:${surfaceColor};font-family:'Lato',sans-serif;transition:background ${duration}ms ${flightFor(transition).easing};}
   #impress{}
   .step{box-sizing:border-box;}
   .slideContainer{box-shadow:0 10px 60px rgba(0,0,0,.5);}
@@ -238,13 +248,26 @@ ${userCss}
 </head>
 <body class="impress-not-supported">
 <div class="fallback">Your browser doesn't support CSS 3D transforms — open this in a modern browser.</div>
-<div id="impress" class="strut-transition-${transition}" data-transition-duration="${duration}">
+<div id="impress" class="strut-transition-${transition}" data-transition-duration="${duration}" data-surface="${esc(surface)}">
 ${steps}
   <div id="overview" class="step" data-x="0" data-y="0" data-scale="10"></div>
 </div>
 <div class="hint">Use the spacebar or arrow keys to navigate</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/impress.js/2.0.0/impress.min.js"></script>
-<script>impress().init();</script>
+<script>
+(function(){
+  var root = document.getElementById('impress');
+  var fallbackSurface = root ? (root.getAttribute('data-surface') || '') : '';
+  function applySurface(step){
+    document.body.style.background = step ? (step.getAttribute('data-surface') || fallbackSurface) : fallbackSurface;
+  }
+  document.addEventListener('impress:stepenter', function(e){ applySurface(e.target); });
+  impress().init();
+  window.setTimeout(function(){
+    applySurface(document.querySelector('.step.active') || document.querySelector('.step'));
+  }, 0);
+})();
+</script>
 </body>
 </html>`
 }
