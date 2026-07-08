@@ -1406,6 +1406,92 @@ button {
   padding: 10px;
   z-index: 50;
 }
+
+/* ---- usage meter (dashboard brandbar): a click-to-open progress ring ---- */
+.usage {
+  position: relative;
+  display: inline-flex;
+}
+.usage__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.usage__btn:hover {
+  background: var(--panel-2);
+}
+.usage__panel {
+  width: 284px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.usage__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-brand);
+  font-weight: 600;
+  font-size: 13px;
+}
+.usage__pro {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: #fff;
+  background-image: var(--grad);
+}
+.usage__row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.usage__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 12px;
+}
+.usage__label {
+  color: var(--text);
+}
+.usage__val {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.usage__bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.usage__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+.usage__reset {
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.usage__upgrade {
+  justify-content: center;
+}
 .swatches {
   display: grid;
   grid-template-columns: repeat(6, 22px);

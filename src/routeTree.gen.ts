@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
+import { Route as ApiUsageRouteImport } from './routes/api.usage'
 import { Route as ApiImageSearchRouteImport } from './routes/api.image-search'
 import { Route as ApiImageRouteImport } from './routes/api.image'
 import { Route as ApiGenerateRouteImport } from './routes/api.generate'
@@ -51,6 +52,11 @@ const ShareDeckIdRoute = ShareDeckIdRouteImport.update({
 const DeckDeckIdRoute = DeckDeckIdRouteImport.update({
   id: '/deck/$deckId',
   path: '/deck/$deckId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUsageRoute = ApiUsageRouteImport.update({
+  id: '/api/usage',
+  path: '/api/usage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiImageSearchRoute = ApiImageSearchRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/usage': typeof ApiUsageRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/usage': typeof ApiUsageRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/usage': typeof ApiUsageRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/share/$deckId': typeof ShareDeckIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/usage'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/usage'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/usage'
     | '/deck/$deckId'
     | '/share/$deckId'
     | '/api/auth/$'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   ApiGenerateRoute: typeof ApiGenerateRoute
   ApiImageRoute: typeof ApiImageRoute
   ApiImageSearchRoute: typeof ApiImageSearchRoute
+  ApiUsageRoute: typeof ApiUsageRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/deck/$deckId'
       fullPath: '/deck/$deckId'
       preLoaderRoute: typeof DeckDeckIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/usage': {
+      id: '/api/usage'
+      path: '/api/usage'
+      fullPath: '/api/usage'
+      preLoaderRoute: typeof ApiUsageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/image-search': {
@@ -515,6 +535,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGenerateRoute: ApiGenerateRoute,
   ApiImageRoute: ApiImageRoute,
   ApiImageSearchRoute: ApiImageSearchRoute,
+  ApiUsageRoute: ApiUsageRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
