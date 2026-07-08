@@ -4,8 +4,17 @@
 // root — the trigger is inside that root, so clicking it just toggles (no close-then-reopen race).
 // Selecting inside the panel does NOT auto-close, so several swatches can be tried in one visit.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
+
+const GAP = 6
+const VIEWPORT_MARGIN = 8
+
+interface PopchipPosition {
+  top: number
+  left: number
+}
 
 export function Popchip({
   swatch,
@@ -17,12 +26,62 @@ export function Popchip({
   children: ReactNode
 }) {
   const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState<PopchipPosition | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  function place() {
+    const root = ref.current
+    if (!root) return
+
+    const trigger = root.getBoundingClientRect()
+    const panel = panelRef.current
+    const panelWidth = panel?.offsetWidth ?? 210
+    const panelHeight = panel?.offsetHeight ?? 120
+
+    let left = trigger.left
+    if (left + panelWidth + VIEWPORT_MARGIN > window.innerWidth) {
+      left = window.innerWidth - panelWidth - VIEWPORT_MARGIN
+    }
+    left = Math.max(VIEWPORT_MARGIN, left)
+
+    let top = trigger.bottom + GAP
+    if (
+      top + panelHeight + VIEWPORT_MARGIN > window.innerHeight &&
+      trigger.top - panelHeight - GAP > VIEWPORT_MARGIN
+    ) {
+      top = trigger.top - panelHeight - GAP
+    }
+    top = Math.max(VIEWPORT_MARGIN, top)
+
+    setPosition({ top, left })
+  }
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPosition(null)
+      return
+    }
+
+    place()
+    const frame = window.requestAnimationFrame(place)
+    const onMove = () => place()
+    window.addEventListener('resize', onMove)
+    window.addEventListener('scroll', onMove, true)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', onMove)
+      window.removeEventListener('scroll', onMove, true)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
     const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (ref.current?.contains(target) || panelRef.current?.contains(target))
+        return
+      setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -49,7 +108,23 @@ export function Popchip({
       >
         <span className="popchip__sw" style={{ background: swatch }} />
       </button>
-      {open && <div className="popover popover--sub">{children}</div>}
+      {open &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="popover popover--sub"
+            style={{
+              top: position?.top ?? 0,
+              left: position?.left ?? 0,
+              visibility: position ? 'visible' : 'hidden',
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {children}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

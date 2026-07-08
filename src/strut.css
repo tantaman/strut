@@ -1706,6 +1706,45 @@ button {
   color: var(--muted);
   letter-spacing: 0.06em;
 }
+.theme__inline-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+.theme__bggrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.theme__bgcell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.theme__bgcell > span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.1;
+}
+.theme__bgcell .popchip,
+.theme__bgcell .popchip__trigger {
+  width: 100%;
+}
+.theme__bgcell .popchip__trigger {
+  justify-content: center;
+  padding: 4px;
+  background: var(--panel);
+}
+.theme__bgcell .theme__inline-note {
+  font-size: 11px;
+  line-height: 26px;
+}
 .theme__check {
   display: flex;
   align-items: center;
@@ -1755,7 +1794,11 @@ button {
   box-shadow: 0 0 0 3px var(--coral-soft);
 }
 .theme__bgimg-file {
-  color: var(--muted);
+  display: none;
+}
+.theme__bgimg-upload {
+  justify-content: center;
+  padding: 6px 8px;
   font-size: 12px;
 }
 .theme__bgimg-actions {
@@ -1820,21 +1863,15 @@ button {
   border: 1px solid rgba(20, 22, 30, 0.15);
   flex: none;
 }
-/* The picker panel floats below the chip (over whatever it sits in — theme popover / inspector). */
+/* The picker panel is portaled to the document body so scrollable popovers cannot clip it. */
 .popover--sub {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 60;
+  position: fixed;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 10px;
-}
-/* The inspector hugs the right screen edge — open its picker leftward so it can't clip off-screen. */
-.insp .popover--sub {
-  left: auto;
-  right: 0;
+  font-size: 12px;
 }
 
 /* "Theme default" swatch (text color pickers): shows the theme's resolved color with a T glyph. */
