@@ -93,11 +93,24 @@ const publicDeckDetailQuery = defineQuery(
     deckDetailBody(q.deck.where.id(deckId).where(publicAccess(token))),
 )
 
+// Research notes for a deck — gated by access to the note's OWNING deck (existsNoSync via noteDeck), so
+// notes sync only for decks the principal owns or collaborates on. Separate from deckDetail on purpose:
+// the (potentially large) note docs load on demand when the Research surface subscribes.
+const deckNotesQuery = defineQuery(
+  'deckNotes',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }, ctx: Ctx) =>
+    q.slide_notes.where
+      .deck_id(deckId)
+      .where(existsNoSync(rels.noteDeck, (d) => d.where(deckAccess(ctx.user)))),
+)
+
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
   deckSharesQuery,
+  deckNotesQuery,
   profileQuery,
 ]

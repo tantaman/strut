@@ -9,7 +9,7 @@
 // anchor just above it via `--m-tabbar-h`.
 
 import { useNavigate } from '@tanstack/react-router'
-import { Film, LayoutGrid, Play, Sparkles } from 'lucide-react'
+import { Film, LayoutGrid, NotebookPen, Play, Sparkles } from 'lucide-react'
 import { useEditor } from '../EditorState'
 
 export function MobileTabBar({
@@ -46,6 +46,17 @@ export function MobileTabBar({
           <LayoutGrid size={20} />
         </span>
         <span className="m-tab__lbl">Overview</span>
+      </button>
+
+      <button
+        className={'m-tab' + (editor.mode === 'research' ? ' is-active' : '')}
+        onClick={() => editor.setMode('research')}
+        aria-pressed={editor.mode === 'research'}
+      >
+        <span className="m-tab__ic">
+          <NotebookPen size={20} />
+        </span>
+        <span className="m-tab__lbl">Research</span>
       </button>
 
       <button
