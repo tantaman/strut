@@ -93,6 +93,8 @@ interface DeckRow {
   share_token: string
 }
 
+type BackgroundImageTarget = 'deck' | 'slide' | 'surface'
+
 // Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
 // and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).
 const STARTER_ARTIFACT = `// Runnable artifact — an ES module. Import libraries from esm.sh and render
@@ -811,159 +813,211 @@ function ThemePopover({
   onEditCss: () => void
 }) {
   const align = deck.text_align || 'left'
+  const [imageTarget, setImageTarget] = useState<BackgroundImageTarget | null>(
+    null,
+  )
+  const imageModal =
+    imageTarget === 'deck'
+      ? {
+          title: 'Deck background image',
+          value: deck.background,
+          fallback: undefined,
+          supportsEffects: true,
+          onChange: onBackground,
+        }
+      : imageTarget === 'slide' && activeSlide
+        ? {
+            title: 'Slide background image',
+            value: activeSlide.background,
+            fallback: deck.background,
+            supportsEffects: true,
+            allowInherit: true,
+            onChange: onSlideBackground,
+          }
+        : imageTarget === 'surface'
+          ? {
+              title: 'Surface image',
+              value: deck.surface,
+              fallback: undefined,
+              supportsEffects: false,
+              onChange: onSurface,
+            }
+          : null
+
   return (
-    <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
-      <div className="theme__group theme__group--first">
-        <div className="theme__label">Background</div>
-        <div className="theme__bggrid">
-          <div className="theme__bgcell">
-            <span>Deck</span>
-            <TokenColorField
-              label="Slide background"
-              current={deck.background}
-              swatches={BACKGROUND_SWATCHES}
-              resolve={(v) => resolveBackground(v, v)}
-              onPick={onBackground}
-              onCustom={onCustomBackground}
-              onCustomLive={onCustomBackgroundLive}
-              allowTransparent
-            />
-          </div>
-          <div className="theme__bgcell">
-            <span>Slide</span>
-            {activeSlide ? (
+    <>
+      <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
+        <div className="theme__group theme__group--first">
+          <div className="theme__label">Background</div>
+          <div className="theme__bggrid">
+            <div className="theme__bgcell">
+              <span>Deck</span>
               <TokenColorField
                 label="Slide background"
-                current={activeSlide.background}
+                current={deck.background}
                 swatches={BACKGROUND_SWATCHES}
-                resolve={(v) => resolveBackground(v, deck.background)}
-                onPick={onSlideBackground}
-                onCustom={onSlideCustomBackground}
+                resolve={(v) => resolveBackground(v, v)}
+                onPick={onBackground}
+                onCustom={onCustomBackground}
+                onCustomLive={onCustomBackgroundLive}
                 allowTransparent
-                defaultToken=""
-                defaultTitle="inherit deck"
-                defaultGlyph="D"
+                imageAction={{
+                  title: 'Set deck background image',
+                  active: !!parseBackgroundImageToken(deck.background),
+                  onSelect: () => setImageTarget('deck'),
+                }}
               />
-            ) : (
-              <div className="theme__inline-note">No slide</div>
-            )}
+            </div>
+            <div className="theme__bgcell">
+              <span>Slide</span>
+              {activeSlide ? (
+                <TokenColorField
+                  label="Slide background"
+                  current={activeSlide.background}
+                  swatches={BACKGROUND_SWATCHES}
+                  resolve={(v) => resolveBackground(v, deck.background)}
+                  onPick={onSlideBackground}
+                  onCustom={onSlideCustomBackground}
+                  allowTransparent
+                  imageAction={{
+                    title: 'Set slide background image',
+                    active: !!parseBackgroundImageToken(activeSlide.background),
+                    onSelect: () => setImageTarget('slide'),
+                  }}
+                  defaultToken=""
+                  defaultTitle="inherit deck"
+                  defaultGlyph="D"
+                />
+              ) : (
+                <div className="theme__inline-note">No slide</div>
+              )}
+            </div>
+            <div className="theme__bgcell">
+              <span>Surface</span>
+              <TokenColorField
+                label="Surface"
+                current={deck.surface}
+                swatches={SURFACE_SWATCHES}
+                resolve={(v) => resolveSurface(v, v)}
+                onPick={onSurface}
+                onCustom={onCustomSurface}
+                onCustomLive={onCustomSurfaceLive}
+                imageAction={{
+                  title: 'Set surface image',
+                  active: !!parseBackgroundImageToken(deck.surface),
+                  onSelect: () => setImageTarget('surface'),
+                }}
+              />
+            </div>
           </div>
-          <div className="theme__bgcell">
-            <span>Surface</span>
-            <TokenColorField
-              label="Surface"
-              current={deck.surface}
-              swatches={SURFACE_SWATCHES}
-              resolve={(v) => resolveSurface(v, v)}
-              onPick={onSurface}
-              onCustom={onCustomSurface}
-              onCustomLive={onCustomSurfaceLive}
+        </div>
+
+        <div className="theme__group">
+          <div className="theme__label">Heading text</div>
+          <div className="insp__row">
+            <span>Font</span>
+            <ThemeFontSelect
+              value={deck.heading_font ?? ''}
+              onChange={(f) => onText({ heading_font: f })}
+            />
+          </div>
+          <div className="insp__row">
+            <span>Color</span>
+            <ColorField
+              value={deck.heading_color ?? ''}
+              onChange={(hex) => onText({ heading_color: hex })}
+              onLive={(hex) => onTextLive({ heading_color: hex })}
             />
           </div>
         </div>
-      </div>
-      <div className="theme__group">
-        <div className="theme__label">Slide image</div>
-        <BackgroundImageControls
-          deck={deck}
-          activeSlide={activeSlide}
-          onChange={onSlideBackground}
-        />
-      </div>
 
-      <div className="theme__group">
-        <div className="theme__label">Heading text</div>
-        <div className="insp__row">
-          <span>Font</span>
-          <ThemeFontSelect
-            value={deck.heading_font ?? ''}
-            onChange={(f) => onText({ heading_font: f })}
-          />
-        </div>
-        <div className="insp__row">
-          <span>Color</span>
-          <ColorField
-            value={deck.heading_color ?? ''}
-            onChange={(hex) => onText({ heading_color: hex })}
-            onLive={(hex) => onTextLive({ heading_color: hex })}
-          />
-        </div>
-      </div>
-
-      <div className="theme__group">
-        <div className="theme__label">Body text</div>
-        <div className="insp__row">
-          <span>Font</span>
-          <ThemeFontSelect
-            value={deck.body_font ?? ''}
-            onChange={(f) => onText({ body_font: f })}
-          />
-        </div>
-        <div className="insp__row">
-          <span>Color</span>
-          <ColorField
-            value={deck.body_color ?? ''}
-            onChange={(hex) => onText({ body_color: hex })}
-            onLive={(hex) => onTextLive({ body_color: hex })}
-          />
-        </div>
-      </div>
-
-      <div className="theme__group">
-        <div className="theme__label">Layout</div>
-        <div className="insp__row">
-          <span>Align</span>
-          <div className="seg seg--align">
-            {(
-              [
-                ['left', AlignLeft],
-                ['center', AlignCenter],
-                ['right', AlignRight],
-              ] as const
-            ).map(([value, Icon]) => (
-              <button
-                key={value}
-                className={align === value ? 'is-active' : ''}
-                title={`Align ${value}`}
-                onClick={() => onAlign(value)}
-              >
-                <Icon size={15} />
-              </button>
-            ))}
+        <div className="theme__group">
+          <div className="theme__label">Body text</div>
+          <div className="insp__row">
+            <span>Font</span>
+            <ThemeFontSelect
+              value={deck.body_font ?? ''}
+              onChange={(f) => onText({ body_font: f })}
+            />
+          </div>
+          <div className="insp__row">
+            <span>Color</span>
+            <ColorField
+              value={deck.body_color ?? ''}
+              onChange={(hex) => onText({ body_color: hex })}
+              onLive={(hex) => onTextLive({ body_color: hex })}
+            />
           </div>
         </div>
-        <label className="theme__check">
-          <input
-            type="checkbox"
-            checked={deck.default_slide_mode === 'markdown'}
-            onChange={(e) => onDefaultMarkdown(e.target.checked)}
-          />
-          <span>New slides use Markdown</span>
-        </label>
-      </div>
 
-      {/* Custom CSS lives here rather than as its own header button — theme + CSS are one job. */}
-      <div className="menu-sep" />
-      <button className="menu-item menu-item--icon" onClick={onEditCss}>
-        <Code2 size={15} /> Edit custom CSS…
-      </button>
-    </div>
+        <div className="theme__group">
+          <div className="theme__label">Layout</div>
+          <div className="insp__row">
+            <span>Align</span>
+            <div className="seg seg--align">
+              {(
+                [
+                  ['left', AlignLeft],
+                  ['center', AlignCenter],
+                  ['right', AlignRight],
+                ] as const
+              ).map(([value, Icon]) => (
+                <button
+                  key={value}
+                  className={align === value ? 'is-active' : ''}
+                  title={`Align ${value}`}
+                  onClick={() => onAlign(value)}
+                >
+                  <Icon size={15} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <label className="theme__check">
+            <input
+              type="checkbox"
+              checked={deck.default_slide_mode === 'markdown'}
+              onChange={(e) => onDefaultMarkdown(e.target.checked)}
+            />
+            <span>New slides use Markdown</span>
+          </label>
+        </div>
+
+        {/* Custom CSS lives here rather than as its own header button — theme + CSS are one job. */}
+        <div className="menu-sep" />
+        <button className="menu-item menu-item--icon" onClick={onEditCss}>
+          <Code2 size={15} /> Edit custom CSS…
+        </button>
+      </div>
+      {imageModal && (
+        <BackgroundImageModal
+          {...imageModal}
+          onClose={() => setImageTarget(null)}
+        />
+      )}
+    </>
   )
 }
 
-function BackgroundImageControls({
-  deck,
-  activeSlide,
+function BackgroundImageModal({
+  title,
+  value,
+  fallback,
+  supportsEffects,
+  allowInherit,
   onChange,
+  onClose,
 }: {
-  deck: DeckRow
-  activeSlide: SlideDetail | null
+  title: string
+  value: string
+  fallback?: string
+  supportsEffects: boolean
+  allowInherit?: boolean
   onChange: (value: string) => void
+  onClose: () => void
 }) {
-  const image = activeSlide
-    ? resolveBackgroundImage(activeSlide.background, deck.background)
-    : undefined
-  const explicitImage = parseBackgroundImageToken(activeSlide?.background)
+  const image = resolveBackgroundImage(value, fallback)
+  const explicitImage = parseBackgroundImageToken(value)
   const fileRef = useRef<HTMLInputElement>(null)
   const [url, setUrl] = useState(image?.src ?? '')
   const [uploading, setUploading] = useState(false)
@@ -972,10 +1026,7 @@ function BackgroundImageControls({
   useEffect(() => {
     setUrl(image?.src ?? '')
     setError(null)
-  }, [activeSlide?.id, image?.src])
-
-  if (!activeSlide)
-    return <div className="modal__note">No active slide selected.</div>
+  }, [image?.src, value])
 
   const layout = image?.layout ?? 'full'
   const hasImage = !!(image?.src || url.trim())
@@ -995,10 +1046,12 @@ function BackgroundImageControls({
     setUrl(src)
     onChange(
       makeBackgroundImageToken(src, {
-        layout: patch.layout ?? image?.layout ?? 'full',
-        fade: patch.fade ?? image?.fade ?? false,
-        blur: patch.blur ?? image?.blur ?? false,
-        mask: patch.mask ?? image?.mask ?? false,
+        layout: supportsEffects
+          ? (patch.layout ?? image?.layout ?? 'full')
+          : 'full',
+        fade: supportsEffects ? (patch.fade ?? image?.fade ?? false) : false,
+        blur: supportsEffects ? (patch.blur ?? image?.blur ?? false) : false,
+        mask: supportsEffects ? (patch.mask ?? image?.mask ?? false) : false,
       }),
     )
   }
@@ -1021,96 +1074,138 @@ function BackgroundImageControls({
     }
   }
 
+  function removeImage() {
+    setUrl('')
+    onChange('bg-default')
+  }
+
+  function done() {
+    if (url.trim()) writeImage({ src: url })
+    onClose()
+  }
+
   return (
-    <div className="theme__bgimg">
-      <div className="theme__bgimg-line">
-        <span>Image</span>
-        <input
-          className="theme__bgimg-url"
-          type="url"
-          placeholder="https://..."
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onBlur={() => url.trim() && writeImage({ src: url })}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && url.trim()) writeImage({ src: url })
-          }}
-        />
-      </div>
-      <input
-        className="theme__bgimg-file"
-        type="file"
-        ref={fileRef}
-        accept="image/*"
-        disabled={uploading}
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) void pickFile(file)
-          e.currentTarget.value = ''
-        }}
-      />
-      <button
-        className="btn btn--ghost theme__bgimg-upload"
-        disabled={uploading}
-        onClick={() => fileRef.current?.click()}
-      >
-        <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload image'}
-      </button>
-      <div className="theme__bgimg-line">
-        <span>Fit</span>
-        <div className="seg seg--bgimg" role="group" aria-label="Image fit">
-          {BACKGROUND_IMAGE_LAYOUTS.map((value) => (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal modal--bgimg" onClick={(e) => e.stopPropagation()}>
+        <h3>{title}</h3>
+        <div className="theme__bgimg theme__bgimg--modal">
+          <div className="theme__bgimg-line">
+            <span>Image</span>
+            <input
+              className="theme__bgimg-url"
+              type="url"
+              autoFocus
+              placeholder="https://..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onBlur={() => url.trim() && writeImage({ src: url })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') done()
+                if (e.key === 'Escape') onClose()
+              }}
+            />
+          </div>
+          <input
+            className="theme__bgimg-file"
+            type="file"
+            ref={fileRef}
+            accept="image/*"
+            disabled={uploading}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void pickFile(file)
+              e.currentTarget.value = ''
+            }}
+          />
+          <button
+            className="btn btn--ghost theme__bgimg-upload"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload image'}
+          </button>
+          {supportsEffects && (
+            <>
+              <div className="theme__bgimg-line">
+                <span>Fit</span>
+                <div
+                  className="seg seg--bgimg"
+                  role="group"
+                  aria-label="Image fit"
+                >
+                  {BACKGROUND_IMAGE_LAYOUTS.map((layoutValue) => (
+                    <button
+                      key={layoutValue}
+                      className={layout === layoutValue ? 'is-active' : ''}
+                      disabled={!hasImage}
+                      onClick={() => writeImage({ layout: layoutValue })}
+                    >
+                      {layoutValue === 'full'
+                        ? 'Full'
+                        : layoutValue === 'left'
+                          ? 'Left'
+                          : 'Right'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="theme__fx">
+                {(
+                  [
+                    ['fade', 'Fade'],
+                    ['blur', 'Blur'],
+                    ['mask', 'Mask'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <label key={key}>
+                    <input
+                      type="checkbox"
+                      disabled={!hasImage}
+                      checked={!!image?.[key]}
+                      onChange={(e) => writeEffect(key, e.target.checked)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
+          {uploading && <div className="modal__note">Uploading...</div>}
+          {error && <div className="modal__error">{error}</div>}
+          <div className="theme__bgimg-actions">
+            {allowInherit && (
+              <button
+                className="btn btn--ghost"
+                disabled={!value}
+                onClick={() => {
+                  setUrl('')
+                  onChange('')
+                }}
+              >
+                Inherit
+              </button>
+            )}
             <button
-              key={value}
-              className={layout === value ? 'is-active' : ''}
-              disabled={!hasImage}
-              onClick={() => writeImage({ layout: value })}
+              className="btn btn--ghost"
+              disabled={!explicitImage && !image}
+              onClick={removeImage}
             >
-              {value === 'full' ? 'Full' : value === 'left' ? 'Left' : 'Right'}
+              Remove
             </button>
-          ))}
+            <span className="theme__bgimg-actions-spacer" />
+            <button className="btn btn--ghost" onClick={onClose}>
+              Close
+            </button>
+            <button
+              className="btn btn--primary"
+              disabled={uploading || !url.trim()}
+              onClick={done}
+            >
+              Done
+            </button>
+          </div>
         </div>
       </div>
-      <div className="theme__fx">
-        {(
-          [
-            ['fade', 'Fade'],
-            ['blur', 'Blur'],
-            ['mask', 'Mask'],
-          ] as const
-        ).map(([key, label]) => (
-          <label key={key}>
-            <input
-              type="checkbox"
-              disabled={!hasImage}
-              checked={!!image?.[key]}
-              onChange={(e) => writeEffect(key, e.target.checked)}
-            />
-            <span>{label}</span>
-          </label>
-        ))}
-      </div>
-      <div className="theme__bgimg-actions">
-        <button
-          className="btn btn--ghost"
-          disabled={!activeSlide.background}
-          onClick={() => onChange('')}
-        >
-          Inherit
-        </button>
-        <button
-          className="btn btn--ghost"
-          disabled={!explicitImage && !image}
-          onClick={() => {
-            setUrl('')
-            onChange('bg-default')
-          }}
-        >
-          Remove
-        </button>
-      </div>
-      {uploading && <div className="modal__note">Uploading...</div>}
-      {error && <div className="modal__error">{error}</div>}
     </div>
   )
 }
