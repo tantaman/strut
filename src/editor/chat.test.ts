@@ -11,10 +11,13 @@ import type { StrutStore } from '../rindle/client'
 // sanitized at render, see shared/chat.ts). Whatever the client sends, the server trims it before the model.
 describe('clampChatRequest', () => {
   it('keeps the MOST RECENT maxMessages turns (trims the head, not the tail)', () => {
-    const messages = Array.from({ length: CHAT_LIMITS.maxMessages + 5 }, (_, i) => ({
-      role: i % 2 === 0 ? ('user' as const) : ('assistant' as const),
-      content: `m${i}`,
-    }))
+    const messages = Array.from(
+      { length: CHAT_LIMITS.maxMessages + 5 },
+      (_, i) => ({
+        role: i % 2 === 0 ? ('user' as const) : ('assistant' as const),
+        content: `m${i}`,
+      }),
+    )
     const out = clampChatRequest({ deckId: 'd', messages, slides: [] })
     expect(out.messages).toHaveLength(CHAT_LIMITS.maxMessages)
     // The last turn (the one being answered) always survives.
@@ -27,7 +30,10 @@ describe('clampChatRequest', () => {
     const out = clampChatRequest({
       deckId: 'd',
       messages: [
-        { role: 'user', content: 'x'.repeat(CHAT_LIMITS.maxContentPerMessage + 50) },
+        {
+          role: 'user',
+          content: 'x'.repeat(CHAT_LIMITS.maxContentPerMessage + 50),
+        },
       ],
       slides: Array.from({ length: CHAT_LIMITS.maxSlides + 10 }, (_, i) => ({
         id: `s${i}`,
@@ -35,7 +41,9 @@ describe('clampChatRequest', () => {
         text: 'y'.repeat(CHAT_LIMITS.maxTextPerSlide + 20),
       })),
     })
-    expect(out.messages[0].content.length).toBe(CHAT_LIMITS.maxContentPerMessage)
+    expect(out.messages[0].content.length).toBe(
+      CHAT_LIMITS.maxContentPerMessage,
+    )
     expect(out.slides).toHaveLength(CHAT_LIMITS.maxSlides)
     expect(out.slides[0].title.length).toBe(CHAT_LIMITS.maxTitle)
     expect(out.slides[0].text.length).toBe(CHAT_LIMITS.maxTextPerSlide)
@@ -135,14 +143,16 @@ describe('sendChat', () => {
   it('appends the user turn and folds the token stream into a done assistant turn', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        sseStreamResponse([
-          'data: {"response":"Hello"}\n\n',
-          'data: {"response":", "}\n\n',
-          'data: {"response":"world"}\n\n',
-          'data: [DONE]\n\n',
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"response":"Hello"}\n\n',
+            'data: {"response":", "}\n\n',
+            'data: {"response":"world"}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        ),
     )
     const { rows, store } = fakeStore()
     await sendChat(store, ctx, '  How does this flow?  ')
@@ -163,12 +173,14 @@ describe('sendChat', () => {
     // The three enqueued chunks split a single logical frame mid-JSON — the reader must buffer.
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        sseStreamResponse([
-          'data: {"resp',
-          'onse":"chunk-split"}\n\ndata: [DONE]\n\n',
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"resp',
+            'onse":"chunk-split"}\n\ndata: [DONE]\n\n',
+          ]),
+        ),
     )
     const { rows, store } = fakeStore()
     await sendChat(store, ctx, 'hi')
@@ -180,10 +192,13 @@ describe('sendChat', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ message: 'Daily AI chat limit reached.' }), {
-          status: 429,
-          headers: { 'content-type': 'application/json' },
-        }),
+        new Response(
+          JSON.stringify({ message: 'Daily AI chat limit reached.' }),
+          {
+            status: 429,
+            headers: { 'content-type': 'application/json' },
+          },
+        ),
       ),
     )
     const { rows, store } = fakeStore()
@@ -217,30 +232,32 @@ describe('sendChat', () => {
 describe('sendChatAction', () => {
   const ctx = { deckId: 'd1', slides: [], history: [] }
 
-  it('streams the reply into content, then dispatches the result-frame action', async () => {
+  it('streams the reply into content, then dispatches the result-frame actions', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        sseStreamResponse([
-          'data: {"response":"Warmed "}\n\n',
-          'data: {"response":"it up."}\n\n',
-          'data: {"result":{"say":"Warmed it up.","action":{"kind":"set_theme","background":"1e1e24"}}}\n\n',
-          'data: [DONE]\n\n',
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"response":"Warmed "}\n\n',
+            'data: {"response":"it up."}\n\n',
+            'data: {"result":{"say":"Warmed it up.","actions":[{"kind":"set_theme","background":"1e1e24"}]}}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        ),
     )
     const { rows, store } = fakeStore()
-    let dispatched: ChatAction | null = null
+    let dispatched: ChatAction[] | null = null
     let noteWhileApplying = ''
-    const dispatch = (action: ChatAction): Promise<DispatchOutcome> => {
-      dispatched = action
+    const dispatch = (actions: ChatAction[]): Promise<DispatchOutcome> => {
+      dispatched = actions
       noteWhileApplying = assistantOf(rows)?.note ?? '' // the row shows the sub-status during the apply
       return Promise.resolve({ ok: true, label: 'AI theme' })
     }
 
     const tip = await sendChatAction(store, ctx, 'make it warmer', dispatch)
 
-    expect(dispatched).toEqual({ kind: 'set_theme', background: '1e1e24' })
+    expect(dispatched).toEqual([{ kind: 'set_theme', background: '1e1e24' }])
     expect(noteWhileApplying).toBe('Applying theme…')
     expect(assistantOf(rows)).toMatchObject({
       role: 'assistant',
@@ -251,17 +268,19 @@ describe('sendChatAction', () => {
     expect(tip).toEqual({ label: 'AI theme' })
   })
 
-  it('renders an advice-only turn (null action) without dispatching', async () => {
+  it('renders an advice-only turn (no actions) without dispatching', async () => {
     const dispatch = vi.fn()
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        sseStreamResponse([
-          'data: {"response":"That flow reads well."}\n\n',
-          'data: {"result":{"say":"That flow reads well.","action":null}}\n\n',
-          'data: [DONE]\n\n',
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"response":"That flow reads well."}\n\n',
+            'data: {"result":{"say":"That flow reads well.","actions":[]}}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        ),
     )
     const { rows, store } = fakeStore()
     const tip = await sendChatAction(store, ctx, 'does this flow?', dispatch)
@@ -276,12 +295,14 @@ describe('sendChatAction', () => {
   it('keeps the reply but errors the turn when the apply fails', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        sseStreamResponse([
-          'data: {"result":{"say":"On it.","action":{"kind":"arrange","instruction":"timeline"}}}\n\n',
-          'data: [DONE]\n\n',
-        ]),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"result":{"say":"On it.","actions":[{"kind":"arrange","instruction":"timeline"}]}}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        ),
     )
     const { rows, store } = fakeStore()
     const dispatch = (): Promise<DispatchOutcome> =>

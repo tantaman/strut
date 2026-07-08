@@ -11,7 +11,7 @@
 // DOMPurify), the same sanitizer the slide surfaces already use.
 //
 // Phase 2 (actionable chat) is now realized in shared/chatAction.ts (the `Action` union + the
-// `normalizeAction` firewall) and the `/api/chat/act` route — see AI_CHAT_TOOLS_PLAN.md. The advisor here
+// `normalizeActions` firewall) and the `/api/chat/act` route — see AI_CHAT_TOOLS_PLAN.md. The advisor here
 // stays prose-only; the Edit lane is a separate structured pass. The action types are re-exported below so
 // chat callers have one import surface.
 

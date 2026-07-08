@@ -74,6 +74,27 @@ export class History {
     })
   }
 
+  /** Drain this history's whole undo stack into ONE atomic command (and reset it), or null if empty. Unlike
+   *  `batch` — which collects only SYNCHRONOUS pushes — this lets an ASYNC multi-step apply record each step
+   *  into a throwaway History instance, then fold the lot into a single parent undo. The returned command's
+   *  undo reverses the steps in reverse order; its redo replays them forward. */
+  drain = (label: string): Command | null => {
+    const collected = this.undoStack
+    this.undoStack = []
+    this.redoStack = []
+    this.emit()
+    if (collected.length === 0) return null
+    return {
+      label,
+      undo: () => {
+        for (let i = collected.length - 1; i >= 0; i--) collected[i].undo()
+      },
+      redo: () => {
+        for (const c of collected) c.redo()
+      },
+    }
+  }
+
   undo = (): void => {
     const cmd = this.undoStack.pop()
     if (!cmd) return
