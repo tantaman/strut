@@ -88,19 +88,117 @@ export function componentsFromRows(
   return rows.map(componentFromRow).sort((a, b) => a.z_order - b.z_order)
 }
 
-// ---- shape catalog (subset of spec §6; currentColor lets `fill` drive the color) ----------------
+// ---- shape catalog (Excalidraw-style set) --------------------------------------------------------
 
+// Box shapes: an outlined SVG stretched to the component box (`preserveAspectRatio="none"`) — a
+// transparent fill and a `currentColor` stroke, so the `fill` field drives the outline color exactly
+// as it drives the stroke shapes below. `vector-effect:non-scaling-stroke` keeps the outline crisp at
+// any box size (stroke-width matches STROKE_W). Mirrors Excalidraw's defaults: core primitives, no
+// fill, thin ink outline.
+const BOX_STROKE = `fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" vector-effect="non-scaling-stroke"`
 export const SHAPES: Record<string, string> = {
-  square: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="currentColor"/></svg>`,
-  circle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" fill="currentColor"/></svg>`,
-  triangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 98,98 2,98" fill="currentColor"/></svg>`,
-  hexagon: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="25,3 75,3 100,50 75,97 25,97 0,50" fill="currentColor"/></svg>`,
-  pentagon: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 98,38 79,97 21,97 2,38" fill="currentColor"/></svg>`,
-  star: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,2 61,38 98,38 68,60 79,96 50,74 21,96 32,60 2,38 39,38" fill="currentColor"/></svg>`,
-  heart: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50,88 L12,50 A20,20 0 0 1 50,24 A20,20 0 0 1 88,50 Z" fill="currentColor"/></svg>`,
+  rectangle: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="0" y="0" width="100" height="100" ${BOX_STROKE}/></svg>`,
+  diamond: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 100,50 50,100 0,50" ${BOX_STROKE}/></svg>`,
+  ellipse: `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="50" ry="50" ${BOX_STROKE}/></svg>`,
 }
 
 export const SHAPE_NAMES = Object.keys(SHAPES)
+
+// Stroke shapes (line, arrow, freehand draw) can't be static: they're baked at creation from the
+// captured pointer geometry into a real-coordinate SVG. `vector-effect:non-scaling-stroke` keeps the
+// stroke crisp at any box size and `currentColor` lets the `fill` field drive the stroke color (just
+// as it drives the fill of the box shapes above).
+export function isStrokeShape(name: string): boolean {
+  return name === 'arrow' || name === 'line' || name === 'draw'
+}
+
+// The shape-menu order + implicit keyboard shortcut (index 0 → key "2", mirroring Excalidraw's 2–7).
+export const SHAPE_TOOLS = [
+  'rectangle',
+  'diamond',
+  'ellipse',
+  'arrow',
+  'line',
+  'draw',
+] as const
+export type ShapeTool = (typeof SHAPE_TOOLS)[number]
+
+/** Default color for a freshly-drawn shape — Excalidraw's dark ink, shared by outlined box shapes and
+ *  stroke shapes alike (the `fill` field is the stroke color for both). Stored bare (no `#`). */
+export const DEFAULT_SHAPE_FILL = '1e1e1e'
+
+const STROKE_W = 4
+type Pt = { x: number; y: number }
+const r1 = (n: number) => Math.round(n * 10) / 10
+
+// The inner SVG body for a stroke shape, in the box's local coordinate space (0..w, 0..h).
+function strokeBody(name: string, pts: Pt[], w: number, h: number): string {
+  const stroke = `stroke="currentColor" stroke-width="${STROKE_W}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"`
+  if (name === 'draw') {
+    if (pts.length < 2) {
+      const p = pts[0] ?? { x: w / 2, y: h / 2 }
+      return `<circle cx="${r1(p.x)}" cy="${r1(p.y)}" r="${STROKE_W / 2}" fill="currentColor"/>`
+    }
+    // Quadratic smoothing: each vertex is a control point, midpoints are the on-curve joins.
+    let d = `M ${r1(pts[0].x)} ${r1(pts[0].y)}`
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2
+      const my = (pts[i].y + pts[i + 1].y) / 2
+      d += ` Q ${r1(pts[i].x)} ${r1(pts[i].y)} ${r1(mx)} ${r1(my)}`
+    }
+    const last = pts[pts.length - 1]
+    d += ` L ${r1(last.x)} ${r1(last.y)}`
+    return `<path d="${d}" fill="none" ${stroke}/>`
+  }
+  // line / arrow — the segment from the first to the last captured point.
+  const a = pts[0]
+  const b = pts[pts.length - 1]
+  const line = `<line x1="${r1(a.x)}" y1="${r1(a.y)}" x2="${r1(b.x)}" y2="${r1(b.y)}" ${stroke}/>`
+  if (name === 'line') return line
+  // arrow: an open "V" head at the end point, sized to the segment but clamped.
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len = Math.hypot(dx, dy) || 1
+  const ux = dx / len
+  const uy = dy / len
+  const head = Math.max(10, Math.min(28, len * 0.28))
+  const px = -uy // perpendicular
+  const py = ux
+  const spread = 0.55
+  const baseX = b.x - ux * head
+  const baseY = b.y - uy * head
+  const w1 = `${r1(baseX + px * head * spread)},${r1(baseY + py * head * spread)}`
+  const w2 = `${r1(baseX - px * head * spread)},${r1(baseY - py * head * spread)}`
+  return `${line}<polyline points="${w1} ${r1(b.x)},${r1(b.y)} ${w2}" fill="none" ${stroke}/>`
+}
+
+/** Bake a stroke shape from raw slide-coordinate points into a component box + SVG markup. The box is
+ *  the points' bounding box, padded so a near-axis-aligned line stays grabbable and the viewBox never
+ *  goes degenerate. Local coords are baked into a real-size viewBox so the stroke reads at ~STROKE_W
+ *  px regardless of later scaling. */
+export function strokeGeometry(
+  name: string,
+  pts: Pt[],
+): { x: number; y: number; w: number; h: number; markup: string } {
+  const xs = pts.map((p) => p.x)
+  const ys = pts.map((p) => p.y)
+  let minX = Math.min(...xs)
+  let minY = Math.min(...ys)
+  let w = Math.max(...xs) - minX
+  let h = Math.max(...ys) - minY
+  const PAD = 14
+  if (w < PAD) {
+    minX -= (PAD - w) / 2
+    w = PAD
+  }
+  if (h < PAD) {
+    minY -= (PAD - h) / 2
+    h = PAD
+  }
+  const local = pts.map((p) => ({ x: p.x - minX, y: p.y - minY }))
+  const markup = `<svg viewBox="0 0 ${r1(w)} ${r1(h)}" preserveAspectRatio="none">${strokeBody(name, local, w, h)}</svg>`
+  return { x: minX, y: minY, w, h, markup }
+}
 
 // ---- deck text theme ------------------------------------------------------------------------------
 
@@ -165,44 +263,68 @@ export function resolveTheme(
   }
 }
 
+// ---- theme palette (spec §8.2) -------------------------------------------------------------------
+// A curated, named hue set is the single source of truth for the deck's default color stack. Each
+// hue carries BOTH the slide-card color and the deck `surface` color (the "table" the card floats
+// on — a lighter sibling of the same hue). The two token records (BG_COLORS / SURFACE_COLORS) and
+// the picker swatch lists all derive from it, so a card color and its surface can't drift apart and
+// the picker can never offer a hue the resolver doesn't know. Values are Open Color, matching the
+// text/shape swatches (COLOR_SWATCHES) so the whole palette reads as one system.
+export interface ThemeHue {
+  /** Stable token id: the slide-card class is `bg-<key>`, the surface class `bg-surf-<key>`. */
+  key: string
+  /** Human label shown in the picker. */
+  name: string
+  /** Slide-card background. */
+  card: string
+  /** Deck surface (the table behind the card) — a lighter step of the same hue. */
+  surface: string
+}
+
+export const THEME_HUES: ThemeHue[] = [
+  // Neutrals — the ink/paper anchors
+  { key: 'ink', name: 'Ink', card: '#1e1e24', surface: '#2b2b33' },
+  { key: 'white', name: 'White', card: '#ffffff', surface: '#f1f3f5' },
+  { key: 'smoke', name: 'Smoke', card: '#dee2e6', surface: '#f1f3f5' },
+  // Warm
+  { key: 'red', name: 'Red', card: '#c92a2a', surface: '#e03131' },
+  { key: 'orange', name: 'Orange', card: '#e8590c', surface: '#fd7e14' },
+  { key: 'yellow', name: 'Yellow', card: '#ffd43b', surface: '#ffe066' },
+  // Green
+  { key: 'green', name: 'Green', card: '#2f9e44', surface: '#40c057' },
+  { key: 'teal', name: 'Teal', card: '#099268', surface: '#12b886' },
+  // Cool
+  { key: 'blue', name: 'Blue', card: '#1971c2', surface: '#228be6' },
+  { key: 'indigo', name: 'Indigo', card: '#3b5bdb', surface: '#4c6ef5' },
+  { key: 'violet', name: 'Violet', card: '#6741d9', surface: '#7950f2' },
+  { key: 'pink', name: 'Pink', card: '#d6336c', surface: '#e64980' },
+]
+
 // ---- background / surface resolution (spec §8.6, simplified) -------------------------------------
 
+/** Slide-card colors: the white default plus one entry per hue, keyed `bg-<key>`. */
 const BG_COLORS: Record<string, string> = {
   'bg-default': '#ffffff',
-  'bg-black': '#222222',
-  'bg-light': '#ffffff',
-  'bg-smoke': '#dddddd',
-  'bg-orange': '#774040',
-  'bg-yellow': '#d1b377',
-  'bg-grass': '#597847',
-  'bg-darkgreen': '#134952',
-  'bg-sky': '#515e99',
-  'bg-lavender': '#443c4d',
-  'bg-purple': '#6c478f',
-  'bg-salmon': '#c98d8d',
+  ...Object.fromEntries(THEME_HUES.map((h) => [`bg-${h.key}`, h.card])),
 }
 
-export const BACKGROUND_SWATCHES = Object.keys(BG_COLORS).filter(
-  (k) => k !== 'bg-default',
+/** Swatch tokens for the slide-background picker (excludes the always-present `bg-default`). */
+export const BACKGROUND_SWATCHES = THEME_HUES.map((h) => ({
+  key: `bg-${h.key}`,
+  name: h.name,
+}))
+
+// Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Keyed `bg-surf-<key>`;
+// no default here (`bg-default` resolves to SURFACE_DEFAULT) and no transparent (surfaces are the
+// bottom layer).
+const SURFACE_COLORS: Record<string, string> = Object.fromEntries(
+  THEME_HUES.map((h) => [`bg-surf-${h.key}`, h.surface]),
 )
 
-// Surfaces — the deck-wide outer "table" below each slide card (spec §8.2). Flat (gradients shipped
-// flat in old-master). No transparent (surfaces are the bottom layer).
-const SURFACE_COLORS: Record<string, string> = {
-  'bg-surf-grad-black': '#333333',
-  'bg-surf-grad-light': '#ffffff',
-  'bg-surf-grad-smoke': '#eeeeee',
-  'bg-surf-grad-orange': '#945353',
-  'bg-surf-grad-yellow': '#cfb98c',
-  'bg-surf-grad-grass': '#6c855d',
-  'bg-surf-grad-darkgreen': '#4a939e',
-  'bg-surf-grad-sky': '#5e699c',
-  'bg-surf-grad-lavender': '#554b61',
-  'bg-surf-grad-purple': '#775796',
-  'bg-surf-grad-salmon': '#cfa2a2',
-}
-
-export const SURFACE_SWATCHES = Object.keys(SURFACE_COLORS)
+export const SURFACE_SWATCHES = THEME_HUES.map((h) => ({
+  key: `bg-surf-${h.key}`,
+  name: h.name,
+}))
 
 // The default surface "table": a subtle radial gray (old-master `bg-default`).
 const SURFACE_DEFAULT = 'radial-gradient(circle at 50% 28%, #3a3a40, #18181b)'

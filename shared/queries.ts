@@ -78,6 +78,16 @@ export const deckSharesQuery = defineQuery(
   ({ deckId }: { deckId: string }) => q.deck_share.where.deck_id(deckId),
 )
 
+// Research notes for a whole deck — one slide_notes row per slide that has notes, keyed off deck_id.
+// A SEPARATE subscription from deckDetailQuery on purpose: the note docs can be large, so they load
+// only while the Research surface subscribes to this query (not on every deck open). Un-gated like the
+// rest (reads the already-scoped local store); the server twin (server/queries.ts) gates by deck access.
+export const deckNotesQuery = defineQuery(
+  'deckNotes',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }) => q.slide_notes.where.deck_id(deckId),
+)
+
 // A user's profile (display name). World-readable to any authenticated principal — names aren't secret.
 export const profileQuery = defineQuery(
   'profile',
@@ -110,5 +120,6 @@ export const allQueries = [
   deckDetailQuery,
   publicDeckDetailQuery,
   deckSharesQuery,
+  deckNotesQuery,
   profileQuery,
 ]

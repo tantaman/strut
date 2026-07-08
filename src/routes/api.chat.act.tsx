@@ -1,29 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { ChatRequest } from '../../shared/chat'
+import { FONT_FAMILIES } from '../config'
+import type { ChatActRequest } from '../../shared/chatAction'
 
-// "✨ Chat" endpoint. Takes a running conversation + a deck digest and STREAMS a prose answer (server/chat.ts
-// → Workers AI SSE). Same two boundaries as /api/arrange and /api/generate:
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can SEE the Chat
-//      panel (the client renders a sign-in nudge) but cannot spend the app's inference budget. The client
-//      gate is UX only; THIS is the real one, mirroring server/session.ts's trust posture.
-//   2. COST BOUND — the app pays for inference, so two layers cap it: a cheap per-isolate burst throttle
-//      (below), and the AUTHORITATIVE durable daily quota in server/quota.ts (chat_usage, D1), consumed
-//      before the model call and refunded ONLY if that call fails before any token streams. Plus the
-//      CHAT_LIMITS caps in the adapter.
-// We do NOT verify the user owns `deckId` here: the endpoint only READS a client-supplied digest and returns
-// prose — advisor chat can't mutate the deck (Phase 1). The only thing it spends is inference, gated by auth
-// + quota. The digest may name slides the user can see; that's their own deck's content, sent by their own
-// client.
-//
-// Streaming contract: unlike arrange/generate (one-shot JSON), the OK response is `text/event-stream` — the
-// raw Workers AI SSE, passed through untouched; the client parses `data: {"response":"…"}` frames. Errors
-// (auth/throttle/quota/unavailable) are still one-shot JSON so the client can branch on them BEFORE it
-// starts reading the stream.
+// "✨ Chat — Edit lane" endpoint. Takes a conversation + deck grounding and STREAMS the turn (server/chatAct.ts
+// chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out, then one terminal
+// `data: {"result":{say,action}}` frame carries the validated change the client applies. Like the advisor
+// twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot JSON so the client can
+// branch BEFORE it reads the stream. Same two boundaries as /api/arrange and /api/generate:
+//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path;
+//      a BYO OpenRouter caller (they pay) is allowed. Mirrors server/session.ts's trust posture.
+//   2. COST BOUND — the app pays for inference, so a per-isolate burst throttle + the AUTHORITATIVE durable
+//      daily quota (server/quota.ts) cap it. An Edit turn is one model call, so it meters exactly like an
+//      advisor turn — it shares the SAME chat quota bucket (consumeChatQuota).
+// We do NOT verify the user owns `deckId` here: the result is only a proposed change; APPLYING it flows
+// through the authoritative slide/deck mutators (server/rindle-api.ts withSlideEditable/withDeckEditable),
+// which independently reject edits the user can't make. The only thing this endpoint spends is inference.
 
-// Per-isolate rolling-window burst throttle — a cheap brake on rapid-fire turns that also spares the durable
-// quota a D1 write per hammered request. Chat is conversational, so bursts are natural; the window is a
-// touch roomier than arrange's. Best-effort (doesn't survive isolate recycling); the durable per-user daily
-// quota (server/quota.ts) is the real cost ceiling.
+// Per-isolate rolling-window burst throttle (mirrors /api/chat). Best-effort; the durable daily quota is
+// the real ceiling.
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 20
 const hits = new Map<string, number[]>()
@@ -46,7 +40,7 @@ function json(data: unknown, status: number): Response {
   })
 }
 
-export const Route = createFileRoute('/api/chat')({
+export const Route = createFileRoute('/api/chat/act')({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -61,8 +55,7 @@ export const Route = createFileRoute('/api/chat')({
         const choice = await resolveModel(account.id)
         const byo = choice.kind === 'openrouter'
 
-        // App-paid inference stays member-only (a guest can't spend the app's budget); BYO is open to any
-        // session, guest or member, because the USER pays (OPENROUTER_PLAN.md "Decisions").
+        // App-paid inference stays member-only; BYO is open to any session because the USER pays.
         if (!byo && account.isAnonymous) {
           return json({ error: 'sign_in_required' }, 401)
         }
@@ -79,7 +72,7 @@ export const Route = createFileRoute('/api/chat')({
         if (typeof body !== 'object' || body === null) {
           return json({ error: 'bad_request' }, 400)
         }
-        const b = body as Partial<ChatRequest>
+        const b = body as Partial<ChatActRequest>
         if (
           typeof b.deckId !== 'string' ||
           !Array.isArray(b.messages) ||
@@ -88,9 +81,8 @@ export const Route = createFileRoute('/api/chat')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — ONLY for the app-paid path. A BYO turn spends the user's OWN OpenRouter
-        // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
-        // Consumed (one unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
+        // Durable daily quota — ONLY for the app-paid path, and the SAME bucket as the advisor (an Edit
+        // turn is a chat turn). Consumed BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
         if (!byo) {
           const { consumeChatQuota } = await import('../../server/quota')
@@ -98,7 +90,7 @@ export const Route = createFileRoute('/api/chat')({
           try {
             quota = await consumeChatQuota(account.id, now)
           } catch (err) {
-            console.error('[chat] quota check failed:', err)
+            console.error('[chat/act] quota check failed:', err)
             return json({ error: 'internal' }, 500)
           }
           if (!quota.allowed) {
@@ -112,11 +104,14 @@ export const Route = createFileRoute('/api/chat')({
           }
         }
 
-        const { chatStream, ChatUnavailableError } =
-          await import('../../server/chat')
+        const { chatActStream, ChatActUnavailableError } =
+          await import('../../server/chatAct')
         try {
-          const stream = await chatStream(b as ChatRequest, choice)
-          // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client.
+          const stream = await chatActStream(b as ChatActRequest, choice, {
+            fonts: FONT_FAMILIES,
+          })
+          // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client: it
+          // types the reply out of `{response}` frames and applies the terminal `{result}` frame.
           return new Response(stream, {
             status: 200,
             headers: {
@@ -131,10 +126,10 @@ export const Route = createFileRoute('/api/chat')({
             const { refundChatQuota } = await import('../../server/quota')
             await refundChatQuota(account.id, now).catch(() => {})
           }
-          if (err instanceof ChatUnavailableError) {
+          if (err instanceof ChatActUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }
-          console.error('[chat] failed:', err)
+          console.error('[chat/act] failed:', err)
           return json({ error: 'internal' }, 500)
         }
       },

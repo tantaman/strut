@@ -9,16 +9,22 @@ import {
   AlignLeft,
   AlignRight,
   ChevronDown,
+  Circle,
   Code2,
+  Diamond,
   Download,
   FileText,
   Image as ImageIcon,
   Link2,
+  Minus,
+  MoveRight,
   Palette,
+  Pencil,
   Play,
   Redo2,
   Shapes,
   Sparkles,
+  Square,
   SquareCode,
   Type,
   Undo2,
@@ -26,12 +32,8 @@ import {
   Globe,
   Share2,
 } from 'lucide-react'
-import {
-  DEFAULT_FONT,
-  DEFAULT_FONT_SIZE,
-  FONT_FAMILIES,
-  newId,
-} from '../config'
+import type { LucideIcon } from 'lucide-react'
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadArtifact, uploadImage } from './upload'
 import { exportDeckHTML, exportDeckJSON } from './deckIO'
@@ -40,17 +42,28 @@ import { useEditor } from './EditorState'
 import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
+import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
 import {
   BACKGROUND_SWATCHES,
   resolveBackground,
   resolveSurface,
-  SHAPE_NAMES,
-  SHAPES,
+  SHAPE_TOOLS,
   SURFACE_SWATCHES,
 } from './types'
-import { cssFontFamily, parseVideo } from './render'
+import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
+
+// Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
+// keyboard shortcut wired up in Stage.
+const SHAPE_TOOL_ICONS: Record<string, LucideIcon> = {
+  rectangle: Square,
+  diamond: Diamond,
+  ellipse: Circle,
+  arrow: MoveRight,
+  line: Minus,
+  draw: Pencil,
+}
 
 interface DeckRow {
   id: string
@@ -260,14 +273,15 @@ export function Header({
   }
 
   // Theme edits deliberately do NOT close the popover — the user usually tweaks several
-  // defaults (bg, surface, fonts) in one visit.
+  // defaults (bg, surface, fonts) in one visit. Each commit goes through applyThemePatch so it lands on
+  // Cmd/Z as one undo (closing the pre-existing no-undo gap; shared with the AI Edit lane's set_theme).
   function setBg(scope: 'bg' | 'surface', value: string) {
     if (!deck) return
-    mutate.setDeckTheme({
-      id: deck.id,
-      [scope === 'bg' ? 'background' : 'surface']: value,
-      now: Date.now(),
-    })
+    applyThemePatch(
+      scope === 'bg' ? { background: value } : { surface: value },
+      { mutate, history, deck },
+      scope === 'bg' ? 'Background color' : 'Surface color',
+    )
   }
 
   function setTextTheme(
@@ -279,20 +293,36 @@ export function Header({
     >,
   ) {
     if (!deck) return
-    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
+    applyThemePatch(patch, { mutate, history, deck }, 'Text theme')
   }
 
   function setDeckAlign(align: string) {
     if (!deck) return
-    mutate.setDeckTheme({ id: deck.id, text_align: align, now: Date.now() })
+    applyThemePatch(
+      { text_align: align },
+      { mutate, history, deck },
+      'Text alignment',
+    )
   }
 
   function setDefaultMarkdown(on: boolean) {
     if (!deck) return
-    mutate.setDeckTheme({
-      id: deck.id,
-      default_slide_mode: on ? 'markdown' : '',
-      now: Date.now(),
+    // default_slide_mode is an enum column (not covered by applyThemePatch's string patch) — one undo
+    // by hand so this toggle is also reversible.
+    const before = deck.default_slide_mode === 'markdown' ? 'markdown' : ''
+    const next = on ? 'markdown' : ''
+    if (before === next) return
+    const apply = (m: '' | 'markdown') =>
+      mutate.setDeckTheme({
+        id: deck.id,
+        default_slide_mode: m,
+        now: Date.now(),
+      })
+    apply(next)
+    history.push({
+      label: 'Default slide mode',
+      redo: () => apply(next),
+      undo: () => apply(before),
     })
   }
 
@@ -458,25 +488,23 @@ export function Header({
                 </button>
                 {menu === 'shapes' && (
                   <div className="popover" style={{ top: '110%', left: 0 }}>
-                    <div
-                      className="swatches"
-                      style={{ gridTemplateColumns: 'repeat(4, 30px)' }}
-                    >
-                      {SHAPE_NAMES.map((n) => (
-                        <button
-                          key={n}
-                          className="swatch"
-                          title={n}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            color: '#3498db',
-                            padding: 3,
-                          }}
-                          onClick={() => addShape(n)}
-                          dangerouslySetInnerHTML={{ __html: SHAPES[n] }}
-                        />
-                      ))}
+                    <div className="shape-menu">
+                      {SHAPE_TOOLS.map((n, i) => {
+                        const Icon = SHAPE_TOOL_ICONS[n]
+                        return (
+                          <button
+                            key={n}
+                            className={`shape-menu__tool${
+                              editor.pendingShape === n ? ' is-active' : ''
+                            }`}
+                            title={`${n} (${i + 2})`}
+                            onClick={() => addShape(n)}
+                          >
+                            <Icon size={18} />
+                            <span className="shape-menu__key">{i + 2}</span>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -606,6 +634,12 @@ export function Header({
         >
           Overview
         </button>
+        <button
+          className={editor.mode === 'research' ? 'is-active' : ''}
+          onClick={() => editor.setMode('research')}
+        >
+          Research
+        </button>
       </div>
 
       <button
@@ -687,11 +721,7 @@ function ThemeFontSelect({
         onChange(e.target.value === DEFAULT_FONT ? '' : e.target.value)
       }
     >
-      {FONT_FAMILIES.map((f) => (
-        <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
-          {f}
-        </option>
-      ))}
+      <FontOptions />
     </select>
   )
 }

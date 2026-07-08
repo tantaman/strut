@@ -425,8 +425,10 @@ Each selected component shows handles wired to delta-drag controls:
   (prompt for URL, forces `http://`), **Font family**, **Font size**, **Color** (Spectrum picker),
   **Clear formatting**. Underline / justify-right / H3 heading exist in the library but aren't in the
   default set.
-- **Font families:** Lato (default), League Gothic, Droid Sans Mono, Ubuntu, Abril Fatface, Hammersmith
-  One, Fredoka One, Gorditas, Press Start 2P.
+- **Font families:** a curated set organized by role (defined once in `config.ts` `FONTS`, which also
+  derives the Google Fonts `<link>` and the picker `<optgroup>`s): _sans_ — Inter, Lato (default), DM
+  Sans, Space Grotesk; _serif_ — Fraunces, Playfair Display, Lora; _display_ — Anton, Archivo Black;
+  _mono_ — JetBrains Mono; _playful_ — Fredoka, Press Start 2P.
 - **Font sizes:** 144, 96, 72 (default), 64, 48, 36, 24, 16, 12, 8. (Font size sets the model `size`
   attribute directly, not via execCommand.)
 - Formatting uses legacy `<b>/<i>/<font>` tags (`styleWithCSS` off) so text serializes as the renderer
@@ -515,16 +517,33 @@ can be set **deck-wide** ("All Slides") or **per-slide** ("Selected Slide").
 
 ### 8.2 Palettes
 
-**Backgrounds** (solid slide-card colors): black `#222`, light `white`, smoke `#DDD`, orange `#774040`,
-yellow `#D1B377`, grass `#597847`, dark-green `#134952`, sky `#515E99`, lavender `#443C4D`, purple
-`#6C478F`, salmon `#C98D8D`. Plus special values: `bg-default` (radial gray gradient / "inherit"),
-`bg-transparent` (show surface through), `img:<url>` (image), `bg-custom-<hex>` (custom color).
+A single curated hue set — `THEME_HUES` in `editor/types.ts` — is the source of truth for the default
+color stack. Each entry carries a stable `key`, a human `name`, the slide-card `card` color, and the
+deck `surface` color (a lighter sibling of the same hue). The background/surface token records and the
+picker swatch lists all derive from it, so a card and its surface can't drift apart and the picker can
+never offer a hue the resolver doesn't know. Values are Open Color, matching the text/shape swatches
+(§8.5) so the whole palette reads as one system.
 
-**Surfaces** (the table): `bg-surf-grad-*` variants — black `#333`, light `#FFF`, smoke `#EEE`, orange
-`#945353`, yellow `#cfb98c`, grass `#6c855d`, dark-green `#4a939e`, sky `#5e699c`, lavender `#554b61`,
-purple `#775796`, salmon `#cfa2a2`. Surfaces support `bg-default`, `img:`, and `bg-custom` but **not**
-transparent (they're the bottom layer). (Swatch names don't match their hex; gradients are commented out
-— surfaces ship flat.)
+| key | name | card | surface |
+| --- | --- | --- | --- |
+| `ink` | Ink | `#1e1e24` | `#2b2b33` |
+| `white` | White | `#ffffff` | `#f1f3f5` |
+| `smoke` | Smoke | `#dee2e6` | `#f1f3f5` |
+| `red` | Red | `#c92a2a` | `#e03131` |
+| `orange` | Orange | `#e8590c` | `#fd7e14` |
+| `yellow` | Yellow | `#ffd43b` | `#ffe066` |
+| `green` | Green | `#2f9e44` | `#40c057` |
+| `teal` | Teal | `#099268` | `#12b886` |
+| `blue` | Blue | `#1971c2` | `#228be6` |
+| `indigo` | Indigo | `#3b5bdb` | `#4c6ef5` |
+| `violet` | Violet | `#6741d9` | `#7950f2` |
+| `pink` | Pink | `#d6336c` | `#e64980` |
+
+**Backgrounds** are keyed `bg-<key>` (solid slide-card colors), plus special values: `bg-default`
+(white card / "inherit"), `bg-transparent` (show surface through), `img:<url>` (image), `bg-custom-<hex>`
+(custom color). **Surfaces** (the table) are keyed `bg-surf-<key>`; they support `bg-default` (a radial
+gray gradient), `img:`, and `bg-custom` but **not** transparent (they're the bottom layer). Surfaces ship
+flat.
 
 ### 8.3 Custom colors & images
 

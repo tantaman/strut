@@ -3,7 +3,7 @@
 // edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
 
 import { memo, useState } from 'react'
-import { DEFAULT_FONT, FONT_FAMILIES, FONT_SIZES } from '../config'
+import { DEFAULT_FONT, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
@@ -12,6 +12,7 @@ import type { AnyComponent, DeckThemeFields } from './types'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
 import { ColorField } from './ColorField'
+import { FontOptions } from './render'
 import { uploadArtifact } from './upload'
 import { buildArtifactModule } from './artifactBuild'
 
@@ -190,11 +191,7 @@ const InspectorPanel = memo(function InspectorPanel({
                   onChange={(e) => editText({ font_family: e.target.value })}
                 >
                   <option value="">Theme · {themeFont}</option>
-                  {FONT_FAMILIES.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
+                  <FontOptions />
                 </select>
               </label>
               <label className="insp__row">
@@ -234,7 +231,7 @@ const InspectorPanel = memo(function InspectorPanel({
 
       {c.kind === 'shape' && (
         <div className="insp__row">
-          <span>Fill</span>
+          <span>Color</span>
           <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
         </div>
       )}

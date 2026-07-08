@@ -13,15 +13,33 @@
 //      re-renders at frame rate, not per token. (`edit` wants the full prior row — we hold `prev`; for a
 //      local table the engine keys by PK so an out-of-order flush still converges — RINDLE_NOTES #21.)
 
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { newId } from '../config'
-import { buildDigest } from './aiArrange'
+import { buildDigest, slideText } from './aiArrange'
+import { dispatchAction } from './aiChatActions'
+import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
+import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
-import { useStore } from '../rindle/RindleProvider'
+import { useMutate, useStore } from '../rindle/RindleProvider'
+import { useHistory } from './UndoProvider'
 import type { StrutStore } from '../rindle/client'
 import type { ChatMessageRow } from '../rindle/localSchema'
+import type { ThemeDeck } from './aiTheme'
 import type { SlideDetail } from './deckDetail'
 import type { ChatRequest, ChatTurn } from '../../shared/chat'
+import type {
+  ChatAction,
+  ChatActRequest,
+  ChatActResult,
+  ChatActSlide,
+  ChatActTheme,
+} from '../../shared/chatAction'
 
 /** A thread row as the UI reads it (a full `chat_message` row). */
 export type ChatMessage = ChatMessageRow
@@ -55,6 +73,66 @@ export function parseSseDelta(line: string): SseEvent | null {
     }
   } catch {
     return null
+  }
+}
+
+/** One parsed Edit-lane SSE line. The Edit stream reuses the advisor's `{response}` prose frames (typed
+ *  out live) but adds a terminal `{result}` frame carrying the server-validated `{ say, action }` — the
+ *  authoritative value to APPLY. `done` marks the `[DONE]` terminator. */
+export interface ActEvent {
+  done: boolean
+  delta: string
+  result: ChatActResult | null
+}
+
+/** Parse ONE Edit-lane SSE line (src/routes/api.chat.act.tsx). Returns null for a line carrying nothing
+ *  (blank / comment / non-`data:` / garbled). `[DONE]` → `{ done: true }`; a `{"result":…}` frame → its
+ *  validated result; a `{"response":"…"}` frame → its prose delta. Pure — unit-tested in chat.test.ts. */
+export function parseActLine(line: string): ActEvent | null {
+  const trimmed = line.trimEnd()
+  if (!trimmed.startsWith('data:')) return null
+  const payload = trimmed.slice('data:'.length).trim()
+  if (!payload) return null
+  if (payload === '[DONE]') return { done: true, delta: '', result: null }
+  try {
+    const obj = JSON.parse(payload) as { response?: unknown; result?: unknown }
+    if (obj.result && typeof obj.result === 'object') {
+      const r = obj.result as { say?: unknown; action?: unknown }
+      return {
+        done: false,
+        delta: '',
+        result: {
+          say: typeof r.say === 'string' ? r.say : '',
+          action: (r.action ?? null) as ChatActResult['action'],
+        },
+      }
+    }
+    return {
+      done: false,
+      delta: typeof obj.response === 'string' ? obj.response : '',
+      result: null,
+    }
+  } catch {
+    return null
+  }
+}
+
+/** The sub-status shown under the streamed reply while an Edit action is being APPLIED — the other silent
+ *  gap, since `generate`/`arrange` make a second round-trip after the prose finishes. */
+export function applyNote(action: ChatAction): string {
+  switch (action.kind) {
+    case 'set_theme':
+      return 'Applying theme…'
+    case 'set_body':
+      return 'Rewriting the slide…'
+    case 'generate':
+      return action.count
+        ? `Generating ${action.count} slides…`
+        : 'Generating slides…'
+    case 'arrange':
+      return 'Rearranging slides…'
+    default:
+      return 'Applying…'
   }
 }
 
@@ -99,6 +177,7 @@ export async function sendChat(
     role: 'user',
     content: text,
     status: 'done',
+    note: '',
     created: now,
   }
   // The assistant turn is stamped 1ms later so it always sorts AFTER its prompting user turn.
@@ -108,6 +187,7 @@ export async function sendChat(
     role: 'assistant',
     content: '',
     status: 'streaming',
+    note: '',
     created: now + 1,
   }
 
@@ -218,6 +298,196 @@ export async function sendChat(
   })
 }
 
+// ---- Edit lane (actionable turn) -------------------------------------------------------------------
+
+/** The extra grounding an Edit-lane turn carries beyond the advisor's SendContext (see
+ *  shared/chatAction.ts): the deck's resolved theme + the active slide's full text. */
+export interface ActionSendContext {
+  deckId: string
+  slides: ChatActRequest['slides']
+  history: ChatTurn[]
+  theme?: ChatActTheme
+  activeSlide?: ChatActSlide
+}
+
+/** Run ONE Edit-lane turn: append the user turn + a working assistant turn, POST /api/chat/act, then STREAM
+ *  the reply into the assistant row's `content` (the `{response}` frames — same live typing as the advisor)
+ *  and DISPATCH the terminal `{result}` frame's action (via the injected `dispatch`, which closes over the
+ *  live mutators + history), showing an "Applying…" note on the row while that apply (possibly a second
+ *  round-trip) runs. Returns the applied action's undo label (for the Undo chip) or null when nothing was
+ *  applied. Never throws — every failure lands as an error row so the UI stays consistent. */
+export async function sendChatAction(
+  store: StrutStore,
+  ctx: ActionSendContext,
+  userText: string,
+  dispatch: (action: ChatAction) => Promise<DispatchOutcome>,
+): Promise<{ label: string } | null> {
+  const text = userText.trim()
+  if (!text) return null
+  const now = Date.now()
+
+  const userRow: ChatMessageRow = {
+    id: newId(),
+    deck_id: ctx.deckId,
+    role: 'user',
+    content: text,
+    status: 'done',
+    note: '',
+    created: now,
+  }
+  // Stamped 1ms later so it always sorts AFTER its prompting user turn. `streaming` shows the thinking
+  // dots until the first token, then the reply types in; `note` carries the apply sub-status.
+  const assistantRow: ChatMessageRow = {
+    id: newId(),
+    deck_id: ctx.deckId,
+    role: 'assistant',
+    content: '',
+    status: 'streaming',
+    note: '',
+    created: now + 1,
+  }
+  await store.writeLocal((tx) => {
+    tx.add('chat_message', userRow)
+    tx.add('chat_message', assistantRow)
+  })
+
+  let current = assistantRow
+  const commit = (patch: Partial<ChatMessageRow>): Promise<void> => {
+    const prev = current
+    const next = { ...current, ...patch }
+    current = next
+    return store.writeLocal((tx) => tx.edit('chat_message', prev, next))
+  }
+
+  let res: Response
+  try {
+    const body: ChatActRequest = {
+      deckId: ctx.deckId,
+      slides: ctx.slides,
+      messages: [...ctx.history, { role: 'user', content: text }],
+      theme: ctx.theme,
+      activeSlide: ctx.activeSlide,
+    }
+    res = await fetch('/api/chat/act', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body),
+    })
+  } catch {
+    await commit({ status: 'error', content: 'Network error — try again.' })
+    return null
+  }
+
+  if (!res.ok || !res.body) {
+    await commit({ status: 'error', content: await friendlyError(res) })
+    return null
+  }
+
+  // Fold the reply's `{response}` frames into `content` (throttled to a frame, like the advisor) so it types
+  // out live; capture the terminal `{result}` frame — the validated { say, action } we then apply.
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let acc = ''
+  let result: ChatActResult | null = null
+  let frame: number | null = null
+  const canRaf = typeof requestAnimationFrame === 'function'
+  const flush = () => {
+    frame = null
+    void commit({ content: acc, status: 'streaming' })
+  }
+  const schedule = () => {
+    if (frame !== null) return
+    if (canRaf) frame = requestAnimationFrame(flush)
+    else void commit({ content: acc, status: 'streaming' })
+  }
+  const cancel = () => {
+    if (frame !== null && canRaf) cancelAnimationFrame(frame)
+    frame = null
+  }
+
+  try {
+    let streamedDone = false
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+      for (const line of lines) {
+        const ev = parseActLine(line)
+        if (!ev) continue
+        if (ev.done) {
+          streamedDone = true
+          break
+        }
+        if (ev.result) result = ev.result
+        else if (ev.delta) {
+          acc += ev.delta
+          schedule()
+        }
+      }
+      if (streamedDone) break
+    }
+    if (buffer.trim()) {
+      const ev = parseActLine(buffer)
+      if (ev?.result) result = ev.result
+      else if (ev && !ev.done) acc += ev.delta
+    }
+  } catch {
+    cancel()
+    await commit({
+      content: acc || 'The response was interrupted — try again.',
+      status: 'error',
+    })
+    return null
+  }
+  cancel()
+
+  // The result frame's `say` is authoritative (normalized/clamped server-side); fall back to the streamed
+  // prose if the frame never arrived.
+  const say = (result?.say ?? acc).trim()
+  const action = result?.action ?? null
+
+  // Advice-only turn (no action) — render the answer like the advisor would.
+  if (!action) {
+    await commit({ content: say || acc || '(no change needed)', status: 'done' })
+    return null
+  }
+
+  // Apply phase — the reply is already on screen; show what's happening while the apply (for generate /
+  // arrange, a second round-trip) runs, so the turn is never silent.
+  await commit({
+    content: say || acc,
+    note: applyNote(action),
+    status: 'streaming',
+  })
+  let outcome: DispatchOutcome
+  try {
+    outcome = await dispatch(action)
+  } catch {
+    outcome = { ok: false, error: 'Could not apply that change.' }
+  }
+
+  if (outcome.ok) {
+    await commit({
+      content: say || `Done — ${outcome.label.toLowerCase()}.`,
+      note: '',
+      status: 'done',
+    })
+    return { label: outcome.label }
+  }
+  // The model answered but the apply failed (e.g. a delegated /api/arrange error) — keep the answer,
+  // append the reason, mark it errored.
+  await commit({
+    content: (say ? say + '\n\n' : '') + `⚠️ ${outcome.error}`,
+    note: '',
+    status: 'error',
+  })
+  return null
+}
+
 // ---- useChat hook ----------------------------------------------------------------------------------
 
 const EMPTY: readonly ChatMessage[] = []
@@ -225,20 +495,68 @@ const EMPTY: readonly ChatMessage[] = []
 export interface UseChat {
   /** The thread for this deck, in `created` order. Reactive — every `writeLocal` re-renders. */
   messages: readonly ChatMessage[]
-  /** Send a user turn (grounded in the current `slides`). No-op while busy or for empty text. */
+  /** Send an ADVISOR turn (streamed prose, read-only). No-op while busy or for empty text. */
   send: (text: string) => void
-  /** True while an assistant turn is still streaming. */
+  /** Send an EDIT-lane turn: the AI drives ONE deck change (one undo). No-op while busy / empty. */
+  sendEdit: (text: string) => void
+  /** True while an assistant turn is still streaming / an edit is being applied. */
   busy: boolean
   /** Clear the whole thread for this deck (removes every local row). */
   clear: () => void
+  /** After a successful Edit-lane apply, the undo affordance ({ label }); null otherwise. */
+  undoTip: { label: string } | null
+  /** Undo the last Edit-lane change (a shortcut for Cmd/Ctrl+Z) and clear the chip. */
+  undoLast: () => void
+}
+
+/** Extra editor context the Edit lane needs to ground + apply an action: the deck row (for the resolved
+ *  theme + theme before-values) and the currently-active slide (the natural `set_body` target). */
+export interface ChatEditContext {
+  deck?: ThemeDeck | null
+  activeSlide?: SlideDetail | null
+}
+
+/** Build the Edit-lane grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and
+ *  the active slide's FULL body text (so a body rewrite sees the whole slide, not the 240-char digest). */
+function buildActGrounding(
+  deck: ThemeDeck | null,
+  activeSlide: SlideDetail | null,
+): { theme?: ChatActTheme; activeSlide?: ChatActSlide } {
+  const out: { theme?: ChatActTheme; activeSlide?: ChatActSlide } = {}
+  if (deck) {
+    const rt = resolveTheme(deck)
+    out.theme = {
+      background: resolveBackground(undefined, deck.background ?? undefined),
+      surface: resolveSurface(undefined, deck.surface ?? undefined),
+      headingColor: rt.headingColor,
+      bodyColor: rt.bodyColor,
+      headingFont: rt.headingFont,
+      bodyFont: rt.bodyFont,
+    }
+  }
+  if (activeSlide) {
+    out.activeSlide = { id: activeSlide.id, text: slideText(activeSlide) }
+  }
+  return out
 }
 
 /** Read + drive the advisor thread for `deckId`, grounded in the live `slides`. Reads the memory-only
  *  `chat_message` local table off the LIVE store (never the SSR seed store, which doesn't know the table),
  *  so it's empty until the client boots and then fully reactive. `slides` is passed so each `send` rebuilds
  *  a fresh digest — the model always reasons about the CURRENT deck. */
-export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
+export function useChat(
+  deckId: string,
+  slides: SlideDetail[],
+  edit?: ChatEditContext,
+): UseChat {
   const store = useStore()
+  // The Edit lane routes applied actions through the AUTHORITATIVE store (unlike the advisor thread, which
+  // is local-only) — grab the live mutators + undo history the dispatcher needs.
+  const mutate = useMutate()
+  const history = useHistory()
+  const deck = edit?.deck ?? null
+  const activeSlide = edit?.activeSlide ?? null
+  const [undoTip, setUndoTip] = useState<{ label: string } | null>(null)
 
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
   const view = useMemo(() => {
@@ -267,27 +585,64 @@ export function useChat(deckId: string, slides: SlideDetail[]): UseChat {
     (text: string) => {
       if (!store || busy || !text.trim()) return
       // History = only settled turns — an in-flight/errored assistant row isn't real model context.
-      const history: ChatTurn[] = messages
+      const convo: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
-      track('chat:sent', { turn: history.length })
+      track('chat:sent', { turn: convo.length })
       void sendChat(
         store,
-        { deckId, slides: buildDigest(slides), history },
+        { deckId, slides: buildDigest(slides), history: convo },
         text,
       )
     },
     [store, busy, messages, deckId, slides],
   )
 
+  const sendEdit = useCallback(
+    (text: string) => {
+      if (!store || busy || !text.trim()) return
+      // History = only settled turns — an in-flight/errored assistant row isn't real model context.
+      const convo: ChatTurn[] = messages
+        .filter((m) => m.status === 'done')
+        .map((m) => ({ role: m.role, content: m.content }))
+      const grounding = buildActGrounding(deck, activeSlide)
+      // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
+      // request carries the trimmed digest.
+      const dctx: DispatchCtx = { deckId, slides, deck, mutate, history }
+      setUndoTip(null)
+      track('chat:edit', { slides: slides.length })
+      void sendChatAction(
+        store,
+        {
+          deckId,
+          slides: buildDigest(slides),
+          history: convo,
+          theme: grounding.theme,
+          activeSlide: grounding.activeSlide,
+        },
+        text,
+        (action) => dispatchAction(action, dctx),
+      ).then((tip) => {
+        if (tip) setUndoTip(tip)
+      })
+    },
+    [store, busy, messages, deckId, slides, deck, activeSlide, mutate, history],
+  )
+
+  const undoLast = useCallback(() => {
+    history.undo()
+    setUndoTip(null)
+  }, [history])
+
   const clear = useCallback(() => {
     if (!store || !view) return
     const rows = view.data
     if (rows.length === 0) return
+    setUndoTip(null)
     void store.writeLocal((tx) => {
       for (const r of rows) tx.remove('chat_message', r)
     })
   }, [store, view])
 
-  return { messages, send, busy, clear }
+  return { messages, send, sendEdit, busy, clear, undoTip, undoLast }
 }

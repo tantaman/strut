@@ -28,9 +28,13 @@ import {
 import {
   backgroundImage,
   composeBackground,
+  DEFAULT_SHAPE_FILL,
+  isStrokeShape,
   resolveBackground,
   resolveSurface,
   SHAPES,
+  SHAPE_TOOLS,
+  strokeGeometry,
   textTypeOf,
 } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
@@ -107,12 +111,13 @@ export function Stage({
     w: number
     h: number
   }>(null)
-  // Live preview box (slide coords) while sweeping out a shape with the armed shape tool.
+  // Live preview (slide coords + baked markup) while drawing a shape with the armed shape tool.
   const [shapeDraft, setShapeDraft] = useState<null | {
     x: number
     y: number
     w: number
     h: number
+    markup: string
   }>(null)
 
   const bg = resolveBackground(slideData.background, deck?.background)
@@ -143,11 +148,31 @@ export function Stage({
     return () => window.removeEventListener('keydown', onKey)
   }, [editor, getComponents, mutate])
 
-  // Esc disarms the shape tool (back to Select), mirroring tldraw/Figma.
+  // Shape-tool keyboard shortcuts (Excalidraw parity): 1 or Esc = Select, 2–7 = arm a shape tool.
+  // Guarded so digits typed into a field or the text editor don't hijack the canvas.
   useEffect(() => {
-    if (!editor.pendingShape) return
+    if (!editor.canEdit) return
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') editor.setPendingShape(null)
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key === 'Escape') {
+        editor.setPendingShape(null)
+        return
+      }
+      const t = e.target as HTMLElement | null
+      if (
+        t &&
+        (t.isContentEditable ||
+          t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.tagName === 'SELECT')
+      )
+        return
+      if (e.key === '1') editor.setPendingShape(null)
+      else if (e.key >= '2' && e.key <= '7') {
+        // '2'..'7' → SHAPE_TOOLS[0..5]; the range guard keeps the index in-bounds.
+        e.preventDefault()
+        editor.setPendingShape(SHAPE_TOOLS[Number(e.key) - 2])
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -560,6 +585,8 @@ export function Stage({
     y: number,
     w: number,
     h: number,
+    markup: string,
+    fill: string,
   ) {
     const id = newId()
     const addArgs = {
@@ -569,8 +596,8 @@ export function Stage({
       y,
       z_order: Math.floor(Date.now() / 1000),
       shape: name,
-      markup: SHAPES[name] ?? '',
-      fill: '3498db',
+      markup,
+      fill,
     }
     const size = {
       id,
@@ -598,14 +625,9 @@ export function Stage({
   // Sweep out the new shape's bounding box (position + size in one gesture). Shift = 1:1 (perfect
   // square/circle), Alt = grow from the center. A plain click (no real drag) drops a default-sized
   // shape centered on the pointer. Reverts to Select after committing.
-  function beginDrawShape(e: RPointerEvent) {
-    if (!editor.canEdit) return
-    const name = editor.pendingShape
-    if (!name) return
-    e.stopPropagation()
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    const ox = (e.clientX - rect.left) / scale
-    const oy = (e.clientY - rect.top) / scale
+  function beginDrawBox(name: string, ox: number, oy: number, rect: DOMRect) {
+    const markup = SHAPES[name] ?? ''
+    const fill = DEFAULT_SHAPE_FILL
     let box = { x: ox, y: oy, w: 0, h: 0 }
     let moved = false
     const move = (ev: PointerEvent) => {
@@ -630,7 +652,7 @@ export function Stage({
       }
       if (Math.abs(dx) > DRAW_SLOP || Math.abs(dy) > DRAW_SLOP) moved = true
       box = { x, y, w, h }
-      setShapeDraft(box)
+      setShapeDraft({ ...box, markup })
     }
     const up = () => {
       window.removeEventListener('pointermove', move)
@@ -649,11 +671,82 @@ export function Stage({
         Math.round(y),
         Math.round(w),
         Math.round(h),
+        markup,
+        fill,
       )
       editor.setPendingShape(null) // one shape, then back to Select
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+  }
+
+  // Draw a stroke shape (line / arrow / freehand). Line & arrow are the segment from press to release
+  // (Shift snaps the angle to 45°); freehand accumulates the pointer path. A plain click drops a short
+  // default line/arrow; a click with the draw tool is a no-op. Reverts to Select after committing.
+  function beginDrawStroke(name: string, ox: number, oy: number, rect: DOMRect) {
+    const fill = DEFAULT_SHAPE_FILL
+    const freehand = name === 'draw'
+    const pts: { x: number; y: number }[] = [{ x: ox, y: oy }]
+    let moved = false
+    const move = (ev: PointerEvent) => {
+      let x = (ev.clientX - rect.left) / scale
+      let y = (ev.clientY - rect.top) / scale
+      const dx = x - ox
+      const dy = y - oy
+      if (Math.abs(dx) > DRAW_SLOP || Math.abs(dy) > DRAW_SLOP) moved = true
+      if (freehand) {
+        const last = pts[pts.length - 1]
+        if (Math.hypot(x - last.x, y - last.y) >= 2) pts.push({ x, y })
+      } else {
+        if (ev.shiftKey) {
+          const len = Math.hypot(dx, dy)
+          const step = Math.PI / 4
+          const ang = Math.round(Math.atan2(dy, dx) / step) * step
+          x = ox + Math.cos(ang) * len
+          y = oy + Math.sin(ang) * len
+        }
+        pts[1] = { x, y }
+      }
+      const g = strokeGeometry(name, pts)
+      setShapeDraft({ x: g.x, y: g.y, w: g.w, h: g.h, markup: g.markup })
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setShapeDraft(null)
+      if (!moved) {
+        if (freehand) {
+          editor.setPendingShape(null) // a bare click isn't a doodle
+          return
+        }
+        pts[1] = { x: ox + 160, y: oy } // click drops a default horizontal line/arrow
+      }
+      const g = strokeGeometry(name, pts)
+      insertShape(
+        name,
+        Math.round(g.x),
+        Math.round(g.y),
+        Math.round(g.w),
+        Math.round(g.h),
+        g.markup,
+        fill,
+      )
+      editor.setPendingShape(null)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  function beginDrawShape(e: RPointerEvent) {
+    if (!editor.canEdit) return
+    const name = editor.pendingShape
+    if (!name) return
+    e.stopPropagation()
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const ox = (e.clientX - rect.left) / scale
+    const oy = (e.clientY - rect.top) / scale
+    if (isStrokeShape(name)) beginDrawStroke(name, ox, oy, rect)
+    else beginDrawBox(name, ox, oy, rect)
   }
 
   // Bare-canvas pointer-down: draw a shape when the shape tool is armed, else marquee-select.
@@ -781,11 +874,9 @@ export function Stage({
                 top: shapeDraft.y,
                 width: shapeDraft.w,
                 height: shapeDraft.h,
-                color: '#3498db',
+                color: `#${DEFAULT_SHAPE_FILL}`,
               }}
-              dangerouslySetInnerHTML={{
-                __html: SHAPES[editor.pendingShape] ?? '',
-              }}
+              dangerouslySetInnerHTML={{ __html: shapeDraft.markup }}
             />
           )}
         </div>

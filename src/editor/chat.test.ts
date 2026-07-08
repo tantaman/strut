@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CHAT_LIMITS, clampChatRequest } from '../../shared/chat'
-import { parseSseDelta, sendChat } from './aiChat'
+import { parseSseDelta, sendChat, sendChatAction } from './aiChat'
 import type { ChatMessage } from './aiChat'
+import type { DispatchOutcome } from './aiChatActions'
+import type { ChatAction } from '../../shared/chatAction'
 import type { StrutStore } from '../rindle/client'
 
 // ---- clampChatRequest: the input half of the trust boundary (there's no output firewall — chat is prose,
@@ -207,5 +209,105 @@ describe('sendChat', () => {
     await sendChat(store, ctx, '   ')
     expect(rows.size).toBe(0)
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+// ---- sendChatAction: the Edit lane now STREAMS too — the reply types out of `{response}` frames, then the
+// terminal `{result}` frame's action is applied (with an "Applying…" note on the row during the apply).
+describe('sendChatAction', () => {
+  const ctx = { deckId: 'd1', slides: [], history: [] }
+
+  it('streams the reply into content, then dispatches the result-frame action', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        sseStreamResponse([
+          'data: {"response":"Warmed "}\n\n',
+          'data: {"response":"it up."}\n\n',
+          'data: {"result":{"say":"Warmed it up.","action":{"kind":"set_theme","background":"1e1e24"}}}\n\n',
+          'data: [DONE]\n\n',
+        ]),
+      ),
+    )
+    const { rows, store } = fakeStore()
+    let dispatched: ChatAction | null = null
+    let noteWhileApplying = ''
+    const dispatch = (action: ChatAction): Promise<DispatchOutcome> => {
+      dispatched = action
+      noteWhileApplying = assistantOf(rows)?.note ?? '' // the row shows the sub-status during the apply
+      return Promise.resolve({ ok: true, label: 'AI theme' })
+    }
+
+    const tip = await sendChatAction(store, ctx, 'make it warmer', dispatch)
+
+    expect(dispatched).toEqual({ kind: 'set_theme', background: '1e1e24' })
+    expect(noteWhileApplying).toBe('Applying theme…')
+    expect(assistantOf(rows)).toMatchObject({
+      role: 'assistant',
+      content: 'Warmed it up.',
+      status: 'done',
+      note: '', // cleared once applied
+    })
+    expect(tip).toEqual({ label: 'AI theme' })
+  })
+
+  it('renders an advice-only turn (null action) without dispatching', async () => {
+    const dispatch = vi.fn()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        sseStreamResponse([
+          'data: {"response":"That flow reads well."}\n\n',
+          'data: {"result":{"say":"That flow reads well.","action":null}}\n\n',
+          'data: [DONE]\n\n',
+        ]),
+      ),
+    )
+    const { rows, store } = fakeStore()
+    const tip = await sendChatAction(store, ctx, 'does this flow?', dispatch)
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(tip).toBeNull()
+    expect(assistantOf(rows)).toMatchObject({
+      content: 'That flow reads well.',
+      status: 'done',
+    })
+  })
+
+  it('keeps the reply but errors the turn when the apply fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        sseStreamResponse([
+          'data: {"result":{"say":"On it.","action":{"kind":"arrange","instruction":"timeline"}}}\n\n',
+          'data: [DONE]\n\n',
+        ]),
+      ),
+    )
+    const { rows, store } = fakeStore()
+    const dispatch = (): Promise<DispatchOutcome> =>
+      Promise.resolve({ ok: false, error: 'The AI is unavailable right now.' })
+    const tip = await sendChatAction(store, ctx, 'make a timeline', dispatch)
+    expect(tip).toBeNull()
+    const a = assistantOf(rows)
+    expect(a?.status).toBe('error')
+    expect(a?.content).toContain('On it.')
+    expect(a?.content).toMatch(/unavailable/i)
+    expect(a?.note).toBe('')
+  })
+
+  it('errors the turn on a non-OK response before any stream', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: 'Sign in to edit.' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    )
+    const { rows, store } = fakeStore()
+    const tip = await sendChatAction(store, ctx, 'x', vi.fn())
+    expect(tip).toBeNull()
+    expect(assistantOf(rows)?.status).toBe('error')
   })
 })

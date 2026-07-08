@@ -38,6 +38,7 @@ import {
   rels,
   deck,
   deck_share,
+  slide,
   schema,
   mutators as sharedMutators,
   deleteDeckArgs,
@@ -120,6 +121,27 @@ const withSlideEditable = <TArgs>(
     const row = await tx.query(
       q.slide.where
         .id(slideIdOf(a))
+        .where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))
+        .one(),
+    )
+    return row != null
+  })
+
+/** A research-note write (setSlideNotes): the target SLIDE (by id) exists, the CLAIMED deck_id IS its
+ *  real owning deck, and that deck is editable by the principal. Gating on the SLIDE (not the claimed
+ *  deck) is what prevents hijacking another user's note: the row is keyed by slide_id (PK), so an
+ *  upsert with a known slide_id would otherwise clobber that slide's note — and slide ids leak via
+ *  public share links. A stranger can't edit the slide's real deck, so the write is rejected. The
+ *  deck_id equality also stops a note being stamped with a foreign deck_id. Safe on the FIRST write:
+ *  it reads the slide (which exists), not the not-yet-created note row. */
+const withSlideNotesEditable = <TArgs extends { slideId: string; deckId: string }>(
+  gen: SharedMutatorWithArgs<TArgs>,
+) =>
+  guarded(gen, async (tx, a, user) => {
+    const row = await tx.query(
+      q.slide.where
+        .id(a.slideId)
+        .where(slide.deck_id(a.deckId))
         .where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))
         .one(),
     )
@@ -219,6 +241,10 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   ),
   setSlideDoc: withSlideEditable((a) => a.id, sharedMutators.setSlideDoc),
   setSlideMode: withSlideEditable((a) => a.id, sharedMutators.setSlideMode),
+  // Research notes upsert a slide_notes row keyed by slide_id, so gate on the target SLIDE being
+  // editable (NOT the client-claimed deck) — otherwise a known slide_id could clobber another user's
+  // note. The guard also verifies the claimed deck_id is the slide's real deck.
+  setSlideNotes: withSlideNotesEditable(sharedMutators.setSlideNotes),
 
   // ---- component adds: the target slide is editable ----
   addText: withSlideEditable((a) => a.slideId, sharedMutators.addText),
@@ -274,6 +300,11 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
       id,
       user,
     ])
+    tx.exec(`DELETE FROM slide_notes WHERE deck_id = ? AND ${owner}`, [
+      id,
+      id,
+      user,
+    ])
     tx.exec(`DELETE FROM slide WHERE deck_id = ? AND ${owner}`, [id, id, user])
     tx.exec('DELETE FROM deck WHERE id = ? AND owner_id = ?', [id, user])
   },
@@ -286,6 +317,10 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
       "(SELECT id FROM slide WHERE deck_id IN (SELECT id FROM deck WHERE owner_id = ? UNION SELECT deck_id FROM deck_share WHERE user_id = ? AND role = 'editor'))"
     tx.exec(
       `DELETE FROM component WHERE slide_id = ? AND slide_id IN ${editableSlides}`,
+      [id, user, user],
+    )
+    tx.exec(
+      `DELETE FROM slide_notes WHERE slide_id = ? AND slide_id IN ${editableSlides}`,
       [id, user, user],
     )
     tx.exec(`DELETE FROM slide WHERE id = ? AND id IN ${editableSlides}`, [

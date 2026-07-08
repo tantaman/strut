@@ -23,6 +23,7 @@ import {
   List,
   ListOrdered,
   Quote,
+  SquareCode,
   Strikethrough,
 } from 'lucide-react'
 import { FONT_FAMILIES, SLIDE_H, SLIDE_W } from '../config'
@@ -31,7 +32,7 @@ import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
 import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
-import { cssFontFamily, themeVars } from './render'
+import { cssFontFamily, FontOptions, themeVars } from './render'
 import { ColorField } from './ColorField'
 import { backgroundImage, composeBackground, resolveBackground } from './types'
 import type { DeckThemeFields } from './types'
@@ -164,6 +165,12 @@ function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
       run: () => editor.chain().focus().toggleCode().run(),
     },
     {
+      icon: SquareCode,
+      title: 'Code block',
+      active: editor.isActive('codeBlock'),
+      run: () => editor.chain().focus().toggleCodeBlock().run(),
+    },
+    {
       icon: Heading1,
       title: 'Heading 1',
       active: editor.isActive('heading', { level: 1 }),
@@ -249,11 +256,7 @@ function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
         }}
       >
         <option value="">Theme font</option>
-        {FONT_FAMILIES.map((f) => (
-          <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
-            {f}
-          </option>
-        ))}
+        <FontOptions />
       </select>
       <ColorField
         value={currentColor}

@@ -36,9 +36,12 @@ export type StrutEvent =
   | 'slides:generated' // ✨ AI authored N slides from a description (SlideWell)
   | 'arrange:applied' //  ✨ AI Arrange plan committed to the deck (Overview)
   | 'chat:sent' //        ✨ Chat — a user turn sent to the advisor (ChatPanel)
+  | 'chat:edit' //        ✨ Chat — an Edit-lane turn (the AI drives one deck change; ChatPanel)
   | 'play:started' //     entered Play / present mode
   | 'export' //           downloaded a deck (json | html)
   | 'account:promote' //  guest chose to promote to a real account (github | google)
+  | 'model:connect' //    connected a BYO OpenRouter model (ModelControl); data.model = id | 'auto'
+  | 'model:disconnect' // disconnected the BYO model (ModelControl)
 
 /** Record a product event. Safe to call anywhere, anytime: no-op on the server, in dev, in a clone
  *  without VITE_UMAMI_*, or before the deferred Umami script has loaded (window.umami still absent).

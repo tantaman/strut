@@ -50,8 +50,10 @@ export function insertComponent(
     case 'shape':
       mutate.addShape({
         ...common,
-        shape: c.shape ?? 'square',
-        markup: c.markup || SHAPES[c.shape ?? 'square'] || '',
+        shape: c.shape ?? 'rectangle',
+        // Stroke shapes (line/arrow/draw) always carry their own baked markup; the SHAPES fallback
+        // only covers the static box shapes (and legacy rows whose markup somehow went missing).
+        markup: c.markup || SHAPES[c.shape ?? 'rectangle'] || '',
         fill: c.fill ?? '3498db',
       })
       break

@@ -10,11 +10,13 @@
 // (3) RENDER: the assistant's Markdown is shown through the app's existing `markdownToHtml` sink (marked →
 // DOMPurify), the same sanitizer the slide surfaces already use.
 //
-// `ChatTurn` is deliberately kept open for Phase 2 (actionable chat): a turn may later carry an optional
-// structured `action` the user confirms → routed to the existing applyPlan/applyGenerated. Nothing of that
-// is built yet; the shape just leaves room.
+// Phase 2 (actionable chat) is now realized in shared/chatAction.ts (the `Action` union + the
+// `normalizeAction` firewall) and the `/api/chat/act` route — see AI_CHAT_TOOLS_PLAN.md. The advisor here
+// stays prose-only; the Edit lane is a separate structured pass. The action types are re-exported below so
+// chat callers have one import surface.
 
 import type { SlideDigest } from './arrange.ts'
+export type { ChatAction, ChatActRequest, ChatActResult } from './chatAction.ts'
 
 // The deck grounding is EXACTLY AI Arrange's digest (id · title · text), rebuilt client-side per send from
 // the live editor slides — re-export it so chat callers don't reach across into the arrange module.

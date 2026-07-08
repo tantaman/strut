@@ -17,13 +17,15 @@ export const Route = createFileRoute('/deck/$deckId_/play')({
   // reopens where you were (§5).
   validateSearch: (
     s: Record<string, unknown>,
-  ): { view?: 'slide' | 'overview'; slide?: string } => ({
+  ): { view?: 'slide' | 'overview' | 'research'; slide?: string } => ({
     view:
       s.view === 'overview'
         ? 'overview'
-        : s.view === 'slide'
-          ? 'slide'
-          : undefined,
+        : s.view === 'research'
+          ? 'research'
+          : s.view === 'slide'
+            ? 'slide'
+            : undefined,
     slide: typeof s.slide === 'string' ? s.slide : undefined,
   }),
 })
