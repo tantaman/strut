@@ -11,7 +11,7 @@ import { getAuth } from './auth.ts'
  *  session. Never throws — a resolution failure is treated as "no principal" (the gates reject). */
 export async function resolveSessionUser(request: Request): Promise<string> {
   try {
-    const auth = await getAuth()
+    const auth = await getAuth(request)
     const session = await auth.api.getSession({ headers: request.headers })
     return session?.user.id ?? ''
   } catch (err) {
@@ -41,7 +41,7 @@ export async function resolveSessionAccount(
   request: Request,
 ): Promise<SessionAccount | null> {
   try {
-    const auth = await getAuth()
+    const auth = await getAuth(request)
     const session = await auth.api.getSession({ headers: request.headers })
     const user = session?.user
     if (!user) return null

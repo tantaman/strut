@@ -9,11 +9,11 @@ export const Route = createFileRoute('/api/auth/$')({
     handlers: {
       GET: async ({ request }) => {
         const { getAuth } = await import('../../server/auth')
-        return (await getAuth()).handler(request)
+        return (await getAuth(request)).handler(request)
       },
       POST: async ({ request }) => {
         const { getAuth } = await import('../../server/auth')
-        return (await getAuth()).handler(request)
+        return (await getAuth(request)).handler(request)
       },
     },
   },

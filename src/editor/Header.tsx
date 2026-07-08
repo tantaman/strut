@@ -797,18 +797,33 @@ function ThemePopover({
   const align = deck.text_align || 'left'
   return (
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
-      <div className="insp__row">
-        <span>Deck bg</span>
-        <TokenColorField
-          label="Slide background"
-          current={deck.background}
-          swatches={BACKGROUND_SWATCHES}
-          resolve={(v) => resolveBackground(v, v)}
-          onPick={onBackground}
-          onCustom={onCustomBackground}
-          onCustomLive={onCustomBackgroundLive}
-          allowTransparent
-        />
+      <div className="theme__group theme__group--first">
+        <div className="theme__label">Background</div>
+        <div className="insp__row">
+          <span>Deck</span>
+          <TokenColorField
+            label="Slide background"
+            current={deck.background}
+            swatches={BACKGROUND_SWATCHES}
+            resolve={(v) => resolveBackground(v, v)}
+            onPick={onBackground}
+            onCustom={onCustomBackground}
+            onCustomLive={onCustomBackgroundLive}
+            allowTransparent
+          />
+        </div>
+        <div className="insp__row">
+          <span>Surface</span>
+          <TokenColorField
+            label="Surface"
+            current={deck.surface}
+            swatches={SURFACE_SWATCHES}
+            resolve={(v) => resolveSurface(v, v)}
+            onPick={onSurface}
+            onCustom={onCustomSurface}
+            onCustomLive={onCustomSurfaceLive}
+          />
+        </div>
       </div>
       <div className="theme__group">
         <div className="theme__label">Slide image</div>
@@ -816,18 +831,6 @@ function ThemePopover({
           deck={deck}
           activeSlide={activeSlide}
           onChange={onSlideBackground}
-        />
-      </div>
-      <div className="insp__row">
-        <span>Surface</span>
-        <TokenColorField
-          label="Surface"
-          current={deck.surface}
-          swatches={SURFACE_SWATCHES}
-          resolve={(v) => resolveSurface(v, v)}
-          onPick={onSurface}
-          onCustom={onCustomSurface}
-          onCustomLive={onCustomSurfaceLive}
         />
       </div>
 

@@ -8,8 +8,9 @@
 //      process.env. We resolve it by dynamic import, exactly like server/cf-env.ts's R2 loader. When it
 //      isn't there (Node dev), we open a local better-sqlite3 auth DB instead (auto-migrated from
 //      migrations-d1/). The native module + node:fs are dynamic + @vite-ignore'd so they never enter the
-//      workerd/client build graph. (String secrets — BETTER_AUTH_SECRET, GITHUB_*, GOOGLE_* — DO ride
-//      process.env via nodejs_compat, so those come straight off process.env.)
+//      workerd/client build graph. String secrets — BETTER_AUTH_SECRET, GITHUB_*, GOOGLE_* — DO ride
+//      process.env via nodejs_compat. For local SQLite dev only, missing BETTER_AUTH_* values fall back
+//      to deterministic localhost defaults so a fresh clone can run without a .env.
 //   2. Better-Auth wants a FRESH instance per request on Workers (a shared one causes D1/SQLite lock
 //      contention → 503s), so getAuth() builds one on each call; only the db lookup is memoized (both the
 //      D1 binding object and the local better-sqlite3 connection are stable across requests).
@@ -27,10 +28,14 @@ const DB_BINDING = 'DB'
 // `@cloudflare/workers-types` global D1Database, whose workerd globals shadow the DOM lib and break
 // browser-side type-checking (same reasoning as cf-env.ts's R2BucketLike).
 type DbOption = BetterAuthOptions['database']
+interface LoadedDb {
+  database: DbOption
+  local: boolean
+}
 
-let cachedDb: DbOption | null | undefined
+let cachedDb: LoadedDb | null | undefined
 
-async function loadDb(): Promise<DbOption | null> {
+async function loadDb(): Promise<LoadedDb | null> {
   if (cachedDb !== undefined) return cachedDb
   try {
     // Indirection + @vite-ignore so neither the Node SSR build nor the client bundle resolves this
@@ -41,13 +46,13 @@ async function loadDb(): Promise<DbOption | null> {
     }
     const binding = mod.env?.[DB_BINDING] as DbOption | undefined
     if (binding) {
-      cachedDb = binding
+      cachedDb = { database: binding, local: false }
       return cachedDb
     }
   } catch {
     // not under workerd — fall through to the local sqlite dev DB
   }
-  cachedDb = await loadLocalSqlite()
+  cachedDb = { database: await loadLocalSqlite(), local: true }
   return cachedDb
 }
 
@@ -118,10 +123,33 @@ function migrateLocalAuth(db: LocalDb, fs: FsLike, path: PathLike): void {
   }
 }
 
+const LOCAL_AUTH_URL = 'http://localhost:3000'
+const LOCAL_AUTH_SECRET = 'strut-local-dev-secret-not-for-production-change-me'
+
 function req(name: string): string {
   const v = process.env[name]
   if (!v) throw new Error(`[auth] missing required env: ${name}`)
   return v
+}
+
+function requestOrigin(request: Request | undefined): string | null {
+  if (!request) return null
+  try {
+    return new URL(request.url).origin
+  } catch {
+    return null
+  }
+}
+
+function localOrRequired(
+  name: string,
+  local: boolean,
+  fallback: string,
+): string {
+  const v = process.env[name]
+  if (v) return v
+  if (local) return fallback
+  return req(name)
 }
 
 // Only wire a provider when its credentials are present, so a spike can run with just one configured.
@@ -146,15 +174,20 @@ function resolveSocialProviders(): BetterAuthOptions['socialProviders'] {
   return p
 }
 
-export async function getAuth() {
-  const database = await loadDb()
-  if (!database) {
+export async function getAuth(request?: Request) {
+  const loaded = await loadDb()
+  if (!loaded) {
     throw new Error(
       '[auth] D1 binding "DB" unavailable — run under the Workers runtime ' +
         '(pnpm preview:cf / wrangler dev with a --local D1). See docs/AUTH_SETUP.md.',
     )
   }
-  const baseURL = req('BETTER_AUTH_URL')
+  const origin = requestOrigin(request)
+  const baseURL = localOrRequired(
+    'BETTER_AUTH_URL',
+    loaded.local,
+    origin ?? LOCAL_AUTH_URL,
+  )
   // Host-split support (the commercial overlay runs the app on app.strut.io and marketing on strut.io).
   // Both are unset by default → single-host behavior, identical to before:
   //   AUTH_TRUSTED_ORIGINS — extra comma-separated origins to trust (e.g. the marketing apex) beyond baseURL.
@@ -165,11 +198,18 @@ export async function getAuth() {
     .map((s) => s.trim())
     .filter(Boolean)
   const cookieDomain = process.env.AUTH_COOKIE_DOMAIN?.trim()
+  const trustedOrigins = Array.from(
+    new Set([baseURL, origin, ...extraOrigins].filter((v): v is string => !!v)),
+  )
   return betterAuth({
-    database,
-    secret: req('BETTER_AUTH_SECRET'),
+    database: loaded.database,
+    secret: localOrRequired(
+      'BETTER_AUTH_SECRET',
+      loaded.local,
+      LOCAL_AUTH_SECRET,
+    ),
     baseURL,
-    trustedOrigins: [baseURL, ...extraOrigins],
+    trustedOrigins,
     basePath: '/api/auth', // default; explicit so the route path stays in sync
     // No passwords — social sign-in only (GitHub / Google; Apple is a fast-follow, AUTH_PLAN.md Phase 4).
     emailAndPassword: { enabled: false },
