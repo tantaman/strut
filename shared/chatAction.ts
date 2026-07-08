@@ -81,10 +81,13 @@ export interface ChatActTheme {
 }
 
 /** The currently-active slide's id + its FULL body text (not the 240-char digest excerpt) — the natural
- *  target for a `set_body` rewrite ("tighten this slide"). Absent when no slide is active / it's empty. */
+ *  target for a `set_body` rewrite ("tighten this slide"). Absent when no slide is active / it's empty.
+ *  `notes` carries the author's private RESEARCH notes / backing evidence for this slide (flattened text)
+ *  when they've written any — grounding for "draft this slide from my notes". Never shown in a presentation. */
 export interface ChatActSlide {
   id: string
   text: string
+  notes?: string
 }
 
 /** POST body of `/api/chat/act`. Extends the advisor's ChatRequest (conversation + append-only deck
@@ -109,6 +112,7 @@ export const CHAT_ACTION_LIMITS = {
   maxDescription: 2000, // mirrors GENERATE_LIMITS.maxPrompt
   maxCount: 40, // mirrors GENERATE_LIMITS.maxSlides
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
+  maxActiveNotes: 8000, // the active slide's research notes, for evidence-grounded rewrites
   maxThemeField: 80,
   maxSlideIds: 150,
   maxSlideId: 200,
@@ -161,11 +165,14 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
   const a = req.activeSlide
   if (a && typeof a === 'object') {
     const id = str(a.id)
-    if (id)
+    if (id) {
       out.activeSlide = {
         id,
         text: str(a.text).slice(0, CHAT_ACTION_LIMITS.maxActiveText),
       }
+      const notes = str(a.notes).slice(0, CHAT_ACTION_LIMITS.maxActiveNotes)
+      if (notes) out.activeSlide.notes = notes
+    }
   }
   return out
 }

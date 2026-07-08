@@ -21,8 +21,10 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
+import { useQuery } from '@rindle/react'
 import { newId } from '../config'
-import { slideText } from './aiArrange'
+import { slideNotesQuery } from '../../shared/queries'
+import { docText, slideText } from './aiArrange'
 import { dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
@@ -549,6 +551,7 @@ export interface ChatEditContext {
 function buildActGrounding(
   deck: ThemeDeck | null,
   activeSlide: SlideDetail | null,
+  notesText = '',
 ): { theme?: ChatActTheme; activeSlide?: ChatActSlide } {
   const out: { theme?: ChatActTheme; activeSlide?: ChatActSlide } = {}
   if (deck) {
@@ -564,6 +567,8 @@ function buildActGrounding(
   }
   if (activeSlide) {
     out.activeSlide = { id: activeSlide.id, text: slideText(activeSlide) }
+    // Attach the slide's research notes so a set_body rewrite can be grounded in the author's evidence.
+    if (notesText) out.activeSlide.notes = notesText
   }
   return out
 }
@@ -585,6 +590,12 @@ export function useChat(
   const deck = edit?.deck ?? null
   const activeSlide = edit?.activeSlide ?? null
   const deckContext = edit?.deckContext ?? null
+  // Ground the Edit lane on the ACTIVE slide's research notes too — a lean single-note subscription (not
+  // the whole deck's notes). 'none' is a non-id sentinel so the hook stays unconditional and simply matches
+  // no row when nothing is active. Notes sync only for a deck the principal can access (server twin gate).
+  const noteRows = useQuery(slideNotesQuery({ slideId: activeSlide?.id ?? 'none' }))
+  const activeNotesText =
+    activeSlide && noteRows.length ? docText(noteRows[0].doc) : ''
   const [undoTip, setUndoTip] = useState<{ label: string } | null>(null)
 
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
@@ -617,7 +628,7 @@ export function useChat(
       const convo: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
-      const grounding = buildActGrounding(deck, activeSlide)
+      const grounding = buildActGrounding(deck, activeSlide, activeNotesText)
       const contextText = deckContext?.take() ?? ''
       // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
       // request carries append-only deck narration plus a slide-id allowlist.
@@ -659,6 +670,7 @@ export function useChat(
       deck,
       activeSlide,
       deckContext,
+      activeNotesText,
       mutate,
       history,
     ],
