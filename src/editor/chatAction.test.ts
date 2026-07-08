@@ -340,4 +340,33 @@ describe('clampChatActRequest', () => {
     expect(req.activeSlide).toBeUndefined()
     expect(req.theme).toBeUndefined()
   })
+
+  it('keeps + caps the active slide research notes (evidence grounding)', () => {
+    const req = clampChatActRequest({
+      deckId: 'd',
+      messages: [],
+      deckContext: '',
+      slideIds: [],
+      activeSlide: {
+        id: 's1',
+        text: 'body',
+        notes: 'n'.repeat(CHAT_ACTION_LIMITS.maxActiveNotes + 50),
+      },
+    })
+    expect(req.activeSlide?.notes).toHaveLength(
+      CHAT_ACTION_LIMITS.maxActiveNotes,
+    )
+  })
+
+  it('omits notes when the active slide has none (no empty field on the wire)', () => {
+    const req = clampChatActRequest({
+      deckId: 'd',
+      messages: [],
+      deckContext: '',
+      slideIds: [],
+      activeSlide: { id: 's1', text: 'body' },
+    })
+    expect(req.activeSlide).toBeDefined()
+    expect(req.activeSlide?.notes).toBeUndefined()
+  })
 })

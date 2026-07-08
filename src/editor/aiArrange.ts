@@ -64,8 +64,9 @@ function placementOverrides(plan: ArrangementPlan): Map<string, Partial<Xform>> 
 }
 
 // Collect the plain text of a TipTap doc (markdown-mode slides store content as doc JSON) by walking
-// text nodes — cheaper and safer than rendering to HTML and stripping tags.
-function docText(raw: string | null | undefined): string {
+// text nodes — cheaper and safer than rendering to HTML and stripping tags. Exported so the AI Edit lane
+// can flatten a slide's research-note doc the same way (both are TipTap docs).
+export function docText(raw: string | null | undefined): string {
   const parts: string[] = []
   const walk = (n: JSONContent) => {
     if (typeof n.text === 'string') parts.push(n.text)

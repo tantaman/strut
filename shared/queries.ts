@@ -104,6 +104,15 @@ export const deckNotesQuery = defineQuery(
   ({ deckId }: { deckId: string }) => q.slide_notes.where.deck_id(deckId),
 )
 
+// A SINGLE slide's research note (0 or 1 rows). A lean subscription the AI Edit lane uses to ground a
+// rewrite on the active slide's notes without loading the whole deck's notes. Un-gated like the rest; the
+// server twin gates by deck access.
+export const slideNotesQuery = defineQuery(
+  'slideNotes',
+  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
+  ({ slideId }: { slideId: string }) => q.slide_notes.where.slide_id(slideId),
+)
+
 // A user's profile (display name). World-readable to any authenticated principal — names aren't secret.
 export const profileQuery = defineQuery(
   'profile',
@@ -138,5 +147,6 @@ export const allQueries = [
   publicDeckDetailQuery,
   deckSharesQuery,
   deckNotesQuery,
+  slideNotesQuery,
   profileQuery,
 ]

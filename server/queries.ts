@@ -120,6 +120,16 @@ const deckNotesQuery = defineQuery(
       .where(existsNoSync(rels.noteDeck, (d) => d.where(deckAccess(ctx.user)))),
 )
 
+// Single-slide note twin (AI Edit-lane grounding) — same deck-access gate as deckNotes.
+const slideNotesQuery = defineQuery(
+  'slideNotes',
+  (raw): { slideId: string } => ({ slideId: reqString(raw, 'slideId') }),
+  ({ slideId }: { slideId: string }, ctx: Ctx) =>
+    q.slide_notes.where
+      .slide_id(slideId)
+      .where(existsNoSync(rels.noteDeck, (d) => d.where(deckAccess(ctx.user)))),
+)
+
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
@@ -128,5 +138,6 @@ export const serverQueries = [
   publicDeckDetailQuery,
   deckSharesQuery,
   deckNotesQuery,
+  slideNotesQuery,
   profileQuery,
 ]
