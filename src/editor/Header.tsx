@@ -28,6 +28,7 @@ import {
   SquareCode,
   Type,
   Undo2,
+  Upload,
   Video,
   Globe,
   Share2,
@@ -163,9 +164,8 @@ export function Header({
     })
   }
 
-  // The Theme popover dismisses on a pointer-down outside its wrapper (button + panel + any nested
-  // color sub-popovers are all inside `themeRef`, so those clicks don't close it). Other menus keep
-  // their toggle-only behavior.
+  // The Theme popover dismisses on a pointer-down outside its wrapper. Portaled color sub-popovers
+  // stop pointer-down propagation themselves so swatch clicks do not close the whole menu.
   const themeRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (menu !== 'theme') return
@@ -297,6 +297,19 @@ export function Header({
       redo: () => apply(value),
       undo: () => apply(before),
     })
+  }
+
+  function setSlideCustomBackground(hex: string) {
+    if (!deck || !activeSlide) return
+    const bare = hex.replace(/^#+/, '').toLowerCase()
+    const klass = `bg-custom-${bare}`
+    mutate.mintCustomColor({
+      id: newId(),
+      deckId: deck.id,
+      klass,
+      style: `.${klass}{background:#${bare}}`,
+    })
+    setSlideBackground(klass)
   }
 
   function setTextTheme(
@@ -569,6 +582,7 @@ export function Header({
                     onCustomBackground={(hex) => setCustom('bg', hex)}
                     onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
                     onSlideBackground={setSlideBackground}
+                    onSlideCustomBackground={setSlideCustomBackground}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
                     onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
@@ -756,6 +770,7 @@ function ThemePopover({
   onCustomBackground,
   onCustomBackgroundLive,
   onSlideBackground,
+  onSlideCustomBackground,
   onSurface,
   onCustomSurface,
   onCustomSurfaceLive,
@@ -771,6 +786,7 @@ function ThemePopover({
   onCustomBackground: (hex: string) => void
   onCustomBackgroundLive: (hex: string) => void
   onSlideBackground: (value: string) => void
+  onSlideCustomBackground: (hex: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
   onCustomSurfaceLive: (hex: string) => void
@@ -799,30 +815,51 @@ function ThemePopover({
     <div className="popover popover--theme" style={{ top: '110%', left: 0 }}>
       <div className="theme__group theme__group--first">
         <div className="theme__label">Background</div>
-        <div className="insp__row">
-          <span>Deck</span>
-          <TokenColorField
-            label="Slide background"
-            current={deck.background}
-            swatches={BACKGROUND_SWATCHES}
-            resolve={(v) => resolveBackground(v, v)}
-            onPick={onBackground}
-            onCustom={onCustomBackground}
-            onCustomLive={onCustomBackgroundLive}
-            allowTransparent
-          />
-        </div>
-        <div className="insp__row">
-          <span>Surface</span>
-          <TokenColorField
-            label="Surface"
-            current={deck.surface}
-            swatches={SURFACE_SWATCHES}
-            resolve={(v) => resolveSurface(v, v)}
-            onPick={onSurface}
-            onCustom={onCustomSurface}
-            onCustomLive={onCustomSurfaceLive}
-          />
+        <div className="theme__bggrid">
+          <div className="theme__bgcell">
+            <span>Deck</span>
+            <TokenColorField
+              label="Slide background"
+              current={deck.background}
+              swatches={BACKGROUND_SWATCHES}
+              resolve={(v) => resolveBackground(v, v)}
+              onPick={onBackground}
+              onCustom={onCustomBackground}
+              onCustomLive={onCustomBackgroundLive}
+              allowTransparent
+            />
+          </div>
+          <div className="theme__bgcell">
+            <span>Slide</span>
+            {activeSlide ? (
+              <TokenColorField
+                label="Slide background"
+                current={activeSlide.background}
+                swatches={BACKGROUND_SWATCHES}
+                resolve={(v) => resolveBackground(v, deck.background)}
+                onPick={onSlideBackground}
+                onCustom={onSlideCustomBackground}
+                allowTransparent
+                defaultToken=""
+                defaultTitle="inherit deck"
+                defaultGlyph="D"
+              />
+            ) : (
+              <div className="theme__inline-note">No slide</div>
+            )}
+          </div>
+          <div className="theme__bgcell">
+            <span>Surface</span>
+            <TokenColorField
+              label="Surface"
+              current={deck.surface}
+              swatches={SURFACE_SWATCHES}
+              resolve={(v) => resolveSurface(v, v)}
+              onPick={onSurface}
+              onCustom={onCustomSurface}
+              onCustomLive={onCustomSurfaceLive}
+            />
+          </div>
         </div>
       </div>
       <div className="theme__group">
@@ -927,6 +964,7 @@ function BackgroundImageControls({
     ? resolveBackgroundImage(activeSlide.background, deck.background)
     : undefined
   const explicitImage = parseBackgroundImageToken(activeSlide?.background)
+  const fileRef = useRef<HTMLInputElement>(null)
   const [url, setUrl] = useState(image?.src ?? '')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -1002,13 +1040,22 @@ function BackgroundImageControls({
       <input
         className="theme__bgimg-file"
         type="file"
+        ref={fileRef}
         accept="image/*"
         disabled={uploading}
         onChange={(e) => {
           const file = e.target.files?.[0]
           if (file) void pickFile(file)
+          e.currentTarget.value = ''
         }}
       />
+      <button
+        className="btn btn--ghost theme__bgimg-upload"
+        disabled={uploading}
+        onClick={() => fileRef.current?.click()}
+      >
+        <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload image'}
+      </button>
       <div className="theme__bgimg-line">
         <span>Fit</span>
         <div className="seg seg--bgimg" role="group" aria-label="Image fit">

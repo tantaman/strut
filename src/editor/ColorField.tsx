@@ -32,8 +32,11 @@ function bareHex(hex: string): string {
 }
 
 /** The trigger swatch color for a background/surface value (checker for transparent). */
-function bgSwatch(value: string, resolve: (v: string) => string): string {
-  return value === 'bg-transparent' ? CHECKER : resolve(value || 'bg-default')
+function bgSwatch(
+  value: string | null | undefined,
+  resolve: (v: string) => string,
+): string {
+  return value === 'bg-transparent' ? CHECKER : resolve(value ?? 'bg-default')
 }
 
 /** A valid `#rrggbb` seed for the native custom picker: the current custom hex if the value is one,
@@ -44,7 +47,7 @@ function bgInputHex(
 ): string {
   if (value && value.startsWith('bg-custom-'))
     return '#' + value.slice('bg-custom-'.length)
-  const r = resolve(value || 'bg-default')
+  const r = resolve(value ?? 'bg-default')
   return HEX6.test(r) ? r : '#ffffff'
 }
 
@@ -235,6 +238,9 @@ export function TokenColorField({
   onCustom,
   onCustomLive,
   allowTransparent,
+  defaultToken = 'bg-default',
+  defaultTitle = 'default',
+  defaultGlyph,
 }: {
   current?: string | null
   label: string
@@ -244,13 +250,18 @@ export function TokenColorField({
   onCustom: (hex: string) => void
   onCustomLive?: (hex: string) => void
   allowTransparent?: boolean
+  defaultToken?: string
+  defaultTitle?: string
+  defaultGlyph?: string
 }) {
+  const active = current ?? defaultToken
   const items: SwatchSpec[] = [
     {
-      key: 'bg-default',
-      color: resolve('bg-default'),
-      title: 'default',
-      onSelect: () => onPick('bg-default'),
+      key: defaultToken,
+      color: resolve(defaultToken),
+      title: defaultTitle,
+      glyph: defaultGlyph,
+      onSelect: () => onPick(defaultToken),
     },
   ]
   if (allowTransparent)
@@ -270,17 +281,15 @@ export function TokenColorField({
 
   return (
     <ColorPicker
-      triggerColor={bgSwatch(current || 'bg-default', resolve)}
+      triggerColor={bgSwatch(active, resolve)}
       title={label}
       swatches={items}
-      activeKey={
-        current && items.some((i) => i.key === current) ? current : null
-      }
+      activeKey={items.some((i) => i.key === active) ? active : null}
       // A custom (native-picked) color is a `bg-custom-<hex>` class that matches no grid swatch —
       // mark the native chip as the selected swatch so the dynamic pick stays visibly current.
       customActive={!!current && current.startsWith('bg-custom-')}
       custom={{
-        value: bgInputHex(current, resolve),
+        value: bgInputHex(active, resolve),
         onCommit: onCustom,
         onLive: onCustomLive,
       }}
