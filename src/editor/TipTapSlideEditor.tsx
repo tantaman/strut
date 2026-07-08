@@ -32,9 +32,14 @@ import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
 import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
-import { cssFontFamily, FontOptions, themeVars } from './render'
+import {
+  BackgroundImageLayer,
+  cssFontFamily,
+  FontOptions,
+  themeVars,
+} from './render'
 import { ColorField } from './ColorField'
-import { backgroundImage, composeBackground, resolveBackground } from './types'
+import { resolveBackground, resolveBackgroundImage } from './types'
 import type { DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 
@@ -96,9 +101,13 @@ export function TipTapSlideEditor({
     })
   }
 
-  const background = composeBackground(
-    resolveBackground(slide.background, deck?.background ?? undefined),
-    backgroundImage(slide.background, deck?.background ?? undefined),
+  const background = resolveBackground(
+    slide.background,
+    deck?.background ?? undefined,
+  )
+  const bgImage = resolveBackgroundImage(
+    slide.background,
+    deck?.background ?? undefined,
   )
 
   return (
@@ -119,6 +128,7 @@ export function TipTapSlideEditor({
               ...themeVars(deck, slide),
             }}
           >
+            <BackgroundImageLayer image={bgImage} />
             <EditorContent editor={editor} className="strut-md-host" />
             {children}
           </div>

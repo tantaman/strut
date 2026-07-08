@@ -19,6 +19,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import {
+  BackgroundImageLayer,
   cmpStyle,
   componentSize,
   MarkdownSurface,
@@ -31,6 +32,7 @@ import {
   DEFAULT_SHAPE_FILL,
   isStrokeShape,
   resolveBackground,
+  resolveBackgroundImage,
   resolveSurface,
   SHAPES,
   SHAPE_TOOLS,
@@ -121,7 +123,7 @@ export function Stage({
   }>(null)
 
   const bg = resolveBackground(slideData.background, deck?.background)
-  const bgImg = backgroundImage(slideData.background, deck?.background)
+  const bgImg = resolveBackgroundImage(slideData.background, deck?.background)
   const surf = resolveSurface(slideData.surface, deck?.surface)
   const surfImg = backgroundImage(slideData.surface, deck?.surface)
 
@@ -448,7 +450,8 @@ export function Stage({
         // so the control can't produce a degenerate (near-flat) skew.
         const drag =
           axis === 'x' ? (ev.clientX - sx) / scale : (ev.clientY - sy) / scale
-        let a = (axis === 'x' ? start.skew_x : start.skew_y) +
+        let a =
+          (axis === 'x' ? start.skew_x : start.skew_y) +
           Math.atan2(drag, SKEW_BASE)
         if (ev.shiftKey) a = Math.round(a / SKEW_SNAP) * SKEW_SNAP
         last =
@@ -683,7 +686,12 @@ export function Stage({
   // Draw a stroke shape (line / arrow / freehand). Line & arrow are the segment from press to release
   // (Shift snaps the angle to 45°); freehand accumulates the pointer path. A plain click drops a short
   // default line/arrow; a click with the draw tool is a no-op. Reverts to Select after committing.
-  function beginDrawStroke(name: string, ox: number, oy: number, rect: DOMRect) {
+  function beginDrawStroke(
+    name: string,
+    ox: number,
+    oy: number,
+    rect: DOMRect,
+  ) {
     const fill = DEFAULT_SHAPE_FILL
     const freehand = name === 'draw'
     const pts: { x: number; y: number }[] = [{ x: ox, y: oy }]
@@ -785,10 +793,11 @@ export function Stage({
                   width: SLIDE_W,
                   height: SLIDE_H,
                   transform: `scale(${mdScale})`,
-                  background: composeBackground(bg, bgImg),
+                  background: bg,
                   ...themeVars(deck, slideData),
                 }}
               >
+                <BackgroundImageLayer image={bgImg} />
                 <MarkdownSurface doc={slideData.doc} />
                 <LockedObjects slide={slideData} />
               </div>
@@ -824,10 +833,11 @@ export function Stage({
             width: SLIDE_W,
             height: SLIDE_H,
             transform: `scale(${scale})`,
-            background: composeBackground(bg, bgImg),
+            background: bg,
             ...themeVars(deck, slideData),
           }}
         >
+          <BackgroundImageLayer image={bgImg} />
           {/* Body underlay: the markdown doc, shown behind the editable objects but inert (its layer
               is pointer-events:none) so marquee/canvas clicks pass through. Skipped when empty, so a
               pure-objects slide is unchanged. */}

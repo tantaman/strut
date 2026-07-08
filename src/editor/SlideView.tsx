@@ -9,8 +9,8 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { MarkdownSurface, themeVars } from './render'
-import { backgroundImage, composeBackground, resolveBackground } from './types'
+import { BackgroundImageLayer, MarkdownSurface, themeVars } from './render'
+import { resolveBackground, resolveBackgroundImage } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import type { ReactNode } from 'react'
@@ -43,13 +43,13 @@ function SlideFrame({
         width: SLIDE_W,
         height: (SLIDE_W * 9) / 16,
         transform: `scale(${scale})`,
-        background: composeBackground(
-          resolveBackground(slide.background, deck?.background),
-          backgroundImage(slide.background, deck?.background),
-        ),
+        background: resolveBackground(slide.background, deck?.background),
         ...themeVars(deck, slide),
       }}
     >
+      <BackgroundImageLayer
+        image={resolveBackgroundImage(slide.background, deck?.background)}
+      />
       {children}
     </div>
   )
@@ -93,4 +93,3 @@ export function SlideView({
     </SlideFrame>
   )
 }
-

@@ -336,16 +336,115 @@ export function cssHex(value: string | undefined, fallback: string): string {
   return '#' + (h.length ? h : fallback.replace(/^#+/, ''))
 }
 
-/** Resolve a slide-card background to a CSS color (or transparent). `bg-custom-<hex>` and `img:` are
- *  handled too. Per-slide value wins, else deck value. */
+export const BACKGROUND_IMAGE_LAYOUTS = ['full', 'left', 'right'] as const
+export type BackgroundImageLayout = (typeof BACKGROUND_IMAGE_LAYOUTS)[number]
+
+export interface BackgroundImageSpec {
+  src: string
+  layout: BackgroundImageLayout
+  fade: boolean
+  blur: boolean
+  mask: boolean
+}
+
+const DEFAULT_BG_IMAGE: Omit<BackgroundImageSpec, 'src'> = {
+  layout: 'full',
+  fade: false,
+  blur: false,
+  mask: false,
+}
+
+function effectiveThemeValue(
+  value: string | undefined,
+  fallback: string | undefined,
+): string {
+  return value && value !== '' ? value : (fallback ?? 'bg-default')
+}
+
+function validBackgroundLayout(
+  value: string | null | undefined,
+): BackgroundImageLayout {
+  return value === 'left' || value === 'right' ? value : 'full'
+}
+
+function boolParam(value: string | null): boolean {
+  return value === '1' || value === 'true'
+}
+
+export function makeBackgroundImageToken(
+  src: string,
+  spec: Partial<Omit<BackgroundImageSpec, 'src'>> = {},
+): string {
+  const trimmed = src.trim()
+  if (!trimmed) return ''
+  const next: BackgroundImageSpec = {
+    src: trimmed,
+    ...DEFAULT_BG_IMAGE,
+    ...spec,
+    layout: validBackgroundLayout(spec.layout),
+  }
+  const params = new URLSearchParams()
+  params.set('src', next.src)
+  if (next.layout !== 'full') params.set('layout', next.layout)
+  if (next.fade) params.set('fade', '1')
+  if (next.blur) params.set('blur', '1')
+  if (next.mask) params.set('mask', '1')
+  return `img2:${params.toString()}`
+}
+
+export function parseBackgroundImageToken(
+  value: string | null | undefined,
+): BackgroundImageSpec | null {
+  if (!value) return null
+  if (value.startsWith('img2:')) {
+    const params = new URLSearchParams(value.slice('img2:'.length))
+    const src = (params.get('src') ?? '').trim()
+    if (!src) return null
+    return {
+      src,
+      layout: validBackgroundLayout(params.get('layout')),
+      fade: boolParam(params.get('fade')),
+      blur: boolParam(params.get('blur')),
+      mask: boolParam(params.get('mask')),
+    }
+  }
+  if (value.startsWith('img:')) {
+    const src = value.slice('img:'.length).trim()
+    return src ? { src, ...DEFAULT_BG_IMAGE } : null
+  }
+  return null
+}
+
+function hasBackgroundImage(value: string | null | undefined): boolean {
+  return parseBackgroundImageToken(value) !== null
+}
+
+export function resolveBackgroundImage(
+  bg: string | undefined,
+  fallback: string | undefined,
+): BackgroundImageSpec | undefined {
+  const spec = parseBackgroundImageToken(effectiveThemeValue(bg, fallback))
+  return spec ?? undefined
+}
+
+export function cssUrlValue(src: string): string {
+  return `url("${src.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n|\r/g, '')}")`
+}
+
+/** Resolve a slide-card background to a CSS color (or transparent). Image tokens keep the fallback
+ *  color underneath when a per-slide image sits on top of a colored deck default. */
 export function resolveBackground(
   slideBg: string | undefined,
   deckBg: string | undefined,
 ): string {
-  const v = slideBg && slideBg !== '' ? slideBg : (deckBg ?? 'bg-default')
+  const hasSlideValue = !!(slideBg && slideBg !== '')
+  const v = effectiveThemeValue(slideBg, deckBg)
   if (v === 'bg-transparent') return 'transparent'
   if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
-  if (v.startsWith('img:')) return '#ffffff'
+  if (hasBackgroundImage(v))
+    return hasSlideValue && deckBg && !hasBackgroundImage(deckBg)
+      ? resolveBackground('', deckBg)
+      : '#ffffff'
   return BG_COLORS[v] ?? '#ffffff'
 }
 
@@ -355,14 +454,15 @@ export function resolveSurface(
   slideSurface: string | undefined,
   deckSurface: string | undefined,
 ): string {
-  const v =
-    slideSurface && slideSurface !== ''
-      ? slideSurface
-      : (deckSurface ?? 'bg-default')
+  const hasSlideValue = !!(slideSurface && slideSurface !== '')
+  const v = effectiveThemeValue(slideSurface, deckSurface)
   if (v === 'bg-default' || v === '' || v === 'bg-transparent')
     return SURFACE_DEFAULT
   if (v.startsWith('bg-custom-')) return '#' + v.slice('bg-custom-'.length)
-  if (v.startsWith('img:')) return '#222222'
+  if (hasBackgroundImage(v))
+    return hasSlideValue && deckSurface && !hasBackgroundImage(deckSurface)
+      ? resolveSurface('', deckSurface)
+      : '#222222'
   return SURFACE_COLORS[v] ?? SURFACE_DEFAULT
 }
 
@@ -370,8 +470,8 @@ export function backgroundImage(
   bg: string | undefined,
   fallback: string | undefined,
 ): string | undefined {
-  const v = bg && bg !== '' ? bg : (fallback ?? 'bg-default')
-  return v.startsWith('img:') ? `url(${v.slice(4)})` : undefined
+  const spec = resolveBackgroundImage(bg, fallback)
+  return spec ? cssUrlValue(spec.src) : undefined
 }
 
 /** Compose a single CSS `background` shorthand from a resolved color/gradient and an optional

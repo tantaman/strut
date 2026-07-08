@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { resolveTextAlign, resolveTheme } from './types'
+import {
+  makeBackgroundImageToken,
+  parseBackgroundImageToken,
+  resolveBackground,
+  resolveBackgroundImage,
+  resolveTextAlign,
+  resolveTheme,
+} from './types'
 
 describe('resolveTextAlign', () => {
   it('lets a per-slide override win over the deck default', () => {
@@ -49,9 +56,53 @@ describe('resolveTheme', () => {
     expect(
       resolveTheme({ text_align: 'right' }, { text_align: 'center' }).textAlign,
     ).toBe('center')
-    expect(resolveTheme({ text_align: 'right' }, { text_align: '' }).textAlign).toBe(
-      'right',
-    )
+    expect(
+      resolveTheme({ text_align: 'right' }, { text_align: '' }).textAlign,
+    ).toBe('right')
     expect(resolveTheme(null, { text_align: '' }).textAlign).toBe('left')
+  })
+})
+
+describe('background image tokens', () => {
+  it('parses legacy img: tokens as full-slide images with no effects', () => {
+    expect(
+      parseBackgroundImageToken('img:https://example.com/a b.png'),
+    ).toEqual({
+      src: 'https://example.com/a b.png',
+      layout: 'full',
+      fade: false,
+      blur: false,
+      mask: false,
+    })
+  })
+
+  it('round-trips full/half placement and effects through img2 tokens', () => {
+    const token = makeBackgroundImageToken(
+      'https://img.example/bg.png?x=1&y=2',
+      {
+        layout: 'left',
+        fade: true,
+        blur: true,
+        mask: true,
+      },
+    )
+    expect(parseBackgroundImageToken(token)).toEqual({
+      src: 'https://img.example/bg.png?x=1&y=2',
+      layout: 'left',
+      fade: true,
+      blur: true,
+      mask: true,
+    })
+  })
+
+  it('resolves an explicit slide image over the deck background color', () => {
+    const token = makeBackgroundImageToken('https://img.example/bg.png', {
+      layout: 'right',
+    })
+    expect(resolveBackground(token, 'bg-ink')).toBe('#1e1e24')
+    expect(resolveBackgroundImage(token, 'bg-ink')).toMatchObject({
+      src: 'https://img.example/bg.png',
+      layout: 'right',
+    })
   })
 })
