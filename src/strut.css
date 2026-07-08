@@ -1676,7 +1676,7 @@ button {
 
 /* ---- deck theme popover (Header) ---- */
 .popover--theme {
-  width: 300px;
+  width: 340px;
   max-height: min(760px, calc(100vh - 76px));
   overflow-y: auto;
   display: flex;
@@ -1715,7 +1715,7 @@ button {
 }
 .theme__bggrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 .theme__bgcell {
