@@ -32,12 +32,13 @@ const STUB_URL =
       'text-anchor="middle" dominant-baseline="middle">AI image (dev stub)</text></svg>',
   )
 
-/** Generate an image for `prompt` and return its stored public URL. Throws ImageUnavailableError when the
- *  Workers AI binding is unreachable or returns nothing usable (the route maps that to 503 + a refund). */
+/** Generate an image for `prompt`; return its stored public URL and stored byte size (for the storage
+ *  meter — 0 for the dev stub, which isn't stored in R2). Throws ImageUnavailableError when the Workers AI
+ *  binding is unreachable or returns nothing usable (the route maps that to 503 + a refund). */
 export async function generateImage(
   promptRaw: unknown,
   r2: R2BucketLike | null,
-): Promise<string> {
+): Promise<{ url: string; bytes: number }> {
   const prompt = String(promptRaw ?? '')
     .slice(0, MAX_PROMPT)
     .trim()
@@ -46,7 +47,7 @@ export async function generateImage(
   const ai = await loadAi()
   if (!ai) {
     // Dev-only escape hatch: no Workers AI binding under `pnpm dev` → deterministic placeholder.
-    if (process.env.STRUT_IMAGE_STUB) return STUB_URL
+    if (process.env.STRUT_IMAGE_STUB) return { url: STUB_URL, bytes: 0 }
     throw new ImageUnavailableError(
       'Workers AI binding is unavailable in this runtime.',
     )
@@ -64,7 +65,9 @@ export async function generateImage(
   if (typeof b64 !== 'string' || !b64)
     throw new ImageUnavailableError('the image model returned no image')
 
-  return storeImageBytes(r2, base64ToBytes(b64), 'image/jpeg')
+  const imgBytes = base64ToBytes(b64)
+  const url = await storeImageBytes(r2, imgBytes, 'image/jpeg')
+  return { url, bytes: imgBytes.byteLength }
 }
 
 // atob is a global in both the Workers runtime and Node 18+.

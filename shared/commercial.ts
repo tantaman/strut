@@ -16,8 +16,9 @@ export interface Entitlements {
    *  deck private is the paid feature. false → new decks are created public and cannot be set private.
    *  (COMMUNITY/self-host = true: decks are private by default, exactly as before.) */
   canKeepPrivate: boolean
-  /** Total storage ceiling (bytes) across the account's uploads; null = unlimited. The only cap on the
-   *  free tier's unlimited public decks. NOTE: not enforced yet — needs per-user usage accounting. */
+  /** Total storage ceiling (bytes) across the account's stored images; null = unlimited. The cap on the
+   *  free tier's unlimited public decks — enforced on the R2 write paths (image uploads + AI images) via
+   *  server/storage.ts's per-user counter. (Artifacts are excluded: small, deduped, separately capped.) */
   storageLimitBytes: number | null
   /** Skip the per-user daily AI quota entirely (mirrors the BYO-key path). */
   aiUnlimited: boolean
