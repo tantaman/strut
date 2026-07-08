@@ -90,19 +90,57 @@ async function loadAi(): Promise<AiBinding | null> {
   return cachedAi
 }
 
-// Workers AI returns `{ response: obj|string }` for json_schema output; OpenRouter returns the content as
-// a JSON string. Normalize both to a parsed object (or {} if unparseable — the adapters' normalize* is the
-// trust boundary and tolerates junk). Was the per-adapter extractJson().
+// Workers AI returns `{ response: obj|string }` for json_schema output; OpenRouter returns the content as a
+// JSON string — and a provider that ignored `response_format` may wrap it in a ```json fence or stray prose.
+// Normalize all of these to a parsed object (or {} if unsalvageable — the adapters' normalize* is the trust
+// boundary and tolerates junk). Was the per-adapter extractJson().
 function extractJson(resp: unknown): unknown {
   if (resp && typeof resp === 'object') return resp
-  if (typeof resp === 'string') {
+  if (typeof resp === 'string') return parseJsonLoose(resp) ?? {}
+  return {}
+}
+
+// Parse a model's JSON reply that may be bare, fenced (```json … ```), or wrapped in stray prose. Tries the
+// whole string, then the first brace-balanced object inside it. Null if nothing parses. This lets the
+// structured endpoints survive an OpenRouter provider that returns JSON-as-prose instead of honoring
+// response_format.
+function parseJsonLoose(s: string): unknown {
+  const trimmed = s.trim()
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    const obj = firstJsonObject(trimmed)
+    if (!obj) return null
     try {
-      return JSON.parse(resp)
+      return JSON.parse(obj)
     } catch {
-      return {}
+      return null
     }
   }
-  return {}
+}
+
+// Extract the first brace-balanced `{ … }` substring, respecting strings/escapes, or null. (Mirrors the
+// same helper in server/chatAct.ts — kept local so the seam doesn't import upward from a route adapter.)
+function firstJsonObject(s: string): string | null {
+  const start = s.indexOf('{')
+  if (start === -1) return null
+  let depth = 0
+  let inStr = false
+  let esc = false
+  for (let i = start; i < s.length; i++) {
+    const c = s[i]
+    if (inStr) {
+      if (esc) esc = false
+      else if (c === '\\') esc = true
+      else if (c === '"') inStr = false
+    } else if (c === '"') inStr = true
+    else if (c === '{') depth++
+    else if (c === '}') {
+      depth--
+      if (depth === 0) return s.slice(start, i + 1)
+    }
+  }
+  return null
 }
 
 /** One-shot structured completion (Arrange, Generate). Returns the model's JSON as a parsed object.
@@ -239,9 +277,27 @@ async function openrouterFetch(
 async function readOpenRouterError(res: Response): Promise<string> {
   try {
     const j = (await res.clone().json()) as {
-      error?: { message?: unknown }
+      error?: {
+        message?: unknown
+        metadata?: { provider_name?: unknown; raw?: unknown }
+      }
     } | null
-    return typeof j?.error?.message === 'string' ? j.error.message : ''
+    const err = j?.error
+    const msg = typeof err?.message === 'string' ? err.message : ''
+    // "Provider returned error" is opaque on its own — OpenRouter tucks the upstream provider's ACTUAL
+    // rejection into error.metadata (provider_name + raw). Surface it (capped) so the failure is
+    // diagnosable instead of a dead end.
+    const meta = err?.metadata
+    const provider = typeof meta?.provider_name === 'string' ? meta.provider_name : ''
+    let raw =
+      typeof meta?.raw === 'string'
+        ? meta.raw
+        : meta?.raw != null
+          ? JSON.stringify(meta.raw)
+          : ''
+    if (raw.length > 300) raw = raw.slice(0, 300) + '…'
+    const detail = raw && raw !== msg ? `${msg} (${raw})` : msg
+    return provider ? `${detail} [provider: ${provider}]` : detail
   } catch {
     return ''
   }
@@ -250,20 +306,60 @@ async function readOpenRouterError(res: Response): Promise<string> {
 // Workers AI accepts the raw JSON Schema directly under `json_schema`; OpenAI/OpenRouter want it wrapped as
 // `{ name, schema }`. Rewrap the Workers-AI-shaped response_format for OpenRouter (strict:false — our
 // schemas use optional fields, and OpenRouter ignores response_format for models that don't support it, so
-// output still flows and the adapters' normalize* salvages it). Non-json_schema shapes pass through.
+// output still flows and the adapters' normalize* salvages it). The inner schema is also SANITIZED
+// (sanitizeSchema) because some providers' structured-output validators reject size/range constraint
+// keywords — Anthropic errors with "For 'array' type, property 'maxItems' is not supported", which is what
+// broke Arrange/Generate over a connected Claude model. Non-json_schema shapes pass through.
 function toOpenRouterResponseFormat(rf: unknown): unknown {
   if (!rf || typeof rf !== 'object') return undefined
   const r = rf as { type?: unknown; json_schema?: unknown }
   if (r.type !== 'json_schema') return rf
-  const schema = r.json_schema
-  // Already in OpenAI `{ name, schema }` form → leave as-is (don't double-wrap).
-  if (schema && typeof schema === 'object' && 'schema' in schema) {
-    return rf
+  const inner = r.json_schema
+  // Already in OpenAI `{ name, schema }` form → sanitize its inner schema in place, don't double-wrap.
+  if (inner && typeof inner === 'object' && 'schema' in inner) {
+    const w = inner as Record<string, unknown>
+    return { type: 'json_schema', json_schema: { ...w, schema: sanitizeSchema(w.schema) } }
   }
   return {
     type: 'json_schema',
-    json_schema: { name: 'response', strict: false, schema },
+    json_schema: { name: 'response', strict: false, schema: sanitizeSchema(inner) },
   }
+}
+
+// JSON Schema validation keywords that stricter structured-output backends (notably Anthropic's, whether
+// direct or via Bedrock/Azure) reject outright. Our schemas use them only as SOFT hints — the adapters'
+// normalize* is the real trust boundary — so we strip them for OpenRouter to keep the request portable
+// across providers. Workers AI accepts them, so its path is left untouched (sanitizeSchema runs only here).
+const UNSUPPORTED_SCHEMA_KEYS = new Set([
+  'minItems',
+  'maxItems',
+  'uniqueItems',
+  'minLength',
+  'maxLength',
+  'pattern',
+  'format',
+  'minimum',
+  'maximum',
+  'exclusiveMinimum',
+  'exclusiveMaximum',
+  'multipleOf',
+  'minProperties',
+  'maxProperties',
+  'default',
+])
+
+// Deep-copy a JSON Schema with the unsupported constraint keywords removed at every level.
+function sanitizeSchema(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(sanitizeSchema)
+  if (node && typeof node === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+      if (UNSUPPORTED_SCHEMA_KEYS.has(k)) continue
+      out[k] = sanitizeSchema(v)
+    }
+    return out
+  }
+  return node
 }
 
 // Transform OpenRouter's OpenAI-style SSE (`data: {"choices":[{"delta":{"content":"…"}}]}`) into the
