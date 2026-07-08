@@ -47,10 +47,23 @@ function Dashboard() {
   const [creating, setCreating] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Free-tier accounts (canKeepPrivate === false) create PUBLIC, link-shareable decks; everyone else
+  // (self-host / Pro) creates private. The server (rindle-api createDeckGuarded) is authoritative — this
+  // just keeps the optimistic row in sync so it doesn't snap on confirm.
+  const makesPublic = entitlement?.canKeepPrivate === false
+  function newDeckVisibility(): {
+    visibility: 'private' | 'public-read'
+    share_token: string
+  } {
+    return makesPublic
+      ? { visibility: 'public-read', share_token: newId() }
+      : { visibility: 'private', share_token: '' }
+  }
+
   function createDeck(title: string) {
     const id = newId()
     const now = Date.now()
-    mutate.createDeck({ id, title, now })
+    mutate.createDeck({ id, title, now, ...newDeckVisibility() })
     // Seed the deck with one blank slide so the editor opens onto something. Match the deck's default
     // render mode (markdown-first) so the first slide isn't an odd spatial exception to the deck default.
     mutate.addSlide({
@@ -66,31 +79,16 @@ function Dashboard() {
     navigate({ to: '/deck/$deckId', params: { deckId: id } })
   }
 
-  // Client pre-check for the plan's deck cap — a friendly upgrade prompt before the authoritative server
-  // guard (server/rindle-api.ts createDeckCapped) would reject. No cap in the open-source build
-  // (deckLimit null) → this always opens the modal.
-  function onNewDeck() {
-    const limit = entitlement?.deckLimit
-    if (limit != null && decks.length >= limit) {
-      if (
-        entitlement?.upgradeUrl &&
-        confirm(
-          `You've reached your plan's ${limit}-deck limit. Upgrade to Pro for unlimited decks?`,
-        )
-      ) {
-        window.location.assign(entitlement.upgradeUrl)
-      }
-      return
-    }
-    setCreating(true)
-  }
-
   async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = '' // allow re-importing the same file
     if (!file) return
     try {
-      const deckId = importDeck(mutate, await readDeckFile(file))
+      const deckId = importDeck(
+        mutate,
+        await readDeckFile(file),
+        newDeckVisibility(),
+      )
       navigate({ to: '/deck/$deckId', params: { deckId } })
     } catch (err) {
       alert(
@@ -131,7 +129,10 @@ function Dashboard() {
           >
             <Upload size={16} /> Import
           </button>
-          <button className="btn btn--primary" onClick={onNewDeck}>
+          <button
+            className="btn btn--primary"
+            onClick={() => setCreating(true)}
+          >
             <Plus size={16} /> New deck
           </button>
         </div>
@@ -180,6 +181,8 @@ function Dashboard() {
 
       {creating && (
         <NewDeckModal
+          makesPublic={makesPublic}
+          upgradeUrl={entitlement?.upgradeUrl ?? null}
           onCancel={() => setCreating(false)}
           onCreate={createDeck}
         />
@@ -189,9 +192,14 @@ function Dashboard() {
 }
 
 function NewDeckModal({
+  makesPublic,
+  upgradeUrl,
   onCancel,
   onCreate,
 }: {
+  // Free tier: new decks are public/link-shareable (private is Pro) — surface that before they create.
+  makesPublic: boolean
+  upgradeUrl: string | null
   onCancel: () => void
   onCreate: (title: string) => void
 }) {
@@ -211,6 +219,17 @@ function NewDeckModal({
             if (e.key === 'Escape') onCancel()
           }}
         />
+        {makesPublic && (
+          <p className="dash__sub" style={{ margin: '2px 0 0', fontSize: 13 }}>
+            On the free plan this deck is shareable by link.{' '}
+            {upgradeUrl ? (
+              <a href={upgradeUrl}>Upgrade to Pro</a>
+            ) : (
+              'Upgrade to Pro'
+            )}{' '}
+            for private decks.
+          </p>
+        )}
         <div className="modal__row">
           <button className="btn btn--ghost" onClick={onCancel}>
             Cancel

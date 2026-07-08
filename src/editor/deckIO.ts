@@ -110,14 +110,23 @@ export async function exportDeckHTML(
   return true
 }
 
-/** Rebuild a deck from a parsed import. Returns the new deck id. */
-export function importDeck(mutate: Mutate, imported: ImportedDeck): string {
+/** Rebuild a deck from a parsed import. Returns the new deck id. `initialVisibility` seeds the deck's
+ *  visibility (free-tier decks are public; default private) — see index.tsx newDeckVisibility(). */
+export function importDeck(
+  mutate: Mutate,
+  imported: ImportedDeck,
+  initialVisibility: {
+    visibility: 'private' | 'public-read'
+    share_token: string
+  } = { visibility: 'private', share_token: '' },
+): string {
   const now = Date.now()
   const deckId = newId()
   mutate.createDeck({
     id: deckId,
     title: imported.title,
     now,
+    ...initialVisibility,
   })
   mutate.setDeckTheme({
     id: deckId,

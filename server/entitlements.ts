@@ -53,7 +53,6 @@ export function entitlementSummary(ent: Entitlements): EntitlementSummary {
   return {
     isPro: ent.pro,
     upgradeUrl: commercial?.upgradeUrl ?? null,
-    deckLimit: ent.deckLimit,
-    canPublish: ent.canPublish,
+    canKeepPrivate: ent.canKeepPrivate,
   }
 }

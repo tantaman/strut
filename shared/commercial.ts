@@ -12,26 +12,29 @@ export type AiFeature = 'arrange' | 'generate' | 'chat' | 'image' | 'artifact'
 export interface Entitlements {
   /** True only for a paid subscriber (set by the overlay's provider). */
   pro: boolean
-  /** Max owned decks; null = unlimited. */
-  deckLimit: number | null
+  /** May a deck be PRIVATE? The pricing wedge: public/link-shared decks are free & uncapped, keeping a
+   *  deck private is the paid feature. false → new decks are created public and cannot be set private.
+   *  (COMMUNITY/self-host = true: decks are private by default, exactly as before.) */
+  canKeepPrivate: boolean
+  /** Total storage ceiling (bytes) across the account's uploads; null = unlimited. The only cap on the
+   *  free tier's unlimited public decks. NOTE: not enforced yet — needs per-user usage accounting. */
+  storageLimitBytes: number | null
   /** Skip the per-user daily AI quota entirely (mirrors the BYO-key path). */
   aiUnlimited: boolean
   /** Per-feature daily-cap overrides; null = use the built-in server/quota.ts constants. */
   aiDailyLimits: Partial<Record<AiFeature, number>> | null
-  /** May flip a deck to public ("Anyone with the link"). */
-  canPublish: boolean
   /** Drop the PoweredBy / "shared read-only" watermark on shared decks (Pro white-label). */
   whiteLabelShare: boolean
 }
 
-/** The no-overlay default — equals this repo's historical behavior (no deck cap, built-in AI caps,
- *  publishing on). Self-hosters get the full app with zero billing setup. */
+/** The no-overlay default — equals this repo's historical behavior (private decks allowed, no storage
+ *  cap, built-in AI caps). Self-hosters get the full app with zero billing setup. */
 export const COMMUNITY: Entitlements = {
   pro: false,
-  deckLimit: null,
+  canKeepPrivate: true,
+  storageLimitBytes: null,
   aiUnlimited: false,
   aiDailyLimits: null,
-  canPublish: true,
   whiteLabelShare: false,
 }
 
@@ -40,8 +43,8 @@ export const COMMUNITY: Entitlements = {
 export interface EntitlementSummary {
   isPro: boolean
   upgradeUrl: string | null
-  deckLimit: number | null
-  canPublish: boolean
+  /** false → the client creates new decks public and hides the "make private" control (a free viewer). */
+  canKeepPrivate: boolean
 }
 
 /** The overlay module contract: `#commercial` exports `commercial: Commercial | null`. */
