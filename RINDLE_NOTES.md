@@ -353,7 +353,36 @@ enforced; don't assume `QueryData` of an `.include()`d subtree gives you the sam
 necessarily a bug — `Pick` only ever removes fields, so a wider node type is still sound against the
 runtime row — but worth knowing before you treat a raw query-data node as if it were masked.
 
-### 🔴 20. SSR seed→live handoff flashes EMPTY for one daemon round-trip — the seed is dropped on `hello`, not `snapshot`
+### 🟡 20. SSR seed→live handoff flashes EMPTY for one daemon round-trip — the seed is dropped on `hello`, not `snapshot` — PARTIALLY addressed in @rindle 0.4.4, workaround STILL required
+
+**0.4.4 restructured seed handling but the dashboard flash STILL reproduces — the `src/routes/index.tsx`
+workaround stays.** Verified by runtime A/B (headless Chrome, hard-reload `/`, sample the deck grid every
+animation frame across the seed→live swap):
+
+| `index.tsx` | dashboard first paint |
+| --- | --- |
+| `useQueryStatus`/`lastComplete` bridge PRESENT (shipped) | cards=1 steady — **no flash** |
+| bridge REMOVED (plain `useQuery`) | cards 1 → 0 (`.dash__empty` "No decks yet") → 1 — **flash ~40ms** |
+
+- **What 0.4.4 changed.** The seed now lives in the Store's `seeds` map (not `view.seeded` as the trace
+  below described) and is retired on the first live `snapshot`, not `hello` (`@rindle/client/dist/store.js`
+  seeds-map + `onEvent`). That closes the gap for an **async ws** backend (seed shows until snapshot).
+- **Why the flash persists for STRUT anyway.** Strut's live client is the **synchronous wasm** backend.
+  In `registerMaterialized` (`store.js:309-314`) the wasm engine resets the view to its LOCAL result
+  *inside* `registerQuery`, BEFORE `view.seed(seed.rows)` runs — and the code's own comment says so: "A
+  synchronous backend (wasm) already reset the view above, so its live data wins and **the seed is inert**."
+  `decksQuery` can't be computed locally at that instant (its rows + the `slideCount` `countAs` aggregate
+  aren't synced yet — they arrive a WS round-trip later), so the wasm view reads `[]` for that window → the
+  empty flash. The seeds-map retirement fix never gets a chance to bridge it because the seed was already
+  overridden at register time.
+- **Bottom line.** `index.tsx`'s `lastComplete` bridge is still load-bearing. The other `useQueryStatus`
+  gates (`deck.$deckId.tsx` `accessResolved`, `ResearchView.tsx` `notesResolved`) are a DIFFERENT concern
+  ("wait for authoritative data before judging access / seeding un-rebasing editors") and were never about
+  this flash. The real fix still belongs in `@rindle`: make `view.seed()` authoritative over a
+  synchronous-backend register-time reset (don't let an un-synced local `[]` win over a present seed), and
+  retire it on the first real snapshot. Original write-up (pre-0.4.4 trace) preserved below.
+
+
 
 Cost real time (and one wrong first fix). Symptom: a route that SSR-seeds its first paint (dashboard
 `decksQuery`) visibly flashes its empty state ("No decks yet" + "0 presentations") for a beat on load,
