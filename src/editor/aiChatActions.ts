@@ -27,6 +27,7 @@ import type { SlideDetail } from './deckDetail'
 import type { ChatAction } from '../../shared/chatAction'
 import type { ArrangementPlan } from '../../shared/arrange'
 import type { GeneratedDeck } from '../../shared/generate'
+import { appPath } from '../../shared/appPath'
 import type {
   AddArtifactArgs,
   AddImageArgs,
@@ -297,9 +298,12 @@ async function resolveImageSrc(
   if (a.source === 'search') {
     let res: Response
     try {
-      res = await fetch(`/api/image-search?q=${encodeURIComponent(a.value)}`, {
-        credentials: 'same-origin',
-      })
+      res = await fetch(
+        appPath(`/api/image-search?q=${encodeURIComponent(a.value)}`),
+        {
+          credentials: 'same-origin',
+        },
+      )
     } catch {
       return { ok: false, error: 'Network error — try again.' }
     }
@@ -314,7 +318,7 @@ async function resolveImageSrc(
   // generate
   let res: Response
   try {
-    res = await fetch('/api/image', {
+    res = await fetch(appPath('/api/image'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',
@@ -471,7 +475,7 @@ async function runGenerate(
     : a.description
   let res: Response
   try {
-    res = await fetch('/api/generate', {
+    res = await fetch(appPath('/api/generate'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',
@@ -503,7 +507,7 @@ async function runArrange(
     return { ok: false, error: 'There are no slides to arrange.' }
   let res: Response
   try {
-    res = await fetch('/api/arrange', {
+    res = await fetch(appPath('/api/arrange'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',

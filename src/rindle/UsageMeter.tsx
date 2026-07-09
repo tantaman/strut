@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AiFeature } from '../../shared/commercial'
+import { appPath } from '../../shared/appPath'
 import { USAGE_CHANGED } from '../lib/usage'
 
 interface Usage {
@@ -65,7 +66,7 @@ export function UsageMeter() {
   const wrap = useRef<HTMLDivElement>(null)
 
   const load = useCallback(() => {
-    fetch('/api/usage', { cache: 'no-store' })
+    fetch(appPath('/api/usage'), { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: (Usage & { error?: string }) | null) => {
         if (d && !d.error) setUsage(d)

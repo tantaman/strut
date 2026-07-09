@@ -11,10 +11,11 @@
 
 import type { S3Client as S3ClientT } from '@aws-sdk/client-s3'
 import type { R2BucketLike } from './cf-env.ts'
+import { appPath } from '../shared/appPath.ts'
 
 // Local-fallback files are served back by serveUploadByKey (Vite/Start won't serve files written at
 // runtime). With R2 (binding or S3) configured, URLs point at the bucket / a Worker-served path.
-export const UPLOAD_SERVE_PREFIX = '/api/rindle/uploads/'
+export const UPLOAD_SERVE_PREFIX = appPath('/api/rindle/uploads/')
 const LOCAL_DIR_NAME = '.uploads'
 
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB

@@ -73,7 +73,9 @@ GitHub.
 
 ## 5. Register the OAuth app(s)
 
-Set the callback URL to `${BETTER_AUTH_URL}/api/auth/callback/<provider>`:
+Set the callback URL to `${BETTER_AUTH_URL}/api/auth/callback/<provider>`.
+If the app is mounted under a base path, include it before `/api/auth` (the hosted commercial build uses
+`https://strut.io/app/api/auth/callback/<provider>`):
 
 - **GitHub** → Settings ▸ Developer settings ▸ OAuth Apps → `.../api/auth/callback/github`
 - **Google** → Cloud Console ▸ OAuth client → redirect URI `.../api/auth/callback/google`

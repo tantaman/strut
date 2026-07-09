@@ -92,11 +92,11 @@ paid **Pro** accounts via Stripe) is a **private overlay** kept out of this repo
 deploy time — so a clone has **no billing, no marketing, and no paywall**, and behaves exactly as it does
 today. This follows the same opt-in posture as the analytics above.
 
-The repo ships the open-core **seam** (`#commercial`) that an overlay plugs into: the app *reads* an
-entitlement (`server/entitlements.ts`) to lift AI caps / the deck cap / publishing, and *renders* an
+The repo ships the open-core **seam** (`#commercial`) that an overlay plugs into: the app _reads_ an
+entitlement (`server/entitlements.ts`) to lift AI caps / the deck cap / publishing, and _renders_ an
 optional Upgrade affordance — all inert without an overlay. `pnpm deploy` builds the free app on a single
 host; `pnpm deploy:pro` builds the app **plus** the overlay as one Worker (marketing on `strut.io`, the
-app on `app.strut.io`). See **[`docs/COMMERCIAL_OVERLAY.md`](docs/COMMERCIAL_OVERLAY.md)**.
+app on `strut.io/app`). See **[`docs/COMMERCIAL_OVERLAY.md`](docs/COMMERCIAL_OVERLAY.md)**.
 
 ## Analytics
 

@@ -36,6 +36,7 @@ import type { ThemeDeck } from './aiTheme'
 import type { SlideDetail } from './deckDetail'
 import type { DeckChatContext } from './chatNarration'
 import type { ChatRequest, ChatTurn } from '../../shared/chat'
+import { appPath } from '../../shared/appPath'
 import type {
   ChatAction,
   ChatActRequest,
@@ -238,7 +239,7 @@ export async function sendChat(
       deckContext: ctx.deckContext,
       messages: [...ctx.history, { role: 'user', content: text }],
     }
-    res = await fetch('/api/chat', {
+    res = await fetch(appPath('/api/chat'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',
@@ -393,7 +394,7 @@ export async function sendChatAction(
       theme: ctx.theme,
       activeSlide: ctx.activeSlide,
     }
-    res = await fetch('/api/chat/act', {
+    res = await fetch(appPath('/api/chat/act'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',

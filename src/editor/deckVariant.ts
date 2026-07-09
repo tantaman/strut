@@ -11,6 +11,7 @@ import type {
   VariantRequest,
   VariantSourceSlide,
 } from '../../shared/variant'
+import { appPath } from '../../shared/appPath'
 
 export interface DeckVisibilitySeed {
   visibility: 'private' | 'public-read'
@@ -70,7 +71,7 @@ function sourceSlides(
 }
 
 async function requestVariant(req: VariantRequest): Promise<GeneratedVariant> {
-  const res = await fetch('/api/variant', {
+  const res = await fetch(appPath('/api/variant'), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(req),

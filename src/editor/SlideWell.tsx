@@ -27,6 +27,7 @@ import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { AddSlideArgs } from '../../shared/app-def'
 import type { GeneratedDeck, GenerateRequest } from '../../shared/generate'
+import { appPath } from '../../shared/appPath'
 
 export function SlideWell({
   slides,
@@ -677,7 +678,7 @@ function GenerateForm({
     setError(null)
     try {
       const body: GenerateRequest = { deckId, prompt }
-      const res = await fetch('/api/generate', {
+      const res = await fetch(appPath('/api/generate'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         credentials: 'same-origin',

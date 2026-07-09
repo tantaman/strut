@@ -23,6 +23,7 @@ import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { DeckThemeFields } from './types'
+import { appPath } from '../../shared/appPath'
 
 export interface OverviewSlide {
   id: string
@@ -675,7 +676,7 @@ function AiArrangeForm({
         instruction,
         slides: buildDigest(slides),
       }
-      const res = await fetch('/api/arrange', {
+      const res = await fetch(appPath('/api/arrange'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         credentials: 'same-origin',
