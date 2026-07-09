@@ -59,6 +59,20 @@ const SLIDE_FIELDS = [
   'text_align',
 ]
 
+const SLIDE_BODY_FIELDS = ['doc', 'markdown']
+const SLIDE_SPATIAL_FIELDS = [
+  'sort',
+  'x',
+  'y',
+  'z',
+  'rotate_x',
+  'rotate_y',
+  'rotate_z',
+  'imp_scale',
+]
+const SLIDE_STYLE_FIELDS = ['background', 'surface', 'render_mode', 'text_align']
+const SLIDE_ALL_FIELDS = [...SLIDE_BODY_FIELDS, ...SLIDE_FIELDS]
+
 const COMPONENT_FIELDS = [
   'slide_id',
   'type',
@@ -76,6 +90,90 @@ const COMPONENT_FIELDS = [
   'fill',
 ]
 
+const COMPONENT_SPATIAL_FIELDS = [
+  'z_order',
+  'x',
+  'y',
+  'scale_x',
+  'scale_y',
+  'scale_w',
+  'scale_h',
+  'rotate',
+  'skew_x',
+  'skew_y',
+]
+
+const COMPONENT_DETAIL_FIELDS = ['slide_id', 'type', 'custom_classes', 'fill']
+const COMPONENT_ALL_FIELDS = [...COMPONENT_FIELDS, 'props']
+const CUSTOM_BACKGROUND_FIELDS = ['klass', 'style']
+
+type EditGroup = {
+  name: string
+  path: string
+  fields: readonly string[]
+  allFields: readonly string[]
+  render: (row: NamedRow, old: NamedRow | undefined, parent?: NamedRow) => string | null
+}
+
+const EDIT_GROUPS: EditGroup[] = [
+  {
+    name: 'deck-fields',
+    path: '',
+    fields: DECK_FIELDS,
+    allFields: DECK_FIELDS,
+    render: renderDeckEdit,
+  },
+  {
+    name: 'slide-body',
+    path: 'slides',
+    fields: SLIDE_BODY_FIELDS,
+    allFields: SLIDE_ALL_FIELDS,
+    render: renderSlideEdit,
+  },
+  {
+    name: 'slide-spatial',
+    path: 'slides',
+    fields: SLIDE_SPATIAL_FIELDS,
+    allFields: SLIDE_ALL_FIELDS,
+    render: renderSlideEdit,
+  },
+  {
+    name: 'slide-style',
+    path: 'slides',
+    fields: SLIDE_STYLE_FIELDS,
+    allFields: SLIDE_ALL_FIELDS,
+    render: renderSlideEdit,
+  },
+  {
+    name: 'component-props',
+    path: 'slides.components',
+    fields: ['props'],
+    allFields: COMPONENT_ALL_FIELDS,
+    render: renderComponentEdit,
+  },
+  {
+    name: 'component-spatial',
+    path: 'slides.components',
+    fields: COMPONENT_SPATIAL_FIELDS,
+    allFields: COMPONENT_ALL_FIELDS,
+    render: renderComponentEdit,
+  },
+  {
+    name: 'component-detail',
+    path: 'slides.components',
+    fields: COMPONENT_DETAIL_FIELDS,
+    allFields: COMPONENT_ALL_FIELDS,
+    render: renderComponentEdit,
+  },
+  {
+    name: 'custom-background',
+    path: 'customBackgrounds',
+    fields: CUSTOM_BACKGROUND_FIELDS,
+    allFields: CUSTOM_BACKGROUND_FIELDS,
+    render: renderCustomBackgroundEdit,
+  },
+]
+
 export interface DeckChatContext {
   /** Drain new narration into the cumulative context and return the full bounded prompt prefix. */
   take: () => string
@@ -91,22 +189,14 @@ export const CHAT_NARRATORS: NarratorRegistry = {
     root: {
       add: ({ row }) => `Deck snapshot: ${deckSummary(row)}.`,
       remove: ({ row }) => `Deck removed: id=${s(row.id)} title=${q(row.title)}.`,
-      edit: ({ row, old }) => {
-        const fields = changedFields(row, old, DECK_FIELDS, formatDeckField)
-        return fields.length ? `Deck updated: ${fields.join(', ')}.` : null
-      },
+      edit: ({ row, old }) => renderDeckEdit(row, old),
     },
     related: {
       slides: {
         salience: 'info',
         add: ({ row }) => `Slide snapshot/add: ${slideSummary(row)}.`,
         remove: ({ row }) => `Slide removed: ${slideSummary(row)}.`,
-        edit: ({ row, old }) => {
-          const fields = changedSlideFields(row, old)
-          return fields.length
-            ? `Slide ${s(row.id)} updated: ${fields.join(', ')}.`
-            : null
-        },
+        edit: ({ row, old }) => renderSlideEdit(row, old),
       },
       'slides.components': {
         salience: 'info',
@@ -114,32 +204,20 @@ export const CHAT_NARRATORS: NarratorRegistry = {
           `Component snapshot/add: ${componentSummary(row, parent)}.`,
         remove: ({ row, parent }) =>
           `Component removed: ${componentSummary(row, parent)}.`,
-        edit: ({ row, old, parent }) => {
-          const fields = changedComponentFields(row, old)
-          return fields.length
-            ? `Component ${s(row.id)} on slide ${slideId(row, parent)} updated: ${fields.join(', ')}.`
-            : null
-        },
+        edit: ({ row, old, parent }) => renderComponentEdit(row, old, parent),
       },
       customBackgrounds: {
         salience: 'ambient',
         add: ({ row }) => `Custom background snapshot/add: ${customBackground(row)}.`,
         remove: ({ row }) => `Custom background removed: ${customBackground(row)}.`,
-        edit: ({ row, old }) => {
-          const fields = changedFields(row, old, ['klass', 'style'], (k, v) =>
-            k === 'style' ? `style=${q(cap(s(v), MAX_FIELD))}` : `${k}=${q(v)}`,
-          )
-          return fields.length
-            ? `Custom background ${s(row.id)} updated: ${fields.join(', ')}.`
-            : null
-        },
+        edit: ({ row, old }) => renderCustomBackgroundEdit(row, old),
       },
     },
   },
 }
 
 export function digestChatNarration(events: SemanticEvent[]): string {
-  const rendered = events
+  const rendered = coalesceBufferedEvents(events)
     .filter((e) => e.text !== null)
     .sort((a, b) => salienceRank(b.salience) - salienceRank(a.salience))
 
@@ -157,6 +235,63 @@ export function digestChatNarration(events: SemanticEvent[]): string {
     header,
     ...rendered.map((e) => `[${SALIENCE_LABEL[e.salience]}] ${e.text}`),
   ].join('\n')
+}
+
+function coalesceBufferedEvents(events: SemanticEvent[]): SemanticEvent[] {
+  const out: SemanticEvent[] = []
+  const byKey = new Map<
+    string,
+    { group: EditGroup; index: number; old: NamedRow | undefined }
+  >()
+  for (const event of events) {
+    const target = coalesceTarget(event)
+    if (!target) {
+      out.push(event)
+      continue
+    }
+    const existing = byKey.get(target.key)
+    if (existing === undefined) {
+      byKey.set(target.key, {
+        group: target.group,
+        index: out.length,
+        old: event.resolved.old,
+      })
+      out.push(renderCoalescedEdit(event, event.resolved.old, target.group))
+    } else {
+      out[existing.index] = renderCoalescedEdit(event, existing.old, existing.group)
+    }
+  }
+  return out
+}
+
+function coalesceTarget(
+  event: SemanticEvent,
+): { key: string; group: EditGroup } | null {
+  if (event.phase !== 'batch') return null
+  const r = event.resolved
+  if (r.op !== 'edit' || !r.old) return null
+  const path = r.aliasChain.join('.')
+  const id = s(r.row.id)
+  if (!id) return null
+  for (const group of EDIT_GROUPS) {
+    if (group.path !== path) continue
+    if (!isOnlyGroupFieldsChanged(r.row, r.old, group)) continue
+    return { key: `${event.query}:${path}:${group.name}:${id}`, group }
+  }
+  return null
+}
+
+function renderCoalescedEdit(
+  event: SemanticEvent,
+  old: NamedRow | undefined,
+  group: EditGroup,
+): SemanticEvent {
+  const resolved = { ...event.resolved, old }
+  return {
+    ...event,
+    resolved,
+    text: group.render(resolved.row, old, resolved.parent),
+  }
 }
 
 export function useDeckChatContext(deckId: string): DeckChatContext {
@@ -246,6 +381,36 @@ function customBackground(row: NamedRow): string {
   ].join(' ')
 }
 
+function renderDeckEdit(row: NamedRow, old?: NamedRow): string | null {
+  const fields = changedFields(row, old, DECK_FIELDS, formatDeckField)
+  return fields.length ? `Deck updated: ${fields.join(', ')}.` : null
+}
+
+function renderSlideEdit(row: NamedRow, old?: NamedRow): string | null {
+  const fields = changedSlideFields(row, old)
+  return fields.length ? `Slide ${s(row.id)} updated: ${fields.join(', ')}.` : null
+}
+
+function renderComponentEdit(
+  row: NamedRow,
+  old?: NamedRow,
+  parent?: NamedRow,
+): string | null {
+  const fields = changedComponentFields(row, old)
+  return fields.length
+    ? `Component ${s(row.id)} on slide ${slideId(row, parent)} updated: ${fields.join(', ')}.`
+    : null
+}
+
+function renderCustomBackgroundEdit(row: NamedRow, old?: NamedRow): string | null {
+  const fields = changedFields(row, old, CUSTOM_BACKGROUND_FIELDS, (k, v) =>
+    k === 'style' ? `style=${q(cap(s(v), MAX_FIELD))}` : `${k}=${q(v)}`,
+  )
+  return fields.length
+    ? `Custom background ${s(row.id)} updated: ${fields.join(', ')}.`
+    : null
+}
+
 function changedSlideFields(row: NamedRow, old?: NamedRow): string[] {
   const out = changedFields(row, old, SLIDE_FIELDS, (k, v, prev) =>
     `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
@@ -264,6 +429,23 @@ function changedComponentFields(row: NamedRow, old?: NamedRow): string[] {
     out.push(`props={${propsSummary(parseProps(row.props))}}`)
   }
   return out
+}
+
+function isOnlyGroupFieldsChanged(
+  row: NamedRow,
+  old: NamedRow,
+  group: EditGroup,
+): boolean {
+  const changed = changedFieldNames(row, old, group.allFields)
+  return changed.length > 0 && changed.every((field) => group.fields.includes(field))
+}
+
+function changedFieldNames(
+  row: NamedRow,
+  old: NamedRow,
+  fields: readonly string[],
+): string[] {
+  return fields.filter((field) => !same(row[field], old[field]))
 }
 
 function changedFields(
