@@ -2,16 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { FONT_FAMILIES } from '../config'
 import type { ChatActRequest } from '../../shared/chatAction'
 
-// "✨ Chat — Edit lane" endpoint. Takes a conversation + deck grounding and STREAMS the turn (server/chatAct.ts
-// chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out, then one terminal
-// `data: {"result":{say,actions}}` frame carries the validated changes the client applies. Like the advisor
-// twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot JSON so the client can
-// branch BEFORE it reads the stream. Same two boundaries as /api/arrange and /api/generate:
+// "✨ Chat" action-capable endpoint. Takes a conversation + deck grounding and STREAMS the turn
+// (server/chatAct.ts chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out,
+// then one terminal `data: {"result":{say,actions}}` frame carries any validated changes the client applies.
+// Like the prose-only twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot
+// JSON so the client can branch BEFORE it reads the stream. Same two boundaries as /api/arrange and
+// /api/generate:
 //   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path;
 //      a BYO OpenRouter caller (they pay) is allowed. Mirrors server/session.ts's trust posture.
 //   2. COST BOUND — the app pays for inference, so a per-isolate burst throttle + the AUTHORITATIVE durable
-//      daily quota (server/quota.ts) cap it. An Edit turn is one model call, so it meters exactly like an
-//      advisor turn — it shares the SAME chat quota bucket (consumeChatQuota).
+//      daily quota (server/quota.ts) cap it. An action-capable chat turn is one model call, so it meters
+//      exactly like a prose-only chat turn — it shares the SAME chat quota bucket (consumeChatQuota).
 // We do NOT verify the user owns `deckId` here: the result is only a proposed change; APPLYING it flows
 // through the authoritative slide/deck mutators (server/rindle-api.ts withSlideEditable/withDeckEditable),
 // which independently reject edits the user can't make. The only thing this endpoint spends is inference.

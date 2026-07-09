@@ -1,4 +1,4 @@
-// Client dispatcher for the "✨ Chat — Edit lane": route ONE normalized ChatAction to the right one-undo
+// Client dispatcher for action-capable "✨ Chat": route ONE normalized ChatAction to the right one-undo
 // apply path. Two of the four kinds reuse the SHIPPED ✨ features verbatim — `arrange` re-runs the existing
 // /api/arrange flow → applyPlan, `generate` re-runs /api/generate → applyGenerated — so they inherit those
 // features' prompting, normalize firewall, and one-undo apply with zero new code. Only `set_theme` and

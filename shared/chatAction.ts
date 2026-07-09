@@ -1,7 +1,7 @@
-// The client ↔ server contract for "✨ Chat — Edit lane" (AI_CHAT_TOOLS_PLAN.md): the actionable half of
-// chat. Where the advisor (shared/chat.ts) only TALKS, the Edit lane lets the model drive deck changes —
-// recolor the theme, rewrite a slide's body, create/generate slides, arrange them, or drop components —
-// through the same isomorphic mutators a human uses (so sync, permission gating, and undo come free).
+// The client ↔ server contract for action-capable "✨ Chat": the actionable half of chat. It lets the model
+// drive deck changes when the author asks — recolor the theme, rewrite a slide's body, create/generate
+// slides, arrange them, or drop components — through the same isomorphic mutators a human uses (so sync,
+// permission gating, and undo come free).
 //
 // A turn may carry SEVERAL actions (a LIST), applied in order and collapsed into ONE undo. That's what lets
 // "make a new slide and put an image on it" happen in a single turn: a `create_slide` (which can declare a
@@ -16,11 +16,11 @@
 // The worst a poisoned slide/theme value can do is a bounded change to the user's OWN deck — one undo away.
 //
 // Transport is prose + a fenced ```json action block, NOT native tool-calling and NOT streamed json_schema:
-// the Edit lane STREAMS (server/chatAct.ts) and Workers AI — the default backend — can't stream JSON Mode
-// (developers.cloudflare.com/workers-ai/features/json-mode), so the model writes a friendly reply then a
-// fenced JSON array of the changes, which the adapter parses out. `normalizeActions` below is the firewall
+// action-capable chat STREAMS (server/chatAct.ts) and Workers AI — the default backend — can't stream JSON
+// Mode (developers.cloudflare.com/workers-ai/features/json-mode), so the model writes a friendly reply then
+// a fenced JSON array of the changes, which the adapter parses out. `normalizeActions` below is the firewall
 // on that parsed list, exactly as before. (Arrange/Generate keep their one-shot json_schema calls — the
-// streaming constraint is specific to this lane.)
+// streaming constraint is specific to this path.)
 
 import { clampChatRequest } from './chat.ts'
 import type { ChatTurn, SlideDigest } from './chat.ts'
@@ -60,8 +60,9 @@ export type ChatAction =
   | { kind: 'add_web'; src: string; slideId?: string } // embed a live website (webframe). `src` is a full http(s) URL.
   | { kind: 'add_artifact'; code: string; title?: string; slideId?: string } // author a runnable component + drop it live
 
-/** What the Edit-lane model returns: a short prose confirmation/answer (`say`) plus the LIST of deck changes
- *  to apply, in order (empty = advice only, no deck change). Mirrors the Arrange/Generate result shape. */
+/** What the action-capable chat model returns: a short prose confirmation/answer (`say`) plus the LIST of
+ *  deck changes to apply, in order (empty = advice only, no deck change). Mirrors the Arrange/Generate
+ *  result shape. */
 export interface ChatActResult {
   say: string
   actions: ChatAction[]

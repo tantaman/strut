@@ -3133,8 +3133,8 @@ button {
   }
 }
 
-/* Edit-lane apply sub-status ("Applying theme…") — a muted row beneath the streamed reply while the change
-   is being applied (for generate／arrange, a second round-trip), so an Edit turn is never silent. */
+/* Apply sub-status ("Applying theme…") — a muted row beneath the streamed reply while a change is being
+   applied (for generate/arrange, a second round-trip), so an actionable chat turn is never silent. */
 .chat__note {
   display: flex;
   align-items: center;
@@ -3151,7 +3151,7 @@ button {
   height: 4px;
 }
 
-/* Footer: the Chat／Edit mode toggle + Undo chip above the composer, one separator at the top. */
+/* Footer: Undo chip above the composer, one separator at the top. */
 .chat__foot {
   flex: 0 0 auto;
   border-top: 1px solid var(--line);
@@ -3159,42 +3159,11 @@ button {
 .chat__toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
   padding: 8px 12px 0;
 }
-/* Chat／Edit segmented control — a compact two-lane switch (advise vs. change the deck). */
-.chat__modes {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-.chat__modes button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s;
-}
-.chat__modes button.is-active {
-  background: var(--panel);
-  color: var(--coral);
-  box-shadow: 0 1px 2px rgba(24, 26, 33, 0.08);
-}
-/* Undo affordance shown after an Edit-lane apply (a shortcut for Cmd/Z on the last AI change). */
+/* Undo affordance shown after an AI-applied change (a shortcut for Cmd/Z on the last AI change). */
 .chat__undo {
   display: inline-flex;
   align-items: center;
@@ -3268,10 +3237,6 @@ button {
 .chat__send:disabled {
   opacity: 0.5;
   cursor: default;
-}
-/* Edit-lane send: a deeper shade so the "this changes my deck" action reads distinct from advice. */
-.chat__send--edit:not(:disabled) {
-  background: var(--coral-strong);
 }
 .chat__spinner {
   width: 14px;

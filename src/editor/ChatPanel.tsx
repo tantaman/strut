@@ -1,17 +1,15 @@
-// The "✨ Chat" advisor panel (AI_CHAT_PLAN.md): a right-side rail where the user converses with an LLM
-// about the deck they're editing. Reads + drives the memory-only `chat_message` local thread through
-// useChat; the model can SEE the deck (grounded via buildDigest) and answers in streamed prose.
+// The "✨ Chat" panel: a right-side rail where the user converses with an LLM about the deck they're
+// editing. Reads + drives the memory-only `chat_message` local thread through useChat; the model can SEE
+// the deck, answer in streamed prose, and apply normalized deck changes when the author asks.
 //
 // Trust boundary at render: the assistant's turn is free Markdown, so it flows through the app's existing
 // `markdownToHtml` sink (marked → DOMPurify) — the SAME sanitizer the slide surfaces use — before it
 // reaches dangerouslySetInnerHTML. User turns render as plain text (React escapes them). Guests see a
-// sign-in nudge (the feature is member-gated — the /api/chat route enforces it too — but discoverable to
-// everyone), mirroring AI Arrange / Generate.
+// sign-in nudge (the server route enforces it too), mirroring AI Arrange / Generate.
 
 import { useEffect, useRef, useState } from 'react'
 import { RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
 import { authClient } from '../rindle/authClient'
-import { track } from '../lib/analytics'
 import { markdownToHtml } from './markdown'
 import { useChat } from './aiChat'
 import type { ChatMessage } from './aiChat'
@@ -27,7 +25,7 @@ export function ChatPanel({
   deckId: string
   slides: SlideDetail[]
   // The deck row (resolved theme + theme before-values) and the active slide (the natural body-edit
-  // target) ground + apply the Edit lane. Null until the deck subtree resolves.
+  // target) ground any chat-applied change. Null until the deck subtree resolves.
   deck: DeckRoot | null
   activeSlide: SlideDetail | null
   onClose: () => void
@@ -39,15 +37,11 @@ export function ChatPanel({
     !!session?.user &&
     (session.user as { isAnonymous?: boolean }).isAnonymous !== true
 
-  const { messages, send, sendEdit, busy, clear, undoTip, undoLast } = useChat(
+  const { messages, send, busy, clear, undoTip, undoLast } = useChat(
     deckId,
     slides,
     { deck, activeSlide },
   )
-  // Two lanes (AI_CHAT_TOOLS_PLAN.md fork A): 'chat' = the streamed advisor (read-only), 'edit' = the AI
-  // drives one deck change. The mode is an explicit affordance so the "AI is about to change my deck"
-  // boundary is visible.
-  const [mode, setMode] = useState<'chat' | 'edit'>('chat')
   const [text, setText] = useState('')
   const threadRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -66,22 +60,15 @@ export function ChatPanel({
   function submit() {
     const t = text.trim()
     if (!t || busy) return
-    if (mode === 'edit') {
-      // sendEdit records its own 'chat:edit' event (and dispatches the applied action).
-      sendEdit(t)
-    } else {
-      send(t)
-      // Interaction-only: how many slides the advisor is grounded on. Never the prompt or slide content.
-      track('chat:sent', { slides: slides.length })
-    }
+    send(t)
     setText('')
   }
 
   return (
-    <aside className="chat" aria-label="AI advisor">
+    <aside className="chat" aria-label="AI chat">
       <header className="chat__head">
         <div className="chat__title">
-          <Sparkles size={15} /> Advisor
+          <Sparkles size={15} /> Chat
         </div>
         <div className="chat__head-actions">
           <button
@@ -105,54 +92,31 @@ export function ChatPanel({
           <div className="chat__thread" ref={threadRef}>
             {messages.length === 0 ? (
               <div className="chat__empty">
-                <strong>Chat</strong> to talk it through — does this flow?
-                what’s a stronger closing? Switch to <strong>Edit</strong> and
-                the AI changes your deck: “make the background darker”, “add
-                three slides on pricing”, “tighten this slide”.
+                Ask for critique or tell the AI to change the deck: “does this
+                flow?”, “make the background darker”, “add three slides on
+                pricing”, “tighten this slide”.
               </div>
             ) : (
               messages.map((m) => <ChatBubble key={m.id} message={m} />)
             )}
           </div>
           <div className="chat__foot">
-            <div className="chat__toolbar">
-              <div className="chat__modes" role="group" aria-label="Mode">
-                <button
-                  className={mode === 'chat' ? 'is-active' : ''}
-                  onClick={() => setMode('chat')}
-                  title="Ask for advice (read-only)"
-                  aria-pressed={mode === 'chat'}
-                >
-                  Chat
-                </button>
-                <button
-                  className={mode === 'edit' ? 'is-active' : ''}
-                  onClick={() => setMode('edit')}
-                  title="Tell the AI to change your deck"
-                  aria-pressed={mode === 'edit'}
-                >
-                  <Sparkles size={12} /> Edit
-                </button>
-              </div>
-              {undoTip && (
+            {undoTip && (
+              <div className="chat__toolbar">
                 <div className="chat__undo">
                   <span>Applied</span>
                   <button onClick={undoLast} title="Undo the change (⌘/Ctrl+Z)">
                     <RotateCcw size={12} /> Undo
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <div className="chat__composer">
               <textarea
                 ref={inputRef}
                 className="chat__input"
                 rows={2}
-                placeholder={
-                  mode === 'edit'
-                    ? 'Tell the AI what to change… (⌘/Ctrl+Enter)'
-                    : 'Ask your advisor… (⌘/Ctrl+Enter to send)'
-                }
+                placeholder="Ask or tell the AI what to change… (⌘/Ctrl+Enter)"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
@@ -164,17 +128,13 @@ export function ChatPanel({
                 }}
               />
               <button
-                className={
-                  'chat__send' + (mode === 'edit' ? ' chat__send--edit' : '')
-                }
+                className="chat__send"
                 onClick={submit}
                 disabled={busy || !text.trim()}
                 title="Send (⌘/Ctrl+Enter)"
               >
                 {busy ? (
                   <span className="chat__spinner" aria-label="Thinking" />
-                ) : mode === 'edit' ? (
-                  'Edit'
                 ) : (
                   'Send'
                 )}
@@ -250,7 +210,7 @@ function SignInGate() {
   return (
     <div className="chat__gate">
       <p className="chat__gate-text">
-        Sign in to chat with an AI advisor about your deck.
+        Sign in to chat with AI about your deck.
       </p>
       <div className="chat__gate-signin">
         <button

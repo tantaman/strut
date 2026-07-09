@@ -10,10 +10,9 @@
 // (3) RENDER: the assistant's Markdown is shown through the app's existing `markdownToHtml` sink (marked →
 // DOMPurify), the same sanitizer the slide surfaces already use.
 //
-// Phase 2 (actionable chat) is now realized in shared/chatAction.ts (the `Action` union + the
-// `normalizeActions` firewall) and the `/api/chat/act` route — see AI_CHAT_TOOLS_PLAN.md. The advisor here
-// stays prose-only; the Edit lane is a separate structured pass. The action types are re-exported below so
-// chat callers have one import surface.
+// Action-capable chat is realized in shared/chatAction.ts (the `Action` union + the `normalizeActions`
+// firewall) and the `/api/chat/act` route. This request shape stays prose-only for the legacy /api/chat
+// endpoint. The action types are re-exported below so chat callers have one import surface.
 
 import type { SlideDigest } from './arrange.ts'
 

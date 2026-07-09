@@ -1,6 +1,7 @@
-// Client side of "✨ Chat": the advisor panel's engine. A user turn + the current thread + a fresh deck
-// digest → POST /api/chat → a token STREAM parsed and folded into a memory-only local `chat_message` row
-// whose `content` grows per token. See AI_CHAT_PLAN.md.
+// Client side of "✨ Chat": the panel's engine. A user turn + the current thread + a fresh deck digest
+// stream into a memory-only local `chat_message` row whose `content` grows per token. The product path uses
+// the action-capable stream: the assistant can answer with prose only, or return normalized actions that
+// apply through the same one-undo dispatcher as the rest of the editor.
 //
 // Two load-bearing decisions from the plan live here:
 //   1. Storage is a LOCAL table (src/rindle/localSchema.ts): writes go through `store.writeLocal` (NOT
@@ -77,18 +78,19 @@ export function parseSseDelta(line: string): SseEvent | null {
   }
 }
 
-/** One parsed Edit-lane SSE line. The Edit stream reuses the advisor's `{response}` prose frames (typed
- *  out live) but adds a terminal `{result}` frame carrying the server-validated `{ say, action }` — the
- *  authoritative value to APPLY. `done` marks the `[DONE]` terminator. */
+/** One parsed action-capable chat SSE line. The stream reuses the advisor's `{response}` prose frames
+ *  (typed out live) but adds a terminal `{result}` frame carrying the server-validated `{ say, action }` —
+ *  the authoritative value to APPLY. `done` marks the `[DONE]` terminator. */
 export interface ActEvent {
   done: boolean
   delta: string
   result: ChatActResult | null
 }
 
-/** Parse ONE Edit-lane SSE line (src/routes/api.chat.act.tsx). Returns null for a line carrying nothing
- *  (blank / comment / non-`data:` / garbled). `[DONE]` → `{ done: true }`; a `{"result":…}` frame → its
- *  validated result; a `{"response":"…"}` frame → its prose delta. Pure — unit-tested in chat.test.ts. */
+/** Parse ONE action-capable chat SSE line (src/routes/api.chat.act.tsx). Returns null for a line carrying
+ *  nothing (blank / comment / non-`data:` / garbled). `[DONE]` → `{ done: true }`; a `{"result":…}` frame
+ *  → its validated result; a `{"response":"…"}` frame → its prose delta. Pure — unit-tested in
+ *  chat.test.ts. */
 export function parseActLine(line: string): ActEvent | null {
   const trimmed = line.trimEnd()
   if (!trimmed.startsWith('data:')) return null
@@ -319,9 +321,9 @@ export async function sendChat(
   })
 }
 
-// ---- Edit lane (actionable turn) -------------------------------------------------------------------
+// ---- Action-capable chat turn ----------------------------------------------------------------------
 
-/** The extra grounding an Edit-lane turn carries beyond the advisor's SendContext (see
+/** The extra grounding an action-capable turn carries beyond the advisor's SendContext (see
  *  shared/chatAction.ts): the deck's resolved theme + the active slide's full text. */
 export interface ActionSendContext {
   deckId: string
@@ -331,12 +333,12 @@ export interface ActionSendContext {
   activeSlide?: ChatActSlide
 }
 
-/** Run ONE Edit-lane turn: append the user turn + a working assistant turn, POST /api/chat/act, then STREAM
- *  the reply into the assistant row's `content` (the `{response}` frames — same live typing as the advisor)
- *  and DISPATCH the terminal `{result}` frame's action (via the injected `dispatch`, which closes over the
- *  live mutators + history), showing an "Applying…" note on the row while that apply (possibly a second
- *  round-trip) runs. Returns the applied action's undo label (for the Undo chip) or null when nothing was
- *  applied. Never throws — every failure lands as an error row so the UI stays consistent. */
+/** Run ONE action-capable chat turn: append the user turn + a working assistant turn, POST /api/chat/act,
+ *  then STREAM the reply into the assistant row's `content` (the `{response}` frames — same live typing as
+ *  the advisor) and DISPATCH the terminal `{result}` frame's action (via the injected `dispatch`, which
+ *  closes over the live mutators + history), showing an "Applying…" note on the row while that apply
+ *  (possibly a second round-trip) runs. Returns the applied action's undo label (for the Undo chip) or null
+ *  when nothing was applied. Never throws — every failure lands as an error row so the UI stays consistent. */
 export async function sendChatAction(
   store: StrutStore,
   ctx: ActionSendContext,
@@ -519,29 +521,27 @@ const EMPTY: readonly ChatMessage[] = []
 export interface UseChat {
   /** The thread for this deck, in `created` order. Reactive — every `writeLocal` re-renders. */
   messages: readonly ChatMessage[]
-  /** Send an ADVISOR turn (streamed prose, read-only). No-op while busy or for empty text. */
+  /** Send one chat turn. The model may answer only, or apply normalized deck changes. */
   send: (text: string) => void
-  /** Send an EDIT-lane turn: the AI drives ONE deck change (one undo). No-op while busy / empty. */
-  sendEdit: (text: string) => void
   /** True while an assistant turn is still streaming / an edit is being applied. */
   busy: boolean
   /** Clear the whole thread for this deck (removes every local row). */
   clear: () => void
-  /** After a successful Edit-lane apply, the undo affordance ({ label }); null otherwise. */
+  /** After a successful AI-applied change, the undo affordance ({ label }); null otherwise. */
   undoTip: { label: string } | null
-  /** Undo the last Edit-lane change (a shortcut for Cmd/Ctrl+Z) and clear the chip. */
+  /** Undo the last AI-applied change (a shortcut for Cmd/Ctrl+Z) and clear the chip. */
   undoLast: () => void
 }
 
-/** Extra editor context the Edit lane needs to ground + apply an action: the deck row (for the resolved
+/** Extra editor context action-capable chat needs to ground + apply an action: the deck row (for the resolved
  *  theme + theme before-values) and the currently-active slide (the natural `set_body` target). */
 export interface ChatEditContext {
   deck?: ThemeDeck | null
   activeSlide?: SlideDetail | null
 }
 
-/** Build the Edit-lane grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and
- *  the active slide's FULL body text (so a body rewrite sees the whole slide, not the 240-char digest). */
+/** Build the action grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and the
+ *  active slide's FULL body text (so a body rewrite sees the whole slide, not the 240-char digest). */
 function buildActGrounding(
   deck: ThemeDeck | null,
   activeSlide: SlideDetail | null,
@@ -574,8 +574,8 @@ export function useChat(
   edit?: ChatEditContext,
 ): UseChat {
   const store = useStore()
-  // The Edit lane routes applied actions through the AUTHORITATIVE store (unlike the advisor thread, which
-  // is local-only) — grab the live mutators + undo history the dispatcher needs.
+  // Applied chat actions route through the AUTHORITATIVE store (unlike the chat thread, which is local-only)
+  // — grab the live mutators + undo history the dispatcher needs.
   const mutate = useMutate()
   const history = useHistory()
   const deck = edit?.deck ?? null
@@ -612,24 +612,6 @@ export function useChat(
       const convo: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
-      track('chat:sent', { turn: convo.length })
-      notifyUsageChanged() // a chat turn spends an app-paid unit → refresh the usage ring
-      void sendChat(
-        store,
-        { deckId, slides: buildDigest(slides), history: convo },
-        text,
-      )
-    },
-    [store, busy, messages, deckId, slides],
-  )
-
-  const sendEdit = useCallback(
-    (text: string) => {
-      if (!store || busy || !text.trim()) return
-      // History = only settled turns — an in-flight/errored assistant row isn't real model context.
-      const convo: ChatTurn[] = messages
-        .filter((m) => m.status === 'done')
-        .map((m) => ({ role: m.role, content: m.content }))
       const grounding = buildActGrounding(deck, activeSlide)
       // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
       // request carries the trimmed digest.
@@ -642,8 +624,8 @@ export function useChat(
         activeSlideId: activeSlide?.id ?? null,
       }
       setUndoTip(null)
-      track('chat:edit', { slides: slides.length })
-      notifyUsageChanged() // a chat-edit turn spends an app-paid unit → refresh the usage ring
+      track('chat:sent', { turn: convo.length })
+      notifyUsageChanged() // a chat turn spends an app-paid unit → refresh the usage ring
       void sendChatAction(
         store,
         {
@@ -656,7 +638,9 @@ export function useChat(
         text,
         (actions) => dispatchActions(actions, dctx),
       ).then((tip) => {
-        if (tip) setUndoTip(tip)
+        if (!tip) return
+        setUndoTip(tip)
+        track('chat:edit', { slides: slides.length })
       })
     },
     [store, busy, messages, deckId, slides, deck, activeSlide, mutate, history],
@@ -677,5 +661,5 @@ export function useChat(
     })
   }, [store, view])
 
-  return { messages, send, sendEdit, busy, clear, undoTip, undoLast }
+  return { messages, send, busy, clear, undoTip, undoLast }
 }

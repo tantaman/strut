@@ -19,7 +19,7 @@ export const chatMessage = table('chat_message', { local: true })
     role: string<'user' | 'assistant'>(),
     content: string(), // grows per token for a streaming assistant turn
     status: string<'streaming' | 'done' | 'error'>(), // drives the typing caret / error styling
-    note: string(), // transient sub-status shown below the content while streaming (Edit-lane "Applying…")
+    note: string(), // transient sub-status shown below the content while applying a chat action
     created: number(), // thread order within a deck
   })
   .primaryKey('id')

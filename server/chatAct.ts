@@ -1,4 +1,4 @@
-// The "✨ Chat — Edit lane" server adapter: turn a running conversation + deck grounding into a validated
+// The "✨ Chat" action-capable server adapter: turn a running conversation + deck grounding into a validated
 // { say, actions } result. Inference goes through the shared model seam (server/llm.ts), which routes to the
 // caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app pays). This
 // adapter builds the prompt, streams the turn, and validates the output; the ROUTE resolves the ModelChoice
@@ -7,18 +7,19 @@
 // STREAMING vs. structure — why this DOESN'T use json_schema: a one-shot structured call reads dead (the
 // user waits on thinking dots with no feedback), but Workers AI — the default backend — can't stream JSON
 // Mode at all (developers.cloudflare.com/workers-ai/features/json-mode: "JSON Mode currently doesn't support
-// streaming"). So the Edit lane streams PLAIN PROSE and asks the model to append a fenced ```json block for
-// the change. `chatActStream` forwards the prose before the fence AS IT ARRIVES (the reply types out live,
-// same `data: {"response":"…"}` frames the advisor client renders), then at the end parses the fenced JSON,
-// runs the firewall, and emits ONE terminal `data: {"result":{say,actions}}` frame — the authoritative value
-// the client dispatches. If the model omits the block, the turn degrades to advice-only (a reply, no edit)
-// rather than failing. The live prose is just the typing effect; the result frame is the source of truth.
+// streaming"). So action-capable chat streams PLAIN PROSE and asks the model to append a fenced ```json
+// block for the change. `chatActStream` forwards the prose before the fence AS IT ARRIVES (the reply types
+// out live, same `data: {"response":"…"}` frames the advisor client renders), then at the end parses the
+// fenced JSON, runs the firewall, and emits ONE terminal `data: {"result":{say,actions}}` frame — the
+// authoritative value the client dispatches. If the model omits the block, the turn degrades to advice-only
+// (a reply, no edit) rather than failing. The live prose is just the typing effect; the result frame is the
+// source of truth.
 //
 // The output is untrusted: `normalizeActions` (shared/chatAction.ts) is the firewall — target ids must be
 // real (or a ref created this turn), colors clamp to hex, fonts to the allowlist, and the list is capped.
 // Dev-without-workerd: STRUT_CHAT_STUB yields a
-// deterministic keyword-driven stub so the Edit lane is exercisable under `pnpm dev` (BYO OpenRouter works
-// in dev directly).
+// deterministic keyword-driven stub so action-capable chat is exercisable under `pnpm dev` (BYO OpenRouter
+// works in dev directly).
 
 import { clampChatActRequest, normalizeActions } from '../shared/chatAction.ts'
 import type {
@@ -45,6 +46,11 @@ function systemPrompt(fonts: string[]): string {
     'You are an assistant embedded in a slide-deck editor. Each turn you either just ANSWER the author',
     '(advice, no change) or perform ONE OR MORE changes to their deck — do everything they asked for in',
     'this one turn, however many steps it takes.',
+    '',
+    'Intent policy: emit deck-changing actions ONLY when the author clearly asks you to change, create,',
+    'rewrite, arrange, style, add, or remove something in the deck. If they ask for advice, critique,',
+    'suggestions, alternatives, hypotheticals, or what you would change, answer in prose and omit the JSON',
+    'block. If they explicitly say not to change the deck, never emit actions.',
     '',
     'Reply in this format:',
     '1. First, a short friendly reply (one or two sentences) shown to the author — confirm what you are',
@@ -142,7 +148,7 @@ function buildMessages(req: ChatActRequest, fonts: string[]): ModelMessage[] {
   ]
 }
 
-// Deterministic local stub (STRUT_CHAT_STUB) so the Edit lane is exercisable under `pnpm dev` with no
+// Deterministic local stub (STRUT_CHAT_STUB) so action-capable chat is exercisable under `pnpm dev` with no
 // workerd/AI. Classifies the last user turn by keyword into a demonstrative action so the apply/undo path
 // runs end-to-end. Everything still passes through normalizeActions. NOT used in production.
 function stubResult(req: ChatActRequest): ChatActResult {
@@ -208,7 +214,7 @@ function stubResult(req: ChatActRequest): ChatActResult {
   return raw as ChatActResult
 }
 
-/** Stream a validated Edit-lane turn. The OK response is an SSE byte stream: zero or more
+/** Stream a validated action-capable chat turn. The OK response is an SSE byte stream: zero or more
  *  `data: {"response":"…"}` prose frames (the reply typing out) followed by exactly one
  *  `data: {"result":{say,actions}}` frame (the normalizeActions-safe value the client applies) and
  *  `data: [DONE]`. Throws ChatActUnavailableError if the backend is unreachable BEFORE a stream exists (the
@@ -230,7 +236,7 @@ export async function chatActStream(
     })
   } catch (err) {
     // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_CHAT_STUB yields a deterministic result so
-    // the Edit lane is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
+    // action-capable chat is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
     if (
       choice.kind === 'workers-ai' &&
       process.env.STRUT_CHAT_STUB &&
@@ -392,7 +398,7 @@ function firstJsonObject(s: string): string | null {
   return null
 }
 
-/** The heart of the streaming Edit lane: consume the model's prose token stream and re-emit a client stream
+/** The heart of action-capable chat streaming: consume the model's prose token stream and re-emit a client stream
  *  that (1) types the reply out as `{response}` frames (the prose BEFORE the ```json block) and (2) ends
  *  with one authoritative `{result}` frame — the reply's prose + the parsed, firewalled actions — plus
  *  `[DONE]`. A mid-stream failure still finalizes with whatever arrived, so the client always gets a
