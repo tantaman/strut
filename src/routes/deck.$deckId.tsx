@@ -18,6 +18,7 @@ import { ResearchView } from '../editor/ResearchView'
 import { ChatPanel } from '../editor/ChatPanel'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { MobileTabBar } from '../editor/mobile/MobileTabBar'
+import { useDeckChatContext } from '../editor/chatNarration'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId')({
@@ -89,6 +90,7 @@ function EditorInner({ deckId }: { deckId: string }) {
   const accessResolved = deckStatus !== 'unknown' && sharesStatus !== 'unknown'
   const variants = useQuery(deckVariantsQuery({ deckId, limit: 5 }))
   const { entitlement } = Route.useLoaderData()
+  const deckContext = useDeckChatContext(deckId)
 
   // Keep exactly one active slide (spec §3.2). While slides are still loading (empty) we leave the
   // URL's `?slide=` untouched so a deep-linked / Present-restored slide isn't clobbered before it
@@ -151,6 +153,7 @@ function EditorInner({ deckId }: { deckId: string }) {
             slides={slides}
             deck={deck}
             activeSlide={activeSlide}
+            deckContext={deckContext}
             onClose={() => setChatOpen(false)}
           />
         )}

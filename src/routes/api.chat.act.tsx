@@ -77,7 +77,8 @@ export const Route = createFileRoute('/api/chat/act')({
         if (
           typeof b.deckId !== 'string' ||
           !Array.isArray(b.messages) ||
-          !Array.isArray(b.slides)
+          typeof b.deckContext !== 'string' ||
+          !Array.isArray(b.slideIds)
         ) {
           return json({ error: 'bad_request' }, 400)
         }

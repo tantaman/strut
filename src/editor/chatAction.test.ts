@@ -286,11 +286,12 @@ describe('normalizeActions · totality', () => {
 })
 
 describe('clampChatActRequest', () => {
-  it('caps the active-slide text and coerces theme fields, keeps the digest half', () => {
+  it('caps the active-slide text and coerces theme fields, keeps context and slide ids', () => {
     const req = clampChatActRequest({
       deckId: 'd',
       messages: [{ role: 'user', content: 'hi' }],
-      slides: [{ id: 's1', title: 't', text: 'x' }],
+      deckContext: 'Deck context.',
+      slideIds: ['s1'],
       theme: {
         background: '#000',
         surface: '#111',
@@ -305,16 +306,35 @@ describe('clampChatActRequest', () => {
       },
     })
     expect(req.deckId).toBe('d')
-    expect(req.slides).toHaveLength(1)
+    expect(req.deckContext).toBe('Deck context.')
+    expect(req.slideIds).toEqual(['s1'])
     expect(req.theme?.background).toBe('#000')
     expect(req.activeSlide?.text).toHaveLength(CHAT_ACTION_LIMITS.maxActiveText)
+  })
+
+  it('caps slide ids and drops empty ids', () => {
+    const req = clampChatActRequest({
+      deckId: 'd',
+      messages: [],
+      deckContext: '',
+      slideIds: [
+        '',
+        ...Array.from(
+          { length: CHAT_ACTION_LIMITS.maxSlideIds + 5 },
+          (_, i) => `s${i}`,
+        ),
+      ],
+    })
+    expect(req.slideIds).toHaveLength(CHAT_ACTION_LIMITS.maxSlideIds)
+    expect(req.slideIds[0]).toBe('s0')
   })
 
   it('drops an active slide with no id and omits an absent theme', () => {
     const req = clampChatActRequest({
       deckId: 'd',
       messages: [],
-      slides: [],
+      deckContext: '',
+      slideIds: [],
       activeSlide: { id: '', text: 'orphan' },
     })
     expect(req.activeSlide).toBeUndefined()
