@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@assemblyscript/loader':
+        specifier: ^0.28.19
+        version: 0.28.19
       '@aws-sdk/client-s3':
         specifier: ^3.1075.0
         version: 3.1075.0
@@ -74,6 +77,9 @@ importers:
       '@tiptap/static-renderer':
         specifier: ^3.27.1
         version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))(@tiptap/pm@3.27.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      assemblyscript:
+        specifier: ^0.28.19
+        version: 0.28.19
       better-auth:
         specifier: ^1.6.23
         version: 1.6.23(@prisma/client@5.22.0)(@tanstack/react-start@1.168.27(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)))(better-sqlite3@12.11.1)(pg@8.22.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(solid-js@1.9.13)(vitest@4.1.9(@types/node@22.20.0)(jsdom@28.1.0(@noble/hashes@2.2.0))(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)))
@@ -196,6 +202,9 @@ packages:
 
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
+
+  '@assemblyscript/loader@0.28.19':
+    resolution: {integrity: sha512-6OhPTJ0nS8aay8t2lhbA/XkyffgU15ECPsLHT0VZFG7j7sUA1CT2HS7nIALwjg6Pdpgp+RTHQukgK1IoCUbxCQ==}
 
   '@aws-crypto/crc32@5.2.0':
     resolution: {integrity: sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==}
@@ -2303,6 +2312,11 @@ packages:
   aria-query@5.3.0:
     resolution: {integrity: sha512-b0P0sZPKtyu8HkeRAfCq0IfURZK+SuwMjY1UXGBU27wpAiTwQAIlq56IbIO+ytk/JjS1fMR14ee5WBBfKi5J6A==}
 
+  assemblyscript@0.28.19:
+    resolution: {integrity: sha512-yOAlAb9EsrI00oUaf6qUTtTcYYeelG2iC3f1LnA45XUeSlMrp2O2FF5Llj4P+Y84ZiIlh/ciEEpOaPwwmOKq8g==}
+    engines: {node: '>=20', npm: '>=10'}
+    hasBin: true
+
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
@@ -2401,6 +2415,10 @@ packages:
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
+
+  binaryen@130.0.0-nightly.20260609:
+    resolution: {integrity: sha512-Zyl9Tw638x08LDew22YtxdYiUGxn+quzpR3ySIS4Nccv6yAiO5j1Yko9IEPNpj/aBZf71xtD/6hYXsgZ2ye3ew==}
+    hasBin: true
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -3041,6 +3059,9 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
+
+  long@5.3.2:
+    resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
 
   lru-cache@11.5.1:
     resolution: {integrity: sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==}
@@ -3875,6 +3896,8 @@ snapshots:
   '@asamuzakjp/generational-cache@1.0.1': {}
 
   '@asamuzakjp/nwsapi@2.3.9': {}
+
+  '@assemblyscript/loader@0.28.19': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -5936,6 +5959,11 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
+  assemblyscript@0.28.19:
+    dependencies:
+      binaryen: 130.0.0-nightly.20260609
+      long: 5.3.2
+
   assertion-error@2.0.1: {}
 
   babel-dead-code-elimination@1.0.12:
@@ -6004,6 +6032,8 @@ snapshots:
   bidi-js@1.0.3:
     dependencies:
       require-from-string: 2.0.2
+
+  binaryen@130.0.0-nightly.20260609: {}
 
   bindings@1.5.0:
     dependencies:
@@ -6613,6 +6643,8 @@ snapshots:
       p-locate: 5.0.0
 
   lodash.merge@4.6.2: {}
+
+  long@5.3.2: {}
 
   lru-cache@11.5.1: {}
 
