@@ -91,6 +91,11 @@ export function Overview({
   const history = useHistory()
   const stageRef = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 })
+  // False until the camera has framed the cards once. The initial {scale:1} view is a placeholder the
+  // server can't improve on (no container to measure), so the world stays hidden until `fit()` runs
+  // post-mount — otherwise a refresh into Overview paints the cards at the wrong zoom/offset and then
+  // snaps them into frame (the overview twin of the stage flash). See strut.css .overview__world.is-fitting.
+  const [fitted, setFitted] = useState(false)
   const [panning, setPanning] = useState(false)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   // Overview-local multi-selection (the editor's `selected` set is for components, not slides).
@@ -156,6 +161,7 @@ export function Overview({
     const cx = (minX + maxX) / 2
     const cy = (minY + maxY) / 2
     setView({ scale, x: cw / 2 - scale * cx, y: ch / 2 - scale * cy })
+    setFitted(true)
   }
 
   // Re-frame whenever the set of slides changes (mount, add, remove) — but NOT on drags,
@@ -420,7 +426,7 @@ export function Overview({
       onPointerDown={beginBg}
     >
       <div
-        className="overview__world"
+        className={`overview__world${fitted ? '' : ' is-fitting'}`}
         style={{
           transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
         }}
