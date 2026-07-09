@@ -46,6 +46,25 @@ small VM/VPS, Fly.io, Railway, Render, a container platform, etc. Requirements:
 > If you don't want to operate a daemon yet, deploy the Worker anyway — it serves and builds fine —
 > but reads/writes will fail until `RINDLE_DAEMON_URL` points at a running daemon.
 
+### Managed daemon: Rindle Cloud (headwaters)
+
+The official Strut deployment doesn't self-host `rindled` — it runs a **managed app on Rindle Cloud**,
+and `wrangler.jsonc`'s `RINDLE_DAEMON_URL`/`RINDLE_DAEMON_WS` already point at it. The repo is bound to
+that app in `.rindle/cloud.json` (committed — it holds an app id + public names, **no secrets**, the
+`wrangler.toml` analogue). `topology.ncl` describes the daemon's shape. With that binding in place:
+
+```sh
+rindle login                    # once — device flow to https://cloud.rindle.sh
+pnpm rindle:deploy              # ensure/re-attach the managed app (won't provision a duplicate)
+pnpm rindle:migrate:remote      # push migrations/ (Rindle schema) to the managed daemon
+```
+
+> **Forking Strut?** Before your first `rindle deploy`, `rm .rindle/cloud.json` so you provision your
+> _own_ app instead of re-attaching to the official one (which you can't access — deploy will error
+> until you remove it). Then point `RINDLE_DAEMON_URL`/`RINDLE_DAEMON_WS` in `wrangler.jsonc` at your
+> app, exactly as you override the other deployment identifiers here. Or ignore all of this and
+> self-host `rindled` per the section above — Rindle Cloud is optional.
+
 ---
 
 ## Image storage: three backends, auto-selected

@@ -22,6 +22,13 @@ todos.json
 *.db-wal2
 .dev.vars
 
+# Rindle: `rindle render`/`up`/`deploy` regenerate these from topology.ncl. Ignore the renders, but
+# COMMIT the cloud binding (.rindle/cloud.json) — it's what re-attaches deploys to our headwaters
+# app instead of provisioning a duplicate (deploy.rs: `POST /api/apps` is not idempotent).
+/rindle.json
+/.rindle/*
+!/.rindle/cloud.json
+
 # Private commercial overlay (marketing site + Stripe billing). Kept OUT of the open-source tree; it's
 # its own private repo cloned/symlinked in here, merged into the build via the #commercial seam.
 # See docs/COMMERCIAL_OVERLAY.md.
