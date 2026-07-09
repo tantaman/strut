@@ -101,7 +101,11 @@ function Dashboard() {
   return (
     <div className="dash">
       <div className="brandbar">
-        <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
+        {/* Plain anchor (not a router Link) so it navigates to the site root `/` — the marketing home
+            served by the commercial overlay, which lives OUTSIDE the app's /app basepath. */}
+        <a className="brandbar__home" href="/" title="Strut home">
+          <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
+        </a>
         <span className="brandbar__tag">Spatial presentations</span>
         <PoweredByRindle variant="inline" />
         <ModelControl />

@@ -173,6 +173,10 @@ button {
   width: auto;
   display: block;
 }
+.brandbar__home {
+  display: inline-flex;
+  align-items: center;
+}
 .brandbar__tag {
   color: var(--muted);
   font-size: 13px;
