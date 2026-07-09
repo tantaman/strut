@@ -30,6 +30,7 @@ import { FONT_FAMILIES, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
+import { useFontsReady } from './useFontsReady'
 import { strutExtensions } from './tiptapSchema'
 import { parseDoc } from './tiptapDoc'
 import {
@@ -59,7 +60,11 @@ export function TipTapSlideEditor({
   const mutate = useMutate()
   const history = useHistory()
   const previewRef = useRef<HTMLDivElement>(null)
-  const scale = useFitScale(previewRef, SLIDE_W, SLIDE_H)
+  const { scale, ready: fitReady } = useFitScale(previewRef, SLIDE_W, SLIDE_H)
+  // Hold first paint until measured + fonts loaded, so the on-slide editor fades in at its final
+  // size/typography on a refresh instead of popping from the placeholder scale (see strut.css .is-fitting).
+  const fontsReady = useFontsReady()
+  const surfaceReady = fitReady && fontsReady
   // The doc JSON at the start of this edit session — one coarse undo step is pushed on blur (the
   // per-keystroke stream is a live-preview write, not an undo boundary). Keyed by slide id at the call
   // site so the editor remounts per slide and this baseline reseeds.
@@ -115,7 +120,7 @@ export function TipTapSlideEditor({
       <FormatBar editor={editor} deck={deck} />
       <div className="md-preview" ref={previewRef}>
         <div
-          className="slide-surface"
+          className={`slide-surface${surfaceReady ? '' : ' is-fitting'}`}
           style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
         >
           <div

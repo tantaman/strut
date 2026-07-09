@@ -55,6 +55,7 @@ import { TipTapSlideEditor } from './TipTapSlideEditor'
 import { LockedObjects } from './ObjectsLayer'
 import { isDocEmpty } from './tiptapDoc'
 import { useFitScale } from './useFitScale'
+import { useFontsReady } from './useFontsReady'
 import { UserStyle } from './CssEditor'
 import {
   ComponentDataReader,
@@ -117,11 +118,21 @@ export function Stage({
     [],
   )
   const stageRef = useRef<HTMLDivElement>(null)
-  const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
+  const { scale, ready: fitReady } = useFitScale(stageRef, SLIDE_W, SLIDE_H)
   // Markdown mode measures the preview area (which excludes the editor panel) so the slide fits the
   // space actually available to it. Both fit hooks run every render to keep hook order stable.
   const mdPreviewRef = useRef<HTMLDivElement>(null)
-  const mdScale = useFitScale(mdPreviewRef, SLIDE_W, SLIDE_H)
+  const { scale: mdScale, ready: mdReady } = useFitScale(
+    mdPreviewRef,
+    SLIDE_W,
+    SLIDE_H,
+  )
+  // Hold the slide's first paint until it's both measured (correct fit-scale) AND the web fonts are in,
+  // so a refresh fades the slide in at its final size/typography instead of popping from the SSR
+  // placeholder scale and reflowing when fonts swap. `is-fitting` (opacity 0) until then — see strut.css.
+  const fontsReady = useFontsReady()
+  const slideReady = fitReady && fontsReady
+  const mdSlideReady = mdReady && fontsReady
   const mutate = useMutate()
   const editor = useEditor()
   const history = useHistory()
@@ -865,7 +876,7 @@ export function Stage({
           // Viewer (no edit rights): the read-only body surface + the (locked) objects on top.
           <div className="md-preview" ref={mdPreviewRef}>
             <div
-              className="slide-surface"
+              className={`slide-surface${mdSlideReady ? '' : ' is-fitting'}`}
               style={{ width: SLIDE_W * mdScale, height: SLIDE_H * mdScale }}
             >
               <div
@@ -902,7 +913,7 @@ export function Stage({
         deck={deck}
       />
       <div
-        className="slide-surface"
+        className={`slide-surface${slideReady ? '' : ' is-fitting'}`}
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
       >
         <div
