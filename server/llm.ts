@@ -3,7 +3,10 @@
 //   • BYO — the user connected an OpenRouter key (server/modelCred.ts): call OpenRouter with THEIR key,
 //     THEY pay. OpenRouter is OpenAI-compatible, so it's a plain fetch — no binding, and it works under
 //     `pnpm dev` (Node) too, unlike the Workers AI object binding.
-//   • default — no connected key: Cloudflare Workers AI (the app pays), exactly as before.
+//   • default (app pays) — no connected key: Anthropic Claude Haiku when ANTHROPIC_API_KEY is set (the
+//     "free taste" — a small, genuinely good model that replaces Llama), else Cloudflare Workers AI (Llama)
+//     as the no-key fallback. Both are the METERED path (choice.kind !== 'openrouter'), so the existing
+//     daily quota + guest gate apply unchanged; only the model behind them changes.
 //
 // This folds together the three formerly-duplicated loadAi()/AiBinding/extractJson copies that lived in
 // server/{arrange,generate,chat}.ts. Those adapters now just build messages + schema and call callModel /
@@ -19,9 +22,18 @@ const WORKERS_AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 const OPENROUTER_DEFAULT_MODEL = 'openrouter/auto'
 const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
+// App-paid default when ANTHROPIC_API_KEY is set: Claude Haiku 4.5 — small, fast, and genuinely good, so a
+// few free calls are a real "taste" (fractions of a cent each) rather than Llama slop. Called over plain
+// HTTPS (no binding), so it works under `pnpm dev` too; the app's own key means the app pays, and the
+// existing daily quota meters it exactly as it did the Workers AI path.
+const ANTHROPIC_MODEL = 'claude-haiku-4-5'
+const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages'
+const ANTHROPIC_VERSION = '2023-06-01'
+
 export type ModelChoice =
   | { kind: 'workers-ai'; model: string }
   | { kind: 'openrouter'; model: string; apiKey: string }
+  | { kind: 'anthropic'; model: string; apiKey: string }
 
 export interface ModelMessage {
   role: 'system' | 'user' | 'assistant'
@@ -45,9 +57,10 @@ export class ModelUnavailableError extends Error {
   }
 }
 
-/** Pick the backend for a user: their connected OpenRouter key if present, else app-paid Workers AI. A
- *  credential read/decrypt failure falls back to Workers AI (logged) so a misconfigured MODEL_CRED_KEY
- *  never hard-fails the ✨ features. */
+/** Pick the backend for a user: their connected OpenRouter key if present (they pay), else the app-paid
+ *  default — Anthropic Haiku when ANTHROPIC_API_KEY is set, otherwise Workers AI (Llama). A credential
+ *  read/decrypt failure falls through to the same app-paid default (logged) so a misconfigured
+ *  MODEL_CRED_KEY never hard-fails the ✨ features. */
 export async function resolveModel(userId: string): Promise<ModelChoice> {
   try {
     const cred = await getCredential(userId)
@@ -60,9 +73,16 @@ export async function resolveModel(userId: string): Promise<ModelChoice> {
     }
   } catch (err) {
     console.error(
-      '[llm] credential resolution failed; falling back to Workers AI:',
+      '[llm] credential resolution failed; falling back to the app-paid default:',
       err instanceof Error ? err.message : err,
     )
+  }
+  // App-paid default. Prefer Haiku (the "free taste") when the app has a key; else Workers AI so
+  // key-less environments — and `pnpm dev` before you set one — keep working. Both are metered by the
+  // route's existing quota (choice.kind !== 'openrouter'); only the model behind the meter changes.
+  const anthropicKey = process.env.ANTHROPIC_API_KEY
+  if (anthropicKey) {
+    return { kind: 'anthropic', model: ANTHROPIC_MODEL, apiKey: anthropicKey }
   }
   return { kind: 'workers-ai', model: WORKERS_AI_MODEL }
 }
@@ -150,6 +170,25 @@ export async function callModel(
   choice: ModelChoice,
   input: CallInput,
 ): Promise<unknown> {
+  if (choice.kind === 'anthropic') {
+    const { system, messages } = toAnthropicRequest(input)
+    const body: Record<string, unknown> = {
+      model: choice.model,
+      max_tokens: input.max_tokens ?? 4096,
+      messages,
+    }
+    if (system) body.system = system
+
+    const res = await anthropicFetch(choice, body)
+    let payload: unknown
+    try {
+      payload = await res.json()
+    } catch {
+      throw new ModelUnavailableError('Anthropic returned a non-JSON response.')
+    }
+    return extractJson(anthropicText(payload))
+  }
+
   if (choice.kind === 'openrouter') {
     const body: Record<string, unknown> = {
       model: choice.model,
@@ -164,7 +203,9 @@ export async function callModel(
     try {
       payload = await res.json()
     } catch {
-      throw new ModelUnavailableError('OpenRouter returned a non-JSON response.')
+      throw new ModelUnavailableError(
+        'OpenRouter returned a non-JSON response.',
+      )
     }
     const content = (
       payload as {
@@ -189,7 +230,8 @@ export async function callModel(
     })
   } catch (err) {
     throw new ModelUnavailableError(
-      'AI request failed: ' + (err instanceof Error ? err.message : String(err)),
+      'AI request failed: ' +
+        (err instanceof Error ? err.message : String(err)),
     )
   }
   const r = (result ?? {}) as { response?: unknown }
@@ -208,6 +250,27 @@ export async function streamModel(
   choice: ModelChoice,
   input: { messages: ModelMessage[] },
 ): Promise<ReadableStream<Uint8Array>> {
+  if (choice.kind === 'anthropic') {
+    // Plain prose only (no response_format) — same contract as the Workers AI streaming path; a streaming
+    // feature that needs structure (the Edit lane) prompts for a fenced JSON block and parses it out.
+    const { system, messages } = toAnthropicRequest({
+      messages: input.messages,
+    })
+    const body: Record<string, unknown> = {
+      model: choice.model,
+      max_tokens: 4096,
+      messages,
+      stream: true,
+    }
+    if (system) body.system = system
+
+    const res = await anthropicFetch(choice, body)
+    if (!res.body) {
+      throw new ModelUnavailableError('Anthropic returned no stream body.')
+    }
+    return normalizeAnthropicSse(res.body)
+  }
+
   if (choice.kind === 'openrouter') {
     const res = await openrouterFetch(choice, {
       model: choice.model,
@@ -228,10 +291,14 @@ export async function streamModel(
   }
   let result: unknown
   try {
-    result = await ai.run(choice.model, { messages: input.messages, stream: true })
+    result = await ai.run(choice.model, {
+      messages: input.messages,
+      stream: true,
+    })
   } catch (err) {
     throw new ModelUnavailableError(
-      'AI request failed: ' + (err instanceof Error ? err.message : String(err)),
+      'AI request failed: ' +
+        (err instanceof Error ? err.message : String(err)),
     )
   }
   if (!(result instanceof ReadableStream)) {
@@ -289,7 +356,8 @@ async function readOpenRouterError(res: Response): Promise<string> {
     // rejection into error.metadata (provider_name + raw). Surface it (capped) so the failure is
     // diagnosable instead of a dead end.
     const meta = err?.metadata
-    const provider = typeof meta?.provider_name === 'string' ? meta.provider_name : ''
+    const provider =
+      typeof meta?.provider_name === 'string' ? meta.provider_name : ''
     let raw =
       typeof meta?.raw === 'string'
         ? meta.raw
@@ -302,6 +370,159 @@ async function readOpenRouterError(res: Response): Promise<string> {
   } catch {
     return ''
   }
+}
+
+// ---- Anthropic transport ----
+
+// Split our {system,user,assistant} messages into the Anthropic Messages API shape: `system` is a
+// TOP-LEVEL param there (not a message role), and when the caller asked for structured JSON
+// (response_format) we fold the schema into the system prompt as an instruction. We deliberately DON'T use
+// Anthropic's native structured-output constraint: our schemas use optional fields and lack the
+// `additionalProperties:false` the strict validator requires, so prompt-guided JSON is both simpler and
+// can't hard-fail the request — Haiku follows the instruction well, and the adapters' normalize* stays the
+// trust boundary (same posture as the OpenRouter strict:false path).
+function toAnthropicRequest(input: CallInput): {
+  system: string
+  messages: ModelMessage[]
+} {
+  const systemParts: string[] = []
+  const messages: ModelMessage[] = []
+  for (const m of input.messages) {
+    if (m.role === 'system') systemParts.push(m.content)
+    else messages.push(m)
+  }
+  const schema = jsonSchemaOf(input.response_format)
+  if (schema) {
+    systemParts.push(
+      'Respond with ONLY a single JSON object that conforms to this JSON Schema. Output raw JSON — no ' +
+        'markdown fences, no prose before or after.\n' +
+        JSON.stringify(schema),
+    )
+  }
+  return { system: systemParts.join('\n\n'), messages }
+}
+
+// Pull the raw JSON Schema out of a Workers-AI-shaped `{ type:'json_schema', json_schema:<schema> }`
+// response_format (or an OpenAI-shaped `{ …, schema }` wrapper), or null when it isn't a json_schema request.
+function jsonSchemaOf(rf: unknown): unknown {
+  if (!rf || typeof rf !== 'object') return null
+  const r = rf as { type?: unknown; json_schema?: unknown }
+  if (r.type !== 'json_schema') return null
+  const inner = r.json_schema
+  if (inner && typeof inner === 'object' && 'schema' in inner) {
+    return (inner as { schema?: unknown }).schema
+  }
+  return inner
+}
+
+// Concatenate the text of an Anthropic Messages response's content blocks (ignoring non-text blocks). The
+// result is handed to extractJson → parseJsonLoose, which salvages bare / fenced / prose-wrapped JSON.
+function anthropicText(payload: unknown): string {
+  const blocks = (payload as { content?: unknown } | null)?.content
+  if (!Array.isArray(blocks)) return ''
+  let out = ''
+  for (const b of blocks) {
+    if (
+      b &&
+      typeof b === 'object' &&
+      (b as { type?: unknown }).type === 'text'
+    ) {
+      const t = (b as { text?: unknown }).text
+      if (typeof t === 'string') out += t
+    }
+  }
+  return out
+}
+
+async function anthropicFetch(
+  choice: { apiKey: string },
+  body: Record<string, unknown>,
+): Promise<Response> {
+  let res: Response
+  try {
+    res = await fetch(ANTHROPIC_MESSAGES_URL, {
+      method: 'POST',
+      headers: {
+        'x-api-key': choice.apiKey,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+  } catch (err) {
+    throw new ModelUnavailableError(
+      'Could not reach Anthropic: ' +
+        (err instanceof Error ? err.message : String(err)),
+    )
+  }
+  if (!res.ok) {
+    // 401 = bad key, 429 = rate limited, 529 = overloaded — surface Anthropic's message.
+    const detail = await readAnthropicError(res)
+    throw new ModelUnavailableError(
+      `Anthropic error ${res.status}${detail ? ': ' + detail : ''}`,
+    )
+  }
+  return res
+}
+
+async function readAnthropicError(res: Response): Promise<string> {
+  try {
+    const j = (await res.clone().json()) as {
+      error?: { message?: unknown }
+    } | null
+    const msg = j?.error?.message
+    return typeof msg === 'string' ? msg : ''
+  } catch {
+    return ''
+  }
+}
+
+// Transform Anthropic's Messages SSE into the Workers-AI-shaped frames the client parses
+// (`data: {"response":"…"}` + a terminal `data: [DONE]`). Anthropic emits typed events; we forward only
+// `text_delta` content and close on `message_stop`. `event:` lines are ignored — each `data:` JSON carries
+// its own `type`. Buffers partial lines across chunk boundaries. Mirrors normalizeOpenRouterSse.
+function normalizeAnthropicSse(
+  src: ReadableStream<Uint8Array>,
+): ReadableStream<Uint8Array> {
+  const dec = new TextDecoder()
+  const enc = new TextEncoder()
+  let buffer = ''
+  const transform = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      buffer += dec.decode(chunk, { stream: true })
+      let nl: number
+      while ((nl = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, nl).trim()
+        buffer = buffer.slice(nl + 1)
+        if (!line.startsWith('data:')) continue
+        const payload = line.slice(5).trim()
+        if (!payload) continue
+        try {
+          const obj = JSON.parse(payload) as {
+            type?: string
+            delta?: { type?: string; text?: unknown }
+          }
+          if (
+            obj.type === 'content_block_delta' &&
+            obj.delta?.type === 'text_delta' &&
+            typeof obj.delta.text === 'string' &&
+            obj.delta.text.length
+          ) {
+            controller.enqueue(
+              enc.encode(
+                `data: ${JSON.stringify({ response: obj.delta.text })}\n\n`,
+              ),
+            )
+          } else if (obj.type === 'message_stop') {
+            controller.enqueue(enc.encode('data: [DONE]\n\n'))
+          }
+        } catch {
+          // ping / comment / partial frame — ignore
+        }
+      }
+    },
+  })
+  return src.pipeThrough(transform)
 }
 
 // Workers AI accepts the raw JSON Schema directly under `json_schema`; OpenAI/OpenRouter want it wrapped as
@@ -319,11 +540,18 @@ function toOpenRouterResponseFormat(rf: unknown): unknown {
   // Already in OpenAI `{ name, schema }` form → sanitize its inner schema in place, don't double-wrap.
   if (inner && typeof inner === 'object' && 'schema' in inner) {
     const w = inner as Record<string, unknown>
-    return { type: 'json_schema', json_schema: { ...w, schema: sanitizeSchema(w.schema) } }
+    return {
+      type: 'json_schema',
+      json_schema: { ...w, schema: sanitizeSchema(w.schema) },
+    }
   }
   return {
     type: 'json_schema',
-    json_schema: { name: 'response', strict: false, schema: sanitizeSchema(inner) },
+    json_schema: {
+      name: 'response',
+      strict: false,
+      schema: sanitizeSchema(inner),
+    },
   }
 }
 
