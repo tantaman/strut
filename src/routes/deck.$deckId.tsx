@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryStatus, useRoot } from '@rindle/react'
+import type { ResultType } from '@rindle/react'
 import {
   deckDetailQuery,
   deckSharesQuery,
@@ -48,6 +49,27 @@ export const Route = createFileRoute('/deck/$deckId')({
 
 const EMPTY_SLIDES: SlideDetail[] = []
 
+// Bridge the SSR→live-store boot handoff. After hydration the live Rindle client boots and its store is
+// swapped in under us (RindleProvider/RindleSSR); until its first WebSocket sync lands, this query can
+// transiently read empty — which blanks the editor and flashes "No slides yet" mid-boot on a full refresh.
+// Hold the last deck that had slides across that gap. Once the query is authoritatively `complete` we
+// trust the live read even when it's empty, so a genuinely empty deck (or deleting the last slide) still
+// resolves to the empty state. Both editor components call this (the query is deduped); each keeps its own
+// latch, which is fine — they see identical reads.
+function useLatchedDeck(deckId: string): {
+  deck: DeckRoot | null
+  status: ResultType
+} {
+  const [deckRaw, { status }] = useRoot(deckDetailQuery, { deckId })
+  const live = deckRaw as DeckRoot | null
+  const liveHasSlides = (live?.slides.length ?? 0) > 0
+  const lastGood = useRef<DeckRoot | null>(null)
+  if (liveHasSlides) lastGood.current = live
+  const deck =
+    liveHasSlides || status === 'complete' ? live : (lastGood.current ?? live)
+  return { deck, status }
+}
+
 function EditorPage() {
   const { deckId } = Route.useParams()
   return <EditorAccess deckId={deckId} />
@@ -55,8 +77,9 @@ function EditorPage() {
 
 function EditorAccess({ deckId }: { deckId: string }) {
   // The relay root: one sync query for the deck subtree; component children are local fragment refs.
-  const [deckRaw] = useRoot(deckDetailQuery, { deckId })
-  const deck = deckRaw as DeckRoot | null
+  // Latched (useLatchedDeck) so the boot handoff's transient empty read doesn't drop canEdit and flash
+  // the read-only chrome for the owner.
+  const { deck } = useLatchedDeck(deckId)
   const shares = useQuery(deckSharesQuery({ deckId }))
   // Owner or 'editor' collaborator → editable; everyone else (incl. a 'viewer') → read-only. While
   // the deck row is still syncing we assume read-only so editing chrome doesn't flash for viewers.
@@ -79,10 +102,9 @@ function EditorAccess({ deckId }: { deckId: string }) {
 }
 
 function EditorInner({ deckId }: { deckId: string }) {
-  const [deckRaw, { status: deckStatus }] = useRoot(deckDetailQuery, {
-    deckId,
-  }) // deduped with EditorAccess's identical query
-  const deck = deckRaw as DeckRoot | null
+  // Deduped with EditorAccess's identical query; latched so the boot handoff's transient empty read
+  // doesn't blank the stage / flash "No slides yet" mid-boot (see useLatchedDeck).
+  const { deck, status: deckStatus } = useLatchedDeck(deckId)
   const slides = deck?.slides ?? EMPTY_SLIDES
   const editor = useEditor()
   // Don't judge access until both the deck row and its shares are authoritative — otherwise canEdit is
