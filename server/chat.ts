@@ -1,4 +1,4 @@
-// The "✨ Chat" server adapter: turn a running conversation + a deck digest into a STREAMED prose answer
+// The "✨ Chat" server adapter: turn a running conversation + append-only deck context into a STREAMED prose answer
 // from a presentation advisor. Inference goes through the shared model seam (server/llm.ts), which routes
 // to the caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app
 // pays). This adapter builds the grounded message list; the ROUTE resolves the ModelChoice and passes it
@@ -7,7 +7,7 @@
 // client stays provider-agnostic.
 
 import { clampChatRequest } from '../shared/chat.ts'
-import type { ChatRequest, SlideDigest } from '../shared/chat.ts'
+import type { ChatRequest } from '../shared/chat.ts'
 import { streamModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice } from './llm.ts'
 
@@ -24,8 +24,9 @@ export class ChatUnavailableError extends Error {
 
 function systemPrompt(): string {
   return [
-    'You are a presentation advisor. You can see the deck the author is editing: a list of its slides,',
-    'each with an opaque id, a short title, and a text excerpt. Talk with the author ABOUT the deck —',
+    'You are a presentation advisor. You can see the deck the author is editing through an append-only',
+    'semantic log of the deck, its slides, and its spatial components. Later entries may supersede',
+    'earlier snapshot fields. Talk with the author ABOUT the deck —',
     'critique the flow, suggest a stronger opening or closing, point out what is missing or unclear,',
     'answer questions. Be concise, specific, and honest; a short, direct answer beats a padded one.',
     'You can SUGGEST changes but you cannot edit the deck yourself — phrase advice as suggestions, never',
@@ -35,24 +36,21 @@ function systemPrompt(): string {
   ].join(' ')
 }
 
-/** The deck grounding, rendered into the system message. Empty decks get a note so the model doesn't
- *  hallucinate slides. Mirrors server/arrange.ts's userPrompt slide listing. */
-function renderDigest(slides: SlideDigest[]): string {
-  if (slides.length === 0) {
-    return '\n\nThe deck currently has no slides.'
-  }
-  const lines = slides.map((s, i) => {
-    const title = s.title || '(untitled)'
-    const text = s.text ? ` — ${s.text}` : ''
-    return `${i + 1}. id=${s.id} · ${title}${text}`
-  })
-  return ['\n\nThe deck currently has these slides:', ...lines].join('\n')
+/** The append-only deck grounding rendered into the system message. */
+function renderDeckContext(context: string): string {
+  const body = context.trim()
+  return body
+    ? `\n\nObserved deck context (append-only; later updates supersede earlier snapshot fields):\n${body}`
+    : '\n\nNo deck context has arrived yet.'
 }
 
 /** The full message list handed to the model: a grounded system turn, then the running conversation. */
 function buildMessages(req: ChatRequest): ChatTurnMessage[] {
   return [
-    { role: 'system', content: systemPrompt() + renderDigest(req.slides) },
+    {
+      role: 'system',
+      content: systemPrompt() + renderDeckContext(req.deckContext),
+    },
     ...req.messages,
   ]
 }
@@ -72,9 +70,7 @@ function stubStream(req: ChatRequest): ReadableStream<Uint8Array> {
     [...req.messages].reverse().find((m) => m.role === 'user')?.content ?? ''
   const tokens = [
     '**(dev stub)** ',
-    'I can see ',
-    `${req.slides.length} slide${req.slides.length === 1 ? '' : 's'}`,
-    ' in this deck. ',
+    req.deckContext ? 'I received narrated deck context. ' : 'I have no deck context yet. ',
     'You said: ',
     `“${lastUser.slice(0, 80)}”. `,
     'Deploy under workerd (`pnpm preview:cf`) for a real answer.',

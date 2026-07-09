@@ -14,12 +14,14 @@ import { markdownToHtml } from './markdown'
 import { useChat } from './aiChat'
 import type { ChatMessage } from './aiChat'
 import type { DeckRoot, SlideDetail } from './deckDetail'
+import type { DeckChatContext } from './chatNarration'
 
 export function ChatPanel({
   deckId,
   slides,
   deck,
   activeSlide,
+  deckContext,
   onClose,
 }: {
   deckId: string
@@ -28,6 +30,7 @@ export function ChatPanel({
   // target) ground any chat-applied change. Null until the deck subtree resolves.
   deck: DeckRoot | null
   activeSlide: SlideDetail | null
+  deckContext: DeckChatContext
   onClose: () => void
 }) {
   // Membership gate (a promoted, non-anonymous account). During the initial session resolve we treat the
@@ -40,7 +43,7 @@ export function ChatPanel({
   const { messages, send, busy, clear, undoTip, undoLast } = useChat(
     deckId,
     slides,
-    { deck, activeSlide },
+    { deck, activeSlide, deckContext },
   )
   const [text, setText] = useState('')
   const threadRef = useRef<HTMLDivElement>(null)

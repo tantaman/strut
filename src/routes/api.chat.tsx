@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import type { ChatRequest } from '../../shared/chat'
 
-// "✨ Chat" endpoint. Takes a running conversation + a deck digest and STREAMS a prose answer (server/chat.ts
+// "✨ Chat" endpoint. Takes a running conversation + append-only deck context and STREAMS a prose answer (server/chat.ts
 // → Workers AI SSE). Same two boundaries as /api/arrange and /api/generate:
 //   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can SEE the Chat
 //      panel (the client renders a sign-in nudge) but cannot spend the app's inference budget. The client
@@ -10,10 +10,8 @@ import type { ChatRequest } from '../../shared/chat'
 //      (below), and the AUTHORITATIVE durable daily quota in server/quota.ts (chat_usage, D1), consumed
 //      before the model call and refunded ONLY if that call fails before any token streams. Plus the
 //      CHAT_LIMITS caps in the adapter.
-// We do NOT verify the user owns `deckId` here: the endpoint only READS a client-supplied digest and returns
-// prose — advisor chat can't mutate the deck (Phase 1). The only thing it spends is inference, gated by auth
-// + quota. The digest may name slides the user can see; that's their own deck's content, sent by their own
-// client.
+// We do NOT verify the user owns `deckId` here: the endpoint only READS client-supplied context and returns
+// prose — advisor chat can't mutate the deck. The only thing it spends is inference, gated by auth + quota.
 //
 // Streaming contract: unlike arrange/generate (one-shot JSON), the OK response is `text/event-stream` — the
 // raw Workers AI SSE, passed through untouched; the client parses `data: {"response":"…"}` frames. Errors
@@ -83,7 +81,7 @@ export const Route = createFileRoute('/api/chat')({
         if (
           typeof b.deckId !== 'string' ||
           !Array.isArray(b.messages) ||
-          !Array.isArray(b.slides)
+          typeof b.deckContext !== 'string'
         ) {
           return json({ error: 'bad_request' }, 400)
         }

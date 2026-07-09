@@ -18,7 +18,7 @@ describe('clampChatRequest', () => {
         content: `m${i}`,
       }),
     )
-    const out = clampChatRequest({ deckId: 'd', messages, slides: [] })
+    const out = clampChatRequest({ deckId: 'd', messages, deckContext: 'ctx' })
     expect(out.messages).toHaveLength(CHAT_LIMITS.maxMessages)
     // The last turn (the one being answered) always survives.
     expect(out.messages[out.messages.length - 1].content).toBe(
@@ -26,7 +26,8 @@ describe('clampChatRequest', () => {
     )
   })
 
-  it('truncates each message + each slide field, caps slide count', () => {
+  it('truncates each message and the deck context', () => {
+    const deckContext = 'c'.repeat(CHAT_LIMITS.maxDeckContext + 50)
     const out = clampChatRequest({
       deckId: 'd',
       messages: [
@@ -35,25 +36,20 @@ describe('clampChatRequest', () => {
           content: 'x'.repeat(CHAT_LIMITS.maxContentPerMessage + 50),
         },
       ],
-      slides: Array.from({ length: CHAT_LIMITS.maxSlides + 10 }, (_, i) => ({
-        id: `s${i}`,
-        title: 't'.repeat(CHAT_LIMITS.maxTitle + 20),
-        text: 'y'.repeat(CHAT_LIMITS.maxTextPerSlide + 20),
-      })),
+      deckContext,
     })
     expect(out.messages[0].content.length).toBe(
       CHAT_LIMITS.maxContentPerMessage,
     )
-    expect(out.slides).toHaveLength(CHAT_LIMITS.maxSlides)
-    expect(out.slides[0].title.length).toBe(CHAT_LIMITS.maxTitle)
-    expect(out.slides[0].text.length).toBe(CHAT_LIMITS.maxTextPerSlide)
+    expect(out.deckContext).toHaveLength(CHAT_LIMITS.maxDeckContext)
+    expect(out.deckContext).toBe(deckContext.slice(-CHAT_LIMITS.maxDeckContext))
   })
 
   it('coerces junk: bad role → user, non-string → empty, non-array → empty', () => {
     const out = clampChatRequest({
       deckId: 42,
       messages: [{ role: 'system', content: null }, 'nope', null],
-      slides: 'nope',
+      deckContext: null,
     } as never)
     expect(out.deckId).toBe('')
     expect(out.messages).toEqual([
@@ -61,7 +57,7 @@ describe('clampChatRequest', () => {
       { role: 'user', content: '' },
       { role: 'user', content: '' },
     ])
-    expect(out.slides).toEqual([])
+    expect(out.deckContext).toBe('')
   })
 })
 
@@ -138,7 +134,7 @@ const userOf = (rows: Map<string, ChatMessage>) =>
 afterEach(() => vi.unstubAllGlobals())
 
 describe('sendChat', () => {
-  const ctx = { deckId: 'd1', slides: [], history: [] }
+  const ctx = { deckId: 'd1', deckContext: 'Deck context.', history: [] }
 
   it('appends the user turn and folds the token stream into a done assistant turn', async () => {
     vi.stubGlobal(
@@ -230,7 +226,12 @@ describe('sendChat', () => {
 // ---- sendChatAction: the Edit lane now STREAMS too — the reply types out of `{response}` frames, then the
 // terminal `{result}` frame's action is applied (with an "Applying…" note on the row during the apply).
 describe('sendChatAction', () => {
-  const ctx = { deckId: 'd1', slides: [], history: [] }
+  const ctx = {
+    deckId: 'd1',
+    deckContext: 'Deck context.',
+    slideIds: ['s1'],
+    history: [],
+  }
 
   it('streams the reply into content, then dispatches the result-frame actions', async () => {
     vi.stubGlobal(

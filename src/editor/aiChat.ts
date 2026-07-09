@@ -1,7 +1,7 @@
-// Client side of "✨ Chat": the panel's engine. A user turn + the current thread + a fresh deck digest
-// stream into a memory-only local `chat_message` row whose `content` grows per token. The product path uses
-// the action-capable stream: the assistant can answer with prose only, or return normalized actions that
-// apply through the same one-undo dispatcher as the rest of the editor.
+// Client side of "✨ Chat": the panel's engine. A user turn + the current thread + append-only narrated deck
+// context stream into a memory-only local `chat_message` row whose `content` grows per token. The product
+// path uses the action-capable stream: the assistant can answer with prose only, or return normalized
+// actions that apply through the same one-undo dispatcher as the rest of the editor.
 //
 // Two load-bearing decisions from the plan live here:
 //   1. Storage is a LOCAL table (src/rindle/localSchema.ts): writes go through `store.writeLocal` (NOT
@@ -22,7 +22,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { newId } from '../config'
-import { buildDigest, slideText } from './aiArrange'
+import { slideText } from './aiArrange'
 import { dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
@@ -34,6 +34,7 @@ import type { StrutStore } from '../rindle/client'
 import type { ChatMessageRow } from '../rindle/localSchema'
 import type { ThemeDeck } from './aiTheme'
 import type { SlideDetail } from './deckDetail'
+import type { DeckChatContext } from './chatNarration'
 import type { ChatRequest, ChatTurn } from '../../shared/chat'
 import type {
   ChatAction,
@@ -161,12 +162,11 @@ export function applyNote(actions: ChatAction[]): string {
 
 // ---- send ------------------------------------------------------------------------------------------
 
-/** The inputs a send needs beyond the user's text: which deck (scopes the thread), the current deck digest
- *  (grounding — rebuilt fresh per send so the model reasons about the CURRENT deck), and the prior thread
- *  as model-facing turns (history the server prepends to the new user turn). */
+/** The inputs a send needs beyond the user's text: which deck (scopes the thread), the append-only deck
+ *  context, and the prior thread as model-facing turns (history the server prepends to the new user turn). */
 export interface SendContext {
   deckId: string
-  slides: ChatRequest['slides']
+  deckContext: string
   history: ChatTurn[]
 }
 
@@ -235,7 +235,7 @@ export async function sendChat(
   try {
     const body: ChatRequest = {
       deckId: ctx.deckId,
-      slides: ctx.slides,
+      deckContext: ctx.deckContext,
       messages: [...ctx.history, { role: 'user', content: text }],
     }
     res = await fetch('/api/chat', {
@@ -327,7 +327,8 @@ export async function sendChat(
  *  shared/chatAction.ts): the deck's resolved theme + the active slide's full text. */
 export interface ActionSendContext {
   deckId: string
-  slides: ChatActRequest['slides']
+  deckContext: string
+  slideIds: ChatActRequest['slideIds']
   history: ChatTurn[]
   theme?: ChatActTheme
   activeSlide?: ChatActSlide
@@ -386,7 +387,8 @@ export async function sendChatAction(
   try {
     const body: ChatActRequest = {
       deckId: ctx.deckId,
-      slides: ctx.slides,
+      deckContext: ctx.deckContext,
+      slideIds: ctx.slideIds,
       messages: [...ctx.history, { role: 'user', content: text }],
       theme: ctx.theme,
       activeSlide: ctx.activeSlide,
@@ -538,6 +540,7 @@ export interface UseChat {
 export interface ChatEditContext {
   deck?: ThemeDeck | null
   activeSlide?: SlideDetail | null
+  deckContext?: DeckChatContext | null
 }
 
 /** Build the action grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and the
@@ -566,8 +569,8 @@ function buildActGrounding(
 
 /** Read + drive the advisor thread for `deckId`, grounded in the live `slides`. Reads the memory-only
  *  `chat_message` local table off the LIVE store (never the SSR seed store, which doesn't know the table),
- *  so it's empty until the client boots and then fully reactive. `slides` is passed so each `send` rebuilds
- *  a fresh digest — the model always reasons about the CURRENT deck. */
+ *  so it's empty until the client boots and then fully reactive. `slides` is still passed to apply actions
+ *  and provide the server's slide-id allowlist; model-facing deck content comes from `deckContext`. */
 export function useChat(
   deckId: string,
   slides: SlideDetail[],
@@ -580,6 +583,7 @@ export function useChat(
   const history = useHistory()
   const deck = edit?.deck ?? null
   const activeSlide = edit?.activeSlide ?? null
+  const deckContext = edit?.deckContext ?? null
   const [undoTip, setUndoTip] = useState<{ label: string } | null>(null)
 
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
@@ -613,8 +617,9 @@ export function useChat(
         .filter((m) => m.status === 'done')
         .map((m) => ({ role: m.role, content: m.content }))
       const grounding = buildActGrounding(deck, activeSlide)
+      const contextText = deckContext?.take() ?? ''
       // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
-      // request carries the trimmed digest.
+      // request carries append-only deck narration plus a slide-id allowlist.
       const dctx: DispatchCtx = {
         deckId,
         slides,
@@ -630,7 +635,8 @@ export function useChat(
         store,
         {
           deckId,
-          slides: buildDigest(slides),
+          deckContext: contextText,
+          slideIds: slides.map((s) => s.id),
           history: convo,
           theme: grounding.theme,
           activeSlide: grounding.activeSlide,
@@ -643,7 +649,18 @@ export function useChat(
         track('chat:edit', { slides: slides.length })
       })
     },
-    [store, busy, messages, deckId, slides, deck, activeSlide, mutate, history],
+    [
+      store,
+      busy,
+      messages,
+      deckId,
+      slides,
+      deck,
+      activeSlide,
+      deckContext,
+      mutate,
+      history,
+    ],
   )
 
   const undoLast = useCallback(() => {

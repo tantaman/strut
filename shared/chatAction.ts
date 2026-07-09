@@ -23,7 +23,7 @@
 // streaming constraint is specific to this path.)
 
 import { clampChatRequest } from './chat.ts'
-import type { ChatTurn, SlideDigest } from './chat.ts'
+import type { ChatTurn } from './chat.ts'
 
 // ---- the action union (v1) ------------------------------------------------------------------------
 
@@ -87,12 +87,15 @@ export interface ChatActSlide {
   text: string
 }
 
-/** POST body of `/api/chat/act`. Extends the advisor's ChatRequest (conversation + deck digest) with the
- *  two extra grounding channels the two data-hungry actions need. The server re-clamps everything. */
+/** POST body of `/api/chat/act`. Extends the advisor's ChatRequest (conversation + append-only deck
+ *  context) with a slide-id allowlist and the two extra grounding channels the data-hungry actions need.
+ *  The server re-clamps everything. */
 export interface ChatActRequest {
   deckId: string
   messages: ChatTurn[]
-  slides: SlideDigest[]
+  deckContext: string
+  /** Real slide ids currently in the deck. Used only as the action-target validation allowlist. */
+  slideIds: string[]
   theme?: ChatActTheme
   activeSlide?: ChatActSlide
 }
@@ -107,6 +110,8 @@ export const CHAT_ACTION_LIMITS = {
   maxCount: 40, // mirrors GENERATE_LIMITS.maxSlides
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
   maxThemeField: 80,
+  maxSlideIds: 150,
+  maxSlideId: 200,
   maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
   maxUrl: 2000, //       any URL: add_web src + add_image url-mode value (URLs run longer than 600)
   maxAlt: 300, //        add_image alt text
@@ -128,12 +133,18 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
   const base = clampChatRequest({
     deckId: req.deckId,
     messages: req.messages,
-    slides: req.slides,
+    deckContext: req.deckContext,
   })
   const out: ChatActRequest = {
     deckId: base.deckId,
     messages: base.messages,
-    slides: base.slides,
+    deckContext: base.deckContext,
+    slideIds: Array.isArray(req.slideIds)
+      ? req.slideIds
+          .map((id) => str(id).slice(0, CHAT_ACTION_LIMITS.maxSlideId))
+          .filter(Boolean)
+          .slice(0, CHAT_ACTION_LIMITS.maxSlideIds)
+      : [],
   }
   const t = req.theme
   if (t && typeof t === 'object') {
