@@ -2,7 +2,7 @@
 
 Strut the app is **open source**. The **official, hosted** Strut adds a marketing/product page and
 **paid Pro accounts** (Stripe) — code we keep **out of this repo**. This document explains the seam that
-makes both true at once: a single Cloudflare Worker serves the open-source app *and* a private
+makes both true at once: a single Cloudflare Worker serves the open-source app _and_ a private
 commercial overlay, and a plain clone (no overlay) is the full, free, self-hostable app that phones home
 to no one.
 
@@ -15,7 +15,7 @@ here are **inert** until an overlay is supplied.
                      ┌──────────────── ONE Cloudflare Worker ────────────────┐
  strut.io/       ───▶│ worker-entry.ts → commercial.fetch()  (marketing +    │  ← private overlay
  strut.io/pricing ──▶│   /api/billing/*), else fall through to the app       │
- app.strut.io/*  ───▶│ TanStack Start `forward` — the app + /api/*           │  ← this repo
+ strut.io/app/*  ───▶│ TanStack Start `forward` — the app + /app/api/*       │  ← this repo
  sandbox.strut.io ─▶ │ existing artifact-only host branch                    │
                      └───────────────────────┬───────────────────────────────┘
                                               │ getEntitlements(userId)
@@ -62,12 +62,12 @@ Two consumers in this repo import `#commercial`:
 
 All of these are no-ops under `COMMUNITY` (a clone/self-host), so nothing changes without an overlay:
 
-| Gate | Where | COMMUNITY behavior |
-| --- | --- | --- |
-| AI daily caps | the six `if (!byo && ai.meter)` sites in `src/routes/api.*` + `server/artifact.ts`, via `aiMetering()` | built-in `server/quota.ts` constants |
-| Deck cap | `createDeckCapped` in `server/rindle-api.ts` | `deckLimit: null` → unlimited |
-| Publishing | `setDeckVisibilityGuarded` in `server/rindle-api.ts` | `canPublish: true` |
-| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`) | `upgradeUrl: null` → hidden |
+| Gate                     | Where                                                                                                  | COMMUNITY behavior                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| AI daily caps            | the six `if (!byo && ai.meter)` sites in `src/routes/api.*` + `server/artifact.ts`, via `aiMetering()` | built-in `server/quota.ts` constants |
+| Deck cap                 | `createDeckCapped` in `server/rindle-api.ts`                                                           | `deckLimit: null` → unlimited        |
+| Publishing               | `setDeckVisibilityGuarded` in `server/rindle-api.ts`                                                   | `canPublish: true`                   |
+| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`)                                               | `upgradeUrl: null` → hidden          |
 
 ## Building an overlay
 
@@ -81,16 +81,15 @@ module that `export const commercial: Commercial`. A reference implementation sh
 - `stripe.ts` — Stripe via `fetch` + WebCrypto (no SDK, no Node crypto → runs on Workers).
 - `marketing.ts` — the product/pricing page (plain, theme-aware HTML).
 - `plans.ts` — the FREE/PRO entitlement sets (pricing/packaging stays private).
-- `wrangler.jsonc` — a full config adding the `app.strut.io` route + host/auth/Stripe vars.
+- `wrangler.jsonc` — a full config serving marketing at `/`, app at `/app`, plus auth/Stripe vars.
 
 ## Build & deploy envs
 
-| Env | Set for | Effect |
-| --- | --- | --- |
-| `STRUT_COMMERCIAL` | build | Path to the overlay entry; aliases `#commercial` to it. |
-| `WRANGLER_CONFIG` | build | Alternate wrangler config (`cloudflare({ configPath })`) — the overlay's, adding the app host + vars. |
-| `AUTH_TRUSTED_ORIGINS` | runtime | Comma-separated extra trusted origins (e.g. the marketing apex). |
-| `AUTH_COOKIE_DOMAIN` | runtime | Parent cookie domain (e.g. `.strut.io`) to share the session across subdomains. |
+| Env                  | Set for | Effect                                                                                  |
+| -------------------- | ------- | --------------------------------------------------------------------------------------- |
+| `STRUT_COMMERCIAL`   | build   | Path to the overlay entry; aliases `#commercial` to it.                                 |
+| `WRANGLER_CONFIG`    | build   | Alternate wrangler config (`cloudflare({ configPath })`) — the overlay's routes + vars. |
+| `STRUT_APP_BASEPATH` | build   | Optional override for the hosted app mount path. Commercial builds default to `/app`.   |
 
 One-command deploy (`package.json`):
 
@@ -101,12 +100,12 @@ pnpm preview:pro   # same build, local preview
 
 The base `pnpm deploy` is unchanged — a clone with no overlay deploys the free app on a single host.
 
-## Host-split checklist (official cutover)
+## Path-split checklist (official cutover)
 
-Moving the app from the apex to `app.strut.io`:
+Moving the app from the apex to `strut.io/app`:
 
-1. Add the `app.strut.io` custom-domain route (done in `commercial/wrangler.jsonc`).
-2. `BETTER_AUTH_URL=https://app.strut.io`, `AUTH_TRUSTED_ORIGINS=https://strut.io`,
-   `AUTH_COOKIE_DOMAIN=.strut.io`.
-3. **Update the GitHub/Google OAuth apps** — callback URLs to `https://app.strut.io/api/auth/callback/*`.
-4. Point the Stripe webhook at `https://app.strut.io/api/billing/webhook` (or the apex — both are served).
+1. Keep the `strut.io` custom-domain route (done in `commercial/wrangler.jsonc`); remove `app.strut.io`.
+2. `BETTER_AUTH_URL=https://strut.io`; Better Auth is mounted at `/app/api/auth`.
+3. **Update the GitHub/Google OAuth apps** — callback URLs to
+   `https://strut.io/app/api/auth/callback/*`.
+4. Point the Stripe webhook at `https://strut.io/api/billing/webhook`.

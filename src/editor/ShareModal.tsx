@@ -13,6 +13,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { authClient } from '../rindle/authClient'
 import { newId } from '../config'
 import type { CollaboratorRole } from '../../shared/app-def'
+import { appPath } from '../../shared/appPath'
 
 interface ShareDeck {
   id: string
@@ -93,7 +94,7 @@ export function ShareModal({
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
-  const shareLink = `${origin}/share/${deck.id}?t=${deck.share_token}`
+  const shareLink = `${origin}${appPath(`/share/${deck.id}`)}?t=${deck.share_token}`
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

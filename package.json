@@ -20,7 +20,7 @@
     "// deploy:pro": "OFFICIAL deploy — the open-source app + the private commercial overlay (marketing + Stripe) as ONE Worker. Requires the git-ignored commercial/ overlay present. See docs/COMMERCIAL_OVERLAY.md.",
     "deploy:pro": "wrangler d1 migrations apply strut-auth --remote -c commercial/wrangler.jsonc && STRUT_COMMERCIAL=commercial/index.ts WRANGLER_CONFIG=commercial/wrangler.jsonc CF=1 vite build && wrangler deploy -c dist/server/wrangler.json",
     "preview:pro": "STRUT_COMMERCIAL=commercial/index.ts WRANGLER_CONFIG=commercial/wrangler.jsonc CF=1 vite build && CF=1 vite preview",
-    "// dev:pro": "LOCAL dev of app + commercial overlay in ONE workerd server (CF=1 vite dev). Marketing → http://localhost:3000, app → http://app.localhost:3000 (both loopback). Needs the git-ignored commercial/ overlay + commercial/.dev.vars (BETTER_AUTH_SECRET etc.). See commercial/README.md.",
+    "// dev:pro": "LOCAL dev of app + commercial overlay in ONE workerd server (CF=1 vite dev). Marketing → http://localhost:3000, app → http://localhost:3000/app. Needs the git-ignored commercial/ overlay + commercial/.dev.vars (BETTER_AUTH_SECRET etc.). See commercial/README.md.",
     "dev:pro:migrate": "wrangler d1 migrations apply strut-auth --local --persist-to .wrangler/state -c commercial/wrangler.dev.jsonc",
     "dev:pro": "pnpm dev:pro:migrate && concurrently -k -n daemon,web -c blue,green \"rindle up --migrate --gen shared/schema.ts --watch\" \"STRUT_COMMERCIAL=commercial/index.ts WRANGLER_CONFIG=commercial/wrangler.dev.jsonc CF=1 vite dev --port 3000\"",
     "migrate:db:local": "wrangler d1 migrations apply strut-auth --local",

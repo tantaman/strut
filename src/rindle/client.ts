@@ -7,6 +7,7 @@
 import { mutators } from '../../shared/app-def.ts'
 import { clientSchema } from './localSchema.ts'
 import { authClient } from './authClient.ts'
+import { APP_BASEPATH, appPath } from '../../shared/appPath.ts'
 
 // The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
 // MUST match what the server derives from the session cookie (server/session.ts), so the optimistic
@@ -33,7 +34,9 @@ async function ensureSession(): Promise<string> {
   }
   sessionUserId = user?.id ?? ''
   if (!sessionUserId)
-    console.error('[rindle] no session user id — API reads will be unauthorized')
+    console.error(
+      '[rindle] no session user id — API reads will be unauthorized',
+    )
   return sessionUserId
 }
 
@@ -43,7 +46,7 @@ async function ensureSession(): Promise<string> {
 // the local daemon default.
 async function resolveWsUrl(): Promise<string> {
   try {
-    const res = await fetch('/api/rindle/config')
+    const res = await fetch(appPath('/api/rindle/config'))
     if (res.ok) {
       const { wsUrl } = (await res.json()) as { wsUrl?: string }
       if (wsUrl) return wsUrl
@@ -77,13 +80,14 @@ async function create() {
     user: () => sessionUserId,
     api: {
       // NOTE: request url = api.url + routes.query, and routes.query defaults to the ABSOLUTE
-      // "/api/rindle/query". So url MUST be "" here (not "/api", which double-prefixes). See
-      // RINDLE_NOTES.md #2.
-      url: '',
+      // "/api/rindle/query". The app basepath is the only safe prefix here: root builds use "",
+      // commercial builds use "/app", yielding "/app/api/rindle/query".
+      url: APP_BASEPATH,
       // Identity now rides the session cookie (same-origin), NOT a spoofable header — the server
       // ignores x-user. `credentials: same-origin` is fetch's default; set explicitly so the cookie is
       // guaranteed to be sent even if a future default changes.
-      fetch: (input, init) => fetch(input, { ...init, credentials: 'same-origin' }),
+      fetch: (input, init) =>
+        fetch(input, { ...init, credentials: 'same-origin' }),
     },
     daemon: {
       wsUrl,

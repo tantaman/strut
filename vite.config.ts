@@ -17,10 +17,12 @@ const CF = process.env.CF === '1'
 // Open-core commercial overlay (private; absent in this repo). When STRUT_COMMERCIAL points at an
 // overlay entry module, we alias `#commercial` to it — overriding the inert src/commercial/stub.ts —
 // so the SAME Worker bundle also serves the marketing site + Stripe billing. WRANGLER_CONFIG lets the
-// overlay supply its own wrangler config (adding the app.strut.io route + host vars) without editing
-// the open-source wrangler.jsonc. Both unset = the plain open-source build. See docs/COMMERCIAL_OVERLAY.md.
+// overlay supply its own wrangler config (marketing at / and the app at /app) without editing the
+// open-source wrangler.jsonc. Both unset = the plain open-source build. See docs/COMMERCIAL_OVERLAY.md.
 const COMMERCIAL = process.env.STRUT_COMMERCIAL
 const WRANGLER_CONFIG = process.env.WRANGLER_CONFIG
+const APP_BASEPATH =
+  process.env.STRUT_APP_BASEPATH ?? (COMMERCIAL ? '/app' : undefined)
 
 // Server-side secrets the Rindle API + upload handlers read via process.env. Vite doesn't expose
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
@@ -90,7 +92,9 @@ const config = defineConfig(({ mode }) => {
       // Disable the piping (keeps the devtools panel + source injection). See RINDLE/dev notes.
       devtools({ consolePiping: { enabled: false } }),
       tailwindcss(),
-      tanstackStart(),
+      tanstackStart(
+        APP_BASEPATH ? { router: { basepath: APP_BASEPATH } } : undefined,
+      ),
       viteReact(),
     ],
   }

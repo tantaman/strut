@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { authClient } from '../rindle/authClient'
+import { appPath } from '../../shared/appPath'
 
 // Minimal sign-in surface for the auth spike (AUTH_PLAN.md Phase 1–2). Deliberately unstyled beyond a
 // few utilities — the real UI comes later. Renders the current session when signed in.
@@ -32,7 +33,10 @@ function SignIn() {
       <button
         className="rounded border px-3 py-1"
         onClick={() =>
-          authClient.signIn.social({ provider: 'github', callbackURL: '/' })
+          authClient.signIn.social({
+            provider: 'github',
+            callbackURL: appPath('/'),
+          })
         }
       >
         Continue with GitHub
@@ -40,7 +44,10 @@ function SignIn() {
       <button
         className="rounded border px-3 py-1"
         onClick={() =>
-          authClient.signIn.social({ provider: 'google', callbackURL: '/' })
+          authClient.signIn.social({
+            provider: 'google',
+            callbackURL: appPath('/'),
+          })
         }
       >
         Continue with Google

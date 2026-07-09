@@ -4,6 +4,7 @@
 // never returned by any route, so nothing here ever holds a key.
 
 import { useCallback, useEffect, useState } from 'react'
+import { appPath } from '../../shared/appPath'
 
 export interface ModelStatus {
   connected: boolean
@@ -11,7 +12,11 @@ export interface ModelStatus {
   model: string | null
 }
 
-const DISCONNECTED: ModelStatus = { connected: false, provider: null, model: null }
+const DISCONNECTED: ModelStatus = {
+  connected: false,
+  provider: null,
+  model: null,
+}
 
 export interface ConnectResult {
   ok: boolean
@@ -23,7 +28,9 @@ export interface ConnectResult {
 /** Current connection status (never includes a key). Falls back to "disconnected" on any error. */
 export async function getModelStatus(): Promise<ModelStatus> {
   try {
-    const res = await fetch('/api/model/status', { credentials: 'same-origin' })
+    const res = await fetch(appPath('/api/model/status'), {
+      credentials: 'same-origin',
+    })
     if (!res.ok) return DISCONNECTED
     return (await res.json()) as ModelStatus
   } catch {
@@ -38,7 +45,7 @@ export async function connectModel(
 ): Promise<ConnectResult> {
   let res: Response
   try {
-    res = await fetch('/api/model/connect', {
+    res = await fetch(appPath('/api/model/connect'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',
@@ -66,7 +73,7 @@ export async function connectModel(
 /** Forget the connected model. Best-effort — resolves even on error (the caller refreshes status). */
 export async function disconnectModel(): Promise<void> {
   try {
-    await fetch('/api/model/disconnect', {
+    await fetch(appPath('/api/model/disconnect'), {
       method: 'POST',
       credentials: 'same-origin',
     })

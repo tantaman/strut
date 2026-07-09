@@ -10,6 +10,7 @@
 //   GET  /a/<hash>.html  (a.$key.tsx)        — serve the built HTML with text/html + CSP + nosniff
 
 import type { R2BucketLike } from './cf-env.ts'
+import { appPath } from '../shared/appPath.ts'
 
 const LOCAL_DIR = '.uploads'
 const ARTIFACT_PREFIX = 'artifacts/' // R2 key prefix / local subdir; keeps runnable HTML out of the image namespace
@@ -177,9 +178,9 @@ export async function uploadArtifactFromRequest(
         await putLocal(key, html)
       }
       // Prefer the dedicated sandbox origin (real cross-origin isolation); else serve same-origin through
-      // the Worker at /a/<key> (still opaque-origin via the iframe sandbox, just no second boundary).
+      // the Worker at /a/<key> (or /app/a/<key> when the app is mounted there).
       const base = (process.env.ARTIFACT_ORIGIN || '').replace(/\/+$/, '')
-      const url = base ? `${base}/a/${key}` : `/a/${key}`
+      const url = base ? `${base}/a/${key}` : appPath(`/a/${key}`)
       return Response.json({ url })
     } catch (err) {
       // The store failed — refund the consumed quota unit so the user isn't charged for nothing

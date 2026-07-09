@@ -19,6 +19,7 @@ import { betterAuth } from 'better-auth'
 import type { BetterAuthOptions } from 'better-auth'
 import { anonymous } from 'better-auth/plugins'
 
+import { appPath } from '../shared/appPath.ts'
 import { onGuestPromotion } from './claim.ts'
 
 // Must match the d1_databases[].binding name in wrangler.jsonc.
@@ -188,8 +189,8 @@ export async function getAuth(request?: Request) {
     loaded.local,
     origin ?? LOCAL_AUTH_URL,
   )
-  // Host-split support (the commercial overlay runs the app on app.strut.io and marketing on strut.io).
-  // Both are unset by default → single-host behavior, identical to before:
+  // Optional cross-origin support for non-standard deploys. Both are unset by default → single-host
+  // behavior, identical to before:
   //   AUTH_TRUSTED_ORIGINS — extra comma-separated origins to trust (e.g. the marketing apex) beyond baseURL.
   //   AUTH_COOKIE_DOMAIN   — a parent cookie domain (e.g. ".strut.io") to share the session across
   //                          subdomains, so a checkout initiated from marketing knows the signed-in user.
@@ -210,7 +211,7 @@ export async function getAuth(request?: Request) {
     ),
     baseURL,
     trustedOrigins,
-    basePath: '/api/auth', // default; explicit so the route path stays in sync
+    basePath: appPath('/api/auth'), // follows the router mount path; /app/api/auth in commercial builds
     // No passwords — social sign-in only (GitHub / Google; Apple is a fast-follow, AUTH_PLAN.md Phase 4).
     emailAndPassword: { enabled: false },
     socialProviders: resolveSocialProviders(),

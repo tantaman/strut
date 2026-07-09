@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LogIn, LogOut, Sparkles, User } from 'lucide-react'
 import type { SessionAccount } from '../../server/session'
 import type { EntitlementSummary } from '../../shared/commercial'
+import { appPath } from '../../shared/appPath'
 import { authClient } from './authClient'
 import { track } from '../lib/analytics'
 
@@ -58,13 +59,13 @@ export function AccountControl({
 
   function promote(provider: 'github' | 'google') {
     track('account:promote', { provider })
-    void authClient.signIn.social({ provider, callbackURL: '/' })
+    void authClient.signIn.social({ provider, callbackURL: appPath('/') })
   }
   async function signOut() {
     setOpen(false)
     await authClient.signOut()
     // Reload so a fresh anonymous session is minted (reads stay authorized, app keeps working).
-    window.location.assign('/')
+    window.location.assign(appPath('/'))
   }
 
   return (
