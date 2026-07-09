@@ -118,12 +118,6 @@ export function SlideWell({
     virtualizer.measure()
   }, [horizontal, virtualizer])
 
-  // The virtualizer needs a scroll element to size against, which is null during SSR — so the server
-  // renders zero rows and the thumbnails only mount after hydration. Fade them in (post-paint `useEffect`)
-  // so they resolve gently instead of hard-popping into the strip on a refresh.
-  const [rowsMounted, setRowsMounted] = useState(false)
-  useEffect(() => setRowsMounted(true), [])
-
   // Edge autoscroll for the mobile long-press reorder. The drag suppresses native touch scrolling (see
   // `preventScroll`), so to reach an off-window slot we scroll the strip ourselves while the finger rests
   // near an edge, recomputing the drop index against the newly revealed tiles each frame.
@@ -483,8 +477,6 @@ export function SlideWell({
           flex: '0 0 auto',
           width: horizontal ? `${virtualizer.getTotalSize()}px` : '100%',
           height: horizontal ? '100%' : `${virtualizer.getTotalSize()}px`,
-          opacity: rowsMounted ? 1 : 0,
-          transition: 'opacity 0.15s ease',
         }}
       >
         {virtualRows.map((row) => {

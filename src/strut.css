@@ -830,14 +830,6 @@ button {
   position: relative;
   box-shadow: var(--shadow-lg);
   border-radius: 2px;
-  transition: opacity 0.18s ease;
-}
-/* Held hidden until the surface has been measured (correct fit-scale) and the web fonts are in — so a
-   full refresh fades the slide in at its final size/typography instead of painting the SSR placeholder
-   scale and then snapping/reflowing (the operating-table flash). useLayoutEffect clears this before the
-   first paint on a client-side navigation, so opening a deck in-app stays instant. */
-.slide-surface.is-fitting {
-  opacity: 0;
 }
 .slide-canvas {
   position: absolute;
@@ -1263,12 +1255,6 @@ button {
   width: 0;
   height: 0;
   transform-origin: 0 0;
-  transition: opacity 0.18s ease;
-}
-/* Hidden until the camera has framed the cards once (see Overview `fitted`), so a refresh into Overview
-   doesn't paint the cards at the placeholder zoom and then snap them into frame. */
-.overview__world.is-fitting {
-  opacity: 0;
 }
 .ov-controls {
   position: absolute;
