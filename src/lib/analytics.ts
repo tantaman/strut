@@ -34,6 +34,7 @@ export const UMAMI_ID = import.meta.env.VITE_UMAMI_ID ?? ''
 // call sites) keeps the Umami dashboard legible and prevents typo'd, un-mergeable event names.
 export type StrutEvent =
   | 'slides:generated' // ✨ AI authored N slides from a description (SlideWell)
+  | 'variant:create' //    ✨ AI authored a new audience-specific deck variant
   | 'arrange:applied' //  ✨ AI Arrange plan committed to the deck (Overview)
   | 'chat:sent' //        ✨ Chat — a user turn sent to the advisor (ChatPanel)
   | 'chat:edit' //        ✨ Chat — an Edit-lane turn (the AI drives one deck change; ChatPanel)

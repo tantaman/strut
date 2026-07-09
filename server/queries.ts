@@ -18,7 +18,7 @@ type User = string
 type Ctx = ApiContext<User>
 
 function reqString(raw: unknown, field: string): string {
-  const v = (raw as Record<string, unknown>)?.[field]
+  const v = (raw as Record<string, unknown>)[field]
   if (typeof v !== 'string' || v.length === 0) throw new Error(`bad ${field}`)
   return v
 }
@@ -29,7 +29,7 @@ function publicAccess(token: string) {
   return and(deck.visibility('public-read'), deck.share_token(token))
 }
 function reqLimit(raw: unknown): number {
-  const v = (raw as Record<string, unknown>)?.limit
+  const v = (raw as Record<string, unknown>).limit
   if (typeof v !== 'number' || !Number.isInteger(v) || v < 1 || v > 1000)
     throw new Error('bad limit')
   return v
@@ -47,6 +47,21 @@ const decksQuery = defineQuery(
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
   ({ limit }: { limit: number }, ctx: Ctx) =>
     q.deck
+      .where(deckAccess(ctx.user))
+      .orderBy('modified', 'desc')
+      .limit(limit)
+      .countAs('slideCount', rels.deckSlides),
+)
+
+const deckVariantsQuery = defineQuery(
+  'deckVariants',
+  (raw): { deckId: string; limit: number } => ({
+    deckId: reqString(raw, 'deckId'),
+    limit: reqLimit(raw),
+  }),
+  ({ deckId, limit }: { deckId: string; limit: number }, ctx: Ctx) =>
+    q.deck.where
+      .source_deck_id(deckId)
       .where(deckAccess(ctx.user))
       .orderBy('modified', 'desc')
       .limit(limit)
@@ -108,6 +123,7 @@ const deckNotesQuery = defineQuery(
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
+  deckVariantsQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
   deckSharesQuery,

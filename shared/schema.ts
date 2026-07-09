@@ -62,6 +62,9 @@ export const deck = table("deck")
     body_color: string(),
     default_slide_mode: string(),
     text_align: string(),
+    source_deck_id: string(),
+    variant_label: string(),
+    variant_prompt: string(),
   })
   .primaryKey("id");
 

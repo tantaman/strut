@@ -122,11 +122,15 @@ export const preloadDeck = createServerFn({ method: 'GET' })
           ),
       },
     )
+    const { getEntitlements, entitlementSummary } =
+      await import('../../server/entitlements')
+    const entitlement = entitlementSummary(
+      await getEntitlements(ctx.account.id),
+    )
     return {
       rindle: JSON.stringify(state),
       userId: ctx.account.id,
       account: ctx.account,
-      // The editor chrome has no account pill, so skip the entitlement read here.
-      entitlement: null,
+      entitlement,
     }
   })

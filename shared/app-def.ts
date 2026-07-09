@@ -114,6 +114,10 @@ export const createDeckArgs = z.object({
   // pass 'public-read' + a share_token so a new deck is link-shareable but not private (server enforces).
   visibility: z.enum(['private', 'public-read']).optional(),
   share_token: z.string().optional(),
+  // Variant lineage. Empty/omitted source_deck_id means this is a canonical/standalone deck.
+  source_deck_id: z.string().optional(),
+  variant_label: z.string().optional(),
+  variant_prompt: z.string().optional(),
 })
 export type CreateDeckArgs = z.infer<typeof createDeckArgs>
 
@@ -420,6 +424,9 @@ export const mutators = {
         body_color: '',
         default_slide_mode: DEFAULT_SLIDE_MODE,
         text_align: '',
+        source_deck_id: a.source_deck_id ?? '',
+        variant_label: a.variant_label ?? '',
+        variant_prompt: a.variant_prompt ?? '',
       })
     },
   ),

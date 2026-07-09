@@ -14,13 +14,13 @@ import { q, rels } from './app-def.ts'
 import { SlideFragment } from './fragments.ts'
 
 function reqString(raw: unknown, field: string): string {
-  const v = (raw as Record<string, unknown>)?.[field]
+  const v = (raw as Record<string, unknown>)[field]
   if (typeof v !== 'string' || v.length === 0) throw new Error(`bad ${field}`)
   return v
 }
 
 function reqLimit(raw: unknown, field = 'limit'): number {
-  const v = (raw as Record<string, unknown>)?.[field]
+  const v = (raw as Record<string, unknown>)[field]
   if (typeof v !== 'number' || !Number.isInteger(v) || v < 1 || v > 1000)
     throw new Error(`bad ${field}`)
   return v
@@ -38,6 +38,22 @@ export const decksQuery = defineQuery(
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
   ({ limit }: { limit: number }) =>
     q.deck
+      .orderBy('modified', 'desc')
+      .limit(limit)
+      .countAs('slideCount', rels.deckSlides),
+)
+
+// Variants derived from a source deck, newest first. The server twin gates each variant by the viewer's
+// normal deck access, so this shows only derived decks the current principal can see.
+export const deckVariantsQuery = defineQuery(
+  'deckVariants',
+  (raw): { deckId: string; limit: number } => ({
+    deckId: reqString(raw, 'deckId'),
+    limit: reqLimit(raw),
+  }),
+  ({ deckId, limit }: { deckId: string; limit: number }) =>
+    q.deck.where
+      .source_deck_id(deckId)
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
@@ -117,6 +133,7 @@ export const publicDeckDetailQuery = defineQuery(
 
 export const allQueries = [
   decksQuery,
+  deckVariantsQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
   deckSharesQuery,
