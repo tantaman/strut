@@ -107,8 +107,6 @@ interface DeckVariantRow {
   variant_label: string
 }
 
-type BackgroundImageTarget = 'deck' | 'slide' | 'surface' | 'slide-surface'
-
 // Seed a fresh artifact with a runnable snippet so the block does something the instant it's dropped —
 // and doubles as inline docs for the format (ES module; import from esm.sh; render into #root).
 const STARTER_ARTIFACT = `// Runnable artifact — an ES module. Import libraries from esm.sh and render

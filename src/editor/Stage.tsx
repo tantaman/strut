@@ -17,7 +17,15 @@ import {
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
-import { reinsertComponent } from './componentOps'
+import { reinsertComponent, zNow } from './componentOps'
+import {
+  buildComponentClipboardPayload,
+  COMPONENT_PASTE_OFFSET,
+  componentClipboardKey,
+  instantiateComponentClipboard,
+  readComponentClipboardData,
+  writeComponentClipboardData,
+} from './componentClipboard'
 import {
   BackgroundImageLayer,
   cmpStyle,
@@ -65,6 +73,17 @@ interface DeckRow extends DeckThemeFields {
 // how far the pointer may move and still count as a "click" rather than a size-defining drag.
 const SHAPE_DEFAULT = 200
 const DRAW_SLOP = 6
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  const t = target as HTMLElement | null
+  return !!(
+    t &&
+    (t.isContentEditable ||
+      t.tagName === 'INPUT' ||
+      t.tagName === 'TEXTAREA' ||
+      t.tagName === 'SELECT')
+  )
+}
 
 export function Stage({
   slide,
@@ -121,6 +140,7 @@ export function Stage({
     h: number
     markup: string
   }>(null)
+  const pasteStateRef = useRef({ key: '', count: 0 })
 
   const bg = resolveBackground(slideData.background, deck?.background)
   const bgImg = resolveBackgroundImage(slideData.background, deck?.background)
@@ -132,14 +152,7 @@ export function Stage({
     function onKey(e: KeyboardEvent) {
       if (!editor.canEdit) return
       if (e.key !== 'Delete' && e.key !== 'Backspace') return
-      const t = e.target as HTMLElement | null
-      if (
-        t &&
-        (t.isContentEditable ||
-          t.tagName === 'INPUT' ||
-          t.tagName === 'TEXTAREA')
-      )
-        return
+      if (isEditableTarget(e.target)) return
       if (editor.selected.size === 0) return
       e.preventDefault()
       const victims = getComponents().filter((c) => editor.selected.has(c.id))
@@ -149,6 +162,40 @@ export function Stage({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [editor, getComponents, mutate])
+
+  // Component clipboard: Cmd/Ctrl+C copies selected objects; Cmd/Ctrl+V pastes fresh copies onto the
+  // active slide. The payload is app-specific JSON, while the paste operation itself goes through the
+  // same reinsert path as undo/import so every component kind stays covered.
+  useEffect(() => {
+    function onCopy(e: ClipboardEvent) {
+      if (isEditableTarget(e.target) || editor.selected.size === 0) return
+      const selected = getComponents().filter((c) => editor.selected.has(c.id))
+      const payload = buildComponentClipboardPayload(selected)
+      if (!payload) return
+      e.preventDefault()
+      if (!e.clipboardData) return
+      writeComponentClipboardData(e.clipboardData, payload)
+      pasteStateRef.current = {
+        key: componentClipboardKey(payload),
+        count: 0,
+      }
+    }
+
+    function onPaste(e: ClipboardEvent) {
+      if (!editor.canEdit || isEditableTarget(e.target)) return
+      const payload = readComponentClipboardData(e.clipboardData)
+      if (!payload) return
+      e.preventDefault()
+      pasteComponents(payload)
+    }
+
+    window.addEventListener('copy', onCopy)
+    window.addEventListener('paste', onPaste)
+    return () => {
+      window.removeEventListener('copy', onCopy)
+      window.removeEventListener('paste', onPaste)
+    }
+  }, [editor, getComponents, history, mutate, slideData.id])
 
   // Shape-tool keyboard shortcuts (Excalidraw parity): 1 or Esc = Select, 2–7 = arm a shape tool.
   // Guarded so digits typed into a field or the text editor don't hijack the canvas.
@@ -197,6 +244,40 @@ export function Stage({
         }
       },
     )
+  }
+
+  function pasteComponents(
+    payload: NonNullable<ReturnType<typeof readComponentClipboardData>>,
+  ) {
+    const key = componentClipboardKey(payload)
+    const count =
+      pasteStateRef.current.key === key ? pasteStateRef.current.count + 1 : 1
+    pasteStateRef.current = { key, count }
+
+    const current = getComponents()
+    const maxZ = current.reduce((m, c) => Math.max(m, c.z_order), zNow())
+    const pasted = instantiateComponentClipboard(payload, {
+      slideId: slideData.id,
+      offset: COMPONENT_PASTE_OFFSET * count,
+      zStart: maxZ + 1,
+      newId,
+    })
+    if (pasted.length === 0) return
+
+    history.batch(
+      pasted.length > 1 ? 'Paste components' : 'Paste component',
+      () => {
+        for (const c of pasted) {
+          reinsertComponent(mutate, c)
+          history.push({
+            label: 'Paste component',
+            redo: () => reinsertComponent(mutate, c),
+            undo: () => mutate.removeComponent({ id: c.id }),
+          })
+        }
+      },
+    )
+    editor.selectMany(pasted.map((c) => c.id))
   }
 
   function raise(c: AnyComponent) {
