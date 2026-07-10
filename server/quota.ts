@@ -28,6 +28,11 @@ const ARTIFACT_TABLE = 'artifact_usage'
 // Text-to-image generation is a heavy Workers AI call (the app pays), so it gets its own small bucket —
 // separate from generate so a batch of images can't drain the slide-generation allowance and vice versa.
 const IMAGE_TABLE = 'image_usage'
+// "🎙️ From a recording": speech-to-text (Whisper) and transcript→deck are each heavy Workers AI calls, so
+// each gets its own small bucket. transcribe is the audio precursor; narrate authors the deck (and, on a
+// pooled plan, counts as one pooled AI message — see POOLED_FEATURES in server/entitlements.ts).
+const TRANSCRIBE_TABLE = 'transcribe_usage'
+const NARRATE_TABLE = 'narrate_usage'
 // The POOLED monthly allowance (paid plans): ONE counter shared across the inference features
 // (arrange/generate/chat/image — see aiMetering's POOLED_FEATURES), keyed by (user, MONTH) instead of
 // (user, day). Same table shape + store logic as the daily buckets; the `day` column just holds a
@@ -43,6 +48,10 @@ export const CHAT_DAILY_LIMIT = 200
 export const ARTIFACT_DAILY_LIMIT = 200
 // Generating an image is heavy; keep the daily allowance modest (mirrors generate).
 export const IMAGE_DAILY_LIMIT = 20
+// Transcribing audio and authoring a deck from a transcript are both heavy; keep their free-tier daily
+// allowances modest (a recording→deck run costs one of each).
+export const TRANSCRIBE_DAILY_LIMIT = 10
+export const NARRATE_DAILY_LIMIT = 10
 // Fallback for the pooled monthly allowance if a plan somehow sets a pool without a number (aiMetering only
 // ever returns a concrete limit for the month window, so this is a safety net, not a real cap).
 export const MONTHLY_POOL_LIMIT = 1000
@@ -66,6 +75,8 @@ const FEATURE_TABLE: Record<AiFeature, string> = {
   chat: CHAT_TABLE,
   image: IMAGE_TABLE,
   artifact: ARTIFACT_TABLE,
+  transcribe: TRANSCRIBE_TABLE,
+  narrate: NARRATE_TABLE,
 }
 export const FEATURE_DEFAULT_LIMIT: Record<AiFeature, number> = {
   arrange: ARRANGE_DAILY_LIMIT,
@@ -73,6 +84,8 @@ export const FEATURE_DEFAULT_LIMIT: Record<AiFeature, number> = {
   chat: CHAT_DAILY_LIMIT,
   image: IMAGE_DAILY_LIMIT,
   artifact: ARTIFACT_DAILY_LIMIT,
+  transcribe: TRANSCRIBE_DAILY_LIMIT,
+  narrate: NARRATE_DAILY_LIMIT,
 }
 
 /** Today's consumed count for a feature (no increment) — the read behind /api/usage. */

@@ -12,8 +12,15 @@ function json(data: unknown, status: number): Response {
   })
 }
 
-// The user-facing ✨ features (artifact usage is internal, so it's left off the panel).
-const FEATURES: Array<AiFeature> = ['arrange', 'generate', 'chat', 'image']
+// The user-facing ✨ features (artifact + transcribe usage are internal precursors, so they're left off the
+// panel; narrate is the user-facing "recording → slides" action).
+const FEATURES: Array<AiFeature> = [
+  'arrange',
+  'generate',
+  'chat',
+  'image',
+  'narrate',
+]
 
 export const Route = createFileRoute('/api/usage')({
   server: {
@@ -39,6 +46,10 @@ export const Route = createFileRoute('/api/usage')({
           chat: true,
           image: false,
           artifact: false,
+          // narrate runs through the shared model seam, so a BYO key lifts its cap (like generate); transcribe
+          // is Workers-AI-only (Whisper), so it stays capped even with a key (like image).
+          narrate: true,
+          transcribe: false,
         }
 
         // A pooled plan (Pro) reports ONE shared monthly counter instead of the per-feature daily buckets;

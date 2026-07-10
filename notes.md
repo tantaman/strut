@@ -1,3 +1,8 @@
+1. Create a $10/mo Price in Stripe and paste its price_... id into STRIPE_PRICE_PRO in commercial/wrangler.jsonc. I only changed the display label — the actual charge is driven by that Price ID, which still points at the old $3 price. I left an inline ⚠️ note there.
+2. Apply the migration in prod: wrangler d1 migrations apply strut-auth.
+
+---
+
 Maybe just a single chat and actions in it rather than buttons all over...
 
 
