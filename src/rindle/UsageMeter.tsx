@@ -18,6 +18,9 @@ interface Usage {
   storage: { used: number; limit: number | null }
   ai: {
     unlimited: boolean
+    /** A pooled plan (Pro): one shared monthly allowance across the ✨ inference features. null = the
+     *  free tier's per-feature daily buckets (see `features`). */
+    pool: { used: number; limit: number } | null
     features: Array<{ key: AiFeature; used: number; limit: number | null }>
   }
 }
@@ -40,6 +43,8 @@ function fmtBytes(n: number): string {
 function fmtReset(iso: string): string {
   const ms = new Date(iso).getTime() - Date.now()
   if (!(ms > 0)) return 'soon'
+  const days = Math.floor(ms / 86_400_000)
+  if (days >= 1) return days === 1 ? '1 day' : `${days} days`
   const h = Math.floor(ms / 3_600_000)
   const m = Math.floor((ms % 3_600_000) / 60_000)
   return h > 0 ? `${h}h ${m}m` : `${m}m`
@@ -112,6 +117,15 @@ export function UsageMeter() {
       label: 'AI features',
       used: 0,
       limit: null,
+      unit: 'count',
+    })
+  } else if (usage.ai.pool) {
+    // Pooled plan (Pro): one shared "AI messages" meter instead of per-feature rows.
+    meters.push({
+      id: 'ai',
+      label: 'AI messages',
+      used: usage.ai.pool.used,
+      limit: usage.ai.pool.limit,
       unit: 'count',
     })
   } else {

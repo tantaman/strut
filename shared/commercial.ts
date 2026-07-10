@@ -24,6 +24,11 @@ export interface Entitlements {
   aiUnlimited: boolean
   /** Per-feature daily-cap overrides; null = use the built-in server/quota.ts constants. */
   aiDailyLimits: Partial<Record<AiFeature, number>> | null
+  /** A single POOLED monthly allowance shared across the inference features (arrange/generate/chat/image) —
+   *  one counter, any of those ✨ actions = 1 message, e.g. 1000/month for Pro. When set (and aiUnlimited
+   *  is false) it REPLACES the per-feature daily caps for those four features; artifact keeps its own daily
+   *  cap (it spends R2, not model inference). null = not pooled (use aiDailyLimits / the daily defaults). */
+  aiMonthlyPool: number | null
   /** Drop the PoweredBy / "shared read-only" watermark on shared decks (Pro white-label). */
   whiteLabelShare: boolean
 }
@@ -36,6 +41,7 @@ export const COMMUNITY: Entitlements = {
   storageLimitBytes: null,
   aiUnlimited: false,
   aiDailyLimits: null,
+  aiMonthlyPool: null,
   whiteLabelShare: false,
 }
 

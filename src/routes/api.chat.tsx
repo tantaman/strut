@@ -86,19 +86,20 @@ export const Route = createFileRoute('/api/chat')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — ONLY for the app-paid path. A BYO turn spends the user's OWN OpenRouter
-        // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
-        // Consumed (one unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
+        // Durable quota — ONLY for the app-paid path. A BYO turn spends the user's OWN OpenRouter credits,
+        // so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse. Consumed (one
+        // unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
-        // Pro (like BYO) lifts the app-paid daily cap; `ai.meter === false` means unlimited.
+        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
+        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap.
         const { getEntitlements, aiMetering } =
           await import('../../server/entitlements')
         const ai = aiMetering(await getEntitlements(account.id), 'chat')
         if (!byo && ai.meter) {
-          const { consumeChatQuota } = await import('../../server/quota')
+          const { consumeAiQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeChatQuota(account.id, now, undefined, ai.limit)
+            quota = await consumeAiQuota(account.id, now, 'chat', ai)
           } catch (err) {
             console.error('[chat] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -107,7 +108,10 @@ export const Route = createFileRoute('/api/chat')({
             return json(
               {
                 error: 'quota_exceeded',
-                message: `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
+                message:
+                  quota.window === 'month'
+                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
+                    : `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
               },
               429,
             )
@@ -130,8 +134,10 @@ export const Route = createFileRoute('/api/chat')({
           // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
           // (only if we metered it).
           if (!byo && ai.meter) {
-            const { refundChatQuota } = await import('../../server/quota')
-            await refundChatQuota(account.id, now).catch(() => {})
+            const { refundAiQuota } = await import('../../server/quota')
+            await refundAiQuota(account.id, now, 'chat', ai.window).catch(
+              () => {},
+            )
           }
           if (err instanceof ChatUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)

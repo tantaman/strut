@@ -148,14 +148,15 @@ export async function uploadArtifactFromRequest(
     if (new TextEncoder().encode(code).byteLength > MAX_CODE_BYTES)
       throw new ArtifactError('artifact source must be under 512 KB', 413)
 
-    // Pro accounts can raise/lift this cap (the overlay decides; `ai.meter === false` = unlimited).
+    // `ai.meter === false` = unlimited. Artifact spends R2, not model inference, so it's NOT part of the
+    // pooled AI-message allowance (aiMetering excludes it from POOLED_FEATURES) — it always meters on its
+    // own daily bucket, even on a pooled paid plan.
     const { getEntitlements, aiMetering } = await import('./entitlements.ts')
     const ai = aiMetering(await getEntitlements(user), 'artifact')
-    const { consumeArtifactQuota, refundArtifactQuota } =
-      await import('./quota.ts')
+    const { consumeAiQuota, refundAiQuota } = await import('./quota.ts')
     const now = Date.now()
     if (ai.meter) {
-      const quota = await consumeArtifactQuota(user, now, undefined, ai.limit)
+      const quota = await consumeAiQuota(user, now, 'artifact', ai)
       if (!quota.allowed)
         throw new ArtifactError(
           `Daily artifact limit reached (${quota.limit}/day). Try again tomorrow.`,
@@ -185,7 +186,8 @@ export async function uploadArtifactFromRequest(
     } catch (err) {
       // The store failed — refund the consumed quota unit so the user isn't charged for nothing
       // (only if we metered it).
-      if (ai.meter) await refundArtifactQuota(user, now).catch(() => {})
+      if (ai.meter)
+        await refundAiQuota(user, now, 'artifact', ai.window).catch(() => {})
       throw err
     }
   } catch (err) {

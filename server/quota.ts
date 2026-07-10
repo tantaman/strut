@@ -28,6 +28,11 @@ const ARTIFACT_TABLE = 'artifact_usage'
 // Text-to-image generation is a heavy Workers AI call (the app pays), so it gets its own small bucket —
 // separate from generate so a batch of images can't drain the slide-generation allowance and vice versa.
 const IMAGE_TABLE = 'image_usage'
+// The POOLED monthly allowance (paid plans): ONE counter shared across the inference features
+// (arrange/generate/chat/image — see aiMetering's POOLED_FEATURES), keyed by (user, MONTH) instead of
+// (user, day). Same table shape + store logic as the daily buckets; the `day` column just holds a
+// `YYYY-MM` month key here (see migrations-d1/0009_ai_pool_usage.sql).
+const POOL_TABLE = 'ai_pool_usage'
 
 export const ARRANGE_DAILY_LIMIT = 50
 // Generating a whole batch of slides is a bigger call than a single arrange, so it gets a smaller cap.
@@ -38,10 +43,19 @@ export const CHAT_DAILY_LIMIT = 200
 export const ARTIFACT_DAILY_LIMIT = 200
 // Generating an image is heavy; keep the daily allowance modest (mirrors generate).
 export const IMAGE_DAILY_LIMIT = 20
+// Fallback for the pooled monthly allowance if a plan somehow sets a pool without a number (aiMetering only
+// ever returns a concrete limit for the month window, so this is a safety net, not a real cap).
+export const MONTHLY_POOL_LIMIT = 1000
 
-/** UTC calendar-day key (YYYY-MM-DD) for a timestamp — the quota window. */
+/** UTC calendar-day key (YYYY-MM-DD) for a timestamp — the daily quota window. */
 export function utcDay(now: number): string {
   return new Date(now).toISOString().slice(0, 10)
+}
+
+/** UTC calendar-month key (YYYY-MM) for a timestamp — the pooled-allowance window. Lexical order matches
+ *  chronological order, so the sweep's `day < ?` prune works on month keys too. */
+export function utcMonth(now: number): string {
+  return new Date(now).toISOString().slice(0, 7)
 }
 
 // Feature → its usage table + default (free-tier) daily limit, so the usage meter can read every bucket
@@ -214,6 +228,92 @@ export function refundImageQuota(
   store?: QuotaStore,
 ): Promise<void> {
   return refundQuota(userId, now, IMAGE_TABLE, store)
+}
+
+// ---- pooled monthly allowance ----
+
+// The pooled counterparts of consumeQuota/refundQuota: same atomic upsert-increment enforcement, but keyed
+// by MONTH (utcMonth) into the single POOL_TABLE. Any inference feature (arrange/generate/chat/image) bumps
+// the same row, so N calls across features share one N/limit allowance for the calendar month.
+async function consumePool(
+  userId: string,
+  now: number,
+  limit: number,
+  store?: QuotaStore,
+): Promise<QuotaResult> {
+  const s = store ?? (await getStore(POOL_TABLE))
+  const month = utcMonth(now)
+  const used = await s.bump(userId, month)
+  if (used === 1) {
+    // First call this month for this user — prune every prior-month row (day < this month).
+    void s.sweep(month).catch(() => {})
+  }
+  return { allowed: used <= limit, used, limit }
+}
+async function refundPool(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<void> {
+  const s = store ?? (await getStore(POOL_TABLE))
+  await s.refund(userId, utcMonth(now))
+}
+
+/** This month's pooled consumption (no increment) — the read behind /api/usage for a pooled plan. */
+export async function peekPool(
+  userId: string,
+  now: number,
+  store?: QuotaStore,
+): Promise<number> {
+  const s = store ?? (await getStore(POOL_TABLE))
+  return s.peek(userId, utcMonth(now))
+}
+
+// ---- unified dispatch (routes call these) ----
+
+export type MeteredWindow = 'day' | 'month'
+
+/** Consume one unit for `feature` against whichever window the plan uses. `metering` is the object
+ *  aiMetering returns for a metered plan — `window: 'month'` routes to the shared pool, `window: 'day'`
+ *  routes to the feature's own daily bucket (falling back to its built-in default when `limit` is
+ *  undefined). The returned `window` lets the route phrase the right "reached your limit" message. */
+export async function consumeAiQuota(
+  userId: string,
+  now: number,
+  feature: AiFeature,
+  metering: { window: MeteredWindow; limit: number | undefined },
+  store?: QuotaStore,
+): Promise<QuotaResult & { window: MeteredWindow }> {
+  if (metering.window === 'month') {
+    const r = await consumePool(
+      userId,
+      now,
+      metering.limit ?? MONTHLY_POOL_LIMIT,
+      store,
+    )
+    return { ...r, window: 'month' }
+  }
+  const limit = metering.limit ?? FEATURE_DEFAULT_LIMIT[feature]
+  const r = await consumeQuota(
+    userId,
+    now,
+    limit,
+    FEATURE_TABLE[feature],
+    store,
+  )
+  return { ...r, window: 'day' }
+}
+
+/** Give back one unit on a failed call, on the same window `consumeAiQuota` charged. Best-effort. */
+export async function refundAiQuota(
+  userId: string,
+  now: number,
+  feature: AiFeature,
+  window: MeteredWindow,
+  store?: QuotaStore,
+): Promise<void> {
+  if (window === 'month') return refundPool(userId, now, store)
+  return refundQuota(userId, now, FEATURE_TABLE[feature], store)
 }
 
 // ---- store construction ----
