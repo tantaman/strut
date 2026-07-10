@@ -8,7 +8,7 @@ import {
   composeBackground,
   resolveSurface,
 } from '../editor/types'
-import { UserStyle } from '../editor/CssEditor'
+import { DeckStyles } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
@@ -117,7 +117,10 @@ function Play() {
         perspective: 1000,
       }}
     >
-      <UserStyle css={deck?.custom_stylesheet} />
+      <DeckStyles
+        generatedCss={deck?.generated_stylesheet}
+        userCss={deck?.custom_stylesheet}
+      />
       <div
         className="play__cam"
         style={{

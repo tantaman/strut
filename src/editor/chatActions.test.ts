@@ -61,6 +61,52 @@ describe('applyThemePatch', () => {
     expect(mutate.setDeckTheme).not.toHaveBeenCalled()
     expect(history.canUndo).toBe(false)
   })
+
+  it('treats the generated stylesheet as an ordinary reversible theme field', () => {
+    const calls: SetDeckThemeArgs[] = []
+    const mutate = { setDeckTheme: (a: SetDeckThemeArgs) => calls.push(a) }
+    const history = new History()
+    applyThemePatch(
+      { generated_stylesheet: '.strut-md { color: white; }' },
+      {
+        mutate,
+        history,
+        deck: { id: 'd', generated_stylesheet: '.strut-md { color: black; }' },
+      },
+      'AI custom theme',
+    )
+    expect(calls[0].generated_stylesheet).toContain('white')
+    history.undo()
+    expect(calls[1].generated_stylesheet).toContain('black')
+  })
+})
+
+describe('dispatchAction · set_theme_css', () => {
+  it('replaces only the AI-owned CSS layer and exposes one undo', async () => {
+    const calls: SetDeckThemeArgs[] = []
+    const ctx = makeCtx({
+      setDeckTheme: (a: SetDeckThemeArgs) => calls.push(a),
+    })
+    ctx.deck = {
+      id: 'd',
+      generated_stylesheet: '.strut-md { color: black; }',
+    }
+
+    const out = await dispatchAction(
+      { kind: 'set_theme_css', css: '.strut-md { color: white; }' },
+      ctx,
+    )
+    expect(out).toEqual({ ok: true, label: 'AI custom theme' })
+    expect(calls[0]).toMatchObject({
+      generated_stylesheet: '.strut-md { color: white; }',
+    })
+    expect(calls[0].custom_stylesheet).toBeUndefined()
+
+    ctx.history.undo()
+    expect(calls[1]).toMatchObject({
+      generated_stylesheet: '.strut-md { color: black; }',
+    })
+  })
 })
 
 describe('applyBodyEdit', () => {

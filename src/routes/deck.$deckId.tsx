@@ -19,6 +19,7 @@ import { ChatPanel } from '../editor/ChatPanel'
 import { ExtensionLabMount } from '../editor/ExtensionLabMount'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { MobileTabBar } from '../editor/mobile/MobileTabBar'
+import { DeckStyles } from '../editor/CssEditor'
 import { useDeckChatContext } from '../editor/chatNarration'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
@@ -116,6 +117,10 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   return (
     <div className="editor">
+      <DeckStyles
+        generatedCss={deck?.generated_stylesheet}
+        userCss={deck?.custom_stylesheet}
+      />
       <Header
         deck={deck}
         activeSlide={activeSlide}

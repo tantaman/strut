@@ -9,7 +9,7 @@ import { useRoot } from '@rindle/react'
 import { publicDeckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
 import { resolveSurface } from '../editor/types'
-import { UserStyle } from '../editor/CssEditor'
+import { DeckStyles } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
@@ -120,7 +120,10 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         perspective: 1000,
       }}
     >
-      <UserStyle css={deck.custom_stylesheet} />
+      <DeckStyles
+        generatedCss={deck.generated_stylesheet}
+        userCss={deck.custom_stylesheet}
+      />
       <div
         className="play__cam"
         style={{

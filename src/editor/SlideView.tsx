@@ -38,7 +38,7 @@ function SlideFrame({
   const scale = width / SLIDE_W
   return (
     <div
-      className="well__thumb-inner"
+      className="well__thumb-inner strut-surface"
       style={{
         width: SLIDE_W,
         height: (SLIDE_W * 9) / 16,

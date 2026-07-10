@@ -148,6 +148,7 @@ export const setDeckThemeArgs = z.object({
   // stamped on newly added slides ('' = spatial | 'markdown').
   text_align: z.string().optional(),
   default_slide_mode: z.enum(['', 'markdown']).optional(),
+  generated_stylesheet: z.string().optional(),
   custom_stylesheet: z.string().optional(),
   chosen_presenter: z.string().optional(),
   canned_transition: z.string().optional(),
@@ -408,6 +409,7 @@ export const mutators = {
         surface: 'bg-default',
         chosen_presenter: 'impress',
         canned_transition: 'none',
+        generated_stylesheet: '',
         custom_stylesheet: '',
         deck_version: '1.0',
         // Author = the acting principal (`ctx.user`). The client predicts the session user id (so the
@@ -467,6 +469,8 @@ export const mutators = {
       if (a.text_align !== undefined) row.text_align = a.text_align
       if (a.default_slide_mode !== undefined)
         row.default_slide_mode = a.default_slide_mode
+      if (a.generated_stylesheet !== undefined)
+        row.generated_stylesheet = a.generated_stylesheet
       if (a.custom_stylesheet !== undefined)
         row.custom_stylesheet = a.custom_stylesheet
       if (a.chosen_presenter !== undefined)

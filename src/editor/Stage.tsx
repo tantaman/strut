@@ -55,7 +55,6 @@ import { TipTapSlideEditor } from './TipTapSlideEditor'
 import { LockedObjects } from './ObjectsLayer'
 import { isDocEmpty } from './tiptapDoc'
 import { useFitScale } from './useFitScale'
-import { UserStyle } from './CssEditor'
 import {
   ComponentDataReader,
   componentRefKey,
@@ -65,7 +64,6 @@ import {
 interface DeckRow extends DeckThemeFields {
   background: string
   surface: string
-  custom_stylesheet?: string
 }
 
 // A single click (no real drag) with the shape tool armed drops this size, centered on the pointer —
@@ -854,7 +852,6 @@ export function Stage({
         ref={stageRef}
         style={{ background: composeBackground(surf, surfImg) }}
       >
-        <UserStyle css={deck?.custom_stylesheet} />
         {editor.canEdit ? (
           // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale); the
           // locked Objects overlay rides along on top so you place body text in the real layout.
@@ -895,7 +892,6 @@ export function Stage({
       ref={stageRef}
       style={{ background: composeBackground(surf, surfImg) }}
     >
-      <UserStyle css={deck?.custom_stylesheet} />
       <Inspector
         componentRefs={componentRefs}
         getComponents={getComponents}
@@ -1020,7 +1016,7 @@ function ComponentView({
   const counter = { transform: `translate(-50%, -50%) scale(${1 / scale})` }
   return (
     <div
-      className={`cmp cmp--${c.kind}${selected ? ' is-selected' : ''}`}
+      className={`cmp cmp--${c.kind}${c.custom_classes ? ` ${c.custom_classes}` : ''}${selected ? ' is-selected' : ''}`}
       data-id={c.id}
       style={cmpStyle(c)}
       onPointerDown={onPointerDownBody}

@@ -51,6 +51,7 @@ export const deck = table("deck")
     surface: string(),
     chosen_presenter: string(),
     canned_transition: string(),
+    generated_stylesheet: string(),
     custom_stylesheet: string(),
     deck_version: string(),
     owner_id: string(),

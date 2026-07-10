@@ -38,6 +38,7 @@ const DECK_FIELDS = [
   'body_color',
   'default_slide_mode',
   'text_align',
+  'generated_stylesheet',
   'custom_stylesheet',
   'chosen_presenter',
   'canned_transition',
@@ -462,8 +463,12 @@ function changedFields(
   return out
 }
 
-function formatDeckField(field: string, value: unknown, previous: unknown): string {
-  if (field === 'custom_stylesheet') {
+function formatDeckField(
+  field: string,
+  value: unknown,
+  previous: unknown,
+): string {
+  if (field === 'custom_stylesheet' || field === 'generated_stylesheet') {
     return `custom_stylesheet len ${s(previous).length} -> ${s(value).length}`
   }
   return `${field} ${formatScalar(previous)} -> ${formatScalar(value)}`

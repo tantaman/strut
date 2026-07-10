@@ -136,6 +136,8 @@ export function applyNote(actions: ChatAction[]): string {
   switch (action.kind) {
     case 'set_theme':
       return 'Applying theme…'
+    case 'set_theme_css':
+      return 'Applying custom theme…'
     case 'set_body':
       return 'Rewriting the slide…'
     case 'create_slide':
@@ -332,6 +334,7 @@ export interface ActionSendContext {
   slideIds: ChatActRequest['slideIds']
   history: ChatTurn[]
   theme?: ChatActTheme
+  generatedStylesheet?: string
   activeSlide?: ChatActSlide
 }
 
@@ -392,6 +395,7 @@ export async function sendChatAction(
       slideIds: ctx.slideIds,
       messages: [...ctx.history, { role: 'user', content: text }],
       theme: ctx.theme,
+      generatedStylesheet: ctx.generatedStylesheet,
       activeSlide: ctx.activeSlide,
     }
     res = await fetch(appPath('/api/chat/act'), {
@@ -549,8 +553,16 @@ export interface ChatEditContext {
 function buildActGrounding(
   deck: ThemeDeck | null,
   activeSlide: SlideDetail | null,
-): { theme?: ChatActTheme; activeSlide?: ChatActSlide } {
-  const out: { theme?: ChatActTheme; activeSlide?: ChatActSlide } = {}
+): {
+  theme?: ChatActTheme
+  generatedStylesheet?: string
+  activeSlide?: ChatActSlide
+} {
+  const out: {
+    theme?: ChatActTheme
+    generatedStylesheet?: string
+    activeSlide?: ChatActSlide
+  } = {}
   if (deck) {
     const rt = resolveTheme(deck)
     out.theme = {
@@ -561,6 +573,7 @@ function buildActGrounding(
       headingFont: rt.headingFont,
       bodyFont: rt.bodyFont,
     }
+    out.generatedStylesheet = deck.generated_stylesheet ?? ''
   }
   if (activeSlide) {
     out.activeSlide = { id: activeSlide.id, text: slideText(activeSlide) }
@@ -640,6 +653,7 @@ export function useChat(
           slideIds: slides.map((s) => s.id),
           history: convo,
           theme: grounding.theme,
+          generatedStylesheet: grounding.generatedStylesheet,
           activeSlide: grounding.activeSlide,
         },
         text,

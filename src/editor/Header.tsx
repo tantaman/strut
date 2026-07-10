@@ -88,6 +88,7 @@ interface DeckRow {
   canned_transition: string
   // Rindle TEXT columns can be NULL, so this is nullable like the other theme fields; the read
   // sites guard with `?? ''`.
+  generated_stylesheet: string | null
   custom_stylesheet: string | null
   owner_id: string
   visibility: string
@@ -846,7 +847,8 @@ export function Header({
       {cssOpen && deck && (
         <CssEditorModal
           deckId={deck.id}
-          initial={deck.custom_stylesheet ?? ''}
+          generatedInitial={deck.generated_stylesheet ?? ''}
+          userInitial={deck.custom_stylesheet ?? ''}
           onClose={() => setCssOpen(false)}
         />
       )}
@@ -1215,7 +1217,7 @@ function ThemePopover({
         {/* Custom CSS lives here rather than as its own header button — theme + CSS are one job. */}
         <div className="menu-sep" />
         <button className="menu-item menu-item--icon" onClick={onEditCss}>
-          <Code2 size={15} /> Edit custom CSS…
+          <Code2 size={15} /> Edit CSS layers…
         </button>
       </div>
       {imageModal && (

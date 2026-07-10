@@ -74,7 +74,7 @@ function componentHTML(c: AnyComponent): string {
         ? `'${esc(c.font_family)}',sans-serif`
         : `var(--strut-${cat}-font, 'Lato',sans-serif)`
       extra = `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;max-width:1100px;`
-      body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
+      body = `<div class="cmp-text cmp__textbody">${c.text && c.text.length ? c.text : 'Text'}</div>`
       break
     }
     case 'image':
@@ -104,7 +104,8 @@ function componentHTML(c: AnyComponent): string {
       break
   }
   const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
-  return `<div class="cmp" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
+  const classes = `cmp cmp--${c.kind}${c.custom_classes ? ` ${c.custom_classes}` : ''}`
+  return `<div class="${esc(classes)}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
 }
 
 function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
@@ -220,6 +221,7 @@ export function toImpressHTML(bundle: DeckBundle): string {
   // name as a class for fidelity (a Bespoke generator would consume it; impress ignores it).
   const transition = deck.canned_transition || 'none'
   const duration = flightFor(transition).duration || 900
+  const generatedCss = scopeCss(deck.generated_stylesheet || '')
   const userCss = scopeCss(deck.custom_stylesheet || '')
 
   return `<!DOCTYPE html>
@@ -243,6 +245,7 @@ ${STRUT_MD_CSS}
   .impress-supported .fallback{display:none;}
   .hint{position:fixed;bottom:10px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:13px;}
 ${customCss}
+${generatedCss}
 ${userCss}
 </style>
 </head>

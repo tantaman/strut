@@ -29,7 +29,10 @@ export function StaticComponent({
   present?: boolean
 }) {
   return (
-    <div className={`cmp cmp--${c.kind}`} style={cmpStyle(c)}>
+    <div
+      className={`cmp cmp--${c.kind}${c.custom_classes ? ` ${c.custom_classes}` : ''}`}
+      style={cmpStyle(c)}
+    >
       {c.kind === 'artifact' ? (
         live || present ? (
           renderInner(c, { interactive: present })

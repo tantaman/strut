@@ -37,6 +37,7 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
       default_slide_mode: 'markdown',
       chosen_presenter: 'impress',
       canned_transition: 'zoom',
+      generated_stylesheet: '.strut-md h1 { text-transform: uppercase; }',
       custom_stylesheet: '',
       deck_version: '1.0',
     },
@@ -84,6 +85,17 @@ describe('serialize round-trip with markdown + theme', () => {
     expect(back.text_align).toBe('center')
   })
 
+  it('round-trips the AI stylesheet separately from user CSS', () => {
+    const json = serializeDeck(bundle())
+    expect(json.generatedStylesheet).toBe(
+      '.strut-md h1 { text-transform: uppercase; }',
+    )
+    const back = deserializeDeck(json)
+    expect(back.generated_stylesheet).toBe(
+      '.strut-md h1 { text-transform: uppercase; }',
+    )
+  })
+
   it('carries a markdown slide (doc, mode, alignment) across a round-trip', () => {
     const json = serializeDeck(bundle())
     const back = deserializeDeck(json)
@@ -116,6 +128,7 @@ describe('serialize round-trip with markdown + theme', () => {
     const back = deserializeDeck(legacy)
     expect(back.default_slide_mode).toBe('')
     expect(back.text_align).toBe('')
+    expect(back.generated_stylesheet).toBe('')
     expect(back.slides[0].render_mode).toBe('')
     expect(back.slides[0].doc).toBe('')
   })

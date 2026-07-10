@@ -17,6 +17,7 @@ export interface DeckRowLike {
   default_slide_mode?: string | null
   chosen_presenter: string
   canned_transition: string
+  generated_stylesheet: string
   custom_stylesheet: string
   deck_version: string
 }
@@ -139,6 +140,7 @@ export function serializeDeck(
     textAlign: deck.text_align || '',
     defaultSlideMode: deck.default_slide_mode || '',
     cannedTransition: deck.canned_transition || 'none',
+    generatedStylesheet: deck.generated_stylesheet || '',
     customStylesheet: deck.custom_stylesheet || '',
     customBackgrounds: {
       bgs: customBackgrounds.map((b) => ({ klass: b.klass, style: b.style })),
@@ -225,6 +227,7 @@ export interface ImportedDeck {
   text_align: string
   default_slide_mode: string
   canned_transition: string
+  generated_stylesheet: string
   custom_stylesheet: string
   deck_version: string
   customBackgrounds: CustomBgRow[]
@@ -314,6 +317,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
     text_align: str(o.textAlign),
     default_slide_mode: str(o.defaultSlideMode),
     canned_transition: str(o.cannedTransition, 'none'),
+    generated_stylesheet: str(o.generatedStylesheet),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),
     customBackgrounds: bgs

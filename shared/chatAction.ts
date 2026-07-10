@@ -40,6 +40,9 @@ export type ChatAction =
       heading_font?: string // known family, or '' = reset to default
       body_font?: string
     }
+  /** Replace the model-owned deck stylesheet. An empty string clears it. User-authored custom CSS is a
+   * separate, later cascade layer and is never touched by this action. */
+  | { kind: 'set_theme_css'; css: string }
   | { kind: 'set_body'; slideId: string; markdown: string } // rewrite ONE slide's body
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
   | { kind: 'arrange'; instruction: string } // reorder / lay out the slides
@@ -97,6 +100,8 @@ export interface ChatActRequest {
   /** Real slide ids currently in the deck. Used only as the action-target validation allowlist. */
   slideIds: string[]
   theme?: ChatActTheme
+  /** Current model-owned CSS, so follow-up requests revise rather than blindly accumulate. */
+  generatedStylesheet?: string
   activeSlide?: ChatActSlide
 }
 
@@ -110,6 +115,7 @@ export const CHAT_ACTION_LIMITS = {
   maxCount: 40, // mirrors GENERATE_LIMITS.maxSlides
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
   maxThemeField: 80,
+  maxGeneratedCss: 24_000,
   maxSlideIds: 150,
   maxSlideId: 200,
   maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
@@ -158,6 +164,11 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
       bodyFont: str(t.bodyFont).slice(0, cap),
     }
   }
+  if (typeof req.generatedStylesheet === 'string')
+    out.generatedStylesheet = req.generatedStylesheet.slice(
+      0,
+      CHAT_ACTION_LIMITS.maxGeneratedCss,
+    )
   const a = req.activeSlide
   if (a && typeof a === 'object') {
     const id = str(a.id)
@@ -178,6 +189,34 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
 // ---- the firewall ---------------------------------------------------------------------------------
 
 const HEX_RE = /^#?([0-9a-fA-F]{3,8})$/
+
+// AI CSS is intentionally more conservative than the user's hand-authored escape hatch. The current
+// scoper understands ordinary rules plus @media/@supports and passes keyframes through. Reject resource
+// loads, style-element escapes, and grouping constructs it cannot recursively scope. This is an output
+// guardrail, not a replacement for the render-time `.strut-surface` boundary.
+const CSS_COMMENTS_OR_STRINGS =
+  /\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g
+const SAFE_CSS_AT_RULES = new Set([
+  'media',
+  'supports',
+  'keyframes',
+  '-webkit-keyframes',
+])
+
+function generatedCss(v: unknown): string | null {
+  if (typeof v !== 'string') return null
+  const css = v.slice(0, CHAT_ACTION_LIMITS.maxGeneratedCss).trim()
+  if (/<\/?style\b/i.test(css)) return null
+  // Backslash escapes can disguise resource-loading tokens; generated theme CSS does not need them.
+  if (css.includes('\\')) return null
+  if (/https?:|data:/i.test(css)) return null
+  const scan = css.replace(CSS_COMMENTS_OR_STRINGS, '')
+  if (/\burl\s*\(|\bexpression\s*\(|@import\b/i.test(scan)) return null
+  for (const match of scan.matchAll(/@(-?[\w-]+)/g)) {
+    if (!SAFE_CSS_AT_RULES.has(match[1].toLowerCase())) return null
+  }
+  return css
+}
 
 /** Coerce an untrusted color to a BARE hex string (no '#', lowercased), or undefined if it isn't a valid
  *  3/4/6/8-digit hex. Bare is the stored form for text colors; the dispatcher wraps bg/surface hex into a
@@ -288,6 +327,10 @@ function normalizeOneAction(
       if (bf !== undefined) out.body_font = bf
       // An action that set no usable field is noise — drop it (nothing to apply).
       return Object.keys(out).length > 1 ? out : null
+    }
+    case 'set_theme_css': {
+      const css = generatedCss(r.css)
+      return css === null ? null : { kind: 'set_theme_css', css }
     }
     case 'set_body': {
       // A real slide of THIS deck OR a slide a create_slide declared this turn.

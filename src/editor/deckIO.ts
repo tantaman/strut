@@ -135,6 +135,7 @@ export function importDeck(
     text_align: imported.text_align,
     default_slide_mode:
       imported.default_slide_mode === 'markdown' ? 'markdown' : '',
+    generated_stylesheet: imported.generated_stylesheet,
     custom_stylesheet: imported.custom_stylesheet,
     canned_transition: imported.canned_transition,
     now,

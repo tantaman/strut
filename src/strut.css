@@ -2247,6 +2247,10 @@ button {
   font-size: 12px;
   line-height: 1.4;
 }
+.css-editor__tabs {
+  width: fit-content;
+  margin-bottom: 12px;
+}
 .css-editor {
   width: 100%;
   height: 360px;

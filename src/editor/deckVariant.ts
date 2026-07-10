@@ -142,6 +142,7 @@ export async function createDeckVariant({
     body_color: source.deck.body_color ?? '',
     text_align: source.deck.text_align ?? '',
     default_slide_mode: 'markdown',
+    generated_stylesheet: source.deck.generated_stylesheet,
     custom_stylesheet: source.deck.custom_stylesheet,
     chosen_presenter: source.deck.chosen_presenter,
     canned_transition: source.deck.canned_transition,

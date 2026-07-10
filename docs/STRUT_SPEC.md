@@ -115,6 +115,7 @@ deck 1───* slide 1───* component   (component is polymorphic: text |
 | `theme_id` | id → theme | — | (rewrite) bundled theme |
 | `chosen_presenter` / `generator` | text | `'impress'` | active generator id |
 | `cannedTransition` | text | `'none'` | Bespoke transition class name |
+| `generatedStylesheet` | text (CSS) | `''` | replaceable AI-authored theme CSS, auto-scoped to `.strut-surface` |
 | `customStylesheet` | text (CSS) | `''` | user CSS, auto-scoped to `.strut-surface` |
 | `deckVersion` | text | `'1.0'` | schema/migration version |
 | `__genid` | int | `0`, bumped each save | monotonic generation counter (higher = newer) |
@@ -220,6 +221,7 @@ This is also the **import** format (round-trips exactly). Representative shape:
   "background": "bg-default",
   "surface": "bg-default",
   "cannedTransition": "none",
+  "generatedStylesheet": "/* AI theme CSS, scoped to .strut-surface */",
   "customStylesheet": "/* user CSS, scoped to .strut-surface */",
   "customBackgrounds": { "bgs": [ { "klass": "bg-custom-ff0000", "style": "#ff0000" } ] },
   "slides": [
@@ -556,10 +558,11 @@ flat.
 
 ### 8.4 Stylesheet system
 
-- **CSS editor** (header "CSS" button): a CodeMirror editor for the deck's `customStylesheet`. On save,
-  every selector is auto-prefixed with `.strut-surface ` so user CSS is sandboxed to the presentation
-  surface (and can't leak into editor chrome); on edit it's un-prefixed back. The live `<style
-  id="userStylesheet">` and the deck attribute stay in sync.
+- **AI theme CSS:** the Advisor can replace `generatedStylesheet` to implement a full visual theme. The
+  current generated CSS is sent back as grounding for iterative changes and each replacement is undoable.
+- **CSS editor** (Theme → “Edit CSS layers…”): exposes separate “AI theme” and “Custom overrides” tabs.
+  Every selector is auto-prefixed with `.strut-surface ` at render time. The generated layer renders first;
+  `customStylesheet` renders last so hand-authored CSS always wins and is never overwritten by the model.
 - **Class editor** (header "Class" button, enabled when a component is selected): a popover to assign
   arbitrary CSS class names (`customClasses`) to the selected component(s), targetable by the custom CSS.
 
@@ -611,6 +614,7 @@ Per slide → a `.step` div. **Exact attribute mapping** (overview space → sli
 Skeleton:
 
 ```html
+<style>{{generatedStylesheet}}</style>
 <style>{{customStylesheet}}</style>
 <style>/* .bg-custom-<hex>{background:#<hex>} per custom color */</style>
 <!-- per-slide image-background <style> rules -->

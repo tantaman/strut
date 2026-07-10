@@ -54,6 +54,43 @@ describe('normalizeActions · set_theme', () => {
   })
 })
 
+describe('normalizeActions · set_theme_css', () => {
+  it('keeps a complete scoped theme stylesheet and allows an explicit reset', () => {
+    const css = `
+      .strut-md h1 { text-transform: uppercase; }
+      @media (max-width: 900px) { .strut-md { padding: 40px; } }
+      @keyframes rise { from { opacity: 0; } to { opacity: 1; } }
+    `
+    expect(one({ kind: 'set_theme_css', css })).toEqual({
+      kind: 'set_theme_css',
+      css: css.trim(),
+    })
+    expect(one({ kind: 'set_theme_css', css: '' })).toEqual({
+      kind: 'set_theme_css',
+      css: '',
+    })
+  })
+
+  it('caps CSS and rejects resource loads, style escapes, and unsupported at-rules', () => {
+    const big = one({
+      kind: 'set_theme_css',
+      css: 'a'.repeat(CHAT_ACTION_LIMITS.maxGeneratedCss + 100),
+    }) as Extract<ChatAction, { kind: 'set_theme_css' }> | null
+    expect(big?.css).toHaveLength(CHAT_ACTION_LIMITS.maxGeneratedCss)
+
+    for (const css of [
+      '@import "https://tracker.example/x.css";',
+      '.x { background: url(https://tracker.example/pixel); }',
+      '.x { background: image-set("https://tracker.example/x.png" 1x); }',
+      '</style><script>alert(1)</script>',
+      '@container card (width > 1px) { body { display: none; } }',
+      '.x\\2e y { color: red; }',
+    ]) {
+      expect(one({ kind: 'set_theme_css', css })).toBeNull()
+    }
+  })
+})
+
 describe('normalizeActions · set_body', () => {
   it('accepts a real slide id + trims/caps the markdown', () => {
     expect(
@@ -300,6 +337,7 @@ describe('clampChatActRequest', () => {
         headingFont: 'Lato',
         bodyFont: 'Inter',
       },
+      generatedStylesheet: 'x'.repeat(CHAT_ACTION_LIMITS.maxGeneratedCss + 50),
       activeSlide: {
         id: 's1',
         text: 'y'.repeat(CHAT_ACTION_LIMITS.maxActiveText + 50),
@@ -309,6 +347,9 @@ describe('clampChatActRequest', () => {
     expect(req.deckContext).toBe('Deck context.')
     expect(req.slideIds).toEqual(['s1'])
     expect(req.theme?.background).toBe('#000')
+    expect(req.generatedStylesheet).toHaveLength(
+      CHAT_ACTION_LIMITS.maxGeneratedCss,
+    )
     expect(req.activeSlide?.text).toHaveLength(CHAT_ACTION_LIMITS.maxActiveText)
   })
 

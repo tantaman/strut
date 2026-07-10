@@ -157,6 +157,8 @@ async function dispatchOne(
   switch (action.kind) {
     case 'set_theme':
       return applyTheme(action, ctx)
+    case 'set_theme_css':
+      return applyThemeCss(action, ctx)
     case 'set_body':
       return applyBody({ ...action, slideId: target ?? action.slideId }, ctx)
     case 'generate':
@@ -435,6 +437,19 @@ function applyTheme(
     'AI theme',
   )
   return { ok: true, label: 'AI theme' }
+}
+
+function applyThemeCss(
+  a: Extract<ChatAction, { kind: 'set_theme_css' }>,
+  ctx: DispatchCtx,
+): DispatchOutcome {
+  if (!ctx.deck) return { ok: false, error: 'No deck to theme.' }
+  applyThemePatch(
+    { generated_stylesheet: a.css },
+    { mutate: ctx.mutate, history: ctx.history, deck: ctx.deck },
+    'AI custom theme',
+  )
+  return { ok: true, label: 'AI custom theme' }
 }
 
 function mintCustom(ctx: DispatchCtx, token: string, hex: string): void {

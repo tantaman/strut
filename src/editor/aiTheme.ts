@@ -25,6 +25,7 @@ export interface ThemePatch {
   body_font?: string
   body_color?: string
   text_align?: string
+  generated_stylesheet?: string
 }
 
 /** The deck row this reads before-values off (only `id` + the patched columns matter). DeckRoot and the
@@ -38,6 +39,7 @@ export interface ThemeDeck {
   body_font?: string | null
   body_color?: string | null
   text_align?: string | null
+  generated_stylesheet?: string | null
 }
 
 /** Apply a theme patch as ONE undoable step: capture the CURRENT value of each touched column, apply the
