@@ -20,7 +20,7 @@ export type AiFeature =
 export interface Entitlements {
   /** True only for a paid subscriber (set by the overlay's provider). */
   pro: boolean
-  /** May a deck be PRIVATE? The pricing wedge: public/link-shared decks are free & uncapped, keeping a
+  /** May a deck be PRIVATE? The pricing wedge: public/discoverable decks are free & uncapped, keeping a
    *  deck private is the paid feature. false → new decks are created public and cannot be set private.
    *  (COMMUNITY/self-host = true: decks are private by default, exactly as before.) */
   canKeepPrivate: boolean

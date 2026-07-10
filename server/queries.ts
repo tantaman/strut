@@ -53,6 +53,20 @@ const decksQuery = defineQuery(
       .countAs('slideCount', rels.deckSlides),
 )
 
+// One-shot public discovery feed. Unlike `decks`, access is granted by the row's public visibility
+// rather than ownership/collaboration. There is intentionally no client twin/subscription: public rows
+// stay out of the browser replica and cannot contaminate its un-gated owned/shared decks view.
+const recentDecksQuery = defineQuery(
+  'recentDecks',
+  (raw): { limit: number } => ({ limit: reqLimit(raw) }),
+  ({ limit }: { limit: number }) =>
+    q.deck.where
+      .visibility('public-read')
+      .orderBy('created', 'desc')
+      .limit(limit)
+      .countAs('slideCount', rels.deckSlides),
+)
+
 const deckVariantsQuery = defineQuery(
   'deckVariants',
   (raw): { deckId: string; limit: number } => ({
@@ -123,6 +137,7 @@ const deckNotesQuery = defineQuery(
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
+  recentDecksQuery,
   deckVariantsQuery,
   deckDetailQuery,
   publicDeckDetailQuery,

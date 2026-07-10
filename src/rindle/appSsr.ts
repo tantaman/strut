@@ -62,15 +62,71 @@ export interface AppSeed {
    *  (no account pill there) and when there's no session. With no commercial overlay this is the
    *  COMMUNITY projection with `upgradeUrl: null`, so no upgrade affordance renders. */
   entitlement: EntitlementSummary | null
+  /** Plain server-read discovery results. These intentionally stay OUTSIDE the dehydrated Rindle
+   *  store: deck rows are unioned across active coverages, so adding unrelated public rows there
+   *  could make the intentionally un-gated client `decksQuery` mistake them for the viewer's decks. */
+  recentDecks?: RecentDeckSummary[]
+}
+
+export interface RecentDeckSummary {
+  id: string
+  title: string
+  created: number
+  share_token: string
+  slideCount: number
+}
+
+async function readRecentDecks(): Promise<RecentDeckSummary[]> {
+  try {
+    const [{ readNamedQuery }, { RECENT_DECKS_LIMIT }] = await Promise.all([
+      import('../../server/rindle-api'),
+      import('../../shared/queries'),
+    ])
+    const { rows } = await readNamedQuery(
+      'recentDecks',
+      { limit: RECENT_DECKS_LIMIT },
+      'public-discovery',
+    )
+    return rows.flatMap(({ cols }) => {
+      const id = typeof cols.id === 'string' ? cols.id : ''
+      const share_token =
+        typeof cols.share_token === 'string' ? cols.share_token : ''
+      if (!id || !share_token) return []
+      return [
+        {
+          id,
+          title: typeof cols.title === 'string' ? cols.title : '',
+          created: typeof cols.created === 'number' ? cols.created : 0,
+          share_token,
+          slideCount: typeof cols.slideCount === 'number' ? cols.slideCount : 0,
+        },
+      ]
+    })
+  } catch (err) {
+    console.error(
+      '[ssr] recent decks read failed:',
+      err instanceof Error ? err.message : err,
+    )
+    return []
+  }
 }
 
 // Dashboard: the principal's decks (newest first). The server twin (server/queries.ts) scopes `decks`
 // to "owned or shared", so the seed only ever carries this viewer's decks.
 export const preloadDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<AppSeed> => {
-    const ctx = await seedContext()
+    const [recentDecks, ctx] = await Promise.all([
+      readRecentDecks(),
+      seedContext(),
+    ])
     if (!ctx)
-      return { rindle: null, userId: '', account: null, entitlement: null }
+      return {
+        rindle: null,
+        userId: '',
+        account: null,
+        entitlement: null,
+        recentDecks,
+      }
     const { decksQuery, DECKS_LIMIT } = await import('../../shared/queries')
     const state = await ctx.store.preloadAll(
       [decksQuery({ limit: DECKS_LIMIT })],
@@ -94,6 +150,7 @@ export const preloadDecks = createServerFn({ method: 'GET' }).handler(
       userId: ctx.account.id,
       account: ctx.account,
       entitlement,
+      recentDecks,
     }
   },
 )

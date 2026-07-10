@@ -1,6 +1,6 @@
 // Share panel (spec §12): the one place to manage who can see/edit a deck.
 //   • Identity — set your display name + copy your Strut ID (the handle others add you by).
-//   • Public link (owner) — flip the deck to "anyone with the link can view" and copy the link.
+//   • Public access (owner) — publish the deck for discovery/read-only viewing and copy its link.
 //   • Collaborators (owner) — add by Strut ID as editor/viewer, see them by name, remove them.
 // All writes go through the access-guarded mutators; non-owners only get the identity section.
 
@@ -58,9 +58,11 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
 
 export function ShareModal({
   deck,
+  canKeepPrivate,
   onClose,
 }: {
   deck: ShareDeck
+  canKeepPrivate: boolean
   onClose: () => void
 }) {
   const mutate = useMutate()
@@ -140,18 +142,24 @@ export function ShareModal({
 
         {isOwner && (
           <>
-            {/* Public link */}
+            {/* Public access */}
             <section className="share__section">
               <label className="share__toggle">
                 <input
                   type="checkbox"
                   checked={isPublic}
+                  disabled={!canKeepPrivate && isPublic}
                   onChange={(e) => togglePublic(e.target.checked)}
                 />
                 <span>
-                  <Link2 size={15} /> Anyone with the link can view
+                  <Link2 size={15} /> Public — anyone can view and discover it
                 </span>
               </label>
+              {!canKeepPrivate && (
+                <p className="share__note" style={{ marginTop: 8 }}>
+                  Private decks are a Pro feature.
+                </p>
+              )}
               {isPublic && (
                 <div className="share__row" style={{ marginTop: 8 }}>
                   <code className="share__code share__code--link">

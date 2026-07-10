@@ -209,6 +209,37 @@ button {
   justify-content: space-between;
   margin-bottom: 22px;
 }
+.dash-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  margin: -8px 0 24px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.58);
+}
+.dash-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+.dash-tabs__tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.72);
+}
+.dash-tabs__tab.is-active {
+  color: var(--coral-strong);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
 .dash__title {
   font-family: var(--font-brand);
   font-size: 26px;
@@ -282,6 +313,21 @@ button {
   font-size: 11px;
   font-weight: 700;
   padding: 4px 8px;
+}
+.deck-card__badge--public {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #287153;
+}
+.deck-card--public .deck-card__preview {
+  background:
+    radial-gradient(
+      circle at 24% 18%,
+      rgba(47, 158, 107, 0.15),
+      transparent 54%
+    ),
+    linear-gradient(135deg, #fbfbfc 0%, #eef4f1 100%);
 }
 .deck-card__meta {
   padding: 13px 15px 15px;

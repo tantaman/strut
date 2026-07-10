@@ -205,9 +205,9 @@ const withShareOwner = <TArgs>(
 // (getEntitlements), independent of the rindle txn; with no commercial overlay it's COMMUNITY
 // (canKeepPrivate=true), so both are no-ops for a clone (decks stay private by default, as before).
 
-/** createDeck: for an account that can't keep decks private (free tier), FORCE the new deck public and
- *  ensure a share token — even if a tampered client asked for 'private'. COMMUNITY/Pro (canKeepPrivate)
- *  pass straight through with the client's chosen visibility (default private). */
+/** createDeck: for an account that can't keep decks private (free tier), FORCE the new deck public —
+ *  even if a tampered client asked for 'private'. For every tier, normalize the visibility/token pair
+ *  so every public row can be opened from discovery and no private row retains a bearer token. */
 const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   const gen = sharedMutators.createDeck
   const a = gen.args.parse(raw)
@@ -215,8 +215,10 @@ const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   const ent = await getEntitlements(user)
   if (!ent.canKeepPrivate) {
     a.visibility = 'public-read'
-    if (!a.share_token) a.share_token = crypto.randomUUID()
   }
+  if (a.visibility === 'public-read' && !a.share_token)
+    a.share_token = crypto.randomUUID()
+  if (a.visibility !== 'public-read') a.share_token = ''
   return runSharedMutation(gen, a, sharedCtx(ctx), tx)
 }
 
@@ -250,6 +252,9 @@ const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
         403,
       )
     }
+    a.share_token = ''
+  } else if (!a.share_token) {
+    a.share_token = crypto.randomUUID()
   }
   return runSharedMutation(gen, a, sharedCtx(ctx), tx)
 }

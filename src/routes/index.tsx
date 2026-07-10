@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
-import { Plus, Upload, X } from 'lucide-react'
+import { Globe2, Plus, Upload, X } from 'lucide-react'
 import { decksQuery, DECKS_LIMIT } from '../../shared/queries'
 import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
@@ -42,15 +42,16 @@ function Dashboard() {
   const decks = decksStatus === 'complete' ? liveDecks : lastComplete.current
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
-  const { account, entitlement } = Route.useLoaderData()
+  const { account, entitlement, recentDecks = [] } = Route.useLoaderData()
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
+  const [view, setView] = useState<'mine' | 'recent'>('mine')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Free-tier accounts (canKeepPrivate === false) create PUBLIC, link-shareable decks; everyone else
-  // (self-host / Pro) creates private. The server (rindle-api createDeckGuarded) is authoritative — this
-  // just keeps the optimistic row in sync so it doesn't snap on confirm.
+  // Free-tier accounts (canKeepPrivate === false) create PUBLIC, discoverable decks; everyone else
+  // (self-host / Pro) creates private. The server (rindle-api createDeckGuarded) is authoritative —
+  // this just keeps the optimistic row in sync so it doesn't snap on confirm.
   const makesPublic = entitlement?.canKeepPrivate === false
   function newDeckVisibility(): {
     visibility: 'private' | 'public-read'
@@ -112,12 +113,40 @@ function Dashboard() {
         <UsageMeter />
         <AccountControl initial={account} entitlement={entitlement} />
       </div>
+      <div className="dash-tabs" role="tablist" aria-label="Browse decks">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'mine'}
+          className={`dash-tabs__tab${view === 'mine' ? ' is-active' : ''}`}
+          onClick={() => setView('mine')}
+        >
+          Your decks
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'recent'}
+          className={`dash-tabs__tab${view === 'recent' ? ' is-active' : ''}`}
+          onClick={() => setView('recent')}
+        >
+          <Globe2 size={15} /> Recent
+        </button>
+      </div>
       <div className="dash__head">
         <div>
-          <h1 className="dash__title">Your decks</h1>
+          <h1 className="dash__title">
+            {view === 'mine' ? 'Your decks' : 'Recent public decks'}
+          </h1>
           <p className="dash__sub">
-            {decks.length} presentation{decks.length === 1 ? '' : 's'},
-            local-first on Rindle.
+            {view === 'mine' ? (
+              <>
+                {decks.length} presentation{decks.length === 1 ? '' : 's'},
+                local-first on Rindle.
+              </>
+            ) : (
+              'The newest public presentations from the Strut community.'
+            )}
           </p>
         </div>
         <div className="dash__actions">
@@ -144,11 +173,13 @@ function Dashboard() {
         </div>
       </div>
 
-      {decks.length === 0 ? (
+      {view === 'mine' && decks.length === 0 && (
         <div className="dash__empty">
           No decks yet — create one to get started.
         </div>
-      ) : (
+      )}
+
+      {view === 'mine' && decks.length > 0 && (
         <div className="deck-grid">
           {decks.map((d) => (
             <button
@@ -190,6 +221,44 @@ function Dashboard() {
         </div>
       )}
 
+      {view === 'recent' && recentDecks.length === 0 && (
+        <div className="dash__empty">
+          No public decks have been created yet.
+        </div>
+      )}
+
+      {view === 'recent' && recentDecks.length > 0 && (
+        <div className="deck-grid">
+          {recentDecks.map((d) => (
+            <button
+              key={d.id}
+              className="deck-card deck-card--public"
+              onClick={() =>
+                navigate({
+                  to: '/share/$deckId',
+                  params: { deckId: d.id },
+                  search: { t: d.share_token },
+                })
+              }
+            >
+              <div className="deck-card__preview">
+                {(d.title || '?').slice(0, 1).toUpperCase()}
+                <span className="deck-card__badge deck-card__badge--public">
+                  <Globe2 size={11} /> Public
+                </span>
+              </div>
+              <div className="deck-card__meta">
+                <p className="deck-card__name">{d.title || 'Untitled'}</p>
+                <p className="deck-card__info">
+                  {d.slideCount} slide{d.slideCount === 1 ? '' : 's'} · Created{' '}
+                  {new Date(d.created).toLocaleDateString()}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
       {creating && (
         <NewDeckModal
           makesPublic={makesPublic}
@@ -208,7 +277,7 @@ function NewDeckModal({
   onCancel,
   onCreate,
 }: {
-  // Free tier: new decks are public/link-shareable (private is Pro) — surface that before they create.
+  // Free tier: new decks are public and discoverable (private is Pro) — surface that before creation.
   makesPublic: boolean
   upgradeUrl: string | null
   onCancel: () => void
@@ -232,7 +301,7 @@ function NewDeckModal({
         />
         {makesPublic && (
           <p className="dash__sub" style={{ margin: '2px 0 0', fontSize: 13 }}>
-            On the free plan this deck is shareable by link.{' '}
+            On the free plan this deck is public and may appear in Recent.{' '}
             {upgradeUrl ? (
               <a href={upgradeUrl}>Upgrade to Pro</a>
             ) : (

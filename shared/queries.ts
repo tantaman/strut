@@ -31,6 +31,10 @@ function reqLimit(raw: unknown, field = 'limit'): number {
 // keepalive (rindle/DecksKeepalive) — share the SAME query identity/viewKey. If these drift, the seed
 // no longer bridges first paint and the keepalive no longer warms the view the dashboard reads.
 export const DECKS_LIMIT = 10
+// One-shot server discovery feed size (see appSsr.readRecentDecks + server/queries). It deliberately
+// has no client query twin: syncing unrelated public rows into the local replica would contaminate the
+// un-gated `decksQuery`, whose coverage is intentionally limited to owned/shared rows.
+export const RECENT_DECKS_LIMIT = 24
 
 // Dashboard: the principal's decks (the local store already holds only owned + shared), newest first.
 export const decksQuery = defineQuery(

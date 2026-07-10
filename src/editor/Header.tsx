@@ -851,7 +851,11 @@ export function Header({
         />
       )}
       {shareOpen && deck && (
-        <ShareModal deck={deck} onClose={() => setShareOpen(false)} />
+        <ShareModal
+          deck={deck}
+          canKeepPrivate={!makesPublic}
+          onClose={() => setShareOpen(false)}
+        />
       )}
       {variantOpen && deck && (
         <VariantModal
