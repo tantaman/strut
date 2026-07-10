@@ -28,9 +28,9 @@ export const Route = createFileRoute('/api/usage')({
         const ent = await getEntitlements(account.id)
         const now = Date.now()
 
-        // A connected BYO OpenRouter key lifts the app-paid daily cap for the features that HAVE a BYO
-        // path (arrange/generate/chat run on the user's own credits). Image is Workers-AI-only, so it
-        // stays capped even with a key — mirroring the `if (!byo)` gating in the AI routes.
+        // A connected BYO OpenRouter key lifts the app-paid cap for the features that HAVE a BYO path
+        // (arrange/generate/chat run on the user's own credits). Image is Workers-AI-only, so it stays
+        // capped even with a key — mirroring the `if (!byo)` gating in the AI routes.
         const { resolveModel } = await import('../../server/llm')
         const byo = (await resolveModel(account.id)).kind === 'openrouter'
         const BYO_UNLIMITED: Record<AiFeature, boolean> = {
@@ -41,20 +41,37 @@ export const Route = createFileRoute('/api/usage')({
           artifact: false,
         }
 
-        const { peekUsage, FEATURE_DEFAULT_LIMIT } =
-          await import('../../server/quota')
-        const features = await Promise.all(
-          FEATURES.map(async (key) => {
-            const unlimited = ent.aiUnlimited || (byo && BYO_UNLIMITED[key])
-            return {
-              key,
-              used: unlimited ? 0 : await peekUsage(account.id, now, key),
-              limit: unlimited
-                ? null
-                : (ent.aiDailyLimits?.[key] ?? FEATURE_DEFAULT_LIMIT[key]),
-            }
-          }),
-        )
+        // A pooled plan (Pro) reports ONE shared monthly counter instead of the per-feature daily buckets;
+        // the free tier reports each daily bucket. (aiUnlimited short-circuits both to "Unlimited".)
+        const pooled = !ent.aiUnlimited && ent.aiMonthlyPool != null
+        let pool: { used: number; limit: number } | null = null
+        let features: Array<{
+          key: AiFeature
+          used: number
+          limit: number | null
+        }> = []
+        if (pooled) {
+          const { peekPool } = await import('../../server/quota')
+          pool = {
+            used: await peekPool(account.id, now),
+            limit: ent.aiMonthlyPool as number,
+          }
+        } else {
+          const { peekUsage, FEATURE_DEFAULT_LIMIT } =
+            await import('../../server/quota')
+          features = await Promise.all(
+            FEATURES.map(async (key) => {
+              const unlimited = ent.aiUnlimited || (byo && BYO_UNLIMITED[key])
+              return {
+                key,
+                used: unlimited ? 0 : await peekUsage(account.id, now, key),
+                limit: unlimited
+                  ? null
+                  : (ent.aiDailyLimits?.[key] ?? FEATURE_DEFAULT_LIMIT[key]),
+              }
+            }),
+          )
+        }
 
         let storageUsed = 0
         if (ent.storageLimitBytes != null) {
@@ -62,9 +79,14 @@ export const Route = createFileRoute('/api/usage')({
           storageUsed = await getStorageUsed(account.id)
         }
 
-        // Daily quotas roll over at UTC midnight.
+        // Pooled allowance rolls over at the start of next UTC month; daily quotas at the next UTC midnight.
         const reset = new Date(now)
-        reset.setUTCHours(24, 0, 0, 0)
+        if (pooled) {
+          reset.setUTCMonth(reset.getUTCMonth() + 1, 1)
+          reset.setUTCHours(0, 0, 0, 0)
+        } else {
+          reset.setUTCHours(24, 0, 0, 0)
+        }
 
         return json(
           {
@@ -73,7 +95,7 @@ export const Route = createFileRoute('/api/usage')({
             upgradeUrl: entitlementSummary(ent).upgradeUrl,
             resetsAt: reset.toISOString(),
             storage: { used: storageUsed, limit: ent.storageLimitBytes },
-            ai: { unlimited: ent.aiUnlimited, features },
+            ai: { unlimited: ent.aiUnlimited, pool, features },
           },
           200,
         )

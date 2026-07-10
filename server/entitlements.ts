@@ -34,17 +34,35 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
   }
 }
 
-/** How an AI feature should be metered for this plan, for use by the AI route quota gates:
- *   - `{ meter: false }`             → unlimited: skip the daily quota entirely (like the BYO-key path).
- *   - `{ meter: true, limit }`       → enforce `limit`/day; `limit` undefined ⇒ the built-in server/quota
- *                                      default constant. Condition on the returned `.meter` so TS narrows
- *                                      `.limit` (e.g. `if (!byo && ai.meter) consume(..., ai.limit)`). */
-export function aiMetering(
-  ent: Entitlements,
-  feature: AiFeature,
-): { meter: false } | { meter: true; limit: number | undefined } {
+// The features that draw from a POOLED monthly allowance (aiMonthlyPool) — the ones that spend model
+// inference. Artifact is deliberately excluded: it spends R2, not tokens, so it keeps its own daily cap
+// even on a pooled plan (a Pro user's artifact runs shouldn't eat their AI-message budget).
+const POOLED_FEATURES: ReadonlySet<AiFeature> = new Set([
+  'arrange',
+  'generate',
+  'chat',
+  'image',
+])
+
+/** How an AI feature should be metered for this plan, for use by the AI route quota gates (which pass the
+ *  returned object straight to `consumeAiQuota`/`refundAiQuota` in server/quota.ts). Three outcomes:
+ *   - `{ meter: false }`                     → unlimited: skip the quota entirely (like the BYO-key path).
+ *   - `{ meter: true, window: 'month', limit }` → the pooled monthly allowance (one counter across the four
+ *                                                inference features); `limit` is always a number.
+ *   - `{ meter: true, window: 'day', limit }`   → the per-feature daily cap; `limit` undefined ⇒ the
+ *                                                built-in server/quota default constant.
+ *  Condition on `.meter` so TS narrows `.window`/`.limit` (e.g. `if (!byo && ai.meter) consumeAiQuota(…, ai)`). */
+export type AiMetering =
+  | { meter: false }
+  | { meter: true; window: 'month'; limit: number }
+  | { meter: true; window: 'day'; limit: number | undefined }
+
+export function aiMetering(ent: Entitlements, feature: AiFeature): AiMetering {
   if (ent.aiUnlimited) return { meter: false }
-  return { meter: true, limit: ent.aiDailyLimits?.[feature] }
+  if (ent.aiMonthlyPool != null && POOLED_FEATURES.has(feature)) {
+    return { meter: true, window: 'month', limit: ent.aiMonthlyPool }
+  }
+  return { meter: true, window: 'day', limit: ent.aiDailyLimits?.[feature] }
 }
 
 /** The client-safe projection for the account UI, seeded through the SSR loader. `upgradeUrl` comes

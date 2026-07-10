@@ -55,8 +55,9 @@ export const Route = createFileRoute('/api/image')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — consumed BEFORE the model call so concurrent calls can't race past the cap.
-        // Pro accounts are unlimited (`ai.meter === false`) and skip the cap.
+        // Durable quota — consumed BEFORE the model call so concurrent calls can't race past the cap.
+        // `ai.meter === false` (unlimited) skips it; otherwise consumeAiQuota charges the plan's window
+        // (a paid plan's pooled monthly allowance, or the free tier's daily image cap).
         const now = Date.now()
         const { getEntitlements, aiMetering } =
           await import('../../server/entitlements')
@@ -77,17 +78,12 @@ export const Route = createFileRoute('/api/image')({
             )
           }
         }
-        const { consumeImageQuota, refundImageQuota } =
+        const { consumeAiQuota, refundAiQuota } =
           await import('../../server/quota')
         if (ai.meter) {
           let quota
           try {
-            quota = await consumeImageQuota(
-              account.id,
-              now,
-              undefined,
-              ai.limit,
-            )
+            quota = await consumeAiQuota(account.id, now, 'image', ai)
           } catch (err) {
             console.error('[image] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -96,7 +92,10 @@ export const Route = createFileRoute('/api/image')({
             return json(
               {
                 error: 'quota_exceeded',
-                message: `Daily AI image limit reached (${quota.limit}/day). Try again tomorrow.`,
+                message:
+                  quota.window === 'month'
+                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
+                    : `Daily AI image limit reached (${quota.limit}/day). Try again tomorrow.`,
               },
               429,
             )
@@ -118,7 +117,10 @@ export const Route = createFileRoute('/api/image')({
           return json({ url }, 200)
         } catch (err) {
           // The work didn't happen — refund the consumed unit (only if we metered it).
-          if (ai.meter) await refundImageQuota(account.id, now).catch(() => {})
+          if (ai.meter)
+            await refundAiQuota(account.id, now, 'image', ai.window).catch(
+              () => {},
+            )
           if (err instanceof ImageUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

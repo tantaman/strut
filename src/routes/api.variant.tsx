@@ -70,15 +70,10 @@ export const Route = createFileRoute('/api/variant')({
           await import('../../server/entitlements')
         const ai = aiMetering(await getEntitlements(account.id), 'generate')
         if (!byo && ai.meter) {
-          const { consumeGenerateQuota } = await import('../../server/quota')
+          const { consumeAiQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeGenerateQuota(
-              account.id,
-              now,
-              undefined,
-              ai.limit,
-            )
+            quota = await consumeAiQuota(account.id, now, 'generate', ai)
           } catch (err) {
             console.error('[variant] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -87,7 +82,10 @@ export const Route = createFileRoute('/api/variant')({
             return json(
               {
                 error: 'quota_exceeded',
-                message: `Daily AI slide-generation limit reached (${quota.limit}/day). Try again tomorrow.`,
+                message:
+                  quota.window === 'month'
+                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
+                    : `Daily AI slide-generation limit reached (${quota.limit}/day). Try again tomorrow.`,
               },
               429,
             )
@@ -101,8 +99,10 @@ export const Route = createFileRoute('/api/variant')({
           return json(variant, 200)
         } catch (err) {
           if (!byo && ai.meter) {
-            const { refundGenerateQuota } = await import('../../server/quota')
-            await refundGenerateQuota(account.id, now).catch(() => {})
+            const { refundAiQuota } = await import('../../server/quota')
+            await refundAiQuota(account.id, now, 'generate', ai.window).catch(
+              () => {},
+            )
           }
           if (err instanceof VariantUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)

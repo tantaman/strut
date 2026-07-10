@@ -5,14 +5,17 @@ import {
   ARRANGE_DAILY_LIMIT,
   GENERATE_DAILY_LIMIT,
   IMAGE_DAILY_LIMIT,
+  consumeAiQuota,
   consumeArrangeQuota,
   consumeGenerateQuota,
   consumeImageQuota,
   makeSqliteStore,
+  refundAiQuota,
   refundArrangeQuota,
   refundGenerateQuota,
   refundImageQuota,
   utcDay,
+  utcMonth,
 } from '../../server/quota'
 
 // Exercise the durable-quota enforcement SQL (upsert-increment / refund / day rollover) against a real
@@ -52,13 +55,100 @@ function imgStore() {
   )
 }
 
-const T0 = Date.parse('2026-07-06T12:00:00Z') // → day 2026-07-06
-const NEXT_DAY = Date.parse('2026-07-07T00:30:00Z') // → day 2026-07-07
+// The pooled monthly allowance shares ONE table across all inference features (mirrors
+// migrations-d1/0009_ai_pool_usage.sql). consumeAiQuota with window:'month' bumps this via the passed store.
+function poolStore() {
+  const db = new Database(':memory:')
+  db.exec(
+    'create table ai_pool_usage (user_id text not null, day text not null, count integer not null default 0, primary key (user_id, day))',
+  )
+  return makeSqliteStore(
+    db as unknown as Parameters<typeof makeSqliteStore>[0],
+    'ai_pool_usage',
+  )
+}
+
+const T0 = Date.parse('2026-07-06T12:00:00Z') // → day 2026-07-06, month 2026-07
+const NEXT_DAY = Date.parse('2026-07-07T00:30:00Z') // → day 2026-07-07, month 2026-07
+const NEXT_MONTH = Date.parse('2026-08-02T00:30:00Z') // → month 2026-08
 
 describe('utcDay', () => {
   it('keys by UTC calendar day', () => {
     expect(utcDay(T0)).toBe('2026-07-06')
     expect(utcDay(NEXT_DAY)).toBe('2026-07-07')
+  })
+})
+
+describe('utcMonth', () => {
+  it('keys by UTC calendar month', () => {
+    expect(utcMonth(T0)).toBe('2026-07')
+    expect(utcMonth(NEXT_DAY)).toBe('2026-07') // same month as T0
+    expect(utcMonth(NEXT_MONTH)).toBe('2026-08')
+  })
+})
+
+describe('consumeAiQuota — pooled monthly window', () => {
+  const month = { window: 'month', limit: 3 } as const
+
+  it('shares ONE allowance across features (arrange/generate/chat/image pool together)', async () => {
+    const store = poolStore()
+    // Three different features, three calls — all draw from the same pool.
+    expect((await consumeAiQuota('u1', T0, 'chat', month, store)).allowed).toBe(
+      true,
+    )
+    expect(
+      (await consumeAiQuota('u1', T0, 'arrange', month, store)).allowed,
+    ).toBe(true)
+    const third = await consumeAiQuota('u1', T0, 'image', month, store)
+    expect(third.allowed).toBe(true)
+    expect(third.used).toBe(3)
+    expect(third.window).toBe('month')
+    // Fourth call (any feature) tips over the shared limit.
+    const over = await consumeAiQuota('u1', T0, 'generate', month, store)
+    expect(over.allowed).toBe(false)
+    expect(over.used).toBe(4)
+  })
+
+  it('refund frees a pooled unit', async () => {
+    const store = poolStore()
+    for (let i = 0; i < 3; i++)
+      await consumeAiQuota('u1', T0, 'chat', month, store)
+    expect((await consumeAiQuota('u1', T0, 'chat', month, store)).allowed).toBe(
+      false,
+    )
+    await refundAiQuota('u1', T0, 'chat', 'month', store)
+    const r = await consumeAiQuota('u1', T0, 'chat', month, store)
+    expect(r.used).toBe(4)
+    expect(r.allowed).toBe(false)
+  })
+
+  it('shares the pool within a month but resets on a new UTC month', async () => {
+    const store = poolStore()
+    for (let i = 0; i < 3; i++)
+      await consumeAiQuota('u1', T0, 'chat', month, store)
+    // Same calendar month, a LATER day → still the same pool (over the limit, not reset).
+    const sameMonth = await consumeAiQuota('u1', NEXT_DAY, 'chat', month, store)
+    expect(sameMonth.used).toBe(4)
+    expect(sameMonth.allowed).toBe(false)
+    // A new UTC month → fresh pool.
+    const nextMonth = await consumeAiQuota(
+      'u1',
+      NEXT_MONTH,
+      'chat',
+      month,
+      store,
+    )
+    expect(nextMonth.allowed).toBe(true)
+    expect(nextMonth.used).toBe(1)
+  })
+
+  it('counts each user independently', async () => {
+    const store = poolStore()
+    for (let i = 0; i < 3; i++)
+      await consumeAiQuota('u1', T0, 'chat', month, store)
+    const other = await consumeAiQuota('u2', T0, 'chat', month, store)
+    expect(other.allowed).toBe(true)
+    expect(other.used).toBe(1)
   })
 })
 

@@ -12,7 +12,7 @@ import type { ChatActRequest } from '../../shared/chatAction'
 //      a BYO OpenRouter caller (they pay) is allowed. Mirrors server/session.ts's trust posture.
 //   2. COST BOUND — the app pays for inference, so a per-isolate burst throttle + the AUTHORITATIVE durable
 //      daily quota (server/quota.ts) cap it. An action-capable chat turn is one model call, so it meters
-//      exactly like a prose-only chat turn — it shares the SAME chat quota bucket (consumeChatQuota).
+//      exactly like a prose-only chat turn — it shares the SAME 'chat' quota bucket (consumeAiQuota).
 // We do NOT verify the user owns `deckId` here: the result is only a proposed change; APPLYING it flows
 // through the authoritative slide/deck mutators (server/rindle-api.ts withSlideEditable/withDeckEditable),
 // which independently reject edits the user can't make. The only thing this endpoint spends is inference.
@@ -86,15 +86,17 @@ export const Route = createFileRoute('/api/chat/act')({
         // Durable daily quota — ONLY for the app-paid path, and the SAME bucket as the advisor (an Edit
         // turn is a chat turn). Consumed BEFORE the model call so concurrent turns can't race the cap.
         const now = Date.now()
-        // Pro (like BYO) lifts the app-paid daily cap; `ai.meter === false` means unlimited.
+        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
+        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap. The Edit lane
+        // shares the SAME 'chat' bucket as a prose turn.
         const { getEntitlements, aiMetering } =
           await import('../../server/entitlements')
         const ai = aiMetering(await getEntitlements(account.id), 'chat')
         if (!byo && ai.meter) {
-          const { consumeChatQuota } = await import('../../server/quota')
+          const { consumeAiQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeChatQuota(account.id, now, undefined, ai.limit)
+            quota = await consumeAiQuota(account.id, now, 'chat', ai)
           } catch (err) {
             console.error('[chat/act] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -103,7 +105,10 @@ export const Route = createFileRoute('/api/chat/act')({
             return json(
               {
                 error: 'quota_exceeded',
-                message: `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
+                message:
+                  quota.window === 'month'
+                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
+                    : `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
               },
               429,
             )
@@ -129,8 +134,10 @@ export const Route = createFileRoute('/api/chat/act')({
           // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
           // (only if we metered it).
           if (!byo && ai.meter) {
-            const { refundChatQuota } = await import('../../server/quota')
-            await refundChatQuota(account.id, now).catch(() => {})
+            const { refundAiQuota } = await import('../../server/quota')
+            await refundAiQuota(account.id, now, 'chat', ai.window).catch(
+              () => {},
+            )
           }
           if (err instanceof ChatActUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)

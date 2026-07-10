@@ -86,21 +86,16 @@ export const Route = createFileRoute('/api/arrange')({
         // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
         // Consumed BEFORE the model call so concurrent calls can't race past the cap.
         const now = Date.now()
-        // Pro (like BYO) lifts the app-paid daily cap. Resolve the plan once; `ai.meter === false`
-        // means unlimited → skip the quota, and Pro may also carry a raised `ai.limit`.
+        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
+        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap.
         const { getEntitlements, aiMetering } =
           await import('../../server/entitlements')
         const ai = aiMetering(await getEntitlements(account.id), 'arrange')
         if (!byo && ai.meter) {
-          const { consumeArrangeQuota } = await import('../../server/quota')
+          const { consumeAiQuota } = await import('../../server/quota')
           let quota
           try {
-            quota = await consumeArrangeQuota(
-              account.id,
-              now,
-              undefined,
-              ai.limit,
-            )
+            quota = await consumeAiQuota(account.id, now, 'arrange', ai)
           } catch (err) {
             console.error('[arrange] quota check failed:', err)
             return json({ error: 'internal' }, 500)
@@ -109,7 +104,10 @@ export const Route = createFileRoute('/api/arrange')({
             return json(
               {
                 error: 'quota_exceeded',
-                message: `Daily AI arrange limit reached (${quota.limit}/day). Try again tomorrow.`,
+                message:
+                  quota.window === 'month'
+                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
+                    : `Daily AI arrange limit reached (${quota.limit}/day). Try again tomorrow.`,
               },
               429,
             )
@@ -124,8 +122,10 @@ export const Route = createFileRoute('/api/arrange')({
         } catch (err) {
           // The work didn't happen — refund the consumed unit (only if we metered it).
           if (!byo && ai.meter) {
-            const { refundArrangeQuota } = await import('../../server/quota')
-            await refundArrangeQuota(account.id, now).catch(() => {})
+            const { refundAiQuota } = await import('../../server/quota')
+            await refundAiQuota(account.id, now, 'arrange', ai.window).catch(
+              () => {},
+            )
           }
           if (err instanceof ArrangeUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
