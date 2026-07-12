@@ -8,6 +8,7 @@ import { RindleProvider } from '../rindle/RindleProvider'
 import { DecksKeepalive } from '../rindle/DecksKeepalive'
 import { ANALYTICS_ENABLED, UMAMI_ID, UMAMI_SRC } from '../lib/analytics'
 import { googleFontsHref } from '../config'
+import { themeBootstrapScript } from '../ThemeToggle'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -42,8 +43,9 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <HeadContent />
         {/* Privacy-first, cookieless product analytics (Umami). Rendered ONLY when the build set
             VITE_UMAMI_SRC — an unconfigured clone omits it entirely and collects nothing. See

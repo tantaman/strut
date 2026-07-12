@@ -62,6 +62,7 @@ import {
 import type { BackgroundImageLayout } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
+import { ThemeToggle } from '../ThemeToggle'
 
 // Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
 // keyboard shortcut wired up in Stage.
@@ -821,6 +822,8 @@ export function Header({
       {/* Usage ring — this is the point of consumption (AI + uploads), so it lives here too. Hidden on
           the mobile app-bar (the actions it tracks move to the tab bar). */}
       <UsageMeter />
+
+      <ThemeToggle className="hdr__theme-toggle" />
 
       {menu === 'media-image' && (
         <MediaModal

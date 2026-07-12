@@ -12,6 +12,7 @@ import { UsageMeter } from '../rindle/UsageMeter'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
+import { ThemeToggle } from '../ThemeToggle'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -111,6 +112,7 @@ function Dashboard() {
         <ModelControl />
         <UsageMeter />
         <AccountControl initial={account} entitlement={entitlement} />
+        <ThemeToggle />
       </div>
       <div className="dash__head">
         <div>
