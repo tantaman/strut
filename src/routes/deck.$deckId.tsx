@@ -16,7 +16,6 @@ import { Stage } from '../editor/Stage'
 import { Overview } from '../editor/Overview'
 import { ResearchView } from '../editor/ResearchView'
 import { ChatPanel } from '../editor/ChatPanel'
-import { ExtensionLabMount } from '../editor/ExtensionLabMount'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { MobileTabBar } from '../editor/mobile/MobileTabBar'
 import { useDeckChatContext } from '../editor/chatNarration'
@@ -163,8 +162,6 @@ function EditorInner({ deckId }: { deckId: string }) {
           controls in the same bottom-right corner, so we'd collide there. (Hidden on mobile, where
           the bottom tab bar owns that corner — see strut.css.) */}
       {editor.mode === 'slide' && <PoweredByRindle />}
-      {/* DEV-only: AssemblyScript → WASM extension harness (issue #438). No-ops in production. */}
-      <ExtensionLabMount />
       {/* Bottom tab bar — hidden above the mobile breakpoint (strut.css); on phones it owns mode +
           Advisor + Present, which the header sheds there. Last child so sheets anchor above it. */}
       <MobileTabBar
