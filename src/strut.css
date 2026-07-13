@@ -804,6 +804,90 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* Two well-foot AI actions stacked: "✨ Generate slides" + "🎙️ From a recording". */
+.well__gen-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* "🎙️ From a recording" panel extras (audio picker, transcript divider, slide-count row). */
+.well__gen-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.well__gen-file:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+.well__gen-file input {
+  display: none;
+}
+.well__gen-file.is-busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+.well__gen-or {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.well__gen-or::before,
+.well__gen-or::after {
+  content: '';
+  flex: 1 1 0;
+  height: 1px;
+  background: var(--line);
+}
+.well__gen-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.well__gen-select {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+}
+.well__gen-hint {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.well__gen-mini-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--coral);
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: well-gen-spin 0.7s linear infinite;
+}
+
 .well__slide.is-dragging {
   opacity: 0.35;
 }

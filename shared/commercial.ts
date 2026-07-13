@@ -5,7 +5,15 @@
 // marketing, and — with no overlay — the COMMUNITY entitlement below, which equals the historical
 // behavior so a clone never regresses and needs no payment setup.
 
-export type AiFeature = 'arrange' | 'generate' | 'chat' | 'image' | 'artifact'
+export type AiFeature =
+  | 'arrange'
+  | 'generate'
+  | 'chat'
+  | 'image'
+  | 'artifact'
+  // "🎙️ From a recording": `transcribe` = audio → text (Whisper); `narrate` = transcript → slides + notes.
+  | 'transcribe'
+  | 'narrate'
 
 /** What a viewer's plan grants. Resolved server-side (server/entitlements.ts) and, in summary form
  *  ({@link EntitlementSummary}), seeded to the client for the account UI. */

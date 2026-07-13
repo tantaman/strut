@@ -3,10 +3,9 @@
 // (the `DB` binding — same store as Better-Auth, NOT Rindle). The routes' in-memory throttles are only
 // cheap burst pre-filters; THIS survives isolate recycling and spans every isolate.
 //
-// Three features, three independent buckets (three tables, same shape): `arrange_usage` (✨ Arrange),
-// `generate_usage` (✨ Generate slides — heavier, so a smaller limit), and `chat_usage` (✨ Chat — metered
-// one unit per user turn; turns are cheap but conversations are many, so a larger limit). The store logic
-// is identical and table-parameterized; the feature wrappers below pick the table + limit.
+// Each feature has an independent daily bucket (same table shape); paid plans may instead route selected
+// inference features through one pooled monthly allowance. The store logic is identical and
+// table-parameterized; the feature wrappers below pick the table + limit.
 //
 // Runtime access mirrors server/auth.ts: under workerd the `DB` binding is an OBJECT binding reached via
 // the `cloudflare:workers` module (not process.env); under `pnpm dev` (Node, no D1) we open the same
@@ -28,8 +27,13 @@ const ARTIFACT_TABLE = 'artifact_usage'
 // Text-to-image generation is a heavy Workers AI call (the app pays), so it gets its own small bucket —
 // separate from generate so a batch of images can't drain the slide-generation allowance and vice versa.
 const IMAGE_TABLE = 'image_usage'
+// "🎙️ From a recording": speech-to-text (Whisper) and transcript→deck are each heavy Workers AI calls, so
+// each gets its own small bucket. transcribe is the audio precursor; narrate authors the deck (and, on a
+// pooled plan, counts as one pooled AI message — see POOLED_FEATURES in server/entitlements.ts).
+const TRANSCRIBE_TABLE = 'transcribe_usage'
+const NARRATE_TABLE = 'narrate_usage'
 // The POOLED monthly allowance (paid plans): ONE counter shared across the inference features
-// (arrange/generate/chat/image — see aiMetering's POOLED_FEATURES), keyed by (user, MONTH) instead of
+// (arrange/generate/chat/image/narrate — see aiMetering's POOLED_FEATURES), keyed by (user, MONTH) instead of
 // (user, day). Same table shape + store logic as the daily buckets; the `day` column just holds a
 // `YYYY-MM` month key here (see migrations-d1/0009_ai_pool_usage.sql).
 const POOL_TABLE = 'ai_pool_usage'
@@ -43,6 +47,10 @@ export const CHAT_DAILY_LIMIT = 200
 export const ARTIFACT_DAILY_LIMIT = 200
 // Generating an image is heavy; keep the daily allowance modest (mirrors generate).
 export const IMAGE_DAILY_LIMIT = 20
+// Transcribing audio and authoring a deck from a transcript are both heavy; keep their free-tier daily
+// allowances modest (a recording→deck run costs one of each).
+export const TRANSCRIBE_DAILY_LIMIT = 10
+export const NARRATE_DAILY_LIMIT = 10
 // Fallback for the pooled monthly allowance if a plan somehow sets a pool without a number (aiMetering only
 // ever returns a concrete limit for the month window, so this is a safety net, not a real cap).
 export const MONTHLY_POOL_LIMIT = 1000
@@ -66,6 +74,8 @@ const FEATURE_TABLE: Record<AiFeature, string> = {
   chat: CHAT_TABLE,
   image: IMAGE_TABLE,
   artifact: ARTIFACT_TABLE,
+  transcribe: TRANSCRIBE_TABLE,
+  narrate: NARRATE_TABLE,
 }
 export const FEATURE_DEFAULT_LIMIT: Record<AiFeature, number> = {
   arrange: ARRANGE_DAILY_LIMIT,
@@ -73,6 +83,8 @@ export const FEATURE_DEFAULT_LIMIT: Record<AiFeature, number> = {
   chat: CHAT_DAILY_LIMIT,
   image: IMAGE_DAILY_LIMIT,
   artifact: ARTIFACT_DAILY_LIMIT,
+  transcribe: TRANSCRIBE_DAILY_LIMIT,
+  narrate: NARRATE_DAILY_LIMIT,
 }
 
 /** Today's consumed count for a feature (no increment) — the read behind /api/usage. */
@@ -233,8 +245,9 @@ export function refundImageQuota(
 // ---- pooled monthly allowance ----
 
 // The pooled counterparts of consumeQuota/refundQuota: same atomic upsert-increment enforcement, but keyed
-// by MONTH (utcMonth) into the single POOL_TABLE. Any inference feature (arrange/generate/chat/image) bumps
-// the same row, so N calls across features share one N/limit allowance for the calendar month.
+// by MONTH (utcMonth) into the single POOL_TABLE. Any pooled inference feature
+// (arrange/generate/chat/image/narrate) bumps the same row, so N calls across features share one N/limit
+// allowance for the calendar month.
 async function consumePool(
   userId: string,
   now: number,

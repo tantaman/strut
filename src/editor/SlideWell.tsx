@@ -11,7 +11,7 @@ import {
 } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Plus, Sparkles } from 'lucide-react'
+import { Mic, Plus, Sparkles } from 'lucide-react'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
 import { useMutate } from '../rindle/RindleProvider'
@@ -20,6 +20,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent } from './componentOps'
 import { applyGenerated } from './aiGenerate'
+import { applyNarrated } from './aiNarrate'
 import { track } from '../lib/analytics'
 import { notifyUsageChanged } from '../lib/usage'
 import type { AnyComponent, DeckThemeFields } from './types'
@@ -27,6 +28,12 @@ import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { AddSlideArgs } from '../../shared/app-def'
 import type { GeneratedDeck, GenerateRequest } from '../../shared/generate'
+import type {
+  NarratedDeck,
+  NarrateRequest,
+  TranscribeResult,
+} from '../../shared/transcript'
+import { TRANSCRIBE_LIMITS } from '../../shared/transcript'
 import { appPath } from '../../shared/appPath'
 
 export function SlideWell({
@@ -61,6 +68,9 @@ export function SlideWell({
     !!session?.user &&
     (session.user as { isAnonymous?: boolean }).isAnonymous !== true
   const [genOpen, setGenOpen] = useState(false)
+  // "🎙️ From a recording": author slides (+ speaker notes) from a talk — an uploaded audio file
+  // (transcribed by Whisper) or a pasted transcript. Same member gate as Generate.
+  const [narrateOpen, setNarrateOpen] = useState(false)
   const componentsBySlideRef = useRef(
     new Map<string, Map<string, AnyComponent>>(),
   )
@@ -220,6 +230,21 @@ export function SlideWell({
     track('slides:generated', { count: generated.slides.length })
     notifyUsageChanged() // ✨ Generate spent an app-paid unit → refresh the usage ring
     setGenOpen(false)
+  }
+
+  // Append the slides authored from a talk (one undo for the whole batch, notes included) and jump to the
+  // first new one. Mirrors handleGenerated but via applyNarrated (which also writes the Research notes).
+  function handleNarrated(narrated: NarratedDeck) {
+    const firstId = applyNarrated(
+      narrated,
+      mutate,
+      { deckId: editor.deckId, slides },
+      history,
+    )
+    if (firstId) editor.setActiveSlide(firstId)
+    track('slides:narrated', { count: narrated.slides.length })
+    notifyUsageChanged() // 🎙️ narrate spent an app-paid unit → refresh the usage ring
+    setNarrateOpen(false)
   }
 
   // Restore a deleted slide (row + transform + theme + all its components).
@@ -596,14 +621,30 @@ export function SlideWell({
               onGenerated={handleGenerated}
               onClose={() => setGenOpen(false)}
             />
+          ) : narrateOpen ? (
+            <NarrateForm
+              deckId={editor.deckId}
+              isMember={isMember}
+              onNarrated={handleNarrated}
+              onClose={() => setNarrateOpen(false)}
+            />
           ) : (
-            <button
-              className="well__gen-toggle"
-              onClick={() => setGenOpen(true)}
-              title="Ask AI to generate slides from a description"
-            >
-              <Sparkles size={15} /> Generate slides
-            </button>
+            <div className="well__gen-toggles">
+              <button
+                className="well__gen-toggle"
+                onClick={() => setGenOpen(true)}
+                title="Ask AI to generate slides from a description"
+              >
+                <Sparkles size={15} /> Generate slides
+              </button>
+              <button
+                className="well__gen-toggle"
+                onClick={() => setNarrateOpen(true)}
+                title="Turn a talk recording or transcript into slides + speaker notes"
+              >
+                <Mic size={15} /> From a recording
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -752,6 +793,250 @@ function GenerateForm({
           onClick={onClose}
           disabled={loading}
         >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// The "🎙️ From a recording" form: drop in an audio file (transcribed via /api/transcribe) OR paste a
+// transcript, optionally pick a target slide count, then POST /api/narrate → hand the returned deck up to be
+// appended (slides + speaker notes). Member-gated exactly like GenerateForm — the toggle is visible to
+// everyone (discoverability) but the feature is member-gated (the routes enforce it too). The audio → text
+// step is a separate call so the recognized transcript lands in the box EDITABLE — the user can fix Whisper
+// before spending a generate on it.
+function NarrateForm({
+  deckId,
+  isMember,
+  onNarrated,
+  onClose,
+}: {
+  deckId: string
+  isMember: boolean
+  onNarrated: (deck: NarratedDeck) => void
+  onClose: () => void
+}) {
+  const [transcript, setTranscript] = useState('')
+  const [target, setTarget] = useState('') // '' = let the model choose
+  const [loading, setLoading] = useState(false) // generating slides
+  const [transcribing, setTranscribing] = useState(false) // audio → text
+  const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  if (!isMember) {
+    const back =
+      typeof window !== 'undefined'
+        ? window.location.pathname + window.location.search
+        : '/'
+    return (
+      <div className="well__gen-panel">
+        <div className="well__gen-gate">
+          Sign in to build slides from a recording
+        </div>
+        <div className="well__gen-signin">
+          <button
+            onClick={() =>
+              authClient.signIn.social({
+                provider: 'github',
+                callbackURL: back,
+              })
+            }
+          >
+            GitHub
+          </button>
+          <button
+            onClick={() =>
+              authClient.signIn.social({
+                provider: 'google',
+                callbackURL: back,
+              })
+            }
+          >
+            Google
+          </button>
+        </div>
+        <button className="well__gen-close" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    )
+  }
+
+  const busy = loading || transcribing
+
+  // Transcribe a picked audio file into the transcript box (appended, so mixing audio + paste works). The
+  // size cap is checked client-side too so an oversized file fails fast without an upload.
+  async function transcribeFile(file: File) {
+    if (busy) return
+    setError(null)
+    if (file.size > TRANSCRIBE_LIMITS.maxAudioBytes) {
+      const mb = Math.round(TRANSCRIBE_LIMITS.maxAudioBytes / (1024 * 1024))
+      setError(
+        `That recording is too large (max ${mb} MB). Paste the transcript instead.`,
+      )
+      return
+    }
+    setTranscribing(true)
+    try {
+      const res = await fetch(appPath('/api/transcribe'), {
+        method: 'POST',
+        headers: { 'content-type': file.type || 'application/octet-stream' },
+        credentials: 'same-origin',
+        body: file,
+      })
+      if (!res.ok) {
+        const b = (await res.json().catch(() => null)) as {
+          message?: string
+        } | null
+        setError(
+          res.status === 401
+            ? 'Sign in to transcribe audio.'
+            : (b?.message ??
+                (res.status === 429
+                  ? 'Too many requests — wait a moment.'
+                  : 'Transcription is unavailable right now.')),
+        )
+        return
+      }
+      const { text } = (await res.json()) as TranscribeResult
+      if (!text.trim()) {
+        setError(
+          'No speech detected in that file — try another recording or paste a transcript.',
+        )
+        return
+      }
+      // Append to whatever's already there so a user can transcribe several clips (or add to a paste).
+      setTranscript((prev) =>
+        prev.trim() ? prev.trimEnd() + '\n\n' + text : text,
+      )
+      inputRef.current?.focus()
+    } catch {
+      setError('Network error — try again.')
+    } finally {
+      setTranscribing(false)
+    }
+  }
+
+  async function submit() {
+    if (busy || !transcript.trim()) return
+    setLoading(true)
+    setError(null)
+    try {
+      const body: NarrateRequest = {
+        deckId,
+        transcript,
+        targetSlides: target ? Number(target) : undefined,
+      }
+      const res = await fetch(appPath('/api/narrate'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const b = (await res.json().catch(() => null)) as {
+          message?: string
+        } | null
+        setError(
+          res.status === 401
+            ? 'Sign in to generate slides.'
+            : (b?.message ??
+                (res.status === 429
+                  ? 'Too many requests — wait a moment.'
+                  : 'AI is unavailable right now.')),
+        )
+        return
+      }
+      const deck = (await res.json()) as NarratedDeck
+      if (!Array.isArray(deck.slides) || deck.slides.length === 0) {
+        setError('No slides came back — try a longer transcript.')
+        return
+      }
+      onNarrated(deck)
+      setTranscript('')
+    } catch {
+      setError('Network error — try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="well__gen-panel">
+      <label className={'well__gen-file' + (transcribing ? ' is-busy' : '')}>
+        {transcribing ? (
+          <>
+            <span className="well__gen-mini-spinner" /> Transcribing…
+          </>
+        ) : (
+          <>
+            <Mic size={14} /> Choose an audio file
+          </>
+        )}
+        <input
+          type="file"
+          accept="audio/*"
+          disabled={busy}
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            e.target.value = '' // let the same file be re-picked after an error
+            if (f) transcribeFile(f)
+          }}
+        />
+      </label>
+      <div className="well__gen-or">or paste a transcript</div>
+      <textarea
+        ref={inputRef}
+        className="well__gen-input"
+        rows={4}
+        placeholder="Paste your talk transcript here…"
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        onKeyDown={(e) => {
+          // Enter alone is a newline; ⌘/Ctrl+Enter submits, Escape closes.
+          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault()
+            submit()
+          } else if (e.key === 'Escape') onClose()
+        }}
+        disabled={busy}
+      />
+      <div className="well__gen-row">
+        <span>Slides</span>
+        <select
+          className="well__gen-select"
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          disabled={busy}
+        >
+          <option value="">Auto</option>
+          <option value="5">5</option>
+          <option value="8">8</option>
+          <option value="12">12</option>
+          <option value="16">16</option>
+        </select>
+      </div>
+      {error && <div className="well__gen-error">{error}</div>}
+      <div className="well__gen-actions">
+        <button
+          className="well__gen-go"
+          onClick={submit}
+          disabled={busy || !transcript.trim()}
+          title="Generate slides from the transcript (⌘/Ctrl+Enter)"
+        >
+          {loading ? (
+            <span className="well__gen-spinner" aria-label="Generating" />
+          ) : (
+            <>
+              <Sparkles size={14} /> Generate
+            </>
+          )}
+        </button>
+        <button className="well__gen-close" onClick={onClose} disabled={busy}>
           Cancel
         </button>
       </div>

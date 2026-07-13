@@ -35,19 +35,22 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
 }
 
 // The features that draw from a POOLED monthly allowance (aiMonthlyPool) — the ones that spend model
-// inference. Artifact is deliberately excluded: it spends R2, not tokens, so it keeps its own daily cap
-// even on a pooled plan (a Pro user's artifact runs shouldn't eat their AI-message budget).
+// inference as a user-facing "message". Artifact is excluded: it spends R2, not tokens, so it keeps its own
+// daily cap even on a pooled plan. `transcribe` is likewise excluded: it's the audio→text precursor to
+// narrate, not a message on its own — it keeps its daily cap so a pooled plan meters the deck it authors
+// (narrate) once, not twice.
 const POOLED_FEATURES: ReadonlySet<AiFeature> = new Set([
   'arrange',
   'generate',
   'chat',
   'image',
+  'narrate',
 ])
 
 /** How an AI feature should be metered for this plan, for use by the AI route quota gates (which pass the
  *  returned object straight to `consumeAiQuota`/`refundAiQuota` in server/quota.ts). Three outcomes:
  *   - `{ meter: false }`                     → unlimited: skip the quota entirely (like the BYO-key path).
- *   - `{ meter: true, window: 'month', limit }` → the pooled monthly allowance (one counter across the four
+ *   - `{ meter: true, window: 'month', limit }` → the pooled monthly allowance (one counter across the
  *                                                inference features); `limit` is always a number.
  *   - `{ meter: true, window: 'day', limit }`   → the per-feature daily cap; `limit` undefined ⇒ the
  *                                                built-in server/quota default constant.

@@ -15,6 +15,8 @@ import { Route as ShareDeckIdRouteImport } from './routes/share.$deckId'
 import { Route as DeckDeckIdRouteImport } from './routes/deck.$deckId'
 import { Route as ApiVariantRouteImport } from './routes/api.variant'
 import { Route as ApiUsageRouteImport } from './routes/api.usage'
+import { Route as ApiTranscribeRouteImport } from './routes/api.transcribe'
+import { Route as ApiNarrateRouteImport } from './routes/api.narrate'
 import { Route as ApiImageSearchRouteImport } from './routes/api.image-search'
 import { Route as ApiImageRouteImport } from './routes/api.image'
 import { Route as ApiGenerateRouteImport } from './routes/api.generate'
@@ -63,6 +65,16 @@ const ApiVariantRoute = ApiVariantRouteImport.update({
 const ApiUsageRoute = ApiUsageRouteImport.update({
   id: '/api/usage',
   path: '/api/usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNarrateRoute = ApiNarrateRouteImport.update({
+  id: '/api/narrate',
+  path: '/api/narrate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiImageSearchRoute = ApiImageSearchRouteImport.update({
@@ -171,6 +183,8 @@ export interface FileRoutesByFullPath {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/narrate': typeof ApiNarrateRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/api/usage': typeof ApiUsageRoute
   '/api/variant': typeof ApiVariantRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -198,6 +212,8 @@ export interface FileRoutesByTo {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/narrate': typeof ApiNarrateRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/api/usage': typeof ApiUsageRoute
   '/api/variant': typeof ApiVariantRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -226,6 +242,8 @@ export interface FileRoutesById {
   '/api/generate': typeof ApiGenerateRoute
   '/api/image': typeof ApiImageRoute
   '/api/image-search': typeof ApiImageSearchRoute
+  '/api/narrate': typeof ApiNarrateRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/api/usage': typeof ApiUsageRoute
   '/api/variant': typeof ApiVariantRoute
   '/deck/$deckId': typeof DeckDeckIdRoute
@@ -255,6 +273,8 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/narrate'
+    | '/api/transcribe'
     | '/api/usage'
     | '/api/variant'
     | '/deck/$deckId'
@@ -282,6 +302,8 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/narrate'
+    | '/api/transcribe'
     | '/api/usage'
     | '/api/variant'
     | '/deck/$deckId'
@@ -309,6 +331,8 @@ export interface FileRouteTypes {
     | '/api/generate'
     | '/api/image'
     | '/api/image-search'
+    | '/api/narrate'
+    | '/api/transcribe'
     | '/api/usage'
     | '/api/variant'
     | '/deck/$deckId'
@@ -337,6 +361,8 @@ export interface RootRouteChildren {
   ApiGenerateRoute: typeof ApiGenerateRoute
   ApiImageRoute: typeof ApiImageRoute
   ApiImageSearchRoute: typeof ApiImageSearchRoute
+  ApiNarrateRoute: typeof ApiNarrateRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiUsageRoute: typeof ApiUsageRoute
   ApiVariantRoute: typeof ApiVariantRoute
   DeckDeckIdRoute: typeof DeckDeckIdRoute
@@ -396,6 +422,20 @@ declare module '@tanstack/react-router' {
       path: '/api/usage'
       fullPath: '/api/usage'
       preLoaderRoute: typeof ApiUsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/narrate': {
+      id: '/api/narrate'
+      path: '/api/narrate'
+      fullPath: '/api/narrate'
+      preLoaderRoute: typeof ApiNarrateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/image-search': {
@@ -555,6 +595,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGenerateRoute: ApiGenerateRoute,
   ApiImageRoute: ApiImageRoute,
   ApiImageSearchRoute: ApiImageSearchRoute,
+  ApiNarrateRoute: ApiNarrateRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
   ApiUsageRoute: ApiUsageRoute,
   ApiVariantRoute: ApiVariantRoute,
   DeckDeckIdRoute: DeckDeckIdRoute,

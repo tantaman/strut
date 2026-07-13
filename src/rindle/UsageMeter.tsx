@@ -31,6 +31,8 @@ const LABEL: Record<AiFeature, string> = {
   chat: 'AI Chat',
   image: 'AI Images',
   artifact: 'Artifacts',
+  transcribe: 'Transcription',
+  narrate: 'Recording → slides',
 }
 
 function fmtBytes(n: number): string {
