@@ -278,7 +278,8 @@ export function Overview({
       imp_scale: patch.imp_scale ?? s.imp_scale,
       now: Date.now(),
     }
-    if (folded) mutate.setSlideTransform.folded({ key: s.id }, args)
+    if (folded)
+      mutate.setSlideTransform.folded({ key: s.id, roomDebounceMs: 0 }, args)
     else mutate.setSlideTransform(args)
   }
 

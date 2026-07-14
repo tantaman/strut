@@ -10,7 +10,7 @@
 
 import { HttpRindleDaemonClient } from '@rindle/daemon-client'
 
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7610'
 
 export async function claimDecks(from: string, to: string): Promise<void> {
   const daemon = new HttpRindleDaemonClient({

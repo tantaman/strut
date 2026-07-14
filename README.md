@@ -16,7 +16,7 @@ world (the impress.js model, made visual and editable).
 
 ## Architecture
 
-- **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7600` control, `:7601` ws).
+- **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7610` control, `:7611` ws).
 - **API** — TanStack Start server routes (`src/routes/api.rindle.*`) host the stateless Rindle API
   (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators, and register the named
   queries. Same-origin, no separate process. Image uploads (`server/upload.ts`) go to Cloudflare R2 —
@@ -24,7 +24,7 @@ world (the impress.js model, made visual and editable).
   predicted client mutators in `shared/app-def.ts`.
 - **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
   live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket connects
-  directly to the daemon (`:7601`).
+  directly to the daemon (`:7611`).
 
 Schema lives in `migrations/`; `shared/` holds the generated schema, query builder, named queries, and
 client mutators (imported by both browser and server). App code is in `src/` (`routes/`, `editor/`,
@@ -50,6 +50,12 @@ Then open http://localhost:3000.
   image upload endpoints are served by this same web process under `/api/rindle/*`; there is no
   separate API server to start.
 
+Realtime is included in that one command. A solo deck remains daemon-backed; when a second browser
+session opens the same deck, Vite lazily starts an in-memory local room for that deck and both tabs
+upgrade into it. Open one deck in two separate browser profiles (or two accounts) to exercise it.
+Closing the second tab downgrades back to the daemon after a short grace period. Local rooms are
+ephemeral by design; their writes flush through the normal local daemon.
+
 Local state lives in `rindle.db` and `.uploads/`. Image uploads work with no config by using the local
 fallback; copy `.env.example` to `.env` only if you want uploads stored in Cloudflare R2. `vite.config.ts`
 loads `.env` for server-side values during `vite dev`.
@@ -61,8 +67,8 @@ pnpm daemon   # daemon + migration/schema watcher
 pnpm dev:web  # web app + same-origin API routes; expects the daemon to already be running
 ```
 
-By default the daemon control plane is `http://127.0.0.1:7600` and the live-query WebSocket is
-`ws://127.0.0.1:7601`. Override them with `RINDLE_DAEMON_URL` for the server/API side and
+By default the daemon control plane is `http://127.0.0.1:7610` and the live-query WebSocket is
+`ws://127.0.0.1:7611`. Override them with `RINDLE_DAEMON_URL` for the server/API side and
 `VITE_RINDLE_WS` for the browser side.
 
 Other scripts:

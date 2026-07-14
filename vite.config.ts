@@ -31,6 +31,12 @@ const SERVER_ENV = [
   'RINDLE_DAEMON_URL',
   'RINDLE_DAEMON_WS',
   'RINDLE_DAEMON_TOKEN',
+  'RINDLE_API_ORIGIN',
+  'RINDLE_APP_ID',
+  'RINDLE_ROOM_WORKER_URL',
+  'RINDLE_ROOM_SHELL_SECRET',
+  'RINDLE_ROOM_TOKEN_KID',
+  'RINDLE_ROOM_TOKEN_SECRET',
   'R2_ACCOUNT_ID',
   'R2_ACCESS_KEY_ID',
   'R2_SECRET_ACCESS_KEY',
@@ -67,7 +73,7 @@ const config = defineConfig(({ mode }) => {
       port: 3000,
       // The Rindle API + image upload are now TanStack Start server routes (src/routes/api.rindle.*),
       // served same-origin — no separate API process, no proxy. The live-query WebSocket still
-      // connects directly to the daemon (:7601).
+      // connects directly to the daemon (:7611 in local Strut dev).
       // Don't let runtime-written files under .uploads/ (the local-disk dev fallback for image uploads
       // and runnable artifacts) trip the HMR watcher — otherwise saving one forces a full page reload
       // mid-edit (e.g. right after every artifact "Run"). Prod builds on Workers never write here.

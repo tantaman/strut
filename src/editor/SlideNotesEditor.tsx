@@ -44,7 +44,7 @@ export function SlideNotesEditor({
     onUpdate: ({ editor: ed }) => {
       const json = JSON.stringify(ed.getJSON())
       mutate.setSlideNotes.folded(
-        { key: slideId },
+        { key: slideId, roomDebounceMs: 0 },
         { slideId, deckId, doc: json, now: Date.now() },
       )
     },
@@ -75,7 +75,9 @@ export function SlideNotesEditor({
     <div className="notes-doc">
       {showPlaceholder && (
         <div className="notes-doc__ph" aria-hidden="true">
-          {canEdit ? 'Research notes, sources, evidence…' : 'No research notes.'}
+          {canEdit
+            ? 'Research notes, sources, evidence…'
+            : 'No research notes.'}
         </div>
       )}
       <EditorContent editor={editor} className="notes-doc__host" />

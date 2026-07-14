@@ -74,6 +74,9 @@
   //   RINDLE_DAEMON_WS   — wss URL of the daemon's live-query WebSocket. Served to the browser at
   //                        runtime via /api/rindle/config, so changing it is a var edit + redeploy —
   //                        no client rebuild. (Leave empty to fall back to the local dev default.)
+  //   RINDLE_ROOM_WORKER_URL — https URL of Headwaters' shared room worker. The API derives the
+  //                        document-specific wss endpoint from it and RINDLE_APP_ID.
+  //   RINDLE_APP_ID      — Headwaters app id (from .rindle/cloud.json / Connect → Realtime).
   //   R2_PUBLIC_BASE_URL — OPTIONAL. Public bucket/custom-domain base (e.g. https://pub-xxx.r2.dev).
   //                        If set, uploads return that CDN URL directly. If empty, images are served
   //                        back through the Worker from the bucket (private bucket is fine).
@@ -88,6 +91,8 @@
   "vars": {
     "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
     "RINDLE_DAEMON_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
+    "RINDLE_ROOM_WORKER_URL": "",
+    "RINDLE_APP_ID": "",
     "R2_PUBLIC_BASE_URL": "",
     "ARTIFACT_ORIGIN": "https://sandbox.strut.io",
     "BETTER_AUTH_URL": "https://strut.io",
@@ -95,6 +100,9 @@
 
   // Secrets are NOT stored here. Set them with wrangler:
   //   wrangler secret put RINDLE_DAEMON_TOKEN
+  //   wrangler secret put RINDLE_ROOM_SHELL_SECRET
+  //   wrangler secret put RINDLE_ROOM_TOKEN_KID
+  //   wrangler secret put RINDLE_ROOM_TOKEN_SECRET
   //   wrangler secret put BETTER_AUTH_SECRET      # openssl rand -base64 32
   //   wrangler secret put GITHUB_CLIENT_ID
   //   wrangler secret put GITHUB_CLIENT_SECRET

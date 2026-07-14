@@ -32,6 +32,9 @@ function reqLimit(raw: unknown, field = 'limit'): number {
 // no longer bridges first paint and the keepalive no longer warms the view the dashboard reads.
 export const DECKS_LIMIT = 10
 
+/** The named Rindle Realtime room profile serving one editable deck. */
+export const DECK_ROOM_PROFILE = 'deck'
+
 // Dashboard: the principal's decks (the local store already holds only owned + shared), newest first.
 export const decksQuery = defineQuery(
   'decks',
@@ -77,6 +80,21 @@ export function deckDetailBody(root: DeckRoot) {
     .one()
 }
 
+/**
+ * The unwindowed replica boundary for a deck room. It deliberately contains the complete editor
+ * subtree plus collaborators as read-only context: `deckDetailQuery` is a smaller view over this
+ * superset, which is what lets the daemon prove it can be served by the room.
+ */
+export function deckRoomFootprint(deckId: string) {
+  return q.deck.where
+    .id(deckId)
+    .sub('slides', rels.deckSlides, (s) =>
+      s.orderBy('sort', 'asc').include(SlideFragment),
+    )
+    .sub('customBackgrounds', rels.deckCustomBackgrounds)
+    .sub('collaborators', rels.deckShares)
+}
+
 // ONE composed query for a whole deck: the deck row + its slides (sorted) + every component on each
 // slide (the SlideFragment fragment) + custom backgrounds — a single subscription that replaces the
 // deck + slides + (5 × N component) + customBackgrounds queries. This is the fragment-composition win
@@ -85,6 +103,7 @@ export const deckDetailQuery = defineQuery(
   'deckDetail',
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }) => deckDetailBody(q.deck.where.id(deckId)),
+  { realtime: { room: DECK_ROOM_PROFILE } },
 )
 
 // Collaborators on a deck (role = 'editor' | 'viewer').
