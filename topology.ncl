@@ -14,6 +14,11 @@
 # The `app` name below becomes the cloud `displayName` and groups every component under one app in
 # `rindle ps`. `dev` maps to the cloud `single` profile — one standalone daemon, which is what our
 # deployed app (app_a218b5eae4fd49bc → rindle-a218b5eae4fd49bc.fly.dev) is.
+#
+# To enable managed realtime after choosing a concurrent-room cap, add:
+#   realtime = { rooms = 5, api_origin = "https://strut.io" }
+# `rindle deploy` then uploads rooms.ts as Strut's tenant write bundle. The cap is billed by
+# Headwaters, so it is intentionally not enabled by default in source control.
 {
   profile = "dev",
   app = "strut",

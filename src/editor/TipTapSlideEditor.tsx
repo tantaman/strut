@@ -77,7 +77,7 @@ export function TipTapSlideEditor({
     onUpdate: ({ editor: ed }) => {
       const json = JSON.stringify(ed.getJSON())
       mutate.setSlideDoc.folded(
-        { key: slide.id },
+        { key: slide.id, roomDebounceMs: 0 },
         { id: slide.id, doc: json, now: Date.now() },
       )
     },

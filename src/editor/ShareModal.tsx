@@ -181,7 +181,6 @@ export function ShareModal({
               <AddCollaborator
                 onAdd={(userId, role) =>
                   mutate.addCollaborator({
-                    id: newId(),
                     deckId: deck.id,
                     userId,
                     role,

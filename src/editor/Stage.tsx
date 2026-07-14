@@ -333,7 +333,10 @@ export function Stage({
           }
           const pos = { x: Math.round(nx), y: Math.round(ny) }
           finals.set(id, pos)
-          mutate.moveComponent.folded({ key: id }, { id, x: pos.x, y: pos.y })
+          mutate.moveComponent.folded(
+            { key: id, roomDebounceMs: 0 },
+            { id, x: pos.x, y: pos.y },
+          )
         })
       },
       () => {
@@ -381,7 +384,7 @@ export function Stage({
             Math.round(startSize + (ev.clientY - sy) / scale),
           )
           mutate.setText.folded(
-            { key: c.id },
+            { key: c.id, roomDebounceMs: 0 },
             {
               id: c.id,
               text,
@@ -426,7 +429,7 @@ export function Stage({
           : Math.round(nw * ratio)
         last = { scale_w: nw, scale_h: nh }
         mutate.transformComponent.folded(
-          { key: c.id },
+          { key: c.id, roomDebounceMs: 0 },
           {
             id: c.id,
             scale_x: 1,
@@ -481,7 +484,7 @@ export function Stage({
         if (ev.shiftKey) a = Math.round(a / ROTATE_SNAP) * ROTATE_SNAP
         lastRot = a
         mutate.transformComponent.folded(
-          { key: c.id },
+          { key: c.id, roomDebounceMs: 0 },
           {
             id: c.id,
             scale_x: 1,
@@ -540,7 +543,7 @@ export function Stage({
             ? { skew_x: a, skew_y: start.skew_y }
             : { skew_x: start.skew_x, skew_y: a }
         mutate.transformComponent.folded(
-          { key: c.id },
+          { key: c.id, roomDebounceMs: 0 },
           {
             id: c.id,
             scale_x: 1,

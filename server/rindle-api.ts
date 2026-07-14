@@ -12,7 +12,7 @@
 //     `tx.exec` escape hatch with the gate IN the SQL (accepted-but-no-op for a non-owner/-editor).
 //
 // Hosted by the TanStack Start server routes in src/routes/api.rindle.* (they import handleRindleJson).
-// The daemon control plane is :7600 (RINDLE_DAEMON_URL).
+// The daemon control plane is :7610 in local Strut dev (RINDLE_DAEMON_URL).
 
 import {
   createRindleApiServer,
@@ -45,10 +45,107 @@ import {
   deleteDeckArgs,
   deleteSlideArgs,
 } from '../shared/app-def.ts'
+import { DECK_ROOM_PROFILE, deckRoomFootprint } from '../shared/queries.ts'
 
 export type User = string
 type ServerCtx = MutationContext<User>
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7610'
+const DAEMON_WS_URL = process.env.RINDLE_DAEMON_WS ?? 'ws://127.0.0.1:7611'
+const LOCAL_ROOMS = import.meta.env.DEV
+const ROOM_SHELL_SECRET =
+  process.env.RINDLE_ROOM_SHELL_SECRET ??
+  (LOCAL_ROOMS ? 'strut-local-room-shell' : undefined)
+const ROOM_TOKEN_KID =
+  process.env.RINDLE_ROOM_TOKEN_KID ??
+  (LOCAL_ROOMS ? 'strut-local-room-k1' : undefined)
+const ROOM_TOKEN_SECRET =
+  process.env.RINDLE_ROOM_TOKEN_SECRET ??
+  (LOCAL_ROOMS ? 'strut-local-room-token' : undefined)
+const LOCAL_ROOM_FLUSH_CREDENTIAL = 'strut-local-room-flush'
+
+function roomConfig() {
+  if (!ROOM_SHELL_SECRET || !ROOM_TOKEN_KID || !ROOM_TOKEN_SECRET)
+    return undefined
+  const workerUrl = process.env.RINDLE_ROOM_WORKER_URL
+  const appId = process.env.RINDLE_APP_ID
+  if (!LOCAL_ROOMS && (!workerUrl || !appId)) return undefined
+
+  const managedRoomEndpoint = (doc: string): string => {
+    const url = new URL(
+      `/v1/room/${encodeURIComponent(appId!)}/${encodeURIComponent(doc)}`,
+      workerUrl!,
+    )
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    return url.toString()
+  }
+
+  const drainManagedRoom = async (doc: string) => {
+    const url = new URL(
+      `/v1/room/${encodeURIComponent(appId!)}/${encodeURIComponent(doc)}/drain`,
+      workerUrl!,
+    )
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${ROOM_SHELL_SECRET}` },
+    })
+    if (!response.ok)
+      throw new Error(`managed room drain failed (${response.status})`)
+    return (await response.json()) as { finalFlushSeq: number }
+  }
+
+  return {
+    shellSecret: ROOM_SHELL_SECRET,
+    rooms: {
+      [DECK_ROOM_PROFILE]: {
+        key: (args: { deckId: string }) => args.deckId,
+        footprint: (deckId: string) => deckRoomFootprint(deckId),
+        // Collaborator rows are a read-only authorisation context. The room writes the editor
+        // tables only; this prevents a room from changing roles or granting access.
+        context: ['deck_share'],
+      },
+    },
+    roomTokenKey: { kid: ROOM_TOKEN_KID, secret: ROOM_TOKEN_SECRET },
+    roomTokenTtlMs: 15_000,
+    locateRoom: async (doc: string) => {
+      if (!LOCAL_ROOMS) return { wsEndpoint: managedRoomEndpoint(doc) }
+      const { ensureLocalDeckRoom } = await import('./local-rooms.ts')
+      return ensureLocalDeckRoom(doc, {
+        apiOrigin: process.env.RINDLE_API_ORIGIN ?? 'http://127.0.0.1:3000',
+        daemonUrl: DAEMON_URL,
+        daemonWsUrl: DAEMON_WS_URL,
+        daemonToken: process.env.RINDLE_DAEMON_TOKEN ?? '',
+        shellSecret: ROOM_SHELL_SECRET,
+        tokenKid: ROOM_TOKEN_KID,
+        tokenSecret: ROOM_TOKEN_SECRET,
+        flushCredential: LOCAL_ROOM_FLUSH_CREDENTIAL,
+      })
+    },
+    ...(LOCAL_ROOMS
+      ? {
+          authorize: ({ request }: { request?: unknown }) =>
+            request instanceof Request &&
+            request.headers.get('x-rindle-room-credential') ===
+              LOCAL_ROOM_FLUSH_CREDENTIAL,
+          mintFlushHeaders: () => ({
+            'x-rindle-room-credential': LOCAL_ROOM_FLUSH_CREDENTIAL,
+          }),
+        }
+      : {}),
+    lifecycle: {
+      // The first viewer stays on the daemon. The second rings the lifecycle doorbell and
+      // upgrades both collaborators into the shared room.
+      minSessions: 2,
+      sessionTtlMs: 6_000,
+      graceMs: 3_000,
+      drainRoom: LOCAL_ROOMS
+        ? async (doc: string) => {
+            const { drainLocalRoom } = await import('./local-rooms.ts')
+            return drainLocalRoom(doc)
+          }
+        : drainManagedRoom,
+    },
+  }
+}
 
 // ---- principal + access predicates --------------------------------------------------------------
 
@@ -407,10 +504,18 @@ const api = createRindleApiServer<User>({
   // queries are owner/share-scoped (server/queries.ts) and mutators are access-guarded (above).
   authorizeQuery: ({ user }) => typeof user === 'string' && user.length > 0,
   authorizeMutation: ({ user }) => typeof user === 'string' && user.length > 0,
+  realtime: roomConfig(),
 })
 
 // Web-standard entrypoint used by the TanStack Start server routes (src/routes/api.rindle.*).
-export type RindleRouteKind = 'query' | 'read' | 'mutate'
+export type RindleRouteKind =
+  | 'query'
+  | 'read'
+  | 'mutate'
+  | 'apply-row-change-txn'
+  | 'claim-room-epoch'
+  | 'room-lmids'
+  | 'room-boot'
 
 export async function handleRindleJson(
   kind: RindleRouteKind,
@@ -428,7 +533,24 @@ export async function handleRindleJson(
         ? await api.handleQueryJson(body, ctx)
         : kind === 'read'
           ? await api.handleReadJson(body, ctx)
-          : await api.handleMutateJson(body, ctx)
+          : kind === 'mutate'
+            ? await api.handleMutateJson(body, ctx)
+            : kind === 'apply-row-change-txn'
+              ? await api.handleApplyRowChangeTxnJson(body, ctx)
+              : kind === 'claim-room-epoch'
+                ? await api.handleClaimRoomEpochJson(body, ctx)
+                : kind === 'room-lmids'
+                  ? await api.handleRoomLmidsJson(body, ctx)
+                  : await api.handleRoomBootJson(body, ctx)
+    if (
+      kind === 'apply-row-change-txn' ||
+      kind === 'claim-room-epoch' ||
+      kind === 'room-lmids' ||
+      kind === 'room-boot'
+    ) {
+      const roomOut = out as { body: unknown; status: number }
+      return Response.json(roomOut.body, { status: roomOut.status })
+    }
     return Response.json(out)
   } catch (err) {
     const status = err instanceof RindleApiError ? err.status : 500

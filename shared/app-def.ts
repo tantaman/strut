@@ -53,6 +53,14 @@ export type Visibility = 'private' | 'public-read'
 // render_mode / default_slide_mode: '' = spatial (components) | 'markdown' = full-slide markdown.
 export type SlideMode = '' | 'markdown'
 
+/**
+ * A collaborator's stable primary key. Rooms can make a point read only, so keeping this key
+ * derivable lets the room authorise an editor without a table scan.
+ */
+export function deckShareId(deckId: string, userId: string): string {
+  return `deck:${deckId}:${userId}`
+}
+
 // refineTable re-types the generated columns within their kind (runtime-validated identity — the wire
 // shape is unchanged). props becomes the typed JSON object; the discriminator + enums become unions.
 export const component = refineTable(componentGen, {
@@ -357,9 +365,8 @@ export const mintCustomColorArgs = z.object({
 })
 export type MintCustomColorArgs = z.infer<typeof mintCustomColorArgs>
 
-// id = the deck_share row id; userId = the collaborator's Strut id; role = editor|viewer.
+// userId = the collaborator's Strut id; role = editor|viewer. The row id is derived from both.
 export const addCollaboratorArgs = z.object({
-  id: z.string(),
   deckId: z.string(),
   userId: z.string(),
   role: z.enum(['editor', 'viewer']),
@@ -781,7 +788,7 @@ export const mutators = {
     addCollaboratorArgs,
     function* (tx: IsoTx, a: AddCollaboratorArgs): MutationGen {
       yield tx.insert('deck_share', {
-        id: a.id,
+        id: deckShareId(a.deckId, a.userId),
         deck_id: a.deckId,
         user_id: a.userId,
         role: a.role,

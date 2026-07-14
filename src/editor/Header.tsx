@@ -462,7 +462,7 @@ export function Header({
     if (!deck) return
     const patch = scope === 'bg' ? { background: value } : { surface: value }
     mutate.setDeckTheme.folded(
-      { key: `deck-theme:${scope}` },
+      { key: `deck-theme:${scope}`, roomDebounceMs: 0 },
       { id: deck.id, ...patch, now: Date.now() },
     )
   }
@@ -484,7 +484,7 @@ export function Header({
     // One target per drag (a single color input) → key the fold on that column.
     const key = Object.keys(patch)[0] ?? 'text'
     mutate.setDeckTheme.folded(
-      { key: `deck-theme:${key}` },
+      { key: `deck-theme:${key}`, roomDebounceMs: 0 },
       { id: deck.id, ...patch, now: Date.now() },
     )
   }

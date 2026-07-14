@@ -54,7 +54,7 @@ async function resolveWsUrl(): Promise<string> {
   } catch {
     // network/parse error — fall through to the build-time / local defaults
   }
-  return import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7601'
+  return import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7611'
 }
 
 async function create() {

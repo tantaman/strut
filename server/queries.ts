@@ -12,7 +12,11 @@
 import { and, defineQuery, existsNoSync, or } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels, deck, deck_share } from '../shared/app-def.ts'
-import { deckDetailBody, profileQuery } from '../shared/queries.ts'
+import {
+  DECK_ROOM_PROFILE,
+  deckDetailBody,
+  profileQuery,
+} from '../shared/queries.ts'
 
 type User = string
 type Ctx = ApiContext<User>
@@ -77,6 +81,7 @@ const deckDetailQuery = defineQuery(
   (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
     deckDetailBody(q.deck.where.id(deckId).where(deckAccess(ctx.user))),
+  { realtime: { room: DECK_ROOM_PROFILE } },
 )
 
 // Collaborators on a deck — visible to the OWNER (manages the list) and to each collaborator (their own row).

@@ -26,10 +26,14 @@ import { Route as ApiArrangeRouteImport } from './routes/api.arrange'
 import { Route as AKeyRouteImport } from './routes/a.$key'
 import { Route as DeckDeckIdPlayRouteImport } from './routes/deck.$deckId_.play'
 import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
+import { Route as ApiRindleRoomLmidsRouteImport } from './routes/api.rindle.room-lmids'
+import { Route as ApiRindleRoomBootRouteImport } from './routes/api.rindle.room-boot'
 import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
 import { Route as ApiRindleQueryRouteImport } from './routes/api.rindle.query'
 import { Route as ApiRindleMutateRouteImport } from './routes/api.rindle.mutate'
 import { Route as ApiRindleConfigRouteImport } from './routes/api.rindle.config'
+import { Route as ApiRindleClaimRoomEpochRouteImport } from './routes/api.rindle.claim-room-epoch'
+import { Route as ApiRindleApplyRowChangeTxnRouteImport } from './routes/api.rindle.apply-row-change-txn'
 import { Route as ApiModelStatusRouteImport } from './routes/api.model.status'
 import { Route as ApiModelDisconnectRouteImport } from './routes/api.model.disconnect'
 import { Route as ApiModelConnectRouteImport } from './routes/api.model.connect'
@@ -122,6 +126,16 @@ const ApiRindleUploadRoute = ApiRindleUploadRouteImport.update({
   path: '/api/rindle/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRindleRoomLmidsRoute = ApiRindleRoomLmidsRouteImport.update({
+  id: '/api/rindle/room-lmids',
+  path: '/api/rindle/room-lmids',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleRoomBootRoute = ApiRindleRoomBootRouteImport.update({
+  id: '/api/rindle/room-boot',
+  path: '/api/rindle/room-boot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRindleReadRoute = ApiRindleReadRouteImport.update({
   id: '/api/rindle/read',
   path: '/api/rindle/read',
@@ -142,6 +156,17 @@ const ApiRindleConfigRoute = ApiRindleConfigRouteImport.update({
   path: '/api/rindle/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRindleClaimRoomEpochRoute = ApiRindleClaimRoomEpochRouteImport.update({
+  id: '/api/rindle/claim-room-epoch',
+  path: '/api/rindle/claim-room-epoch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRindleApplyRowChangeTxnRoute =
+  ApiRindleApplyRowChangeTxnRouteImport.update({
+    id: '/api/rindle/apply-row-change-txn',
+    path: '/api/rindle/apply-row-change-txn',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiModelStatusRoute = ApiModelStatusRouteImport.update({
   id: '/api/model/status',
   path: '/api/model/status',
@@ -194,10 +219,14 @@ export interface FileRoutesByFullPath {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
+  '/api/rindle/apply-row-change-txn': typeof ApiRindleApplyRowChangeTxnRoute
+  '/api/rindle/claim-room-epoch': typeof ApiRindleClaimRoomEpochRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/room-boot': typeof ApiRindleRoomBootRoute
+  '/api/rindle/room-lmids': typeof ApiRindleRoomLmidsRoute
   '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId/play': typeof DeckDeckIdPlayRoute
   '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
@@ -223,10 +252,14 @@ export interface FileRoutesByTo {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
+  '/api/rindle/apply-row-change-txn': typeof ApiRindleApplyRowChangeTxnRoute
+  '/api/rindle/claim-room-epoch': typeof ApiRindleClaimRoomEpochRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/room-boot': typeof ApiRindleRoomBootRoute
+  '/api/rindle/room-lmids': typeof ApiRindleRoomLmidsRoute
   '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId/play': typeof DeckDeckIdPlayRoute
   '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
@@ -253,10 +286,14 @@ export interface FileRoutesById {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
+  '/api/rindle/apply-row-change-txn': typeof ApiRindleApplyRowChangeTxnRoute
+  '/api/rindle/claim-room-epoch': typeof ApiRindleClaimRoomEpochRoute
   '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
+  '/api/rindle/room-boot': typeof ApiRindleRoomBootRoute
+  '/api/rindle/room-lmids': typeof ApiRindleRoomLmidsRoute
   '/api/rindle/upload': typeof ApiRindleUploadRoute
   '/deck/$deckId_/play': typeof DeckDeckIdPlayRoute
   '/api/rindle/uploads/$key': typeof ApiRindleUploadsKeyRoute
@@ -284,10 +321,14 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
+    | '/api/rindle/apply-row-change-txn'
+    | '/api/rindle/claim-room-epoch'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
+    | '/api/rindle/room-boot'
+    | '/api/rindle/room-lmids'
     | '/api/rindle/upload'
     | '/deck/$deckId/play'
     | '/api/rindle/uploads/$key'
@@ -313,10 +354,14 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
+    | '/api/rindle/apply-row-change-txn'
+    | '/api/rindle/claim-room-epoch'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
+    | '/api/rindle/room-boot'
+    | '/api/rindle/room-lmids'
     | '/api/rindle/upload'
     | '/deck/$deckId/play'
     | '/api/rindle/uploads/$key'
@@ -342,10 +387,14 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
+    | '/api/rindle/apply-row-change-txn'
+    | '/api/rindle/claim-room-epoch'
     | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
+    | '/api/rindle/room-boot'
+    | '/api/rindle/room-lmids'
     | '/api/rindle/upload'
     | '/deck/$deckId_/play'
     | '/api/rindle/uploads/$key'
@@ -371,10 +420,14 @@ export interface RootRouteChildren {
   ApiModelConnectRoute: typeof ApiModelConnectRoute
   ApiModelDisconnectRoute: typeof ApiModelDisconnectRoute
   ApiModelStatusRoute: typeof ApiModelStatusRoute
+  ApiRindleApplyRowChangeTxnRoute: typeof ApiRindleApplyRowChangeTxnRoute
+  ApiRindleClaimRoomEpochRoute: typeof ApiRindleClaimRoomEpochRoute
   ApiRindleConfigRoute: typeof ApiRindleConfigRoute
   ApiRindleMutateRoute: typeof ApiRindleMutateRoute
   ApiRindleQueryRoute: typeof ApiRindleQueryRoute
   ApiRindleReadRoute: typeof ApiRindleReadRoute
+  ApiRindleRoomBootRoute: typeof ApiRindleRoomBootRoute
+  ApiRindleRoomLmidsRoute: typeof ApiRindleRoomLmidsRoute
   ApiRindleUploadRoute: typeof ApiRindleUploadRoute
   DeckDeckIdPlayRoute: typeof DeckDeckIdPlayRoute
   ApiRindleUploadsKeyRoute: typeof ApiRindleUploadsKeyRoute
@@ -501,6 +554,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRindleUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rindle/room-lmids': {
+      id: '/api/rindle/room-lmids'
+      path: '/api/rindle/room-lmids'
+      fullPath: '/api/rindle/room-lmids'
+      preLoaderRoute: typeof ApiRindleRoomLmidsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/room-boot': {
+      id: '/api/rindle/room-boot'
+      path: '/api/rindle/room-boot'
+      fullPath: '/api/rindle/room-boot'
+      preLoaderRoute: typeof ApiRindleRoomBootRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rindle/read': {
       id: '/api/rindle/read'
       path: '/api/rindle/read'
@@ -527,6 +594,20 @@ declare module '@tanstack/react-router' {
       path: '/api/rindle/config'
       fullPath: '/api/rindle/config'
       preLoaderRoute: typeof ApiRindleConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/claim-room-epoch': {
+      id: '/api/rindle/claim-room-epoch'
+      path: '/api/rindle/claim-room-epoch'
+      fullPath: '/api/rindle/claim-room-epoch'
+      preLoaderRoute: typeof ApiRindleClaimRoomEpochRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rindle/apply-row-change-txn': {
+      id: '/api/rindle/apply-row-change-txn'
+      path: '/api/rindle/apply-row-change-txn'
+      fullPath: '/api/rindle/apply-row-change-txn'
+      preLoaderRoute: typeof ApiRindleApplyRowChangeTxnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/model/status': {
@@ -605,10 +686,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiModelConnectRoute: ApiModelConnectRoute,
   ApiModelDisconnectRoute: ApiModelDisconnectRoute,
   ApiModelStatusRoute: ApiModelStatusRoute,
+  ApiRindleApplyRowChangeTxnRoute: ApiRindleApplyRowChangeTxnRoute,
+  ApiRindleClaimRoomEpochRoute: ApiRindleClaimRoomEpochRoute,
   ApiRindleConfigRoute: ApiRindleConfigRoute,
   ApiRindleMutateRoute: ApiRindleMutateRoute,
   ApiRindleQueryRoute: ApiRindleQueryRoute,
   ApiRindleReadRoute: ApiRindleReadRoute,
+  ApiRindleRoomBootRoute: ApiRindleRoomBootRoute,
+  ApiRindleRoomLmidsRoute: ApiRindleRoomLmidsRoute,
   ApiRindleUploadRoute: ApiRindleUploadRoute,
   DeckDeckIdPlayRoute: DeckDeckIdPlayRoute,
   ApiRindleUploadsKeyRoute: ApiRindleUploadsKeyRoute,
