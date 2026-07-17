@@ -5,6 +5,7 @@ import type { StrutApp } from '../rindle/client'
 import { markdownToDoc } from './aiGenerate'
 import { gatherDeckBundle } from './deckIO'
 import { parseDoc } from './tiptapDoc'
+import { parseCells } from './types'
 import type { AnyComponent } from './types'
 import type {
   GeneratedVariant,
@@ -60,6 +61,7 @@ function sourceSlides(
     const text = [
       docText(s.doc),
       markdownText(s.markdown),
+      ...parseCells(s.cells).map(docText),
       componentText(bundle.componentsBySlide[s.id] ?? []),
     ]
       .filter(Boolean)

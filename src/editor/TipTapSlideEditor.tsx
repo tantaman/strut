@@ -13,10 +13,9 @@
 
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
-import { EditorContent } from '@tiptap/react'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { useFitScale } from './useFitScale'
-import { useSlideDocEditor } from './useSlideDocEditor'
+import { SlideBodyEditors } from './SlideBodyEditors'
 import { BackgroundImageLayer, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { DeckThemeFields } from './types'
@@ -37,8 +36,6 @@ export function TipTapSlideEditor({
 }) {
   const previewRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(previewRef, SLIDE_W, SLIDE_H)
-  // Keyed by slide id at the call site so the editor remounts per slide and its baseline reseeds.
-  const editor = useSlideDocEditor(slide)
 
   const background = resolveBackground(
     slide.background,
@@ -66,7 +63,7 @@ export function TipTapSlideEditor({
           }}
         >
           <BackgroundImageLayer image={bgImage} />
-          <EditorContent editor={editor} className="strut-md-host" />
+          <SlideBodyEditors slide={slide} />
           {children}
         </div>
       </div>

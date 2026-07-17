@@ -184,6 +184,7 @@ export function importDeck(
         now,
       })
     if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })
+    if (s.cells) mutate.setSlideCells({ id: slideId, cells: s.cells, now })
     for (const c of s.components)
       insertComponent(mutate, { id: newId(), slideId }, c)
   }

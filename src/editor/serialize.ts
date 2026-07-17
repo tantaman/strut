@@ -38,6 +38,8 @@ export interface SlideRowLike {
   text_align?: string | null
   body_region?: string | null
   layout?: string | null
+  // Per-cell content (layout phase 2): a JSON string[] of TipTap docs for cells 1..N.
+  cells?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -168,6 +170,7 @@ export function serializeDeck(
       if (s.text_align) slide.textAlign = s.text_align
       if (s.body_region) slide.bodyRegion = s.body_region
       if (s.layout) slide.layout = s.layout
+      if (s.cells) slide.cells = s.cells
       return slide
     }),
   }
@@ -219,6 +222,7 @@ export interface ImportedSlide {
   text_align: string
   body_region: string
   layout: string
+  cells: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -342,6 +346,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       text_align: str(s.textAlign),
       body_region: str(s.bodyRegion),
       layout: str(s.layout),
+      cells: str(s.cells),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

@@ -564,6 +564,77 @@ export function bodyStyleFor(
   )
 }
 
+// ---- per-cell content (layout phase 2) ------------------------------------------------------------
+// A layout tiles the canvas into N cells; each is its own editor. Cell 0's doc is the slide's `doc`
+// column (unchanged — a full-layout slide only ever has cell 0, so it's byte-identical to before). Cells
+// 1..N live in the `cells` column: a JSON string[] of TipTap doc JSON strings, index-aligned to
+// layoutCells. Index 0 in that array is an unused placeholder ('') — the doc column is the source of
+// truth for cell 0. Switching layouts is non-destructive: content stays in its cell index, so a cell
+// hidden by a smaller layout reappears when the larger one returns.
+
+/** The slide columns per-cell content reads: cell 0's doc + the higher cells' JSON blob. */
+export interface SlideCellFields {
+  doc?: string | null
+  cells?: string | null
+}
+
+/** Parse the `cells` column (JSON string[]) into an array of TipTap doc JSON strings. Tolerant of
+ *  null/empty/malformed (all → []), like parseDoc. */
+export function parseCells(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v)
+      ? v.map((x) => (typeof x === 'string' ? x : ''))
+      : []
+  } catch {
+    return []
+  }
+}
+
+/** The stored doc (TipTap JSON string) for cell `i`: cell 0 is the slide's `doc` column; cells 1..N come
+ *  from the `cells` blob. '' when that cell has no content yet. */
+export function cellDocAt(
+  slide: SlideCellFields | null | undefined,
+  i: number,
+): string {
+  if (i <= 0) return slide?.doc ?? ''
+  return parseCells(slide?.cells)[i] ?? ''
+}
+
+/** A new `cells` JSON string with cell `i` (i≥1) set to `doc`, every sibling cell preserved — the merge
+ *  the client applies before a setSlideCells write so streaming one cell never clobbers another. Index 0
+ *  stays a placeholder; cell 0 is written through the `doc` column instead. */
+export function writeCellDoc(
+  cellsRaw: string | null | undefined,
+  i: number,
+  doc: string,
+): string {
+  const arr = parseCells(cellsRaw)
+  while (arr.length <= i) arr.push('')
+  arr[i] = doc
+  return JSON.stringify(arr)
+}
+
+/** Inner padding + type-scale for a cell drawn as its OWN positioned box (per-cell editor). Distinct
+ *  from rectBodyStyle, which pads a full-canvas body DOWN to a region: here the box is already sized to
+ *  the cell, so this is a comfortable safe-area inset that eases off for smaller cells, plus the same
+ *  type down-scale (shared with rectBodyStyle) so a heading still fits the narrower measure. Pure, so the
+ *  editor and every read surface derive identical geometry. */
+export function cellPad(rect: Rect): {
+  padX: number
+  padY: number
+  scale: number
+} {
+  const wf = rect.w / SLIDE_W
+  const hf = rect.h / SLIDE_H
+  return {
+    padX: Math.round(PAD_X * (0.55 + 0.45 * wf)),
+    padY: Math.round(PAD_Y * (0.55 + 0.45 * hf)),
+    scale: Math.round((0.4 + 0.6 * Math.min(wf, hf)) * 100) / 100,
+  }
+}
+
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved
  *  alignment (slide override → deck → default). Fonts are family names; colors are `#rrggbb`. Both
  *  rendering modes read the same resolved theme. */

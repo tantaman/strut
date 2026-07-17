@@ -1020,6 +1020,15 @@ button {
   outline: none;
   cursor: text;
 }
+/* One layout cell as its OWN positioned body box (layout phase 2 — each cell an editor). Placed at the
+   cell's canvas-px rect (cellBoxStyle); the enclosed .strut-md-host fills it and confines/scales off the
+   per-cell --strut-body-* vars set inline on this box. `overflow:hidden` clips an overset cell to its
+   bounds instead of bleeding into a neighbour. Both the editor (SlideBodyEditors) and the read renderer
+   (MarkdownBodies) use this class, so a cell looks identical editing and rendered. */
+.strut-md-cell {
+  position: absolute;
+  overflow: hidden;
+}
 /* ProseMirror shows the placeholder via a decoration on an empty doc; keep the caret comfortable. */
 .strut-md-host .strut-md:focus {
   outline: none;

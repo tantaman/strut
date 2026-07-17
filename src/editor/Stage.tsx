@@ -30,8 +30,9 @@ import {
   BackgroundImageLayer,
   cmpStyle,
   componentSize,
-  MarkdownSurface,
+  MarkdownBodies,
   renderInner,
+  slideHasBody,
   themeVars,
 } from './render'
 import {
@@ -53,7 +54,6 @@ import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
 import { TipTapSlideEditor } from './TipTapSlideEditor'
 import { LockedObjects } from './ObjectsLayer'
-import { isDocEmpty } from './tiptapDoc'
 import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
 import {
@@ -879,7 +879,7 @@ export function Stage({
                 }}
               >
                 <BackgroundImageLayer image={bgImg} />
-                <MarkdownSurface doc={slideData.doc} />
+                <MarkdownBodies slide={slideData} />
                 <LockedObjects slide={slideData} />
               </div>
             </div>
@@ -922,9 +922,9 @@ export function Stage({
           {/* Body underlay: the markdown doc, shown behind the editable objects but inert (its layer
               is pointer-events:none) so marquee/canvas clicks pass through. Skipped when empty, so a
               pure-objects slide is unchanged. */}
-          {!isDocEmpty(slideData.doc) && (
+          {slideHasBody(slideData) && (
             <div className="slide-locked-layer">
-              <MarkdownSurface doc={slideData.doc} />
+              <MarkdownBodies slide={slideData} />
             </div>
           )}
           {componentRefs.map((component) => (

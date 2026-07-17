@@ -298,6 +298,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     sharedMutators.setSlideMarkdown,
   ),
   setSlideDoc: withSlideEditable((a) => a.id, sharedMutators.setSlideDoc),
+  setSlideCells: withSlideEditable((a) => a.id, sharedMutators.setSlideCells),
   setSlideMode: withSlideEditable((a) => a.id, sharedMutators.setSlideMode),
   // Research notes upsert a slide_notes row keyed by slide_id, so gate on the target SLIDE being
   // editable (NOT the client-claimed deck) — otherwise a known slide_id could clobber another user's
