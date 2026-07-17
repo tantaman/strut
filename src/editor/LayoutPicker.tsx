@@ -15,7 +15,12 @@ import { createPortal } from 'react-dom'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import { SLIDE_H, SLIDE_W } from '../config'
-import { layoutCells, resolveLayout, SLIDE_LAYOUTS } from './types'
+import {
+  layoutCells,
+  layoutDividers,
+  resolveLayout,
+  SLIDE_LAYOUTS,
+} from './types'
 import type { SlideLayout } from './types'
 import type { SlideDetail } from './deckDetail'
 
@@ -149,21 +154,22 @@ export function LayoutPicker({
     }
   }, [open])
 
-  // Cells beyond the first, drawn on the real slide as empty outlines (cell 0 holds the body). Only for a
-  // multi-cell layout — a full slide shows nothing extra. In the card's canvas-px × scale coordinate space.
-  const emptyCells = current === '' ? [] : layoutCells(current).slice(1)
+  // The tiling's interior gridlines, drawn on the real slide (cell 0 holds the body; the rest are the
+  // empty cells this divides off). Lines, not boxes — each interior boundary once, so abutting cells
+  // never double a divider. Canvas-px × scale, in the card's own coordinate space.
+  const dividers = current === '' ? [] : layoutDividers(current)
 
   return (
     <div className="doc__region" ref={rootRef}>
-      {emptyCells.map((c, i) => (
+      {dividers.map((d, i) => (
         <div
           key={i}
-          className="lyt-cell"
+          className={'lyt-divider' + (d.vertical ? ' lyt-divider--v' : '')}
           style={{
-            left: c.x * scale,
-            top: c.y * scale,
-            width: c.w * scale,
-            height: c.h * scale,
+            left: d.x * scale,
+            top: d.y * scale,
+            width: d.vertical ? 0 : d.length * scale,
+            height: d.vertical ? d.length * scale : 0,
           }}
         />
       ))}

@@ -3069,12 +3069,20 @@ button {
   pointer-events: none; /* only the button is interactive; text below stays editable */
   z-index: 3;
 }
-/* A cell the layout defines but nothing fills yet (phase 1): a faint dashed outline so the structure is
-   visible while the body sits in cell 0. Phase 2 turns each into its own editor. */
-.lyt-cell {
+/* The tiling's interior dividers (phase 1): a faint dashed gridline at each boundary the layout defines,
+   so the structure is visible while the body sits in cell 0. A LINE, not a box — a zero-width/height
+   element carrying a single dashed border, nudged back half its thickness so it sits centred on the
+   boundary. Phase 2 turns each cell into its own editor. */
+.lyt-divider {
   position: absolute;
-  border: 1.5px dashed var(--line);
-  border-radius: 6px;
+  border-top: 1.5px dashed var(--line);
+  margin-top: -0.75px;
+}
+.lyt-divider--v {
+  border-top: 0;
+  border-left: 1.5px dashed var(--line);
+  margin-top: 0;
+  margin-left: -0.75px;
 }
 /* The corner button — same idiom as the flip button: hidden until you're on the card. Shows the glyph
    of the current layout. */

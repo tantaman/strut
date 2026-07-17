@@ -11,6 +11,7 @@ import {
   bodyRegionStyle,
   bodyStyleFor,
   layoutCells,
+  layoutDividers,
   rectBodyStyle,
   resolveLayout,
 } from './types'
@@ -58,6 +59,46 @@ describe('layoutCells', () => {
     expect(grid[0]).toEqual({ x: 0, y: 0, w: SLIDE_W / 2, h: SLIDE_H / 2 })
     expect(grid[1].x).toBeGreaterThan(grid[0].x) // top-right after top-left
     expect(grid[2].y).toBeGreaterThan(grid[0].y) // bottom row after top row
+  })
+})
+
+describe('layoutDividers', () => {
+  it('has none for a full slide', () => {
+    expect(layoutDividers('')).toEqual([])
+  })
+
+  it('draws one interior line per boundary, never doubled', () => {
+    // cols-2 → a single vertical divider at the midline (not two edges stacked).
+    expect(layoutDividers('cols-2')).toEqual([
+      { x: SLIDE_W / 2, y: 0, length: SLIDE_H, vertical: true },
+    ])
+    // tri → exactly two verticals (thirds), each once — the bug was the shared edge drawn twice.
+    const tri = layoutDividers('tri')
+    expect(tri).toHaveLength(2)
+    expect(tri.every((d) => d.vertical)).toBe(true)
+  })
+
+  it('never places a divider on the canvas boundary', () => {
+    for (const layout of SLIDE_LAYOUTS) {
+      for (const d of layoutDividers(layout)) {
+        if (d.vertical) {
+          expect(d.x).toBeGreaterThan(0)
+          expect(d.x).toBeLessThan(SLIDE_W)
+        } else {
+          expect(d.y).toBeGreaterThan(0)
+          expect(d.y).toBeLessThan(SLIDE_H)
+        }
+      }
+    }
+  })
+
+  it('covers both axes for a 2×2 grid, deduped', () => {
+    const g = layoutDividers('grid-4')
+    expect(g.some((d) => d.vertical)).toBe(true)
+    expect(g.some((d) => !d.vertical)).toBe(true)
+    // No two identical segments survived the dedupe.
+    const keys = g.map((d) => `${d.vertical}|${d.x}|${d.y}|${d.length}`)
+    expect(new Set(keys).size).toBe(keys.length)
   })
 })
 
