@@ -457,6 +457,46 @@ export function layoutCells(layout: SlideLayout): Rect[] {
   }
 }
 
+/** A single interior boundary between cells — a line, not a box edge. Canvas px; `vertical` picks the
+ *  axis, `length` runs along it from (x, y). */
+export interface LayoutDivider {
+  x: number
+  y: number
+  length: number
+  vertical: boolean
+}
+
+/** The tiling's interior gridlines, each drawn ONCE. A cell edge that touches the canvas boundary is
+ *  not a divider; a shared edge between two cells would be produced by both, so identical segments are
+ *  deduped — that's what stops two abutting cells rendering a double-width line. (All current presets
+ *  are guillotine grids, so shared edges match exactly; a future T-junction layout would want collinear
+ *  segments merged, but none exist yet.) */
+export function layoutDividers(layout: SlideLayout): LayoutDivider[] {
+  const seen = new Set<string>()
+  const out: LayoutDivider[] = []
+  const addV = (x: number, y0: number, y1: number) => {
+    if (x <= 0 || x >= SLIDE_W) return
+    const k = `v|${x}|${y0}|${y1}`
+    if (seen.has(k)) return
+    seen.add(k)
+    out.push({ x, y: y0, length: y1 - y0, vertical: true })
+  }
+  const addH = (y: number, x0: number, x1: number) => {
+    if (y <= 0 || y >= SLIDE_H) return
+    const k = `h|${y}|${x0}|${x1}`
+    if (seen.has(k)) return
+    seen.add(k)
+    out.push({ x: x0, y, length: x1 - x0, vertical: false })
+  }
+  for (const c of layoutCells(layout)) {
+    addV(c.x, c.y, c.y + c.h) // left edge
+    addV(c.x + c.w, c.y, c.y + c.h) // right edge
+    addH(c.y, c.x, c.x + c.w) // top edge
+    addH(c.y + c.h, c.x, c.x + c.w) // bottom edge
+  }
+  return out
+}
+
 /** The body-style (pad / type-scale / display) for a body confined to an arbitrary cell — the generic
  *  form of `bodyRegionStyle`, used for layout cells. The body element still fills the whole canvas, so
  *  the padding is what confines it: on a side that touches the canvas edge, the safe-area pad; on an
