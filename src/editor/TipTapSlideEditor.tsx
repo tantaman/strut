@@ -1,15 +1,18 @@
 // WYSIWYG markdown-mode editing, directly on the slide (replaces the old split textarea-below-preview).
 // A TipTap editor is mounted INTO the same `.strut-md` scope the read-only surface uses, at the same
 // fit-to-slide scale, so what you edit is literally what renders. The stored `doc` (TipTap JSON) is the
-// source of truth; the editor streams it via Rindle's `.folded` (debounced, last-value-wins) on every
-// keystroke for live sync, and commits ONE undo step per edit session on blur — mirroring how the
-// textarea behaved. Formatting is per-selection, like a document: the format bar drives real TipTap
-// commands — marks/blocks, per-block alignment (TextAlign), and font-family/color on the `textStyle`
-// mark — all stored inline in the doc. The deck theme still supplies the defaults these override.
+// source of truth; the write model lives in `useSlideDocEditor` (shared with Doc mode) — it streams via
+// Rindle's `.folded` on every keystroke and commits ONE undo step per edit session on blur. Formatting
+// is per-selection, like a document: the format bar drives real TipTap commands — marks/blocks,
+// per-block alignment (TextAlign), and font-family/color on the `textStyle` mark — all stored inline in
+// the doc. The deck theme still supplies the defaults these override.
+//
+// This is the STAGE's editor: one slide, fit to the viewport, owning its own format bar. Doc mode
+// composes the same pieces differently (N scaled cards, one hoisted bar) — see DocView.
 
-import { useRef } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import {
   AlignCenter,
@@ -27,11 +30,8 @@ import {
   Strikethrough,
 } from 'lucide-react'
 import { FONT_FAMILIES, SLIDE_H, SLIDE_W } from '../config'
-import { useMutate } from '../rindle/RindleProvider'
-import { useHistory } from './UndoProvider'
 import { useFitScale } from './useFitScale'
-import { strutExtensions } from './tiptapSchema'
-import { parseDoc } from './tiptapDoc'
+import { useSlideDocEditor } from './useSlideDocEditor'
 import {
   BackgroundImageLayer,
   cssFontFamily,
@@ -56,50 +56,10 @@ export function TipTapSlideEditor({
   // the editable body but inert, so what you see while editing the body matches what renders.
   children?: ReactNode
 }) {
-  const mutate = useMutate()
-  const history = useHistory()
   const previewRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(previewRef, SLIDE_W, SLIDE_H)
-  // The doc JSON at the start of this edit session — one coarse undo step is pushed on blur (the
-  // per-keystroke stream is a live-preview write, not an undo boundary). Keyed by slide id at the call
-  // site so the editor remounts per slide and this baseline reseeds.
-  const baselineRef = useRef(slide.doc)
-
-  const editor = useEditor({
-    extensions: strutExtensions,
-    content: parseDoc(slide.doc),
-    // The editable element IS the `.strut-md` surface, so it inherits the exact theme/typography the
-    // renderer uses. `immediatelyRender: false` keeps it SSR-safe (no DOM at first render).
-    immediatelyRender: false,
-    editorProps: {
-      attributes: { class: 'strut-md', spellcheck: 'false' },
-    },
-    onUpdate: ({ editor: ed }) => {
-      const json = JSON.stringify(ed.getJSON())
-      mutate.setSlideDoc.folded(
-        { key: slide.id },
-        { id: slide.id, doc: json, now: Date.now() },
-      )
-    },
-    onBlur: () => commit(),
-  })
-
-  // Commit the edit session as one undoable step (undo/redo swap the whole doc).
-  function commit() {
-    if (!editor) return
-    const after = JSON.stringify(editor.getJSON())
-    const before = baselineRef.current
-    if (after === before) return
-    baselineRef.current = after
-    const apply = (doc: string) =>
-      mutate.setSlideDoc({ id: slide.id, doc, now: Date.now() })
-    apply(after)
-    history.push({
-      label: 'Edit slide',
-      redo: () => apply(after),
-      undo: () => apply(before),
-    })
-  }
+  // Keyed by slide id at the call site so the editor remounts per slide and its baseline reseeds.
+  const editor = useSlideDocEditor(slide)
 
   const background = resolveBackground(
     slide.background,
@@ -139,10 +99,30 @@ export function TipTapSlideEditor({
 }
 
 // The floating format toolbar. Everything is a TipTap command on the current selection — marks/blocks,
-// per-block alignment, and font-family/color (via the shared font select + ColorField). Re-renders with
-// the editor on every transaction, so the active-state highlights track the selection.
-function FormatBar({ editor, deck }: { editor: Editor | null; deck: MdDeck }) {
-  if (!editor) return null
+// per-block alignment, and font-family/color (via the shared font select + ColorField).
+//
+// It subscribes to its editor's transactions itself rather than riding the parent's re-render, so the
+// active-state highlights track the selection even when the bar is mounted AWAY from the editor it
+// drives — which is exactly Doc mode, where one hoisted bar serves whichever of N cards has focus.
+export function FormatBar({
+  editor,
+  deck,
+}: {
+  editor: Editor | null
+  deck: MdDeck
+}) {
+  const [, bump] = useReducer((n: number) => n + 1, 0)
+  useEffect(() => {
+    if (!editor) return
+    editor.on('transaction', bump)
+    return () => {
+      editor.off('transaction', bump)
+    }
+  }, [editor])
+
+  // A card can unmount (scrolled out of Doc mode's window) while still the bar's editor; commands on a
+  // destroyed editor throw, so drop the bar instead.
+  if (!editor || editor.isDestroyed) return null
 
   const marks: Array<{
     icon: typeof Bold

@@ -8,11 +8,17 @@ import {
 } from '../../shared/queries'
 import { authClient } from '../rindle/authClient'
 import { preloadDeck } from '../rindle/appSsr'
-import { EditorStateProvider, useEditor } from '../editor/EditorState'
+import {
+  EditorStateProvider,
+  parseEditorMode,
+  useEditor,
+} from '../editor/EditorState'
+import type { EditorMode } from '../editor/EditorState'
 import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
 import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
+import { DocView } from '../editor/DocView'
 import { Overview } from '../editor/Overview'
 import { ResearchView } from '../editor/ResearchView'
 import { ChatPanel } from '../editor/ChatPanel'
@@ -27,15 +33,8 @@ export const Route = createFileRoute('/deck/$deckId')({
   // Both optional → existing links (`/deck/:id` with no search) keep working; defaults applied on read.
   validateSearch: (
     s: Record<string, unknown>,
-  ): { view?: 'slide' | 'overview' | 'research'; slide?: string } => ({
-    view:
-      s.view === 'overview'
-        ? 'overview'
-        : s.view === 'research'
-          ? 'research'
-          : s.view === 'slide'
-            ? 'slide'
-            : undefined,
+  ): { view?: EditorMode; slide?: string } => ({
+    view: parseEditorMode(s.view),
     slide: typeof s.slide === 'string' ? s.slide : undefined,
   }),
   // SSR seed: read the deck subtree + collaborators on the server so a direct load / reload of the
@@ -142,6 +141,13 @@ function EditorInner({ deckId }: { deckId: string }) {
               </div>
             )}
           </>
+        ) : editor.mode === 'doc' ? (
+          // Doc keeps the well beside it, but demoted: it tracks the scroll instead of gating the edit,
+          // so it reads as a minimap (jump-to + reorder) rather than the way in to a slide.
+          <>
+            <SlideWell slides={slides} deck={deck} />
+            <DocView slides={slides} deck={deck} />
+          </>
         ) : editor.mode === 'research' ? (
           <ResearchView slides={slides} deck={deck} />
         ) : (
@@ -158,10 +164,12 @@ function EditorInner({ deckId }: { deckId: string }) {
           />
         )}
       </div>
-      {/* Floating "powered by rindle" credit. Only in Slide mode — Overview parks its zoom/Fit
-          controls in the same bottom-right corner, so we'd collide there. (Hidden on mobile, where
-          the bottom tab bar owns that corner — see strut.css.) */}
-      {editor.mode === 'slide' && <PoweredByRindle />}
+      {/* Floating "powered by rindle" credit. Not in Overview — it parks its zoom/Fit controls in the
+          same bottom-right corner, so we'd collide there. (Hidden on mobile, where the bottom tab bar
+          owns that corner — see strut.css.) */}
+      {(editor.mode === 'slide' || editor.mode === 'doc') && (
+        <PoweredByRindle />
+      )}
       {/* Bottom tab bar — hidden above the mobile breakpoint (strut.css); on phones it owns mode +
           Advisor + Present, which the header sheds there. Last child so sheets anchor above it. */}
       <MobileTabBar

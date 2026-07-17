@@ -778,6 +778,12 @@ export function Header({
           Slides
         </button>
         <button
+          className={editor.mode === 'doc' ? 'is-active' : ''}
+          onClick={() => editor.setMode('doc')}
+        >
+          Doc
+        </button>
+        <button
           className={editor.mode === 'overview' ? 'is-active' : ''}
           onClick={() => editor.setMode('overview')}
         >

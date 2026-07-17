@@ -9,6 +9,8 @@ import {
   resolveSurface,
 } from '../editor/types'
 import { UserStyle } from '../editor/CssEditor'
+import { parseEditorMode } from '../editor/EditorState'
+import type { EditorMode } from '../editor/EditorState'
 import { flightFor } from '../editor/transitions'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
@@ -21,15 +23,8 @@ export const Route = createFileRoute('/deck/$deckId_/play')({
   // reopens where you were (§5).
   validateSearch: (
     s: Record<string, unknown>,
-  ): { view?: 'slide' | 'overview' | 'research'; slide?: string } => ({
-    view:
-      s.view === 'overview'
-        ? 'overview'
-        : s.view === 'research'
-          ? 'research'
-          : s.view === 'slide'
-            ? 'slide'
-            : undefined,
+  ): { view?: EditorMode; slide?: string } => ({
+    view: parseEditorMode(s.view),
     slide: typeof s.slide === 'string' ? s.slide : undefined,
   }),
 })
