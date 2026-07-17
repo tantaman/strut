@@ -2898,6 +2898,76 @@ button {
   /* Top gutter clears the floating format bar; the tall bottom one lets the last card reach center. */
   padding: 56px clamp(16px, 4vw, 56px) 120px;
 }
+
+/* ---- the Dock-well (Doc mode's summonable slide well) ----
+   An OVERLAY, never layout: it floats above the column (absolute in .doc), so revealing it can't
+   resize the column — which would re-scale every card. Retracted it's translated fully offscreen
+   AND visibility:hidden (its buttons leave the tab order); the transition delays visibility on the
+   way out so the slide-away stays visible. The well inside renders unchanged — .dock is a flex row
+   so .well's own `flex: 0 0 176px` sizing applies as it does in Slides mode. */
+.dock {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  background: var(--panel);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1),
+    visibility 0s 0.22s;
+}
+.dock.is-out {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock {
+    transition: visibility 0s 0s;
+  }
+  .dock.is-out {
+    transition: none;
+  }
+}
+/* The hot zone: an invisible strip on the screen edge (an infinitely deep pointer target). Below the
+   dock in z-order — retracted, it owns the edge; out, the panel covers it and takes the events. */
+.dock__edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  z-index: 39;
+}
+/* The whisper: a faint pill hinting there's something behind the edge. Brightens when the pointer
+   arrives (the dwell window), disappears once the dock is out. */
+.dock__edge::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--muted);
+  opacity: 0.25;
+  transition: opacity 0.15s;
+}
+.dock__edge:hover::after {
+  opacity: 0.7;
+}
+@media (max-width: 768px) {
+  /* No hover edge on touch — the mobile tab bar routes to Slides mode for reordering. */
+  .dock,
+  .dock__edge {
+    display: none;
+  }
+}
 .doc__empty {
   margin: auto;
   color: var(--muted);
