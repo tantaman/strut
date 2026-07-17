@@ -3,12 +3,21 @@
 
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { cssHex, cssUrlValue, resolveTextAlign, textTypeOf } from './types'
+import {
+  bodyRegionStyle,
+  cssHex,
+  cssUrlValue,
+  resolveBackgroundImage,
+  resolveBodyRegion,
+  resolveTextAlign,
+  textTypeOf,
+} from './types'
 import type {
   AnyComponent,
   BackgroundImageSpec,
   ComponentKind,
-  DeckThemeFields,
+  DeckPresentationFields,
+  SlideThemeFields,
 } from './types'
 import { docToHtml } from './tiptapDoc'
 import { FONTS_BY_CATEGORY } from '../config'
@@ -64,11 +73,28 @@ export function FontOptions() {
  *  frame, impress export), so a text component with an empty color/font_family can inherit via
  *  `var(--strut-<category>-…)` no matter which surface renders it. `--strut-text-align` (slide
  *  override → deck default → 'left') drives markdown-mode alignment; the optional `slide` supplies
- *  the per-slide override. */
+ *  the per-slide override.
+ *
+ *  `--strut-body-pad` / `--strut-type-scale` carry the body's REGION (see resolveBodyRegion). Riding
+ *  as vars on the container is what keeps partitioning to one place: every app surface already sets
+ *  these vars, so the thumbnail, the stage, Doc's cards, Play and share all partition for free — none
+ *  of them needs to learn the concept. The standalone export has its own twin, themeVarsCss.
+ *
+ *  IMPORTANT: every var added here must also be added to `themeVarsCss` in impressExport.ts, or an
+ *  exported deck renders differently from the app. `themeVars.test.ts` pins the two together. */
 export function themeVars(
-  theme: DeckThemeFields | null | undefined,
-  slide?: { text_align?: string | null } | null,
+  theme: DeckPresentationFields | null | undefined,
+  slide?: SlideThemeFields | null,
 ): CSSProperties {
+  const region = bodyRegionStyle(
+    resolveBodyRegion(
+      slide?.body_region,
+      resolveBackgroundImage(
+        slide?.background ?? undefined,
+        theme?.background ?? undefined,
+      )?.layout,
+    ),
+  )
   return {
     '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
@@ -78,6 +104,9 @@ export function themeVars(
       slide?.text_align,
       theme?.text_align,
     ),
+    '--strut-body-pad': region.pad,
+    '--strut-type-scale': String(region.scale),
+    '--strut-body-display': region.display,
   } as CSSProperties
 }
 

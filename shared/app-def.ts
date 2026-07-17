@@ -205,6 +205,9 @@ export const setSlideThemeArgs = z.object({
   surface: z.string().optional(),
   // Per-slide alignment override ('' = inherit the deck default).
   text_align: z.string().optional(),
+  // Which part of the canvas the markdown body occupies ('' = auto — derived from the background
+  // image's half; see resolveBodyRegion).
+  body_region: z.string().optional(),
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
@@ -512,6 +515,7 @@ export const mutators = {
         doc: '',
         render_mode: a.render_mode ?? '',
         text_align: '',
+        body_region: '',
       })
     },
   ),
@@ -559,6 +563,7 @@ export const mutators = {
       if (a.background !== undefined) row.background = a.background
       if (a.surface !== undefined) row.surface = a.surface
       if (a.text_align !== undefined) row.text_align = a.text_align
+      if (a.body_region !== undefined) row.body_region = a.body_region
       yield tx.update('slide', row)
     },
   ),

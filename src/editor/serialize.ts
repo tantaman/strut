@@ -36,6 +36,7 @@ export interface SlideRowLike {
   doc?: string | null
   render_mode?: string | null
   text_align?: string | null
+  body_region?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -158,11 +159,13 @@ export function serializeDeck(
         surface: s.surface || '',
         components: (componentsBySlide[s.id] ?? []).map(serializeComponent),
       }
-      // Markdown mode + per-slide alignment: emitted only when set, so spatial-only decks are
-      // byte-identical to before. Markdown-mode content travels as the TipTap `doc` JSON.
+      // Markdown mode + per-slide alignment + a pinned body region: emitted only when set, so
+      // spatial-only decks are byte-identical to before, and an auto-region slide ('') stays absent.
+      // Markdown-mode content travels as the TipTap `doc` JSON.
       if (s.render_mode) slide.renderMode = s.render_mode
       if (s.doc) slide.doc = s.doc
       if (s.text_align) slide.textAlign = s.text_align
+      if (s.body_region) slide.bodyRegion = s.body_region
       return slide
     }),
   }
@@ -212,6 +215,7 @@ export interface ImportedSlide {
   doc: string
   render_mode: string
   text_align: string
+  body_region: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -333,6 +337,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       doc: str(s.doc),
       render_mode: str(s.renderMode),
       text_align: str(s.textAlign),
+      body_region: str(s.bodyRegion),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

@@ -39,6 +39,7 @@ import { useEditor } from './EditorState'
 import { useAddSlide } from './useAddSlide'
 import { useSlideDocEditor } from './useSlideDocEditor'
 import { FormatBar } from './TipTapSlideEditor'
+import { DocRegionDrag, useDropImage } from './DocRegion'
 import { SlideView } from './SlideView'
 import { LockedObjects } from './ObjectsLayer'
 import { UserStyle } from './CssEditor'
@@ -327,10 +328,20 @@ function DocCard({
   // Body-editable only where a body IS the edit layer. Flipping render_mode swaps which component
   // renders, remounting the card — the same branch Stage makes, for the same reason.
   const editable = editor.canEdit && slide.render_mode === 'markdown'
+  const drop = useDropImage(slide)
   return (
     <div
-      className={'doc__card' + (active ? ' is-active' : '')}
+      className={
+        'doc__card' +
+        (active ? ' is-active' : '') +
+        (drop.side ? ' is-dropping' : '')
+      }
       style={{ width: colW, height: cardH }}
+      // Drop an image on a card and it half-bleeds to the side you dropped it, with the body moving
+      // to the other half on its own. The whole card is the target — the side is the drop's x.
+      onDragOver={editable ? drop.onDragOver : undefined}
+      onDragLeave={editable ? drop.onDragLeave : undefined}
+      onDrop={editable ? drop.onDrop : undefined}
     >
       {editable ? (
         <DocCardBody
@@ -358,6 +369,9 @@ function DocCard({
           <SlideView slide={slide} deck={deck} width={colW} />
         </button>
       )}
+      {/* The grip + snap preview ride above the scaled canvas, in the card's own coordinate space. */}
+      {editable && <DocRegionDrag slide={slide} deck={deck} scale={scale} />}
+      {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
     </div>
   )
 }

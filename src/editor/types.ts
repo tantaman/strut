@@ -3,7 +3,7 @@
 
 import { parseProps } from '../../shared/componentProps'
 import type { ComponentProps, ComponentType } from '../../shared/componentProps'
-import { DEFAULT_FONT } from '../config'
+import { DEFAULT_FONT, SLIDE_H, SLIDE_W } from '../config'
 
 export type ComponentKind = ComponentType
 
@@ -215,6 +215,19 @@ export interface DeckThemeFields {
   text_align?: string | null
 }
 
+/** The slide-side columns the shared presentation resolution reads: the alignment override, and the
+ *  two inputs to the body's region (its own pin + the background whose image supplies the auto rule). */
+export interface SlideThemeFields {
+  text_align?: string | null
+  background?: string | null
+  body_region?: string | null
+}
+
+/** A deck as the presentation resolvers see it: text theme + the background the slide falls back to. */
+export type DeckPresentationFields = DeckThemeFields & {
+  background?: string | null
+}
+
 export const TEXT_TYPES = ['body', 'heading'] as const
 export type TextType = (typeof TEXT_TYPES)[number]
 
@@ -237,6 +250,129 @@ export function resolveTextAlign(
 ): TextAlign {
   const v = (slideAlign && slideAlign !== '' ? slideAlign : deckAlign) || 'left'
   return v === 'center' || v === 'right' ? v : 'left'
+}
+
+// ---- body region ---------------------------------------------------------------------------------
+// Which part of the 1280×720 canvas the markdown body occupies. The slide column stores INTENT ('' =
+// auto, else a pinned region); the geometry below is DERIVED, so the two can evolve apart — a future
+// free-rect body can keep these names as presets that produce one, with no migration.
+//
+// Named `region`, deliberately not `layout`: `layouts.ts` already owns that word for where slides sit
+// relative to each other in the 3-D overview world, which is a different problem entirely.
+
+export const BODY_REGIONS = ['full', 'left', 'right', 'top', 'bottom'] as const
+export type BodyRegion = (typeof BODY_REGIONS)[number]
+
+/** Resolve where the body sits. A pinned slide value wins outright. Otherwise it's AUTO: derived from
+ *  the slide's background image, which already half-bleeds via its own `layout` enum — so the body
+ *  simply takes the half the image doesn't. That makes "paste an image and the card partitions itself"
+ *  a consequence of one rule rather than a special case, and it un-partitions on its own when the
+ *  image goes away. Auto only ever yields full/left/right (the image's own axis); top/bottom are
+ *  reachable by pinning. */
+export function resolveBodyRegion(
+  pinned: string | null | undefined,
+  imageLayout: BackgroundImageLayout | null | undefined,
+): BodyRegion {
+  if (pinned && (BODY_REGIONS as readonly string[]).includes(pinned))
+    return pinned as BodyRegion
+  if (imageLayout === 'left') return 'right'
+  if (imageLayout === 'right') return 'left'
+  return 'full'
+}
+
+// The full-bleed body's inset — the entire "safe area" concept, and the value `.strut-md` falls back to.
+const PAD_Y = 64
+const PAD_X = 88
+// Breathing room between the body and whatever occupies the other half.
+const GUTTER = 24
+
+export interface BodyRegionStyle {
+  /** A `padding` shorthand that confines the body to its region (the body box itself still fills the
+   *  canvas, so nothing about stacking or `position` changes — only where its content may land). */
+  pad: string
+  /** Multiplier on every absolute font size in `.strut-md`. Type is sized in px against a 1280-wide
+   *  canvas (h1 88px), so a half-width region would otherwise fit ~5 characters on a heading line. */
+  scale: number
+  /** `.strut-md`'s display. A partitioned body centres in its half ('flex' + the stylesheet's column
+   *  `justify-content: safe center`); a full-bleed one stays 'block' and top-aligned — which is both
+   *  what it has always done and what a canvas wants, so no existing slide moves by a pixel. */
+  display: 'block' | 'flex'
+}
+
+/** The area a region visually claims, in canvas px — what the drag preview paints and where the grip
+ *  sits. The inset in `bodyRegionStyle` is this rect plus the safe-area padding. */
+export function bodyRegionRect(region: BodyRegion): {
+  x: number
+  y: number
+  w: number
+  h: number
+} {
+  const halfW = SLIDE_W / 2
+  const halfH = SLIDE_H / 2
+  switch (region) {
+    case 'left':
+      return { x: 0, y: 0, w: halfW, h: SLIDE_H }
+    case 'right':
+      return { x: halfW, y: 0, w: halfW, h: SLIDE_H }
+    case 'top':
+      return { x: 0, y: 0, w: SLIDE_W, h: halfH }
+    case 'bottom':
+      return { x: 0, y: halfH, w: SLIDE_W, h: halfH }
+    default:
+      return { x: 0, y: 0, w: SLIDE_W, h: SLIDE_H }
+  }
+}
+
+// How close to the middle counts as "put it back to full-bleed". Rectangular rather than radial: the
+// canvas is 16:9, so a radius would reach much further vertically than it looks like it should.
+const CENTER_ZONE = 0.18
+
+/** The region a drag lands on, from a pointer at normalized (0..1) coords within the slide. Snapping
+ *  by dominant axis is the window-snap gesture — drag toward an edge, get that half; drag to the
+ *  middle, get full-bleed. Pure so the feel can be tested without a browser. */
+export function regionAtPoint(nx: number, ny: number): BodyRegion {
+  const dx = nx - 0.5
+  const dy = ny - 0.5
+  if (Math.abs(dx) < CENTER_ZONE && Math.abs(dy) < CENTER_ZONE) return 'full'
+  if (Math.abs(dx) >= Math.abs(dy)) return dx < 0 ? 'left' : 'right'
+  return dy < 0 ? 'top' : 'bottom'
+}
+
+/** The geometry for a region: an inset + a type scale. Pure — both the app (themeVars) and the
+ *  standalone export (themeVarsCss) derive their CSS vars from this one function. */
+export function bodyRegionStyle(region: BodyRegion): BodyRegionStyle {
+  const halfX = SLIDE_W / 2 + GUTTER
+  const halfY = SLIDE_H / 2 + GUTTER
+  switch (region) {
+    // Width is the binding constraint on a column, so type shrinks with the measure.
+    case 'left':
+      return {
+        pad: `${PAD_Y}px ${halfX}px ${PAD_Y}px ${PAD_X}px`,
+        scale: 0.68,
+        display: 'flex',
+      }
+    case 'right':
+      return {
+        pad: `${PAD_Y}px ${PAD_X}px ${PAD_Y}px ${halfX}px`,
+        scale: 0.68,
+        display: 'flex',
+      }
+    // A row keeps the full measure; height is what's scarce, so type shrinks only slightly.
+    case 'top':
+      return {
+        pad: `${PAD_Y}px ${PAD_X}px ${halfY}px ${PAD_X}px`,
+        scale: 0.85,
+        display: 'flex',
+      }
+    case 'bottom':
+      return {
+        pad: `${halfY}px ${PAD_X}px ${PAD_Y}px ${PAD_X}px`,
+        scale: 0.85,
+        display: 'flex',
+      }
+    default:
+      return { pad: `${PAD_Y}px ${PAD_X}px`, scale: 1, display: 'block' }
+  }
 }
 
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved

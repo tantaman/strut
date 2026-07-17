@@ -1094,20 +1094,39 @@ button {
 
 /* The markdown render scope — one place both the app surfaces and the impress export style (the
    export inlines a mirror of these rules; keep them in sync). Theme flows in via CSS vars set on the
-   enclosing slide container (themeVars). */
+   enclosing slide container (themeVars).
+
+   The body's REGION rides in on two of those vars rather than on a class, which is why partitioning
+   needed no change at any of the six render surfaces:
+     --strut-body-pad    the inset that confines the body to its half. The box still fills the canvas,
+                         so `position`/`z-index` and the underlay stacking are untouched — only where
+                         the content may land moves.
+     --strut-type-scale  multiplies every absolute size below. Type here is px against a fixed
+                         1280-wide canvas, so a half-width region without this fits ~5 characters on
+                         an h1 line.
+     --strut-body-display  'flex' centres a partitioned body in its half; 'block' (the default) keeps a
+                         full-bleed body top-aligned. `flex-direction`/`justify-content` below are
+                         INERT in block layout, so the default reproduces the pre-region rendering
+                         exactly and no existing slide moves.
+   `safe center` degrades to flex-start when the content is taller than its half — centring an overset
+   body would clip its heading off the TOP, which is far worse than running past the bottom. A browser
+   that doesn't know `safe` drops the declaration and lands on flex-start anyway. */
 .strut-md {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 64px 88px;
+  padding: var(--strut-body-pad, 64px 88px);
+  display: var(--strut-body-display, block);
+  flex-direction: column;
+  justify-content: safe center;
   overflow: hidden;
   font-family: var(--strut-body-font, 'Lato', sans-serif);
   color: var(--strut-body-color, #111);
   text-align: var(--strut-text-align, left);
   line-height: 1.35;
-  font-size: 32px;
+  font-size: calc(32px * var(--strut-type-scale, 1));
 }
 .strut-md > *:first-child {
   margin-top: 0;
@@ -1123,16 +1142,16 @@ button {
   font-weight: 700;
 }
 .strut-md h1 {
-  font-size: 88px;
+  font-size: calc(88px * var(--strut-type-scale, 1));
 }
 .strut-md h2 {
-  font-size: 64px;
+  font-size: calc(64px * var(--strut-type-scale, 1));
 }
 .strut-md h3 {
-  font-size: 48px;
+  font-size: calc(48px * var(--strut-type-scale, 1));
 }
 .strut-md h4 {
-  font-size: 38px;
+  font-size: calc(38px * var(--strut-type-scale, 1));
 }
 .strut-md p,
 .strut-md ul,
@@ -2903,6 +2922,93 @@ button {
     var(--shadow-lg),
     0 0 0 2px var(--coral);
 }
+/* ---- partitioning a card (DocRegion) ----
+   The grip and the snap preview live in the CARD's coordinate space, above the scaled canvas — so the
+   grip stays a constant size at any column width while the preview is drawn in canvas px × scale. */
+.doc__region {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* only the grip itself is interactive; text below stays editable */
+  z-index: 3;
+}
+.doc__grip {
+  position: absolute;
+  /* Nudged inside the region's corner so it reads as belonging to the text, not the card. */
+  margin: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: grab;
+  opacity: 0;
+  pointer-events: auto;
+  transition:
+    opacity 0.12s,
+    color 0.12s;
+}
+/* A card at rest is a slide, not a control panel — the grip only exists once you're on this card. */
+.doc__card:hover .doc__grip,
+.doc__grip:focus-visible {
+  opacity: 1;
+}
+.doc__grip:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+.doc__grip:active {
+  cursor: grabbing;
+}
+/* The live snap target, drawn on the real slide rather than on a thumbnail of a template. */
+.doc__snap {
+  position: absolute;
+  border: 2px dashed var(--coral);
+  border-radius: 4px;
+  background: var(--coral-soft);
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* The half the body is vacating — i.e. where an image would land. Quieter than the target itself. */
+.doc__snap--other {
+  border-style: dotted;
+  border-color: var(--line);
+  background: rgba(24, 26, 33, 0.06);
+  opacity: 0.6;
+}
+.doc__snap-lbl {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+/* Dragging an image over a card: the whole card arms, and the side is picked by the drop's x. */
+.doc__card.is-dropping {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--coral);
+}
+.doc__drop-busy {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 4;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(24, 26, 33, 0.78);
+  color: #fff;
+  font-size: 12px;
+}
+
 /* A spatial slide has no editable body here — the whole card is the button that hands it to the Stage. */
 .doc__static {
   display: block;
