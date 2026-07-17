@@ -42,9 +42,13 @@ import type { ReactNode } from 'react'
 import { NotebookPen, Plus } from 'lucide-react'
 import { useQuery, useQueryStatus } from '@rindle/react'
 import { deckNotesQuery } from '../../shared/queries'
+import { keyBetween } from '../lib/order'
+import { useMutate } from '../rindle/RindleProvider'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { useEditor } from './EditorState'
+import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
+import { WellDock } from './WellDock'
 import { useSlideDocEditor } from './useSlideDocEditor'
 import { FormatBar } from './TipTapSlideEditor'
 import { DocRegionDrag, useDropImage } from './DocRegion'
@@ -69,6 +73,8 @@ export function DocView({
   deck: DeckRoot | null
 }) {
   const editor = useEditor()
+  const mutate = useMutate()
+  const history = useHistory()
   const scrollRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const addSlideAt = useAddSlide(slides, deck)
@@ -245,20 +251,64 @@ export function DocView({
     },
     [flipped, editor],
   )
-  // ⌘. / Ctrl+. flips the active card — reachable mid-sentence without leaving the keyboard (a bare
-  // letter would type into the focused TipTap editor).
+  // ---- keyboard reorder: ⌘⇧↑ / ⌘⇧↓ moves the active card ----
+  // Same fractional-key math as the well's drop(): moving past neighbor j lands between j's far-side
+  // pair — the moved slide itself is never in that pair, so the original array indexes are exact.
+  const followMove = useRef<string | null>(null)
+  const moveSlide = useCallback(
+    (id: string, dir: -1 | 1) => {
+      const i = slides.findIndex((s) => s.id === id)
+      if (i < 0 || i + dir < 0 || i + dir >= slides.length) return
+      const before = dir === -1 ? slides[i - 2] : slides[i + 1]
+      const after = dir === -1 ? slides[i - 1] : slides[i + 2]
+      const sort = keyBetween(before?.sort, after?.sort)
+      const fromSort = slides[i].sort
+      mutate.reorderSlide({ id, sort })
+      history.push({
+        label: 'Move slide',
+        redo: () => mutate.reorderSlide({ id, sort }),
+        undo: () => mutate.reorderSlide({ id, sort: fromSort }),
+      })
+      followMove.current = id
+    },
+    [slides, mutate, history],
+  )
+  // The doc follows the moved card: once the reordered `slides` lands, recenter on it — so repeated
+  // presses walk a card down the deck with the card staying put under your eyes. Instant, not smooth:
+  // a smooth scroll's intermediate frames would let the scroll→`?slide=` sync claim a passing slide.
+  useEffect(() => {
+    if (!followMove.current) return
+    const i = slides.findIndex((s) => s.id === followMove.current)
+    if (i < 0) return
+    followMove.current = null
+    const sc = scrollRef.current
+    if (sc) sc.scrollTop = offsetToCenter(i)
+  }, [slides, offsetToCenter])
+
+  // The doc's keyboard verbs, on the ACTIVE card, reachable mid-sentence without leaving the keys
+  // (a bare letter would type into the focused TipTap editor):
+  //   ⌘.  flip to notes  ·  ⌘⇧↑/↓ move the slide (accepted cost: select-to-doc-edge inside a body —
+  //   bodies are a few lines, the deck-level verb earns the combo).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const id = editor.activeSlideId
+      if (!id) return
       if (e.key === '.' && (e.metaKey || e.ctrlKey)) {
-        const id = editor.activeSlideId
-        if (!id) return
         e.preventDefault()
         toggleFlip(id)
+      } else if (
+        (e.metaKey || e.ctrlKey) &&
+        e.shiftKey &&
+        (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+      ) {
+        if (!editor.canEdit) return
+        e.preventDefault()
+        moveSlide(id, e.key === 'ArrowUp' ? -1 : 1)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [editor.activeSlideId, toggleFlip])
+  }, [editor.activeSlideId, editor.canEdit, toggleFlip, moveSlide])
 
   if (slides.length === 0) {
     return (
@@ -281,6 +331,9 @@ export function DocView({
   return (
     <div className="doc">
       <UserStyle css={deck?.custom_stylesheet} />
+      {/* The Dock-well: push the pointer against the left screen edge and the well slides out —
+          reorder/jump/delete/add without resident chrome. */}
+      <WellDock slides={slides} deck={deck} />
       {/* One bar for the whole column, floating over the top gutter — bound to the focused card. */}
       <FormatBar editor={focusedEditor} deck={deck} />
       <div className="doc__scroll" ref={scrollRef} onScroll={onScroll}>
