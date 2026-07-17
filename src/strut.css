@@ -2875,7 +2875,7 @@ button {
 }
 
 /* ---- Doc mode (the scrolling deck) ----
-   A full-body flex child of .editor__body (like .overview / .research), sitting BESIDE the well: one
+   The default mode, and chrome-free: no header, no well — the lone flex child of .editor__body, one
    vertical scroll of fit-scaled 16:9 cards, each body editable in place. Cards keep the slide's real
    geometry by reusing `.slide-canvas` (absolute, transform-origin top left) — so `.doc__card` is just
    the box that scaled canvas paints into, and its width/height come inline from the measured column.

@@ -73,7 +73,7 @@ function Play() {
         navigate({
           to: '/deck/$deckId',
           params: { deckId },
-          search: { view: view ?? 'slide', slide: slides[i]?.id ?? slide },
+          search: { view: view ?? 'doc', slide: slides[i]?.id ?? slide },
         })
     }
     window.addEventListener('keydown', key)
