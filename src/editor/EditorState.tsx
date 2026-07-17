@@ -23,7 +23,7 @@ const editorRoute = getRouteApi('/deck/$deckId')
 export const EDITOR_MODES = ['slide', 'doc', 'overview', 'research'] as const
 export type EditorMode = (typeof EDITOR_MODES)[number]
 
-/** Narrow an unknown `?view=` search param to a mode; undefined (→ the 'slide' default) if it isn't one. */
+/** Narrow an unknown `?view=` search param to a mode; undefined (→ the 'doc' default) if it isn't one. */
 export function parseEditorMode(v: unknown): EditorMode | undefined {
   return typeof v === 'string' &&
     (EDITOR_MODES as readonly string[]).includes(v)
@@ -78,7 +78,9 @@ export function EditorStateProvider({
 }) {
   const search = editorRoute.useSearch()
   const navigate = editorRoute.useNavigate()
-  const mode: EditorMode = search.view ?? 'slide'
+  // Doc is the default on open: the deck greets you as a document you write into, not a canvas you
+  // operate. The other modes stay reachable (`?view=`), but they're where you go, not where you land.
+  const mode: EditorMode = search.view ?? 'doc'
   const activeSlideId = search.slide ?? null
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [draggingComponentId, setDraggingComponentId] = useState<string | null>(

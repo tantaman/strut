@@ -1,7 +1,7 @@
-// The Doc surface — a deck mode alongside Slides / Overview / Research. Every slide is rendered as a
-// fit-scaled 16:9 card in ONE vertical scroll, each body editable in place, so you read and edit the deck
-// as a document instead of selecting one slide at a time. The well stays mounted beside it as a minimap:
-// it tracks the scroll rather than gating the edit.
+// The Doc surface — the deck's DEFAULT mode (alongside Slides / Overview / Research). Every slide is
+// rendered as a fit-scaled 16:9 card in ONE vertical scroll, each body editable in place, so you read
+// and edit the deck as a document instead of selecting one slide at a time. In this mode it owns the
+// whole viewport: no header, no well — chrome-free by design, the clean slate for authoring.
 //
 // Cards stay SLIDE-SHAPED (1280×720 scaled to the column, not reflowed into prose): the fixed geometry is
 // the contract LockedObjects, the spatial components and the impress export all depend on, and it keeps
@@ -12,9 +12,9 @@
 // live read-only composite; click it to jump to Slides mode where the object canvas lives.
 //
 // Two couplings to "one active slide" are resolved here rather than pushed onto the rest of the editor:
-//   • The header/AI still act on `?slide=` — so the card under the viewport center drives it (debounced),
-//     and focusing a card's text claims it too. Both keep the URL deep-linkable and the Present/Esc
-//     round-trip intact.
+//   • The AI (and the other modes' chrome) still act on `?slide=` — so the card under the viewport
+//     center drives it (debounced), and focusing a card's text claims it too. Both keep the URL
+//     deep-linkable and the Present/Esc round-trip intact.
 //   • N editors must not mean N format bars — ONE bar is hoisted here and bound to whichever card has
 //     focus (FormatBar subscribes to its editor itself, so it tracks a selection it isn't rendered near).
 //
@@ -82,7 +82,7 @@ export function DocView({
       setMeasured(true)
     }
     measure()
-    // Observing the column catches both window resizes and the well/chat rails opening beside it. Its
+    // Observing the column catches both window resizes and the chat rail opening beside it. Its
     // own height changes re-fire this too, but measure() then sets identical values and React bails.
     const ro = new ResizeObserver(measure)
     if (listRef.current) ro.observe(listRef.current)

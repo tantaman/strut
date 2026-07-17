@@ -114,14 +114,18 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   return (
     <div className="editor">
-      <Header
-        deck={deck}
-        activeSlide={activeSlide}
-        variants={variants}
-        makesPublic={entitlement?.canKeepPrivate === false}
-        chatOpen={chatOpen}
-        onToggleChat={() => setChatOpen((o) => !o)}
-      />
+      {/* Doc mode is the clean slate: no header, no well — the document owns the whole viewport.
+          The other modes keep the full chrome (and are still deep-linkable via `?view=`). */}
+      {editor.mode !== 'doc' && (
+        <Header
+          deck={deck}
+          activeSlide={activeSlide}
+          variants={variants}
+          makesPublic={entitlement?.canKeepPrivate === false}
+          chatOpen={chatOpen}
+          onToggleChat={() => setChatOpen((o) => !o)}
+        />
+      )}
       {accessResolved && !editor.canEdit && (
         <div className="ro-banner">
           👁 Read-only — you’re viewing this shared deck. Changes are disabled.
@@ -142,12 +146,7 @@ function EditorInner({ deckId }: { deckId: string }) {
             )}
           </>
         ) : editor.mode === 'doc' ? (
-          // Doc keeps the well beside it, but demoted: it tracks the scroll instead of gating the edit,
-          // so it reads as a minimap (jump-to + reorder) rather than the way in to a slide.
-          <>
-            <SlideWell slides={slides} deck={deck} />
-            <DocView slides={slides} deck={deck} />
-          </>
+          <DocView slides={slides} deck={deck} />
         ) : editor.mode === 'research' ? (
           <ResearchView slides={slides} deck={deck} />
         ) : (
