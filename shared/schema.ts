@@ -99,6 +99,7 @@ export const slide = table("slide")
     text_align: string(),
     doc: string(),
     body_region: string(),
+    layout: string(),
   })
   .primaryKey("id");
 

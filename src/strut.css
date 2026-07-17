@@ -3059,74 +3059,115 @@ button {
   color: var(--coral);
   border-color: var(--coral);
 }
-/* ---- partitioning a card (DocRegion) ----
-   The grip and the snap preview live in the CARD's coordinate space, above the scaled canvas — so the
-   grip stays a constant size at any column width while the preview is drawn in canvas px × scale. */
+/* ---- card layout picker (LayoutPicker) ----
+   The picker button + the empty-cell outlines live in the CARD's coordinate space, above the scaled
+   canvas — the button stays a constant size at any column width, the outlines are drawn in canvas px ×
+   scale. `.doc__region` is the (non-interactive) overlay root; only the button opts back into pointers. */
 .doc__region {
   position: absolute;
   inset: 0;
-  pointer-events: none; /* only the grip itself is interactive; text below stays editable */
+  pointer-events: none; /* only the button is interactive; text below stays editable */
   z-index: 3;
 }
-.doc__grip {
+/* A cell the layout defines but nothing fills yet (phase 1): a faint dashed outline so the structure is
+   visible while the body sits in cell 0. Phase 2 turns each into its own editor. */
+.lyt-cell {
   position: absolute;
-  /* Nudged inside the region's corner so it reads as belonging to the text, not the card. */
+  border: 1.5px dashed var(--line);
+  border-radius: 6px;
+}
+/* The corner button — same idiom as the flip button: hidden until you're on the card. Shows the glyph
+   of the current layout. */
+.lyt-btn {
+  position: absolute;
   margin: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--panel);
   color: var(--muted);
-  cursor: grab;
+  cursor: pointer;
   opacity: 0;
   pointer-events: auto;
   transition:
     opacity 0.12s,
-    color 0.12s;
+    color 0.12s,
+    border-color 0.12s;
 }
-/* A card at rest is a slide, not a control panel — the grip only exists once you're on this card. */
-.doc__card:hover .doc__grip,
-.doc__grip:focus-visible {
+.doc__card:hover .lyt-btn,
+.lyt-btn.is-open,
+.lyt-btn:focus-visible {
   opacity: 1;
 }
-.doc__grip:hover {
+.lyt-btn:hover,
+.lyt-btn.is-open {
   color: var(--coral);
   border-color: var(--coral);
 }
-.doc__grip:active {
-  cursor: grabbing;
+/* A tiling drawn as filled cells in a 16:9 box (the button icon and each thumbnail). The 1px border in
+   the button/panel color reads as the gutter between adjacent cells. */
+.lyt-glyph {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 12px;
+  color: inherit;
 }
-/* The live snap target, drawn on the real slide rather than on a thumbnail of a template. */
-.doc__snap {
+.lyt-glyph__cell {
   position: absolute;
-  border: 2px dashed var(--coral);
-  border-radius: 4px;
-  background: var(--coral-soft);
-  opacity: 0.9;
-  display: flex;
+  background: currentColor;
+  border: 1px solid var(--panel);
+  border-radius: 1.5px;
+  box-sizing: border-box;
+}
+/* The popover: a 2-column gallery of layout thumbnails, Instagram-style. */
+.lyt-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 10px;
+}
+.lyt-thumb {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 72px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s;
 }
-/* The half the body is vacating — i.e. where an image would land. Quieter than the target itself. */
-.doc__snap--other {
-  border-style: dotted;
-  border-color: var(--line);
-  background: rgba(24, 26, 33, 0.06);
-  opacity: 0.6;
+.lyt-thumb:hover {
+  color: var(--coral);
+  border-color: var(--coral);
 }
-.doc__snap-lbl {
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--coral);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
+.lyt-thumb.is-active {
+  color: var(--coral);
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+/* Thumbnails render the glyph larger, and their cells use the thumb background as the gutter color. */
+.lyt-thumb .lyt-glyph {
+  width: 40px;
+  height: 26px;
+}
+.lyt-thumb .lyt-glyph__cell {
+  border-color: var(--panel-2);
+}
+.lyt-thumb.is-active .lyt-glyph__cell {
+  border-color: var(--coral-soft);
 }
 /* Dragging an image over a card: the whole card arms, and the side is picked by the drop's x. */
 .doc__card.is-dropping .doc__face {

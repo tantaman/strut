@@ -4,11 +4,9 @@
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import {
-  bodyRegionStyle,
+  bodyStyleFor,
   cssHex,
   cssUrlValue,
-  resolveBackgroundImage,
-  resolveBodyRegion,
   resolveTextAlign,
   textTypeOf,
 } from './types'
@@ -86,15 +84,9 @@ export function themeVars(
   theme: DeckPresentationFields | null | undefined,
   slide?: SlideThemeFields | null,
 ): CSSProperties {
-  const region = bodyRegionStyle(
-    resolveBodyRegion(
-      slide?.body_region,
-      resolveBackgroundImage(
-        slide?.background ?? undefined,
-        theme?.background ?? undefined,
-      )?.layout,
-    ),
-  )
+  // The body sits in the layout's first cell (or, for a full layout, the legacy single region). Same
+  // three CSS vars either way, so thumbnail/stage/Doc/Play/export all confine the body for free.
+  const region = bodyStyleFor(slide, theme)
   return {
     '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),

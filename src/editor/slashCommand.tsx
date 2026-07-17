@@ -238,7 +238,7 @@ export const SlashCommand = Extension.create({
               // zoom, unlike the counter-scaled bar it replaces. `animationFrame` because BOTH surfaces
               // move the anchor under a transform the observers can't see: Stage scales the canvas, Doc
               // mode scales its cards and FLIP-animates them.
-              unmount = props.mount(renderer.element as HTMLElement, {
+              unmount = props.mount(renderer.element, {
                 autoUpdate: { animationFrame: true },
               })
             },

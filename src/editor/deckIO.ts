@@ -173,13 +173,14 @@ export function importDeck(
       imp_scale: s.imp_scale,
       now,
     })
-    if (s.background || s.surface || s.text_align || s.body_region)
+    if (s.background || s.surface || s.text_align || s.body_region || s.layout)
       mutate.setSlideTheme({
         id: slideId,
         background: s.background,
         surface: s.surface,
         text_align: s.text_align,
         body_region: s.body_region,
+        layout: s.layout,
         now,
       })
     if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })

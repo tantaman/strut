@@ -37,6 +37,7 @@ export interface SlideRowLike {
   render_mode?: string | null
   text_align?: string | null
   body_region?: string | null
+  layout?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -166,6 +167,7 @@ export function serializeDeck(
       if (s.doc) slide.doc = s.doc
       if (s.text_align) slide.textAlign = s.text_align
       if (s.body_region) slide.bodyRegion = s.body_region
+      if (s.layout) slide.layout = s.layout
       return slide
     }),
   }
@@ -216,6 +218,7 @@ export interface ImportedSlide {
   render_mode: string
   text_align: string
   body_region: string
+  layout: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -338,6 +341,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       render_mode: str(s.renderMode),
       text_align: str(s.textAlign),
       body_region: str(s.bodyRegion),
+      layout: str(s.layout),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

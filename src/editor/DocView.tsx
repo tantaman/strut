@@ -48,7 +48,8 @@ import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
 import { useSlideDocEditor } from './useSlideDocEditor'
-import { DocRegionDrag, useDropImage } from './DocRegion'
+import { useDropImage } from './DocRegion'
+import { LayoutPicker } from './LayoutPicker'
 import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
 import { LockedObjects } from './ObjectsLayer'
@@ -471,10 +472,9 @@ function DocCard({
               <SlideView slide={slide} deck={deck} width={colW} />
             </button>
           )}
-          {/* The grip + snap preview ride above the scaled canvas, in the card's own coordinate space. */}
-          {editable && (
-            <DocRegionDrag slide={slide} deck={deck} scale={scale} />
-          )}
+          {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
+              coordinate space, so the button stays a constant size at any column width. */}
+          {editable && <LayoutPicker slide={slide} scale={scale} />}
           {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
         </div>
         <div className="doc__face doc__face--back">
