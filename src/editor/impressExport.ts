@@ -7,13 +7,12 @@ import { componentSize } from './render'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
   backgroundImage,
-  bodyRegionStyle,
+  bodyStyleFor,
   composeBackground,
   cssHex,
   cssUrlValue,
   resolveBackground,
   resolveBackgroundImage,
-  resolveBodyRegion,
   resolveSurface,
   resolveTextAlign,
   textTypeOf,
@@ -21,7 +20,7 @@ import {
 import type {
   AnyComponent,
   BackgroundImageSpec,
-  BodyRegion,
+  BodyRegionStyle,
   DeckThemeFields,
 } from './types'
 import { flightFor } from './transitions'
@@ -147,19 +146,19 @@ function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
 
 /** The deck text theme as CSS custom-property declarations for the slide container, so a text
  *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export.
- *  `align` is the slide-resolved alignment (drives markdown-mode text-align); `region` is the
- *  slide-resolved body region (drives the body's inset + type scale).
+ *  `align` is the slide-resolved alignment (drives markdown-mode text-align); `style` is the
+ *  slide-resolved body style (its layout cell's inset + type scale + display).
  *
  *  The string twin of `themeVars` in render.tsx — it must emit the SAME set of var names, or an
- *  exported deck renders differently from the app. `themeVars.test.ts` pins the two together. */
+ *  exported deck renders differently from the app. `bodyRegion.test.ts` pins the two together. */
 function themeVarsCss(
   theme: DeckThemeFields,
   align: string,
-  region: BodyRegion,
+  style: BodyRegionStyle,
 ): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
-  const r = bodyRegionStyle(region)
+  const r = style
   return (
     `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
     `--strut-heading-font:${font(theme.heading_font)};` +
@@ -201,8 +200,9 @@ function stepHTML(
     backgroundImage(slide.surface, deck.surface),
   )
   const align = resolveTextAlign(slide.text_align, deck.text_align)
-  // Auto-derived from the half-bleed image resolved just above, exactly as themeVars does in-app.
-  const region = resolveBodyRegion(slide.body_region, bgImage?.layout)
+  // The body's cell-0 style — a real layout tiling, else the legacy single region (auto-derived from
+  // the half-bleed image above). Exactly what themeVars resolves in-app, so exports match.
+  const bodyStyle = bodyStyleFor(slide, deck)
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
   // Each is emitted only when it has content, so single-layer slides export exactly as before.
@@ -216,7 +216,7 @@ function stepHTML(
   const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
   const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" data-surface="${esc(surface)}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, region)}">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, bodyStyle)}">
 ${inner}
     </div>
   </div>`

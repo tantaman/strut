@@ -208,6 +208,9 @@ export const setSlideThemeArgs = z.object({
   // Which part of the canvas the markdown body occupies ('' = auto — derived from the background
   // image's half; see resolveBodyRegion).
   body_region: z.string().optional(),
+  // The slide's layout tiling ('' = full — one cell; else 'cols-2' | 'rows-2' | 'tri' | 'grid-4' |
+  // 'split-l'). Supersedes body_region when a real tiling; see layoutCells / bodyCells.
+  layout: z.string().optional(),
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
@@ -516,6 +519,7 @@ export const mutators = {
         render_mode: a.render_mode ?? '',
         text_align: '',
         body_region: '',
+        layout: '',
       })
     },
   ),
@@ -564,6 +568,7 @@ export const mutators = {
       if (a.surface !== undefined) row.surface = a.surface
       if (a.text_align !== undefined) row.text_align = a.text_align
       if (a.body_region !== undefined) row.body_region = a.body_region
+      if (a.layout !== undefined) row.layout = a.layout
       yield tx.update('slide', row)
     },
   ),

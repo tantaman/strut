@@ -215,12 +215,15 @@ export interface DeckThemeFields {
   text_align?: string | null
 }
 
-/** The slide-side columns the shared presentation resolution reads: the alignment override, and the
- *  two inputs to the body's region (its own pin + the background whose image supplies the auto rule). */
+/** The slide-side columns the shared presentation resolution reads: the alignment override, the two
+ *  inputs to the body's region (its own pin + the background whose image supplies the auto rule), and
+ *  the layout tiling. `layout` (when a real multi-cell tiling) supersedes `body_region` — the body
+ *  takes the layout's first cell; see bodyCells / rectBodyStyle. */
 export interface SlideThemeFields {
   text_align?: string | null
   background?: string | null
   body_region?: string | null
+  layout?: string | null
 }
 
 /** A deck as the presentation resolvers see it: text theme + the background the slide falls back to. */
@@ -373,6 +376,152 @@ export function bodyRegionStyle(region: BodyRegion): BodyRegionStyle {
     default:
       return { pad: `${PAD_Y}px ${PAD_X}px`, scale: 1, display: 'block' }
   }
+}
+
+// ---- layout: a tiling of the canvas into ordered cells --------------------------------------------
+// `body_region` (above) pins the ONE markdown body to a rect; a `layout` generalizes that to N cells,
+// each destined to become its own editor (phase 2). Phase 1: cell 0 hosts the existing body, so a
+// full-layout ('' ) slide is byte-identical to before — nothing here runs unless a real tiling is set.
+//
+// Named against the screenshot's Instagram-style picker. Rects are canvas px (0..1280 × 0..720), so
+// the same math positions cells on every surface. The order is reading order (top-left → bottom-right),
+// which is the order cell editors will take and the camera/export will follow.
+
+export const SLIDE_LAYOUTS = [
+  '', // full — one cell, the whole canvas (default; today's single body)
+  'cols-2', // two columns
+  'rows-2', // two rows
+  'tri', // three columns
+  'grid-4', // 2×2
+  'split-l', // narrow-left / wide-right (image-beside-text)
+] as const
+export type SlideLayout = (typeof SLIDE_LAYOUTS)[number]
+
+/** Normalize a stored `layout` to a known preset ('' / unknown = full). */
+export function resolveLayout(layout: string | null | undefined): SlideLayout {
+  return (SLIDE_LAYOUTS as readonly string[]).includes(layout ?? '')
+    ? ((layout ?? '') as SlideLayout)
+    : ''
+}
+
+export interface Rect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+const SPLIT_L_FRAC = 0.4 // the narrow column in 'split-l'
+
+/** The ordered cell rects a layout tiles the canvas into (canvas px). Full = one whole-canvas cell. */
+export function layoutCells(layout: SlideLayout): Rect[] {
+  const W = SLIDE_W
+  const H = SLIDE_H
+  const hw = W / 2
+  const hh = H / 2
+  switch (layout) {
+    case 'cols-2':
+      return [
+        { x: 0, y: 0, w: hw, h: H },
+        { x: hw, y: 0, w: hw, h: H },
+      ]
+    case 'rows-2':
+      return [
+        { x: 0, y: 0, w: W, h: hh },
+        { x: 0, y: hh, w: W, h: hh },
+      ]
+    case 'tri': {
+      const tw = W / 3
+      return [
+        { x: 0, y: 0, w: tw, h: H },
+        { x: tw, y: 0, w: tw, h: H },
+        { x: 2 * tw, y: 0, w: tw, h: H },
+      ]
+    }
+    case 'grid-4':
+      return [
+        { x: 0, y: 0, w: hw, h: hh },
+        { x: hw, y: 0, w: hw, h: hh },
+        { x: 0, y: hh, w: hw, h: hh },
+        { x: hw, y: hh, w: hw, h: hh },
+      ]
+    case 'split-l': {
+      const lw = Math.round(W * SPLIT_L_FRAC)
+      return [
+        { x: 0, y: 0, w: lw, h: H },
+        { x: lw, y: 0, w: W - lw, h: H },
+      ]
+    }
+    default:
+      return [{ x: 0, y: 0, w: W, h: H }]
+  }
+}
+
+/** The body-style (pad / type-scale / display) for a body confined to an arbitrary cell — the generic
+ *  form of `bodyRegionStyle`, used for layout cells. The body element still fills the whole canvas, so
+ *  the padding is what confines it: on a side that touches the canvas edge, the safe-area pad; on an
+ *  interior side, the full distance to that edge PLUS a gutter (exactly what bodyRegionStyle's half/row
+ *  cases compute, e.g. 'left' pads right by SLIDE_W/2 + GUTTER). Type shrinks with the cell's smaller
+ *  dimension so a heading still fits the measure. Pure, so app + export derive identical CSS from it. */
+export function rectBodyStyle(rect: Rect): BodyRegionStyle {
+  const atLeft = rect.x <= 0
+  const atTop = rect.y <= 0
+  const atRight = rect.x + rect.w >= SLIDE_W
+  const atBottom = rect.y + rect.h >= SLIDE_H
+  if (atLeft && atTop && atRight && atBottom)
+    return { pad: `${PAD_Y}px ${PAD_X}px`, scale: 1, display: 'block' }
+  const left = atLeft ? PAD_X : Math.round(rect.x) + GUTTER
+  const right = atRight ? PAD_X : Math.round(SLIDE_W - rect.x - rect.w) + GUTTER
+  const top = atTop ? PAD_Y : Math.round(rect.y) + GUTTER
+  const bottom = atBottom
+    ? PAD_Y
+    : Math.round(SLIDE_H - rect.y - rect.h) + GUTTER
+  const wf = rect.w / SLIDE_W
+  const hf = rect.h / SLIDE_H
+  const scale = Math.round((0.4 + 0.6 * Math.min(wf, hf)) * 100) / 100
+  return {
+    pad: `${top}px ${right}px ${bottom}px ${left}px`,
+    scale,
+    display: 'flex',
+  }
+}
+
+/** The cells this slide's body layout resolves to. A real multi-cell tiling wins; otherwise the single
+ *  legacy body region (full/left/right/top/bottom + auto-image) as one cell — so `layout=''` is exactly
+ *  today's behavior. Cell 0 is where the markdown body sits in phase 1. */
+export function bodyCells(
+  slide: SlideThemeFields | null | undefined,
+  deck: DeckPresentationFields | null | undefined,
+): Rect[] {
+  const layout = resolveLayout(slide?.layout)
+  if (layout !== '') return layoutCells(layout)
+  const region = resolveBodyRegion(
+    slide?.body_region,
+    resolveBackgroundImage(
+      slide?.background ?? undefined,
+      deck?.background ?? undefined,
+    )?.layout,
+  )
+  return [bodyRegionRect(region)]
+}
+
+/** The body-style for this slide's FIRST cell — what the single markdown body renders with. Layout
+ *  tilings derive it generically; the legacy single-region path keeps its exact tuned values. */
+export function bodyStyleFor(
+  slide: SlideThemeFields | null | undefined,
+  deck: DeckPresentationFields | null | undefined,
+): BodyRegionStyle {
+  const layout = resolveLayout(slide?.layout)
+  if (layout !== '') return rectBodyStyle(layoutCells(layout)[0])
+  return bodyRegionStyle(
+    resolveBodyRegion(
+      slide?.body_region,
+      resolveBackgroundImage(
+        slide?.background ?? undefined,
+        deck?.background ?? undefined,
+      )?.layout,
+    ),
+  )
 }
 
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved
