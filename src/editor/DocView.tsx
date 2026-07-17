@@ -47,7 +47,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
-import { useDropImage } from './DocRegion'
+import { useDropImage, DropCellHighlight } from './imageDrop'
 import { LayoutPicker } from './LayoutPicker'
 import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
@@ -418,7 +418,7 @@ function DocCard({
   // Body-editable only where a body IS the edit layer. Flipping render_mode swaps which component
   // renders, remounting the card — the same branch Stage makes, for the same reason.
   const editable = editor.canEdit && slide.render_mode === 'markdown'
-  const drop = useDropImage(slide)
+  const drop = useDropImage(slide, deck)
   // The back mounts on the FIRST flip and then stays while the card lives: mounting is what starts
   // the notes query (so a deck you never flip never loads notes), and staying is what keeps the
   // flip-back animation from rotating an empty face. Windowing resets this with the card — fine,
@@ -435,11 +435,11 @@ function DocCard({
         'doc__card' +
         (active ? ' is-active' : '') +
         (flipped ? ' is-flipped' : '') +
-        (drop.side ? ' is-dropping' : '')
+        (drop.cellIndex != null ? ' is-dropping' : '')
       }
       style={{ width: colW, height: cardH }}
-      // Drop an image on a card and it half-bleeds to the side you dropped it, with the body moving
-      // to the other half on its own. The whole card is the target — the side is the drop's x.
+      // Drop an image and it becomes an image object snapped to the cell it landed on (fills an empty
+      // cell, or lands as a movable object on one that already has text). The highlight shows the target.
       onDragOver={dropActive ? drop.onDragOver : undefined}
       onDragLeave={dropActive ? drop.onDragLeave : undefined}
       onDrop={dropActive ? drop.onDrop : undefined}
@@ -474,6 +474,14 @@ function DocCard({
           {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
               coordinate space, so the button stays a constant size at any column width. */}
           {editable && <LayoutPicker slide={slide} scale={scale} />}
+          {dropActive && (
+            <DropCellHighlight
+              slide={slide}
+              deck={deck}
+              index={drop.cellIndex}
+              scale={scale}
+            />
+          )}
           {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
         </div>
         <div className="doc__face doc__face--back">

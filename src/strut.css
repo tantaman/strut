@@ -1082,6 +1082,12 @@ button {
   line-height: 1.1;
   margin: 0 0 0.4em;
   font-weight: 700;
+  /* Optical margin alignment: a big bold cap (W, T, V…) carries a left side-bearing that scales with
+     the type size, so a large heading reads as inset while the small body below sits flush — the body
+     looks "pulled left". Pull the heading's first glyph back by roughly that bearing so its VISUAL edge
+     lands on the same margin as the body (which stays truly flush). em-based, so it tracks each level's
+     size; first-line only (slide headings are short), and negligible for center/right alignment. */
+  text-indent: -0.045em;
 }
 .strut-md h1 {
   font-size: calc(88px * var(--strut-type-scale, 1));
@@ -1181,6 +1187,12 @@ button {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+/* An image object COVERS its box (crop to fill) rather than stretching — so snapping a photo to a layout
+   cell fills the region without distortion, and any hand-sized image keeps its aspect. (svg/video keep
+   their own fitting: inline shape svg is governed by preserveAspectRatio, video by its own ratio.) */
+.cmp img {
+  object-fit: cover;
 }
 
 /* selection handles */
@@ -3186,11 +3198,21 @@ button {
 .lyt-thumb.is-active .lyt-glyph__cell {
   border-color: var(--coral-soft);
 }
-/* Dragging an image over a card: the whole card arms, and the side is picked by the drop's x. */
+/* Dragging an image over a card: the whole card arms, and the target CELL lights up (drop.cellIndex). */
 .doc__card.is-dropping .doc__face {
   box-shadow:
     var(--shadow-lg),
     0 0 0 2px var(--coral);
+}
+/* The drop-target highlight: a coral wash over the exact cell the image will land in, in the surface's
+   own coordinate space (canvas px × scale). Inert — it's pure affordance. */
+.drop-cell {
+  position: absolute;
+  z-index: 4;
+  background: rgba(255, 90, 60, 0.12);
+  border: 2px solid var(--coral);
+  border-radius: 6px;
+  pointer-events: none;
 }
 .doc__drop-busy {
   position: absolute;

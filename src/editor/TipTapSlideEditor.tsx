@@ -16,6 +16,7 @@ import type { ReactNode } from 'react'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { useFitScale } from './useFitScale'
 import { SlideBodyEditors } from './SlideBodyEditors'
+import { useDropImage, DropCellHighlight } from './imageDrop'
 import { BackgroundImageLayer, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { DeckThemeFields } from './types'
@@ -36,6 +37,7 @@ export function TipTapSlideEditor({
 }) {
   const previewRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(previewRef, SLIDE_W, SLIDE_H)
+  const drop = useDropImage(slide, deck)
 
   const background = resolveBackground(
     slide.background,
@@ -47,7 +49,13 @@ export function TipTapSlideEditor({
   )
 
   return (
-    <div className="md-preview" ref={previewRef}>
+    <div
+      className="md-preview"
+      ref={previewRef}
+      onDragOver={drop.onDragOver}
+      onDragLeave={drop.onDragLeave}
+      onDrop={drop.onDrop}
+    >
       <div
         className="slide-surface"
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
@@ -66,6 +74,15 @@ export function TipTapSlideEditor({
           <SlideBodyEditors slide={slide} />
           {children}
         </div>
+        {/* Drop an image → it snaps to a cell (fill an empty one, or land as a movable object on one
+            with text). The highlight rides above the scaled canvas, in the surface's coordinate space. */}
+        <DropCellHighlight
+          slide={slide}
+          deck={deck}
+          index={drop.cellIndex}
+          scale={scale}
+        />
+        {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
       </div>
     </div>
   )

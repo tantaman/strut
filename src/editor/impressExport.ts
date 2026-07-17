@@ -37,7 +37,7 @@ const deg = (rad: number) => (rad * 180) / Math.PI
 // and the vars in themeVarsCss in step with their twins, or an exported deck partitions differently.
 const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:safe center;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
   .strut-md>*:first-child{margin-top:0;}
-  .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;}
+  .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;text-indent:-.045em;}
   .strut-md h1{font-size:calc(88px * var(--strut-type-scale,1));}
   .strut-md h2{font-size:calc(64px * var(--strut-type-scale,1));}
   .strut-md h3{font-size:calc(48px * var(--strut-type-scale,1));}
