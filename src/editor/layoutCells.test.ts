@@ -10,10 +10,14 @@ import {
   bodyRegionRect,
   bodyRegionStyle,
   bodyStyleFor,
+  cellDocAt,
+  cellPad,
   layoutCells,
   layoutDividers,
+  parseCells,
   rectBodyStyle,
   resolveLayout,
+  writeCellDoc,
 } from './types'
 import { SLIDE_H, SLIDE_W } from '../config'
 
@@ -140,6 +144,75 @@ describe('rectBodyStyle', () => {
   it('shrinks type for smaller cells', () => {
     const full = rectBodyStyle({ x: 0, y: 0, w: SLIDE_W, h: SLIDE_H })
     const quad = rectBodyStyle({ x: 0, y: 0, w: SLIDE_W / 2, h: SLIDE_H / 2 })
+    expect(quad.scale).toBeLessThan(full.scale)
+    expect(quad.scale).toBeGreaterThan(0)
+  })
+})
+
+describe('parseCells', () => {
+  it('tolerates empty / null / malformed as no cells', () => {
+    expect(parseCells('')).toEqual([])
+    expect(parseCells(null)).toEqual([])
+    expect(parseCells('{not json')).toEqual([])
+    expect(parseCells('{"a":1}')).toEqual([]) // not an array
+  })
+
+  it('coerces non-string entries to empty strings', () => {
+    expect(parseCells('["", "b", 3, null]')).toEqual(['', 'b', '', ''])
+  })
+})
+
+describe('cellDocAt', () => {
+  it('reads cell 0 from the doc column, higher cells from the cells blob', () => {
+    const slide = { doc: 'DOC0', cells: JSON.stringify(['', 'C1', 'C2']) }
+    expect(cellDocAt(slide, 0)).toBe('DOC0')
+    expect(cellDocAt(slide, 1)).toBe('C1')
+    expect(cellDocAt(slide, 2)).toBe('C2')
+  })
+
+  it('is empty for a cell with no stored content', () => {
+    expect(cellDocAt({ doc: '', cells: '' }, 1)).toBe('')
+    expect(cellDocAt({ doc: 'X', cells: JSON.stringify(['', 'C1']) }, 2)).toBe('')
+    expect(cellDocAt(null, 0)).toBe('')
+  })
+
+  it('never lets the cells blob shadow cell 0 (doc is the source of truth)', () => {
+    // Even if index 0 of the blob holds junk, cell 0 comes from `doc`.
+    expect(cellDocAt({ doc: 'DOC0', cells: '["JUNK","C1"]' }, 0)).toBe('DOC0')
+  })
+})
+
+describe('writeCellDoc', () => {
+  it('sets one cell and preserves its siblings', () => {
+    const next = writeCellDoc(JSON.stringify(['', 'C1', 'C2']), 2, 'C2new')
+    expect(parseCells(next)).toEqual(['', 'C1', 'C2new'])
+  })
+
+  it('grows the array with placeholders up to the target index', () => {
+    const next = writeCellDoc('', 3, 'C3')
+    expect(parseCells(next)).toEqual(['', '', '', 'C3'])
+  })
+
+  it('round-trips through cellDocAt', () => {
+    const cells = writeCellDoc(writeCellDoc('', 1, 'A'), 2, 'B')
+    expect(cellDocAt({ doc: 'D', cells }, 1)).toBe('A')
+    expect(cellDocAt({ doc: 'D', cells }, 2)).toBe('B')
+  })
+})
+
+describe('cellPad', () => {
+  it('gives positive insets and a scale in (0,1] for the whole canvas', () => {
+    const full = cellPad({ x: 0, y: 0, w: SLIDE_W, h: SLIDE_H })
+    expect(full.padX).toBeGreaterThan(0)
+    expect(full.padY).toBeGreaterThan(0)
+    expect(full.scale).toBe(1)
+  })
+
+  it('eases the inset and shrinks type for a smaller cell', () => {
+    const full = cellPad({ x: 0, y: 0, w: SLIDE_W, h: SLIDE_H })
+    const quad = cellPad({ x: 0, y: 0, w: SLIDE_W / 2, h: SLIDE_H / 2 })
+    expect(quad.padX).toBeLessThan(full.padX)
+    expect(quad.padY).toBeLessThan(full.padY)
     expect(quad.scale).toBeLessThan(full.scale)
     expect(quad.scale).toBeGreaterThan(0)
   })

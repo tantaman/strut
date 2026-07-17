@@ -1,12 +1,15 @@
 // The write model behind body editing, detached from the chrome around it: a TipTap editor bound to one
-// slide's `doc`, streaming every keystroke through `setSlideDoc.folded` (debounced, last-value-wins) and
-// committing ONE undo step per edit session on blur. Extracted from TipTapSlideEditor so the same model
-// can back BOTH surfaces — the Stage's single fit-to-viewport editor and Doc mode's column of N cards —
-// without either owning the other's layout.
+// CELL of a slide, streaming every keystroke through a `.folded` mutation (debounced, last-value-wins)
+// and committing ONE undo step per edit session on blur. Extracted from TipTapSlideEditor so the same
+// model can back BOTH surfaces — the Stage's single fit-to-viewport editor and Doc mode's column of N
+// cards — without either owning the other's layout.
 //
-// Folding is keyed by slide id, so N concurrent editors stream independently and never clobber each
-// other. The caller keys the component by slide id (like Stage does) so a new slide remounts the editor
-// and reseeds `baselineRef` from its doc.
+// A slide's layout tiles the canvas into cells (types.ts). Cell 0's doc is the `doc` column, written via
+// setSlideDoc — exactly as before, so a full-layout slide is unchanged. Cells 1..N live in the `cells`
+// blob, written via setSlideCells after merging this one cell into the current blob (writeCellDoc), so a
+// keystroke in one cell never clobbers a sibling. Either way the fold key is per (slide, cell), so N
+// concurrent cell editors stream independently. The caller keys each editor by slide id (and cell) so a
+// new slide remounts + reseeds `baselineRef` from that cell's doc.
 
 import { useRef } from 'react'
 import { useEditor } from '@tiptap/react'
@@ -16,37 +19,71 @@ import { useHistory } from './UndoProvider'
 import { strutExtensions } from './tiptapSchema'
 import { SlashCommand } from './slashCommand'
 import { parseDoc } from './tiptapDoc'
+import { cellDocAt, writeCellDoc } from './types'
 import type { SlideDetail } from './deckDetail'
 
-export function useSlideDocEditor(
-  slide: SlideDetail,
-  // Doc mode claims the ACTIVE slide from whichever card you type into. Held in a ref so a fresh inline
+export interface SlideEditorOpts {
+  // Doc mode claims the ACTIVE slide from whichever cell you type into. Held in a ref so a fresh inline
   // callback each render never re-registers.
-  opts?: {
-    onFocus?: () => void
-  },
+  onFocus?: () => void
+}
+
+/** A TipTap editor for cell `idx` of a slide (idx 0 = the legacy single body, in the `doc` column). */
+export function useSlideCellEditor(
+  slide: SlideDetail,
+  idx: number,
+  opts?: SlideEditorOpts,
 ): Editor | null {
   const mutate = useMutate()
   const history = useHistory()
   const optsRef = useRef(opts)
   optsRef.current = opts
-  // The doc JSON at the start of this edit session — one coarse undo step is pushed on blur (the
+  // The live slide row — read at write time so a cell's read-modify-write of the `cells` blob preserves
+  // whatever the sibling cells currently hold (the editor callbacks close over the FIRST render's slide).
+  const slideRef = useRef(slide)
+  slideRef.current = slide
+  // This cell's doc JSON at the start of the edit session — one coarse undo step is pushed on blur (the
   // per-keystroke stream is a live-preview write, not an undo boundary).
-  const baselineRef = useRef(slide.doc)
+  const baselineRef = useRef(cellDocAt(slide, idx))
 
-  // Commit the edit session as one undoable step (undo/redo swap the whole doc).
+  // Write this cell's doc. Cell 0 → the `doc` column (unchanged path); cells 1..N → the `cells` blob,
+  // merging just this cell in. `stream` folds per (slide, cell) for the live keystroke preview; the
+  // plain form is the committed write undo/redo replay through.
+  function writeDoc(doc: string) {
+    if (idx <= 0) {
+      mutate.setSlideDoc({ id: slide.id, doc, now: Date.now() })
+    } else {
+      const cells = writeCellDoc(slideRef.current.cells, idx, doc)
+      mutate.setSlideCells({ id: slide.id, cells, now: Date.now() })
+    }
+  }
+  function streamDoc(doc: string) {
+    if (idx <= 0) {
+      mutate.setSlideDoc.folded(
+        { key: slide.id },
+        { id: slide.id, doc, now: Date.now() },
+      )
+    } else {
+      const cells = writeCellDoc(slideRef.current.cells, idx, doc)
+      mutate.setSlideCells.folded(
+        { key: `${slide.id}:${idx}` },
+        { id: slide.id, cells, now: Date.now() },
+      )
+    }
+  }
+
+  // Commit the edit session as one undoable step. undo/redo swap this cell back/forward, always merged
+  // into the CURRENT blob (writeDoc reads slideRef), so a later sibling edit survives undoing this one.
   function commit(ed: Editor) {
     const after = JSON.stringify(ed.getJSON())
     const before = baselineRef.current
     if (after === before) return
     baselineRef.current = after
-    const apply = (doc: string) =>
-      mutate.setSlideDoc({ id: slide.id, doc, now: Date.now() })
-    apply(after)
+    writeDoc(after)
     history.push({
-      label: 'Edit slide',
-      redo: () => apply(after),
-      undo: () => apply(before),
+      label: idx <= 0 ? 'Edit slide' : 'Edit cell',
+      redo: () => writeDoc(after),
+      undo: () => writeDoc(before),
     })
   }
 
@@ -55,21 +92,24 @@ export function useSlideDocEditor(
     // because it's editor-only chrome (React, `document`) and the schema array stays render-path safe
     // for SSR/export. It contributes no nodes or marks, so it can't change what a doc serializes to.
     extensions: [...strutExtensions, SlashCommand],
-    content: parseDoc(slide.doc),
+    content: parseDoc(cellDocAt(slide, idx)),
     // The editable element IS the `.strut-md` surface, so it inherits the exact theme/typography the
     // renderer uses. `immediatelyRender: false` keeps it SSR-safe (no DOM at first render).
     immediatelyRender: false,
     editorProps: {
       attributes: { class: 'strut-md', spellcheck: 'false' },
     },
-    onUpdate: ({ editor: ed }) => {
-      const json = JSON.stringify(ed.getJSON())
-      mutate.setSlideDoc.folded(
-        { key: slide.id },
-        { id: slide.id, doc: json, now: Date.now() },
-      )
-    },
+    onUpdate: ({ editor: ed }) => streamDoc(JSON.stringify(ed.getJSON())),
     onFocus: () => optsRef.current?.onFocus?.(),
     onBlur: ({ editor: ed }) => commit(ed),
   })
+}
+
+/** The single-body editor (layout cell 0 / full-layout slides). Thin alias kept for the many call sites
+ *  that edit the one body. */
+export function useSlideDocEditor(
+  slide: SlideDetail,
+  opts?: SlideEditorOpts,
+): Editor | null {
+  return useSlideCellEditor(slide, 0, opts)
 }

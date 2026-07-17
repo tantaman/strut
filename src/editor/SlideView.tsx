@@ -9,7 +9,7 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { BackgroundImageLayer, MarkdownSurface, themeVars } from './render'
+import { BackgroundImageLayer, MarkdownBodies, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -20,7 +20,6 @@ import {
   mergeComponentRefs,
 } from './componentFragments'
 import { StaticComponent } from './ObjectsLayer'
-import { isDocEmpty } from './tiptapDoc'
 
 type DeckThemeRow = ({ background: string } & DeckThemeFields) | null
 
@@ -79,7 +78,7 @@ export function SlideView({
   const components = mergeComponentRefs(slide)
   return (
     <SlideFrame slide={slide} deck={deck} width={width}>
-      {!isDocEmpty(slide.doc) && <MarkdownSurface doc={slide.doc} />}
+      <MarkdownBodies slide={slide} />
       {components.map((component) => (
         <ComponentDataReader
           key={componentRefKey(component)}

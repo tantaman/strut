@@ -5,8 +5,12 @@ import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import {
   bodyStyleFor,
+  cellDocAt,
+  cellPad,
   cssHex,
   cssUrlValue,
+  layoutCells,
+  resolveLayout,
   resolveTextAlign,
   textTypeOf,
 } from './types'
@@ -15,9 +19,11 @@ import type {
   BackgroundImageSpec,
   ComponentKind,
   DeckPresentationFields,
+  Rect,
+  SlideCellFields,
   SlideThemeFields,
 } from './types'
-import { docToHtml } from './tiptapDoc'
+import { docToHtml, isDocEmpty } from './tiptapDoc'
 import { FONTS_BY_CATEGORY } from '../config'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
@@ -250,6 +256,62 @@ export const MarkdownSurface = memo(function MarkdownSurface({
       className="strut-md"
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
     />
+  )
+})
+
+/** The absolute box for one layout cell (canvas px) carrying the per-cell body vars. The enclosed
+ *  `.strut-md` fills the box and confines/scales itself off these vars — the SAME `--strut-body-*`
+ *  mechanism the single body uses, now set per cell instead of once on the container (themeVars). So a
+ *  cell body partitions for free on every surface, exactly like the whole-slide body does. */
+export function cellBoxStyle(rect: Rect): CSSProperties {
+  const { padX, padY, scale } = cellPad(rect)
+  return {
+    position: 'absolute',
+    left: rect.x,
+    top: rect.y,
+    width: rect.w,
+    height: rect.h,
+    '--strut-body-pad': `${padY}px ${padX}px`,
+    '--strut-type-scale': String(scale),
+    '--strut-body-display': 'flex',
+  } as CSSProperties
+}
+
+type SlideBodyFields = SlideThemeFields & SlideCellFields
+
+/** True when a slide has ANY body content — its single doc (full layout) or any cell (tiled). Lets the
+ *  spatial-mode underlay skip an empty body layer, exactly as the single-doc check did before. */
+export function slideHasBody(slide: SlideBodyFields): boolean {
+  const layout = resolveLayout(slide.layout)
+  if (layout === '') return !isDocEmpty(slide.doc)
+  return layoutCells(layout).some((_, i) => !isDocEmpty(cellDocAt(slide, i)))
+}
+
+/** The markdown body/bodies for a slide — the ONE shared read renderer, so thumbnails, overview,
+ *  presenter, share and the stage viewer all tile identically. A full-layout slide renders its single
+ *  `doc` (confined by the container's --strut-body-pad, i.e. today's behavior); a tiled slide renders one
+ *  positioned `.strut-md` per non-empty cell (each confined by its own cellBoxStyle vars). */
+export const MarkdownBodies = memo(function MarkdownBodies({
+  slide,
+}: {
+  slide: SlideBodyFields
+}) {
+  const layout = resolveLayout(slide.layout)
+  if (layout === '') {
+    return isDocEmpty(slide.doc) ? null : <MarkdownSurface doc={slide.doc} />
+  }
+  return (
+    <>
+      {layoutCells(layout).map((cell, i) => {
+        const doc = cellDocAt(slide, i)
+        if (isDocEmpty(doc)) return null
+        return (
+          <div key={i} className="strut-md-cell" style={cellBoxStyle(cell)}>
+            <MarkdownSurface doc={doc} />
+          </div>
+        )
+      })}
+    </>
   )
 })
 

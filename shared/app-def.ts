@@ -229,6 +229,17 @@ export const setSlideDocArgs = z.object({
 })
 export type SetSlideDocArgs = z.infer<typeof setSlideDocArgs>
 
+// Per-CELL markdown content (layout phase 2): the docs for cells 1..N as a JSON string[] of TipTap doc
+// JSON strings, index-aligned to layoutCells (index 0 is a placeholder — cell 0 lives in `doc`). Written
+// wholesale as a plain column patch (the client read-modify-writes the blob, preserving sibling cells),
+// streamed via `.folded` keyed per (slide, cell). See cellDocAt / writeCellDoc in src/editor/types.ts.
+export const setSlideCellsArgs = z.object({
+  id: z.string(),
+  cells: z.string(),
+  now: z.number(),
+})
+export type SetSlideCellsArgs = z.infer<typeof setSlideCellsArgs>
+
 // Per-slide RESEARCH NOTES: a free-form TipTap doc (JSON string) stored in the `slide_notes` side table
 // (loaded on demand via the deckNotes query, NOT with the deck). Upserted by slide_id; carries deck_id
 // so the deck-scoped notes query + its access gate resolve without a join. Streamed via `.folded`.
@@ -520,6 +531,7 @@ export const mutators = {
         text_align: '',
         body_region: '',
         layout: '',
+        cells: '',
       })
     },
   ),
@@ -590,6 +602,16 @@ export const mutators = {
     setSlideDocArgs,
     function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
       yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
+    },
+  ),
+
+  // Per-cell markdown content for cells 1..N (layout phase 2). Plain column patch of the whole `cells`
+  // JSON blob — the caller merges its one cell into the current blob before sending, so this stays a
+  // dumb last-write-wins column write (same shape/coarseness as setSlideDoc), streamed via `.folded`.
+  setSlideCells: shared(
+    setSlideCellsArgs,
+    function* (tx: IsoTx, a: SetSlideCellsArgs): MutationGen {
+      yield tx.update('slide', { id: a.id, cells: a.cells, modified: a.now })
     },
   ),
 

@@ -35,7 +35,7 @@ import {
   useState,
 } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { EditorContent } from '@tiptap/react'
+import { SlideBodyEditors } from './SlideBodyEditors'
 import type { ReactNode } from 'react'
 import { NotebookPen, Plus } from 'lucide-react'
 import { useQuery, useQueryStatus } from '@rindle/react'
@@ -47,7 +47,6 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
-import { useSlideDocEditor } from './useSlideDocEditor'
 import { useDropImage } from './DocRegion'
 import { LayoutPicker } from './LayoutPicker'
 import { SlideNotesEditor } from './SlideNotesEditor'
@@ -544,12 +543,9 @@ function DocCardBody({
   scale: number
   onFocusEditor: (slideId: string) => void
 }) {
-  const ed = useSlideDocEditor(slide, {
-    onFocus: () => onFocusEditor(slide.id),
-  })
   return (
     <DocCanvas slide={slide} deck={deck} scale={scale}>
-      <EditorContent editor={ed} className="strut-md-host" />
+      <SlideBodyEditors slide={slide} onFocusEditor={onFocusEditor} />
       {/* The slide's objects, composited on top but inert — so body text is placed in the real layout. */}
       <LockedObjects slide={slide} />
     </DocCanvas>
