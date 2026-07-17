@@ -224,6 +224,9 @@ export interface SlideThemeFields {
   background?: string | null
   body_region?: string | null
   layout?: string | null
+  // Density: how much safe-area padding the body gets ('' = comfortable | 'compact' | 'edge' = full
+  // bleed). Orthogonal to `layout`; scales only the outer safe-area, never interior gutters.
+  pad?: string | null
 }
 
 /** A deck as the presentation resolvers see it: text theme + the background the slide falls back to. */
@@ -343,38 +346,45 @@ export function regionAtPoint(nx: number, ny: number): BodyRegion {
 
 /** The geometry for a region: an inset + a type scale. Pure — both the app (themeVars) and the
  *  standalone export (themeVarsCss) derive their CSS vars from this one function. */
-export function bodyRegionStyle(region: BodyRegion): BodyRegionStyle {
+export function bodyRegionStyle(
+  region: BodyRegion,
+  padScale = 1,
+): BodyRegionStyle {
+  // Only the safe-area margin scales with density; the confinement half (halfX/halfY) is what pins the
+  // body to its region, so it must NOT scale — else full-bleed would dissolve the region.
+  const px = Math.round(PAD_X * padScale)
+  const py = Math.round(PAD_Y * padScale)
   const halfX = SLIDE_W / 2 + GUTTER
   const halfY = SLIDE_H / 2 + GUTTER
   switch (region) {
     // Width is the binding constraint on a column, so type shrinks with the measure.
     case 'left':
       return {
-        pad: `${PAD_Y}px ${halfX}px ${PAD_Y}px ${PAD_X}px`,
+        pad: `${py}px ${halfX}px ${py}px ${px}px`,
         scale: 0.68,
         display: 'flex',
       }
     case 'right':
       return {
-        pad: `${PAD_Y}px ${PAD_X}px ${PAD_Y}px ${halfX}px`,
+        pad: `${py}px ${px}px ${py}px ${halfX}px`,
         scale: 0.68,
         display: 'flex',
       }
     // A row keeps the full measure; height is what's scarce, so type shrinks only slightly.
     case 'top':
       return {
-        pad: `${PAD_Y}px ${PAD_X}px ${halfY}px ${PAD_X}px`,
+        pad: `${py}px ${px}px ${halfY}px ${px}px`,
         scale: 0.85,
         display: 'flex',
       }
     case 'bottom':
       return {
-        pad: `${halfY}px ${PAD_X}px ${PAD_Y}px ${PAD_X}px`,
+        pad: `${halfY}px ${px}px ${py}px ${px}px`,
         scale: 0.85,
         display: 'flex',
       }
     default:
-      return { pad: `${PAD_Y}px ${PAD_X}px`, scale: 1, display: 'block' }
+      return { pad: `${py}px ${px}px`, scale: 1, display: 'block' }
   }
 }
 
@@ -503,18 +513,22 @@ export function layoutDividers(layout: SlideLayout): LayoutDivider[] {
  *  interior side, the full distance to that edge PLUS a gutter (exactly what bodyRegionStyle's half/row
  *  cases compute, e.g. 'left' pads right by SLIDE_W/2 + GUTTER). Type shrinks with the cell's smaller
  *  dimension so a heading still fits the measure. Pure, so app + export derive identical CSS from it. */
-export function rectBodyStyle(rect: Rect): BodyRegionStyle {
+export function rectBodyStyle(rect: Rect, padScale = 1): BodyRegionStyle {
+  // Density scales only the safe-area sides (those touching the canvas edge); interior sides keep their
+  // full distance-to-edge + gutter, which is what confines the body to the cell.
+  const px = Math.round(PAD_X * padScale)
+  const py = Math.round(PAD_Y * padScale)
   const atLeft = rect.x <= 0
   const atTop = rect.y <= 0
   const atRight = rect.x + rect.w >= SLIDE_W
   const atBottom = rect.y + rect.h >= SLIDE_H
   if (atLeft && atTop && atRight && atBottom)
-    return { pad: `${PAD_Y}px ${PAD_X}px`, scale: 1, display: 'block' }
-  const left = atLeft ? PAD_X : Math.round(rect.x) + GUTTER
-  const right = atRight ? PAD_X : Math.round(SLIDE_W - rect.x - rect.w) + GUTTER
-  const top = atTop ? PAD_Y : Math.round(rect.y) + GUTTER
+    return { pad: `${py}px ${px}px`, scale: 1, display: 'block' }
+  const left = atLeft ? px : Math.round(rect.x) + GUTTER
+  const right = atRight ? px : Math.round(SLIDE_W - rect.x - rect.w) + GUTTER
+  const top = atTop ? py : Math.round(rect.y) + GUTTER
   const bottom = atBottom
-    ? PAD_Y
+    ? py
     : Math.round(SLIDE_H - rect.y - rect.h) + GUTTER
   const wf = rect.w / SLIDE_W
   const hf = rect.h / SLIDE_H
@@ -551,8 +565,9 @@ export function bodyStyleFor(
   slide: SlideThemeFields | null | undefined,
   deck: DeckPresentationFields | null | undefined,
 ): BodyRegionStyle {
+  const padScale = slidePadScale(slide)
   const layout = resolveLayout(slide?.layout)
-  if (layout !== '') return rectBodyStyle(layoutCells(layout)[0])
+  if (layout !== '') return rectBodyStyle(layoutCells(layout)[0], padScale)
   return bodyRegionStyle(
     resolveBodyRegion(
       slide?.body_region,
@@ -561,6 +576,7 @@ export function bodyStyleFor(
         deck?.background ?? undefined,
       )?.layout,
     ),
+    padScale,
   )
 }
 
@@ -621,7 +637,10 @@ export function writeCellDoc(
  *  the cell, so this is a comfortable safe-area inset that eases off for smaller cells, plus the same
  *  type down-scale (shared with rectBodyStyle) so a heading still fits the narrower measure. Pure, so the
  *  editor and every read surface derive identical geometry. */
-export function cellPad(rect: Rect): {
+export function cellPad(
+  rect: Rect,
+  padScale = 1,
+): {
   padX: number
   padY: number
   scale: number
@@ -629,10 +648,33 @@ export function cellPad(rect: Rect): {
   const wf = rect.w / SLIDE_W
   const hf = rect.h / SLIDE_H
   return {
-    padX: Math.round(PAD_X * (0.55 + 0.45 * wf)),
-    padY: Math.round(PAD_Y * (0.55 + 0.45 * hf)),
+    padX: Math.round(PAD_X * (0.55 + 0.45 * wf) * padScale),
+    padY: Math.round(PAD_Y * (0.55 + 0.45 * hf) * padScale),
     scale: Math.round((0.4 + 0.6 * Math.min(wf, hf)) * 100) / 100,
   }
+}
+
+// ---- density: how much safe-area padding the body gets (the LayoutPicker's second axis) -----------
+// Orthogonal to `layout`: a slide can be a tight two-column OR a full-bleed single. The preset scales
+// only the OUTER safe-area (PAD_X/PAD_Y in rectBodyStyle/bodyRegionStyle/cellPad); interior cell gutters
+// never scale, so a full-bleed multi-cell slide reaches the outer edges without its cells colliding.
+
+export const SLIDE_PADS = ['', 'compact', 'edge'] as const
+export type SlidePad = (typeof SLIDE_PADS)[number]
+
+/** Normalize a stored `pad` to a known preset ('' / unknown = comfortable). */
+export function resolveSlidePad(pad: string | null | undefined): SlidePad {
+  return (SLIDE_PADS as readonly string[]).includes(pad ?? '')
+    ? ((pad ?? '') as SlidePad)
+    : ''
+}
+
+const PAD_SCALE: Record<SlidePad, number> = { '': 1, compact: 0.5, edge: 0 }
+
+/** The multiplier a slide's density applies to the body's safe-area padding: comfortable (1, today's
+ *  value — so existing slides are unchanged) / compact (½) / edge (0 = full bleed). */
+export function slidePadScale(slide: SlideThemeFields | null | undefined): number {
+  return PAD_SCALE[resolveSlidePad(slide?.pad)]
 }
 
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved

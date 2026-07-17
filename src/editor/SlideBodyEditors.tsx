@@ -11,7 +11,7 @@
 
 import { EditorContent } from '@tiptap/react'
 import { cellBoxStyle } from './render'
-import { layoutCells, resolveLayout } from './types'
+import { layoutCells, resolveLayout, slidePadScale } from './types'
 import { useSlideCellEditor } from './useSlideDocEditor'
 import type { Rect } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -21,6 +21,7 @@ function CellEditor({
   idx,
   cell,
   tiled,
+  padScale,
   onFocusEditor,
 }: {
   slide: SlideDetail
@@ -28,6 +29,7 @@ function CellEditor({
   cell: Rect
   // false = the legacy single body filling the canvas; true = a positioned cell box.
   tiled: boolean
+  padScale: number
   onFocusEditor?: (slideId: string) => void
 }) {
   const editor = useSlideCellEditor(
@@ -37,7 +39,7 @@ function CellEditor({
   )
   if (!tiled) return <EditorContent editor={editor} className="strut-md-host" />
   return (
-    <div className="strut-md-cell" style={cellBoxStyle(cell)}>
+    <div className="strut-md-cell" style={cellBoxStyle(cell, padScale)}>
       <EditorContent editor={editor} className="strut-md-host" />
     </div>
   )
@@ -51,6 +53,7 @@ export function SlideBodyEditors({
   onFocusEditor?: (slideId: string) => void
 }) {
   const layout = resolveLayout(slide.layout)
+  const padScale = slidePadScale(slide)
   if (layout === '') {
     return (
       <CellEditor
@@ -58,6 +61,7 @@ export function SlideBodyEditors({
         idx={0}
         cell={layoutCells('')[0]}
         tiled={false}
+        padScale={padScale}
         onFocusEditor={onFocusEditor}
       />
     )
@@ -73,6 +77,7 @@ export function SlideBodyEditors({
           idx={i}
           cell={cell}
           tiled
+          padScale={padScale}
           onFocusEditor={onFocusEditor}
         />
       ))}

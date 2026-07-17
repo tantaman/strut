@@ -19,9 +19,11 @@ import {
   layoutCells,
   layoutDividers,
   resolveLayout,
+  resolveSlidePad,
   SLIDE_LAYOUTS,
+  SLIDE_PADS,
 } from './types'
-import type { SlideLayout } from './types'
+import type { SlideLayout, SlidePad } from './types'
 import type { SlideDetail } from './deckDetail'
 
 const LABELS: Record<SlideLayout, string> = {
@@ -31,6 +33,24 @@ const LABELS: Record<SlideLayout, string> = {
   tri: 'Three columns',
   'grid-4': 'Grid',
   'split-l': 'Split',
+}
+
+const PAD_LABELS: Record<SlidePad, string> = {
+  '': 'Comfortable',
+  compact: 'Compact',
+  edge: 'Edge to edge',
+}
+
+// The density glyph: a mini slide (the box) with a content block whose inset shrinks as padding does —
+// comfortable = generous margin, edge = the content bleeds to the frame. Same drawn-from-one-value idea
+// as LayoutGlyph, so the popover reads as one system.
+const PAD_INSET: Record<SlidePad, number> = { '': 5, compact: 2.5, edge: 0 }
+function PadGlyph({ pad }: { pad: SlidePad }) {
+  return (
+    <span className="lyt-pad-glyph" aria-hidden>
+      <i style={{ inset: `${PAD_INSET[pad]}px` }} />
+    </span>
+  )
 }
 
 const GAP = 6
@@ -68,6 +88,7 @@ export function LayoutPicker({
   const mutate = useMutate()
   const history = useHistory()
   const current = resolveLayout(slide.layout)
+  const currentPad = resolveSlidePad(slide.pad)
 
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
@@ -84,6 +105,20 @@ export function LayoutPicker({
     apply(next)
     history.push({
       label: 'Change layout',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
+  }
+
+  const commitPad = (next: SlidePad) => {
+    setOpen(false)
+    if (next === currentPad) return
+    const before = slide.pad
+    const apply = (pad: string) =>
+      mutate.setSlideTheme({ id: slide.id, pad, now: Date.now() })
+    apply(next)
+    history.push({
+      label: 'Change padding',
       redo: () => apply(next),
       undo: () => apply(before),
     })
@@ -187,7 +222,7 @@ export function LayoutPicker({
         createPortal(
           <div
             ref={panelRef}
-            className="popover lyt-menu"
+            className="popover lyt-pop"
             style={{
               top: pos?.top ?? 0,
               left: pos?.left ?? 0,
@@ -195,17 +230,34 @@ export function LayoutPicker({
             }}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {SLIDE_LAYOUTS.map((id) => (
-              <button
-                key={id || 'full'}
-                type="button"
-                className={'lyt-thumb' + (id === current ? ' is-active' : '')}
-                title={LABELS[id]}
-                onClick={() => commit(id)}
-              >
-                <LayoutGlyph layout={id} />
-              </button>
-            ))}
+            <div className="lyt-menu">
+              {SLIDE_LAYOUTS.map((id) => (
+                <button
+                  key={id || 'full'}
+                  type="button"
+                  className={'lyt-thumb' + (id === current ? ' is-active' : '')}
+                  title={LABELS[id]}
+                  onClick={() => commit(id)}
+                >
+                  <LayoutGlyph layout={id} />
+                </button>
+              ))}
+            </div>
+            {/* Second axis: body density (padding), from generous to full-bleed. */}
+            <div className="lyt-pads">
+              {SLIDE_PADS.map((p) => (
+                <button
+                  key={p || 'comfy'}
+                  type="button"
+                  className={'lyt-pad' + (p === currentPad ? ' is-active' : '')}
+                  title={`${PAD_LABELS[p]} padding`}
+                  onClick={() => commitPad(p)}
+                >
+                  <PadGlyph pad={p} />
+                  <span className="lyt-pad-label">{PAD_LABELS[p]}</span>
+                </button>
+              ))}
+            </div>
           </div>,
           document.body,
         )}

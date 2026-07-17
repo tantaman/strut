@@ -3154,18 +3154,78 @@ button {
   border-radius: 1.5px;
   box-sizing: border-box;
 }
-/* The popover: a 2-column gallery of layout thumbnails, Instagram-style. */
+/* The popover: a 2-column gallery of layout thumbnails (Instagram-style), then a density row below.
+   The panel chrome/padding comes from .popover; .lyt-pop just stacks the two sections. */
+.lyt-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .lyt-menu {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  padding: 10px;
+}
+/* Second axis: body density — three padding presets (comfortable / compact / edge-to-edge). */
+.lyt-pads {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.lyt-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s;
+}
+.lyt-pad:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+.lyt-pad.is-active {
+  color: var(--coral);
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+/* A mini slide (the box) with a content block inside; the inset (set inline per level) shows how much
+   padding the level leaves — edge-to-edge fills the box. */
+.lyt-pad-glyph {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 22px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.lyt-pad-glyph i {
+  position: absolute;
+  display: block;
+  background: currentColor;
+  border-radius: 1px;
 }
 .lyt-thumb {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
+  /* Stretch to fill the grid column (like the density chips below) so the two rows share one width and
+     the thumbs don't clump to the left. */
+  width: auto;
   height: 52px;
   padding: 0;
   border: 1px solid var(--line);
