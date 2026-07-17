@@ -3,6 +3,12 @@
 // and edit the deck as a document instead of selecting one slide at a time. In this mode it owns the
 // whole viewport: no header, no well — chrome-free by design, the clean slate for authoring.
 //
+// Each card has a BACK: flip it over (corner button, or ⌘. on the active card) and its research notes
+// are there, editable in place — the index-card metaphor made literal. Front = what the audience sees;
+// back = what you (and the AI) know. Same slide_notes store as the Research view, loaded lazily on
+// first flip; the back keeps the card's exact geometry (long notes scroll inside it) so the flip never
+// disturbs the virtualizer's exact row math.
+//
 // Cards stay SLIDE-SHAPED (1280×720 scaled to the column, not reflowed into prose): the fixed geometry is
 // the contract LockedObjects, the spatial components and the impress export all depend on, and it keeps
 // what you edit identical to what renders. It also makes this virtualizer simpler than Research's —
@@ -33,13 +39,16 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/react'
 import type { ReactNode } from 'react'
-import { Plus } from 'lucide-react'
+import { NotebookPen, Plus } from 'lucide-react'
+import { useQuery, useQueryStatus } from '@rindle/react'
+import { deckNotesQuery } from '../../shared/queries'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { useEditor } from './EditorState'
 import { useAddSlide } from './useAddSlide'
 import { useSlideDocEditor } from './useSlideDocEditor'
 import { FormatBar } from './TipTapSlideEditor'
 import { DocRegionDrag, useDropImage } from './DocRegion'
+import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
 import { LockedObjects } from './ObjectsLayer'
 import { UserStyle } from './CssEditor'
@@ -216,6 +225,41 @@ export function DocView({
     setFocusedEditor((cur) => (cur === ed ? null : cur))
   }, [])
 
+  // ---- the flip: research notes live on the BACK of each card ----
+  // Hoisted, not per-card: windowing unmounts offscreen cards, so card-local state would silently
+  // unflip anything you scrolled away from. A Set so several cards can be turned over at once.
+  const [flipped, setFlipped] = useState<ReadonlySet<string>>(new Set())
+  const toggleFlip = useCallback(
+    (id: string) => {
+      setFlipped((prev) => {
+        const next = new Set(prev)
+        next.has(id) ? next.delete(id) : next.add(id)
+        return next
+      })
+      // Turning a card over claims it, the same way focusing its text does — the back you're reading
+      // is what the AI grounds on. No scroll snap: the card is already where you're looking.
+      if (!flipped.has(id) && id !== editor.activeSlideId) {
+        suppressScrollTo.current = id
+        editor.setActiveSlide(id)
+      }
+    },
+    [flipped, editor],
+  )
+  // ⌘. / Ctrl+. flips the active card — reachable mid-sentence without leaving the keyboard (a bare
+  // letter would type into the focused TipTap editor).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === '.' && (e.metaKey || e.ctrlKey)) {
+        const id = editor.activeSlideId
+        if (!id) return
+        e.preventDefault()
+        toggleFlip(id)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [editor.activeSlideId, toggleFlip])
+
   if (slides.length === 0) {
     return (
       <div className="doc">
@@ -280,6 +324,8 @@ export function DocView({
                   colW={colW}
                   cardH={cardH}
                   scale={scale}
+                  flipped={flipped.has(s.id)}
+                  onToggleFlip={toggleFlip}
                   onFocusEditor={onFocusEditor}
                   onBlurEditor={onBlurEditor}
                 />
@@ -312,6 +358,8 @@ function DocCard({
   colW,
   cardH,
   scale,
+  flipped,
+  onToggleFlip,
   onFocusEditor,
   onBlurEditor,
 }: {
@@ -320,6 +368,8 @@ function DocCard({
   colW: number
   cardH: number
   scale: number
+  flipped: boolean
+  onToggleFlip: (id: string) => void
   onFocusEditor: (ed: Editor, slideId: string) => void
   onBlurEditor: (ed: Editor) => void
 }) {
@@ -329,49 +379,115 @@ function DocCard({
   // renders, remounting the card — the same branch Stage makes, for the same reason.
   const editable = editor.canEdit && slide.render_mode === 'markdown'
   const drop = useDropImage(slide)
+  // The back mounts on the FIRST flip and then stays while the card lives: mounting is what starts
+  // the notes query (so a deck you never flip never loads notes), and staying is what keeps the
+  // flip-back animation from rotating an empty face. Windowing resets this with the card — fine,
+  // a remount re-runs the same lazy path.
+  const [backMounted, setBackMounted] = useState(false)
+  useEffect(() => {
+    if (flipped) setBackMounted(true)
+  }, [flipped])
+  // The back is the drop target for nothing: images land on slide bodies, not in notes.
+  const dropActive = editable && !flipped
   return (
     <div
       className={
         'doc__card' +
         (active ? ' is-active' : '') +
+        (flipped ? ' is-flipped' : '') +
         (drop.side ? ' is-dropping' : '')
       }
       style={{ width: colW, height: cardH }}
       // Drop an image on a card and it half-bleeds to the side you dropped it, with the body moving
       // to the other half on its own. The whole card is the target — the side is the drop's x.
-      onDragOver={editable ? drop.onDragOver : undefined}
-      onDragLeave={editable ? drop.onDragLeave : undefined}
-      onDrop={editable ? drop.onDrop : undefined}
+      onDragOver={dropActive ? drop.onDragOver : undefined}
+      onDragLeave={dropActive ? drop.onDragLeave : undefined}
+      onDrop={dropActive ? drop.onDrop : undefined}
     >
-      {editable ? (
-        <DocCardBody
-          slide={slide}
-          deck={deck}
-          scale={scale}
-          onFocusEditor={onFocusEditor}
-          onBlurEditor={onBlurEditor}
+      <div className="doc__flip">
+        <div className="doc__face doc__face--front">
+          {editable ? (
+            <DocCardBody
+              slide={slide}
+              deck={deck}
+              scale={scale}
+              onFocusEditor={onFocusEditor}
+              onBlurEditor={onBlurEditor}
+            />
+          ) : (
+            // A spatial slide (or a read-only viewer): the real composited render, not an editor. Objects
+            // are placed on the Stage's canvas, so hand it off there.
+            <button
+              className="doc__static"
+              title={
+                editor.canEdit
+                  ? 'Objects slide — open it in Slides to edit'
+                  : undefined
+              }
+              onClick={() => {
+                editor.setActiveSlide(slide.id)
+                if (editor.canEdit) editor.setMode('slide')
+              }}
+            >
+              <SlideView slide={slide} deck={deck} width={colW} />
+            </button>
+          )}
+          {/* The grip + snap preview ride above the scaled canvas, in the card's own coordinate space. */}
+          {editable && <DocRegionDrag slide={slide} deck={deck} scale={scale} />}
+          {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
+        </div>
+        <div className="doc__face doc__face--back">
+          {backMounted && <DocNotesFace slide={slide} flipped={flipped} />}
+        </div>
+      </div>
+      {/* The flip affordance sits OUTSIDE the rotating pair so it never mirrors — one fixed corner
+          button that reads as "this card has a back". Also the target of ⌘. on the active card. */}
+      <button
+        className="doc__flipbtn"
+        title={
+          flipped ? 'Flip back to the slide (⌘.)' : 'Notes — flip the card (⌘.)'
+        }
+        onClick={() => onToggleFlip(slide.id)}
+      >
+        <NotebookPen size={14} />
+      </button>
+    </div>
+  )
+}
+
+// The back of a card: the slide's research notes, editable in place. Same store + editor as the
+// Research view (slide_notes via deckNotes) — the flip is another door to the same doc. The query
+// subscribes per-face and rindle dedupes, so notes sync only while at least one back is mounted.
+// Long notes scroll INSIDE the face: the card's geometry is fixed (the virtualizer's row math and
+// the card fiction both depend on it), so the back gets a scrollbar, not a taller box.
+function DocNotesFace({
+  slide,
+  flipped,
+}: {
+  slide: SlideDetail
+  flipped: boolean
+}) {
+  const editor = useEditor()
+  const notes = useQuery(deckNotesQuery({ deckId: editor.deckId }))
+  const notesStatus = useQueryStatus(deckNotesQuery({ deckId: editor.deckId }))
+  // Seed only once the query is authoritative (an open editor doesn't rebase remote edits in) —
+  // the same contract Research honors.
+  const resolved = notesStatus !== 'unknown'
+  const doc = notes.find((n) => n.slide_id === slide.id)?.doc ?? ''
+  return (
+    <div className="doc__notes">
+      <div className="doc__notes-label">Notes</div>
+      {resolved ? (
+        <SlideNotesEditor
+          slideId={slide.id}
+          deckId={editor.deckId}
+          doc={doc}
+          canEdit={editor.canEdit}
+          autoFocus={flipped}
         />
       ) : (
-        // A spatial slide (or a read-only viewer): the real composited render, not an editor. Objects
-        // are placed on the Stage's canvas, so hand it off there.
-        <button
-          className="doc__static"
-          title={
-            editor.canEdit
-              ? 'Objects slide — open it in Slides to edit'
-              : undefined
-          }
-          onClick={() => {
-            editor.setActiveSlide(slide.id)
-            if (editor.canEdit) editor.setMode('slide')
-          }}
-        >
-          <SlideView slide={slide} deck={deck} width={colW} />
-        </button>
+        <div className="doc__notes-loading">Loading notes…</div>
       )}
-      {/* The grip + snap preview ride above the scaled canvas, in the card's own coordinate space. */}
-      {editable && <DocRegionDrag slide={slide} deck={deck} scale={scale} />}
-      {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
     </div>
   )
 }

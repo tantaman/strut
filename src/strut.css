@@ -2907,20 +2907,116 @@ button {
   position: relative;
   margin: 0 auto;
 }
+/* A card is a two-faced object — the slide on the front, its research notes on the back. The card
+   itself is just the 3D stage (perspective, NO overflow clip — a mid-flip face projects outside the
+   box); the faces carry the surface styles (background/radius/shadow) so nothing static lingers
+   behind the rotation. Geometry never changes with the flip: the virtualizer's exact row math and
+   the drop/grip coordinate spaces all keep holding. */
 .doc__card {
   position: relative;
+  perspective: 1600px;
+}
+.doc__flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.35, 0.1, 0.2, 1);
+}
+.doc__card.is-flipped .doc__flip {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .doc__flip {
+    transition: none;
+  }
+}
+.doc__face {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   border-radius: 6px;
   background: #fff;
   box-shadow: var(--shadow-lg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition: box-shadow 0.12s;
 }
-/* The card the header + AI act on (the one under the viewport center). The ring rides in the shadow,
-   not a border, so tracking the scroll never reflows the column by a pixel. */
-.doc__card.is-active {
+/* The back reads as the card's paper back — the app surface, not the slide's white. */
+.doc__face--back {
+  transform: rotateY(180deg);
+  background: var(--panel);
+  display: flex;
+}
+/* 3D hit-testing isn't reliable cross-browser: gate the hidden face's pointer events explicitly so
+   a flipped-away editor can never swallow a click (or keep a caret) it shouldn't have. */
+.doc__card.is-flipped .doc__face--front {
+  pointer-events: none;
+}
+.doc__card:not(.is-flipped) .doc__face--back {
+  pointer-events: none;
+}
+/* The card the AI acts on (the one under the viewport center). The ring rides in the shadow, not a
+   border, so tracking the scroll never reflows the column by a pixel. */
+.doc__card.is-active .doc__face {
   box-shadow:
     var(--shadow-lg),
     0 0 0 2px var(--coral);
+}
+
+/* ---- the back's content: notes, scrolling inside the fixed card ---- */
+.doc__notes {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 24px 34px 30px;
+}
+.doc__notes-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  user-select: none;
+}
+.doc__notes-loading {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* The flip affordance: one fixed corner button OUTSIDE the rotating pair (it never mirrors). Hidden
+   at rest like the grip — a card at rest is a slide — but pinned visible on a flipped card so the
+   way back never needs discovering. */
+.doc__flipbtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+.doc__card:hover .doc__flipbtn,
+.doc__card.is-flipped .doc__flipbtn,
+.doc__flipbtn:focus-visible {
+  opacity: 1;
+}
+.doc__flipbtn:hover {
+  color: var(--coral);
+  border-color: var(--coral);
 }
 /* ---- partitioning a card (DocRegion) ----
    The grip and the snap preview live in the CARD's coordinate space, above the scaled canvas — so the
@@ -2992,7 +3088,7 @@ button {
   text-transform: capitalize;
 }
 /* Dragging an image over a card: the whole card arms, and the side is picked by the drop's x. */
-.doc__card.is-dropping {
+.doc__card.is-dropping .doc__face {
   box-shadow:
     var(--shadow-lg),
     0 0 0 2px var(--coral);

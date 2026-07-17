@@ -5,7 +5,7 @@
 // `strutExtensions` as slides, so a note IS a slide-shaped doc (renderable by the static renderer, and
 // groundable by the AI Edit lane later). Bound by slide_id; deck_id rides along for the deck-scoped write.
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
@@ -17,6 +17,7 @@ export function SlideNotesEditor({
   deckId,
   doc,
   canEdit,
+  autoFocus = false,
 }: {
   slideId: string
   deckId: string
@@ -26,6 +27,10 @@ export function SlideNotesEditor({
   // slideId, so the seed is correct.
   doc: string
   canEdit: boolean
+  // While true, this editor claims the caret (and releases it when it turns false). Doc mode's card
+  // flip drives it so turning a card over drops you straight into writing the notes — and flipping
+  // back blurs, which is what commits the edit session as one undo step.
+  autoFocus?: boolean
 }) {
   const mutate = useMutate()
   const history = useHistory()
@@ -50,6 +55,15 @@ export function SlideNotesEditor({
     },
     onBlur: () => commit(),
   })
+
+  // Follow `autoFocus` AFTER mount too (the flip toggles it on an already-mounted editor). Focusing a
+  // read-only editor would put a useless caret nowhere, so only claim when editable; releasing checks
+  // isFocused so an unflip never blurs an editor the user has since moved out of.
+  useEffect(() => {
+    if (!editor) return
+    if (autoFocus && canEdit) editor.commands.focus('end')
+    else if (!autoFocus && editor.isFocused) editor.commands.blur()
+  }, [autoFocus, canEdit, editor])
 
   // Commit the edit session as one undoable step (undo/redo swap the whole note doc) — mirrors slides.
   function commit() {
