@@ -101,6 +101,7 @@ export const slide = table("slide")
     body_region: string(),
     layout: string(),
     cells: string(),
+    pad: string(),
   })
   .primaryKey("id");
 

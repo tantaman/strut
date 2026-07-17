@@ -17,6 +17,8 @@ import {
   parseCells,
   rectBodyStyle,
   resolveLayout,
+  resolveSlidePad,
+  slidePadScale,
   writeCellDoc,
 } from './types'
 import { SLIDE_H, SLIDE_W } from '../config'
@@ -215,6 +217,47 @@ describe('cellPad', () => {
     expect(quad.padY).toBeLessThan(full.padY)
     expect(quad.scale).toBeLessThan(full.scale)
     expect(quad.scale).toBeGreaterThan(0)
+  })
+})
+
+describe('slidePadScale / density', () => {
+  it('resolves presets, unknown/empty → comfortable', () => {
+    expect(resolveSlidePad('')).toBe('')
+    expect(resolveSlidePad('compact')).toBe('compact')
+    expect(resolveSlidePad('edge')).toBe('edge')
+    expect(resolveSlidePad('bogus')).toBe('')
+    expect(resolveSlidePad(null)).toBe('')
+  })
+
+  it('scales the safe-area: comfortable 1, compact ½, edge 0', () => {
+    expect(slidePadScale({ pad: '' })).toBe(1)
+    expect(slidePadScale({ pad: 'compact' })).toBe(0.5)
+    expect(slidePadScale({ pad: 'edge' })).toBe(0)
+    expect(slidePadScale(null)).toBe(1)
+  })
+
+  it('rectBodyStyle full scales its pad, zero at edge (full bleed)', () => {
+    const full = { x: 0, y: 0, w: SLIDE_W, h: SLIDE_H }
+    expect(rectBodyStyle(full).pad).toBe('64px 88px') // default padScale = 1
+    expect(rectBodyStyle(full, 0.5).pad).toBe('32px 44px')
+    expect(rectBodyStyle(full, 0).pad).toBe('0px 0px')
+  })
+
+  it('cellPad scales with density (0 at edge), type-scale unaffected', () => {
+    const cell = { x: 0, y: 0, w: SLIDE_W / 2, h: SLIDE_H }
+    const comfy = cellPad(cell, 1)
+    const edge = cellPad(cell, 0)
+    expect(comfy.padX).toBeGreaterThan(0)
+    expect(edge.padX).toBe(0)
+    expect(edge.padY).toBe(0)
+    expect(edge.scale).toBe(comfy.scale) // density changes padding, not type size
+  })
+
+  it('bodyRegionStyle keeps the confinement half when density → 0', () => {
+    // 'left' at full bleed: the outer safe-area sides go to 0, but the RIGHT side (the confinement that
+    // pins the body to the left half) must survive — else full-bleed would dissolve the region.
+    const half = SLIDE_W / 2 + 24 // + GUTTER
+    expect(bodyRegionStyle('left', 0).pad).toBe(`0px ${half}px 0px 0px`)
   })
 })
 

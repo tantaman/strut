@@ -12,6 +12,7 @@ import {
   layoutCells,
   resolveLayout,
   resolveTextAlign,
+  slidePadScale,
   textTypeOf,
 } from './types'
 import type {
@@ -263,8 +264,8 @@ export const MarkdownSurface = memo(function MarkdownSurface({
  *  `.strut-md` fills the box and confines/scales itself off these vars — the SAME `--strut-body-*`
  *  mechanism the single body uses, now set per cell instead of once on the container (themeVars). So a
  *  cell body partitions for free on every surface, exactly like the whole-slide body does. */
-export function cellBoxStyle(rect: Rect): CSSProperties {
-  const { padX, padY, scale } = cellPad(rect)
+export function cellBoxStyle(rect: Rect, padScale = 1): CSSProperties {
+  const { padX, padY, scale } = cellPad(rect, padScale)
   return {
     position: 'absolute',
     left: rect.x,
@@ -300,13 +301,14 @@ export const MarkdownBodies = memo(function MarkdownBodies({
   if (layout === '') {
     return isDocEmpty(slide.doc) ? null : <MarkdownSurface doc={slide.doc} />
   }
+  const padScale = slidePadScale(slide)
   return (
     <>
       {layoutCells(layout).map((cell, i) => {
         const doc = cellDocAt(slide, i)
         if (isDocEmpty(doc)) return null
         return (
-          <div key={i} className="strut-md-cell" style={cellBoxStyle(cell)}>
+          <div key={i} className="strut-md-cell" style={cellBoxStyle(cell, padScale)}>
             <MarkdownSurface doc={doc} />
           </div>
         )

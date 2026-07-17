@@ -211,6 +211,9 @@ export const setSlideThemeArgs = z.object({
   // The slide's layout tiling ('' = full — one cell; else 'cols-2' | 'rows-2' | 'tri' | 'grid-4' |
   // 'split-l'). Supersedes body_region when a real tiling; see layoutCells / bodyCells.
   layout: z.string().optional(),
+  // Body density ('' = comfortable | 'compact' | 'edge' = full bleed). Scales the safe-area padding;
+  // orthogonal to layout. See slidePadScale.
+  pad: z.string().optional(),
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
@@ -532,6 +535,7 @@ export const mutators = {
         body_region: '',
         layout: '',
         cells: '',
+        pad: '',
       })
     },
   ),
@@ -581,6 +585,7 @@ export const mutators = {
       if (a.text_align !== undefined) row.text_align = a.text_align
       if (a.body_region !== undefined) row.body_region = a.body_region
       if (a.layout !== undefined) row.layout = a.layout
+      if (a.pad !== undefined) row.pad = a.pad
       yield tx.update('slide', row)
     },
   ),
