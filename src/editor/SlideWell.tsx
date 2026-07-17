@@ -235,12 +235,13 @@ export function SlideWell({
       imp_scale: s.imp_scale,
       now,
     })
-    if (s.background || s.surface || s.text_align)
+    if (s.background || s.surface || s.text_align || s.body_region)
       mutate.setSlideTheme({
         id: s.id,
         background: s.background,
         surface: s.surface,
         text_align: s.text_align,
+        body_region: s.body_region,
         now,
       })
     if (s.doc) mutate.setSlideDoc({ id: s.id, doc: s.doc, now })

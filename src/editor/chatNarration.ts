@@ -57,6 +57,7 @@ const SLIDE_FIELDS = [
   'surface',
   'render_mode',
   'text_align',
+  'body_region',
 ]
 
 const SLIDE_BODY_FIELDS = ['doc', 'markdown']
@@ -70,7 +71,13 @@ const SLIDE_SPATIAL_FIELDS = [
   'rotate_z',
   'imp_scale',
 ]
-const SLIDE_STYLE_FIELDS = ['background', 'surface', 'render_mode', 'text_align']
+const SLIDE_STYLE_FIELDS = [
+  'background',
+  'surface',
+  'render_mode',
+  'text_align',
+  'body_region',
+]
 const SLIDE_ALL_FIELDS = [...SLIDE_BODY_FIELDS, ...SLIDE_FIELDS]
 
 const COMPONENT_FIELDS = [
@@ -112,7 +119,11 @@ type EditGroup = {
   path: string
   fields: readonly string[]
   allFields: readonly string[]
-  render: (row: NamedRow, old: NamedRow | undefined, parent?: NamedRow) => string | null
+  render: (
+    row: NamedRow,
+    old: NamedRow | undefined,
+    parent?: NamedRow,
+  ) => string | null
 }
 
 const EDIT_GROUPS: EditGroup[] = [
@@ -188,7 +199,8 @@ export const CHAT_NARRATORS: NarratorRegistry = {
     salience: 'info',
     root: {
       add: ({ row }) => `Deck snapshot: ${deckSummary(row)}.`,
-      remove: ({ row }) => `Deck removed: id=${s(row.id)} title=${q(row.title)}.`,
+      remove: ({ row }) =>
+        `Deck removed: id=${s(row.id)} title=${q(row.title)}.`,
       edit: ({ row, old }) => renderDeckEdit(row, old),
     },
     related: {
@@ -208,8 +220,10 @@ export const CHAT_NARRATORS: NarratorRegistry = {
       },
       customBackgrounds: {
         salience: 'ambient',
-        add: ({ row }) => `Custom background snapshot/add: ${customBackground(row)}.`,
-        remove: ({ row }) => `Custom background removed: ${customBackground(row)}.`,
+        add: ({ row }) =>
+          `Custom background snapshot/add: ${customBackground(row)}.`,
+        remove: ({ row }) =>
+          `Custom background removed: ${customBackground(row)}.`,
         edit: ({ row, old }) => renderCustomBackgroundEdit(row, old),
       },
     },
@@ -258,7 +272,11 @@ function coalesceBufferedEvents(events: SemanticEvent[]): SemanticEvent[] {
       })
       out.push(renderCoalescedEdit(event, event.resolved.old, target.group))
     } else {
-      out[existing.index] = renderCoalescedEdit(event, existing.old, existing.group)
+      out[existing.index] = renderCoalescedEdit(
+        event,
+        existing.old,
+        existing.group,
+      )
     }
   }
   return out
@@ -355,6 +373,7 @@ function slideSummary(row: NamedRow): string {
     `background=${q(row.background)}`,
     `surface=${q(row.surface)}`,
     `align=${q(row.text_align)}`,
+    `region=${q(row.body_region)}`,
   ].join(' ')
 }
 
@@ -388,7 +407,9 @@ function renderDeckEdit(row: NamedRow, old?: NamedRow): string | null {
 
 function renderSlideEdit(row: NamedRow, old?: NamedRow): string | null {
   const fields = changedSlideFields(row, old)
-  return fields.length ? `Slide ${s(row.id)} updated: ${fields.join(', ')}.` : null
+  return fields.length
+    ? `Slide ${s(row.id)} updated: ${fields.join(', ')}.`
+    : null
 }
 
 function renderComponentEdit(
@@ -402,7 +423,10 @@ function renderComponentEdit(
     : null
 }
 
-function renderCustomBackgroundEdit(row: NamedRow, old?: NamedRow): string | null {
+function renderCustomBackgroundEdit(
+  row: NamedRow,
+  old?: NamedRow,
+): string | null {
   const fields = changedFields(row, old, CUSTOM_BACKGROUND_FIELDS, (k, v) =>
     k === 'style' ? `style=${q(cap(s(v), MAX_FIELD))}` : `${k}=${q(v)}`,
   )
@@ -412,8 +436,11 @@ function renderCustomBackgroundEdit(row: NamedRow, old?: NamedRow): string | nul
 }
 
 function changedSlideFields(row: NamedRow, old?: NamedRow): string[] {
-  const out = changedFields(row, old, SLIDE_FIELDS, (k, v, prev) =>
-    `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
+  const out = changedFields(
+    row,
+    old,
+    SLIDE_FIELDS,
+    (k, v, prev) => `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
   )
   if (old && (row.doc !== old.doc || row.markdown !== old.markdown)) {
     out.push(`body=${q(slideBody(row))}`)
@@ -422,8 +449,11 @@ function changedSlideFields(row: NamedRow, old?: NamedRow): string[] {
 }
 
 function changedComponentFields(row: NamedRow, old?: NamedRow): string[] {
-  const out = changedFields(row, old, COMPONENT_FIELDS, (k, v, prev) =>
-    `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
+  const out = changedFields(
+    row,
+    old,
+    COMPONENT_FIELDS,
+    (k, v, prev) => `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
   )
   if (old && !same(row.props, old.props)) {
     out.push(`props={${propsSummary(parseProps(row.props))}}`)
@@ -437,7 +467,9 @@ function isOnlyGroupFieldsChanged(
   group: EditGroup,
 ): boolean {
   const changed = changedFieldNames(row, old, group.allFields)
-  return changed.length > 0 && changed.every((field) => group.fields.includes(field))
+  return (
+    changed.length > 0 && changed.every((field) => group.fields.includes(field))
+  )
 }
 
 function changedFieldNames(
@@ -457,12 +489,17 @@ function changedFields(
   if (!old) return []
   const out: string[] = []
   for (const field of fields) {
-    if (!same(row[field], old[field])) out.push(format(field, row[field], old[field]))
+    if (!same(row[field], old[field]))
+      out.push(format(field, row[field], old[field]))
   }
   return out
 }
 
-function formatDeckField(field: string, value: unknown, previous: unknown): string {
+function formatDeckField(
+  field: string,
+  value: unknown,
+  previous: unknown,
+): string {
   if (field === 'custom_stylesheet') {
     return `custom_stylesheet len ${s(previous).length} -> ${s(value).length}`
   }
@@ -505,7 +542,8 @@ function propsSummary(props: ComponentProps): string {
   if (props.markup) parts.push(`markup=${q(cap(props.markup, MAX_FIELD))}`)
   if (props.video_type) parts.push(`video_type=${q(props.video_type)}`)
   if (props.src_type) parts.push(`src_type=${q(props.src_type)}`)
-  if (props.short_src) parts.push(`short_src=${q(cap(props.short_src, MAX_FIELD))}`)
+  if (props.short_src)
+    parts.push(`short_src=${q(cap(props.short_src, MAX_FIELD))}`)
   if (props.code) {
     parts.push(
       `code=len:${props.code.length} preview=${q(cap(props.code, MAX_FIELD))}`,

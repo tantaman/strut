@@ -7,11 +7,13 @@ import { componentSize } from './render'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
 import {
   backgroundImage,
+  bodyRegionStyle,
   composeBackground,
   cssHex,
   cssUrlValue,
   resolveBackground,
   resolveBackgroundImage,
+  resolveBodyRegion,
   resolveSurface,
   resolveTextAlign,
   textTypeOf,
@@ -19,6 +21,7 @@ import {
 import type {
   AnyComponent,
   BackgroundImageSpec,
+  BodyRegion,
   DeckThemeFields,
 } from './types'
 import { flightFor } from './transitions'
@@ -30,14 +33,16 @@ const WORLD = SLIDE_W / 240
 const deg = (rad: number) => (rad * 180) / Math.PI
 
 // Markdown-mode surface styling — mirrors the `.strut-md` scope in src/strut.css so an exported deck
-// renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss).
-const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:64px 88px;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:32px;}
+// renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss),
+// including the body-region pair (--strut-body-pad / --strut-type-scale) — keep both the rules here
+// and the vars in themeVarsCss in step with their twins, or an exported deck partitions differently.
+const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:safe center;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
   .strut-md>*:first-child{margin-top:0;}
   .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;}
-  .strut-md h1{font-size:88px;}
-  .strut-md h2{font-size:64px;}
-  .strut-md h3{font-size:48px;}
-  .strut-md h4{font-size:38px;}
+  .strut-md h1{font-size:calc(88px * var(--strut-type-scale,1));}
+  .strut-md h2{font-size:calc(64px * var(--strut-type-scale,1));}
+  .strut-md h3{font-size:calc(48px * var(--strut-type-scale,1));}
+  .strut-md h4{font-size:calc(38px * var(--strut-type-scale,1));}
   .strut-md p,.strut-md ul,.strut-md ol,.strut-md blockquote,.strut-md pre{margin:0 0 .6em;}
   .strut-md ul,.strut-md ol{padding-left:1.3em;list-style:revert;}
   .strut-md li{margin:.15em 0;}
@@ -142,16 +147,28 @@ function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
 
 /** The deck text theme as CSS custom-property declarations for the slide container, so a text
  *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export.
- *  `align` is the slide-resolved alignment (drives markdown-mode text-align). */
-function themeVarsCss(theme: DeckThemeFields, align: string): string {
+ *  `align` is the slide-resolved alignment (drives markdown-mode text-align); `region` is the
+ *  slide-resolved body region (drives the body's inset + type scale).
+ *
+ *  The string twin of `themeVars` in render.tsx — it must emit the SAME set of var names, or an
+ *  exported deck renders differently from the app. `themeVars.test.ts` pins the two together. */
+function themeVarsCss(
+  theme: DeckThemeFields,
+  align: string,
+  region: BodyRegion,
+): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
+  const r = bodyRegionStyle(region)
   return (
     `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
     `--strut-heading-font:${font(theme.heading_font)};` +
     `--strut-body-color:${cssHex(theme.body_color ?? '', '111111')};` +
     `--strut-body-font:${font(theme.body_font)};` +
-    `--strut-text-align:${align};`
+    `--strut-text-align:${align};` +
+    `--strut-body-pad:${r.pad};` +
+    `--strut-type-scale:${r.scale};` +
+    `--strut-body-display:${r.display};`
   )
 }
 
@@ -184,6 +201,8 @@ function stepHTML(
     backgroundImage(slide.surface, deck.surface),
   )
   const align = resolveTextAlign(slide.text_align, deck.text_align)
+  // Auto-derived from the half-bleed image resolved just above, exactly as themeVars does in-app.
+  const region = resolveBodyRegion(slide.body_region, bgImage?.layout)
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
   // Each is emitted only when it has content, so single-layer slides export exactly as before.
@@ -197,7 +216,7 @@ function stepHTML(
   const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
   const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" data-surface="${esc(surface)}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, region)}">
 ${inner}
     </div>
   </div>`
