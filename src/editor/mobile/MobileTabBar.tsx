@@ -1,7 +1,8 @@
 // The mobile bottom tab bar (touch-first editor, phones ≤768px): the primary navigation that the
-// desktop header can't fit under a thumb. It owns the two editor modes (Slides / Overview), the AI
-// Advisor toggle, and Present — the same actions the header exposes on desktop, which the mobile
-// stylesheet hides there (.hdr__mode / .hdr__chat / .hdr__present) so this bar is their single home.
+// desktop header can't fit under a thumb. It owns the editor modes (Slides / Doc / Overview /
+// Research), the AI Advisor toggle, and Present — the same actions the header exposes on desktop, which
+// the mobile stylesheet hides there (.hdr__mode / .hdr__chat / .hdr__present) so this bar is their
+// single home.
 //
 // Rendered on every viewport but `display:none` above the mobile breakpoint (see strut.css), so there's
 // no JS width branch — the layout is correct from first paint on both desktop and mobile (no hydration
@@ -9,7 +10,14 @@
 // anchor just above it via `--m-tabbar-h`.
 
 import { useNavigate } from '@tanstack/react-router'
-import { Film, LayoutGrid, NotebookPen, Play, Sparkles } from 'lucide-react'
+import {
+  FileText,
+  Film,
+  LayoutGrid,
+  NotebookPen,
+  Play,
+  Sparkles,
+} from 'lucide-react'
 import { useEditor } from '../EditorState'
 
 export function MobileTabBar({
@@ -35,6 +43,17 @@ export function MobileTabBar({
           <Film size={20} />
         </span>
         <span className="m-tab__lbl">Slides</span>
+      </button>
+
+      <button
+        className={'m-tab' + (editor.mode === 'doc' ? ' is-active' : '')}
+        onClick={() => editor.setMode('doc')}
+        aria-pressed={editor.mode === 'doc'}
+      >
+        <span className="m-tab__ic">
+          <FileText size={20} />
+        </span>
+        <span className="m-tab__lbl">Doc</span>
       </button>
 
       <button

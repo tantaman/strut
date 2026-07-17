@@ -2855,6 +2855,113 @@ button {
   height: 34px;
 }
 
+/* ---- Doc mode (the scrolling deck) ----
+   A full-body flex child of .editor__body (like .overview / .research), sitting BESIDE the well: one
+   vertical scroll of fit-scaled 16:9 cards, each body editable in place. Cards keep the slide's real
+   geometry by reusing `.slide-canvas` (absolute, transform-origin top left) — so `.doc__card` is just
+   the box that scaled canvas paints into, and its width/height come inline from the measured column.
+   Nothing here sizes itself in CSS: the column width drives the scale, which drives every card height,
+   which the virtualizer needs to know exactly. */
+.doc {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+  background: var(--panel-2);
+  /* Anchors the hoisted format bar (.md-format-bar is position:absolute): it floats over the scroll's
+     top gutter, outside the scaled cards, so it stays readable whatever the column width. */
+  position: relative;
+}
+.doc__scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  /* Top gutter clears the floating format bar; the tall bottom one lets the last card reach center. */
+  padding: 56px clamp(16px, 4vw, 56px) 120px;
+}
+.doc__empty {
+  margin: auto;
+  color: var(--muted);
+  font-size: 14px;
+}
+.doc__list {
+  position: relative;
+  margin: 0 auto;
+}
+.doc__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  transition: box-shadow 0.12s;
+}
+/* The card the header + AI act on (the one under the viewport center). The ring rides in the shadow,
+   not a border, so tracking the scroll never reflows the column by a pixel. */
+.doc__card.is-active {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--coral);
+}
+/* A spatial slide has no editable body here — the whole card is the button that hands it to the Stage. */
+.doc__static {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+/* The seam between two cards: insert-here as a spatial act rather than a menu act. It reveals on hover
+   so a deck at rest reads as a document, not a toolbar. */
+.doc__seam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.doc__seam--end {
+  height: 64px;
+}
+.doc__ins {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+.doc__seam:hover .doc__ins,
+.doc__ins:focus-visible {
+  opacity: 1;
+}
+/* The append affordance has no card below it to hint at, so it stays visible. */
+.doc__seam--end .doc__ins {
+  opacity: 1;
+}
+.doc__ins:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+@media (max-width: 768px) {
+  /* The well is a horizontal filmstrip up here, and there's no room for a gutter — tighten the column. */
+  .doc__scroll {
+    padding: 52px 12px 96px;
+  }
+}
+
 /* ---- Research mode (per-slide notes) ----
    A full-body flex child of .editor__body (like .overview): one scrolling column of per-slide blocks,
    each pairing the slide thumbnail with its free-form notes editor. Notes sync through their own

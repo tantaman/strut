@@ -12,12 +12,12 @@ import {
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Mic, Plus, Sparkles } from 'lucide-react'
-import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
 import { useMutate } from '../rindle/RindleProvider'
 import { authClient } from '../rindle/authClient'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
+import { useAddSlide } from './useAddSlide'
 import { reinsertComponent } from './componentOps'
 import { applyGenerated } from './aiGenerate'
 import { applyNarrated } from './aiNarrate'
@@ -26,7 +26,6 @@ import { notifyUsageChanged } from '../lib/usage'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
-import type { AddSlideArgs } from '../../shared/app-def'
 import type { GeneratedDeck, GenerateRequest } from '../../shared/generate'
 import type {
   NarratedDeck,
@@ -179,42 +178,8 @@ export function SlideWell({
   }
 
   // Insert a blank slide so it lands at index `at` (0 = before the first slide, slides.length =
-  // append). The fractional sort key falls between the neighbors; the 3-D overview position is
-  // placed near them too (midpoint when inserting between, one gap past the end when appending).
-  function addSlideAt(at: number) {
-    const before = slideAt(at - 1)
-    const after = slideAt(at)
-    const id = newId()
-    const between = (
-      b: number | undefined,
-      a: number | undefined,
-      fallback: number,
-    ) =>
-      b != null && a != null
-        ? Math.round((b + a) / 2)
-        : b != null
-          ? b + OVERVIEW_CARD_GAP
-          : a != null
-            ? a - OVERVIEW_CARD_GAP
-            : fallback
-    const args: AddSlideArgs = {
-      id,
-      deckId: editor.deckId,
-      sort: keyBetween(before?.sort, after?.sort),
-      x: between(before?.x, after?.x, 0),
-      y: between(before?.y, after?.y, 0),
-      // New slides inherit the deck's default render mode (spec: deck-level markdown default).
-      render_mode: deck?.default_slide_mode === 'markdown' ? 'markdown' : '',
-      now: Date.now(),
-    }
-    mutate.addSlide(args)
-    editor.setActiveSlide(id)
-    history.push({
-      label: 'Add slide',
-      redo: () => mutate.addSlide(args),
-      undo: () => mutate.deleteSlide({ id, componentIds: [] }),
-    })
-  }
+  // append) — shared with Doc mode's seam inserters, see useAddSlide.
+  const addSlideAt = useAddSlide(slides, deck)
 
   const addSlide = () => addSlideAt(slides.length)
 

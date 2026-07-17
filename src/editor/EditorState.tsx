@@ -16,7 +16,20 @@ import { getRouteApi } from '@tanstack/react-router'
 // Reach the editor route's search/navigate by id (no module import → no coupling to the route file).
 const editorRoute = getRouteApi('/deck/$deckId')
 
-export type EditorMode = 'slide' | 'overview' | 'research'
+// The editor's modes, in one list because they're validated in more than one place: BOTH this route's
+// `validateSearch` and Play's (Play round-trips `view` back so Esc reopens the mode you left from). Adding
+// a mode here — not to a ternary chain in each route — is what keeps that round-trip from silently
+// dropping the new one back to the default.
+export const EDITOR_MODES = ['slide', 'doc', 'overview', 'research'] as const
+export type EditorMode = (typeof EDITOR_MODES)[number]
+
+/** Narrow an unknown `?view=` search param to a mode; undefined (→ the 'slide' default) if it isn't one. */
+export function parseEditorMode(v: unknown): EditorMode | undefined {
+  return typeof v === 'string' &&
+    (EDITOR_MODES as readonly string[]).includes(v)
+    ? (v as EditorMode)
+    : undefined
+}
 
 interface EditorState {
   deckId: string
