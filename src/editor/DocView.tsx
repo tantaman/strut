@@ -17,12 +17,11 @@
 // Doc mode edits BODIES. A spatial slide (render_mode '') has no editable body here, so it renders as a
 // live read-only composite; click it to jump to Slides mode where the object canvas lives.
 //
-// Two couplings to "one active slide" are resolved here rather than pushed onto the rest of the editor:
-//   • The AI (and the other modes' chrome) still act on `?slide=` — so the card under the viewport
-//     center drives it (debounced), and focusing a card's text claims it too. Both keep the URL
-//     deep-linkable and the Present/Esc round-trip intact.
-//   • N editors must not mean N format bars — ONE bar is hoisted here and bound to whichever card has
-//     focus (FormatBar subscribes to its editor itself, so it tracks a selection it isn't rendered near).
+// The coupling to "one active slide" is resolved here rather than pushed onto the rest of the editor:
+// the AI (and the other modes' chrome) still act on `?slide=` — so the card under the viewport center
+// drives it (debounced), and focusing a card's text claims it too. Both keep the URL deep-linkable and
+// the Present/Esc round-trip intact. Formatting needs no such hoisting: it rides the keys (markdown
+// input rules + the `/` menu), so N cards mean N editors and zero bars.
 //
 // Windowing unmounts offscreen editors, which is lossless for the same reason it is in Research: every
 // keystroke already streams through `setSlideDoc.folded` (keyed per slide), so a remounted editor
@@ -37,7 +36,6 @@ import {
 } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { EditorContent } from '@tiptap/react'
-import type { Editor } from '@tiptap/react'
 import type { ReactNode } from 'react'
 import { NotebookPen, Plus } from 'lucide-react'
 import { useQuery, useQueryStatus } from '@rindle/react'
@@ -50,7 +48,6 @@ import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
 import { useSlideDocEditor } from './useSlideDocEditor'
-import { FormatBar } from './TipTapSlideEditor'
 import { DocRegionDrag, useDropImage } from './DocRegion'
 import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
@@ -82,7 +79,6 @@ export function DocView({
   const [colW, setColW] = useState(DOC_COL_MAX)
   // The column starts below the scroll box's top padding; `scrollMargin` offsets the virtualizer past it.
   const [scrollMargin, setScrollMargin] = useState(0)
-  const [focusedEditor, setFocusedEditor] = useState<Editor | null>(null)
   // Until the column has been measured, colW/scrollMargin are defaults, not facts — nothing may act on
   // a scroll offset derived from them.
   const [measured, setMeasured] = useState(false)
@@ -217,8 +213,7 @@ export function DocView({
   }, [editor.activeSlideId, slides, shownIndex, offsetToCenter])
 
   const onFocusEditor = useCallback(
-    (ed: Editor, slideId: string) => {
-      setFocusedEditor(ed)
+    (slideId: string) => {
       // Typing in a card makes it the slide the header and the AI act on.
       if (slideId !== editor.activeSlideId) {
         suppressScrollTo.current = slideId
@@ -227,9 +222,6 @@ export function DocView({
     },
     [editor],
   )
-  const onBlurEditor = useCallback((ed: Editor) => {
-    setFocusedEditor((cur) => (cur === ed ? null : cur))
-  }, [])
 
   // ---- the flip: research notes live on the BACK of each card ----
   // Hoisted, not per-card: windowing unmounts offscreen cards, so card-local state would silently
@@ -334,8 +326,6 @@ export function DocView({
       {/* The Dock-well: push the pointer against the left screen edge and the well slides out —
           reorder/jump/delete/add without resident chrome. */}
       <WellDock slides={slides} deck={deck} />
-      {/* One bar for the whole column, floating over the top gutter — bound to the focused card. */}
-      <FormatBar editor={focusedEditor} deck={deck} />
       <div className="doc__scroll" ref={scrollRef} onScroll={onScroll}>
         <div
           className="doc__list"
@@ -380,7 +370,6 @@ export function DocView({
                   flipped={flipped.has(s.id)}
                   onToggleFlip={toggleFlip}
                   onFocusEditor={onFocusEditor}
-                  onBlurEditor={onBlurEditor}
                 />
               </div>
             )
@@ -414,7 +403,6 @@ function DocCard({
   flipped,
   onToggleFlip,
   onFocusEditor,
-  onBlurEditor,
 }: {
   slide: SlideDetail
   deck: DeckRoot | null
@@ -423,8 +411,7 @@ function DocCard({
   scale: number
   flipped: boolean
   onToggleFlip: (id: string) => void
-  onFocusEditor: (ed: Editor, slideId: string) => void
-  onBlurEditor: (ed: Editor) => void
+  onFocusEditor: (slideId: string) => void
 }) {
   const editor = useEditor()
   const active = slide.id === editor.activeSlideId
@@ -465,7 +452,6 @@ function DocCard({
               deck={deck}
               scale={scale}
               onFocusEditor={onFocusEditor}
-              onBlurEditor={onBlurEditor}
             />
           ) : (
             // A spatial slide (or a read-only viewer): the real composited render, not an editor. Objects
@@ -486,7 +472,9 @@ function DocCard({
             </button>
           )}
           {/* The grip + snap preview ride above the scaled canvas, in the card's own coordinate space. */}
-          {editable && <DocRegionDrag slide={slide} deck={deck} scale={scale} />}
+          {editable && (
+            <DocRegionDrag slide={slide} deck={deck} scale={scale} />
+          )}
           {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
         </div>
         <div className="doc__face doc__face--back">
@@ -550,25 +538,15 @@ function DocCardBody({
   deck,
   scale,
   onFocusEditor,
-  onBlurEditor,
 }: {
   slide: SlideDetail
   deck: DeckRoot | null
   scale: number
-  onFocusEditor: (ed: Editor, slideId: string) => void
-  onBlurEditor: (ed: Editor) => void
+  onFocusEditor: (slideId: string) => void
 }) {
   const ed = useSlideDocEditor(slide, {
-    onFocus: (e) => onFocusEditor(e, slide.id),
-    onBlur: (e) => onBlurEditor(e),
+    onFocus: () => onFocusEditor(slide.id),
   })
-  // Scrolling a focused card out of the window destroys its editor; drop the shared bar with it.
-  useEffect(
-    () => () => {
-      if (ed) onBlurEditor(ed)
-    },
-    [ed, onBlurEditor],
-  )
   return (
     <DocCanvas slide={slide} deck={deck} scale={scale}>
       <EditorContent editor={ed} className="strut-md-host" />

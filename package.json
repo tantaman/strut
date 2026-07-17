@@ -59,6 +59,7 @@
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "@tiptap/static-renderer": "^3.27.1",
+    "@tiptap/suggestion": "3.27.1",
     "assemblyscript": "^0.28.19",
     "better-auth": "^1.6.23",
     "dompurify": "^3.4.11",

@@ -14,16 +14,16 @@ import type { Editor } from '@tiptap/react'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import { strutExtensions } from './tiptapSchema'
+import { SlashCommand } from './slashCommand'
 import { parseDoc } from './tiptapDoc'
 import type { SlideDetail } from './deckDetail'
 
 export function useSlideDocEditor(
   slide: SlideDetail,
-  // Doc mode hoists ONE shared format bar out of the cards and binds it to whichever editor has focus;
-  // these let it track that. Held in a ref so a fresh inline callback each render never re-registers.
+  // Doc mode claims the ACTIVE slide from whichever card you type into. Held in a ref so a fresh inline
+  // callback each render never re-registers.
   opts?: {
-    onFocus?: (ed: Editor) => void
-    onBlur?: (ed: Editor) => void
+    onFocus?: () => void
   },
 ): Editor | null {
   const mutate = useMutate()
@@ -51,7 +51,10 @@ export function useSlideDocEditor(
   }
 
   return useEditor({
-    extensions: strutExtensions,
+    // Schema + the `/` menu. SlashCommand is appended HERE rather than living in `strutExtensions`
+    // because it's editor-only chrome (React, `document`) and the schema array stays render-path safe
+    // for SSR/export. It contributes no nodes or marks, so it can't change what a doc serializes to.
+    extensions: [...strutExtensions, SlashCommand],
     content: parseDoc(slide.doc),
     // The editable element IS the `.strut-md` surface, so it inherits the exact theme/typography the
     // renderer uses. `immediatelyRender: false` keeps it SSR-safe (no DOM at first render).
@@ -66,10 +69,7 @@ export function useSlideDocEditor(
         { id: slide.id, doc: json, now: Date.now() },
       )
     },
-    onFocus: ({ editor: ed }) => optsRef.current?.onFocus?.(ed),
-    onBlur: ({ editor: ed }) => {
-      commit(ed)
-      optsRef.current?.onBlur?.(ed)
-    },
+    onFocus: () => optsRef.current?.onFocus?.(),
+    onBlur: ({ editor: ed }) => commit(ed),
   })
 }
