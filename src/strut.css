@@ -1010,73 +1010,6 @@ button {
   justify-content: center;
   padding: 24px;
 }
-/* Floating format toolbar for the on-slide WYSIWYG editor (TipTapSlideEditor). Pinned above the
-   preview, outside the scaled canvas so it stays readable at any fit-zoom. */
-.md-format-bar {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--panel);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
-}
-.md-format-bar__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 0;
-  border-radius: calc(var(--radius) - 3px);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  transition:
-    background 0.12s ease,
-    color 0.12s ease;
-}
-.md-format-bar__btn:hover {
-  background: var(--panel-2);
-}
-.md-format-bar__btn.is-active {
-  background: var(--coral-soft);
-  color: var(--coral);
-}
-.md-format-bar__sep {
-  width: 1px;
-  align-self: stretch;
-  margin: 3px 4px;
-  background: var(--line);
-}
-/* Selection font picker (native select, styled to match the icon buttons). */
-.md-format-bar__font {
-  height: 30px;
-  max-width: 128px;
-  padding: 0 6px;
-  border: 1px solid var(--line);
-  border-radius: calc(var(--radius) - 3px);
-  background: var(--panel-2);
-  color: var(--text);
-  font-size: 12px;
-  cursor: pointer;
-}
-.md-format-bar__font:hover {
-  border-color: var(--coral);
-}
-/* Selection color picker: the shared Popchip chip, sized to sit inline among the icon buttons. */
-.md-format-bar .popchip__trigger {
-  height: 30px;
-  padding: 0 6px;
-}
-
 /* The editable surface: TipTap mounts its ProseMirror editable here, carrying the .strut-md class so it
    inherits the exact render typography/theme (see .strut-md below). The host fills the scaled canvas. */
 .strut-md-host {
@@ -1867,6 +1800,45 @@ button {
 .menu-item--icon:hover .menu-item__hint {
   color: var(--coral-strong);
 }
+/* Keyboard selection in a menu driven by ↑/↓ (the `/` menu). Same paint as :hover — the two are kept
+   in sync deliberately (hovering sets the selection), so there's never a second, competing highlight. */
+.menu-item.is-active {
+  background: var(--coral-soft);
+  color: var(--coral-strong);
+}
+.menu-item.is-active .menu-item__hint {
+  color: var(--coral-strong);
+}
+/* ---- the `/` command menu (slashCommand.tsx) ----
+   Portalled to <body> by the suggestion plugin's managed mount, which owns left/top/position — so this
+   sets appearance only. Capped and scrollable: the list grows as block types are added, and the plugin
+   flips it above the caret when the line sits low, which only works against a bounded height. */
+.slash-menu {
+  width: 260px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.slash-menu .menu-item {
+  /* Icons come from the same lucide set as the rest of the chrome; mute them until the row is the
+     selection, so the column of glyphs reads as texture rather than nine competing marks. */
+  color: var(--text);
+}
+.slash-menu .menu-item svg {
+  flex: none;
+  opacity: 0.6;
+}
+.slash-menu .menu-item.is-active svg,
+.slash-menu .menu-item:hover svg {
+  opacity: 1;
+}
+/* The live `/query` in the text, marked while the menu is open, so it reads as a command being typed
+   rather than stray characters in the slide body. */
+.strut-md .suggestion {
+  border-radius: 4px;
+  background: var(--coral-soft);
+  color: var(--coral-strong);
+}
+
 /* Divider + uppercase section heading within a dropdown menu. */
 .menu-sep {
   height: 1px;
@@ -2887,15 +2859,14 @@ button {
   display: flex;
   overflow: hidden;
   background: var(--panel-2);
-  /* Anchors the hoisted format bar (.md-format-bar is position:absolute): it floats over the scroll's
-     top gutter, outside the scaled cards, so it stays readable whatever the column width. */
+  /* Anchors the Dock-well (.dock / .dock__edge are position:absolute) to the column, not the page. */
   position: relative;
 }
 .doc__scroll {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  /* Top gutter clears the floating format bar; the tall bottom one lets the last card reach center. */
+  /* The tall bottom gutter lets the last card still reach the viewport center. */
   padding: 56px clamp(16px, 4vw, 56px) 120px;
 }
 
