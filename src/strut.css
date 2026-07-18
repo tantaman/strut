@@ -3353,6 +3353,64 @@ button {
   color: #fff;
   font-size: 12px;
 }
+/* Hover-to-remove for a photo dropped on a Doc card. The root is inert (like .doc__region); only the
+   per-image box opts into pointers, so it arms the × over the photo it covers without stealing clicks
+   from the surrounding text. */
+.doc__imgtools {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.doc__imgtool {
+  position: absolute;
+  pointer-events: auto;
+}
+/* A faint scrim on hover so the centered × reads on a bright photo — quiet until the image is reached for. */
+.doc__imgtool::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.12s;
+  pointer-events: none;
+}
+.doc__imgtool:hover::after {
+  background: rgba(0, 0, 0, 0.16);
+}
+/* Centered on the photo, revealed on hover. Removal is one undo, so it stays a light touch rather than a
+   guarded destructive control; centering keeps it clear of the card's top-corner controls at any size. */
+.doc__imgtool-del {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(24, 26, 33, 0.72);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+  transition:
+    opacity 0.12s,
+    transform 0.12s,
+    background 0.12s;
+}
+.doc__imgtool:hover .doc__imgtool-del,
+.doc__imgtool-del:focus-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.doc__imgtool-del:hover {
+  background: var(--danger);
+}
 
 /* A spatial slide has no editable body here — the whole card is the button that hands it to the Stage. */
 .doc__static {
