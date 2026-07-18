@@ -57,8 +57,9 @@ import { BackgroundImageLayer, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { DeckRoot, SlideDetail } from './deckDetail'
 
-// The gap between two cards — also the hit area of the seam inserter that lives in it.
-const DOC_GAP = 28
+// The gap between two cards — also the hit area of the seam inserter that lives in it. Wide enough that
+// the 24px "+" pill sits with clear air above and below, not flush against either neighbor.
+const DOC_GAP = 44
 // The reading column. Wide enough that 1280×720 body type stays legible at ~0.73 scale.
 const DOC_COL_MAX = 940
 
