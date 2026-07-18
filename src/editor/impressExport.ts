@@ -15,6 +15,7 @@ import {
   resolveBackgroundImage,
   resolveSurface,
   resolveTextAlign,
+  slideBodyVAlign,
   textTypeOf,
 } from './types'
 import type {
@@ -35,7 +36,7 @@ const deg = (rad: number) => (rad * 180) / Math.PI
 // renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss),
 // including the body-region pair (--strut-body-pad / --strut-type-scale) — keep both the rules here
 // and the vars in themeVarsCss in step with their twins, or an exported deck partitions differently.
-const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:safe center;overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
+const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:var(--strut-body-justify,safe center);overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
   .strut-md>*:first-child{margin-top:0;}
   .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;text-indent:-.045em;}
   .strut-md h1{font-size:calc(88px * var(--strut-type-scale,1));}
@@ -155,10 +156,12 @@ function themeVarsCss(
   theme: DeckThemeFields,
   align: string,
   style: BodyRegionStyle,
+  valign: string | null | undefined,
 ): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
   const r = style
+  const va = slideBodyVAlign(valign)
   return (
     `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
     `--strut-heading-font:${font(theme.heading_font)};` +
@@ -167,7 +170,8 @@ function themeVarsCss(
     `--strut-text-align:${align};` +
     `--strut-body-pad:${r.pad};` +
     `--strut-type-scale:${r.scale};` +
-    `--strut-body-display:${r.display};`
+    `--strut-body-display:${va.flex ? 'flex' : r.display};` +
+    `--strut-body-justify:${va.justify};`
   )
 }
 
@@ -216,7 +220,7 @@ function stepHTML(
   const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
   const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" data-surface="${esc(surface)}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, bodyStyle)}">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, bodyStyle, slide.valign)}">
 ${inner}
     </div>
   </div>`

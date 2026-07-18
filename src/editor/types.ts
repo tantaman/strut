@@ -227,6 +227,9 @@ export interface SlideThemeFields {
   // Density: how much safe-area padding the body gets ('' = comfortable | 'compact' | 'edge' = full
   // bleed). Orthogonal to `layout`; scales only the outer safe-area, never interior gutters.
   pad?: string | null
+  // Vertical alignment of the body in its box ('' = auto | 'top' | 'middle' | 'bottom'). A per-card
+  // property every cell snaps to; horizontal alignment is `text_align`. See slideBodyVAlign.
+  valign?: string | null
 }
 
 /** A deck as the presentation resolvers see it: text theme + the background the slide falls back to. */
@@ -675,6 +678,47 @@ const PAD_SCALE: Record<SlidePad, number> = { '': 1, compact: 0.5, edge: 0 }
  *  value — so existing slides are unchanged) / compact (½) / edge (0 = full bleed). */
 export function slidePadScale(slide: SlideThemeFields | null | undefined): number {
   return PAD_SCALE[resolveSlidePad(slide?.pad)]
+}
+
+// ---- vertical alignment: where the body sits in its box (the LayoutPicker's third axis) -----------
+// The picker offers top / middle / bottom; the stored column adds '' = AUTO, which preserves today's
+// exact behavior — a full-layout body stays block/top-aligned, a tiled cell stays flex/centered. Any
+// explicit value forces the body to `display:flex` and drives `justify-content`, so a full-bleed slide
+// can centre or bottom-pin its text. A per-card property (every cell reads the same container var);
+// horizontal alignment is the orthogonal `text_align`.
+
+export const SLIDE_VALIGNS = ['top', 'middle', 'bottom'] as const
+export type SlideValign = (typeof SLIDE_VALIGNS)[number]
+
+/** The `justify-content` a valign maps to, and whether it must force the body to flex (so the align
+ *  takes effect on an otherwise-block full body). '' / unknown = auto: keep the layout's natural default
+ *  — display untouched, justify falls back to the stylesheet's `safe center`. `safe *` degrades to
+ *  flex-start when content overflows, so a centred body never clips its heading off the top. */
+export function slideBodyVAlign(valign: string | null | undefined): {
+  justify: string
+  flex: boolean
+} {
+  switch (valign) {
+    case 'top':
+      return { justify: 'safe flex-start', flex: true }
+    case 'middle':
+      return { justify: 'safe center', flex: true }
+    case 'bottom':
+      return { justify: 'safe flex-end', flex: true }
+    default:
+      return { justify: 'safe center', flex: false }
+  }
+}
+
+/** The valign chip the picker shows as active. A stored value wins; when it's '' (auto), report the
+ *  layout's effective default so the picker always reflects where the body actually sits — a full
+ *  slide reads 'top', a tiled slide reads 'middle'. */
+export function resolveSlideValign(
+  slide: SlideThemeFields | null | undefined,
+): SlideValign {
+  const v = slide?.valign
+  if (v === 'top' || v === 'middle' || v === 'bottom') return v
+  return resolveLayout(slide?.layout) === '' ? 'top' : 'middle'
 }
 
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved

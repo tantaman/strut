@@ -179,7 +179,8 @@ export function importDeck(
       s.text_align ||
       s.body_region ||
       s.layout ||
-      s.pad
+      s.pad ||
+      s.valign
     )
       mutate.setSlideTheme({
         id: slideId,
@@ -189,6 +190,7 @@ export function importDeck(
         body_region: s.body_region,
         layout: s.layout,
         pad: s.pad,
+        valign: s.valign,
         now,
       })
     if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })

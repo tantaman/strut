@@ -1062,7 +1062,7 @@ button {
   padding: var(--strut-body-pad, 64px 88px);
   display: var(--strut-body-display, block);
   flex-direction: column;
-  justify-content: safe center;
+  justify-content: var(--strut-body-justify, safe center);
   overflow: hidden;
   font-family: var(--strut-body-font, 'Lato', sans-serif);
   color: var(--strut-body-color, #111);
@@ -3218,6 +3218,74 @@ button {
   display: block;
   background: currentColor;
   border-radius: 1px;
+}
+/* Third axis: alignment — two rows of icon chips (vertical: top/middle/bottom, then horizontal:
+   left/center/right). Icon-only so the section stays quiet next to the labelled density row above. */
+.lyt-aligns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.lyt-align-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.lyt-align {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s;
+}
+.lyt-align:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+.lyt-align.is-active {
+  color: var(--coral);
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+/* A mini box (16:9-ish) whose content the inline flex prop pins: for vertical, one block moved
+   top/middle/bottom; for horizontal, three ragged text lines pushed left/center/right. */
+.lyt-align-glyph {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  width: 30px;
+  height: 20px;
+  padding: 3px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.lyt-align-glyph i {
+  display: block;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+.lyt-align-glyph--v {
+  align-items: center;
+  gap: 0;
+}
+.lyt-align-glyph--v i {
+  width: 65%;
+  height: 7px;
+  border-radius: 2px;
 }
 .lyt-thumb {
   display: flex;

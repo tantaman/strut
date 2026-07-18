@@ -214,6 +214,9 @@ export const setSlideThemeArgs = z.object({
   // Body density ('' = comfortable | 'compact' | 'edge' = full bleed). Scales the safe-area padding;
   // orthogonal to layout. See slidePadScale.
   pad: z.string().optional(),
+  // Vertical alignment of the body within its box ('' = auto | 'top' | 'middle' | 'bottom'). A per-card
+  // property all cells snap to; orthogonal to layout/pad. Horizontal is text_align. See slideBodyVAlign.
+  valign: z.string().optional(),
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
 
@@ -586,6 +589,7 @@ export const mutators = {
       if (a.body_region !== undefined) row.body_region = a.body_region
       if (a.layout !== undefined) row.layout = a.layout
       if (a.pad !== undefined) row.pad = a.pad
+      if (a.valign !== undefined) row.valign = a.valign
       yield tx.update('slide', row)
     },
   ),
