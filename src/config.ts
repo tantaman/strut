@@ -1,5 +1,4 @@
-// Canonical Strut dimensions & editor constants. See docs/STRUT_SPEC.md §2 (we pick the modern
-// 16:9 1280×720 over the old 1024×768 — §13.5).
+// Canonical Strut dimensions & editor constants — modern 16:9 1280×720 (over the old 1024×768).
 
 export const SLIDE_W = 1280;
 export const SLIDE_H = 720;

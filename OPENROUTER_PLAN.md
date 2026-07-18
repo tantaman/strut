@@ -6,7 +6,7 @@ Status: **Phases 1–4 built & verified** on branch `open-router`: credential st
 deliberately-deferred
 **BYOK path** the AI adapters already name — *"there is NO per-user credential to custody (that's the
 BYOK path we deliberately deferred)"* (`server/arrange.ts:3-4`, `server/chat.ts:8-11`) — and
-[`AI_ARRANGE_PLAN.md`](./AI_ARRANGE_PLAN.md) Phase 1 (credential store) + Phase 5 (OpenRouter OAuth,
+the original AI Arrange plan's Phase 1 (credential store) + Phase 5 (OpenRouter OAuth,
 called *"this **is** 'LLM of choice'… the default path"*).
 
 ## Goal
@@ -46,7 +46,7 @@ connected a model.
   "no AI binding under dev" cliff that forces the `STRUT_*_STUB` fallbacks today.
 - **Credentials never touch Rindle and never reach the browser.** Rindle replicates every row to every
   client — the one store a key must never enter. The key lives **encrypted at rest in the auth D1**
-  (`DB`), decrypted only server-side in the Worker. Mirrors `AI_ARRANGE_PLAN.md`'s credential decision;
+  (`DB`), decrypted only server-side in the Worker. Mirrors the original AI Arrange plan's credential decision;
   reuses the D1 that `AUTH_PLAN.md` already delivered.
 - **The seam resolves the backend per request from the caller's credential.** `resolveModel(userId)`:
   connected → **OpenRouter (user pays)**; not connected → **Workers AI (app pays — today's behavior)**.
@@ -229,7 +229,7 @@ In each of `api.arrange.tsx` / `api.generate.tsx` / `api.chat.tsx`:
 - Streaming for Arrange/Generate (they are one-shot structured calls by design).
 - Team/shared connected models (a credential is strictly per-user).
 - Multimodal (sending slide thumbnails) — orthogonal, tracked with the AI feature plans.
-- An app-owned Claude key via AI Gateway (`AI_CHAT_PLAN.md`'s alternative) — a *different* lever (better
+- An app-owned Claude key via AI Gateway (the AI Chat plan's alternative) — a *different* lever (better
   default quality, app pays) than BYO (user pays, user chooses); not this plan.
 
 ## Quick file map

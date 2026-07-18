@@ -1,5 +1,5 @@
 // The client-only Rindle schema extension: a memory-only `chat_message` table for the "✨ Chat" advisor
-// panel (AI_CHAT_PLAN.md). This is the canonical local-table use case — private, per-device scratch text
+// panel. This is the canonical local-table use case — private, per-device scratch text
 // that never syncs.
 //
 // `{ local: true }` makes the table client-authoritative and memory-only: it NEVER syncs (invisible to

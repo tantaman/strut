@@ -1,7 +1,7 @@
 -- 0002_ownership_sharing
 -- Additive DDL only (ADD COLUMN / CREATE TABLE / CREATE INDEX). One statement per ';'.
 -- Full-line comments only — the applier mishandles inline trailing `-- comments` (RINDLE_NOTES #1).
--- Per-user ownership + sharing. See docs/STRUT_SPEC.md and RINDLE_NOTES (multi-tenant scoping).
+-- Per-user ownership + sharing. See RINDLE_NOTES (multi-tenant scoping).
 --
 -- ADD COLUMN carries NOT NULL DEFAULT: SQLite requires a default when adding a NOT NULL column, and
 -- the default is the same "unset" sentinel the mutators stamp. NOT NULL keeps the generated types

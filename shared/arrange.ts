@@ -1,6 +1,6 @@
 // The client ↔ server contract for "✨ AI Arrange" — connect a model and let it set the reading/camera
-// order + pick a spatial layout for the Overview from a natural-language instruction (see
-// AI_ARRANGE_PLAN.md). The model is JUST ANOTHER PRODUCER of the two mutations a human drag already
+// order + pick a spatial layout for the Overview from a natural-language instruction. The model is
+// JUST ANOTHER PRODUCER of the two mutations a human drag already
 // makes: `reorderSlide` (reading order) and `setSlideTransform` via a layout preset. It emits SEMANTICS
 // (an id permutation + a preset name), never raw geometry — geometry stays deterministic in
 // `src/editor/layouts.ts`.

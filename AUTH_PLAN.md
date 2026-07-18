@@ -1,7 +1,7 @@
 # Accounts & Auth — Better-Auth + social sign-in — Implementation Plan
 
-Status: **proposed** (not yet implemented). Prerequisite for [`AI_ARRANGE_PLAN.md`](./AI_ARRANGE_PLAN.md)
-Phase 0 — you cannot attach paid LLM credentials to a spoofable identity.
+Status: **proposed** (not yet implemented). Prerequisite for the BYO-LLM credential store
+(`OPENROUTER_PLAN.md`) — you cannot attach paid LLM credentials to a spoofable identity.
 
 ## Goal
 
@@ -35,7 +35,7 @@ anyone can send any `x-user` and act as anyone.
   current adapter name against Better-Auth docs. Auth/session data must **not** live in Rindle, which
   replicates every row to every browser.
 - **D1 also absorbs the encrypted model-credential store** the AI plan needed — one binding, no separate
-  KV. (Update `AI_ARRANGE_PLAN.md` Phase 1 accordingly.)
+  KV.
 - **The session cookie replaces the `x-user` header as the source of truth.** Same-origin `/api/rindle/*`
   requests carry the Better-Auth cookie automatically; the Worker resolves it to a verified user id and
   **ignores any client-supplied principal**.
@@ -60,7 +60,7 @@ identity, recovery, cross-device), decoupled from the **security** requirement (
 ## Sequencing
 
 Phase 1–3 is the shippable core (D1 + Better-Auth + GitHub/Google + the `x-user` bridge). Phase 4 adds
-Apple; Phase 5 the guest→linked claim flow. Then `AI_ARRANGE_PLAN.md` Phase 1+ can proceed.
+Apple; Phase 5 the guest→linked claim flow. Then the BYO-LLM credential work (`OPENROUTER_PLAN.md`) can proceed.
 
 ---
 
