@@ -1,3 +1,10 @@
+- Decks for thought. Branching. Going down paths.
+- add slide button has layout hint and we have 4 options based on last used layouts?
+- drag columns to resize cells
+- 
+
+---
+
 Maybe just a single chat and actions in it rather than buttons all over...
 
 

@@ -13,11 +13,17 @@ import { useState } from 'react'
 import { newId, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
-import { zNow } from './componentOps'
+import { reinsertComponent, zNow } from './componentOps'
+import { componentSize } from './render'
+import {
+  ComponentDataReader,
+  componentRefKey,
+  mergeComponentRefs,
+} from './componentFragments'
 import { uploadImage } from './upload'
 import { bodyCells, cellDocAt } from './types'
 import { isDocEmpty } from './tiptapDoc'
-import type { Rect, DeckPresentationFields } from './types'
+import type { AnyComponent, Rect, DeckPresentationFields } from './types'
 import type { SlideDetail } from './deckDetail'
 
 type Deck = DeckPresentationFields | null | undefined
@@ -172,5 +178,73 @@ export function DropCellHighlight({
         height: cell.h * scale,
       }}
     />
+  )
+}
+
+/** Hover-to-remove for images placed on a Doc-mode card. Doc mode's object layer (`LockedObjects`) is
+ *  inert — pointer-events:none so clicks fall through to the text being edited — which also means a
+ *  dropped photo can't be selected or deleted there without switching to Slide mode. This overlays a
+ *  quiet × on each image, revealed on hover, that removes it as ONE undo (the exact inverse of the drop).
+ *  Positioned in the card's own coordinate space (canvas px × scale) like the LayoutPicker, so the ×
+ *  stays a constant on-screen size at any column width. The overlay root is inert; only the per-image
+ *  boxes opt back into pointer events — over the (opaque) photo they cover, never the surrounding text. */
+export function DocImageRemovers({
+  slide,
+  scale,
+}: {
+  slide: SlideDetail
+  scale: number
+}) {
+  const mutate = useMutate()
+  const history = useHistory()
+  const refs = mergeComponentRefs(slide)
+  if (refs.length === 0) return null
+
+  const remove = (c: AnyComponent) => {
+    const snapshot = { ...c }
+    mutate.removeComponent({ id: c.id })
+    history.push({
+      label: 'Remove image',
+      redo: () => mutate.removeComponent({ id: c.id }),
+      undo: () => reinsertComponent(mutate, snapshot),
+    })
+  }
+
+  return (
+    <div className="doc__imgtools">
+      {refs.map((component) => (
+        <ComponentDataReader
+          key={componentRefKey(component)}
+          component={component}
+        >
+          {(c) => {
+            if (c.kind !== 'image') return null
+            const { w, h } = componentSize(c)
+            return (
+              <div
+                className="doc__imgtool"
+                style={{
+                  left: c.x * scale,
+                  top: c.y * scale,
+                  width: w * scale,
+                  height: h * scale,
+                }}
+              >
+                {/* Centered on the photo itself — always on the image, never under the card's corner
+                    controls, and it reads the same whether the photo is full-bleed or a small object. */}
+                <button
+                  type="button"
+                  className="doc__imgtool-del"
+                  title="Remove image"
+                  onClick={() => remove(c)}
+                >
+                  ×
+                </button>
+              </div>
+            )
+          }}
+        </ComponentDataReader>
+      ))}
+    </div>
   )
 }

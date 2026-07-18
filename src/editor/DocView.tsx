@@ -47,7 +47,7 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
-import { useDropImage, DropCellHighlight } from './imageDrop'
+import { useDropImage, DropCellHighlight, DocImageRemovers } from './imageDrop'
 import { LayoutPicker } from './LayoutPicker'
 import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
@@ -474,6 +474,8 @@ function DocCard({
           {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
               coordinate space, so the button stays a constant size at any column width. */}
           {editable && <LayoutPicker slide={slide} deck={deck} scale={scale} />}
+          {/* Hover-× to remove a photo dropped on this card, without leaving Doc mode (one undo). */}
+          {editable && !flipped && <DocImageRemovers slide={slide} scale={scale} />}
           {dropActive && (
             <DropCellHighlight
               slide={slide}
