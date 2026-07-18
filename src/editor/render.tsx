@@ -12,6 +12,7 @@ import {
   layoutCells,
   resolveLayout,
   resolveTextAlign,
+  slideBodyVAlign,
   slidePadScale,
   textTypeOf,
 } from './types'
@@ -94,6 +95,10 @@ export function themeVars(
   // The body sits in the layout's first cell (or, for a full layout, the legacy single region). Same
   // three CSS vars either way, so thumbnail/stage/Doc/Play/export all confine the body for free.
   const region = bodyStyleFor(slide, theme)
+  // Vertical alignment: '' auto keeps the region's own display (block for a full body, flex for a
+  // partitioned one) and lands on the stylesheet's `safe center`; an explicit valign forces flex so a
+  // full-bleed body can also centre/bottom-pin. Cells inherit --strut-body-justify from the container.
+  const valign = slideBodyVAlign(slide?.valign)
   return {
     '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
@@ -105,7 +110,8 @@ export function themeVars(
     ),
     '--strut-body-pad': region.pad,
     '--strut-type-scale': String(region.scale),
-    '--strut-body-display': region.display,
+    '--strut-body-display': valign.flex ? 'flex' : region.display,
+    '--strut-body-justify': valign.justify,
   } as CSSProperties
 }
 

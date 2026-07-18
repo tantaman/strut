@@ -42,6 +42,8 @@ export interface SlideRowLike {
   cells?: string | null
   // Body density preset ('' | 'compact' | 'edge').
   pad?: string | null
+  // Vertical-alignment preset ('' = auto | 'top' | 'middle' | 'bottom').
+  valign?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -174,6 +176,7 @@ export function serializeDeck(
       if (s.layout) slide.layout = s.layout
       if (s.cells) slide.cells = s.cells
       if (s.pad) slide.pad = s.pad
+      if (s.valign) slide.valign = s.valign
       return slide
     }),
   }
@@ -227,6 +230,7 @@ export interface ImportedSlide {
   layout: string
   cells: string
   pad: string
+  valign: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -352,6 +356,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       layout: str(s.layout),
       cells: str(s.cells),
       pad: str(s.pad),
+      valign: str(s.valign),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

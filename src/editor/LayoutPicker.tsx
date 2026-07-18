@@ -20,11 +20,15 @@ import {
   layoutDividers,
   resolveLayout,
   resolveSlidePad,
+  resolveSlideValign,
+  resolveTextAlign,
   SLIDE_LAYOUTS,
   SLIDE_PADS,
+  SLIDE_VALIGNS,
+  TEXT_ALIGNS,
 } from './types'
-import type { SlideLayout, SlidePad } from './types'
-import type { SlideDetail } from './deckDetail'
+import type { SlideLayout, SlidePad, SlideValign, TextAlign } from './types'
+import type { DeckRoot, SlideDetail } from './deckDetail'
 
 const LABELS: Record<SlideLayout, string> = {
   '': 'Full',
@@ -49,6 +53,58 @@ function PadGlyph({ pad }: { pad: SlidePad }) {
   return (
     <span className="lyt-pad-glyph" aria-hidden>
       <i style={{ inset: `${PAD_INSET[pad]}px` }} />
+    </span>
+  )
+}
+
+// Alignment: the box's third axis (after tiling and density) — where the text sits inside it. Two rows
+// of icon chips, one per axis, both drawn from one value like the glyphs above.
+const VALIGN_LABELS: Record<SlideValign, string> = {
+  top: 'top',
+  middle: 'middle',
+  bottom: 'bottom',
+}
+const ALIGN_LABELS: Record<TextAlign, string> = {
+  left: 'left',
+  center: 'center',
+  right: 'right',
+}
+
+// Vertical: a mini box with one content block the inline `justify-content` pins to top/middle/bottom.
+const VALIGN_JUSTIFY: Record<SlideValign, string> = {
+  top: 'flex-start',
+  middle: 'center',
+  bottom: 'flex-end',
+}
+function VAlignGlyph({ valign }: { valign: SlideValign }) {
+  return (
+    <span
+      className="lyt-align-glyph lyt-align-glyph--v"
+      style={{ justifyContent: VALIGN_JUSTIFY[valign] }}
+      aria-hidden
+    >
+      <i />
+    </span>
+  )
+}
+
+// Horizontal: three ragged "text lines" the inline `align-items` pins to left/center/right.
+const HALIGN_ITEMS: Record<TextAlign, string> = {
+  left: 'flex-start',
+  center: 'center',
+  right: 'flex-end',
+}
+const HALIGN_BARS = [0.72, 0.46, 0.62]
+function AlignGlyph({ align }: { align: TextAlign }) {
+  return (
+    <span
+      className="lyt-align-glyph"
+      style={{ alignItems: HALIGN_ITEMS[align] }}
+      aria-hidden
+    >
+      {HALIGN_BARS.map((w, i) => (
+        <i key={i} style={{ width: `${w * 100}%` }} />
+      ))}
     </span>
   )
 }
@@ -80,15 +136,19 @@ function LayoutGlyph({ layout }: { layout: SlideLayout }) {
 
 export function LayoutPicker({
   slide,
+  deck,
   scale,
 }: {
   slide: SlideDetail
+  deck: DeckRoot | null
   scale: number
 }) {
   const mutate = useMutate()
   const history = useHistory()
   const current = resolveLayout(slide.layout)
   const currentPad = resolveSlidePad(slide.pad)
+  const currentValign = resolveSlideValign(slide)
+  const currentAlign = resolveTextAlign(slide.text_align, deck?.text_align)
 
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
@@ -119,6 +179,34 @@ export function LayoutPicker({
     apply(next)
     history.push({
       label: 'Change padding',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
+  }
+
+  const commitValign = (next: SlideValign) => {
+    setOpen(false)
+    if (next === currentValign) return
+    const before = slide.valign ?? ''
+    const apply = (valign: string) =>
+      mutate.setSlideTheme({ id: slide.id, valign, now: Date.now() })
+    apply(next)
+    history.push({
+      label: 'Change alignment',
+      redo: () => apply(next),
+      undo: () => apply(before),
+    })
+  }
+
+  const commitAlign = (next: TextAlign) => {
+    setOpen(false)
+    if (next === currentAlign) return
+    const before = slide.text_align ?? ''
+    const apply = (text_align: string) =>
+      mutate.setSlideTheme({ id: slide.id, text_align, now: Date.now() })
+    apply(next)
+    history.push({
+      label: 'Change alignment',
       redo: () => apply(next),
       undo: () => apply(before),
     })
@@ -257,6 +345,40 @@ export function LayoutPicker({
                   <span className="lyt-pad-label">{PAD_LABELS[p]}</span>
                 </button>
               ))}
+            </div>
+            {/* Third axis: alignment — where the text sits in the box. Vertical row, then horizontal.
+                A per-card property; every cell on the card snaps to it. */}
+            <div className="lyt-aligns">
+              <div className="lyt-align-row">
+                {SLIDE_VALIGNS.map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={
+                      'lyt-align' + (v === currentValign ? ' is-active' : '')
+                    }
+                    title={`Align ${VALIGN_LABELS[v]}`}
+                    onClick={() => commitValign(v)}
+                  >
+                    <VAlignGlyph valign={v} />
+                  </button>
+                ))}
+              </div>
+              <div className="lyt-align-row">
+                {TEXT_ALIGNS.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    className={
+                      'lyt-align' + (a === currentAlign ? ' is-active' : '')
+                    }
+                    title={`Align ${ALIGN_LABELS[a]}`}
+                    onClick={() => commitAlign(a)}
+                  >
+                    <AlignGlyph align={a} />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>,
           document.body,

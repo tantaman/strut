@@ -473,7 +473,7 @@ function DocCard({
           )}
           {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
               coordinate space, so the button stays a constant size at any column width. */}
-          {editable && <LayoutPicker slide={slide} scale={scale} />}
+          {editable && <LayoutPicker slide={slide} deck={deck} scale={scale} />}
           {dropActive && (
             <DropCellHighlight
               slide={slide}
