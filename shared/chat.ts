@@ -2,7 +2,7 @@
 // REORDERS slides, and AI Generate, which AUTHORS them). Chat neither reorders nor authors: it TALKS. The
 // user converses with a model that can *see* the deck (grounded by append-only semantic narration from the
 // live Rindle deck-detail view) and answers in streamed prose — "does this flow?", "what's a stronger
-// closing?". See AI_CHAT_PLAN.md.
+// closing?".
 //
 // Advisor-only in v1: the model suggests, it does not mutate the deck. So — unlike Arrange/Generate — there
 // is NO structured-output firewall / normalize step here, because the output is free prose, not a plan the

@@ -6,8 +6,8 @@ through that world. The point of the product is to let a person _surf_ what AI c
 from an idea to a living, spatial presentation with almost nothing in the way.
 
 Read this before designing or building anything here. It is the bar the work is held to.
-The README covers stack/architecture/setup; `docs/STRUT_SPEC.md` is the deep spec. This file
-is the **why**.
+The README covers stack/architecture/setup; the code is the source of truth. This file is
+the **why**.
 
 ## North star
 
@@ -51,16 +51,13 @@ explain. **Removing a control is usually the better feature.**
   need for it. Prefer that.
 - AI features live in `src/editor/ai*.ts` (client) and `server/*.ts` (authoritative). New AI
   actions should follow the established shape: describe → propose → apply-as-one-undo, with a
-  server-side quota/entitlement check. See the `AI_*_PLAN.md` docs for the patterns.
+  server-side quota/entitlement check. Read the existing lanes for the pattern.
 - Keep this file honest. If the product's orientation shifts, update this — it is the first
   thing an agent reads.
 
 ## Map
 
 - `README.md` — stack, architecture, local setup, deploy.
-- `docs/STRUT_SPEC.md` — the full product/technical spec.
 - `RINDLE_NOTES.md` — the data layer (migrations → schema → optimistic store + live queries).
-- `AI_ARRANGE_PLAN.md`, `AI_CHAT_PLAN.md`, `AI_CHAT_TOOLS_PLAN.md`, `OPENROUTER_PLAN.md` —
-  how the AI surfaces are designed.
 - `src/editor/` — the editor (views, AI lanes, components). `shared/` — schema, queries,
   mutators shared by client + server. `server/` — API routes, AI backends, auth, storage.

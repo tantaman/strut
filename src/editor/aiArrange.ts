@@ -2,7 +2,7 @@
 // model (buildDigest), preview a returned plan without touching Rindle (previewCards), and apply it as a
 // SINGLE undoable step (applyPlan). The AI is just another producer of the two mutations a human drag
 // already makes — `reorderSlide` (reading/camera order) + `setSlideTransform` (spatial layout) — so this
-// inherits sync, server-side permission gating, and undo for free. See AI_ARRANGE_PLAN.md.
+// inherits sync, server-side permission gating, and undo for free.
 
 import type { JSONContent } from '@tiptap/core'
 import { keysBetween } from '../lib/order'
@@ -79,7 +79,7 @@ export function docText(raw: string | null | undefined): string {
 // Slides have no `title` column. Their readable content lives in the markdown-mode `doc` (the default
 // slide mode) or the legacy raw-markdown `markdown` column — both plain scalars on the slide row.
 // (Spatial slides carry their text in component fragment refs, which need a React `useFragment` to read;
-// pulling that into the digest is a follow-up — see AI_ARRANGE_PLAN.md. Markdown is the default, so the
+// pulling that into the digest is a follow-up. Markdown is the default, so the
 // model still has content to reason about for typical decks.)
 export function slideText(s: SlideDetail): string {
   const fromDoc = docText(s.doc)

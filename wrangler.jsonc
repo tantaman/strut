@@ -44,7 +44,7 @@
   ],
 
   // Better-Auth's SQL store (users / sessions / accounts) + the encrypted per-user model-credential
-  // table (see AUTH_PLAN.md / AI_ARRANGE_PLAN.md). This is SEPARATE from Rindle: auth data must never
+  // table. This is SEPARATE from Rindle: auth data must never
   // sync to the browser. Like R2, a D1 binding is an object binding — read via `cloudflare:workers`
   // (server/auth.ts), NOT process.env.
   // Create it, then paste the printed database_id below:

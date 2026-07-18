@@ -1,6 +1,6 @@
 -- 0001_init
 -- Additive DDL only (CREATE TABLE / ADD COLUMN / CREATE INDEX). One statement per ';'.
--- Strut data model. See docs/STRUT_SPEC.md section 3 and 13.1.
+-- Strut data model.
 -- Rindle column types: TEXT | INTEGER | REAL | JSON. Single-column PRIMARY KEY per table.
 -- Conventions: ids are TEXT (uuid); time is REAL (epoch ms); rotations are REAL radians;
 -- sort is a fractional index (TEXT).
