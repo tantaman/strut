@@ -172,6 +172,13 @@ export const addSlideArgs = z.object({
   y: z.number(),
   // '' = spatial (default) | 'markdown'. Add-slide inherits the deck's default_slide_mode.
   render_mode: z.enum(['', 'markdown']).optional(),
+  // The FRAME a new slide inherits from its neighbor (layout tiling / density / vertical + horizontal
+  // alignment) so building a run of similar slides doesn't mean re-picking the same settings every time.
+  // Omitted = '' everywhere = full / comfortable / auto / deck-align. Content is NEVER inherited.
+  layout: z.string().optional(),
+  pad: z.string().optional(),
+  valign: z.string().optional(),
+  text_align: z.string().optional(),
   now: z.number(),
 })
 export type AddSlideArgs = z.infer<typeof addSlideArgs>
@@ -534,11 +541,12 @@ export const mutators = {
         markdown: '',
         doc: '',
         render_mode: a.render_mode ?? '',
-        text_align: '',
+        text_align: a.text_align ?? '',
         body_region: '',
-        layout: '',
+        layout: a.layout ?? '',
         cells: '',
-        pad: '',
+        pad: a.pad ?? '',
+        valign: a.valign ?? '',
       })
     },
   ),

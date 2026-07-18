@@ -32,6 +32,11 @@ export function useAddSlide(
         i >= 0 && i < slides.length ? slides[i] : undefined
       const before = slideAt(at - 1)
       const after = slideAt(at)
+      // Continue the neighbor's FRAME (layout tiling / density / alignment) instead of resetting to
+      // defaults — so a run of similar slides doesn't mean re-picking the same settings each time. Prefer
+      // the slide above the insertion point (the one you were just working under), else the one below for
+      // an insert-at-top. Only the frame is carried; content (doc/cells) always starts empty.
+      const src = before ?? after
       const id = newId()
       const between = (
         b: number | undefined,
@@ -53,6 +58,11 @@ export function useAddSlide(
         y: between(before?.y, after?.y, 0),
         // New slides inherit the deck's default render mode (spec: deck-level markdown default).
         render_mode: defaultMode === 'markdown' ? 'markdown' : '',
+        // …and the neighbor's frame, so the new slide picks up where you left off.
+        layout: src?.layout ?? '',
+        pad: src?.pad ?? '',
+        valign: src?.valign ?? '',
+        text_align: src?.text_align ?? '',
         now: Date.now(),
       }
       mutate.addSlide(args)
