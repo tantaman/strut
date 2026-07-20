@@ -45,14 +45,16 @@ pnpm dev
 
 Then open http://localhost:3000.
 
-`pnpm dev` runs two processes with `concurrently`:
+`pnpm dev` resolves the Rindle bindings once, then runs two processes with `concurrently`. The web
+process waits for the local edge to answer before it starts Vite, avoiding two native toolchains
+competing during cold startup:
 
 - `rindle up --migrate --gen shared/schema.ts --watch` — renders `rindle.ncl`, supervises the
   write-master, follower, and fleet edge, applies migrations, regenerates `shared/schema.ts`, and
   watches `migrations/`.
-- `rindle exec -- vite dev --port 3000` — injects `RINDLE_URL` plus its server-side token and starts
-  the TanStack Start app. The Rindle API and image upload endpoints are served by this
-  same web process under `/api/rindle/*`; there is no separate API server to start.
+- `vite dev --port 3000` — inherits `RINDLE_URL` plus its server-side token from that one outer
+  `rindle exec` and starts the TanStack Start app. The Rindle API and image upload endpoints are
+  served by this same web process under `/api/rindle/*`; there is no separate API server to start.
 
 Local Rindle state lives in `master.db` and `follower-0.db`; uploads live in `.uploads/`. Image
 uploads work with no config by using the local fallback. Copy `.env.example` to `.env` only for
