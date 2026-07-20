@@ -442,3 +442,25 @@ but the write shape makes the hot path awkward:
   keyed local write would collapse both the undo-restore dance and per-chunk streaming into one call. Net:
   not a blocker (holding `prev` is trivial for a small chat row), but a per-token `edit` that needs the full
   prior row reads as accidental friction for the canonical local-table use case (draft/scratch text).
+
+### ✅ 22. Cut over to Rindle 0.7.0 — replicated topology + split read/write bindings
+
+0.7 removes the standalone write-owning `rindled` shape. Strut now uses the same one-topology path as
+the 0.7 examples:
+
+- `rindle.ncl` declares `profile = "replicated"` with one follower. `rindle up` supervises the HCTree
+  `rindle-replicator`, read-only follower, and stable local fleet edge; `daemon.json` and the old
+  `topology.ncl` are gone.
+- `rindle exec` injects `RINDLE_DAEMON_URL` (reads), `RINDLE_REPLICATOR_URL` (writes),
+  `RINDLE_DATABASE_TOKEN` (public SQL), and `VITE_FLEET_WS` (subscriptions). The browser enables
+  follower affinity on the fleet URL; direct `*_DAEMON_WS` values remain explicit debug bypasses.
+- `server/rindle-api.ts` uses `SplitDaemonClient` for control-plane routing and the API server's
+  `database` option for authoritative mutations. Guest-account claims now target the replicator.
+- React narration moved from `@rindle/react` to `@rindle/narrator-react`; devtools attachment moved to
+  `@rindle/devtools`. Vite passes the packaged wasm URL explicitly to `initWasm`.
+
+Verified on the released 0.7.0 npm artifacts: production build, topology render, all 13 migrations,
+schema regeneration, SSR response, anonymous auth, API mutation → follower read replication, and a
+real optimistic client over the affinity-enabled fleet edge (WASM query hydration plus create/delete
+confirmation). The only full-typecheck failures remain the pre-existing AssemblyScript
+`exportRuntime` errors in `extensionHost`; no Rindle type errors remain.

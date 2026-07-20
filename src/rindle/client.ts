@@ -8,6 +8,7 @@ import { mutators } from '../../shared/app-def.ts'
 import { clientSchema } from './localSchema.ts'
 import { authClient } from './authClient.ts'
 import { APP_BASEPATH, appPath } from '../../shared/appPath.ts'
+import wasmUrl from 'rindle-wasm-bin?url'
 
 // The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
 // MUST match what the server derives from the session cookie (server/session.ts), so the optimistic
@@ -40,33 +41,44 @@ async function ensureSession(): Promise<string> {
   return sessionUserId
 }
 
-// The live-query WebSocket URL. Resolved at RUNTIME from the server (/api/rindle/config, backed by the
-// RINDLE_DAEMON_WS host env var) so a single production build can target any daemon host — no rebuild
-// per environment. Falls back to a build-time override (VITE_RINDLE_WS, handy for local dev) and then
-// the local daemon default.
-async function resolveWsUrl(): Promise<string> {
+// The live-query WebSocket target. Production can supply the stable fleet URL at runtime through
+// `/api/rindle/config`; local `rindle exec` injects VITE_FLEET_WS from rindle.ncl. A direct follower
+// remains an explicit debug/legacy bypass and therefore does not enable affinity.
+async function resolveWsTarget(): Promise<{
+  wsUrl: string
+  affinity: boolean
+}> {
   try {
     const res = await fetch(appPath('/api/rindle/config'))
     if (res.ok) {
-      const { wsUrl } = (await res.json()) as { wsUrl?: string }
-      if (wsUrl) return wsUrl
+      const { wsUrl, affinity } = (await res.json()) as {
+        wsUrl?: string
+        affinity?: boolean
+      }
+      if (wsUrl) return { wsUrl, affinity: affinity === true }
     }
   } catch {
     // network/parse error — fall through to the build-time / local defaults
   }
-  return import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7601'
+  const directWs =
+    import.meta.env.VITE_DAEMON_WS ?? import.meta.env.VITE_RINDLE_WS
+  if (directWs) return { wsUrl: directWs, affinity: false }
+  return {
+    wsUrl: import.meta.env.VITE_FLEET_WS ?? 'ws://127.0.0.1:7650',
+    affinity: true,
+  }
 }
 
 async function create() {
   // Ensure a server session FIRST, so `sessionUserId` is set before the engine predicts anything and
   // the session cookie exists for the API fetches below.
-  const [, { createRindleClient }, { initWasm }, wsUrl] = await Promise.all([
+  const [, { createRindleClient }, { initWasm }, ws] = await Promise.all([
     ensureSession(),
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
-    resolveWsUrl(),
+    resolveWsTarget(),
   ])
-  await initWasm()
+  await initWasm(wasmUrl)
   const app = await createRindleClient({
     // The EXTENDED schema — the plain synced `schema` plus the client-only `chat_message` local table
     // (src/rindle/localSchema.ts). Only the browser engine learns the local table; SSR / server keep the
@@ -90,14 +102,16 @@ async function create() {
         fetch(input, { ...init, credentials: 'same-origin' }),
     },
     daemon: {
-      wsUrl,
+      wsUrl: ws.wsUrl,
+      affinity: ws.affinity,
     },
+    dev: { resetOnMutationGap: import.meta.env.DEV },
     onRejected: (envelope, reason) =>
       console.error(`[rindle] ${envelope.name} rejected:`, reason),
   })
 
   if (import.meta.env.DEV) {
-    void import('@rindle/react-devtools')
+    void import('@rindle/devtools')
       .then(({ attachDevtools }) => attachDevtools(app))
       .catch((e) => console.error('[rindle] failed to load devtools:', e))
   }

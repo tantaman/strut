@@ -4,10 +4,10 @@
 // components) to the real account so nothing they made is lost — the ChatGPT/Qwen-style "keep my work"
 // handoff (see strut-auth-guest-first).
 //
-// NOTE: decks live in the rindle DAEMON, not the auth DB, so the reassignment is issued authoritatively
-// against the daemon (server-side only, with the daemon token) — never through the public /api/rindle
-// route, so a client can never invoke it to steal another user's decks. The concrete reassignment is
-// wired in Phase 3 (claimDecks); this hook is the stable seam better-auth calls.
+// NOTE: decks live in Rindle, not the auth DB, so the reassignment is issued authoritatively against
+// the replicator write-master (server-side only, with its control token) — never through the public
+// /api/rindle route, so a client can never invoke it to steal another user's decks. The concrete
+// reassignment is wired in Phase 3 (claimDecks); this hook is the stable seam better-auth calls.
 
 /** better-auth anonymous plugin `onLinkAccount` payload (typed structurally to avoid importing the
  *  plugin's internal types here). */

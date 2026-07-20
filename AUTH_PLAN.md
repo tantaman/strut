@@ -99,8 +99,9 @@ Apple; Phase 5 the guest→linked claim flow. Then the BYO-LLM credential work (
   `beforeLoad`/server-fn session check → redirect to sign-in when required. **Do not guard**
   `share.$deckId.tsx` or `deck.$deckId_.play.tsx` (public/presenter stay anonymous).
 - **Live-query channel (mostly resolved — it's a lease/capability model).** The browser opens the WS
-  directly to the daemon (`RINDLE_DAEMON_WS`), but reads are two-hop: `POST /api/rindle/query` hits the
-  **gated Worker** (`authorizeQuery` + `deckAccess`/`publicAccess`), which returns a daemon **lease**
+  through the stable follower fleet (`RINDLE_FLEET_WS`, with affinity), but reads are two-hop:
+  `POST /api/rindle/query` hits the **gated Worker** (`authorizeQuery` +
+  `deckAccess`/`publicAccess`), which returns a daemon **lease**
   (`{ materializationId, leaseToken, queryKey }`, RINDLE_NOTES.md:65); the WS then only streams
   materializations you hold a valid `leaseToken` for. So the WS is **downstream of the HTTP gate** —
   swapping `x-user` for the session on `/api/rindle/query` (above) secures the WS too; **no separate WS

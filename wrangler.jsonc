@@ -1,15 +1,14 @@
 {
   // Cloudflare Workers config for the Strut web app (TanStack Start). See docs/DEPLOY_CLOUDFLARE.md.
   //
-  // This deploys the SSR app + same-origin API/upload routes to Workers. The `rindled` daemon
-  // (SQLite + live-query WebSocket) CANNOT run on Workers — host it separately and point
-  // RINDLE_DAEMON_URL / RINDLE_DAEMON_WS at it. See the deploy doc for the daemon hosting plan.
+  // This deploys the SSR app + same-origin API/upload routes to Workers. The Rindle replicator and
+  // follower fleet CANNOT run on Workers — host them separately and configure the bindings below.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "strut",
   // Pinned to the installed workerd (1.20260701) so local tooling doesn't warn; bump freely.
   "compatibility_date": "2026-07-01",
   // nodejs_compat: upload.ts / rindle-api.ts use node builtins (crypto, fs fallback) and process.env.
-  // With this flag, process.env is populated from `vars` + secrets below — so RINDLE_DAEMON_URL etc.
+  // With this flag, process.env is populated from `vars` + secrets below — so the Rindle bindings
   // keep working unchanged. R2 bucket bindings are the exception: read via `cloudflare:workers`.
   "compatibility_flags": ["nodejs_compat"],
   // Custom entry wraps TanStack Start's default handler (src/worker-entry.ts) so the artifact sandbox
@@ -70,10 +69,10 @@
   },
 
   // Non-secret config, surfaced on process.env at runtime (nodejs_compat).
-  //   RINDLE_DAEMON_URL  — https URL of your hosted rindled control plane (used by the Worker/server).
-  //   RINDLE_DAEMON_WS   — wss URL of the daemon's live-query WebSocket. Served to the browser at
-  //                        runtime via /api/rindle/config, so changing it is a var edit + redeploy —
-  //                        no client rebuild. (Leave empty to fall back to the local dev default.)
+  //   RINDLE_DAEMON_URL     — https URL of the hosted follower/fleet read control plane.
+  //   RINDLE_REPLICATOR_URL — https URL of the write-master control + public SQL surface.
+  //   RINDLE_FLEET_WS       — stable wss fleet endpoint, served to the browser at runtime via
+  //                           /api/rindle/config with affinity enabled.
   //   R2_PUBLIC_BASE_URL — OPTIONAL. Public bucket/custom-domain base (e.g. https://pub-xxx.r2.dev).
   //                        If set, uploads return that CDN URL directly. If empty, images are served
   //                        back through the Worker from the bucket (private bucket is fine).
@@ -87,7 +86,8 @@
   //                        OAuth redirect/callback URLs + trusted origins. Local dev: http://localhost:3000.
   "vars": {
     "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
-    "RINDLE_DAEMON_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
+    "RINDLE_REPLICATOR_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:7611",
+    "RINDLE_FLEET_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
     "R2_PUBLIC_BASE_URL": "",
     "ARTIFACT_ORIGIN": "https://sandbox.strut.io",
     "BETTER_AUTH_URL": "https://strut.io",
@@ -95,6 +95,8 @@
 
   // Secrets are NOT stored here. Set them with wrangler:
   //   wrangler secret put RINDLE_DAEMON_TOKEN
+  //   wrangler secret put RINDLE_REPLICATOR_TOKEN
+  //   wrangler secret put RINDLE_DATABASE_TOKEN  # must differ from the replicator control token
   //   wrangler secret put BETTER_AUTH_SECRET      # openssl rand -base64 32
   //   wrangler secret put GITHUB_CLIENT_ID
   //   wrangler secret put GITHUB_CLIENT_SECRET

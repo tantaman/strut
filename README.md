@@ -11,20 +11,23 @@ world (the impress.js model, made visual and editable).
 - **React 19** + **[TanStack Start](https://tanstack.com/start)** (file-based routing, SSR) on **Vite**.
 - **[Rindle](https://rindle.sh)** for the data layer (wired): SQL migrations as source of truth →
   generated TypeScript schema → optimistic local store + live windowed queries + named mutators, with
-  a `rindled` daemon behind the app's own server routes. See `RINDLE_NOTES.md` for the write-up.
+  a replicated Rindle data tier behind the app's own server routes. See `RINDLE_NOTES.md` for the
+  write-up.
 - Plain CSS for the editor chrome (`src/strut.css`); Tailwind is available for one-offs.
 
 ## Architecture
 
-- **`rindled` daemon** — owns the SQLite DB + the live-query WebSocket (`:7600` control, `:7601` ws).
+- **Rindle data tier** — a `rindle-replicator` write-master (`:7611`) feeds a read-only `rindled`
+  follower (`:7600`) behind a stable local fleet edge (`:7650`). `rindle.ncl` is the single topology
+  definition for local and managed deployments.
 - **API** — TanStack Start server routes (`src/routes/api.rindle.*`) host the stateless Rindle API
-  (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators, and register the named
-  queries. Same-origin, no separate process. Image uploads (`server/upload.ts`) go to Cloudflare R2 —
-  a native bucket binding on Workers, the S3 API on other hosts, else a local dev fallback. Mirrors the
-  predicted client mutators in `shared/app-def.ts`.
+  (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators on the write-master,
+  and register named queries on the follower fleet. Same-origin, no separate process. Image uploads
+  (`server/upload.ts`) go to Cloudflare R2 — a native bucket binding on Workers, the S3 API on other
+  hosts, else a local dev fallback. Mirrors the predicted client mutators in `shared/app-def.ts`.
 - **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
   live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket connects
-  directly to the daemon (`:7601`).
+  to the stable fleet edge with follower affinity.
 
 Schema lives in `migrations/`; `shared/` holds the generated schema, query builder, named queries, and
 client mutators (imported by both browser and server). App code is in `src/` (`routes/`, `editor/`,
@@ -44,26 +47,26 @@ Then open http://localhost:3000.
 
 `pnpm dev` runs two processes with `concurrently`:
 
-- `rindle up --migrate --gen shared/schema.ts --watch` — starts the daemon from `daemon.json`, applies
-  migrations, regenerates `shared/schema.ts`, and keeps watching `migrations/`.
-- `vite dev --port 3000` — starts the TanStack Start app on http://localhost:3000. The Rindle API and
-  image upload endpoints are served by this same web process under `/api/rindle/*`; there is no
-  separate API server to start.
+- `rindle up --migrate --gen shared/schema.ts --watch` — renders `rindle.ncl`, supervises the
+  write-master, follower, and fleet edge, applies migrations, regenerates `shared/schema.ts`, and
+  watches `migrations/`.
+- `rindle exec -- vite dev --port 3000` — injects the topology-derived read/write/WebSocket bindings
+  and starts the TanStack Start app. The Rindle API and image upload endpoints are served by this
+  same web process under `/api/rindle/*`; there is no separate API server to start.
 
-Local state lives in `rindle.db` and `.uploads/`. Image uploads work with no config by using the local
-fallback; copy `.env.example` to `.env` only if you want uploads stored in Cloudflare R2. `vite.config.ts`
-loads `.env` for server-side values during `vite dev`.
+Local Rindle state lives in `master.db` and `follower-0.db`; uploads live in `.uploads/`. Image
+uploads work with no config by using the local fallback. Copy `.env.example` to `.env` only for
+optional overrides; `rindle exec` supplies the local data-tier bindings automatically.
 
 If you need to run the processes separately:
 
 ```bash
-pnpm daemon   # daemon + migration/schema watcher
-pnpm dev:web  # web app + same-origin API routes; expects the daemon to already be running
+pnpm daemon   # replicator + follower + fleet edge + migration/schema watcher
+pnpm dev:web  # web app + same-origin API routes; expects `pnpm daemon` to be running
 ```
 
-By default the daemon control plane is `http://127.0.0.1:7600` and the live-query WebSocket is
-`ws://127.0.0.1:7601`. Override them with `RINDLE_DAEMON_URL` for the server/API side and
-`VITE_RINDLE_WS` for the browser side.
+`rindle exec` derives `RINDLE_DAEMON_URL`, `RINDLE_REPLICATOR_URL`, `RINDLE_DATABASE_TOKEN`, and
+`VITE_FLEET_WS` from `rindle.ncl`. There are no copied local ports or tokens in the app config.
 
 Other scripts:
 
@@ -80,10 +83,10 @@ pnpm check            # prettier check
 ## Deploying to Cloudflare
 
 The web app (SSR + `/api/rindle/*` routes) deploys to **Cloudflare Workers**, with image uploads in
-**R2** via a native bucket binding. The `rindled` daemon can't run on Workers and must be hosted
-separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it with `wrangler`. Local
-`pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
-for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
+**R2** via a native bucket binding. The Rindle replicator/follower fleet must be hosted separately.
+`pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it with `wrangler`. Local `pnpm dev` and
+`pnpm build` stay on Node. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)** for the
+data-tier bindings, R2 setup, secrets, and deploy steps.
 
 ## Commercial / hosted (optional)
 
