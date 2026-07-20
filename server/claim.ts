@@ -4,8 +4,8 @@
 // components) to the real account so nothing they made is lost — the ChatGPT/Qwen-style "keep my work"
 // handoff (see strut-auth-guest-first).
 //
-// NOTE: decks live in Rindle, not the auth DB, so the reassignment is issued authoritatively against
-// the replicator write-master (server-side only, with its control token) — never through the public
+// NOTE: decks live in Rindle, not the auth DB, so the reassignment is issued authoritatively through
+// the unified ingress (server-side only, with the database token) — never through the public
 // /api/rindle route, so a client can never invoke it to steal another user's decks. The concrete
 // reassignment is wired in Phase 3 (claimDecks); this hook is the stable seam better-auth calls.
 

@@ -8,8 +8,8 @@
   // Pinned to the installed workerd (1.20260701) so local tooling doesn't warn; bump freely.
   "compatibility_date": "2026-07-01",
   // nodejs_compat: upload.ts / rindle-api.ts use node builtins (crypto, fs fallback) and process.env.
-  // With this flag, process.env is populated from `vars` + secrets below — so the Rindle bindings
-  // keep working unchanged. R2 bucket bindings are the exception: read via `cloudflare:workers`.
+  // With this flag, process.env is populated from `vars` + secrets below. R2 bucket bindings are the
+  // exception: read via `cloudflare:workers`.
   "compatibility_flags": ["nodejs_compat"],
   // Custom entry wraps TanStack Start's default handler (src/worker-entry.ts) so the artifact sandbox
   // origin (ARTIFACT_ORIGIN) serves ONLY /a/<key> and never the app. On the app host it's a pass-through.
@@ -69,10 +69,7 @@
   },
 
   // Non-secret config, surfaced on process.env at runtime (nodejs_compat).
-  //   RINDLE_DAEMON_URL     — https URL of the hosted follower/fleet read control plane.
-  //   RINDLE_REPLICATOR_URL — https URL of the write-master control + public SQL surface.
-  //   RINDLE_FLEET_WS       — stable wss fleet endpoint, served to the browser at runtime via
-  //                           /api/rindle/config with affinity enabled.
+  //   RINDLE_URL          — the one hosted Rindle ingress for reads, writes, and WebSockets.
   //   R2_PUBLIC_BASE_URL — OPTIONAL. Public bucket/custom-domain base (e.g. https://pub-xxx.r2.dev).
   //                        If set, uploads return that CDN URL directly. If empty, images are served
   //                        back through the Worker from the bucket (private bucket is fine).
@@ -85,18 +82,14 @@
   //   BETTER_AUTH_URL    — the deployed origin (e.g. https://strut.example.com). Better-Auth uses it for
   //                        OAuth redirect/callback URLs + trusted origins. Local dev: http://localhost:3000.
   "vars": {
-    "RINDLE_DAEMON_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:8443",
-    "RINDLE_REPLICATOR_URL": "https://rindle-a218b5eae4fd49bc.fly.dev:7611",
-    "RINDLE_FLEET_WS": "wss://rindle-a218b5eae4fd49bc.fly.dev",
+    "RINDLE_URL": "https://rindle-a218b5eae4fd49bc.fly.dev",
     "R2_PUBLIC_BASE_URL": "",
     "ARTIFACT_ORIGIN": "https://sandbox.strut.io",
     "BETTER_AUTH_URL": "https://strut.io",
   },
 
   // Secrets are NOT stored here. Set them with wrangler:
-  //   wrangler secret put RINDLE_DAEMON_TOKEN
-  //   wrangler secret put RINDLE_REPLICATOR_TOKEN
-  //   wrangler secret put RINDLE_DATABASE_TOKEN  # must differ from the replicator control token
+  //   wrangler secret put RINDLE_DATABASE_TOKEN  # the one Rindle credential; server-side only
   //   wrangler secret put BETTER_AUTH_SECRET      # openssl rand -base64 32
   //   wrangler secret put GITHUB_CLIENT_ID
   //   wrangler secret put GITHUB_CLIENT_SECRET

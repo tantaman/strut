@@ -19,15 +19,15 @@ world (the impress.js model, made visual and editable).
 
 - **Rindle data tier** — a `rindle-replicator` write-master (`:7611`) feeds a read-only `rindled`
   follower (`:7600`) behind a stable local fleet edge (`:7650`). `rindle.ncl` is the single topology
-  definition for local and managed deployments.
+  definition, and the edge is the app's one read/write/WebSocket ingress.
 - **API** — TanStack Start server routes (`src/routes/api.rindle.*`) host the stateless Rindle API
-  (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators on the write-master,
-  and register named queries on the follower fleet. Same-origin, no separate process. Image uploads
+  (`server/rindle-api.ts`): they validate args, run authoritative SQL mutators, and register named
+  queries through that one ingress. Same-origin, no separate process. Image uploads
   (`server/upload.ts`) go to Cloudflare R2 — a native bucket binding on Workers, the S3 API on other
   hosts, else a local dev fallback. Mirrors the predicted client mutators in `shared/app-def.ts`.
 - **Browser client** (`src/rindle/*`) — the optimistic store (`@rindle/optimistic` + WASM), `useQuery`
-  live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket connects
-  to the stable fleet edge with follower affinity.
+  live reads, and `app.mutate.*` writes, posting to `/api/rindle/*`. The live-query WebSocket uses the
+  same Rindle URL with follower affinity.
 
 Schema lives in `migrations/`; `shared/` holds the generated schema, query builder, named queries, and
 client mutators (imported by both browser and server). App code is in `src/` (`routes/`, `editor/`,
@@ -50,8 +50,8 @@ Then open http://localhost:3000.
 - `rindle up --migrate --gen shared/schema.ts --watch` — renders `rindle.ncl`, supervises the
   write-master, follower, and fleet edge, applies migrations, regenerates `shared/schema.ts`, and
   watches `migrations/`.
-- `rindle exec -- vite dev --port 3000` — injects the topology-derived read/write/WebSocket bindings
-  and starts the TanStack Start app. The Rindle API and image upload endpoints are served by this
+- `rindle exec -- vite dev --port 3000` — injects `RINDLE_URL` plus its server-side token and starts
+  the TanStack Start app. The Rindle API and image upload endpoints are served by this
   same web process under `/api/rindle/*`; there is no separate API server to start.
 
 Local Rindle state lives in `master.db` and `follower-0.db`; uploads live in `.uploads/`. Image
@@ -65,14 +65,14 @@ pnpm daemon   # replicator + follower + fleet edge + migration/schema watcher
 pnpm dev:web  # web app + same-origin API routes; expects `pnpm daemon` to be running
 ```
 
-`rindle exec` derives `RINDLE_DAEMON_URL`, `RINDLE_REPLICATOR_URL`, `RINDLE_DATABASE_TOKEN`, and
-`VITE_FLEET_WS` from `rindle.ncl`. There are no copied local ports or tokens in the app config.
+`rindle exec` derives the one `RINDLE_URL` and `RINDLE_DATABASE_TOKEN` from `rindle.ncl`. There are no
+copied topology ports or role-specific credentials in the app config.
 
 Other scripts:
 
 ```bash
 pnpm build            # production build (client + SSR + API routes); does not start the daemon
-pnpm preview          # preview the built app; expects a reachable daemon
+pnpm preview          # preview the built app through the topology-derived Rindle binding
 pnpm generate-routes  # regenerate src/routeTree.gen.ts
 pnpm setup            # one-shot migrate + schema regen against a running daemon
 pnpm test             # vitest

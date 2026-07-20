@@ -34,13 +34,8 @@ const wasmBin = require.resolve('@rindle/wasm/pkg/rindle_bg.wasm')
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
 // (In production the host provides real env vars.)
 const SERVER_ENV = [
-  'RINDLE_DAEMON_URL',
-  'RINDLE_DAEMON_WS',
-  'RINDLE_DAEMON_TOKEN',
-  'RINDLE_REPLICATOR_URL',
-  'RINDLE_REPLICATOR_TOKEN',
+  'RINDLE_URL',
   'RINDLE_DATABASE_TOKEN',
-  'RINDLE_FLEET_WS',
   'R2_ACCOUNT_ID',
   'R2_ACCESS_KEY_ID',
   'R2_SECRET_ACCESS_KEY',

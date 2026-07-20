@@ -2,19 +2,29 @@ import { createFileRoute } from '@tanstack/react-router'
 
 // Runtime client config, read by the browser before it opens the live-query WebSocket.
 //
-// The fleet WS URL is a RUNTIME value, not baked into the client bundle. A direct daemon URL remains
-// an explicit legacy/debug bypass; the normal 0.7 path enables affinity at the stable fleet edge.
+// The browser uses the same public Rindle ingress as the server, with only the URL scheme changed.
+// The database credential stays server-side.
+function webSocketUrl(origin: string | undefined): string {
+  if (!origin) return ''
+  try {
+    const url = new URL(origin)
+    if (url.protocol === 'http:') url.protocol = 'ws:'
+    else if (url.protocol === 'https:') url.protocol = 'wss:'
+    else return ''
+    return url.toString()
+  } catch {
+    return ''
+  }
+}
+
 export const Route = createFileRoute('/api/rindle/config')({
   server: {
     handlers: {
-      GET: () => {
-        const direct = process.env.RINDLE_DAEMON_WS
-        const fleet = process.env.RINDLE_FLEET_WS
-        return Response.json({
-          wsUrl: direct ?? fleet ?? '',
-          affinity: !direct && Boolean(fleet),
-        })
-      },
+      GET: () =>
+        Response.json({
+          wsUrl: webSocketUrl(process.env.RINDLE_URL),
+          affinity: true,
+        }),
     },
   },
 })

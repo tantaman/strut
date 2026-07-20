@@ -41,9 +41,8 @@ async function ensureSession(): Promise<string> {
   return sessionUserId
 }
 
-// The live-query WebSocket target. Production can supply the stable fleet URL at runtime through
-// `/api/rindle/config`; local `rindle exec` injects VITE_FLEET_WS from rindle.ncl. A direct follower
-// remains an explicit debug/legacy bypass and therefore does not enable affinity.
+// The live-query WebSocket target. The server derives it from the same RINDLE_URL used for HTTP and
+// SQL; the browser receives only the public ws URL, never the database credential.
 async function resolveWsTarget(): Promise<{
   wsUrl: string
   affinity: boolean
@@ -60,13 +59,7 @@ async function resolveWsTarget(): Promise<{
   } catch {
     // network/parse error — fall through to the build-time / local defaults
   }
-  const directWs =
-    import.meta.env.VITE_DAEMON_WS ?? import.meta.env.VITE_RINDLE_WS
-  if (directWs) return { wsUrl: directWs, affinity: false }
-  return {
-    wsUrl: import.meta.env.VITE_FLEET_WS ?? 'ws://127.0.0.1:7650',
-    affinity: true,
-  }
+  return { wsUrl: 'ws://127.0.0.1:7650', affinity: true }
 }
 
 async function create() {

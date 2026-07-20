@@ -17,31 +17,28 @@ local disk or long-lived listening sockets, so **that data tier must be hosted e
 ```
                  ┌─────────────────────── Cloudflare Workers ───────────────────────┐
   browser ─────▶ │  Strut SSR app  +  /api/rindle/* (server routes)  +  R2 binding   │
-     │           └───────────────┬────────────────────────────┬─────────────────────┘
-     │                           │ reads / leases             │ authoritative SQL writes
-     │  wss (RINDLE_FLEET_WS)    ▼                            ▼
-     └────────────────▶ stable fleet edge ──▶ rindled follower    rindle-replicator
-                                              read-only             write-master
+     │           └────────────────────────────┬─────────────────────────────────────┘
+     │                                        │ https (RINDLE_URL)
+     │  wss (same RINDLE_URL origin)          ▼
+     └─────────────────────────────▶ stable fleet ingress
+                                         │             │
+                                      reads/ws       SQL writes
+                                         ▼             ▼
+                                  rindled follower  rindle-replicator
 ```
 
 ### Hosting the Rindle topology
 
-Use Rindle Cloud or run the topology rendered from `rindle.ncl` on persistent infrastructure. The
-application tier needs three public bindings:
+Use Rindle Cloud or run the topology rendered from `rindle.ncl` on persistent infrastructure. Rindle
+0.7.2 gives the application one public binding: `RINDLE_URL`. Its ingress routes reads and live-query
+WebSockets to the follower fleet and `/v1/sql/*` writes to the replicator. The Worker holds one
+server-only `RINDLE_DATABASE_TOKEN`; the browser receives only the URL with an `https`→`wss` scheme
+change.
 
-- `RINDLE_DAEMON_URL`: follower/fleet HTTP reads, leases, SSR reads, and materializations.
-- `RINDLE_REPLICATOR_URL`: the write-master control plane and public `/v1/sql/*` surface.
-- `RINDLE_FLEET_WS`: the stable browser WebSocket endpoint; follower affinity keeps its WebSocket
-  and lease HTTP requests on the same follower.
+> The Worker can deploy without a reachable data tier, but reads and writes will fail until
+> `RINDLE_URL` points at a running unified ingress.
 
-The Worker also needs three server-only credentials: the follower control token, the replicator
-control token, and the database SQL token. The database token is database-wide and must differ from
-the private replicator control token.
-
-> The Worker can deploy without a reachable data tier, but reads and writes will fail until all
-> bindings point at a running 0.7 topology.
-
-### Managed daemon: Rindle Cloud (headwaters)
+### Managed Rindle: Rindle Cloud (headwaters)
 
 The official deployment uses a **managed app on Rindle Cloud**. The repo is bound to it in
 `.rindle/cloud.json` (committed; public identifiers only), while `rindle.ncl` describes its replicated
@@ -54,8 +51,8 @@ pnpm rindle:migrate:remote      # push migrations/ (Rindle schema) to the manage
 ```
 
 > **Forking Strut?** Before your first `rindle deploy`, `rm .rindle/cloud.json` so you provision your
-> _own_ app instead of re-attaching to the official one (which you can't access). Then point the
-> three Rindle URL vars in `wrangler.jsonc` at that app and install its three server credentials.
+> _own_ app instead of re-attaching to the official one (which you can't access). Then point
+> `RINDLE_URL` in `wrangler.jsonc` at that app and install its database credential.
 > Rindle Cloud is optional; the same `rindle.ncl` topology can be self-hosted.
 
 ---
@@ -126,27 +123,22 @@ Edit the `vars` block:
 
 ```jsonc
 "vars": {
-  "RINDLE_DAEMON_URL": "https://your-read-fleet.example.com",
-  "RINDLE_REPLICATOR_URL": "https://your-write-master.example.com",
-  "RINDLE_FLEET_WS": "wss://your-fleet.example.com",
+  "RINDLE_URL": "https://your-rindle-ingress.example.com",
   "R2_PUBLIC_BASE_URL": ""
 }
 ```
 
-These are **runtime** config. The browser fetches `RINDLE_FLEET_WS` from `/api/rindle/config`, so a
-fleet move is a vars edit + redeploy, with no client rebuild. `VITE_FLEET_WS` is the build-time
-fallback; `RINDLE_DAEMON_WS` / `VITE_DAEMON_WS` are direct-follower debug bypasses only.
+This is **runtime** config. The browser fetches the WebSocket form of `RINDLE_URL` from
+`/api/rindle/config`, so moving a fleet is one vars edit + redeploy, with no client rebuild.
 
 ### 3. Set secrets (not stored in the repo)
 
 ```bash
-npx wrangler secret put RINDLE_DAEMON_TOKEN     # matches the token your daemon requires
-npx wrangler secret put RINDLE_REPLICATOR_TOKEN # private write/control token
-npx wrangler secret put RINDLE_DATABASE_TOKEN   # public SQL bearer; distinct from the control token
+npx wrangler secret put RINDLE_DATABASE_TOKEN   # the one Rindle credential; server-side only
 ```
 
-With `nodejs_compat`, vars and secrets are surfaced on `process.env`. Never expose any of the three
-tokens through `VITE_*` variables or browser routes.
+With `nodejs_compat`, vars and secrets are surfaced on `process.env`. Never expose the database token
+through a `VITE_*` variable or browser route.
 
 ---
 
