@@ -2,8 +2,8 @@
 # read-follower. `followers = 1` is the smallest local pair; raising it scales reads without
 # changing the app's bindings.
 #
-# `rindle up` renders and supervises the pair plus the stable local fleet edge. `rindle exec`
-# derives the web tier's one RINDLE_URL + RINDLE_DATABASE_TOKEN binding from this same file.
+# `rindle dev` renders and supervises the pair plus the stable local fleet edge, then launches the
+# web tier with one RINDLE_URL + RINDLE_DATABASE_TOKEN binding derived from this same file.
 # `rindle deploy` uses it with the committed `.rindle/cloud.json` binding for the managed tier.
 {
   profile = "replicated",

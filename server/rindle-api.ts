@@ -396,7 +396,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
 // ---- server wiring ------------------------------------------------------------------------------
 
 const api = createRindleApiServer<User>({
-  // Rindle 0.7.2 derives both the follower control plane and the write-master SQL surface from one
+  // Rindle 0.7.3 derives both the follower control plane and the write-master SQL surface from one
   // fleet ingress. The token authenticates SQL only and never reaches the browser.
   rindle: { url: RINDLE_URL, token: DATABASE_TOKEN },
   // `schema` drives the dialect SQL renderer for the LOGICAL mutator writes (tx.insert/update/…) AND

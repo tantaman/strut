@@ -7,7 +7,7 @@
 import { mutators } from '../../shared/app-def.ts'
 import { clientSchema } from './localSchema.ts'
 import { authClient } from './authClient.ts'
-import { APP_BASEPATH, appPath } from '../../shared/appPath.ts'
+import { APP_BASEPATH } from '../../shared/appPath.ts'
 import wasmUrl from 'rindle-wasm-bin?url'
 
 // The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
@@ -41,35 +41,13 @@ async function ensureSession(): Promise<string> {
   return sessionUserId
 }
 
-// The live-query WebSocket target. The server derives it from the same RINDLE_URL used for HTTP and
-// SQL; the browser receives only the public ws URL, never the database credential.
-async function resolveWsTarget(): Promise<{
-  wsUrl: string
-  affinity: boolean
-}> {
-  try {
-    const res = await fetch(appPath('/api/rindle/config'))
-    if (res.ok) {
-      const { wsUrl, affinity } = (await res.json()) as {
-        wsUrl?: string
-        affinity?: boolean
-      }
-      if (wsUrl) return { wsUrl, affinity: affinity === true }
-    }
-  } catch {
-    // network/parse error — fall through to the build-time / local defaults
-  }
-  return { wsUrl: 'ws://127.0.0.1:7650', affinity: true }
-}
-
 async function create() {
   // Ensure a server session FIRST, so `sessionUserId` is set before the engine predicts anything and
   // the session cookie exists for the API fetches below.
-  const [, { createRindleClient }, { initWasm }, ws] = await Promise.all([
+  const [, { createRindleClient }, { initWasm }] = await Promise.all([
     ensureSession(),
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
-    resolveWsTarget(),
   ])
   await initWasm(wasmUrl)
   const app = await createRindleClient({
@@ -94,10 +72,8 @@ async function create() {
       fetch: (input, init) =>
         fetch(input, { ...init, credentials: 'same-origin' }),
     },
-    daemon: {
-      wsUrl: ws.wsUrl,
-      affinity: ws.affinity,
-    },
+    // No daemon config is needed in 0.7.3: the first query lease discovers the fleet WebSocket
+    // endpoint and carries the affinity ticket that pins the HTTP and WebSocket legs together.
     dev: { resetOnMutationGap: import.meta.env.DEV },
     onRejected: (envelope, reason) =>
       console.error(`[rindle] ${envelope.name} rejected:`, reason),

@@ -19,7 +19,7 @@ local disk or long-lived listening sockets, so **that data tier must be hosted e
   browser ─────▶ │  Strut SSR app  +  /api/rindle/* (server routes)  +  R2 binding   │
      │           └────────────────────────────┬─────────────────────────────────────┘
      │                                        │ https (RINDLE_URL)
-     │  wss (same RINDLE_URL origin)          ▼
+     │  wss (discovered from query lease)     ▼
      └─────────────────────────────▶ stable fleet ingress
                                          │             │
                                       reads/ws       SQL writes
@@ -30,10 +30,10 @@ local disk or long-lived listening sockets, so **that data tier must be hosted e
 ### Hosting the Rindle topology
 
 Use Rindle Cloud or run the topology rendered from `rindle.ncl` on persistent infrastructure. Rindle
-0.7.2 gives the application one public binding: `RINDLE_URL`. Its ingress routes reads and live-query
+0.7.3 gives the application one public binding: `RINDLE_URL`. Its ingress routes reads and live-query
 WebSockets to the follower fleet and `/v1/sql/*` writes to the replicator. The Worker holds one
-server-only `RINDLE_DATABASE_TOKEN`; the browser receives only the URL with an `https`→`wss` scheme
-change.
+server-only `RINDLE_DATABASE_TOKEN`; the browser receives the public WebSocket endpoint and an opaque
+affinity ticket in its first query lease.
 
 > The Worker can deploy without a reachable data tier, but reads and writes will fail until
 > `RINDLE_URL` points at a running unified ingress.
@@ -128,8 +128,9 @@ Edit the `vars` block:
 }
 ```
 
-This is **runtime** config. The browser fetches the WebSocket form of `RINDLE_URL` from
-`/api/rindle/config`, so moving a fleet is one vars edit + redeploy, with no client rebuild.
+This is **runtime** config. The API derives the public WebSocket endpoint from `RINDLE_URL` and puts
+it in each query lease, so moving a fleet is one vars edit + redeploy, with no client rebuild or
+app-authored browser config route.
 
 ### 3. Set secrets (not stored in the repo)
 

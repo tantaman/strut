@@ -45,20 +45,16 @@ pnpm dev
 
 Then open http://localhost:3000.
 
-`pnpm dev` resolves the Rindle bindings once, then runs two processes with `concurrently`. The web
-process waits for the local edge to answer before it starts Vite, avoiding two native toolchains
-competing during cold startup:
-
-- `rindle up --migrate --gen shared/schema.ts --watch` — renders `rindle.ncl`, supervises the
-  write-master, follower, and fleet edge, applies migrations, regenerates `shared/schema.ts`, and
-  watches `migrations/`.
-- `vite dev --port 3000` — inherits `RINDLE_URL` plus its server-side token from that one outer
-  `rindle exec` and starts the TanStack Start app. The Rindle API and image upload endpoints are
-  served by this same web process under `/api/rindle/*`; there is no separate API server to start.
+`pnpm dev` delegates the whole local lifecycle to `rindle dev`. It renders `rindle.ncl`, starts the
+write-master, follower, and fleet edge, waits for all three to become ready, applies migrations,
+regenerates `shared/schema.ts`, and only then launches Vite with `RINDLE_URL` plus the server-side
+database token. Rindle also owns signal forwarding and teardown, so the command exits cleanly as one
+unit. The Rindle API and image upload endpoints are served by the TanStack Start process under
+`/api/rindle/*`; there is no separate API server to start.
 
 Local Rindle state lives in `master.db` and `follower-0.db`; uploads live in `.uploads/`. Image
 uploads work with no config by using the local fallback. Copy `.env.example` to `.env` only for
-optional overrides; `rindle exec` supplies the local data-tier bindings automatically.
+optional overrides; `rindle dev` supplies the local data-tier bindings automatically.
 
 If you need to run the processes separately:
 
@@ -67,8 +63,9 @@ pnpm daemon   # replicator + follower + fleet edge + migration/schema watcher
 pnpm dev:web  # web app + same-origin API routes; expects `pnpm daemon` to be running
 ```
 
-`rindle exec` derives the one `RINDLE_URL` and `RINDLE_DATABASE_TOKEN` from `rindle.ncl`. There are no
-copied topology ports or role-specific credentials in the app config.
+`rindle exec` lets the split web process derive the same `RINDLE_URL` and
+`RINDLE_DATABASE_TOKEN` from `rindle.ncl`. There are no copied topology ports or role-specific
+credentials in the app config.
 
 Other scripts:
 
@@ -76,7 +73,7 @@ Other scripts:
 pnpm build            # production build (client + SSR + API routes); does not start the daemon
 pnpm preview          # preview the built app through the topology-derived Rindle binding
 pnpm generate-routes  # regenerate src/routeTree.gen.ts
-pnpm setup            # one-shot migrate + schema regen against a running daemon
+pnpm setup            # one-shot migrate + schema regen against a running local topology
 pnpm test             # vitest
 pnpm lint             # eslint
 pnpm check            # prettier check

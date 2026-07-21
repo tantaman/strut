@@ -441,7 +441,7 @@ but the write shape makes the hot path awkward:
   not a blocker (holding `prev` is trivial for a small chat row), but a per-token `edit` that needs the full
   prior row reads as accidental friction for the canonical local-table use case (draft/scratch text).
 
-### ✅ 22. Cut over to Rindle 0.7.2 — one topology, one application binding
+### ✅ 22. Cut over to Rindle 0.7.3 — one topology, one application binding
 
 0.7 removes the standalone write-owning `rindled` shape. Strut now uses the same one-topology path as
 the 0.7 examples:
@@ -449,16 +449,18 @@ the 0.7 examples:
 - `rindle.ncl` declares `profile = "replicated"` with one follower. `rindle up` supervises the HCTree
   `rindle-replicator`, read-only follower, and stable local fleet edge; `daemon.json` and the old
   `topology.ncl` are gone.
-- The 0.7.2 edge routes follower reads/WebSockets and master-served SQL paths behind one origin.
-  `rindle exec` gives Strut only `RINDLE_URL` plus the server-side `RINDLE_DATABASE_TOKEN`; the
-  browser derives the WebSocket scheme from that URL and enables follower affinity.
+- The 0.7.3 edge routes follower reads/WebSockets and master-served SQL paths behind one origin.
+  `rindle dev` gives Strut only `RINDLE_URL` plus the server-side `RINDLE_DATABASE_TOKEN`. The first
+  browser query lease discovers the public WebSocket endpoint and supplies its affinity ticket, so
+  Strut has no browser runtime-config route or copied topology address.
+- `rindle dev` owns topology startup, readiness, migration/schema gates, Vite launch, signals, and
+  teardown. This replaces the temporary `concurrently` + `wait-for-rindle` orchestration.
 - `server/rindle-api.ts` uses the unified `rindle: { url, token }` connection. Guest-account claims
   use the same public SQL ingress and credential in one retryable transaction.
 - React narration moved from `@rindle/react` to `@rindle/narrator-react`; devtools attachment moved to
   `@rindle/devtools`. Vite passes the packaged wasm URL explicitly to `initWasm`.
 
-Verified on the released 0.7.2 npm artifacts: production build, topology render, all 13 migrations,
-schema regeneration, SSR response, runtime WebSocket config, a WebSocket handshake through the edge,
-and SQL + guest-claim transactions routed through that same edge. The only full-typecheck failures
-remain the pre-existing AssemblyScript `exportRuntime` errors in `extensionHost`; no Rindle type
-errors remain.
+Verified on the released 0.7.3 npm artifacts: production build, the gated `rindle dev` cold-start,
+all 13 migrations, schema regeneration, SSR response, and an authenticated query lease carrying the
+fleet WebSocket endpoint plus its affinity ticket. The only full-typecheck failures remain the
+pre-existing AssemblyScript `exportRuntime` errors in `extensionHost`; no Rindle type errors remain.
