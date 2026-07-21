@@ -1,5 +1,6 @@
-// Strut's Rindle API — stateless: validates args, runs AUTHORITATIVE writes against the daemon, and
-// registers the named queries. Mutators are ISOMORPHIC (shared/app-def.ts): `sharedApiMutators`
+// Strut's Rindle API — stateless: validates args, runs AUTHORITATIVE writes, and registers named
+// queries through Rindle's unified fleet ingress. Mutators are ISOMORPHIC (shared/app-def.ts):
+// `sharedApiMutators`
 // auto-drives the SAME body the client predicts, parsing untrusted wire args and injecting the
 // AUTHENTICATED principal. The ONLY explicit entries are the server-only AUTHORITY the client must not
 // predict — strut's row-level ACCESS GUARDS:
@@ -7,12 +8,13 @@
 //     (owner OR editor-collaborator of the owning deck) via `tx.query` INSIDE the mutation txn, and
 //     throw `forbidden` if not — a hard reject the client's optimistic write snaps back from. The
 //     shared body stays read-free, so `.folded` hot paths (drag/keystroke) keep folding (the read is
-//     server-side only). Reads run through @rindle/query-compiler's sqlite dialect on the daemon.
+//     server-side only). Reads run inside the write-master's SQL mutation transaction.
 //   - The two multi-table cascades (deleteDeck / deleteSlide) can't be keyed ops, so they keep the raw
 //     `tx.exec` escape hatch with the gate IN the SQL (accepted-but-no-op for a non-owner/-editor).
 //
 // Hosted by the TanStack Start server routes in src/routes/api.rindle.* (they import handleRindleJson).
-// The daemon control plane is :7600 (RINDLE_DAEMON_URL).
+// `RINDLE_URL` is the single read/write/subscription ingress; `RINDLE_DATABASE_TOKEN` is its one
+// server-side SQL credential.
 
 import {
   createRindleApiServer,
@@ -30,7 +32,6 @@ import type {
   ServerMutationTx,
   SharedMutatorWithArgs,
 } from '@rindle/api-server'
-import { HttpRindleDaemonClient } from '@rindle/daemon-client'
 import { and, exists, or } from '@rindle/client'
 import { serverQueries } from './queries.ts'
 import { getEntitlements } from './entitlements.ts'
@@ -48,7 +49,9 @@ import {
 
 export type User = string
 type ServerCtx = MutationContext<User>
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const RINDLE_URL = process.env.RINDLE_URL ?? 'http://127.0.0.1:7650'
+const DATABASE_TOKEN =
+  process.env.RINDLE_DATABASE_TOKEN ?? 'rindle-dev-sql-token'
 
 // ---- principal + access predicates --------------------------------------------------------------
 
@@ -393,12 +396,9 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
 // ---- server wiring ------------------------------------------------------------------------------
 
 const api = createRindleApiServer<User>({
-  daemon: new HttpRindleDaemonClient({
-    baseUrl: DAEMON_URL,
-    headers: {
-      authorization: `Bearer ${process.env.RINDLE_DAEMON_TOKEN ?? ''}`,
-    },
-  }),
+  // Rindle 0.7.3 derives both the follower control plane and the write-master SQL surface from one
+  // fleet ingress. The token authenticates SQL only and never reaches the browser.
+  rindle: { url: RINDLE_URL, token: DATABASE_TOKEN },
   // `schema` drives the dialect SQL renderer for the LOGICAL mutator writes (tx.insert/update/…) AND
   // the read-compiler for the access-guard `tx.query` reads.
   schema,

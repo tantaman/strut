@@ -3,31 +3,34 @@
 // never reachable from the public /api/rindle route — so a client can never call it to steal another
 // user's decks. Isolated in its own module so the daemon wiring loads only on the (rare) promotion path.
 //
-// The reassignment is a single authoritative daemon SQL txn (executeSqlTxn → versioned `cv`/`txId`), so
-// live subscribers reconcile: the guest's decksQuery loses the decks, the account's gains them. Only the
-// user-keyed columns move — deck.owner_id (the decks themselves) and deck_share.user_id (collaborations
-// the guest was granted). The guest's user_profile PK is left alone (the real account keeps its own).
+// The reassignment is a single authoritative SQL txn through the unified Rindle ingress, so live
+// subscribers reconcile:
+// the guest's decksQuery loses the decks, the account's gains them. Only the user-keyed columns move —
+// deck.owner_id (the decks themselves) and deck_share.user_id (collaborations the guest was granted).
+// The guest's user_profile PK is left alone (the real account keeps its own).
 
-import { HttpRindleDaemonClient } from '@rindle/daemon-client'
+import { createSqlClient } from '@rindle/sql-client'
 
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const RINDLE_URL = process.env.RINDLE_URL ?? 'http://127.0.0.1:7650'
+const RINDLE_TOKEN = process.env.RINDLE_DATABASE_TOKEN ?? 'rindle-dev-sql-token'
 
 export async function claimDecks(from: string, to: string): Promise<void> {
-  const daemon = new HttpRindleDaemonClient({
-    baseUrl: DAEMON_URL,
-    headers: { authorization: `Bearer ${process.env.RINDLE_DAEMON_TOKEN ?? ''}` },
-  })
-  const out = await daemon.executeSqlTxn({
-    idempotencyKey: `claim:${from}->${to}`,
-    statements: [
-      { sql: 'UPDATE deck SET owner_id = ? WHERE owner_id = ?', params: [to, from] },
-      {
+  const sql = createSqlClient({ url: RINDLE_URL, authToken: RINDLE_TOKEN })
+  try {
+    // Safe to retry after an OCC conflict: once the first commit wins there are no remaining `from`
+    // rows, so a repeated callback is an accepted no-op.
+    await sql.withTransactionRetry(async (tx) => {
+      await tx.execute({
+        sql: 'UPDATE deck SET owner_id = ? WHERE owner_id = ?',
+        args: [to, from],
+      })
+      await tx.execute({
         sql: 'UPDATE deck_share SET user_id = ? WHERE user_id = ?',
-        params: [to, from],
-      },
-    ],
-  })
-  console.log(
-    `[claim] reassigned guest ${from} → account ${to} (cv=${out.cv}, txId=${out.txId})`,
-  )
+        args: [to, from],
+      })
+    })
+  } finally {
+    sql.close()
+  }
+  console.log(`[claim] reassigned guest ${from} → account ${to}`)
 }

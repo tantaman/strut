@@ -3,55 +3,46 @@
 This deploys the **web app** (SSR + the same-origin `/api/rindle/*` API and image-upload routes) to
 **Cloudflare Workers**, with image uploads stored in **Cloudflare R2** via a native bucket binding.
 
-Local `pnpm dev` and the default `pnpm build` are unchanged — they still run on Node against a local
-`rindled` daemon. The Cloudflare path is opt-in (`CF=1`, wired through `pnpm build:cf` / `pnpm deploy`).
+Local `pnpm dev` and the default `pnpm build` run on Node against the replicated topology in
+`rindle.ncl`. The Cloudflare path is opt-in (`CF=1`, wired through `pnpm build:cf` / `pnpm deploy`).
 
 ---
 
-## The one hard constraint: the daemon can't run on Workers
+## The one hard constraint: the data tier can't run on Workers
 
-Strut's data layer is the **`rindled` daemon** — it owns the SQLite database (`rindle.db`) and the
-live-query **WebSocket**. Workers are stateless and have no persistent local disk or long-lived
-listening sockets, so **the daemon must be hosted somewhere else.** The Worker (and the browser) talk
-to it over the network:
+Rindle 0.7 uses one topology: a **`rindle-replicator` write-master** feeding one or more read-only
+**`rindled` followers** behind a stable fleet edge. Workers are stateless and have no persistent
+local disk or long-lived listening sockets, so **that data tier must be hosted elsewhere.**
 
 ```
                  ┌─────────────────────── Cloudflare Workers ───────────────────────┐
   browser ─────▶ │  Strut SSR app  +  /api/rindle/* (server routes)  +  R2 binding   │
-     │           └───────────────┬──────────────────────────────────────────────────┘
-     │                           │  https  (RINDLE_DAEMON_URL, Bearer RINDLE_DAEMON_TOKEN)
-     │  wss (RINDLE_DAEMON_WS)   ▼
-     └────────────────▶ ┌──────────────────────────────┐
-                        │  rindled daemon (host it!)   │  SQLite + live-query WebSocket
-                        │  :7600 control  :7601 ws     │  needs a persistent volume
-                        └──────────────────────────────┘
+     │           └────────────────────────────┬─────────────────────────────────────┘
+     │                                        │ https (RINDLE_URL)
+     │  wss (discovered from query lease)     ▼
+     └─────────────────────────────▶ stable fleet ingress
+                                         │             │
+                                      reads/ws       SQL writes
+                                         ▼             ▼
+                                  rindled follower  rindle-replicator
 ```
 
-### Hosting the daemon
+### Hosting the Rindle topology
 
-Run `rindled` on any host that gives you a **persistent volume** and lets you terminate **TLS** — a
-small VM/VPS, Fly.io, Railway, Render, a container platform, etc. Requirements:
+Use Rindle Cloud or run the topology rendered from `rindle.ncl` on persistent infrastructure. Rindle
+0.7.3 gives the application one public binding: `RINDLE_URL`. Its ingress routes reads and live-query
+WebSockets to the follower fleet and `/v1/sql/*` writes to the replicator. The Worker holds one
+server-only `RINDLE_DATABASE_TOKEN`; the browser receives the public WebSocket endpoint and an opaque
+affinity ticket in its first query lease.
 
-- Persistent disk for `rindle.db` (and its `-wal`/`-shm` files).
-- Bind to a reachable interface, not just loopback. `daemon.json` ships with `"bindHost":
-"127.0.0.1"`; change it (e.g. `0.0.0.0`) **and put it behind a TLS-terminating reverse proxy** so
-  only `https`/`wss` is exposed publicly.
-- Set an auth token so the control plane isn't open to the world (the Worker sends
-  `Authorization: Bearer <RINDLE_DAEMON_TOKEN>`; see the rindle daemon docs for enabling token auth).
-- Expose two public endpoints:
-  - the **control plane** (`:7600`) as `https://…` → the Worker's `RINDLE_DAEMON_URL` (server env)
-  - the **live-query WebSocket** (`:7601`) as `wss://…` → `RINDLE_DAEMON_WS` (server env), which the
-    Worker hands to the browser at runtime via `/api/rindle/config` — so no client rebuild per host
+> The Worker can deploy without a reachable data tier, but reads and writes will fail until
+> `RINDLE_URL` points at a running unified ingress.
 
-> If you don't want to operate a daemon yet, deploy the Worker anyway — it serves and builds fine —
-> but reads/writes will fail until `RINDLE_DAEMON_URL` points at a running daemon.
+### Managed Rindle: Rindle Cloud (headwaters)
 
-### Managed daemon: Rindle Cloud (headwaters)
-
-The official Strut deployment doesn't self-host `rindled` — it runs a **managed app on Rindle Cloud**,
-and `wrangler.jsonc`'s `RINDLE_DAEMON_URL`/`RINDLE_DAEMON_WS` already point at it. The repo is bound to
-that app in `.rindle/cloud.json` (committed — it holds an app id + public names, **no secrets**, the
-`wrangler.toml` analogue). `topology.ncl` describes the daemon's shape. With that binding in place:
+The official deployment uses a **managed app on Rindle Cloud**. The repo is bound to it in
+`.rindle/cloud.json` (committed; public identifiers only), while `rindle.ncl` describes its replicated
+shape. With that binding in place:
 
 ```sh
 rindle login                    # once — device flow to https://cloud.rindle.sh
@@ -60,10 +51,9 @@ pnpm rindle:migrate:remote      # push migrations/ (Rindle schema) to the manage
 ```
 
 > **Forking Strut?** Before your first `rindle deploy`, `rm .rindle/cloud.json` so you provision your
-> _own_ app instead of re-attaching to the official one (which you can't access — deploy will error
-> until you remove it). Then point `RINDLE_DAEMON_URL`/`RINDLE_DAEMON_WS` in `wrangler.jsonc` at your
-> app, exactly as you override the other deployment identifiers here. Or ignore all of this and
-> self-host `rindled` per the section above — Rindle Cloud is optional.
+> _own_ app instead of re-attaching to the official one (which you can't access). Then point
+> `RINDLE_URL` in `wrangler.jsonc` at that app and install its database credential.
+> Rindle Cloud is optional; the same `rindle.ncl` topology can be self-hosted.
 
 ---
 
@@ -133,24 +123,23 @@ Edit the `vars` block:
 
 ```jsonc
 "vars": {
-  "RINDLE_DAEMON_URL": "https://your-daemon-host.example.com",  // daemon control plane (server-side)
-  "RINDLE_DAEMON_WS": "wss://your-daemon-host.example.com",     // daemon WebSocket (served to browser)
-  "R2_PUBLIC_BASE_URL": ""                                       // "" = serve via Worker; or https://pub-xxxx.r2.dev
+  "RINDLE_URL": "https://your-rindle-ingress.example.com",
+  "R2_PUBLIC_BASE_URL": ""
 }
 ```
 
-Both are **runtime** config — the browser fetches `RINDLE_DAEMON_WS` from `/api/rindle/config` when it
-boots, so pointing at a different daemon is just a `vars` edit + redeploy, **no client rebuild**. (A
-build-time `VITE_RINDLE_WS` in `.env` still works as a local-dev override; runtime config wins when set.)
+This is **runtime** config. The API derives the public WebSocket endpoint from `RINDLE_URL` and puts
+it in each query lease, so moving a fleet is one vars edit + redeploy, with no client rebuild or
+app-authored browser config route.
 
 ### 3. Set secrets (not stored in the repo)
 
 ```bash
-npx wrangler secret put RINDLE_DAEMON_TOKEN     # matches the token your daemon requires
+npx wrangler secret put RINDLE_DATABASE_TOKEN   # the one Rindle credential; server-side only
 ```
 
-With `nodejs_compat`, both `vars` and secrets are surfaced on `process.env` at runtime, so
-`server/rindle-api.ts` keeps reading `process.env.RINDLE_DAEMON_URL` / `RINDLE_DAEMON_TOKEN` unchanged.
+With `nodejs_compat`, vars and secrets are surfaced on `process.env`. Never expose the database token
+through a `VITE_*` variable or browser route.
 
 ---
 

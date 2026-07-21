@@ -20,9 +20,11 @@ todos.json
 *.db-shm
 *.db-wal
 *.db-wal2
+*.db-log-*
+*.db-pagemap
 .dev.vars
 
-# Rindle: `rindle render`/`up`/`deploy` regenerate these from topology.ncl. Ignore the renders, but
+# Rindle: `rindle render`/`up`/`deploy` regenerate these from rindle.ncl. Ignore the renders, but
 # COMMIT the cloud binding (.rindle/cloud.json) — it's what re-attaches deploys to our headwaters
 # app instead of provisioning a duplicate (deploy.rs: `POST /api/apps` is not idempotent).
 /rindle.json

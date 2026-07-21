@@ -215,9 +215,9 @@ headless Chrome (Cmd+Z removes an added component, Cmd+Shift+Z restores it). Two
   insert of a previously-deleted id is accepted, which is what makes redo-of-delete / undo-of-delete
   stable.)
 - **Undo of a slide delete must snapshot the slide's components first** (the server cascades component
-  rows by slide_id, so they're gone after delete). That's the polymorphic 5-query read again (#6/#12)
+  rows by slide*id, so they're gone after delete). That's the polymorphic 5-query read again (#6/#12)
   on a hot path (every slide delete now does a `readSlideComponents` before deleting). A
-  `store.readOnce(query)` (#12) plus a cascade that's _reversible_ (or a delete that returns the
+  `store.readOnce(query)` (#12) plus a cascade that's \_reversible* (or a delete that returns the
   deleted subtree) would remove the snapshot boilerplate. Net: undo/redo didn't need anything FROM
   Rindle, but a full-row upsert + a one-shot subtree read would make the surrounding code much smaller.
 
@@ -359,17 +359,17 @@ runtime row — but worth knowing before you treat a raw query-data node as if i
 workaround stays.** Verified by runtime A/B (headless Chrome, hard-reload `/`, sample the deck grid every
 animation frame across the seed→live swap):
 
-| `index.tsx` | dashboard first paint |
-| --- | --- |
-| `useQueryStatus`/`lastComplete` bridge PRESENT (shipped) | cards=1 steady — **no flash** |
-| bridge REMOVED (plain `useQuery`) | cards 1 → 0 (`.dash__empty` "No decks yet") → 1 — **flash ~40ms** |
+| `index.tsx`                                              | dashboard first paint                                             |
+| -------------------------------------------------------- | ----------------------------------------------------------------- |
+| `useQueryStatus`/`lastComplete` bridge PRESENT (shipped) | cards=1 steady — **no flash**                                     |
+| bridge REMOVED (plain `useQuery`)                        | cards 1 → 0 (`.dash__empty` "No decks yet") → 1 — **flash ~40ms** |
 
 - **What 0.4.4 changed.** The seed now lives in the Store's `seeds` map (not `view.seeded` as the trace
   below described) and is retired on the first live `snapshot`, not `hello` (`@rindle/client/dist/store.js`
   seeds-map + `onEvent`). That closes the gap for an **async ws** backend (seed shows until snapshot).
 - **Why the flash persists for STRUT anyway.** Strut's live client is the **synchronous wasm** backend.
   In `registerMaterialized` (`store.js:309-314`) the wasm engine resets the view to its LOCAL result
-  *inside* `registerQuery`, BEFORE `view.seed(seed.rows)` runs — and the code's own comment says so: "A
+  _inside_ `registerQuery`, BEFORE `view.seed(seed.rows)` runs — and the code's own comment says so: "A
   synchronous backend (wasm) already reset the view above, so its live data wins and **the seed is inert**."
   `decksQuery` can't be computed locally at that instant (its rows + the `slideCount` `countAs` aggregate
   aren't synced yet — they arrive a WS round-trip later), so the wasm view reads `[]` for that window → the
@@ -381,8 +381,6 @@ animation frame across the seed→live swap):
   this flash. The real fix still belongs in `@rindle`: make `view.seed()` authoritative over a
   synchronous-backend register-time reset (don't let an un-synced local `[]` win over a present seed), and
   retire it on the first real snapshot. Original write-up (pre-0.4.4 trace) preserved below.
-
-
 
 Cost real time (and one wrong first fix). Symptom: a route that SSR-seeds its first paint (dashboard
 `decksQuery`) visibly flashes its empty state ("No decks yet" + "0 presentations") for a beat on load,
@@ -442,3 +440,27 @@ but the write shape makes the hot path awkward:
   keyed local write would collapse both the undo-restore dance and per-chunk streaming into one call. Net:
   not a blocker (holding `prev` is trivial for a small chat row), but a per-token `edit` that needs the full
   prior row reads as accidental friction for the canonical local-table use case (draft/scratch text).
+
+### ✅ 22. Cut over to Rindle 0.7.3 — one topology, one application binding
+
+0.7 removes the standalone write-owning `rindled` shape. Strut now uses the same one-topology path as
+the 0.7 examples:
+
+- `rindle.ncl` declares `profile = "replicated"` with one follower. `rindle up` supervises the HCTree
+  `rindle-replicator`, read-only follower, and stable local fleet edge; `daemon.json` and the old
+  `topology.ncl` are gone.
+- The 0.7.3 edge routes follower reads/WebSockets and master-served SQL paths behind one origin.
+  `rindle dev` gives Strut only `RINDLE_URL` plus the server-side `RINDLE_DATABASE_TOKEN`. The first
+  browser query lease discovers the public WebSocket endpoint and supplies its affinity ticket, so
+  Strut has no browser runtime-config route or copied topology address.
+- `rindle dev` owns topology startup, readiness, migration/schema gates, Vite launch, signals, and
+  teardown. This replaces the temporary `concurrently` + `wait-for-rindle` orchestration.
+- `server/rindle-api.ts` uses the unified `rindle: { url, token }` connection. Guest-account claims
+  use the same public SQL ingress and credential in one retryable transaction.
+- React narration moved from `@rindle/react` to `@rindle/narrator-react`; devtools attachment moved to
+  `@rindle/devtools`. Vite passes the packaged wasm URL explicitly to `initWasm`.
+
+Verified on the released 0.7.3 npm artifacts: production build, the gated `rindle dev` cold-start,
+all 13 migrations, schema regeneration, SSR response, and an authenticated query lease carrying the
+fleet WebSocket endpoint plus its affinity ticket. The only full-typecheck failures remain the
+pre-existing AssemblyScript `exportRuntime` errors in `extensionHost`; no Rindle type errors remain.

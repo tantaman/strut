@@ -7,7 +7,8 @@
 import { mutators } from '../../shared/app-def.ts'
 import { clientSchema } from './localSchema.ts'
 import { authClient } from './authClient.ts'
-import { APP_BASEPATH, appPath } from '../../shared/appPath.ts'
+import { APP_BASEPATH } from '../../shared/appPath.ts'
+import wasmUrl from 'rindle-wasm-bin?url'
 
 // The acting principal (the Better-Auth session's user id) the optimistic engine predicts under. It
 // MUST match what the server derives from the session cookie (server/session.ts), so the optimistic
@@ -40,33 +41,15 @@ async function ensureSession(): Promise<string> {
   return sessionUserId
 }
 
-// The live-query WebSocket URL. Resolved at RUNTIME from the server (/api/rindle/config, backed by the
-// RINDLE_DAEMON_WS host env var) so a single production build can target any daemon host — no rebuild
-// per environment. Falls back to a build-time override (VITE_RINDLE_WS, handy for local dev) and then
-// the local daemon default.
-async function resolveWsUrl(): Promise<string> {
-  try {
-    const res = await fetch(appPath('/api/rindle/config'))
-    if (res.ok) {
-      const { wsUrl } = (await res.json()) as { wsUrl?: string }
-      if (wsUrl) return wsUrl
-    }
-  } catch {
-    // network/parse error — fall through to the build-time / local defaults
-  }
-  return import.meta.env.VITE_RINDLE_WS ?? 'ws://127.0.0.1:7601'
-}
-
 async function create() {
   // Ensure a server session FIRST, so `sessionUserId` is set before the engine predicts anything and
   // the session cookie exists for the API fetches below.
-  const [, { createRindleClient }, { initWasm }, wsUrl] = await Promise.all([
+  const [, { createRindleClient }, { initWasm }] = await Promise.all([
     ensureSession(),
     import('@rindle/optimistic'),
     import('@rindle/wasm'),
-    resolveWsUrl(),
   ])
-  await initWasm()
+  await initWasm(wasmUrl)
   const app = await createRindleClient({
     // The EXTENDED schema — the plain synced `schema` plus the client-only `chat_message` local table
     // (src/rindle/localSchema.ts). Only the browser engine learns the local table; SSR / server keep the
@@ -89,15 +72,15 @@ async function create() {
       fetch: (input, init) =>
         fetch(input, { ...init, credentials: 'same-origin' }),
     },
-    daemon: {
-      wsUrl,
-    },
+    // No daemon config is needed in 0.7.3: the first query lease discovers the fleet WebSocket
+    // endpoint and carries the affinity ticket that pins the HTTP and WebSocket legs together.
+    dev: { resetOnMutationGap: import.meta.env.DEV },
     onRejected: (envelope, reason) =>
       console.error(`[rindle] ${envelope.name} rejected:`, reason),
   })
 
   if (import.meta.env.DEV) {
-    void import('@rindle/react-devtools')
+    void import('@rindle/devtools')
       .then(({ attachDevtools }) => attachDevtools(app))
       .catch((e) => console.error('[rindle] failed to load devtools:', e))
   }

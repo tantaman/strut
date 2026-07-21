@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { JSONContent } from '@tiptap/core'
-import { useNarration } from '@rindle/react'
+import { useNarration } from '@rindle/narrator-react'
 import { salienceRank } from '@rindle/narrator'
 import type {
   NamedRow,

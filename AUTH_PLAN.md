@@ -7,7 +7,7 @@ Status: **proposed** (not yet implemented). Prerequisite for the BYO-LLM credent
 
 Give every Strut user a real, server-verified account, with easy social sign-in (**GitHub / Google /
 Apple**). Replace today's spoofable per-browser identity with an unforgeable session, so ownership and
-sharing are actually *authenticated*, not just enforced.
+sharing are actually _authenticated_, not just enforced.
 
 ## What exists today
 
@@ -15,7 +15,7 @@ sharing are actually *authenticated*, not just enforced.
   (`src/rindle/user.ts`) and sent as an `x-user` HTTP header (`src/rindle/client.ts:42`).
 - The server **trusts that header verbatim** as the principal (`server/rindle-api.ts` `handleRindleJson`,
   ~`:572`); the only gate is "non-empty string" (`authorizeQuery` / `authorizeMutation`, ~`:557`).
-- Real *authorization* already exists in SQL: `deckAccess(user)` = owner-or-shared, and
+- Real _authorization_ already exists in SQL: `deckAccess(user)` = owner-or-shared, and
   `publicAccess(token)` = anonymous read via `share_token`, both in `server/queries.ts`; row-level
   mutator guards (`EDITABLE_DECKS` / `EDITABLE_SLIDES`) in `server/rindle-api.ts`. Ownership columns
   (`owner_id`, `visibility`, `share_token`, `deck_share.role`) come from
@@ -43,8 +43,8 @@ anyone can send any `x-user` and act as anyone.
   read of `visibility='public-read'` decks via `share_token` (`share.$deckId.tsx`,
   `deck.$deckId_.play.tsx`, `publicAccess`) stays anonymous — otherwise sharing breaks.
 - **Recommended: Better-Auth anonymous plugin (guest-then-link), not a front-door wall.** Every visitor
-  gets an unforgeable *guest* session instantly (preserves local-first "open and start editing"), which
-  already satisfies the security prerequisite (server-issued, non-spoofable). Require a *linked* social
+  gets an unforgeable _guest_ session instantly (preserves local-first "open and start editing"), which
+  already satisfies the security prerequisite (server-issued, non-spoofable). Require a _linked_ social
   account only at a chosen action (first share, or connecting a model). Hard-gating the whole app is the
   simpler alternative — see Open forks.
 - **Ship GitHub + Google first; Apple fast-follows.** Apple needs a paid Developer Program account and a
@@ -52,9 +52,9 @@ anyone can send any `x-user` and act as anyone.
 
 ## What "unforgeable" buys the AI feature
 
-The security risk we're mitigating is: *someone spoofs another user and burns their LLM credits.* A
+The security risk we're mitigating is: _someone spoofs another user and burns their LLM credits._ A
 server-issued Better-Auth session (guest **or** social-linked) is signed and unforgeable, so it closes
-that risk on its own. Requiring a *linked* social account is therefore a **product** choice (real
+that risk on its own. Requiring a _linked_ social account is therefore a **product** choice (real
 identity, recovery, cross-device), decoupled from the **security** requirement (unforgeable principal).
 
 ## Sequencing
@@ -99,8 +99,9 @@ Apple; Phase 5 the guest→linked claim flow. Then the BYO-LLM credential work (
   `beforeLoad`/server-fn session check → redirect to sign-in when required. **Do not guard**
   `share.$deckId.tsx` or `deck.$deckId_.play.tsx` (public/presenter stay anonymous).
 - **Live-query channel (mostly resolved — it's a lease/capability model).** The browser opens the WS
-  directly to the daemon (`RINDLE_DAEMON_WS`), but reads are two-hop: `POST /api/rindle/query` hits the
-  **gated Worker** (`authorizeQuery` + `deckAccess`/`publicAccess`), which returns a daemon **lease**
+  through the unified fleet ingress (`RINDLE_URL`, with affinity), but reads are two-hop:
+  `POST /api/rindle/query` hits the **gated Worker** (`authorizeQuery` +
+  `deckAccess`/`publicAccess`), which returns a daemon **lease**
   (`{ materializationId, leaseToken, queryKey }`, RINDLE_NOTES.md:65); the WS then only streams
   materializations you hold a valid `leaseToken` for. So the WS is **downstream of the HTTP gate** —
   swapping `x-user` for the session on `/api/rindle/query` (above) secures the WS too; **no separate WS
@@ -144,4 +145,4 @@ Apple; Phase 5 the guest→linked claim flow. Then the BYO-LLM credential work (
 - Worker config: `wrangler.jsonc`, R2-binding pattern in `server/cf-env.ts`.
 - New in this plan: `server/auth.ts`, `src/routes/api.auth.$.tsx`, `src/rindle/authClient.ts`,
   `src/routes/signin.tsx`.
-</content>
+  </content>

@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
@@ -24,13 +25,17 @@ const WRANGLER_CONFIG = process.env.WRANGLER_CONFIG
 const APP_BASEPATH =
   process.env.STRUT_APP_BASEPATH ?? (COMMERCIAL ? '/app' : undefined)
 
+// Resolve the packaged wasm binary once and expose it through a virtual URL import. The browser
+// passes this URL to `initWasm`; the SSR pass never evaluates the engine.
+const require = createRequire(import.meta.url)
+const wasmBin = require.resolve('@rindle/wasm/pkg/rindle_bg.wasm')
+
 // Server-side secrets the Rindle API + upload handlers read via process.env. Vite doesn't expose
 // non-VITE_ vars to the SSR runtime by default, so load .env and assign them for `vite dev`.
 // (In production the host provides real env vars.)
 const SERVER_ENV = [
-  'RINDLE_DAEMON_URL',
-  'RINDLE_DAEMON_WS',
-  'RINDLE_DAEMON_TOKEN',
+  'RINDLE_URL',
+  'RINDLE_DATABASE_TOKEN',
   'R2_ACCOUNT_ID',
   'R2_ACCESS_KEY_ID',
   'R2_SECRET_ACCESS_KEY',
@@ -57,17 +62,25 @@ const config = defineConfig(({ mode }) => {
   return {
     resolve: {
       tsconfigPaths: true,
+      alias: [
+        { find: /^rindle-wasm-bin/, replacement: wasmBin },
+        ...(COMMERCIAL
+          ? [
+              {
+                find: '#commercial',
+                replacement: resolve(process.cwd(), COMMERCIAL),
+              },
+            ]
+          : []),
+      ],
       // An overlay build swaps the `#commercial` stub for the real (private) module. An explicit
       // resolve.alias wins over the tsconfig `paths` fallback used by the open-source build.
-      ...(COMMERCIAL
-        ? { alias: { '#commercial': resolve(process.cwd(), COMMERCIAL) } }
-        : {}),
     },
     server: {
       port: 3000,
       // The Rindle API + image upload are now TanStack Start server routes (src/routes/api.rindle.*),
       // served same-origin — no separate API process, no proxy. The live-query WebSocket still
-      // connects directly to the daemon (:7601).
+      // connects through Rindle's stable fleet edge (:7650 in local development).
       // Don't let runtime-written files under .uploads/ (the local-disk dev fallback for image uploads
       // and runnable artifacts) trip the HMR watcher — otherwise saving one forces a full page reload
       // mid-edit (e.g. right after every artifact "Run"). Prod builds on Workers never write here.
@@ -97,6 +110,7 @@ const config = defineConfig(({ mode }) => {
       ),
       viteReact(),
     ],
+    ssr: { noExternal: [/^@rindle\//] },
   }
 })
 

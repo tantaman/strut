@@ -29,7 +29,6 @@ import { Route as ApiRindleUploadRouteImport } from './routes/api.rindle.upload'
 import { Route as ApiRindleReadRouteImport } from './routes/api.rindle.read'
 import { Route as ApiRindleQueryRouteImport } from './routes/api.rindle.query'
 import { Route as ApiRindleMutateRouteImport } from './routes/api.rindle.mutate'
-import { Route as ApiRindleConfigRouteImport } from './routes/api.rindle.config'
 import { Route as ApiModelStatusRouteImport } from './routes/api.model.status'
 import { Route as ApiModelDisconnectRouteImport } from './routes/api.model.disconnect'
 import { Route as ApiModelConnectRouteImport } from './routes/api.model.connect'
@@ -137,11 +136,6 @@ const ApiRindleMutateRoute = ApiRindleMutateRouteImport.update({
   path: '/api/rindle/mutate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRindleConfigRoute = ApiRindleConfigRouteImport.update({
-  id: '/api/rindle/config',
-  path: '/api/rindle/config',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiModelStatusRoute = ApiModelStatusRouteImport.update({
   id: '/api/model/status',
   path: '/api/model/status',
@@ -194,7 +188,6 @@ export interface FileRoutesByFullPath {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
-  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -223,7 +216,6 @@ export interface FileRoutesByTo {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
-  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -253,7 +245,6 @@ export interface FileRoutesById {
   '/api/model/connect': typeof ApiModelConnectRoute
   '/api/model/disconnect': typeof ApiModelDisconnectRoute
   '/api/model/status': typeof ApiModelStatusRoute
-  '/api/rindle/config': typeof ApiRindleConfigRoute
   '/api/rindle/mutate': typeof ApiRindleMutateRoute
   '/api/rindle/query': typeof ApiRindleQueryRoute
   '/api/rindle/read': typeof ApiRindleReadRoute
@@ -284,7 +275,6 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
-    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -313,7 +303,6 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
-    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -342,7 +331,6 @@ export interface FileRouteTypes {
     | '/api/model/connect'
     | '/api/model/disconnect'
     | '/api/model/status'
-    | '/api/rindle/config'
     | '/api/rindle/mutate'
     | '/api/rindle/query'
     | '/api/rindle/read'
@@ -371,7 +359,6 @@ export interface RootRouteChildren {
   ApiModelConnectRoute: typeof ApiModelConnectRoute
   ApiModelDisconnectRoute: typeof ApiModelDisconnectRoute
   ApiModelStatusRoute: typeof ApiModelStatusRoute
-  ApiRindleConfigRoute: typeof ApiRindleConfigRoute
   ApiRindleMutateRoute: typeof ApiRindleMutateRoute
   ApiRindleQueryRoute: typeof ApiRindleQueryRoute
   ApiRindleReadRoute: typeof ApiRindleReadRoute
@@ -522,13 +509,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRindleMutateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/rindle/config': {
-      id: '/api/rindle/config'
-      path: '/api/rindle/config'
-      fullPath: '/api/rindle/config'
-      preLoaderRoute: typeof ApiRindleConfigRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/model/status': {
       id: '/api/model/status'
       path: '/api/model/status'
@@ -605,7 +585,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiModelConnectRoute: ApiModelConnectRoute,
   ApiModelDisconnectRoute: ApiModelDisconnectRoute,
   ApiModelStatusRoute: ApiModelStatusRoute,
-  ApiRindleConfigRoute: ApiRindleConfigRoute,
   ApiRindleMutateRoute: ApiRindleMutateRoute,
   ApiRindleQueryRoute: ApiRindleQueryRoute,
   ApiRindleReadRoute: ApiRindleReadRoute,
