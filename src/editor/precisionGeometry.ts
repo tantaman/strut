@@ -55,25 +55,38 @@ export type Alignment =
 export type DistributionAxis = 'horizontal' | 'vertical'
 export type MatchDimension = 'width' | 'height'
 
-/**
- * Bounds are deliberately axis-aligned model bounds. Rotation is metadata on a
- * frame and does not change the box used by arrange and group-resize commands.
- */
+/** Axis-aligned bounds of the frame after its box is rotated around its center. */
+export function frameBounds(frame: PrecisionFrame): PrecisionBounds {
+  const centerX = frame.x + frame.w / 2
+  const centerY = frame.y + frame.h / 2
+  const cos = Math.abs(Math.cos(frame.rotate))
+  const sin = Math.abs(Math.sin(frame.rotate))
+  const w = cos * Math.abs(frame.w) + sin * Math.abs(frame.h)
+  const h = sin * Math.abs(frame.w) + cos * Math.abs(frame.h)
+
+  return boundsFromEdges(
+    centerX - w / 2,
+    centerY - h / 2,
+    centerX + w / 2,
+    centerY + h / 2,
+  )
+}
+
+/** Union of the frames' visible, rotation-aware axis-aligned bounds. */
 export function selectionBounds(
   frames: readonly PrecisionFrame[],
 ): PrecisionBounds | null {
   if (frames.length === 0) return null
 
-  let left = frames[0].x
-  let right = frames[0].x + frames[0].w
-  let top = frames[0].y
-  let bottom = frames[0].y + frames[0].h
+  const first = frameBounds(frames[0])
+  let { left, right, top, bottom } = first
 
   for (const frame of frames.slice(1)) {
-    left = Math.min(left, frame.x)
-    right = Math.max(right, frame.x + frame.w)
-    top = Math.min(top, frame.y)
-    bottom = Math.max(bottom, frame.y + frame.h)
+    const bounds = frameBounds(frame)
+    left = Math.min(left, bounds.left)
+    right = Math.max(right, bounds.right)
+    top = Math.min(top, bounds.top)
+    bottom = Math.max(bottom, bounds.bottom)
   }
 
   return boundsFromEdges(left, top, right, bottom)
@@ -107,18 +120,23 @@ export function alignFrames<T extends PrecisionFrame>(
     frames.length === 1 ? boundsFromEdges(0, 0, canvas.w, canvas.h) : selection
 
   return frames.map((frame) => {
-    if (alignment === 'left') return { ...frame, x: target.left }
+    const bounds = frameBounds(frame)
+    if (alignment === 'left') {
+      return { ...frame, x: frame.x + target.left - bounds.left }
+    }
     if (alignment === 'centerX') {
-      return { ...frame, x: target.centerX - frame.w / 2 }
+      return { ...frame, x: frame.x + target.centerX - bounds.centerX }
     }
     if (alignment === 'right') {
-      return { ...frame, x: target.right - frame.w }
+      return { ...frame, x: frame.x + target.right - bounds.right }
     }
-    if (alignment === 'top') return { ...frame, y: target.top }
+    if (alignment === 'top') {
+      return { ...frame, y: frame.y + target.top - bounds.top }
+    }
     if (alignment === 'middleY') {
-      return { ...frame, y: target.middleY - frame.h / 2 }
+      return { ...frame, y: frame.y + target.middleY - bounds.middleY }
     }
-    return { ...frame, y: target.bottom - frame.h }
+    return { ...frame, y: frame.y + target.bottom - bounds.bottom }
   })
 }
 
@@ -129,27 +147,37 @@ export function distributeFrames<T extends PrecisionFrame>(
 ): T[] {
   if (frames.length < 3) return [...frames]
 
-  const position = axis === 'horizontal' ? 'x' : 'y'
-  const size = axis === 'horizontal' ? 'w' : 'h'
   const sorted = frames
-    .map((frame, index) => ({ frame, index }))
-    .sort((a, b) => a.frame[position] - b.frame[position] || a.index - b.index)
-  const first = sorted[0].frame
-  const last = sorted[sorted.length - 1].frame
-  const span = last[position] + last[size] - first[position]
-  const occupied = sorted.reduce((total, item) => total + item.frame[size], 0)
+    .map((frame, index) => ({ frame, bounds: frameBounds(frame), index }))
+    .sort(
+      (a, b) =>
+        axisStart(a.bounds, axis) - axisStart(b.bounds, axis) ||
+        a.index - b.index,
+    )
+  const first = sorted[0].bounds
+  const last = sorted[sorted.length - 1].bounds
+  const span = axisEnd(last, axis) - axisStart(first, axis)
+  const occupied = sorted.reduce(
+    (total, item) => total + axisSize(item.bounds, axis),
+    0,
+  )
   const gap = (span - occupied) / (sorted.length - 1)
   const positions = new Map<string, number>()
 
-  let cursor = first[position] + first[size] + gap
-  for (const { frame } of sorted.slice(1, -1)) {
+  let cursor = axisEnd(first, axis) + gap
+  for (const { frame, bounds } of sorted.slice(1, -1)) {
     positions.set(frame.id, cursor)
-    cursor += frame[size] + gap
+    cursor += axisSize(bounds, axis) + gap
   }
 
   return frames.map((frame) => {
     const next = positions.get(frame.id)
-    return next === undefined ? frame : { ...frame, [position]: next }
+    if (next === undefined) return frame
+    const bounds = frameBounds(frame)
+    const offset = next - axisStart(bounds, axis)
+    return axis === 'horizontal'
+      ? { ...frame, x: frame.x + offset }
+      : { ...frame, y: frame.y + offset }
   })
 }
 
@@ -190,6 +218,8 @@ export interface ZReorderPlan {
   moves: ZOrderMove[]
   /** Collision-free ranks for callers that persist numeric z values. */
   assignments: ZOrderAssignment[]
+  /** Collision-free ranks that restore the exact observed input paint order, including tied z values. */
+  undoAssignments: Array<{ id: string; z: number }>
 }
 
 /**
@@ -206,6 +236,7 @@ export function planZReorder(
     .map((item, inputIndex) => ({ item, inputIndex }))
     .sort((a, b) => a.item.z - b.item.z || a.inputIndex - b.inputIndex)
     .map(({ item }) => item)
+  const undoAssignments = ordered.map((item, z) => ({ id: item.id, z }))
   const beforeIndex = new Map(ordered.map((item, index) => [item.id, index]))
   const selected = new Set(selectedIds)
   const hasSelected = ordered.some((item) => selected.has(item.id))
@@ -254,6 +285,7 @@ export function planZReorder(
       previousZ: item.z,
       z,
     })),
+    undoAssignments,
   }
 }
 
@@ -272,9 +304,10 @@ export interface GroupResizeResult<T extends PrecisionFrame> {
 }
 
 /**
- * Resize an axis-aligned selection from any of its eight handles. Each child is
- * transformed through the selection box, so relative positions are preserved;
- * rotation values pass through untouched.
+ * Resize a selection's visual AABB from any of its eight handles. Child centers
+ * are mapped through that visible box before local dimensions are scaled, so a
+ * rotated child's model-box offset does not make it drift. Rotation passes
+ * through untouched.
  */
 export function resizeGroupFrames<T extends PrecisionFrame>(
   frames: readonly T[],
@@ -341,15 +374,100 @@ export function resizeGroupFrames<T extends PrecisionFrame>(
 
   return {
     bounds: after,
-    frames: frames.map((frame) => ({
-      ...frame,
-      x: after.x + (frame.x - before.x) * scaleX,
-      y: after.y + (frame.y - before.y) * scaleY,
-      w: frame.w * scaleX,
-      h: frame.h * scaleY,
-      rotate: frame.rotate,
-    })),
+    frames: frames.map((frame) => {
+      const centerX = frame.x + frame.w / 2
+      const centerY = frame.y + frame.h / 2
+      const nextW = frame.w * scaleX
+      const nextH = frame.h * scaleY
+      const nextCenterX = after.x + (centerX - before.x) * scaleX
+      const nextCenterY = after.y + (centerY - before.y) * scaleY
+      return {
+        ...frame,
+        x: nextCenterX - nextW / 2,
+        y: nextCenterY - nextH / 2,
+        w: nextW,
+        h: nextH,
+        rotate: frame.rotate,
+      }
+    }),
   }
+}
+
+export interface FrameResizeResult<T extends PrecisionFrame> {
+  frame: T
+  bounds: PrecisionBounds
+}
+
+/**
+ * Resize one rotated frame along its own axes. The pointer delta arrives in
+ * canvas coordinates and is projected into the frame's local coordinate space;
+ * moving an edge therefore keeps its opposite edge fixed on screen at any
+ * angle. Aspect-locked perpendicular growth remains centered, and `center`
+ * keeps the frame center fixed.
+ */
+export function resizeFrameInLocalAxes<T extends PrecisionFrame>(
+  frame: T,
+  handle: ResizeHandle,
+  delta: Readonly<PrecisionDelta>,
+  options: Readonly<GroupResizeOptions> = {},
+): FrameResizeResult<T> {
+  if (frame.w <= 0 || frame.h <= 0) {
+    return { frame: { ...frame }, bounds: frameBounds(frame) }
+  }
+
+  const horizontal = handle.includes('e') ? 1 : handle.includes('w') ? -1 : 0
+  const vertical = handle.includes('s') ? 1 : handle.includes('n') ? -1 : 0
+  const cos = Math.cos(frame.rotate)
+  const sin = Math.sin(frame.rotate)
+  const localDelta = {
+    x: cos * delta.x + sin * delta.y,
+    y: -sin * delta.x + cos * delta.y,
+  }
+  const center = options.center === true
+  const minSize = Math.max(0, options.minSize ?? 0)
+  const multiplier = center ? 2 : 1
+  const rawWidth =
+    horizontal === 0
+      ? frame.w
+      : frame.w + horizontal * localDelta.x * multiplier
+  const rawHeight =
+    vertical === 0 ? frame.h : frame.h + vertical * localDelta.y * multiplier
+
+  let width = horizontal === 0 ? frame.w : Math.max(minSize, rawWidth)
+  let height = vertical === 0 ? frame.h : Math.max(minSize, rawHeight)
+
+  if (options.aspectLock) {
+    const horizontalScale = horizontal === 0 ? null : rawWidth / frame.w
+    const verticalScale = vertical === 0 ? null : rawHeight / frame.h
+    let scale: number
+    if (horizontalScale === null) scale = verticalScale ?? 1
+    else if (verticalScale === null) scale = horizontalScale
+    else {
+      scale =
+        Math.abs(horizontalScale - 1) >= Math.abs(verticalScale - 1)
+          ? horizontalScale
+          : verticalScale
+    }
+    scale = Math.max(minSize / frame.w, minSize / frame.h, scale)
+    width = frame.w * scale
+    height = frame.h * scale
+  }
+
+  const shiftX =
+    center || horizontal === 0 ? 0 : (horizontal * (width - frame.w)) / 2
+  const shiftY =
+    center || vertical === 0 ? 0 : (vertical * (height - frame.h)) / 2
+  const centerX = frame.x + frame.w / 2 + cos * shiftX - sin * shiftY
+  const centerY = frame.y + frame.h / 2 + sin * shiftX + cos * shiftY
+  const resized = {
+    ...frame,
+    x: centerX - width / 2,
+    y: centerY - height / 2,
+    w: width,
+    h: height,
+  }
+
+  return { frame: resized, bounds: frameBounds(resized) }
 }
 
 export type HorizontalSnapAnchor = 'left' | 'center' | 'right'
@@ -395,6 +513,10 @@ export function snapMove<T extends PrecisionFrame>(
   const threshold = Math.max(0, options.threshold)
   const selected = new Set(frames.map((frame) => frame.id))
   const eligiblePeers = peers.filter((peer) => !selected.has(peer.id))
+  const peerBounds = eligiblePeers.map((peer) => ({
+    peer,
+    bounds: frameBounds(peer),
+  }))
 
   const xCandidate = bestSnapCandidate(
     [
@@ -414,22 +536,22 @@ export function snapMove<T extends PrecisionFrame>(
         position: canvas.w,
         source: 'canvas' as const,
       },
-      ...eligiblePeers.flatMap((peer) => [
+      ...peerBounds.flatMap(({ peer, bounds: peerFrameBounds }) => [
         {
           anchor: 'left' as const,
-          position: peer.x,
+          position: peerFrameBounds.left,
           source: 'peer' as const,
           targetId: peer.id,
         },
         {
           anchor: 'center' as const,
-          position: peer.x + peer.w / 2,
+          position: peerFrameBounds.centerX,
           source: 'peer' as const,
           targetId: peer.id,
         },
         {
           anchor: 'right' as const,
-          position: peer.x + peer.w,
+          position: peerFrameBounds.right,
           source: 'peer' as const,
           targetId: peer.id,
         },
@@ -456,22 +578,22 @@ export function snapMove<T extends PrecisionFrame>(
         position: canvas.h,
         source: 'canvas' as const,
       },
-      ...eligiblePeers.flatMap((peer) => [
+      ...peerBounds.flatMap(({ peer, bounds: peerFrameBounds }) => [
         {
           anchor: 'top' as const,
-          position: peer.y,
+          position: peerFrameBounds.top,
           source: 'peer' as const,
           targetId: peer.id,
         },
         {
           anchor: 'middle' as const,
-          position: peer.y + peer.h / 2,
+          position: peerFrameBounds.middleY,
           source: 'peer' as const,
           targetId: peer.id,
         },
         {
           anchor: 'bottom' as const,
-          position: peer.y + peer.h,
+          position: peerFrameBounds.bottom,
           source: 'peer' as const,
           targetId: peer.id,
         },
@@ -512,6 +634,18 @@ function boundsFromEdges(
     middleY: (top + bottom) / 2,
     bottom,
   }
+}
+
+function axisStart(bounds: PrecisionBounds, axis: DistributionAxis): number {
+  return axis === 'horizontal' ? bounds.left : bounds.top
+}
+
+function axisEnd(bounds: PrecisionBounds, axis: DistributionAxis): number {
+  return axis === 'horizontal' ? bounds.right : bounds.bottom
+}
+
+function axisSize(bounds: PrecisionBounds, axis: DistributionAxis): number {
+  return axis === 'horizontal' ? bounds.w : bounds.h
 }
 
 function resizedAxisStart(

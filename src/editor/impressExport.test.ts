@@ -179,4 +179,35 @@ describe('standalone body export', () => {
       toImpressHTML(bundle({}, [{ ...component, scale_w: 320, scale_h: 140 }])),
     ).toContain('width:320px;height:140px;overflow:hidden;')
   })
+
+  it('rotates precision objects around the same center origin as app renderers', () => {
+    const html = toImpressHTML(
+      bundle({}, [
+        {
+          id: 'shape-1',
+          slide_id: 'slide-1',
+          kind: 'shape',
+          z_order: 1,
+          x: 120,
+          y: 80,
+          scale_x: 1,
+          scale_y: 1,
+          scale_w: 320,
+          scale_h: 140,
+          rotate: Math.PI / 6,
+          skew_x: 0,
+          skew_y: 0,
+          custom_classes: '',
+          shape: 'rectangle',
+          markup: '<svg></svg>',
+          fill: '3498db',
+        },
+      ]),
+    )
+
+    expect(html).toContain(
+      `transform:rotate(${Math.PI / 6}rad) skewX(0rad) skewY(0rad);transform-origin:center center;`,
+    )
+    expect(html).not.toContain('transform-origin:top left;')
+  })
 })

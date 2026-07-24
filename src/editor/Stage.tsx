@@ -61,6 +61,7 @@ import {
   distributeFrames,
   matchFrameSize,
   planZReorder,
+  resizeFrameInLocalAxes,
   resizeGroupFrames,
   selectionBounds,
   snapMove,
@@ -150,7 +151,8 @@ export function Stage({
     [],
   )
   const stageRef = useRef<HTMLDivElement>(null)
-  const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
+  // Leave enough screen-space around the fitted slide for the rotate control and 44px mobile handles.
+  const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H, 112)
   const mutate = useMutate()
   const history = useHistory()
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -357,49 +359,37 @@ export function Stage({
     key: string
     before: GeometrySnapshot[]
     after: GeometrySnapshot[]
-    timer: ReturnType<typeof setTimeout> | null
   }>(null)
 
-  function flushNudge() {
-    const burst = nudgeBurstRef.current
-    if (!burst) return
-    if (burst.timer) clearTimeout(burst.timer)
+  function finishNudge() {
     nudgeBurstRef.current = null
-    if (
-      !burst.after.some((value, index) => {
-        const before = burst.before[index]
-        return value.x !== before.x || value.y !== before.y
-      })
-    )
-      return
-    history.push({
-      label: burst.after.length > 1 ? 'Nudge components' : 'Nudge component',
-      redo: () => applyGeometry(burst.after),
-      undo: () => applyGeometry(burst.before),
-    })
   }
 
   // Bento/Figma keyboard muscle memory: arrows nudge by one, Shift by ten, and Cmd/Ctrl+D duplicates.
-  // A held arrow is one gesture, so its repeat burst collapses to a single undo after a short idle.
+  // The first repeat records a mutable command synchronously, so global Undo and later pointer/property
+  // commands can never overtake it. Repeats update that command until keyup, preserving one-gesture undo.
   useEffect(() => {
-    function onKey(event: KeyboardEvent) {
+    const isArrow = (key: string) =>
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'ArrowUp' ||
+      key === 'ArrowDown'
+
+    function onKeyDown(event: KeyboardEvent) {
       if (!editor.canEdit || isEditableTarget(event.target)) return
       const selected = componentsFor(editor.selected)
       if (selected.length === 0) return
       const mod = event.metaKey || event.ctrlKey
       if (mod && event.key.toLowerCase() === 'd') {
         event.preventDefault()
-        flushNudge()
+        finishNudge()
         duplicateComponents(selected)
         return
       }
-      if (
-        event.key !== 'ArrowLeft' &&
-        event.key !== 'ArrowRight' &&
-        event.key !== 'ArrowUp' &&
-        event.key !== 'ArrowDown'
-      )
+      if (!isArrow(event.key)) {
+        finishNudge()
         return
+      }
       event.preventDefault()
       const step = event.shiftKey ? 10 : 1
       const dx =
@@ -414,27 +404,47 @@ export function Stage({
         .map((component) => component.id)
         .sort()
         .join(':')
-      if (nudgeBurstRef.current?.key !== key) flushNudge()
-      const burst = nudgeBurstRef.current ?? {
-        key,
-        before: selected.map(geometryOf),
-        after: selected.map(geometryOf),
-        timer: null,
+      if (nudgeBurstRef.current?.key !== key) finishNudge()
+      let burst = nudgeBurstRef.current
+      const isFirst = burst === null
+      if (!burst) {
+        const before = selected.map(geometryOf)
+        burst = { key, before, after: before }
+        nudgeBurstRef.current = burst
       }
       burst.after = burst.after.map((value) => ({
         ...value,
         x: value.x + dx,
         y: value.y + dy,
       }))
+      if (isFirst) {
+        const command = burst
+        history.push({
+          label:
+            command.after.length > 1 ? 'Nudge components' : 'Nudge component',
+          redo: () => applyGeometry(command.after),
+          undo: () => applyGeometry(command.before),
+        })
+      }
       applyGeometry(burst.after)
-      if (burst.timer) clearTimeout(burst.timer)
-      burst.timer = setTimeout(flushNudge, 220)
-      nudgeBurstRef.current = burst
     }
-    window.addEventListener('keydown', onKey)
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (isArrow(event.key)) finishNudge()
+    }
+    const onPointerDown = () => finishNudge()
+    const onBlur = () => finishNudge()
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('pointerdown', onPointerDown, true)
+    window.addEventListener('blur', onBlur)
     return () => {
-      window.removeEventListener('keydown', onKey)
-      flushNudge()
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('pointerdown', onPointerDown, true)
+      window.removeEventListener('blur', onBlur)
+      finishNudge()
     }
   }, [editor.canEdit, editor.selected, history, mutate, slideData.id])
 
@@ -572,16 +582,19 @@ export function Stage({
   }
 
   // ---- gestures ----
-  function dragListen(move: (ev: PointerEvent) => void, end?: () => void) {
+  function dragListen(
+    move: (ev: PointerEvent) => void,
+    end?: (cancelled: boolean) => void,
+  ) {
     let finished = false
-    const finish = () => {
+    const finish = (event: Event) => {
       if (finished) return
       finished = true
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', finish)
       window.removeEventListener('pointercancel', finish)
       window.removeEventListener('blur', finish)
-      end?.()
+      end?.(event.type !== 'pointerup')
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', finish)
@@ -598,11 +611,16 @@ export function Stage({
     const candidates = getComponents()
       .filter((component) => {
         const frame = frameForComponent(component)
+        const centerX = frame.x + frame.w / 2
+        const centerY = frame.y + frame.h / 2
+        const dx = x - centerX
+        const dy = y - centerY
+        const cos = Math.cos(frame.rotate)
+        const sin = Math.sin(frame.rotate)
+        const localX = cos * dx + sin * dy
+        const localY = -sin * dx + cos * dy
         return (
-          x >= frame.x &&
-          x <= frame.x + frame.w &&
-          y >= frame.y &&
-          y <= frame.y + frame.h
+          Math.abs(localX) <= frame.w / 2 && Math.abs(localY) <= frame.h / 2
         )
       })
       .sort((a, b) => b.z_order - a.z_order)
@@ -625,14 +643,17 @@ export function Stage({
       deepSelect(e)
       return
     }
-    // Cmd/Ctrl-click is an unambiguous toggle and never mutates geometry. Shift-click adds a new item;
+    // Cmd/Ctrl-click is an unambiguous toggle and never mutates geometry. Shift-click adds/removes;
     // Shift-drag on an existing selection remains available for Bento-style axis locking.
     if (e.metaKey || e.ctrlKey) {
       editor.select(c.id, true)
       return
     }
+    const wasSelected = editor.selected.has(c.id)
+    const wasMultiSelection = editor.selected.size > 1
+    const additivePointer = e.shiftKey
     const selectedIds = new Set(editor.selected)
-    if (!selectedIds.has(c.id)) {
+    if (!wasSelected) {
       if (e.shiftKey) selectedIds.add(c.id)
       else {
         selectedIds.clear()
@@ -646,20 +667,42 @@ export function Stage({
     let lastFrames = starts
     const sx = e.clientX
     const sy = e.clientY
+    let moved = false
     editor.setDraggingComponentId(c.id)
     dragListen(
       (ev) => {
-        let dx = (ev.clientX - sx) / scale
-        let dy = (ev.clientY - sy) / scale
+        const screenDx = ev.clientX - sx
+        const screenDy = ev.clientY - sy
+        if (!moved && Math.hypot(screenDx, screenDy) < 3) return
+        moved = true
+        let dx = screenDx / scale
+        let dy = screenDy / scale
+        let lockedAxis: 'x' | 'y' | null = null
         if (ev.shiftKey) {
-          if (Math.abs(dx) >= Math.abs(dy)) dy = 0
-          else dx = 0
+          if (Math.abs(dx) >= Math.abs(dy)) {
+            dy = 0
+            lockedAxis = 'x'
+          } else {
+            dx = 0
+            lockedAxis = 'y'
+          }
         }
         const snapped = snapMove(starts, { x: dx, y: dy }, peers, {
           threshold: 6 / scale,
         })
-        lastFrames = snapped.frames
-        setGuides(snapped.guides)
+        // A perpendicular snap must not defeat the explicit Shift axis lock.
+        const finalDx = lockedAxis === 'y' ? 0 : snapped.delta.x
+        const finalDy = lockedAxis === 'x' ? 0 : snapped.delta.y
+        lastFrames = starts.map((frame) => ({
+          ...frame,
+          x: frame.x + finalDx,
+          y: frame.y + finalDy,
+        }))
+        setGuides(
+          snapped.guides.filter(
+            (guide) => lockedAxis === null || guide.axis === lockedAxis,
+          ),
+        )
         for (const frame of lastFrames) {
           mutate.moveComponent.folded(
             { key: frame.id },
@@ -667,9 +710,17 @@ export function Stage({
           )
         }
       },
-      () => {
+      (cancelled) => {
         editor.setDraggingComponentId(null)
         setGuides([])
+        if (!moved) {
+          if (!cancelled && additivePointer && wasSelected) {
+            editor.select(c.id, true)
+          } else if (!cancelled && !additivePointer && wasMultiSelection) {
+            editor.select(c.id)
+          }
+          return
+        }
         commitGeometry(
           moving.length > 1 ? 'Move components' : 'Move',
           moving,
@@ -697,20 +748,19 @@ export function Stage({
     editor.setDraggingComponentId(components[0].id)
     dragListen(
       (moveEvent) => {
-        const result = resizeGroupFrames(
-          starts,
-          handle,
-          {
-            x: (moveEvent.clientX - sx) / scale,
-            y: (moveEvent.clientY - sy) / scale,
-          },
-          {
-            aspectLock: moveEvent.shiftKey,
-            center: moveEvent.altKey,
-            minSize: 8,
-          },
-        )
-        lastFrames = result.frames
+        const delta = {
+          x: (moveEvent.clientX - sx) / scale,
+          y: (moveEvent.clientY - sy) / scale,
+        }
+        const options = {
+          aspectLock: moveEvent.shiftKey,
+          center: moveEvent.altKey,
+          minSize: 8,
+        }
+        lastFrames =
+          starts.length === 1
+            ? [resizeFrameInLocalAxes(starts[0], handle, delta, options).frame]
+            : resizeGroupFrames(starts, handle, delta, options).frames
         const byId = new Map(lastFrames.map((frame) => [frame.id, frame]))
         applyGeometry(
           components.flatMap((component) => {
@@ -866,9 +916,12 @@ export function Stage({
     )
     if (plan.moves.length === 0) return
 
-    const before = plan.assignments.map(({ id, previousZ }) => ({
+    // Second-resolution insertion ranks can tie. Undo restores the exact observed paint order with
+    // collision-free ordinals; merely writing tied numeric values back would leave the reordered DOM
+    // order visible and make Undo appear broken.
+    const before = plan.undoAssignments.map(({ id, z }) => ({
       id,
-      z_order: previousZ,
+      z_order: z,
     }))
     const after = plan.assignments.map(({ id, z }) => ({ id, z_order: z }))
     const apply = (values: readonly { id: string; z_order: number }[]) => {
@@ -1171,9 +1224,24 @@ export function Stage({
   }
 
   const selectedComponents = componentsInOrder(editor.selected)
-  const selectedBounds = selectionBounds(
-    selectedComponents.map(frameForComponent),
-  )
+  const selectedFrames = selectedComponents.map(frameForComponent)
+  const selectedFrame = selectedFrames.length === 1 ? selectedFrames[0] : null
+  // One object gets a local, rotated frame whose handles follow its own axes. A group gets the visual
+  // AABB of all rotated children, which is the stable plane for group resize/align affordances.
+  const selectedBounds = selectedFrame
+    ? {
+        x: selectedFrame.x,
+        y: selectedFrame.y,
+        w: selectedFrame.w,
+        h: selectedFrame.h,
+        left: selectedFrame.x,
+        centerX: selectedFrame.x + selectedFrame.w / 2,
+        right: selectedFrame.x + selectedFrame.w,
+        top: selectedFrame.y,
+        middleY: selectedFrame.y + selectedFrame.h / 2,
+        bottom: selectedFrame.y + selectedFrame.h,
+      }
+    : selectionBounds(selectedFrames)
 
   return (
     <div
@@ -1237,6 +1305,30 @@ export function Stage({
               )}
             </ComponentDataReader>
           ))}
+          {shapeDraft && editor.pendingShape && (
+            <div
+              className="shape-draft"
+              style={{
+                left: shapeDraft.x,
+                top: shapeDraft.y,
+                width: shapeDraft.w,
+                height: shapeDraft.h,
+                color: `#${DEFAULT_SHAPE_FILL}`,
+              }}
+              dangerouslySetInnerHTML={{ __html: shapeDraft.markup }}
+            />
+          )}
+        </div>
+        {/* Manipulation chrome sits in an unclipped sibling plane. Authored slide content remains clipped
+            to the slide, while edge handles and the rotate control can extend into the stage gutter. */}
+        <div
+          className="precision-overlay"
+          style={{
+            width: SLIDE_W,
+            height: SLIDE_H,
+            transform: `scale(${scale})`,
+          }}
+        >
           {selectedBounds &&
             selectedComponents.length > 0 &&
             !editingId &&
@@ -1246,6 +1338,7 @@ export function Stage({
                 bounds={selectedBounds}
                 scale={scale}
                 count={selectedComponents.length}
+                rotate={selectedFrame?.rotate ?? 0}
                 onResize={(handle, event) =>
                   beginResize(selectedComponents, handle, event)
                 }
@@ -1264,19 +1357,6 @@ export function Stage({
               aria-hidden
             />
           ))}
-          {shapeDraft && editor.pendingShape && (
-            <div
-              className="shape-draft"
-              style={{
-                left: shapeDraft.x,
-                top: shapeDraft.y,
-                width: shapeDraft.w,
-                height: shapeDraft.h,
-                color: `#${DEFAULT_SHAPE_FILL}`,
-              }}
-              dangerouslySetInnerHTML={{ __html: shapeDraft.markup }}
-            />
-          )}
         </div>
       </div>
       {marquee && (
@@ -1344,12 +1424,14 @@ function SelectionFrame({
   bounds,
   scale,
   count,
+  rotate,
   onResize,
   onRotate,
 }: {
   bounds: PrecisionBounds
   scale: number
   count: number
+  rotate: number
   onResize: (handle: ResizeHandle, event: RPointerEvent) => void
   onRotate: (event: RPointerEvent) => void
 }) {
@@ -1365,6 +1447,8 @@ function SelectionFrame({
         width: bounds.w,
         height: bounds.h,
         borderWidth: 1 / scale,
+        transform: rotate ? `rotate(${rotate}rad)` : undefined,
+        transformOrigin: 'center center',
       }}
       aria-label={`${count} selected ${count === 1 ? 'object' : 'objects'}`}
     >

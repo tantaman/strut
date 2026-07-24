@@ -553,14 +553,27 @@ function NumericCommitField({
   onCommit: (value: number) => void
 }) {
   const focused = useRef(false)
+  const edited = useRef(false)
   const [draft, setDraft] = useState(() => formatNumber(value))
 
   useEffect(() => {
-    if (!focused.current) setDraft(formatNumber(value))
+    if (!focused.current) {
+      edited.current = false
+      setDraft(formatNumber(value))
+    }
   }, [value])
 
-  const reset = () => setDraft(formatNumber(value))
+  const reset = () => {
+    edited.current = false
+    setDraft(formatNumber(value))
+  }
   const commit = () => {
+    // Display values are rounded for a quiet rail, but focusing and blurring must not write that
+    // rounded representation back over the exact model value unless the user actually edited it.
+    if (!edited.current) {
+      reset()
+      return
+    }
     if (draft.trim() === '') {
       reset()
       return
@@ -571,6 +584,7 @@ function NumericCommitField({
       return
     }
     const next = Math.min(max ?? Infinity, Math.max(min ?? -Infinity, parsed))
+    edited.current = false
     setDraft(formatNumber(next))
     if (next !== value) onCommit(next)
   }
@@ -590,7 +604,10 @@ function NumericCommitField({
         onFocus={() => {
           focused.current = true
         }}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(event) => {
+          edited.current = true
+          setDraft(event.target.value)
+        }}
         onBlur={() => {
           focused.current = false
           commit()

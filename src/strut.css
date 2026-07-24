@@ -1144,6 +1144,15 @@ button {
   background: #fff;
   color: #111;
 }
+.precision-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  transform-origin: top left;
+  overflow: visible;
+  pointer-events: none;
+}
 .slide-bg-img {
   z-index: 0;
 }
@@ -4596,6 +4605,15 @@ button {
   .precision-selection__rotate::after {
     border-radius: 50%;
     background: var(--panel);
+  }
+  /* At phone fit scales, eight 44px targets overlap even on ordinary objects. Keep one dependable
+     diagonal resize grip; the bottom sheet retains exact width, height, and angle controls. */
+  .precision-selection__handle,
+  .precision-selection__rotate {
+    display: none;
+  }
+  .precision-selection__handle--se {
+    display: block;
   }
 
   /* ---- Inspector → bottom sheet (was a panel floating over the top-right of the canvas) --- */

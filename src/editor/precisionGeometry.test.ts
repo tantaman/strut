@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   alignFrames,
   distributeFrames,
+  frameBounds,
   matchFrameSize,
   nudgeFrames,
   planZReorder,
+  resizeFrameInLocalAxes,
   resizeGroupFrames,
   selectionBounds,
   snapMove,
@@ -21,7 +23,7 @@ const frame = (
 ): PrecisionFrame => ({ id, x, y, w, h, rotate })
 
 describe('precision geometry basics', () => {
-  it('finds selection bounds and preserves fractional nudges', () => {
+  it('finds visible selection bounds and preserves fractional nudges', () => {
     const frames = [frame('a', 1.25, 8.5, 10.5, 20.25), frame('b', 20, 2, 4, 6)]
 
     expect(selectionBounds(frames)).toMatchObject({
@@ -40,6 +42,20 @@ describe('precision geometry basics', () => {
     )
   })
 
+  it('computes the visual AABB of a frame rotated around its center', () => {
+    const rotated = frame('rotated', 10, 20, 100, 50, Math.PI / 2)
+
+    expect(frameBounds(rotated)).toMatchObject({
+      centerX: 60,
+      middleY: 45,
+    })
+    expect(frameBounds(rotated).left).toBeCloseTo(35)
+    expect(frameBounds(rotated).top).toBeCloseTo(-5)
+    expect(frameBounds(rotated).right).toBeCloseTo(85)
+    expect(frameBounds(rotated).bottom).toBeCloseTo(95)
+    expect(selectionBounds([rotated])).toEqual(frameBounds(rotated))
+  })
+
   it('aligns one frame to the canvas and many within selection bounds', () => {
     expect(alignFrames([frame('a', 40, 50, 200, 100)], 'centerX')[0].x).toBe(
       540,
@@ -51,6 +67,22 @@ describe('precision geometry basics', () => {
       'right',
     )
     expect(aligned.map(({ x }) => x)).toEqual([100, 80])
+
+    const rotated = alignFrames(
+      [frame('rotated', 10, 20, 100, 50, Math.PI / 2)],
+      'left',
+    )[0]
+    expect(frameBounds(rotated).left).toBeCloseTo(0)
+
+    const rotatedGroup = [
+      frame('wide', 10, 25, 80, 20, Math.PI / 4),
+      frame('tall', 140, 5, 20, 80, -Math.PI / 4),
+    ]
+    const targetRight = selectionBounds(rotatedGroup)!.right
+    const alignedRotatedGroup = alignFrames(rotatedGroup, 'right')
+    for (const item of alignedRotatedGroup) {
+      expect(frameBounds(item).right).toBeCloseTo(targetRight)
+    }
   })
 
   it('distributes equal horizontal and vertical gaps with fixed endpoints', () => {
@@ -77,6 +109,18 @@ describe('precision geometry basics', () => {
       'vertical',
     )
     expect(vertical.find((item) => item.id === 'middle')?.y).toBe(45)
+
+    const rotated = distributeFrames(
+      [
+        frame('first', 0, 0, 20, 40, Math.PI / 2),
+        frame('middle', 40, 0, 20, 20),
+        frame('last', 100, 0, 20, 40, Math.PI / 2),
+      ],
+      'horizontal',
+    )
+    const visible = rotated.map(frameBounds).sort((a, b) => a.left - b.left)
+    expect(visible[1].left - visible[0].right).toBeCloseTo(20)
+    expect(visible[2].left - visible[1].right).toBeCloseTo(20)
   })
 
   it('matches dimensions to the first supplied frame', () => {
@@ -108,6 +152,12 @@ describe('z reorder plans', () => {
       { id: 'a', previousZ: 1, z: 1 },
       { id: 'b', previousZ: 1, z: 2 },
       { id: 'd', previousZ: 3, z: 3 },
+    ])
+    expect(plan.undoAssignments).toEqual([
+      { id: 'a', z: 0 },
+      { id: 'b', z: 1 },
+      { id: 'c', z: 2 },
+      { id: 'd', z: 3 },
     ])
   })
 
@@ -193,22 +243,30 @@ describe('axis-aligned group resize', () => {
     },
   )
 
-  it('preserves rotations and proportional child positions', () => {
-    const result = resizeGroupFrames(
-      [frame('a', 0, 0, 20, 20, 0.25), frame('b', 60, 40, 40, 60, -0.5)],
-      'e',
-      { x: 50, y: 0 },
-    )
+  it('maps rotated child centers through the visible selection bounds', () => {
+    const source = [
+      frame('a', 0, 0, 40, 20, Math.PI / 2),
+      frame('b', 80, 40, 20, 40, Math.PI / 2),
+    ]
+    const before = selectionBounds(source)!
+    const result = resizeGroupFrames(source, 'e', { x: 100, y: 0 })
 
-    expect(result.bounds).toMatchObject({ x: 0, y: 0, w: 150, h: 100 })
+    expect(before.x).toBeCloseTo(10)
+    expect(before.y).toBeCloseTo(-10)
+    expect(before.w).toBeCloseTo(100)
+    expect(before.h).toBeCloseTo(80)
+    expect(result.bounds?.x).toBeCloseTo(10)
+    expect(result.bounds?.y).toBeCloseTo(-10)
+    expect(result.bounds?.w).toBeCloseTo(200)
+    expect(result.bounds?.h).toBeCloseTo(80)
     expect(result.frames).toEqual([
-      frame('a', 0, 0, 30, 20, 0.25),
-      frame('b', 90, 40, 60, 60, -0.5),
+      frame('a', -10, 0, 80, 20, Math.PI / 2),
+      frame('b', 150, 40, 40, 40, Math.PI / 2),
     ])
   })
 
   it('locks aspect around the opposite anchor or the selection center', () => {
-    const source = [frame('box', 0, 0, 100, 50, 0.75)]
+    const source = [frame('box', 0, 0, 100, 50)]
     const anchored = resizeGroupFrames(
       source,
       'se',
@@ -224,7 +282,46 @@ describe('axis-aligned group resize', () => {
       { aspectLock: true, center: true },
     )
     expect(centered.bounds).toMatchObject({ x: -10, y: -5, w: 120, h: 60 })
-    expect(centered.frames[0].rotate).toBe(0.75)
+  })
+})
+
+describe('single-frame local-axis resize', () => {
+  it('projects canvas movement onto the rotated edge and fixes the opposite edge', () => {
+    const source = frame('box', 0, 0, 100, 50, Math.PI / 2)
+    const result = resizeFrameInLocalAxes(source, 'e', { x: 0, y: 20 })
+
+    expect(result.frame.x).toBeCloseTo(-10)
+    expect(result.frame.y).toBeCloseTo(10)
+    expect(result.frame.w).toBeCloseTo(120)
+    expect(result.frame.h).toBeCloseTo(50)
+    expect(result.frame.rotate).toBe(source.rotate)
+    // The local west-edge midpoint stays at the same canvas point: (50, -25).
+    const centerX = result.frame.x + result.frame.w / 2
+    const centerY = result.frame.y + result.frame.h / 2
+    expect(
+      centerX - (Math.cos(result.frame.rotate) * result.frame.w) / 2,
+    ).toBeCloseTo(50)
+    expect(
+      centerY - (Math.sin(result.frame.rotate) * result.frame.w) / 2,
+    ).toBeCloseTo(-25)
+    expect(result.bounds).toEqual(frameBounds(result.frame))
+  })
+
+  it('supports centered, aspect-locked growth in local axes', () => {
+    const angle = Math.PI / 4
+    const source = frame('box', 20, 30, 100, 50, angle)
+    const delta = { x: 10 * Math.cos(angle), y: 10 * Math.sin(angle) }
+    const result = resizeFrameInLocalAxes(source, 'e', delta, {
+      aspectLock: true,
+      center: true,
+      minSize: 8,
+    })
+
+    expect(result.frame.w).toBeCloseTo(120)
+    expect(result.frame.h).toBeCloseTo(60)
+    expect(result.frame.x + result.frame.w / 2).toBeCloseTo(70)
+    expect(result.frame.y + result.frame.h / 2).toBeCloseTo(55)
+    expect(result.frame.rotate).toBe(angle)
   })
 })
 
@@ -274,6 +371,28 @@ describe('move snapping', () => {
     ).toEqual([
       ['canvas', 0],
       ['canvas', 0],
+    ])
+  })
+
+  it('snaps rotated objects by their visible edges', () => {
+    const result = snapMove(
+      [frame('moving', 0, 200, 100, 50, Math.PI / 2)],
+      { x: 10, y: 0 },
+      [frame('peer', 100, 400, 20, 40, Math.PI / 2)],
+      { threshold: 5 },
+    )
+
+    expect(result.delta).toEqual({ x: 15, y: 0 })
+    expect(result.frames[0].x).toBe(15)
+    expect(result.guides).toEqual([
+      {
+        axis: 'x',
+        position: 90,
+        source: 'peer',
+        targetId: 'peer',
+        movingAnchor: 'right',
+        targetAnchor: 'left',
+      },
     ])
   })
 })

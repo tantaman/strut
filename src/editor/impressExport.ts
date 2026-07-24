@@ -122,7 +122,7 @@ function componentHTML(c: AnyComponent): string {
       break
   }
   const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
-  return `<div class="${esc(componentClassName(c))}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
+  return `<div class="${esc(componentClassName(c))}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:center center;${extra}">${body}</div>`
 }
 
 function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
