@@ -1,7 +1,6 @@
 // Fit-to-container scale: observe a container and return the largest scale (capped at 0.1 min) that
-// fits a `w`×`h` slide inside it, minus `pad`. Shared by the Stage canvas and the markdown-mode editor
-// so both size the slide the same way. Extracted from Stage so it can be reused without a circular
-// import back into it.
+// fits a `w`×`h` slide inside it, minus `pad`. Extracted from Stage so other slide surfaces can reuse it
+// without a circular import.
 
 import { useLayoutEffect, useState } from 'react'
 
@@ -22,9 +21,8 @@ export function useFitScale(
       )
     }
     // Measure synchronously before the browser paints so a freshly-mounted surface never shows a
-    // frame at the placeholder 0.5 scale. This matters when the active slide flips into markdown mode:
-    // the TipTap editor mounts fresh, and without this its canvas would pop from 0.5 to the fitted
-    // scale on the next frame — the stage flicker. The observer then handles later container resizes.
+    // frame at the placeholder 0.5 scale. Without this, a freshly mounted canvas would pop from 0.5 to
+    // the fitted scale on the next frame. The observer handles later container resizes.
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)

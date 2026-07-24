@@ -1,7 +1,7 @@
 // "Powered by rindle" credit — Strut is the showcase app for the rindle sync platform, so this links
 // back to rindle.sh from every surface. Two variants:
 //   • 'float'  (default) — a fixed bottom-right pill. Used by the chrome-less full-screen deck viewers
-//                          (present + public share) and the editor's Slide mode. Mirrors `.share-badge`.
+//                          (present + public share) and the contextual object editor. Mirrors `.share-badge`.
 //                          Callers must keep it out of surfaces that already own the bottom-right corner
 //                          (e.g. Overview, whose zoom/Fit controls live there).
 //   • 'inline'           — a compact credit that sits in the app's top chrome (dashboard brandbar),
@@ -17,14 +17,22 @@ export function PoweredByRindle({
 }) {
   return (
     <a
-      className={variant === 'inline' ? 'powered-by powered-by--inline' : 'powered-by'}
+      className={
+        variant === 'inline' ? 'powered-by powered-by--inline' : 'powered-by'
+      }
       href="https://rindle.sh"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Powered by rindle"
       onClick={(e) => e.stopPropagation()}
     >
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        aria-hidden="true"
+      >
         <rect width="32" height="32" rx="7" fill="#171411" />
         <rect
           x="7.1"

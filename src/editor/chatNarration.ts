@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import type { JSONContent } from '@tiptap/core'
 import { useNarration } from '@rindle/react'
 import { salienceRank } from '@rindle/narrator'
 import type {
@@ -13,7 +12,7 @@ import { parseProps } from '../../shared/componentProps'
 import type { ComponentProps } from '../../shared/componentProps'
 import { CHAT_LIMITS } from '../../shared/chat'
 import { deckDetailQuery } from '../../shared/queries'
-import { parseDoc } from './tiptapDoc'
+import { slideGroundingText } from './aiArrange'
 
 const MAX_EVENTS = 300
 const MAX_FIELD = 220
@@ -36,7 +35,6 @@ const DECK_FIELDS = [
   'heading_color',
   'body_font',
   'body_color',
-  'default_slide_mode',
   'text_align',
   'custom_stylesheet',
   'chosen_presenter',
@@ -55,12 +53,14 @@ const SLIDE_FIELDS = [
   'imp_scale',
   'background',
   'surface',
-  'render_mode',
   'text_align',
   'body_region',
+  'layout',
+  'pad',
+  'valign',
 ]
 
-const SLIDE_BODY_FIELDS = ['doc', 'markdown']
+const SLIDE_BODY_FIELDS = ['doc', 'markdown', 'cells']
 const SLIDE_SPATIAL_FIELDS = [
   'sort',
   'x',
@@ -74,9 +74,11 @@ const SLIDE_SPATIAL_FIELDS = [
 const SLIDE_STYLE_FIELDS = [
   'background',
   'surface',
-  'render_mode',
   'text_align',
   'body_region',
+  'layout',
+  'pad',
+  'valign',
 ]
 const SLIDE_ALL_FIELDS = [...SLIDE_BODY_FIELDS, ...SLIDE_FIELDS]
 
@@ -356,7 +358,6 @@ function deckSummary(row: NamedRow): string {
     `surface=${q(row.surface)}`,
     `heading=(${fontColor(row.heading_font, row.heading_color)})`,
     `body=(${fontColor(row.body_font, row.body_color)})`,
-    `mode=${q(row.default_slide_mode)}`,
     `align=${q(row.text_align)}`,
     `presenter=${q(row.chosen_presenter)}`,
     `transition=${q(row.canned_transition)}`,
@@ -367,13 +368,15 @@ function slideSummary(row: NamedRow): string {
   return [
     `id=${s(row.id)}`,
     `sort=${q(row.sort)}`,
-    `mode=${q(row.render_mode)}`,
     `body=${q(slideBody(row))}`,
     `transform=${slideTransform(row)}`,
     `background=${q(row.background)}`,
     `surface=${q(row.surface)}`,
     `align=${q(row.text_align)}`,
     `region=${q(row.body_region)}`,
+    `layout=${q(row.layout)}`,
+    `pad=${q(row.pad)}`,
+    `valign=${q(row.valign)}`,
   ].join(' ')
 }
 
@@ -442,7 +445,13 @@ function changedSlideFields(row: NamedRow, old?: NamedRow): string[] {
     SLIDE_FIELDS,
     (k, v, prev) => `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
   )
-  if (old && (row.doc !== old.doc || row.markdown !== old.markdown)) {
+  if (
+    old &&
+    (row.doc !== old.doc ||
+      row.markdown !== old.markdown ||
+      !same(row.cells, old.cells) ||
+      row.layout !== old.layout)
+  ) {
     out.push(`body=${q(slideBody(row))}`)
   }
   return out
@@ -507,26 +516,7 @@ function formatDeckField(
 }
 
 function slideBody(row: NamedRow): string {
-  const fromDoc = docText(s(row.doc))
-  if (fromDoc) return cap(fromDoc, MAX_BODY)
-  return cap(
-    s(row.markdown)
-      .replace(/[#*_>`~-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim(),
-    MAX_BODY,
-  )
-}
-
-function docText(raw: string): string {
-  if (!raw) return ''
-  const parts: string[] = []
-  const walk = (node: JSONContent) => {
-    if (typeof node.text === 'string') parts.push(node.text)
-    if (Array.isArray(node.content)) node.content.forEach(walk)
-  }
-  walk(parseDoc(raw))
-  return parts.join(' ').replace(/\s+/g, ' ').trim()
+  return cap(slideGroundingText(row), MAX_BODY)
 }
 
 function propsSummary(props: ComponentProps): string {

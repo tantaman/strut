@@ -1,31 +1,28 @@
-// The Doc surface — the deck's DEFAULT mode (alongside Slides / Overview / Research). Every slide is
-// rendered as a fit-scaled 16:9 card in ONE vertical scroll, each body editable in place, so you read
-// and edit the deck as a document instead of selecting one slide at a time. In this mode it owns the
-// whole viewport: no header, no well — chrome-free by design, the clean slate for authoring.
+// The editor: every slide is a fit-scaled 16:9 card in one vertical scroll, with bodies editable in
+// place. The deck owns the viewport and quiet card/edge affordances appear only when reached for.
 //
 // Each card has a BACK: flip it over (corner button, or ⌘. on the active card) and its research notes
 // are there, editable in place — the index-card metaphor made literal. Front = what the audience sees;
-// back = what you (and the AI) know. Same slide_notes store as the Research view, loaded lazily on
-// first flip; the back keeps the card's exact geometry (long notes scroll inside it) so the flip never
-// disturbs the virtualizer's exact row math.
+// back = what you (and the AI) know. Notes load lazily on first flip; the back keeps the card's exact
+// geometry (long notes scroll inside it) so the flip never disturbs the virtualizer's exact row math.
 //
 // Cards stay SLIDE-SHAPED (1280×720 scaled to the column, not reflowed into prose): the fixed geometry is
 // the contract LockedObjects, the spatial components and the impress export all depend on, and it keeps
 // what you edit identical to what renders. It also makes this virtualizer simpler than Research's —
 // every row is exactly `cardH + DOC_GAP`, so `estimateSize` is EXACT and nothing needs measureElement.
 //
-// Doc mode edits BODIES. A spatial slide (render_mode '') has no editable body here, so it renders as a
-// live read-only composite; click it to jump to Slides mode where the object canvas lives.
+// Bodies edit directly on the card. Positioned objects open in a contextual focused canvas layered over
+// this same editor; it is contextual, and closing it returns to the exact scroll position.
 //
 // The coupling to "one active slide" is resolved here rather than pushed onto the rest of the editor:
-// the AI (and the other modes' chrome) still act on `?slide=` — so the card under the viewport center
-// drives it (debounced), and focusing a card's text claims it too. Both keep the URL deep-linkable and
-// the Present/Esc round-trip intact. Formatting needs no such hoisting: it rides the keys (markdown
+// AI actions and contextual tools act on `?slide=` — so the card under the viewport center drives it
+// (debounced), and focusing a card's text claims it too. Both keep the URL deep-linkable and the
+// Present/Esc round-trip intact. Formatting needs no such hoisting: it rides the keys (markdown
 // input rules + the `/` menu), so N cards mean N editors and zero bars.
 //
-// Windowing unmounts offscreen editors, which is lossless for the same reason it is in Research: every
-// keystroke already streams through `setSlideDoc.folded` (keyed per slide), so a remounted editor
-// re-seeds from the latest synced doc.
+// Windowing unmounts offscreen editors. Every keystroke streams through `setSlideDoc.folded` (keyed per
+// slide), and the destroy boundary records the same one-undo edit session as blur, so a remount re-seeds
+// from the latest synced doc without losing history.
 
 import {
   useCallback,
@@ -37,7 +34,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { SlideBodyEditors } from './SlideBodyEditors'
 import type { ReactNode } from 'react'
-import { NotebookPen, Plus } from 'lucide-react'
+import { NotebookPen, Plus, Shapes } from 'lucide-react'
 import { useQuery, useQueryStatus } from '@rindle/react'
 import { deckNotesQuery } from '../../shared/queries'
 import { keyBetween } from '../lib/order'
@@ -66,16 +63,18 @@ const DOC_COL_MAX = 940
 export function DocView({
   slides,
   deck,
+  onEditObjects,
 }: {
   slides: SlideDetail[]
   deck: DeckRoot | null
+  onEditObjects: (slideId: string) => void
 }) {
   const editor = useEditor()
   const mutate = useMutate()
   const history = useHistory()
   const scrollRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
-  const addSlideAt = useAddSlide(slides, deck)
+  const addSlideAt = useAddSlide(slides)
   // One scale for every card, from the column width — so a card's height is known without measuring it.
   const [colW, setColW] = useState(DOC_COL_MAX)
   // The column starts below the scroll box's top padding; `scrollMargin` offsets the virtualizer past it.
@@ -252,8 +251,10 @@ export function DocView({
     (id: string, dir: -1 | 1) => {
       const i = slides.findIndex((s) => s.id === id)
       if (i < 0 || i + dir < 0 || i + dir >= slides.length) return
-      const before = dir === -1 ? slides[i - 2] : slides[i + 1]
-      const after = dir === -1 ? slides[i - 1] : slides[i + 2]
+      const slideAt = (index: number): SlideDetail | undefined =>
+        index >= 0 && index < slides.length ? slides[index] : undefined
+      const before = dir === -1 ? slideAt(i - 2) : slideAt(i + 1)
+      const after = dir === -1 ? slideAt(i - 1) : slideAt(i + 2)
       const sort = keyBetween(before?.sort, after?.sort)
       const fromSort = slides[i].sort
       mutate.reorderSlide({ id, sort })
@@ -324,8 +325,8 @@ export function DocView({
   return (
     <div className="doc">
       <UserStyle css={deck?.custom_stylesheet} />
-      {/* The Dock-well: push the pointer against the left screen edge and the well slides out —
-          reorder/jump/delete/add without resident chrome. */}
+      {/* Push the pointer against the left edge (or tap the touch tray button) to summon slide
+          management without making it resident chrome. */}
       <WellDock slides={slides} deck={deck} />
       <div className="doc__scroll" ref={scrollRef} onScroll={onScroll}>
         <div
@@ -371,6 +372,7 @@ export function DocView({
                   flipped={flipped.has(s.id)}
                   onToggleFlip={toggleFlip}
                   onFocusEditor={onFocusEditor}
+                  onEditObjects={onEditObjects}
                 />
               </div>
             )
@@ -404,6 +406,7 @@ function DocCard({
   flipped,
   onToggleFlip,
   onFocusEditor,
+  onEditObjects,
 }: {
   slide: SlideDetail
   deck: DeckRoot | null
@@ -413,12 +416,14 @@ function DocCard({
   flipped: boolean
   onToggleFlip: (id: string) => void
   onFocusEditor: (slideId: string) => void
+  onEditObjects: (slideId: string) => void
 }) {
   const editor = useEditor()
   const active = slide.id === editor.activeSlideId
-  // Body-editable only where a body IS the edit layer. Flipping render_mode swaps which component
-  // renders, remounting the card — the same branch Stage makes, for the same reason.
-  const editable = editor.canEdit && slide.render_mode === 'markdown'
+  // Every owned card is directly writable. `render_mode` remains readable for old deck/export data,
+  // but it no longer splits the product into body-vs-object editors: body text lives here and positioned
+  // objects are always reachable through the contextual focus affordance.
+  const editable = editor.canEdit
   const drop = useDropImage(slide, deck)
   // The back mounts on the FIRST flip and then stays while the card lives: mounting is what starts
   // the notes query (so a deck you never flip never loads notes), and staying is what keeps the
@@ -455,19 +460,10 @@ function DocCard({
               onFocusEditor={onFocusEditor}
             />
           ) : (
-            // A spatial slide (or a read-only viewer): the real composited render, not an editor. Objects
-            // are placed on the Stage's canvas, so hand it off there.
+            // Viewers get the exact composited render while owners use the direct body editor above.
             <button
               className="doc__static"
-              title={
-                editor.canEdit
-                  ? 'Objects slide — open it in Slides to edit'
-                  : undefined
-              }
-              onClick={() => {
-                editor.setActiveSlide(slide.id)
-                if (editor.canEdit) editor.setMode('slide')
-              }}
+              onClick={() => editor.setActiveSlide(slide.id)}
             >
               <SlideView slide={slide} deck={deck} width={colW} />
             </button>
@@ -475,8 +471,10 @@ function DocCard({
           {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
               coordinate space, so the button stays a constant size at any column width. */}
           {editable && <LayoutPicker slide={slide} deck={deck} scale={scale} />}
-          {/* Hover-× to remove a photo dropped on this card, without leaving Doc mode (one undo). */}
-          {editable && !flipped && <DocImageRemovers slide={slide} scale={scale} />}
+          {/* Hover-× removes a dropped photo in place as one undoable command. */}
+          {editable && !flipped && (
+            <DocImageRemovers slide={slide} scale={scale} />
+          )}
           {dropActive && (
             <DropCellHighlight
               slide={slide}
@@ -491,6 +489,18 @@ function DocCard({
           {backMounted && <DocNotesFace slide={slide} flipped={flipped} />}
         </div>
       </div>
+      {editable && !flipped && (
+        <button
+          className="doc__objectsbtn"
+          title="Edit positioned objects"
+          onClick={() => {
+            editor.setActiveSlide(slide.id)
+            onEditObjects(slide.id)
+          }}
+        >
+          <Shapes size={14} />
+        </button>
+      )}
       {/* The flip affordance sits OUTSIDE the rotating pair so it never mirrors — one fixed corner
           button that reads as "this card has a back". Also the target of ⌘. on the active card. */}
       <button

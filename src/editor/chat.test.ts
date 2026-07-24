@@ -293,6 +293,36 @@ describe('sendChatAction', () => {
     })
   })
 
+  it('keeps the reply but does not apply it after the deck changes', async () => {
+    const dispatch = vi.fn()
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseStreamResponse([
+            'data: {"result":{"say":"I tightened it.","actions":[{"kind":"set_body","slideId":"s1","markdown":"New copy"}]}}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        ),
+    )
+    const { rows, store } = fakeStore()
+
+    const tip = await sendChatAction(
+      store,
+      ctx,
+      'tighten this slide',
+      dispatch,
+      { isRequestCurrent: () => false },
+    )
+
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(tip).toBeNull()
+    expect(assistantOf(rows)).toMatchObject({ status: 'done', note: '' })
+    expect(assistantOf(rows)?.content).toContain('I tightened it.')
+    expect(assistantOf(rows)?.content).toMatch(/deck changed/i)
+  })
+
   it('keeps the reply but errors the turn when the apply fails', async () => {
     vi.stubGlobal(
       'fetch',

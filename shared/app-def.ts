@@ -50,7 +50,8 @@ export type { ComponentType } from './componentProps.ts'
 // ---- literal unions the SQL can't carry (refined once here; survive every schema regen) -----------
 export type CollaboratorRole = 'editor' | 'viewer'
 export type Visibility = 'private' | 'public-read'
-// render_mode / default_slide_mode: '' = spatial (components) | 'markdown' = full-slide markdown.
+// Legacy compatibility markers. Current rendering composites body + positioned objects in one slide.
+// Older readers interpret '' as objects-first and 'markdown' as body-first.
 export type SlideMode = '' | 'markdown'
 
 // refineTable re-types the generated columns within their kind (runtime-validated identity — the wire
@@ -99,9 +100,8 @@ export type Deck = Row<typeof deck>
 export type Slide = Row<typeof slide>
 export type Component = Row<typeof component>
 
-// The render_mode a brand-new deck (and its seed slide) starts in. Markdown-first: most authoring is
-// content-first, and spatial mode is a non-destructive per-slide/-deck toggle away. Only affects newly
-// created decks — existing decks keep their stored default_slide_mode.
+// Compatibility marker stamped on a brand-new deck and its seed slide. New authoring is body-first;
+// current rendering does not branch on this field.
 export const DEFAULT_SLIDE_MODE: SlideMode = 'markdown'
 
 // ---- mutator arg schemas (zod; the single source of shape for both tiers + the UI) ---------------
@@ -144,8 +144,7 @@ export const setDeckThemeArgs = z.object({
   heading_color: z.string().optional(),
   body_font: z.string().optional(),
   body_color: z.string().optional(),
-  // Unified theme: deck-wide default text alignment ('' = built-in 'left') and the render_mode
-  // stamped on newly added slides ('' = spatial | 'markdown').
+  // Unified theme: deck-wide default text alignment and an older-reader compatibility marker.
   text_align: z.string().optional(),
   default_slide_mode: z.enum(['', 'markdown']).optional(),
   custom_stylesheet: z.string().optional(),
@@ -170,7 +169,7 @@ export const addSlideArgs = z.object({
   sort: z.string(),
   x: z.number(),
   y: z.number(),
-  // '' = spatial (default) | 'markdown'. Add-slide inherits the deck's default_slide_mode.
+  // Older-reader compatibility marker; current Strut composites both body and positioned objects.
   render_mode: z.enum(['', 'markdown']).optional(),
   // The FRAME a new slide inherits from its neighbor (layout tiling / density / vertical + horizontal
   // alignment) so building a run of similar slides doesn't mean re-picking the same settings every time.
@@ -648,7 +647,7 @@ export const mutators = {
     },
   ),
 
-  // Flip a slide between spatial + markdown mode; hidden components are preserved in the DB.
+  // Compatibility setter retained for synced older clients. The current editor does not call it.
   setSlideMode: shared(
     setSlideModeArgs,
     function* (tx: IsoTx, a: SetSlideModeArgs): MutationGen {

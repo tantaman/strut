@@ -28,6 +28,7 @@ import type { ChatAction } from '../../shared/chatAction'
 import type { ArrangementPlan } from '../../shared/arrange'
 import type { GeneratedDeck } from '../../shared/generate'
 import { appPath } from '../../shared/appPath'
+import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import type {
   AddArtifactArgs,
   AddImageArgs,
@@ -62,7 +63,12 @@ export interface DispatchCtx {
   history: History
   /** The slide a freshly-authored component lands on — the add_* actions need it. Null = no slide open. */
   activeSlideId: string | null
+  /** Async chat work may mutate only while the editor is still at the history revision it started from. */
+  isRequestCurrent?: () => boolean
 }
+
+export const CHAT_EDIT_CONFLICT =
+  'The deck changed while the AI was working, so nothing new was applied. Send the request again to use the latest version.'
 
 /** The outcome of an apply. `label` is the undo-stack label (also shown on the chat's Undo chip). */
 export type DispatchOutcome =
@@ -73,13 +79,14 @@ export type DispatchOutcome =
  *  the whole batch is folded into a single command pushed to the real `ctx.history` — so the model's turn
  *  (e.g. "new slide + image + rewrite") is one Cmd/Z. `create_slide` actions run FIRST so their turn-local
  *  `ref`s resolve for any later action that targets them, regardless of the order the model emitted them.
- *  Returns the combined outcome: ok with a label (the single action's own label, or "N changes"); an error
- *  only when NOTHING applied. Partial failures are dropped silently — the changes that landed still stand. */
+ *  Returns the combined outcome: ok with a label (the single action's own label, or "N changes"). A turn
+ *  is atomic: if any action fails, the recorder immediately rolls back everything that already landed. */
 export async function dispatchActions(
   actions: ChatAction[],
   ctx: DispatchCtx,
 ): Promise<DispatchOutcome> {
   if (actions.length === 0) return { ok: false, error: 'Nothing to apply.' }
+  if (!requestIsCurrent(ctx)) return editConflict()
 
   const rec = new History() // collects each step; drained into one parent command at the end
   const recCtx: DispatchCtx = { ...ctx, history: rec }
@@ -103,6 +110,10 @@ export async function dispatchActions(
   let insertIdx = 0
 
   for (const action of ordered) {
+    if (!requestIsCurrent(ctx)) {
+      firstError = CHAT_EDIT_CONFLICT
+      break
+    }
     let out: DispatchOutcome
     if (action.kind === 'create_slide') {
       const res = applyCreateSlide(action, recCtx, tail)
@@ -127,14 +138,20 @@ export async function dispatchActions(
       if (isInsert(action)) insertIdx++
     }
     if (out.ok) applied.push(out.label)
-    else if (!firstError) firstError = out.error
+    else {
+      firstError = out.error
+      break
+    }
   }
 
   const label = applied.length === 1 ? applied[0] : `${applied.length} changes`
   const cmd = rec.drain(label)
+  if (firstError) {
+    cmd?.undo()
+    return { ok: false, error: firstError }
+  }
   if (cmd) ctx.history.push(cmd)
-  if (applied.length === 0)
-    return { ok: false, error: firstError ?? 'Nothing to apply.' }
+  if (applied.length === 0) return { ok: false, error: 'Nothing to apply.' }
   return { ok: true, label }
 }
 
@@ -181,6 +198,14 @@ function isInsert(a: ChatAction): boolean {
   )
 }
 
+function requestIsCurrent(ctx: DispatchCtx): boolean {
+  return ctx.isRequestCurrent?.() !== false
+}
+
+function editConflict(): { ok: false; error: string } {
+  return { ok: false, error: CHAT_EDIT_CONFLICT }
+}
+
 // The implicit "the slide I just made" target — a reserved refMap key so a component with no explicit
 // slideId lands on the most-recently-created slide this turn (else it falls back to the active slide).
 const LAST_CREATED = '::last-created'
@@ -210,9 +235,10 @@ const lastSort = (s: SlideDetail[]): string | null => lastSlide(s)?.sort ?? null
 const lastX = (s: SlideDetail[]): number => lastSlide(s)?.x ?? 0
 const lastY = (s: SlideDetail[]): number => lastSlide(s)?.y ?? 0
 
-/** Append ONE blank slide (spatial, so a component dropped on it renders) — or a markdown-mode slide when
- *  `markdown` seeds a body. Records the add/delete on the recorder history and returns the new id plus the
- *  advanced tail (sort key + x) so a second create_slide in the same batch lands after it, not on top. */
+/** Append ONE slide using the canonical older-reader compatibility marker. Current rendering composites
+ *  its body and positioned objects whether or not `markdown` seeds Cell 1. Records the add/delete on the
+ *  recorder history and returns the new id plus the advanced tail (sort key + x) so a second create_slide
+ *  in the same batch lands after it, not on top. */
 function applyCreateSlide(
   a: Extract<ChatAction, { kind: 'create_slide' }>,
   ctx: DispatchCtx,
@@ -220,6 +246,7 @@ function applyCreateSlide(
 ):
   | { ok: true; id: string; label: string; sort: string; x: number }
   | { ok: false; error: string } {
+  if (!requestIsCurrent(ctx)) return editConflict()
   const now = Date.now()
   const id = newId()
   const sort = keyBetween(tail.sort, null)
@@ -230,9 +257,9 @@ function applyCreateSlide(
     sort,
     x,
     y: tail.y,
-    // A blank slide is SPATIAL ('') so an image/webframe/artifact dropped on it is visible (markdown-mode
-    // slides render from their doc, not components). Only seed markdown-mode when body text was supplied.
-    render_mode: a.markdown ? 'markdown' : '',
+    // Current Strut does not branch rendering on this legacy field; stamp every new slide consistently so
+    // older readers prefer its body while current readers still composite positioned objects on top.
+    render_mode: DEFAULT_SLIDE_MODE,
     now,
   }
   const doc = a.markdown ? markdownToDoc(a.markdown) : ''
@@ -256,6 +283,7 @@ function insertWithUndo(
   doAdd: () => void,
   label: string,
 ): DispatchOutcome {
+  if (!requestIsCurrent(ctx)) return editConflict()
   doAdd()
   ctx.history.push({
     label,
@@ -403,6 +431,7 @@ function applyTheme(
   a: Extract<ChatAction, { kind: 'set_theme' }>,
   ctx: DispatchCtx,
 ): DispatchOutcome {
+  if (!requestIsCurrent(ctx)) return editConflict()
   if (!ctx.deck) return { ok: false, error: 'No deck to theme.' }
   const patch: ThemePatch = {}
 
@@ -452,6 +481,7 @@ function applyBody(
   a: Extract<ChatAction, { kind: 'set_body' }>,
   ctx: DispatchCtx,
 ): DispatchOutcome {
+  if (!requestIsCurrent(ctx)) return editConflict()
   const ok = applyBodyEdit(
     a.slideId,
     a.markdown,
@@ -488,6 +518,7 @@ async function runGenerate(
   const deck = (await res.json().catch(() => null)) as GeneratedDeck | null
   if (!deck || !Array.isArray(deck.slides) || deck.slides.length === 0)
     return { ok: false, error: 'No slides came back — try rephrasing.' }
+  if (!requestIsCurrent(ctx)) return editConflict()
   applyGenerated(
     deck,
     ctx.mutate,
@@ -524,6 +555,7 @@ async function runArrange(
   const plan = (await res.json().catch(() => null)) as ArrangementPlan | null
   if (!plan || !Array.isArray(plan.order))
     return { ok: false, error: 'The arrangement came back malformed.' }
+  if (!requestIsCurrent(ctx)) return editConflict()
   applyPlan(plan, ctx.mutate, ctx.slides, ctx.history)
   return { ok: true, label: 'AI arrange' }
 }

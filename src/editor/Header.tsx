@@ -1,6 +1,7 @@
-// Editor header (spec §4.3): logo/back, deck title, component inserters (hidden in overview), the
-// per-slide Objects|Body edit-layer toggle, the deck Theme picker, the Slides|Overview mode toggle,
-// and Present.
+// The editor's contextual command bar. It lives in the top-edge dock, so the deck stays chrome-free
+// until the user reaches for navigation, undo, design, sharing, AI, arranging, or Present. When the
+// focused object editor is open, its insertion tools join the same bar instead of creating a mode-
+// specific toolbar.
 
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
@@ -8,13 +9,14 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  ArrowLeft,
   ChevronDown,
   Circle,
   Code2,
   Diamond,
   Download,
-  FileText,
   Image as ImageIcon,
+  LayoutGrid,
   Link2,
   Minus,
   MoveRight,
@@ -85,7 +87,6 @@ interface DeckRow {
   body_font: string | null
   body_color: string | null
   text_align: string | null
-  default_slide_mode: string | null
   canned_transition: string
   // Rindle TEXT columns can be NULL, so this is nullable like the other theme fields; the read
   // sites guard with `?? ''`.
@@ -126,6 +127,10 @@ export function Header({
   activeSlide,
   variants,
   makesPublic,
+  editingObjects,
+  onCloseObjects,
+  arrangeOpen,
+  onToggleArrange,
   chatOpen,
   onToggleChat,
 }: {
@@ -133,6 +138,10 @@ export function Header({
   activeSlide: SlideDetail | null
   variants: readonly DeckVariantRow[]
   makesPublic: boolean
+  editingObjects: boolean
+  onCloseObjects: () => void
+  arrangeOpen: boolean
+  onToggleArrange: () => void
   // "✨ Chat" advisor rail toggle. Visible to everyone (the panel itself gates guests with a sign-in
   // nudge); state is owned by the editor page so the panel can mount alongside the well/stage.
   chatOpen: boolean
@@ -158,31 +167,9 @@ export function Header({
   const [shareOpen, setShareOpen] = useState(false)
   const [variantOpen, setVariantOpen] = useState(false)
   const active = editor.activeSlideId
-  // The active slide's editable layer: 'markdown' = Body, '' = Objects (both always render; this only
-  // says which one you're editing). The component inserters belong to the Objects layer, so they show
-  // only when it's the one being edited — flip to Objects (slide toolbar) to drop an image on a body slide.
-  const editingBody = activeSlide?.render_mode === 'markdown'
-  const canEditSlide =
-    active != null && editor.mode === 'slide' && editor.canEdit
-  const canInsert = canEditSlide && !editingBody
-
-  // Flip the active slide's editable layer (Objects '' ⇄ Body 'markdown'). Both layers always render;
-  // this only picks what you edit (and which inserters show). Non-destructive + one undo. Lives in the
-  // top bar (moved here from the on-slide hover toolbar).
-  function setSlideLayer(next: '' | 'markdown') {
-    const slide = activeSlide
-    if (!slide) return
-    const before = slide.render_mode === 'markdown' ? 'markdown' : ''
-    if (next === before) return
-    const apply = (m: '' | 'markdown') =>
-      mutate.setSlideMode({ id: slide.id, render_mode: m, now: Date.now() })
-    apply(next)
-    history.push({
-      label: next === 'markdown' ? 'Edit body' : 'Edit objects',
-      redo: () => apply(next),
-      undo: () => apply(before),
-    })
-  }
+  // Object tools only appear after the user opens a card's focused object editor. Body writing stays
+  // directly on the card, so there is no persistent Objects|Body mode to understand or round-trip.
+  const canInsert = active != null && editingObjects && editor.canEdit
 
   // The Theme popover dismisses on a pointer-down outside its wrapper. Portaled color sub-popovers
   // stop pointer-down propagation themselves so swatch clicks do not close the whole menu.
@@ -381,27 +368,6 @@ export function Header({
     )
   }
 
-  function setDefaultMarkdown(on: boolean) {
-    if (!deck) return
-    // default_slide_mode is an enum column (not covered by applyThemePatch's string patch) — one undo
-    // by hand so this toggle is also reversible.
-    const before = deck.default_slide_mode === 'markdown' ? 'markdown' : ''
-    const next = on ? 'markdown' : ''
-    if (before === next) return
-    const apply = (m: '' | 'markdown') =>
-      mutate.setDeckTheme({
-        id: deck.id,
-        default_slide_mode: m,
-        now: Date.now(),
-      })
-    apply(next)
-    history.push({
-      label: 'Default slide mode',
-      redo: () => apply(next),
-      undo: () => apply(before),
-    })
-  }
-
   async function doExport(kind: 'json' | 'html') {
     if (!deck || exporting || !app) return
     setMenu(null)
@@ -491,6 +457,17 @@ export function Header({
 
   return (
     <div className="hdr">
+      {editingObjects && (
+        <button
+          type="button"
+          className="btn hdr__object-back"
+          title="Back to deck"
+          aria-label="Back to deck"
+          onClick={onCloseObjects}
+        >
+          <ArrowLeft size={17} />
+        </button>
+      )}
       <Link to="/" className="hdr__home" title="All decks">
         <img src="/strut-logo.png" alt="Strut" />
       </Link>
@@ -523,34 +500,8 @@ export function Header({
       {/* Secondary tools: a single cluster so it can collapse to icons and then drop to a
           second row on narrow screens (see .hdr__tools media queries in strut.css). */}
       <div className="hdr__tools">
-        {/* Per-slide edit-layer toggle: Objects (positioned components) vs Body (markdown). Both layers
-            always render; this picks the editable one. Kept FIRST in the cluster so it stays leftmost
-            whether or not the (Objects-only) inserters are showing — no leading divider. */}
-        {canEditSlide && (
-          <div className="seg seg--layers" role="group" aria-label="Edit layer">
-            <button
-              className={editingBody ? '' : 'is-active'}
-              onClick={() => setSlideLayer('')}
-              title="Edit objects (drag & place text, images, shapes)"
-              aria-pressed={!editingBody}
-            >
-              <Shapes size={15} />
-              <span className="lbl">Objects</span>
-            </button>
-            <button
-              className={editingBody ? 'is-active' : ''}
-              onClick={() => setSlideLayer('markdown')}
-              title="Edit body (markdown text)"
-              aria-pressed={editingBody}
-            >
-              <FileText size={15} />
-              <span className="lbl">Body</span>
-            </button>
-          </div>
-        )}
         {canInsert && (
           <>
-            <div className="hdr__sep" />
             <div className="hdr__group">
               <button className="btn" onClick={addText} title="Text">
                 <Type size={16} /> <span className="lbl">Text</span>
@@ -672,7 +623,6 @@ export function Header({
                     onText={setTextTheme}
                     onTextLive={setTextThemeLive}
                     onAlign={setDeckAlign}
-                    onDefaultMarkdown={setDefaultMarkdown}
                     onEditCss={() => {
                       setMenu(null)
                       setCssOpen(true)
@@ -768,34 +718,16 @@ export function Header({
 
       <div className="hdr__spacer" />
 
-      {/* Mode toggle, Chat, and Present are marked so the mobile stylesheet can hide them here and
-          hand those actions to the bottom tab bar (thumb reach) — see the @media block in strut.css. */}
-      <div className="seg hdr__mode">
-        <button
-          className={editor.mode === 'slide' ? 'is-active' : ''}
-          onClick={() => editor.setMode('slide')}
-        >
-          Slides
-        </button>
-        <button
-          className={editor.mode === 'doc' ? 'is-active' : ''}
-          onClick={() => editor.setMode('doc')}
-        >
-          Doc
-        </button>
-        <button
-          className={editor.mode === 'overview' ? 'is-active' : ''}
-          onClick={() => editor.setMode('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={editor.mode === 'research' ? 'is-active' : ''}
-          onClick={() => editor.setMode('research')}
-        >
-          Research
-        </button>
-      </div>
+      <button
+        className={
+          arrangeOpen ? 'btn hdr__arrange is-active' : 'btn hdr__arrange'
+        }
+        onClick={onToggleArrange}
+        title="Arrange slides spatially"
+        aria-pressed={arrangeOpen}
+      >
+        <LayoutGrid size={16} /> <span className="lbl">Arrange</span>
+      </button>
 
       <button
         className={chatOpen ? 'btn hdr__chat is-active' : 'btn hdr__chat'}
@@ -813,11 +745,8 @@ export function Header({
           navigate({
             to: '/deck/$deckId/play',
             params: { deckId: deck.id },
-            // Carry the current view + slide so Esc can drop back into exactly this spot.
-            search: {
-              view: editor.mode,
-              slide: editor.activeSlideId ?? undefined,
-            },
+            // The active slide is the editor's only URL state; Esc restores this reading position.
+            search: { slide: editor.activeSlideId ?? undefined },
           })
         }
         title="Present"
@@ -977,7 +906,6 @@ function ThemePopover({
   onText,
   onTextLive,
   onAlign,
-  onDefaultMarkdown,
   onEditCss,
 }: {
   deck: DeckRow
@@ -1009,7 +937,6 @@ function ThemePopover({
     >,
   ) => void
   onAlign: (align: string) => void
-  onDefaultMarkdown: (on: boolean) => void
   onEditCss: () => void
 }) {
   const align = deck.text_align || 'left'
@@ -1207,14 +1134,6 @@ function ThemePopover({
               ))}
             </div>
           </div>
-          <label className="theme__check">
-            <input
-              type="checkbox"
-              checked={deck.default_slide_mode === 'markdown'}
-              onChange={(e) => onDefaultMarkdown(e.target.checked)}
-            />
-            <span>New slides use Markdown</span>
-          </label>
         </div>
 
         {/* Custom CSS lives here rather than as its own header button — theme + CSS are one job. */}

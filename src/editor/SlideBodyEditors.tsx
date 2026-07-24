@@ -1,7 +1,7 @@
 // The editable body layer, tiled by the slide's layout: one TipTap editor per cell, so a cols-2 slide
 // takes text on the left AND the right. The single shared piece both edit surfaces drop into their
-// scaled `.slide-canvas` — the Stage's fit-to-viewport editor (TipTapSlideEditor) and Doc mode's column
-// of cards (DocCardBody) — so they tile identically and match the read renderer (render.tsx
+// scaled `.slide-canvas` used by the scrolling card editor, so cells tile identically and match the read
+// renderer (render.tsx
 // MarkdownBodies) cell-for-cell.
 //
 // A full-layout slide is exactly today: one editor filling the canvas, confined by the container's
@@ -37,10 +37,20 @@ function CellEditor({
     idx,
     onFocusEditor ? { onFocus: () => onFocusEditor(slide.id) } : undefined,
   )
-  if (!tiled) return <EditorContent editor={editor} className="strut-md-host" />
+  const surface = (
+    <div className="strut-md-editor">
+      <EditorContent editor={editor} className="strut-md-host" />
+      {editor?.isEmpty && (
+        <div className="strut-md strut-md__placeholder" aria-hidden="true">
+          Start writing…
+        </div>
+      )}
+    </div>
+  )
+  if (!tiled) return surface
   return (
     <div className="strut-md-cell" style={cellBoxStyle(cell, padScale)}>
-      <EditorContent editor={editor} className="strut-md-host" />
+      {surface}
     </div>
   )
 }

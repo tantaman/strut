@@ -1,6 +1,6 @@
 // Insert a blank slide at a given index — the one implementation behind every "+" in the editor (the
-// well's gap inserters and its append button, Doc mode's seams). Extracted from SlideWell so a second
-// surface can offer the same affordance without forking the ordering/placement rules.
+// well's gap inserters, its append button, and the scrolling deck's seams). Extracted from SlideWell so
+// each quiet affordance shares the same ordering and placement rules.
 //
 // The fractional sort key falls between the neighbors; the 3-D overview position is placed near them too
 // (midpoint when inserting between, one gap past the end when appending) so a slide added from a
@@ -17,15 +17,10 @@ import type { SlideDetail } from './deckDetail'
 
 /** Returns `addSlideAt(at)` — inserts a blank slide so it lands at index `at` (0 = before the first,
  *  slides.length = append), makes it active, and pushes one undo step. Returns the new slide's id. */
-export function useAddSlide(
-  slides: SlideDetail[],
-  deck: { default_slide_mode?: string | null } | null,
-): (at: number) => string {
+export function useAddSlide(slides: SlideDetail[]): (at: number) => string {
   const editor = useEditor()
   const mutate = useMutate()
   const history = useHistory()
-  const defaultMode = deck?.default_slide_mode
-
   return useCallback(
     (at: number) => {
       const slideAt = (i: number): SlideDetail | undefined =>
@@ -56,8 +51,9 @@ export function useAddSlide(
         sort: keyBetween(before?.sort, after?.sort),
         x: between(before?.x, after?.x, 0),
         y: between(before?.y, after?.y, 0),
-        // New slides inherit the deck's default render mode (spec: deck-level markdown default).
-        render_mode: defaultMode === 'markdown' ? 'markdown' : '',
+        // The single editor is body-first. This persisted value keeps new data legible to older readers;
+        // current Strut renders body and positioned objects together regardless of the compatibility flag.
+        render_mode: 'markdown',
         // …and the neighbor's frame, so the new slide picks up where you left off.
         layout: src?.layout ?? '',
         pad: src?.pad ?? '',
@@ -74,6 +70,6 @@ export function useAddSlide(
       })
       return id
     },
-    [slides, defaultMode, editor, mutate, history],
+    [slides, editor, mutate, history],
   )
 }

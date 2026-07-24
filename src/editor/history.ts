@@ -21,6 +21,9 @@ export class History {
   private redoStack: Command[] = []
   private listeners = new Set<() => void>()
   private batching: Command[] | null = null
+  // Monotonic stack generation. Async producers capture this before they start and may apply only while
+  // it is unchanged; UI affordances can likewise target the exact stack state they were created for.
+  private generation = 0
 
   subscribe = (fn: () => void): (() => void) => {
     this.listeners.add(fn)
@@ -29,6 +32,11 @@ export class History {
 
   private emit() {
     for (const fn of this.listeners) fn()
+  }
+
+  private changed() {
+    this.generation++
+    this.emit()
   }
 
   /** Record an already-applied command (does NOT run it). Clears the redo stack. */
@@ -40,7 +48,7 @@ export class History {
     this.undoStack.push(cmd)
     if (this.undoStack.length > CAP) this.undoStack.shift()
     this.redoStack = []
-    this.emit()
+    this.changed()
   }
 
   /** Run a command's forward action and record it. */
@@ -80,10 +88,14 @@ export class History {
    *  undo reverses the steps in reverse order; its redo replays them forward. */
   drain = (label: string): Command | null => {
     const collected = this.undoStack
+    const hadRedo = this.redoStack.length > 0
     this.undoStack = []
     this.redoStack = []
-    this.emit()
-    if (collected.length === 0) return null
+    if (collected.length === 0) {
+      if (hadRedo) this.changed()
+      return null
+    }
+    this.changed()
     return {
       label,
       undo: () => {
@@ -100,7 +112,7 @@ export class History {
     if (!cmd) return
     cmd.undo()
     this.redoStack.push(cmd)
-    this.emit()
+    this.changed()
   }
 
   redo = (): void => {
@@ -108,13 +120,29 @@ export class History {
     if (!cmd) return
     cmd.redo()
     this.undoStack.push(cmd)
-    this.emit()
+    this.changed()
   }
 
   clear = (): void => {
+    if (this.undoStack.length === 0 && this.redoStack.length === 0) return
     this.undoStack = []
     this.redoStack = []
-    this.emit()
+    this.changed()
+  }
+
+  /** Current monotonic stack generation. Capture before async work to detect any intervening command. */
+  get revision(): number {
+    return this.generation
+  }
+
+  /** Whether no push/undo/redo/clear has changed the history since `revision` was captured. */
+  isCurrent = (revision: number): boolean => this.generation === revision
+
+  /** Undo only when this is still the exact stack state the caller intended to target. */
+  undoIfCurrent = (revision: number): boolean => {
+    if (!this.isCurrent(revision) || !this.canUndo) return false
+    this.undo()
+    return true
   }
 
   get canUndo(): boolean {

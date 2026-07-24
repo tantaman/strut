@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useQuery, useQueryStatus, useRoot } from '@rindle/react'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import {
   deckDetailQuery,
   deckSharesQuery,
@@ -8,35 +9,22 @@ import {
 } from '../../shared/queries'
 import { authClient } from '../rindle/authClient'
 import { preloadDeck } from '../rindle/appSsr'
-import {
-  EditorStateProvider,
-  parseEditorMode,
-  useEditor,
-} from '../editor/EditorState'
-import type { EditorMode } from '../editor/EditorState'
+import { EditorStateProvider, useEditor } from '../editor/EditorState'
+import { parseEditorSearch } from '../editor/editorSearch'
 import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
-import { SlideWell } from '../editor/SlideWell'
 import { Stage } from '../editor/Stage'
 import { DocView } from '../editor/DocView'
-import { Overview } from '../editor/Overview'
-import { ResearchView } from '../editor/ResearchView'
+import { ArrangeView } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
-import { MobileTabBar } from '../editor/mobile/MobileTabBar'
 import { useDeckChatContext } from '../editor/chatNarration'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId')({
   component: EditorPage,
-  // The editor view + active slide live here so they're deep-linkable and survive Present (§5).
-  // Both optional → existing links (`/deck/:id` with no search) keep working; defaults applied on read.
-  validateSearch: (
-    s: Record<string, unknown>,
-  ): { view?: EditorMode; slide?: string } => ({
-    view: parseEditorMode(s.view),
-    slide: typeof s.slide === 'string' ? s.slide : undefined,
-  }),
+  // A deck always opens the editor. Only reading position is durable; legacy `view` data is ignored.
+  validateSearch: parseEditorSearch,
   // SSR seed: read the deck subtree + collaborators on the server so a direct load / reload of the
   // editor first-paints with the deck instead of "Connecting…". Gated to the viewer's session; a deck
   // they can't see seeds empty. Returns { rindle, userId } — the userId lets canEdit resolve correctly
@@ -45,6 +33,11 @@ export const Route = createFileRoute('/deck/$deckId')({
 })
 
 const EMPTY_SLIDES: SlideDetail[] = []
+
+type ActiveTool =
+  | { kind: 'objects'; slideId: string }
+  | { kind: 'arrange' }
+  | null
 
 function EditorPage() {
   const { deckId } = Route.useParams()
@@ -90,6 +83,16 @@ function EditorInner({ deckId }: { deckId: string }) {
   const variants = useQuery(deckVariantsQuery({ deckId, limit: 5 }))
   const { entitlement } = Route.useLoaderData()
   const deckContext = useDeckChatContext(deckId)
+  const search = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  // Canonicalize old deep links after hydration. Their slide location remains valid, but `?view=` no
+  // longer represents product state and should disappear the first time the deck opens.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has('view')) return
+    void navigate({ search: { slide: search.slide }, replace: true })
+  }, [navigate, search.slide])
 
   // Keep exactly one active slide (spec §3.2). While slides are still loading (empty) we leave the
   // URL's `?slide=` untouched so a deep-linked / Present-restored slide isn't clobbered before it
@@ -109,48 +112,166 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   const activeSlide = slides.find((s) => s.id === editor.activeSlideId) ?? null
 
-  // The advisor rail is a per-editor, ephemeral toggle (not URL-persisted — a private side conversation).
+  // Contextual tools are editor-local overlays. The card column stays mounted behind them, preserving
+  // scroll/caret state without introducing route or URL state.
+  const [activeTool, setActiveTool] = useState<ActiveTool>(null)
   const [chatOpen, setChatOpen] = useState(false)
+  const [controlsOpen, setControlsOpen] = useState(false)
+  const topDockRef = useRef<HTMLDivElement>(null)
+  const objectSlide =
+    activeTool?.kind === 'objects'
+      ? (slides.find((s) => s.id === activeTool.slideId) ?? null)
+      : null
+  const arrangeOpen = activeTool?.kind === 'arrange'
+
+  // The dock animates with `top`, not a CSS transform: transformed ancestors capture fixed-position
+  // descendants, which would turn Header's viewport dialogs and mobile sheets into header-sized panels.
+  // Measure the real responsive bar so its collapsed offset and the object canvas's clearance stay exact.
+  useLayoutEffect(() => {
+    const dock = topDockRef.current
+    const header = dock?.querySelector<HTMLElement>('.hdr')
+    const shell = dock?.parentElement
+    if (!dock || !header || !shell) return
+    const measure = () => {
+      const height = header.offsetHeight
+      dock.style.setProperty(
+        '--editor-dock-offset',
+        `${Math.max(0, height - 5)}px`,
+      )
+      shell.style.setProperty('--editor-dock-height', `${height}px`)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(header)
+    return () => {
+      observer.disconnect()
+      shell.style.removeProperty('--editor-dock-height')
+    }
+  }, [])
+
+  // Shape placement belongs to the focused object canvas. Leaving that context by Back, Esc, Chat,
+  // Arrange, or slide deletion must never leave an invisible tool armed for the next visit.
+  useEffect(() => {
+    if (activeTool?.kind !== 'objects' && editor.pendingShape)
+      editor.setPendingShape(null)
+  }, [activeTool?.kind, editor.pendingShape, editor.setPendingShape])
+
+  useEffect(() => {
+    if (
+      activeTool?.kind === 'objects' &&
+      slides.length > 0 &&
+      !slides.some((slide) => slide.id === activeTool.slideId)
+    )
+      setActiveTool(null)
+  }, [activeTool, slides])
+
+  useEffect(() => {
+    if (!activeTool && !chatOpen) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      const target = event.target as HTMLElement | null
+      if (
+        target?.isContentEditable ||
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
+        editor.pendingShape
+      )
+        return
+      event.preventDefault()
+      if (activeTool) setActiveTool(null)
+      else setChatOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [activeTool, chatOpen, editor.pendingShape])
+
+  const toggleChat = () => {
+    setControlsOpen(false)
+    setActiveTool(null)
+    setChatOpen((open) => !open)
+  }
+
+  const toggleArrange = () => {
+    setControlsOpen(false)
+    setChatOpen(false)
+    setActiveTool((tool) =>
+      tool?.kind === 'arrange' ? null : { kind: 'arrange' },
+    )
+  }
+
+  const editObjects = (slideId: string) => {
+    setControlsOpen(false)
+    setChatOpen(false)
+    editor.setActiveSlide(slideId)
+    setActiveTool({ kind: 'objects', slideId })
+  }
 
   return (
     <div className="editor">
-      {/* Doc mode is the clean slate: no header, no well — the document owns the whole viewport.
-          The other modes keep the full chrome (and are still deep-linkable via `?view=`). */}
-      {editor.mode !== 'doc' && (
+      <div
+        ref={topDockRef}
+        className={
+          'editor__topdock' +
+          (controlsOpen ? ' is-open' : '') +
+          (objectSlide ? ' is-pinned' : '')
+        }
+      >
         <Header
           deck={deck}
-          activeSlide={activeSlide}
+          activeSlide={objectSlide ?? activeSlide}
           variants={variants}
           makesPublic={entitlement?.canKeepPrivate === false}
+          editingObjects={objectSlide != null}
+          onCloseObjects={() => setActiveTool(null)}
+          arrangeOpen={arrangeOpen}
+          onToggleArrange={toggleArrange}
           chatOpen={chatOpen}
-          onToggleChat={() => setChatOpen((o) => !o)}
+          onToggleChat={toggleChat}
         />
-      )}
+        {!objectSlide && (
+          <button
+            type="button"
+            className="editor__dock-toggle"
+            title={
+              controlsOpen ? 'Hide editor controls' : 'Show editor controls'
+            }
+            aria-label={
+              controlsOpen ? 'Hide editor controls' : 'Show editor controls'
+            }
+            aria-expanded={controlsOpen}
+            onClick={(event) => {
+              if (controlsOpen) event.currentTarget.blur()
+              setControlsOpen(!controlsOpen)
+            }}
+          >
+            {controlsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        )}
+      </div>
       {accessResolved && !editor.canEdit && (
         <div className="ro-banner">
           👁 Read-only — you’re viewing this shared deck. Changes are disabled.
         </div>
       )}
       <div className="editor__body">
-        {editor.mode === 'slide' ? (
-          <>
-            <SlideWell slides={slides} deck={deck} />
-            {activeSlide ? (
-              <Stage slide={activeSlide} deck={deck} />
-            ) : (
-              <div className="stage">
-                <div className="stage__empty">
-                  No slides yet — add one in the well.
-                </div>
-              </div>
-            )}
-          </>
-        ) : editor.mode === 'doc' ? (
-          <DocView slides={slides} deck={deck} />
-        ) : editor.mode === 'research' ? (
-          <ResearchView slides={slides} deck={deck} />
-        ) : (
-          <Overview slides={slides} deck={deck} />
+        <DocView slides={slides} deck={deck} onEditObjects={editObjects} />
+        {objectSlide && (
+          <div className="context-tool context-tool--objects">
+            <Stage slide={objectSlide} deck={deck} />
+            <div className="context-tool__hint">
+              Move, resize, or use the command bar to add objects · Esc returns
+            </div>
+          </div>
+        )}
+        {arrangeOpen && (
+          <div className="context-tool context-tool--arrange">
+            <ArrangeView slides={slides} deck={deck} />
+            <ContextClose
+              label="Back to deck"
+              onClick={() => setActiveTool(null)}
+            />
+          </div>
         )}
         {chatOpen && (
           <ChatPanel
@@ -159,23 +280,32 @@ function EditorInner({ deckId }: { deckId: string }) {
             deck={deck}
             activeSlide={activeSlide}
             deckContext={deckContext}
+            canEdit={editor.canEdit}
             onClose={() => setChatOpen(false)}
           />
         )}
       </div>
-      {/* Floating "powered by rindle" credit. Not in Overview — it parks its zoom/Fit controls in the
-          same bottom-right corner, so we'd collide there. (Hidden on mobile, where the bottom tab bar
-          owns that corner — see strut.css.) */}
-      {(editor.mode === 'slide' || editor.mode === 'doc') && (
-        <PoweredByRindle />
-      )}
-      {/* Bottom tab bar — hidden above the mobile breakpoint (strut.css); on phones it owns mode +
-          Advisor + Present, which the header sheds there. Last child so sheets anchor above it. */}
-      <MobileTabBar
-        deck={deck}
-        chatOpen={chatOpen}
-        onToggleChat={() => setChatOpen((o) => !o)}
-      />
+      {!arrangeOpen && <PoweredByRindle />}
     </div>
+  )
+}
+
+function ContextClose({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className="context-tool__close"
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+    >
+      <X size={18} />
+    </button>
   )
 }

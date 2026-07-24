@@ -1,4 +1,4 @@
-// The overview / transition editor (spec §7): all slides as draggable 3-D cards positioned at their
+// The spatial Arrange tool (spec §7): all slides as draggable 3-D cards positioned at their
 // (x,y) center, tilted by rotateX/Y/Z, scaled by impScale. The number badge is the camera order.
 //   • Drag a card to set x,y (folded). Shift/⌘-click or shift-drag a marquee to multi-select; dragging
 //     any selected card moves the whole group as a unit.
@@ -9,23 +9,16 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { GRID_SNAP } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
-import { authClient } from '../rindle/authClient'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { CANNED_TRANSITIONS } from './transitions'
 import { LAYOUTS } from './layouts'
 import type { LayoutDef } from './layouts'
-import { applyPlan, buildDigest, previewCards } from './aiArrange'
-import { track } from '../lib/analytics'
-import { notifyUsageChanged } from '../lib/usage'
-import type { PreviewCard } from './aiArrange'
-import type { ArrangementPlan, ArrangeRequest } from '../../shared/arrange'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
 import type { DeckThemeFields } from './types'
-import { appPath } from '../../shared/appPath'
 
-export interface OverviewSlide {
+export interface ArrangeSlide {
   id: string
   x: number
   y: number
@@ -45,7 +38,7 @@ const DEG = 180 / Math.PI
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v))
 
-// The Overview is a flat top-down map, so it can't fly the 3-D camera — but it can HINT a card's depth
+// Arrange is a flat top-down map, so it can't fly the 3-D camera — but it can HINT a card's depth
 // (z): a card pushed toward the viewer floats higher (a larger, softer, more-offset shadow), one pushed
 // back sinks (a tighter, fainter one). Apparent size stays owned by imp_scale; elevation reads as z.
 // Returns undefined near z≈0 so the default `.ov-card` shadow (var(--shadow)) stands unchanged.
@@ -73,7 +66,7 @@ interface Marquee {
   h: number
 }
 
-export function Overview({
+export function ArrangeView({
   slides,
   deck,
 }: {
@@ -93,7 +86,7 @@ export function Overview({
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 })
   const [panning, setPanning] = useState(false)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
-  // Overview-local multi-selection (the editor's `selected` set is for components, not slides).
+  // Arrange-local multi-selection (the editor's `selected` set is for components, not slides).
   const [selIds, setSelIds] = useState<Set<string>>(
     () => new Set(editor.activeSlideId ? [editor.activeSlideId] : []),
   )
@@ -102,25 +95,6 @@ export function Overview({
   const soleSlide = soleId
     ? (slides.find((s) => s.id === soleId) ?? null)
     : null
-
-  // AI Arrange: a proposed plan is held HERE (plain React state) and previewed as a ghost — nothing
-  // touches Rindle until Apply. `isMember` (a promoted, non-anonymous account) gates the feature: guests
-  // see the control but can't spend the app's inference budget (the /api/arrange route enforces the same
-  // gate server-side). During the initial session resolve we treat the user as a non-member (disabled).
-  const { data: session } = authClient.useSession()
-  const isMember =
-    !!session?.user &&
-    (session.user as { isAnonymous?: boolean }).isAnonymous !== true
-  const [preview, setPreview] = useState<{
-    plan: ArrangementPlan
-    cards: PreviewCard[]
-  } | null>(null)
-  const previewById = preview
-    ? new Map(preview.cards.map((c) => [c.id, c]))
-    : null
-  // The prompt input is progressively disclosed: hidden until the ✨ Arrange button in the Layout row is
-  // clicked (kept out of the way since most arranging is the one-click presets).
-  const [arrangeOpen, setArrangeOpen] = useState(false)
 
   // Frame all slide cards (centers ± card extents) into the viewport. Cards are positioned
   // at world (x,y); the world transform is `translate(x,y) scale(s)` about origin 0,0, so a
@@ -263,8 +237,8 @@ export function Overview({
   }
 
   function setTransform(
-    s: OverviewSlide,
-    patch: Partial<OverviewSlide>,
+    s: ArrangeSlide,
+    patch: Partial<ArrangeSlide>,
     folded = false,
   ) {
     const args = {
@@ -283,7 +257,7 @@ export function Overview({
   }
 
   // Card pointer down: resolve selection, then (if editable) drag the whole selection as a unit.
-  function beginCard(s: OverviewSlide, e: React.PointerEvent) {
+  function beginCard(s: ArrangeSlide, e: React.PointerEvent) {
     e.stopPropagation()
     const additive = e.shiftKey || e.metaKey || e.ctrlKey
     if (additive) {
@@ -348,11 +322,20 @@ export function Overview({
   }
 
   function setTransition(name: string) {
-    if (!deck) return
-    mutate.setDeckTheme({
-      id: deck.id,
-      canned_transition: name,
-      now: Date.now(),
+    if (!deck || !editor.canEdit) return
+    const before = deck.canned_transition
+    if (name === before) return
+    const apply = (canned_transition: string) =>
+      mutate.setDeckTheme({
+        id: deck.id,
+        canned_transition,
+        now: Date.now(),
+      })
+    apply(name)
+    history.push({
+      label: `Transition · ${name}`,
+      redo: () => apply(name),
+      undo: () => apply(before),
     })
   }
 
@@ -385,37 +368,11 @@ export function Overview({
     fit(placed)
   }
 
-  // Hold an AI plan as a ghost preview (no mutation) and frame where the cards will land.
-  function previewPlan(plan: ArrangementPlan) {
-    const cards = previewCards(plan, slides)
-    setPreview({ plan, cards })
-    fit(cards)
-  }
-  // Commit the previewed plan as ONE undoable step, then drop the preview.
-  function applyPreview() {
-    if (!preview) return
-    applyPlan(preview.plan, mutate, slides, history)
-    track('arrange:applied', {
-      layout: preview.plan.layout,
-      count: slides.length,
-    })
-    notifyUsageChanged() // ✨ Arrange spent an app-paid unit → refresh the usage ring
-    setPreview(null)
-  }
-  function discardPreview() {
-    setPreview(null)
-    fit()
-  }
-
   const inv = 1 / (view.scale || 1)
 
   return (
     <div
-      className={
-        'overview' +
-        (panning ? ' is-panning' : '') +
-        (preview ? ' is-previewing' : '')
-      }
+      className={'overview' + (panning ? ' is-panning' : '')}
       ref={stageRef}
       onPointerDown={beginBg}
     >
@@ -426,39 +383,27 @@ export function Overview({
         }}
       >
         {slides.map((s, i) => {
-          // While previewing, render each card at its PROPOSED position + reading-order badge (no
-          // mutation); otherwise its live transform + array-order badge.
-          const pc = previewById?.get(s.id)
-          const x = pc ? pc.x : s.x
-          const y = pc ? pc.y : s.y
-          const z = pc ? pc.z : s.z
-          const rx = pc ? pc.rotate_x : s.rotate_x
-          const ry = pc ? pc.rotate_y : s.rotate_y
-          const rz = pc ? pc.rotate_z : s.rotate_z
-          const sc = (pc ? pc.imp_scale : s.imp_scale) || 3
-          const num = pc ? pc.index + 1 : i + 1
           return (
             <div
               key={s.id}
               className={
                 'ov-card' +
                 (selIds.has(s.id) ? ' is-selected' : '') +
-                (soleId === s.id ? ' is-active' : '') +
-                (pc ? ' is-preview' : '')
+                (soleId === s.id ? ' is-active' : '')
               }
               style={{
-                left: x,
-                top: y,
+                left: s.x,
+                top: s.y,
                 width: CARD_W,
                 height: CARD_H,
-                transform: `translate(-50%, -50%) perspective(900px) rotateX(${rx}rad) rotateY(${ry}rad) rotateZ(${rz}rad) scale(${sc / 3})`,
+                transform: `translate(-50%, -50%) perspective(900px) rotateX(${s.rotate_x}rad) rotateY(${s.rotate_y}rad) rotateZ(${s.rotate_z}rad) scale(${(s.imp_scale || 3) / 3})`,
                 // Depth cue for a flat map: forward z floats, receded z sinks (undefined ⇒ default shadow).
-                boxShadow: depthShadow(z),
+                boxShadow: depthShadow(s.z),
                 zIndex: selIds.has(s.id) ? 10 : 1,
               }}
               onPointerDown={(e) => beginCard(s, e)}
             >
-              <span className="ov-card__num">{num}</span>
+              <span className="ov-card__num">{i + 1}</span>
               <div className="well__thumb">
                 <SlideView slide={s} deck={deck} width={CARD_W} />
               </div>
@@ -466,7 +411,7 @@ export function Overview({
           )
         })}
 
-        {editor.canEdit && soleSlide && !preview && (
+        {editor.canEdit && soleSlide && (
           <SlideXform
             s={soleSlide}
             inv={inv}
@@ -534,46 +479,6 @@ export function Overview({
               {def.label}
             </button>
           ))}
-          <span className="ov-layouts__sep" aria-hidden />
-          <button
-            className={'ov-layouts__ai' + (arrangeOpen ? ' is-open' : '')}
-            onClick={() => setArrangeOpen((o) => !o)}
-            title="Ask AI to arrange the slides"
-          >
-            ✨ Arrange
-          </button>
-        </div>
-      )}
-
-      {editor.canEdit && slides.length > 1 && (preview || arrangeOpen) && (
-        <div className="ov-arrange" onPointerDown={stop}>
-          {preview ? (
-            <>
-              <span className="ov-arrange__badge">✨ Proposed</span>
-              {preview.plan.rationale && (
-                <span className="ov-arrange__why">
-                  {preview.plan.rationale}
-                </span>
-              )}
-              <button className="ov-arrange__apply" onClick={applyPreview}>
-                Apply
-              </button>
-              <button className="ov-arrange__discard" onClick={discardPreview}>
-                Discard
-              </button>
-            </>
-          ) : (
-            <AiArrangeForm
-              slides={slides}
-              deckId={deck?.id ?? ''}
-              isMember={isMember}
-              onPreview={(plan) => {
-                previewPlan(plan)
-                setArrangeOpen(false)
-              }}
-              onClose={() => setArrangeOpen(false)}
-            />
-          )}
         </div>
       )}
 
@@ -601,152 +506,6 @@ export function Overview({
   )
 }
 
-// The "✨ Arrange" form: a natural-language instruction → POST /api/arrange → hand the returned plan up
-// for preview. For an anonymous (guest) user it renders a sign-in nudge instead — the button is visible
-// to everyone (discoverability) but the feature is member-gated (the route enforces it too). Sign-in
-// returns to the current deck so in-progress work + the guest's decks carry over on promotion.
-function AiArrangeForm({
-  slides,
-  deckId,
-  isMember,
-  onPreview,
-  onClose,
-}: {
-  slides: SlideDetail[]
-  deckId: string
-  isMember: boolean
-  onPreview: (plan: ArrangementPlan) => void
-  onClose: () => void
-}) {
-  const [instruction, setInstruction] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  // Focus the prompt the moment the panel opens so the user can just start typing.
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
-
-  if (!isMember) {
-    const back =
-      typeof window !== 'undefined'
-        ? window.location.pathname + window.location.search
-        : '/'
-    return (
-      <>
-        <span className="ov-arrange__label">✨</span>
-        <span className="ov-arrange__gate">
-          Sign in to let AI arrange your deck
-        </span>
-        <button
-          className="ov-arrange__signin"
-          onClick={() =>
-            authClient.signIn.social({ provider: 'github', callbackURL: back })
-          }
-        >
-          GitHub
-        </button>
-        <button
-          className="ov-arrange__signin"
-          onClick={() =>
-            authClient.signIn.social({ provider: 'google', callbackURL: back })
-          }
-        >
-          Google
-        </button>
-        <button
-          className="ov-arrange__close"
-          onClick={onClose}
-          title="Close"
-          aria-label="Close"
-        >
-          ×
-        </button>
-      </>
-    )
-  }
-
-  async function submit() {
-    if (loading) return
-    setLoading(true)
-    setError(null)
-    try {
-      const body: ArrangeRequest = {
-        deckId,
-        instruction,
-        slides: buildDigest(slides),
-      }
-      const res = await fetch(appPath('/api/arrange'), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const b = (await res.json().catch(() => null)) as {
-          message?: string
-        } | null
-        setError(
-          res.status === 401
-            ? 'Sign in to use AI arrange.'
-            : // Prefer the server's message (e.g. the daily-quota notice); fall back per status.
-              (b?.message ??
-                (res.status === 429
-                  ? 'Too many requests — wait a moment.'
-                  : 'AI is unavailable right now.')),
-        )
-        return
-      }
-      const plan = (await res.json()) as ArrangementPlan
-      onPreview(plan)
-      setInstruction('')
-    } catch {
-      setError('Network error — try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <>
-      <span className="ov-arrange__label">✨</span>
-      <input
-        ref={inputRef}
-        className="ov-arrange__input"
-        placeholder="group by topic · timeline left-to-right · intro first, CTA last"
-        value={instruction}
-        onChange={(e) => setInstruction(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') submit()
-          else if (e.key === 'Escape') onClose()
-        }}
-        disabled={loading}
-      />
-      <button
-        className="ov-arrange__go"
-        onClick={submit}
-        disabled={loading}
-        title="Ask AI to arrange the slides"
-      >
-        {loading ? (
-          <span className="ov-arrange__spinner" aria-label="Arranging" />
-        ) : (
-          'Go'
-        )}
-      </button>
-      {error && <span className="ov-arrange__error">{error}</span>}
-      <button
-        className="ov-arrange__close"
-        onClick={onClose}
-        title="Close"
-        aria-label="Close"
-      >
-        ×
-      </button>
-    </>
-  )
-}
-
 // Inline transform controls mounted on the selected card's edges (spec §7.1). The frame is flat
 // (no 3-D) and sized to the card footprint; each chip counter-scales by `inv` to stay readable at
 // any zoom. Rotations edit in degrees (converted to radians at the edge). Every field is a scrub:
@@ -757,13 +516,13 @@ function SlideXform({
   apply,
   pushHistory,
 }: {
-  s: OverviewSlide
+  s: ArrangeSlide
   inv: number
-  apply: (patch: Partial<OverviewSlide>, folded: boolean) => void
+  apply: (patch: Partial<ArrangeSlide>, folded: boolean) => void
   pushHistory: (
     label: string,
-    before: Partial<OverviewSlide>,
-    after: Partial<OverviewSlide>,
+    before: Partial<ArrangeSlide>,
+    after: Partial<ArrangeSlide>,
   ) => void
 }) {
   const sf = (s.imp_scale || 3) / 3

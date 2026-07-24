@@ -1,7 +1,6 @@
-// The Dock-well: in Doc mode the slide well is SUMMONED, not resident. Push the pointer against the
-// left screen edge and the well slides out (macOS-Dock style); it carries everything the well already
-// knows — drag-to-reorder, jump-to, delete, insert, Generate — so Doc mode regains slide handling
-// without regaining chrome. The screen edge is the trigger because it's an infinitely deep target
+// The slide well is summoned, not resident. Push the pointer against the left screen edge and it slides
+// out (macOS-Dock style) with reorder, jump, delete, and insert controls. The screen edge is the trigger
+// because it's an infinitely deep target
 // (Fitts): a flick left always lands on it.
 //
 // Three behaviors separate "summoned" from "twitchy drawer", all here rather than in SlideWell
@@ -14,10 +13,11 @@
 //     bubbling dragstart (capture) + window dragend/drop, so SlideWell needs no changes.
 //   • The retracted dock is `visibility: hidden` (CSS), so its buttons leave the tab order entirely.
 //
-// Desktop-only by nature (there is no hover edge on touch) — CSS hides it ≤768px, where the mobile
-// tab bar already routes to Slides mode for reordering.
+// Touch has no hover edge, so the same well becomes a tap-open bottom tray on small screens. That keeps
+// slide management contextual without adding persistent mobile chrome.
 
 import { useEffect, useRef, useState } from 'react'
+import { Film, X } from 'lucide-react'
 import { SlideWell } from './SlideWell'
 import type { DeckRoot, SlideDetail } from './deckDetail'
 
@@ -127,6 +127,16 @@ export function WellDock({
 
   return (
     <>
+      <button
+        type="button"
+        className={'dock__touch-toggle' + (out ? ' is-out' : '')}
+        title={out ? 'Close slide tray' : 'Open slide tray'}
+        aria-label={out ? 'Close slide tray' : 'Open slide tray'}
+        aria-expanded={out}
+        onClick={() => setOut((value) => !value)}
+      >
+        {out ? <X size={16} /> : <Film size={16} />}
+      </button>
       {/* The hot zone + its whisper of an affordance (the ::after pill). Sits UNDER the dock in
           z-order: retracted, it owns the edge; out, the panel covers it and takes the events. */}
       <div

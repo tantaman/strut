@@ -1,11 +1,10 @@
-import type { JSONContent } from '@tiptap/core'
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keysBetween } from '../lib/order'
 import type { StrutApp } from '../rindle/client'
 import { markdownToDoc } from './aiGenerate'
+import { slideCellTexts } from './aiArrange'
+import type { SlideBodyTextFields } from './aiArrange'
 import { gatherDeckBundle } from './deckIO'
-import { parseDoc } from './tiptapDoc'
-import { parseCells } from './types'
 import type { AnyComponent } from './types'
 import type {
   GeneratedVariant,
@@ -13,6 +12,7 @@ import type {
   VariantSourceSlide,
 } from '../../shared/variant'
 import { appPath } from '../../shared/appPath'
+import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 
 export interface DeckVisibilitySeed {
   visibility: 'private' | 'public-read'
@@ -27,27 +27,25 @@ export interface CreateDeckVariantArgs {
   initialVisibility: DeckVisibilitySeed
 }
 
-function docText(raw: string | null | undefined): string {
-  const parts: string[] = []
-  const walk = (n: JSONContent) => {
-    if (typeof n.text === 'string') parts.push(n.text)
-    if (Array.isArray(n.content)) n.content.forEach(walk)
-  }
-  walk(parseDoc(raw))
-  return parts.join(' ').replace(/\s+/g, ' ').trim()
-}
-
-function markdownText(raw: string | null | undefined): string {
-  if (!raw) return ''
-  return raw
-    .replace(/[#*_>`~-]/g, ' ')
+function componentText(components: AnyComponent[]): string {
+  return components
+    .map((c) => (c.kind === 'text' ? (c.text ?? '') : ''))
+    .filter(Boolean)
+    .join(' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-function componentText(components: AnyComponent[]): string {
-  return components
-    .map((c) => (c.kind === 'text' ? (c.text ?? '') : ''))
+/** Source text for one variant slide: visible body cells in layout reading order, followed by any
+ *  positioned text. Hidden retained cells stay out of the prompt until their layout makes them visible. */
+export function variantSlideText(
+  slide: SlideBodyTextFields,
+  components: AnyComponent[],
+): string {
+  return [
+    ...slideCellTexts(slide).map((cell) => cell.text),
+    componentText(components),
+  ]
     .filter(Boolean)
     .join(' ')
     .replace(/\s+/g, ' ')
@@ -58,16 +56,7 @@ function sourceSlides(
   bundle: NonNullable<Awaited<ReturnType<typeof gatherDeckBundle>>>,
 ): VariantSourceSlide[] {
   return bundle.slides.map((s, i) => {
-    const text = [
-      docText(s.doc),
-      markdownText(s.markdown),
-      ...parseCells(s.cells).map(docText),
-      componentText(bundle.componentsBySlide[s.id] ?? []),
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim()
+    const text = variantSlideText(s, bundle.componentsBySlide[s.id] ?? [])
     return { index: i + 1, text }
   })
 }
@@ -143,7 +132,7 @@ export async function createDeckVariant({
     body_font: source.deck.body_font ?? '',
     body_color: source.deck.body_color ?? '',
     text_align: source.deck.text_align ?? '',
-    default_slide_mode: 'markdown',
+    default_slide_mode: DEFAULT_SLIDE_MODE,
     custom_stylesheet: source.deck.custom_stylesheet,
     chosen_presenter: source.deck.chosen_presenter,
     canned_transition: source.deck.canned_transition,
@@ -167,7 +156,7 @@ export async function createDeckVariant({
       sort: keys[i],
       x: i * OVERVIEW_CARD_GAP,
       y: 0,
-      render_mode: 'markdown',
+      render_mode: DEFAULT_SLIDE_MODE,
       now,
     })
     mutate.setSlideDoc({ id: slideId, doc: markdownToDoc(slide.markdown), now })

@@ -22,6 +22,7 @@ export function ChatPanel({
   deck,
   activeSlide,
   deckContext,
+  canEdit = false,
   onClose,
 }: {
   deckId: string
@@ -31,6 +32,8 @@ export function ChatPanel({
   deck: DeckRoot | null
   activeSlide: SlideDetail | null
   deckContext: DeckChatContext
+  /** Secure-by-default until the deck route wires the resolved owner/collaborator permission. */
+  canEdit?: boolean
   onClose: () => void
 }) {
   // Membership gate (a promoted, non-anonymous account). During the initial session resolve we treat the
@@ -43,7 +46,7 @@ export function ChatPanel({
   const { messages, send, busy, clear, undoTip, undoLast } = useChat(
     deckId,
     slides,
-    { deck, activeSlide, deckContext },
+    { deck, activeSlide, deckContext, canEdit },
   )
   const [text, setText] = useState('')
   const threadRef = useRef<HTMLDivElement>(null)
@@ -57,12 +60,12 @@ export function ChatPanel({
   }, [messages])
 
   useEffect(() => {
-    if (isMember) inputRef.current?.focus()
-  }, [isMember])
+    if (isMember && canEdit) inputRef.current?.focus()
+  }, [isMember, canEdit])
 
   function submit() {
     const t = text.trim()
-    if (!t || busy) return
+    if (!t || busy || !canEdit) return
     send(t)
     setText('')
   }
@@ -77,7 +80,7 @@ export function ChatPanel({
           <button
             className="chat__icon"
             onClick={clear}
-            disabled={messages.length === 0}
+            disabled={!canEdit || messages.length === 0}
             title="Clear chat"
           >
             <Trash2 size={15} />
@@ -88,7 +91,9 @@ export function ChatPanel({
         </div>
       </header>
 
-      {!isMember ? (
+      {!canEdit ? (
+        <ReadOnlyGate />
+      ) : !isMember ? (
         <SignInGate />
       ) : (
         <>
@@ -199,6 +204,16 @@ function ChatBubble({ message }: { message: ChatMessage }) {
           </div>
         ) : null}
       </div>
+    </div>
+  )
+}
+
+function ReadOnlyGate() {
+  return (
+    <div className="chat__gate" role="status" aria-disabled="true">
+      <p className="chat__gate-text">
+        AI chat is unavailable while this deck is read-only.
+      </p>
     </div>
   )
 }

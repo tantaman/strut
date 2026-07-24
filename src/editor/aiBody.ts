@@ -1,12 +1,12 @@
 // One-undo body rewrite for the AI Edit lane (aiChatActions.ts `set_body`). The model authors new Markdown
-// for ONE slide; we convert it to a stored TipTap `doc` (the same markdown→doc path AI Generate uses) and
-// swap it in as a single undoable step. Like the other ✨ appliers, it rides the ordinary `setSlideDoc`
-// mutation, so sync + server-side permission gating come free.
+// for ONE slide's PRIMARY body (layout cell 0); we convert it to a stored TipTap `doc` (the same
+// markdown→doc path AI Generate uses) and swap it in as a single undoable step. Sibling `cells` and the
+// slide's layout/pad/valign columns are deliberately untouched. Like the other ✨ appliers, it rides the
+// ordinary `setSlideDoc` mutation, so sync + server-side permission gating come free.
 //
-// markdown-mode slides render from the `doc` JSON, NOT the raw `markdown` column (see render.tsx /
-// aiGenerate.ts), so — matching applyGenerated — we write only `doc`. A spatial slide has no doc text to
-// ground a rewrite (slideText returns ''), so the model won't target one; if it somehow does, the doc is
-// stored but simply not shown until the slide is switched to Body mode.
+// The primary body renders from `doc` once it exists (with raw `markdown` retained only as a legacy
+// fallback), so — matching applyGenerated — a rewrite writes only `doc`. Body and positioned objects are
+// composited on every slide; there is no rendering-mode switch to coordinate.
 
 import { markdownToDoc } from './aiGenerate'
 import type { SetSlideDocArgs } from '../../shared/app-def'
@@ -19,9 +19,10 @@ export interface BodyMutate {
   setSlideDoc: (a: SetSlideDocArgs) => unknown
 }
 
-/** Rewrite one slide's body as ONE undoable step. Captures the slide's current `doc`, sets the converted
- *  Markdown, and pushes a command whose undo restores the prior doc. Returns false (no-op) when the target
- *  slide is no longer in the deck — the dispatcher surfaces that to the user. */
+/** Rewrite one slide's primary body as ONE undoable step. Captures the current `doc`, sets the converted
+ *  Markdown, and pushes a command whose undo restores that doc. Because the mutation writes only `doc`,
+ *  every sibling cell and all layout geometry survive both apply and undo. Returns false (no-op) when the
+ *  target slide is no longer in the deck — the dispatcher surfaces that to the user. */
 export function applyBodyEdit(
   slideId: string,
   markdown: string,

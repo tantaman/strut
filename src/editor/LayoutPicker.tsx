@@ -187,7 +187,7 @@ export function LayoutPicker({
   const commitValign = (next: SlideValign) => {
     setOpen(false)
     if (next === currentValign) return
-    const before = slide.valign ?? ''
+    const before = slide.valign
     const apply = (valign: string) =>
       mutate.setSlideTheme({ id: slide.id, valign, now: Date.now() })
     apply(next)
@@ -201,7 +201,7 @@ export function LayoutPicker({
   const commitAlign = (next: TextAlign) => {
     setOpen(false)
     if (next === currentAlign) return
-    const before = slide.text_align ?? ''
+    const before = slide.text_align
     const apply = (text_align: string) =>
       mutate.setSlideTheme({ id: slide.id, text_align, now: Date.now() })
     apply(next)

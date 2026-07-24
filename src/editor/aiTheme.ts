@@ -15,8 +15,7 @@ export interface ThemeMutate {
   setDeckTheme: (a: SetDeckThemeArgs) => unknown
 }
 
-/** The string-valued theme columns a patch may set. (Enum columns like `default_slide_mode` are handled
- *  by their own controls — this covers the colors/fonts/alignment the AI and the popover touch.) */
+/** The string-valued colors, fonts, and alignment the AI and manual design surface may change. */
 export interface ThemePatch {
   background?: string
   surface?: string

@@ -66,8 +66,8 @@ function Dashboard() {
     const id = newId()
     const now = Date.now()
     mutate.createDeck({ id, title, now, ...newDeckVisibility() })
-    // Seed the deck with one blank slide so the editor opens onto something. Match the deck's default
-    // render mode (markdown-first) so the first slide isn't an odd spatial exception to the deck default.
+    // Seed the deck with one blank slide so the editor opens onto something. The persisted marker is
+    // retained for older readers; current Strut has one editor and composites body + positioned objects.
     mutate.addSlide({
       id: newId(),
       deckId: id,

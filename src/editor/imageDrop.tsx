@@ -70,8 +70,8 @@ function placedBox(
   let h = w / ratio
   const maxW = cell.w * 0.9
   const maxH = cell.h * 0.9
-  if (w > maxW) (w = maxW), (h = w / ratio)
-  if (h > maxH) (h = maxH), (w = h * ratio)
+  if (w > maxW) ((w = maxW), (h = w / ratio))
+  if (h > maxH) ((h = maxH), (w = h * ratio))
   const x = Math.max(cell.x, Math.min(cx - w / 2, cell.x + cell.w - w))
   const y = Math.max(cell.y, Math.min(cy - h / 2, cell.y + cell.h - h))
   return { x, y, w, h }
@@ -83,7 +83,7 @@ async function fileDims(file: File): Promise<{ w: number; h: number } | null> {
   try {
     const bmp = await createImageBitmap(file)
     const dims = { w: bmp.width, h: bmp.height }
-    bmp.close?.()
+    bmp.close()
     return dims
   } catch {
     return null
@@ -166,8 +166,9 @@ export function DropCellHighlight({
   scale: number
 }) {
   if (index == null) return null
-  const cell = bodyCells(slide, deck)[index]
-  if (!cell) return null
+  const cells = bodyCells(slide, deck)
+  if (index < 0 || index >= cells.length) return null
+  const cell = cells[index]
   return (
     <div
       className="drop-cell"
@@ -181,10 +182,9 @@ export function DropCellHighlight({
   )
 }
 
-/** Hover-to-remove for images placed on a Doc-mode card. Doc mode's object layer (`LockedObjects`) is
- *  inert — pointer-events:none so clicks fall through to the text being edited — which also means a
- *  dropped photo can't be selected or deleted there without switching to Slide mode. This overlays a
- *  quiet × on each image, revealed on hover, that removes it as ONE undo (the exact inverse of the drop).
+/** Hover-to-remove for images placed on an editor card. The card's positioned-object layer is inert so
+ *  clicks reach body text, so this overlays a quiet × on each photo instead of forcing a separate focus
+ *  step. Removal is ONE undo (the exact inverse of the drop).
  *  Positioned in the card's own coordinate space (canvas px × scale) like the LayoutPicker, so the ×
  *  stays a constant on-screen size at any column width. The overlay root is inert; only the per-image
  *  boxes opt back into pointer events — over the (opaque) photo they cover, never the surrounding text. */

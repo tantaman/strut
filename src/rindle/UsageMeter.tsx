@@ -221,7 +221,7 @@ export function UsageMeter() {
             <div className="usage__reset">
               {usage.byo && (
                 <div>
-                  Arrange, Generate and Chat run on your connected model.
+                  AI layout, slide creation, and Chat use your connected model.
                 </div>
               )}
               {!usage.ai.unlimited && (

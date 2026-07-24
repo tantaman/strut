@@ -7,6 +7,7 @@
 import type { JSONContent } from '@tiptap/core'
 import { keysBetween } from '../lib/order'
 import { parseDoc } from './tiptapDoc'
+import { cellDocAt, layoutCells, resolveLayout } from './types'
 import { LAYOUTS } from './layouts'
 import type { LayoutTransform } from './layouts'
 import type { History } from './history'
@@ -54,7 +55,9 @@ function xformEq(a: Xform, b: Xform): boolean {
 // The model's freeform per-slide overrides, keyed by id. `normalizePlan` already dropped undefined
 // fields and clamped/rad-converted the rest, so each value is a partial transform ready to spread over a
 // base geometry ({...base, ...override} sets only the axes the model actually authored).
-function placementOverrides(plan: ArrangementPlan): Map<string, Partial<Xform>> {
+function placementOverrides(
+  plan: ArrangementPlan,
+): Map<string, Partial<Xform>> {
   const m = new Map<string, Partial<Xform>>()
   for (const p of plan.placements ?? []) {
     const { id, ...rest } = p
@@ -76,15 +79,53 @@ export function docText(raw: string | null | undefined): string {
   return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
 
-// Slides have no `title` column. Their readable content lives in the markdown-mode `doc` (the default
-// slide mode) or the legacy raw-markdown `markdown` column — both plain scalars on the slide row.
+/** The body columns needed to flatten a slide without depending on a particular Rindle query shape. */
+export interface SlideBodyTextFields {
+  doc?: string | null
+  markdown?: string | null
+  layout?: string | null
+  cells?: string | null
+}
+
+/** Populated body cells in visual reading order. Cell 0 lives in `doc`; siblings live in the `cells` blob.
+ *  Only cells in the current layout are visible/grounded — dormant cells retained from a larger prior
+ *  layout stay untouched and reappear if that layout is restored. */
+export function slideCellTexts(
+  s: SlideBodyTextFields,
+): Array<{ index: number; text: string }> {
+  const count = layoutCells(resolveLayout(s.layout)).length
+  const legacy = legacyMarkdownText(s.markdown)
+  const hasStoredPrimaryDoc = Boolean(s.doc)
+  const populated: Array<{ index: number; text: string }> = []
+  for (let index = 0; index < count; index++) {
+    const text =
+      docText(cellDocAt(s, index)) ||
+      (index === 0 && !hasStoredPrimaryDoc ? legacy : '')
+    if (text) populated.push({ index, text })
+  }
+  return populated
+}
+
+// Slides have no `title` column. Their readable body is every populated cell in the current tiling, in
+// visual reading order. The legacy raw-markdown column remains cell 0's fallback for imported decks.
 // (Spatial slides carry their text in component fragment refs, which need a React `useFragment` to read;
-// pulling that into the digest is a follow-up. Markdown is the default, so the
+// pulling that into the digest is a follow-up. Body writing is the default, so the
 // model still has content to reason about for typical decks.)
-export function slideText(s: SlideDetail): string {
-  const fromDoc = docText(s.doc)
-  if (fromDoc) return fromDoc
-  const md = s.markdown
+export function slideText(s: SlideBodyTextFields): string {
+  return slideCellTexts(s)
+    .map((cell) => cell.text)
+    .join(' ')
+}
+
+/** Full active-slide grounding with cell boundaries retained, so a rewrite can distinguish the primary
+ *  body (cell 1) from siblings that `set_body` deliberately preserves. */
+export function slideGroundingText(s: SlideBodyTextFields): string {
+  const cells = slideCellTexts(s)
+  if (resolveLayout(s.layout) === '') return cells[0]?.text ?? ''
+  return cells.map(({ index, text }) => `Cell ${index + 1}: ${text}`).join('\n')
+}
+
+function legacyMarkdownText(md: unknown): string {
   return typeof md === 'string'
     ? md
         .replace(/[#*_>`~-]/g, ' ')
@@ -140,7 +181,12 @@ export function previewCards(
   return order.map((id, i) => {
     const s = byId.get(id)!
     // preset (or current transform when 'keep') as the base, then the model's per-slide overrides.
-    return { id, index: i, ...(placed ? placed[i] : xformOf(s)), ...overrides.get(id) }
+    return {
+      id,
+      index: i,
+      ...(placed ? placed[i] : xformOf(s)),
+      ...overrides.get(id),
+    }
   })
 }
 

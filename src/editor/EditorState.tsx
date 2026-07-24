@@ -1,7 +1,6 @@
-// Editor state shared across the editor via context. The view (slide/overview) and the active slide
-// live in the route's URL search params (`?view=&slide=`) so they survive a round-trip through Present
-// (Esc restores the last view) and are deep-linkable. Component multi-selection stays ephemeral (NOT
-// persisted — spec §3.2) as plain React state.
+// Shared editor state. The active slide is the sole durable URL location (`?slide=`), so deep links and
+// Present/Esc restore reading position without encoding UI modes. Component selection and contextual
+// tools stay ephemeral React state.
 
 import {
   createContext,
@@ -16,21 +15,6 @@ import { getRouteApi } from '@tanstack/react-router'
 // Reach the editor route's search/navigate by id (no module import → no coupling to the route file).
 const editorRoute = getRouteApi('/deck/$deckId')
 
-// The editor's modes, in one list because they're validated in more than one place: BOTH this route's
-// `validateSearch` and Play's (Play round-trips `view` back so Esc reopens the mode you left from). Adding
-// a mode here — not to a ternary chain in each route — is what keeps that round-trip from silently
-// dropping the new one back to the default.
-export const EDITOR_MODES = ['slide', 'doc', 'overview', 'research'] as const
-export type EditorMode = (typeof EDITOR_MODES)[number]
-
-/** Narrow an unknown `?view=` search param to a mode; undefined (→ the 'doc' default) if it isn't one. */
-export function parseEditorMode(v: unknown): EditorMode | undefined {
-  return typeof v === 'string' &&
-    (EDITOR_MODES as readonly string[]).includes(v)
-    ? (v as EditorMode)
-    : undefined
-}
-
 interface EditorState {
   deckId: string
   // Whether the current principal may mutate this deck (owner or 'editor' collaborator). A 'viewer'
@@ -39,9 +23,6 @@ interface EditorState {
   canEdit: boolean
   activeSlideId: string | null
   setActiveSlide: (id: string | null) => void
-
-  mode: EditorMode
-  setMode: (m: EditorMode) => void
 
   selected: ReadonlySet<string>
   isSelected: (id: string) => boolean
@@ -53,8 +34,8 @@ interface EditorState {
   setDraggingComponentId: (id: string | null) => void
 
   // The armed shape tool for draw-to-place (tldraw/Figma style): the picked shape name
-  // (square/circle/…), or null when the Select tool is active. Header arms it on pick; Stage consumes
-  // the draw gesture on the canvas and reverts it to null after one placement.
+  // (square/circle/…), or null when the Select tool is active. The contextual command bar arms it;
+  // Stage consumes the draw gesture and reverts it to null after one placement.
   pendingShape: string | null
   setPendingShape: (name: string | null) => void
 }
@@ -78,22 +59,12 @@ export function EditorStateProvider({
 }) {
   const search = editorRoute.useSearch()
   const navigate = editorRoute.useNavigate()
-  // Doc is the default on open: the deck greets you as a document you write into, not a canvas you
-  // operate. The other modes stay reachable (`?view=`), but they're where you go, not where you land.
-  const mode: EditorMode = search.view ?? 'doc'
   const activeSlideId = search.slide ?? null
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [draggingComponentId, setDraggingComponentId] = useState<string | null>(
     null,
   )
   const [pendingShape, setPendingShape] = useState<string | null>(null)
-
-  const setMode = useCallback(
-    (m: EditorMode) => {
-      void navigate({ search: (prev) => ({ ...prev, view: m }), replace: true })
-    },
-    [navigate],
-  )
 
   const setActiveSlide = useCallback(
     (id: string | null) => {
@@ -132,8 +103,6 @@ export function EditorStateProvider({
       canEdit,
       activeSlideId,
       setActiveSlide,
-      mode,
-      setMode,
       selected,
       isSelected,
       select,
@@ -149,8 +118,6 @@ export function EditorStateProvider({
       canEdit,
       activeSlideId,
       setActiveSlide,
-      mode,
-      setMode,
       selected,
       isSelected,
       select,

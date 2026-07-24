@@ -46,7 +46,7 @@ export function markdownToDoc(md: string): string {
 
 /** Append the generated slides to the end of the deck as ONE undoable step, each a markdown-mode slide
  *  whose `doc` is the converted Markdown. Returns the id of the first new slide (to make active), or null
- *  when there's nothing to add. Mirrors SlideWell.addSlideAt — the whole batch reverts in a single
+ *  when there's nothing to add. Mirrors useAddSlide — the whole batch reverts in a single
  *  Cmd/Ctrl+Z, and it flows through the authoritative slide mutations (sync + permissions for free). */
 export function applyGenerated(
   generated: GeneratedDeck,

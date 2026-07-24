@@ -3,9 +3,8 @@
 // from a TALK: the user drops in an audio recording (transcribed by Whisper, server/transcribe.ts) or
 // pastes a transcript, and the model splits that NARRATION two ways at once —
 //   • the POINTS the speaker makes in a segment → the slide's body (Markdown, like Generate), and
-//   • the speaker's own WORDS for that segment → the slide's speaker notes (the `slide_notes` side table
-//     that Research mode reads).
-// So the deck arrives with Research/notes already populated and in sync — the thing no plain "generate"
+//   • the speaker's own WORDS for that segment → the slide's speaker notes (`slide_notes`).
+// So the deck arrives with notes already populated and in sync — the thing no plain "generate"
 // does. The client turns each slide's Markdown into a TipTap `doc` and appends via the ordinary
 // addSlide + setSlideDoc + setSlideNotes mutations (sync, permissions, and undo come free); see
 // src/editor/aiNarrate.ts.

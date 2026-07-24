@@ -32,7 +32,7 @@ export interface SlideRowLike {
   background: string
   surface: string
   markdown?: string | null
-  // TipTap doc JSON (source of truth for render_mode = 'markdown'); supersedes `markdown`.
+  // TipTap body JSON; supersedes the legacy raw `markdown` field.
   doc?: string | null
   render_mode?: string | null
   text_align?: string | null
@@ -166,10 +166,11 @@ export function serializeDeck(
         surface: s.surface || '',
         components: (componentsBySlide[s.id] ?? []).map(serializeComponent),
       }
-      // Markdown mode + per-slide alignment + a pinned body region: emitted only when set, so
-      // spatial-only decks are byte-identical to before, and an auto-region slide ('') stays absent.
-      // Markdown-mode content travels as the TipTap `doc` JSON.
+      // Compatibility marker + per-slide alignment + a pinned body region: emitted only when set.
+      // Preserve legacy raw Markdown alongside `doc` when present: `doc` wins for modern readers, while
+      // old markdown-only rows/files still round-trip without silently losing their source.
       if (s.render_mode) slide.renderMode = s.render_mode
+      if (s.markdown) slide.markdown = s.markdown
       if (s.doc) slide.doc = s.doc
       if (s.text_align) slide.textAlign = s.text_align
       if (s.body_region) slide.bodyRegion = s.body_region

@@ -387,6 +387,70 @@ button {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+/* The command bar is an overlay, not layout: the deck keeps the full viewport and a 5px top-edge
+   target reveals the bar when reached for. Focus-within gives keyboard users the same progressive
+   disclosure; object focus pins it because those insertion tools are actively in use. */
+.editor__topdock {
+  --editor-dock-offset: 48px;
+  position: absolute;
+  top: calc(-1 * var(--editor-dock-offset));
+  left: 0;
+  right: 0;
+  z-index: 70;
+  transition: top 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+/* Extend the invisible hit target below the 5px visual whisper; the extra depth makes a fast throw to
+   the top edge reliable without adding visible chrome. Hovering a pseudo-element counts as hovering
+   its parent, so the same rule reveals the dock. */
+.editor__topdock::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 10px;
+}
+.editor__topdock:hover,
+.editor__topdock:focus-within,
+.editor__topdock.is-open,
+.editor__topdock.is-pinned {
+  top: 0;
+}
+.editor__dock-toggle {
+  position: absolute;
+  left: 50%;
+  bottom: -19px;
+  width: 38px;
+  height: 18px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  background: color-mix(in srgb, var(--panel) 84%, transparent);
+  color: var(--muted);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  opacity: 0.72;
+  transition:
+    color 0.15s,
+    opacity 0.15s;
+}
+.editor__dock-toggle:hover,
+.editor__dock-toggle:focus-visible {
+  color: var(--text);
+  opacity: 1;
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor__topdock {
+    transition: none;
+  }
 }
 .hdr {
   display: flex;
@@ -405,6 +469,13 @@ button {
   padding: 4px 8px;
   border-radius: 8px;
   transition: background 0.12s;
+}
+.hdr__object-back {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
 }
 .hdr__home:hover {
   background: var(--panel-2);
@@ -478,7 +549,7 @@ button {
 }
 .seg {
   display: inline-flex;
-  flex: 0 0 auto; /* never shrink/clip the mode toggle (it has overflow:hidden) */
+  flex: 0 0 auto; /* never shrink or clip grouped controls */
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   overflow: hidden;
@@ -512,25 +583,76 @@ button {
   padding: 5px 9px;
 }
 
-/* Objects/Body edit-layer segment in the header: icon + a label that collapses to icon-only with the
-   rest of the tools on narrow screens (.hdr .lbl rule below). */
-.seg--layers button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-}
-
 .editor__body {
   flex: 1;
   display: flex;
   min-height: 0;
+  position: relative;
+}
+
+/* Object focus and spatial arranging are contextual tools inside the editor. The scrolling deck stays
+   mounted underneath, so close/Esc returns to the same card, caret, and scroll position. */
+.context-tool {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  background: var(--stage);
+}
+.context-tool > .stage,
+.context-tool > .overview {
+  flex: 1;
+}
+/* Arrange is a focused canvas: it sits above the ambient command bar and leaves one clear way back.
+   Object editing stays below the pinned bar because its insertion tools are still relevant there. */
+.context-tool--arrange {
+  z-index: 75;
+}
+.context-tool--objects {
+  padding-top: var(--editor-dock-height, 53px);
+}
+.context-tool__close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  color: var(--muted);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(8px);
+}
+.context-tool__close:hover {
+  color: var(--text);
+  border-color: var(--coral);
+}
+.context-tool__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 50;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(20, 22, 30, 0.62);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* ---- responsive header (spec §4.2) ----
    The full toolbar is wide, so it collapses in two steps as the viewport shrinks:
    1) labels drop to icon-only (titles still tooltip them),
-   2) the tool cluster drops to its own row, leaving title + mode toggle + Present on top. */
+   2) the tool cluster drops to its own row, leaving the title and primary actions on top. */
 @media (max-width: 1620px) {
   .hdr .lbl {
     display: none;
@@ -542,6 +664,9 @@ button {
   }
 }
 @media (max-width: 1080px) {
+  .editor__topdock {
+    --editor-dock-offset: 92px;
+  }
   .hdr {
     flex-wrap: wrap;
     row-gap: 8px;
@@ -554,7 +679,7 @@ button {
     min-width: 0; /* shrink/clip the title instead of pushing controls off-screen */
   }
   .hdr__tools {
-    order: 5; /* below the title + mode toggle + Present row */
+    order: 5; /* below the title and primary-action row */
     flex-basis: 100%;
     flex-wrap: wrap;
     row-gap: 6px;
@@ -564,7 +689,7 @@ button {
   }
 }
 @media (max-width: 420px) {
-  /* very small: let the mode toggle breathe by tightening its padding */
+  /* Very small screens tighten grouped-control padding. */
   .seg button {
     padding: 5px 10px;
   }
@@ -649,8 +774,21 @@ button {
 .well__slide:hover .well__del {
   opacity: 1;
 }
+.well__del:focus-visible {
+  opacity: 1;
+}
 .well__del:hover {
   background: var(--danger);
+}
+@media (hover: none), (pointer: coarse) {
+  .well__del {
+    width: 28px;
+    height: 28px;
+    opacity: 1;
+  }
+  .well__del:disabled {
+    opacity: 0.42;
+  }
 }
 .well__add {
   /* Match the 16:9 slide cards so the "add" placeholder reads as an empty slide. */
@@ -674,218 +812,6 @@ button {
   border-color: var(--coral);
   color: var(--coral);
   background: var(--coral-soft);
-}
-
-/* "✨ Generate slides" — sits below the add-slide button at the foot of the well. */
-.well__gen {
-  margin-top: 10px;
-}
-.well__gen-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
-  background: transparent;
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 13px;
-  transition:
-    border-color 0.12s,
-    color 0.12s,
-    background 0.12s;
-}
-.well__gen-toggle:hover {
-  border-color: var(--coral);
-  color: var(--coral);
-  background: var(--coral-soft);
-}
-.well__gen-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 9px;
-  background: var(--panel);
-}
-.well__gen-input {
-  width: 100%;
-  resize: vertical;
-  min-height: 56px;
-  padding: 7px 8px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--bg);
-  color: inherit;
-  font: inherit;
-  font-size: 12.5px;
-  line-height: 1.35;
-}
-.well__gen-input:focus {
-  outline: none;
-  border-color: var(--coral);
-}
-.well__gen-actions {
-  display: flex;
-  gap: 6px;
-}
-.well__gen-go {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-height: 30px;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 7px;
-  background: var(--coral);
-  color: #fff;
-  font-weight: 600;
-  font-size: 13px;
-}
-.well__gen-go:disabled {
-  opacity: 0.55;
-}
-.well__gen-close {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-.well__gen-close:hover:not(:disabled) {
-  color: var(--text);
-}
-.well__gen-error {
-  color: var(--danger);
-  font-size: 12px;
-  line-height: 1.35;
-}
-.well__gen-gate {
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.35;
-}
-.well__gen-signin {
-  display: flex;
-  gap: 6px;
-}
-.well__gen-signin button {
-  flex: 1 1 0;
-  padding: 6px 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: 7px;
-  background: transparent;
-  color: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.well__gen-signin button:hover {
-  border-color: var(--coral);
-  color: var(--coral);
-}
-.well__gen-spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: well-gen-spin 0.7s linear infinite;
-}
-@keyframes well-gen-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Two well-foot AI actions stacked: "✨ Generate slides" + "🎙️ From a recording". */
-.well__gen-toggles {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* "🎙️ From a recording" panel extras (audio picker, transcript divider, slide-count row). */
-.well__gen-file {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 7px;
-  background: var(--bg);
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-.well__gen-file:hover {
-  border-color: var(--coral);
-  color: var(--coral);
-}
-.well__gen-file input {
-  display: none;
-}
-.well__gen-file.is-busy {
-  opacity: 0.7;
-  pointer-events: none;
-}
-.well__gen-or {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.well__gen-or::before,
-.well__gen-or::after {
-  content: '';
-  flex: 1 1 0;
-  height: 1px;
-  background: var(--line);
-}
-.well__gen-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12.5px;
-  color: var(--muted);
-}
-.well__gen-select {
-  padding: 5px 8px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--bg);
-  color: inherit;
-  font: inherit;
-  font-size: 12.5px;
-}
-.well__gen-hint {
-  color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.35;
-}
-.well__gen-mini-spinner {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--line-strong);
-  border-top-color: var(--coral);
-  border-radius: 50%;
-  vertical-align: middle;
-  animation: well-gen-spin 0.7s linear infinite;
 }
 
 .well__slide.is-dragging {
@@ -983,35 +909,21 @@ button {
   will-change: filter;
 }
 
-/* A visible-but-inert slide layer: the non-active layer in the Body/Objects editor — the markdown
-   Body shown behind editable Objects, or the Objects shown on top of an editable Body. Fills the
-   scaled canvas and passes pointer events through (pointer-events:none) to the active layer, so
-   marquee/canvas clicks and text editing land where they should. It carries no z-index, so its
-   contents keep their natural stacking: a static `.strut-md` underlay stays below the positioned
-   `.cmp` objects, which paint on top. */
+/* The body remains visible but inert while positioned objects are in focus. It passes pointer events
+   through to the object canvas and keeps its natural stacking below `.cmp` objects. */
 .slide-locked-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-/* ---- markdown mode (stage preview + editor panel) ---- */
-.stage--md {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  padding: 0;
-}
-.md-preview {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
 /* The editable surface: TipTap mounts its ProseMirror editable here, carrying the .strut-md class so it
    inherits the exact render typography/theme (see .strut-md below). The host fills the scaled canvas. */
+.strut-md-editor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 .strut-md-host {
   width: 100%;
   height: 100%;
@@ -1029,7 +941,17 @@ button {
   position: absolute;
   overflow: hidden;
 }
-/* ProseMirror shows the placeholder via a decoration on an empty doc; keep the caret comfortable. */
+/* A blank card still explains its one essential gesture. Reuse the body surface itself so the hint
+   follows the selected layout/padding/alignment exactly; it unmounts on the first transaction. */
+.strut-md.strut-md__placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  color: var(--strut-body-color, #111);
+  opacity: 0.32;
+  transition: opacity 0.12s;
+}
 .strut-md-host .strut-md:focus {
   outline: none;
 }
@@ -1954,16 +1876,6 @@ button {
   font-size: 11px;
   line-height: 26px;
 }
-.theme__check {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-.theme__check input {
-  accent-color: var(--coral);
-}
 .popover--theme select {
   flex: 1;
   min-width: 0;
@@ -2332,190 +2244,6 @@ button {
   border-color: var(--coral);
   color: var(--coral);
 }
-/* The orange "✨ Arrange" button sits at the end of the Layout row (after a divider) and toggles the
-   prompt panel below. Filled coral so it reads as the one AI action among the plain preset buttons. */
-.ov-layouts__sep {
-  width: 1px;
-  height: 20px;
-  background: var(--line-strong);
-  margin: 0 2px;
-}
-.ov-layouts__ai {
-  border: 1px solid var(--coral);
-  background: var(--coral);
-  color: #fff;
-  border-radius: 8px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter 0.12s;
-}
-.ov-layouts__ai:hover {
-  filter: brightness(1.07);
-}
-.ov-layouts__ai.is-open {
-  filter: brightness(0.9);
-}
-
-/* "✨ Arrange" prompt panel — disclosed under the Layout row when the orange button is toggled on, and
-   (while a plan is proposed) the Apply/Discard preview bar. Same panel chrome as the toolbars. */
-.ov-arrange {
-  position: absolute;
-  top: 62px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  max-width: 92vw;
-  padding: 9px 13px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow-lg);
-  z-index: 41;
-  animation: ov-arrange-in 0.14s ease;
-}
-@keyframes ov-arrange-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-.ov-arrange__label,
-.ov-arrange__badge {
-  color: var(--coral);
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  margin-right: 2px;
-}
-.ov-arrange__input {
-  width: min(46vw, 340px);
-  border: 1px solid var(--line-strong);
-  background: var(--panel-2);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 12px;
-}
-.ov-arrange__input:focus {
-  outline: none;
-  border-color: var(--coral);
-}
-.ov-arrange__go,
-.ov-arrange__apply {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--coral);
-  background: var(--coral);
-  color: #fff;
-  border-radius: 8px;
-  padding: 5px 13px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.12s;
-}
-/* Fixed width so swapping the label for the spinner doesn't make the button jump. */
-.ov-arrange__go {
-  min-width: 74px;
-  height: 27px;
-}
-.ov-arrange__go:disabled {
-  cursor: default;
-}
-/* Working indicator: a small spinner replaces the "Arrange" label while the request is in flight. */
-.ov-arrange__spinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: ov-spin 0.7s linear infinite;
-}
-@keyframes ov-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-/* Small ghost "×" to dismiss the prompt panel. */
-.ov-arrange__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1;
-  border-radius: 6px;
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s;
-}
-.ov-arrange__close:hover {
-  background: var(--panel-2);
-  color: var(--text);
-}
-.ov-arrange__gate,
-.ov-arrange__why {
-  color: var(--muted);
-  font-size: 12px;
-}
-.ov-arrange__why {
-  max-width: 44vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.ov-arrange__error {
-  color: var(--danger, #d33);
-  font-size: 12px;
-  max-width: 280px;
-}
-.ov-arrange__signin,
-.ov-arrange__discard {
-  border: 1px solid var(--line-strong);
-  background: var(--panel-2);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 5px 11px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    border-color 0.12s,
-    color 0.12s;
-}
-.ov-arrange__signin:hover,
-.ov-arrange__discard:hover {
-  border-color: var(--coral);
-  color: var(--coral);
-}
-/* While previewing an AI plan: cards glide to their proposed spots and aren't interactive. */
-.overview.is-previewing .ov-card {
-  transition:
-    left 0.35s ease,
-    top 0.35s ease,
-    transform 0.35s ease;
-  pointer-events: none;
-}
-.ov-card.is-preview {
-  outline: 2px dashed var(--coral);
-  outline-offset: 2px;
-}
 
 .ov-transitions {
   position: absolute;
@@ -2867,8 +2595,8 @@ button {
   height: 34px;
 }
 
-/* ---- Doc mode (the scrolling deck) ----
-   The default mode, and chrome-free: no header, no well — the lone flex child of .editor__body, one
+/* ---- scrolling deck editor ----
+   The canonical chrome-free surface: one
    vertical scroll of fit-scaled 16:9 cards, each body editable in place. Cards keep the slide's real
    geometry by reusing `.slide-canvas` (absolute, transform-origin top left) — so `.doc__card` is just
    the box that scaled canvas paints into, and its width/height come inline from the measured column.
@@ -2891,12 +2619,12 @@ button {
   padding: 56px clamp(16px, 4vw, 56px) 120px;
 }
 
-/* ---- the Dock-well (Doc mode's summonable slide well) ----
+/* ---- summonable slide well ----
    An OVERLAY, never layout: it floats above the column (absolute in .doc), so revealing it can't
    resize the column — which would re-scale every card. Retracted it's translated fully offscreen
    AND visibility:hidden (its buttons leave the tab order); the transition delays visibility on the
-   way out so the slide-away stays visible. The well inside renders unchanged — .dock is a flex row
-   so .well's own `flex: 0 0 176px` sizing applies as it does in Slides mode. */
+   way out so the slide-away stays visible. The well inside renders unchanged — .dock is a flex row,
+   so .well's own `flex: 0 0 176px` sizing supplies the tray width. */
 .dock {
   position: absolute;
   left: 0;
@@ -2916,6 +2644,9 @@ button {
   transform: translateX(0);
   visibility: visible;
   transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.dock__touch-toggle {
+  display: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .dock {
@@ -2954,10 +2685,59 @@ button {
   opacity: 0.7;
 }
 @media (max-width: 768px) {
-  /* No hover edge on touch — the mobile tab bar routes to Slides mode for reordering. */
-  .dock,
+  /* Touch summons the same well as a bottom tray; the button is an action, not a mode tab. */
   .dock__edge {
     display: none;
+  }
+  .dock {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    height: var(--m-strip-h);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition:
+      transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1),
+      visibility 0s 0.22s;
+  }
+  .dock.is-out {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .dock .well {
+    flex: 1 1 auto;
+    width: 100%;
+    height: var(--m-strip-h);
+  }
+  .dock__touch-toggle {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 41;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    color: var(--muted);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(8px);
+    transition:
+      bottom 0.22s cubic-bezier(0.2, 0.7, 0.3, 1),
+      color 0.12s,
+      border-color 0.12s;
+  }
+  .dock__touch-toggle.is-out {
+    bottom: calc(var(--m-strip-h) + 8px);
+  }
+  .dock__touch-toggle:hover {
+    color: var(--coral);
+    border-color: var(--coral);
   }
 }
 .doc__empty {
@@ -3077,6 +2857,38 @@ button {
   opacity: 1;
 }
 .doc__flipbtn:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+/* Opens the positioned-object focus surface. It shares the layout button's corner idiom and remains
+   invisible at rest, so a slide still reads as content rather than a toolbar. */
+.doc__objectsbtn {
+  position: absolute;
+  top: 10px;
+  left: 46px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+.doc__card:hover .doc__objectsbtn,
+.doc__objectsbtn:focus-visible {
+  opacity: 1;
+}
+.doc__objectsbtn:hover {
   color: var(--coral);
   border-color: var(--coral);
 }
@@ -3465,112 +3277,18 @@ button {
   border-color: var(--coral);
 }
 @media (max-width: 768px) {
-  /* The well is a horizontal filmstrip up here, and there's no room for a gutter — tighten the column. */
+  /* The top dock is touch-visible and card controls cannot rely on hover. */
   .doc__scroll {
-    padding: 52px 12px 96px;
+    padding: 102px 12px 96px;
   }
-}
-
-/* ---- Research mode (per-slide notes) ----
-   A full-body flex child of .editor__body (like .overview): one scrolling column of per-slide blocks,
-   each pairing the slide thumbnail with its free-form notes editor. Notes sync through their own
-   deckNotes query (loaded only while this view is mounted). */
-.research {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  overflow: hidden;
-  background: var(--panel-2);
-}
-.research__scroll {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;
-  padding: 24px clamp(16px, 4vw, 56px) 96px;
-}
-.research__empty {
-  margin: auto;
-  color: var(--muted);
-  font-size: 14px;
-}
-.research__intro {
-  max-width: 920px;
-  margin: 0 auto 8px;
-}
-.research__h {
-  margin: 0 0 4px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-}
-.research__sub {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-.research__block {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 22px 0;
-  border-top: 1px solid var(--line);
-}
-.research__block:first-of-type {
-  border-top: none;
-}
-.research__aside {
-  flex: 0 0 auto;
-  position: sticky;
-  top: 8px;
-}
-.research__thumb {
-  /* Fixed box the scaled <SlideView> (width=200, its .well__thumb-inner is absolutely pinned top-left)
-     paints into — without an explicit size the button would collapse to zero around its absolute child. */
-  position: relative;
-  display: block;
-  width: 200px;
-  aspect-ratio: 16 / 9;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--panel);
-  cursor: pointer;
-  line-height: 0;
-  box-shadow: 0 1px 3px rgba(24, 26, 33, 0.06);
-  transition:
-    border-color 0.12s,
-    box-shadow 0.12s;
-}
-.research__thumb:hover {
-  border-color: var(--coral);
-  box-shadow: 0 2px 10px rgba(24, 26, 33, 0.12);
-}
-.research__num {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: rgba(24, 26, 33, 0.72);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-}
-.research__notes {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.research__loading {
-  color: var(--muted);
-  font-size: 13px;
-  padding: 8px 0;
+  .doc__flipbtn,
+  .doc__objectsbtn,
+  .lyt-btn {
+    opacity: 1;
+  }
+  .doc__seam .doc__ins {
+    opacity: 1;
+  }
 }
 
 /* The notes editor: a plain document surface (its own typography — NOT the slide-scaled .strut-md). The
@@ -3670,23 +3388,8 @@ button {
   margin: 1em 0;
 }
 
-/* Phones: stack the thumbnail above the notes, and drop the sticky (the column scrolls as one). */
-@media (max-width: 768px) {
-  .research__scroll {
-    padding: 16px 14px 88px;
-  }
-  .research__block {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .research__aside {
-    position: static;
-  }
-}
-
-/* ---- "✨ Chat" advisor rail ----
-   A right-side rail (flex child of .editor__body, after the well/stage/overview) where the user chats
-   with an AI advisor about the deck. Toggled from the header (.btn.is-active below). */
+/* ---- ambient AI surface ----
+   An overlay rail so opening AI never resizes every slide card or changes which card is active. */
 
 /* Header toggle active state (shared: any .btn used as a toggle). */
 .btn.is-active {
@@ -3696,14 +3399,18 @@ button {
 }
 
 .chat {
-  flex: 0 0 340px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 100%);
   min-width: 0;
   display: flex;
   flex-direction: column;
   background: var(--panel);
   border-left: 1px solid var(--line);
   box-shadow: -8px 0 24px rgba(24, 26, 33, 0.05);
-  z-index: 20;
+  z-index: 55;
 }
 .chat__head {
   flex: 0 0 auto;
@@ -4002,10 +3709,15 @@ button {
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: well-gen-spin 0.7s linear infinite;
+  animation: chat-spin 0.7s linear infinite;
+}
+@keyframes chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Guest sign-in gate (mirrors the well's Generate gate). */
+/* Guest sign-in gate for the one ambient AI surface. */
 .chat__gate {
   flex: 1 1 auto;
   display: flex;
@@ -4040,42 +3752,20 @@ button {
   color: var(--coral);
 }
 
-/* On a narrow viewport the rail would crowd the stage — let it take a roomier share but cap it. */
-@media (max-width: 900px) {
-  .chat {
-    flex-basis: 300px;
-  }
-}
-
 /* =========================================================================================
-   Mobile editor — touch-first companion (phones & small tablets, ≤768px).
-
-   The desktop DOM is reused wholesale; this block reflows it into a touch shell:
-     • header  → a slim app bar (logo + title) over a horizontally-scrolling tool row; the mode
-                 toggle, Chat and Present are hidden here and handed to the bottom tab bar.
-     • body    → a column (column-reverse so the Stage sits on top of the filmstrip without a
-                 DOM change), with the slide well turned into a horizontal filmstrip.
-     • Inspector, Chat, and header popovers become bottom sheets (they'd otherwise float off-canvas
-       or get clipped by the scrolling tool row).
-     • the .m-tabbar (rendered on every viewport) appears and owns mode / Advisor / Present.
-   No JS width branch drives any of this, so first paint is correct on both desktop and mobile.
+   Mobile editor — the same editor and contextual tools, adapted for touch (≤768px).
+   The command bar stays reachable, the slide well becomes a tap-open filmstrip, and floating panels
+   become sheets without a JS width branch.
    ========================================================================================= */
-
-/* The bottom tab bar renders everywhere but only shows on mobile. */
-.m-tabbar {
-  display: none;
-}
 
 @media (max-width: 768px) {
   :root {
-    --m-tabbar-h: 56px;
     --m-strip-h: 100px;
-    /* space a bottom sheet must leave for the tab bar (+ the phone's home indicator) */
-    --m-sheet-gap: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom) + 8px);
+    --m-sheet-gap: calc(env(safe-area-inset-bottom) + 8px);
   }
 
   .editor {
-    height: 100dvh; /* exclude the mobile URL bar so the tab bar isn't clipped off-screen */
+    height: 100dvh; /* exclude the mobile URL bar */
     overflow: hidden;
     overscroll-behavior: none;
   }
@@ -4083,27 +3773,50 @@ button {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ---- header → app bar --------------------------------------------------------------- */
+  /* Touch cannot summon a hover edge, so the quiet command bar stays visible. */
+  .editor__topdock {
+    top: 0;
+  }
+  .editor__dock-toggle {
+    display: none;
+  }
   .hdr {
     padding: 7px 10px;
     gap: 6px;
   }
-  /* Handed to the tab bar; these just eat width in the app bar now. */
-  .hdr__mode,
-  .hdr__chat,
-  .hdr__present,
-  .hdr .usage {
+  .hdr__home {
+    padding: 2px;
+  }
+  .hdr__home img {
+    height: 19px;
+  }
+  .hdr .usage,
+  .hdr__theme-toggle {
     display: none;
   }
-  /* The rindle credit — the inline header pill and the floating bottom-right one — collides with the
-     app bar / tab bar on a phone. Hide it only inside the editor; the chrome-less Present & share
-     viewers live outside .editor and keep their badge. */
+  .hdr__arrange,
+  .hdr__chat {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+  }
+  /* Keep Present in thumb-sized icon form; its title remains the accessible label. */
+  .hdr__present {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  /* The floating credit would collide with the touch tray. Present/share viewers live outside .editor. */
   .editor .powered-by {
     display: none;
   }
   .hdr__title {
-    flex: 1 1 auto;
+    flex: 1 1 48px;
     min-width: 0;
+    padding-inline: 5px;
     font-size: 15px;
   }
   /* One scrolling row of tools instead of a wrapping thicket. */
@@ -4140,10 +3853,6 @@ button {
     z-index: 60;
   }
 
-  /* ---- body → column: Stage on top, filmstrip beneath ---------------------------------- */
-  .editor__body {
-    flex-direction: column-reverse; /* DOM order is [well, stage]; reverse puts the stage up top */
-  }
   .stage {
     min-height: 0;
     padding: 12px;
@@ -4182,8 +3891,7 @@ button {
   .well__ins {
     display: none;
   }
-  .well__add,
-  .well__gen {
+  .well__add {
     flex: 0 0 auto;
     position: relative;
     height: calc(var(--m-strip-h) - 20px);
@@ -4194,23 +3902,6 @@ button {
     flex-direction: column;
     gap: 2px;
     white-space: nowrap;
-  }
-  .well__gen-toggle {
-    height: 100%;
-    white-space: nowrap;
-  }
-  /* The generate composer is too big for the strip — float it as a sheet. */
-  .well__gen-panel {
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    bottom: var(--m-sheet-gap);
-    z-index: 42;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    padding: 12px;
   }
   /* Coral bar marking where a long-press drag will drop the slide. */
   .well__slide.is-drop-before::before,
@@ -4252,96 +3943,49 @@ button {
     z-index: 40;
   }
 
-  /* ---- Advisor → full sheet above the tab bar (was a 340px right rail) ------------------ */
+  /* ---- Advisor → full sheet ------------------------------------------------------------- */
   .chat {
     position: fixed;
     left: 0;
     right: 0;
     top: 0;
-    bottom: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom));
-    flex-basis: auto;
+    bottom: 0;
+    width: 100%;
     border-left: none;
     box-shadow: var(--shadow-lg);
-    z-index: 45;
+    z-index: 80;
   }
 
-  /* ---- Overview: keep the map, tidy the floating control clusters ---------------------- */
+  /* ---- Arrange: keep the map, tidy the floating control clusters ----------------------- */
   .ov-hint {
     display: none; /* the desktop keyboard/scroll hint doesn't apply to touch */
   }
   .ov-layouts,
-  .ov-transitions,
-  .ov-arrange {
+  .ov-transitions {
+    width: calc(100vw - 20px);
     max-width: calc(100vw - 20px);
+    box-sizing: border-box;
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
   }
+  .ov-layouts {
+    top: 58px; /* clear the always-visible Back control */
+  }
+  .ov-transitions {
+    bottom: 10px;
+  }
+  .ov-controls {
+    right: 10px;
+    bottom: 72px;
+    z-index: 42;
+  }
   .ov-layouts::-webkit-scrollbar,
-  .ov-transitions::-webkit-scrollbar,
-  .ov-arrange::-webkit-scrollbar {
+  .ov-transitions::-webkit-scrollbar {
     display: none;
   }
   .ov-layouts > *,
   .ov-transitions > * {
     flex: 0 0 auto;
-  }
-
-  /* ---- the bottom tab bar -------------------------------------------------------------- */
-  .m-tabbar {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: stretch;
-    background: var(--panel);
-    border-top: 1px solid var(--line);
-    padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -1px 3px rgba(24, 26, 33, 0.05);
-    z-index: 35;
-  }
-  .m-tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    height: var(--m-tabbar-h);
-    border: none;
-    background: none;
-    color: var(--muted);
-    font: inherit;
-    cursor: pointer;
-  }
-  .m-tab__ic {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 26px;
-    border-radius: 8px;
-    transition:
-      background 0.12s,
-      color 0.12s;
-  }
-  .m-tab__lbl {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-  .m-tab.is-active {
-    color: var(--coral);
-  }
-  .m-tab.is-active .m-tab__ic {
-    background: var(--coral-soft);
-  }
-  .m-tab--present {
-    color: var(--coral);
-  }
-  .m-tab--present .m-tab__ic {
-    background: var(--grad);
-    color: #fff;
-  }
-  .m-tab:disabled {
-    opacity: 0.4;
   }
 }

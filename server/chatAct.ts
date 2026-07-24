@@ -40,7 +40,7 @@ export class ChatActUnavailableError extends Error {
   }
 }
 
-function systemPrompt(fonts: string[]): string {
+export function systemPrompt(fonts: string[]): string {
   return [
     'You are an assistant embedded in a slide-deck editor. Each turn you either just ANSWER the author',
     '(advice, no change) or perform ONE OR MORE changes to their deck — do everything they asked for in',
@@ -68,9 +68,10 @@ function systemPrompt(fonts: string[]): string {
       fonts.join(', ') +
       ', or "" to reset).',
     '  Set only the fields you mean to change; ground new colors in the CURRENT theme shown below.',
-    '- set_body — rewrite ONE slide. Fields: slideId (a valid slide id below, or a ref you created this',
-    '  turn) and markdown (the FULL new body: a "# Title" line, then a few bullets or a short paragraph).',
-    '  Prefer the currently-active slide, whose full text you are given. If the author has research notes',
+    '- set_body — rewrite ONE slide’s PRIMARY body (Cell 1). Fields: slideId (a valid slide id below, or',
+    '  a ref you created this turn) and markdown (the FULL new Cell 1 body: a "# Title" line, then a few',
+    '  bullets or a short paragraph). Existing sibling cells, layout, padding, and alignment are preserved.',
+    '  Prefer the currently-active slide, whose populated cells are labeled below. If the author has notes',
     '  for that slide (shown below), draw on them as backing evidence.',
     '- create_slide — add a new blank slide. Optional fields: ref (a short alias, e.g. "s1", so LATER',
     '  actions this turn can target it via their slideId) and markdown (seed the slide with body text).',

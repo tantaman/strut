@@ -4,18 +4,25 @@
 
 import { googleFontsHref, SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
+import { componentClassName } from './componentClasses'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
+import { markdownToHtml } from './markdown'
 import {
   backgroundImage,
   bodyStyleFor,
+  cellDocAt,
+  cellPad,
   composeBackground,
   cssHex,
   cssUrlValue,
+  layoutCells,
   resolveBackground,
   resolveBackgroundImage,
+  resolveLayout,
   resolveSurface,
   resolveTextAlign,
   slideBodyVAlign,
+  slidePadScale,
   textTypeOf,
 } from './types'
 import type {
@@ -36,7 +43,8 @@ const deg = (rad: number) => (rad * 180) / Math.PI
 // renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss),
 // including the body-region pair (--strut-body-pad / --strut-type-scale) — keep both the rules here
 // and the vars in themeVarsCss in step with their twins, or an exported deck partitions differently.
-const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:var(--strut-body-justify,safe center);overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
+const STRUT_MD_CSS = `  .strut-md-cell{position:absolute;overflow:hidden;}
+  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:var(--strut-body-justify,safe center);overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
   .strut-md>*:first-child{margin-top:0;}
   .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;text-indent:-.045em;}
   .strut-md h1{font-size:calc(88px * var(--strut-type-scale,1));}
@@ -109,7 +117,7 @@ function componentHTML(c: AnyComponent): string {
       break
   }
   const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
-  return `<div class="cmp" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
+  return `<div class="${esc(componentClassName(c))}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:top left;${extra}">${body}</div>`
 }
 
 function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
@@ -143,6 +151,38 @@ function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
   ]
   if (image.blur) inner.push('filter:blur(10px)')
   return `<div class="slide-bg-img" style="${esc(outer.join(';'))}"><div class="slide-bg-img__media" style="${esc(inner.join(';'))}"></div></div>`
+}
+
+/** The standalone twin of `MarkdownBodies` in render.tsx. Full-layout slides keep the original single
+ *  body element; tiled slides emit one positioned body per populated cell, using the same geometry,
+ *  density and type-scale helpers as the app renderer. */
+function bodyHTML(slide: DeckBundle['slides'][number]): string {
+  const contentAt = (index: number): string => {
+    if (index === 0 && !slide.doc && slide.markdown?.trim())
+      return markdownToHtml(slide.markdown)
+    const doc = cellDocAt(slide, index)
+    return isDocEmpty(doc) ? '' : docToHtml(doc)
+  }
+  const layout = resolveLayout(slide.layout)
+  if (layout === '') {
+    const content = contentAt(0)
+    return content ? `      <div class="strut-md">${content}</div>` : ''
+  }
+
+  const padScale = slidePadScale(slide)
+  return layoutCells(layout)
+    .map((cell, index) => {
+      const content = contentAt(index)
+      if (!content) return ''
+      const { padX, padY, scale } = cellPad(cell, padScale)
+      const style =
+        `left:${cell.x}px;top:${cell.y}px;width:${cell.w}px;height:${cell.h}px;` +
+        `--strut-body-pad:${padY}px ${padX}px;--strut-type-scale:${scale};` +
+        '--strut-body-display:flex;'
+      return `      <div class="strut-md-cell" style="${style}"><div class="strut-md">${content}</div></div>`
+    })
+    .filter(Boolean)
+    .join('\n')
 }
 
 /** The deck text theme as CSS custom-property declarations for the slide container, so a text
@@ -210,9 +250,7 @@ function stepHTML(
   // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
   // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
   // Each is emitted only when it has content, so single-layer slides export exactly as before.
-  const body = isDocEmpty(slide.doc)
-    ? ''
-    : `      <div class="strut-md">${docToHtml(slide.doc)}</div>`
+  const body = bodyHTML(slide)
   const objects = [...components]
     .sort((a, b) => a.z_order - b.z_order)
     .map((c) => '      ' + componentHTML(c))

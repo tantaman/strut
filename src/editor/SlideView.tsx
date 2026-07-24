@@ -73,8 +73,8 @@ export function SlideView({
   onComponentRemove?: (id: string) => void
 }) {
   // Both layers, always composited: the markdown Body underlay + the positioned Objects on top. Each
-  // is emitted only when it has content, so a pure-objects or pure-markdown slide renders exactly as
-  // it did before. `render_mode` now selects the active EDIT layer (editor only), not what renders.
+  // is emitted only when it has content, so old object-only and body-only data renders unchanged. The
+  // persisted `render_mode` field is compatibility metadata, not a rendering branch.
   const components = mergeComponentRefs(slide)
   return (
     <SlideFrame slide={slide} deck={deck} width={width}>

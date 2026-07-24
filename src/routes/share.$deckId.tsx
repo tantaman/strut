@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { useRoot } from '@rindle/react'
 import { publicDeckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
-import { resolveSurface } from '../editor/types'
+import { presentationSurfaceBackground } from '../editor/presentationSurface'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
@@ -102,7 +102,7 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
   const acx = active.x * WORLD
   const acy = active.y * WORLD
   const acz = active.z * WORLD
-  const surf = resolveSurface(active.surface, deck.surface)
+  const surf = presentationSurfaceBackground(active.surface, deck.surface)
   const flight = flightFor(deck.canned_transition)
   const camTransition = flight.duration
     ? `transform ${flight.duration}ms ${flight.easing}`

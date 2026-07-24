@@ -1,5 +1,5 @@
-// The single TipTap/ProseMirror schema for markdown-mode slides — the ONE place the node/mark set is
-// declared. Both the editor (TipTapSlideEditor via `useEditor`) and the read-only renderer (tiptapDoc
+// The single TipTap/ProseMirror schema for slide bodies — the ONE place the node/mark set is declared.
+// Both the direct editor (`useEditor`) and the read-only renderer (tiptapDoc
 // `docToHtml` via the static renderer) build from this same array, so what you edit and what a
 // thumbnail/export shows can't drift. Because a slide's `doc` is now stored JSON, this list is a DATA
 // CONTRACT: adding/removing a node type is effectively a schema change for already-saved slides.

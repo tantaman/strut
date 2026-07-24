@@ -12,15 +12,9 @@ function json(data: unknown, status: number): Response {
   })
 }
 
-// The user-facing ✨ features (artifact + transcribe usage are internal precursors, so they're left off the
-// panel; narrate is the user-facing "recording → slides" action).
-const FEATURES: Array<AiFeature> = [
-  'arrange',
-  'generate',
-  'chat',
-  'image',
-  'narrate',
-]
+// Operations reachable from the ambient Chat surface. Legacy narrate/transcribe counters remain in the
+// quota backend for compatibility, but no longer appear as product entry points in the meter.
+const FEATURES: Array<AiFeature> = ['arrange', 'generate', 'chat', 'image']
 
 export const Route = createFileRoute('/api/usage')({
   server: {

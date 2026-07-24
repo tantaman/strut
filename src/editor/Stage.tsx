@@ -52,10 +52,9 @@ import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
-import { TipTapSlideEditor } from './TipTapSlideEditor'
-import { LockedObjects } from './ObjectsLayer'
 import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
+import { componentClassName } from './componentClasses'
 import {
   ComponentDataReader,
   componentRefKey,
@@ -118,10 +117,6 @@ export function Stage({
   )
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
-  // Markdown mode measures the preview area (which excludes the editor panel) so the slide fits the
-  // space actually available to it. Both fit hooks run every render to keep hook order stable.
-  const mdPreviewRef = useRef<HTMLDivElement>(null)
-  const mdScale = useFitScale(mdPreviewRef, SLIDE_W, SLIDE_H)
   const mutate = useMutate()
   const editor = useEditor()
   const history = useHistory()
@@ -844,51 +839,6 @@ export function Stage({
     else beginMarquee(e)
   }
 
-  // Body-edit layer: the markdown doc is the editable surface (WYSIWYG, scaled to fit) with the
-  // slide's Objects composited on top but locked. All the spatial hooks above still run — only the
-  // rendered output branches — so hook order stays stable when the active slide flips layers.
-  if (slideData.render_mode === 'markdown') {
-    return (
-      <div
-        className="stage stage--md"
-        ref={stageRef}
-        style={{ background: composeBackground(surf, surfImg) }}
-      >
-        <UserStyle css={deck?.custom_stylesheet} />
-        {editor.canEdit ? (
-          // WYSIWYG: edit the TipTap doc in place on the slide surface (owns its own fit scale); the
-          // locked Objects overlay rides along on top so you place body text in the real layout.
-          <TipTapSlideEditor key={slideData.id} slide={slideData} deck={deck}>
-            <LockedObjects slide={slideData} />
-          </TipTapSlideEditor>
-        ) : (
-          // Viewer (no edit rights): the read-only body surface + the (locked) objects on top.
-          <div className="md-preview" ref={mdPreviewRef}>
-            <div
-              className="slide-surface"
-              style={{ width: SLIDE_W * mdScale, height: SLIDE_H * mdScale }}
-            >
-              <div
-                className="slide-canvas strut-surface"
-                style={{
-                  width: SLIDE_W,
-                  height: SLIDE_H,
-                  transform: `scale(${mdScale})`,
-                  background: bg,
-                  ...themeVars(deck, slideData),
-                }}
-              >
-                <BackgroundImageLayer image={bgImg} />
-                <MarkdownBodies slide={slideData} />
-                <LockedObjects slide={slideData} />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div
       className="stage"
@@ -1020,7 +970,7 @@ function ComponentView({
   const counter = { transform: `translate(-50%, -50%) scale(${1 / scale})` }
   return (
     <div
-      className={`cmp cmp--${c.kind}${selected ? ' is-selected' : ''}`}
+      className={componentClassName(c, selected ? ['is-selected'] : [])}
       data-id={c.id}
       style={cmpStyle(c)}
       onPointerDown={onPointerDownBody}
@@ -1123,6 +1073,3 @@ function TextEditor({
     </>
   )
 }
-
-// (The per-slide Objects/Body edit-layer toggle now lives in the deck Header top bar; markdown-mode
-// editing lives in TipTapSlideEditor — WYSIWYG on the slide surface.)

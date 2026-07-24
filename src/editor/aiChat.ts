@@ -18,14 +18,15 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
 import { useQuery } from '@rindle/react'
 import { newId } from '../config'
 import { slideNotesQuery } from '../../shared/queries'
-import { docText, slideText } from './aiArrange'
-import { dispatchActions } from './aiChatActions'
+import { docText, slideGroundingText } from './aiArrange'
+import { CHAT_EDIT_CONFLICT, dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
@@ -337,6 +338,11 @@ export interface ActionSendContext {
   activeSlide?: ChatActSlide
 }
 
+export interface ActionSendOptions {
+  /** Rechecked after the response arrives, immediately before any model-authored mutation may run. */
+  isRequestCurrent?: () => boolean
+}
+
 /** Run ONE action-capable chat turn: append the user turn + a working assistant turn, POST /api/chat/act,
  *  then STREAM the reply into the assistant row's `content` (the `{response}` frames — same live typing as
  *  the advisor) and DISPATCH the terminal `{result}` frame's action (via the injected `dispatch`, which
@@ -348,6 +354,7 @@ export async function sendChatAction(
   ctx: ActionSendContext,
   userText: string,
   dispatch: (actions: ChatAction[]) => Promise<DispatchOutcome>,
+  options: ActionSendOptions = {},
 ): Promise<{ label: string } | null> {
   const text = userText.trim()
   if (!text) return null
@@ -487,6 +494,17 @@ export async function sendChatAction(
     return null
   }
 
+  // The user kept working while the response streamed. Applying an answer grounded in the old deck could
+  // overwrite that newer work, so keep the prose but leave the deck untouched and invite a fresh request.
+  if (options.isRequestCurrent?.() === false) {
+    await commit({
+      content: editConflictContent(say || acc),
+      note: '',
+      status: 'done',
+    })
+    return null
+  }
+
   // Apply phase — the reply is already on screen; show what's happening while the apply (for generate /
   // arrange / add_image, a second round-trip) runs, so the turn is never silent.
   await commit({
@@ -509,6 +527,14 @@ export async function sendChatAction(
     })
     return { label: outcome.label }
   }
+  if (outcome.error === CHAT_EDIT_CONFLICT) {
+    await commit({
+      content: editConflictContent(say || acc),
+      note: '',
+      status: 'done',
+    })
+    return null
+  }
   // The model answered but the apply failed (e.g. a delegated /api/arrange error) — keep the answer,
   // append the reason, mark it errored.
   await commit({
@@ -517,6 +543,10 @@ export async function sendChatAction(
     status: 'error',
   })
   return null
+}
+
+function editConflictContent(reply: string): string {
+  return [reply, CHAT_EDIT_CONFLICT].filter(Boolean).join('\n\n')
 }
 
 // ---- useChat hook ----------------------------------------------------------------------------------
@@ -544,6 +574,8 @@ export interface ChatEditContext {
   deck?: ThemeDeck | null
   activeSlide?: SlideDetail | null
   deckContext?: DeckChatContext | null
+  /** Read-only viewers may inspect the deck, but cannot start an action-capable AI turn. */
+  canEdit?: boolean
 }
 
 /** Build the action grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and the
@@ -566,7 +598,10 @@ function buildActGrounding(
     }
   }
   if (activeSlide) {
-    out.activeSlide = { id: activeSlide.id, text: slideText(activeSlide) }
+    out.activeSlide = {
+      id: activeSlide.id,
+      text: slideGroundingText(activeSlide),
+    }
     // Attach the slide's research notes so a set_body rewrite can be grounded in the author's evidence.
     if (notesText) out.activeSlide.notes = notesText
   }
@@ -590,13 +625,51 @@ export function useChat(
   const deck = edit?.deck ?? null
   const activeSlide = edit?.activeSlide ?? null
   const deckContext = edit?.deckContext ?? null
+  const canEdit = edit?.canEdit === true
   // Ground the Edit lane on the ACTIVE slide's research notes too — a lean single-note subscription (not
   // the whole deck's notes). 'none' is a non-id sentinel so the hook stays unconditional and simply matches
   // no row when nothing is active. Notes sync only for a deck the principal can access (server twin gate).
-  const noteRows = useQuery(slideNotesQuery({ slideId: activeSlide?.id ?? 'none' }))
+  const noteRows = useQuery(
+    slideNotesQuery({ slideId: activeSlide?.id ?? 'none' }),
+  )
   const activeNotesText =
     activeSlide && noteRows.length ? docText(noteRows[0].doc) : ''
-  const [undoTip, setUndoTip] = useState<{ label: string } | null>(null)
+  // A live deck snapshot generation catches writes that stream before their coarse history command lands
+  // (notably TipTap's per-keystroke folded writes). History remains the authoritative nested-async guard.
+  const editVersionRef = useRef({
+    slides,
+    deck,
+    activeNotesText,
+    version: 0,
+  })
+  const previousEdit = editVersionRef.current
+  if (
+    previousEdit.slides !== slides ||
+    previousEdit.deck !== deck ||
+    previousEdit.activeNotesText !== activeNotesText
+  ) {
+    editVersionRef.current = {
+      slides,
+      deck,
+      activeNotesText,
+      version: previousEdit.version + 1,
+    }
+  }
+  const [undoCandidate, setUndoCandidate] = useState<{
+    label: string
+    revision: number
+  } | null>(null)
+  const historyRevision = useSyncExternalStore(
+    history.subscribe,
+    () => history.revision,
+    () => history.revision,
+  )
+  // A later manual command makes the response-specific chip disappear. Even if a stale render clicks it,
+  // undoLast uses History.undoIfCurrent as the final guard and cannot pop the unrelated command.
+  const undoTip =
+    undoCandidate?.revision === historyRevision
+      ? { label: undoCandidate.label }
+      : null
 
   // One live materialized view per (store, deckId); torn down when either changes or on unmount.
   const view = useMemo(() => {
@@ -623,7 +696,7 @@ export function useChat(
 
   const send = useCallback(
     (text: string) => {
-      if (!store || busy || !text.trim()) return
+      if (!store || busy || !canEdit || !text.trim()) return
       // History = only settled turns — an in-flight/errored assistant row isn't real model context.
       const convo: ChatTurn[] = messages
         .filter((m) => m.status === 'done')
@@ -640,7 +713,12 @@ export function useChat(
         history,
         activeSlideId: activeSlide?.id ?? null,
       }
-      setUndoTip(null)
+      const sentAt = history.revision
+      const sentEditVersion = editVersionRef.current.version
+      const historyIsCurrent = () => history.isCurrent(sentAt)
+      dctx.isRequestCurrent = historyIsCurrent
+      let appliedAt: number | null = null
+      setUndoCandidate(null)
       track('chat:sent', { turn: convo.length })
       notifyUsageChanged() // a chat turn spends an app-paid unit → refresh the usage ring
       void sendChatAction(
@@ -654,11 +732,22 @@ export function useChat(
           activeSlide: grounding.activeSlide,
         },
         text,
-        (actions) => dispatchActions(actions, dctx),
+        async (actions) => {
+          const outcome = await dispatchActions(actions, dctx)
+          if (outcome.ok) appliedAt = history.revision
+          return outcome
+        },
+        {
+          isRequestCurrent: () =>
+            historyIsCurrent() &&
+            editVersionRef.current.version === sentEditVersion,
+        },
       ).then((tip) => {
         if (!tip) return
-        setUndoTip(tip)
         track('chat:edit', { slides: slides.length })
+        if (appliedAt !== null && history.isCurrent(appliedAt)) {
+          setUndoCandidate({ label: tip.label, revision: appliedAt })
+        }
       })
     },
     [
@@ -673,19 +762,20 @@ export function useChat(
       activeNotesText,
       mutate,
       history,
+      canEdit,
     ],
   )
 
   const undoLast = useCallback(() => {
-    history.undo()
-    setUndoTip(null)
-  }, [history])
+    if (undoCandidate) history.undoIfCurrent(undoCandidate.revision)
+    setUndoCandidate(null)
+  }, [history, undoCandidate])
 
   const clear = useCallback(() => {
     if (!store || !view) return
     const rows = view.data
     if (rows.length === 0) return
-    setUndoTip(null)
+    setUndoCandidate(null)
     void store.writeLocal((tx) => {
       for (const r of rows) tx.remove('chat_message', r)
     })

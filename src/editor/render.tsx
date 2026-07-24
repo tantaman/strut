@@ -26,6 +26,7 @@ import type {
   SlideThemeFields,
 } from './types'
 import { docToHtml, isDocEmpty } from './tiptapDoc'
+import { markdownToHtml } from './markdown'
 import { FONTS_BY_CATEGORY } from '../config'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
@@ -244,11 +245,11 @@ const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
   )
 })
 
-/** A read-only full-slide markdown surface (spec: markdown mode). Renders a stored TipTap `doc` (JSON
+/** A read-only slide body surface. Renders a stored TipTap `doc` (JSON
  *  string) to sanitized HTML inside a `.strut-md` scope; the theme (fonts/colors/alignment) flows in
  *  via the CSS vars the enclosing slide container sets (themeVars). Used by every read-only surface —
- *  thumbnails, overview, presenter, share — and the editor stage's non-editing (viewer) branch. The
- *  editing branch renders TipTapSlideEditor into the same `.strut-md` scope instead. */
+ *  thumbnails, spatial arranging, presenter, share, and contextual object focus. The direct card editor
+ *  mounts TipTap into the same `.strut-md` scope. */
 export const MarkdownSurface = memo(function MarkdownSurface({
   doc,
 }: {
@@ -257,6 +258,27 @@ export const MarkdownSurface = memo(function MarkdownSurface({
   const dangerouslySetInnerHTML = useMemo(
     () => ({ __html: docToHtml(doc) }),
     [doc],
+  )
+  return (
+    <div
+      className="strut-md"
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+    />
+  )
+})
+
+/** Compatibility renderer for rows/files that predate the TipTap `doc` column. A non-empty stored
+ *  `doc` always wins — including an intentionally empty TipTap document after the user clears a body.
+ *  The raw source remains untouched until the first direct edit writes a doc, so importing an old deck
+ *  does not silently discard Markdown features outside the current editor schema. */
+export const LegacyMarkdownSurface = memo(function LegacyMarkdownSurface({
+  markdown,
+}: {
+  markdown: string
+}) {
+  const dangerouslySetInnerHTML = useMemo(
+    () => ({ __html: markdownToHtml(markdown) }),
+    [markdown],
   )
   return (
     <div
@@ -284,14 +306,28 @@ export function cellBoxStyle(rect: Rect, padScale = 1): CSSProperties {
   } as CSSProperties
 }
 
-type SlideBodyFields = SlideThemeFields & SlideCellFields
+type SlideBodyFields = SlideThemeFields &
+  SlideCellFields & { markdown?: string | null }
 
-/** True when a slide has ANY body content — its single doc (full layout) or any cell (tiled). Lets the
- *  spatial-mode underlay skip an empty body layer, exactly as the single-doc check did before. */
+function hasLegacyBody(slide: SlideBodyFields, index: number): boolean {
+  return index === 0 && !slide.doc && !!slide.markdown?.trim()
+}
+
+function CellBody({ slide, index }: { slide: SlideBodyFields; index: number }) {
+  if (hasLegacyBody(slide, index))
+    return <LegacyMarkdownSurface markdown={slide.markdown ?? ''} />
+  const doc = cellDocAt(slide, index)
+  return isDocEmpty(doc) ? null : <MarkdownSurface doc={doc} />
+}
+
+/** True when a slide has ANY body content — its single doc/legacy source (full layout) or any visible
+ *  cell (tiled). Lets the positioned-object canvas skip an empty body underlay. */
 export function slideHasBody(slide: SlideBodyFields): boolean {
   const layout = resolveLayout(slide.layout)
-  if (layout === '') return !isDocEmpty(slide.doc)
-  return layoutCells(layout).some((_, i) => !isDocEmpty(cellDocAt(slide, i)))
+  if (layout === '') return hasLegacyBody(slide, 0) || !isDocEmpty(slide.doc)
+  return layoutCells(layout).some(
+    (_, i) => hasLegacyBody(slide, i) || !isDocEmpty(cellDocAt(slide, i)),
+  )
 }
 
 /** The markdown body/bodies for a slide — the ONE shared read renderer, so thumbnails, overview,
@@ -305,17 +341,21 @@ export const MarkdownBodies = memo(function MarkdownBodies({
 }) {
   const layout = resolveLayout(slide.layout)
   if (layout === '') {
-    return isDocEmpty(slide.doc) ? null : <MarkdownSurface doc={slide.doc} />
+    return <CellBody slide={slide} index={0} />
   }
   const padScale = slidePadScale(slide)
   return (
     <>
       {layoutCells(layout).map((cell, i) => {
         const doc = cellDocAt(slide, i)
-        if (isDocEmpty(doc)) return null
+        if (!hasLegacyBody(slide, i) && isDocEmpty(doc)) return null
         return (
-          <div key={i} className="strut-md-cell" style={cellBoxStyle(cell, padScale)}>
-            <MarkdownSurface doc={doc} />
+          <div
+            key={i}
+            className="strut-md-cell"
+            style={cellBoxStyle(cell, padScale)}
+          >
+            <CellBody slide={slide} index={i} />
           </div>
         )
       })}
@@ -323,8 +363,8 @@ export const MarkdownBodies = memo(function MarkdownBodies({
   )
 })
 
-/** `opts.interactive` lets the artifact iframe accept pointer events (Present mode). Everywhere else it
- *  stays pointer-transparent so the editor can drag/select the box and thumbnails stay inert. */
+/** `opts.interactive` lets presented embeds accept pointer events. Everywhere else they stay
+ *  pointer-transparent so the editor can drag/select the box and thumbnails stay inert. */
 export function renderInner(
   c: AnyComponent,
   opts?: { interactive?: boolean },
@@ -350,7 +390,7 @@ export function renderInner(
               width: '100%',
               height: '100%',
               border: 0,
-              pointerEvents: 'none',
+              pointerEvents: opts?.interactive ? 'auto' : 'none',
             }}
             allowFullScreen
           />
@@ -367,7 +407,7 @@ export function renderInner(
             width: '100%',
             height: '100%',
             border: 0,
-            pointerEvents: 'none',
+            pointerEvents: opts?.interactive ? 'auto' : 'none',
           }}
         />
       )

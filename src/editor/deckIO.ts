@@ -193,6 +193,10 @@ export function importDeck(
         valign: s.valign,
         now,
       })
+    // Older `.strut` files carry only raw Markdown. Preserve that source exactly; every editor/read
+    // surface falls back to it until a direct edit writes the canonical TipTap `doc`.
+    if (s.markdown)
+      mutate.setSlideMarkdown({ id: slideId, markdown: s.markdown, now })
     if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })
     if (s.cells) mutate.setSlideCells({ id: slideId, cells: s.cells, now })
     for (const c of s.components)

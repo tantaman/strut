@@ -3,7 +3,7 @@
 // "✨ Generate slides" (aiGenerate.ts), the model is just another producer of the ordinary mutations a human
 // makes — here addSlide + setSlideDoc for the body, plus setSlideNotes for the narration — so it inherits
 // sync, server-side permission gating, and undo for free. The differentiator: the narration lands in the
-// `slide_notes` side table, so the generated deck opens with Research mode already populated.
+// `slide_notes` side table, so each generated card opens with its notes already populated.
 //
 // Both the body Markdown and the notes are converted with markdownToDoc (shared with aiGenerate), the same
 // markdown → sanitized HTML → ProseMirror JSON path the markdown editor and deck import use — so this is

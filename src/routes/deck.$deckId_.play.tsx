@@ -3,14 +3,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRoot } from '@rindle/react'
 import { deckDetailQuery } from '../../shared/queries'
 import { SlideView } from '../editor/SlideView'
-import {
-  backgroundImage,
-  composeBackground,
-  resolveSurface,
-} from '../editor/types'
+import { presentationSurfaceBackground } from '../editor/presentationSurface'
 import { UserStyle } from '../editor/CssEditor'
-import { parseEditorMode } from '../editor/EditorState'
-import type { EditorMode } from '../editor/EditorState'
+import {
+  parseEditorSearch,
+  playExitSearch,
+  playStartIndex,
+} from '../editor/editorSearch'
 import { flightFor } from '../editor/transitions'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
@@ -19,14 +18,8 @@ import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/deck/$deckId_/play')({
   component: Play,
-  // The editor passes the view it left + the slide to start on; Esc hands them back so the editor
-  // reopens where you were (§5).
-  validateSearch: (
-    s: Record<string, unknown>,
-  ): { view?: EditorMode; slide?: string } => ({
-    view: parseEditorMode(s.view),
-    slide: typeof s.slide === 'string' ? s.slide : undefined,
-  }),
+  // The active slide is the only durable editor location. Legacy `view` params are ignored.
+  validateSearch: parseEditorSearch,
 })
 
 // Overview (x,y) are in "card" units (240px wide); the world places full 1280px slides, so scale up.
@@ -38,10 +31,23 @@ function Play() {
   const [deckRaw] = useRoot(deckDetailQuery, { deckId })
   const deck = deckRaw as DeckRoot | null
   const slides = deck?.slides ?? []
-  const { view, slide } = Route.useSearch()
+  const { slide } = Route.useSearch()
   const navigate = useNavigate()
   const [i, setI] = useState(0)
   const [vp, setVp] = useState({ w: 1280, h: 720 })
+
+  // Old presentation links may still carry the editor's retired `view` parameter. Keep their slide
+  // target, but make the address canonical immediately so Present never revives mode-shaped state.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has('view')) return
+    void navigate({
+      to: '/deck/$deckId/play',
+      params: { deckId },
+      search: { slide },
+      replace: true,
+    })
+  }, [deckId, navigate, slide])
 
   useLayoutEffect(() => {
     const on = () => setVp({ w: window.innerWidth, h: window.innerHeight })
@@ -56,10 +62,7 @@ function Play() {
     if (startedRef.current || slides.length === 0) return
     startedRef.current = true
     track('play:started', { count: slides.length })
-    if (slide) {
-      const idx = slides.findIndex((s) => s.id === slide)
-      if (idx >= 0) setI(idx)
-    }
+    setI(playStartIndex(slides, slide))
   }, [slides, slide])
 
   useEffect(() => {
@@ -69,16 +72,16 @@ function Play() {
       else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key))
         setI((n) => Math.max(0, n - 1))
       else if (e.key === 'Escape')
-        // Return to the editor in the view we came from, on whatever slide we ended on.
+        // Return to the same editor on whatever slide the presentation ended on.
         navigate({
           to: '/deck/$deckId',
           params: { deckId },
-          search: { view: view ?? 'doc', slide: slides[i]?.id ?? slide },
+          search: playExitSearch(slides, i, slide),
         })
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [slides, navigate, deckId, view, slide, i])
+  }, [slides, navigate, deckId, slide, i])
 
   if (slides.length === 0)
     return <div className="strut-boot">No slides to present.</div>
@@ -91,8 +94,7 @@ function Play() {
   const acy = active.y * WORLD
   const acz = active.z * WORLD
   // The presentation surface (deck-wide "table") shows behind the flying slide cards.
-  const surf = resolveSurface(active.surface, deck?.surface)
-  const surfImg = backgroundImage(active.surface, deck?.surface)
+  const surf = presentationSurfaceBackground(active.surface, deck?.surface)
   // The chosen canned transition (spec §7.2) drives the camera-flight feel.
   const flight = flightFor(deck?.canned_transition)
   const camTransition = flight.duration
@@ -106,7 +108,7 @@ function Play() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: composeBackground(surf, surfImg),
+        background: surf,
         transition: `background ${flight.duration || 400}ms ${flight.easing}`,
         overflow: 'hidden',
         perspective: 1000,

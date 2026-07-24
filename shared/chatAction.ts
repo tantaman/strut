@@ -40,7 +40,7 @@ export type ChatAction =
       heading_font?: string // known family, or '' = reset to default
       body_font?: string
     }
-  | { kind: 'set_body'; slideId: string; markdown: string } // rewrite ONE slide's body
+  | { kind: 'set_body'; slideId: string; markdown: string } // rewrite cell 0; preserve sibling cells/layout
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
   | { kind: 'arrange'; instruction: string } // reorder / lay out the slides
   // Add ONE blank slide (appended to the deck). `ref` is a turn-local alias later actions in the SAME turn
@@ -80,8 +80,10 @@ export interface ChatActTheme {
   bodyFont: string
 }
 
-/** The currently-active slide's id + its FULL body text (not the 240-char digest excerpt) — the natural
- *  target for a `set_body` rewrite ("tighten this slide"). Absent when no slide is active / it's empty.
+/** The currently-active slide's id + its FULL visible body text (not the 240-char digest excerpt), with
+ *  cell labels when tiled — the natural target for a `set_body` rewrite ("tighten this slide").
+ *  `set_body` replaces only Cell 1; labeled sibling cells are grounding and remain untouched.
+ *  Absent when no slide is active / it's empty.
  *  `notes` carries the author's private RESEARCH notes / backing evidence for this slide (flattened text)
  *  when they've written any — grounding for "draft this slide from my notes". Never shown in a presentation. */
 export interface ChatActSlide {

@@ -2,38 +2,27 @@
 // drag to reorder (fractional index), × to delete, + to add a blank slide. Hovering the gap between
 // two slides reveals a + to insert a slide there; while dragging, the gap shows a drop indicator.
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Mic, Plus, Sparkles } from 'lucide-react'
+import { useQuery, useQueryStatus } from '@rindle/react'
+import { Plus } from 'lucide-react'
 import { keyBetween } from '../lib/order'
 import { useMutate } from '../rindle/RindleProvider'
-import { authClient } from '../rindle/authClient'
+import { slideNotesQuery } from '../../shared/queries'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
-import { reinsertComponent } from './componentOps'
-import { applyGenerated } from './aiGenerate'
-import { applyNarrated } from './aiNarrate'
-import { track } from '../lib/analytics'
-import { notifyUsageChanged } from '../lib/usage'
+import {
+  ComponentDataReader,
+  componentRefKey,
+  mergeComponentRefs,
+} from './componentFragments'
+import { captureDeletedSlide, deleteSlideWithUndo } from './slideDelete'
+import type { SlideNoteSnapshot } from './slideDelete'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { SlideView } from './SlideView'
 import type { SlideDetail } from './deckDetail'
-import type { GeneratedDeck, GenerateRequest } from '../../shared/generate'
-import type {
-  NarratedDeck,
-  NarrateRequest,
-  TranscribeResult,
-} from '../../shared/transcript'
-import { TRANSCRIBE_LIMITS } from '../../shared/transcript'
-import { appPath } from '../../shared/appPath'
 
 export function SlideWell({
   slides,
@@ -43,7 +32,6 @@ export function SlideWell({
   deck:
     | ({
         background: string
-        default_slide_mode?: string | null
       } & DeckThemeFields)
     | null
 }) {
@@ -58,42 +46,6 @@ export function SlideWell({
   // also re-activate the slide.
   const [touchDragging, setTouchDragging] = useState(false)
   const suppressClickRef = useRef(false)
-  // "✨ Generate slides": ask the AI to author N slides from a description and append them. `isMember`
-  // (a promoted, non-anonymous account) gates the feature — guests see a sign-in nudge; the /api/generate
-  // route enforces the same gate server-side (guests can't spend the app's inference budget). During the
-  // initial session resolve we treat the user as a non-member (nudge shown).
-  const { data: session } = authClient.useSession()
-  const isMember =
-    !!session?.user &&
-    (session.user as { isAnonymous?: boolean }).isAnonymous !== true
-  const [genOpen, setGenOpen] = useState(false)
-  // "🎙️ From a recording": author slides (+ speaker notes) from a talk — an uploaded audio file
-  // (transcribed by Whisper) or a pasted transcript. Same member gate as Generate.
-  const [narrateOpen, setNarrateOpen] = useState(false)
-  const componentsBySlideRef = useRef(
-    new Map<string, Map<string, AnyComponent>>(),
-  )
-  const rememberSlideComponent = useCallback(
-    (slideId: string, component: AnyComponent) => {
-      let components = componentsBySlideRef.current.get(slideId)
-      if (!components) {
-        components = new Map()
-        componentsBySlideRef.current.set(slideId, components)
-      }
-      components.set(component.id, component)
-    },
-    [],
-  )
-  const forgetSlideComponent = useCallback((slideId: string, id: string) => {
-    const components = componentsBySlideRef.current.get(slideId)
-    components?.delete(id)
-    if (components?.size === 0) componentsBySlideRef.current.delete(slideId)
-  }, [])
-  const componentsForSlide = useCallback((slideId: string) => {
-    return [
-      ...(componentsBySlideRef.current.get(slideId)?.values() ?? []),
-    ].sort((a, b) => a.z_order - b.z_order)
-  }, [])
   const slideAt = (index: number): SlideDetail | undefined =>
     index >= 0 && index < slides.length ? slides[index] : undefined
 
@@ -166,101 +118,26 @@ export function SlideWell({
   }, [horizontal])
 
   function thumbnailForSlide(s: SlideDetail) {
-    return (
-      <SlideView
-        slide={s}
-        deck={deck}
-        width={148}
-        onComponentData={(component) => rememberSlideComponent(s.id, component)}
-        onComponentRemove={(id) => forgetSlideComponent(s.id, id)}
-      />
-    )
+    return <SlideView slide={s} deck={deck} width={148} />
   }
 
   // Insert a blank slide so it lands at index `at` (0 = before the first slide, slides.length =
-  // append) — shared with Doc mode's seam inserters, see useAddSlide.
-  const addSlideAt = useAddSlide(slides, deck)
+  // append) — shared with the scrolling deck's seam inserters, see useAddSlide.
+  const addSlideAt = useAddSlide(slides)
 
   const addSlide = () => addSlideAt(slides.length)
 
-  // Append the AI-generated slides (one undo for the whole batch) and jump to the first new one.
-  function handleGenerated(generated: GeneratedDeck) {
-    const firstId = applyGenerated(
-      generated,
+  function deleteSlide(
+    s: SlideDetail,
+    idx: number,
+    components: AnyComponent[],
+    note: SlideNoteSnapshot | null,
+  ) {
+    deleteSlideWithUndo(
+      captureDeletedSlide(s, components, note),
       mutate,
-      { deckId: editor.deckId, slides },
       history,
     )
-    if (firstId) editor.setActiveSlide(firstId)
-    track('slides:generated', { count: generated.slides.length })
-    notifyUsageChanged() // ✨ Generate spent an app-paid unit → refresh the usage ring
-    setGenOpen(false)
-  }
-
-  // Append the slides authored from a talk (one undo for the whole batch, notes included) and jump to the
-  // first new one. Mirrors handleGenerated but via applyNarrated (which also writes the Research notes).
-  function handleNarrated(narrated: NarratedDeck) {
-    const firstId = applyNarrated(
-      narrated,
-      mutate,
-      { deckId: editor.deckId, slides },
-      history,
-    )
-    if (firstId) editor.setActiveSlide(firstId)
-    track('slides:narrated', { count: narrated.slides.length })
-    notifyUsageChanged() // 🎙️ narrate spent an app-paid unit → refresh the usage ring
-    setNarrateOpen(false)
-  }
-
-  // Restore a deleted slide (row + transform + theme + all its components).
-  function restoreSlide(s: SlideDetail, comps: AnyComponent[]) {
-    const now = Date.now()
-    mutate.addSlide({
-      id: s.id,
-      deckId: s.deck_id,
-      sort: s.sort,
-      x: s.x,
-      y: s.y,
-      render_mode: s.render_mode,
-      now,
-    })
-    mutate.setSlideTransform({
-      id: s.id,
-      x: s.x,
-      y: s.y,
-      z: s.z,
-      rotate_x: s.rotate_x,
-      rotate_y: s.rotate_y,
-      rotate_z: s.rotate_z,
-      imp_scale: s.imp_scale,
-      now,
-    })
-    if (s.background || s.surface || s.text_align || s.body_region)
-      mutate.setSlideTheme({
-        id: s.id,
-        background: s.background,
-        surface: s.surface,
-        text_align: s.text_align,
-        body_region: s.body_region,
-        now,
-      })
-    if (s.doc) mutate.setSlideDoc({ id: s.id, doc: s.doc, now })
-    for (const c of comps) reinsertComponent(mutate, c)
-  }
-
-  function deleteSlide(s: SlideDetail, idx: number) {
-    // Snapshot components first so undo can restore them — the server cascades component rows by
-    // slide_id (see RINDLE_NOTES.md cascade), so once deleted they're gone unless we re-add them. The
-    // snapshot uses the latest leaf fragment data registered by the thumbnail component readers.
-    const comps = componentsForSlide(s.id)
-    const componentIds = comps.map((c) => c.id)
-    const del = () => mutate.deleteSlide({ id: s.id, componentIds })
-    del()
-    history.push({
-      label: 'Delete slide',
-      redo: del,
-      undo: () => restoreSlide(s, comps),
-    })
     if (editor.activeSlideId === s.id) {
       const neighbor = slideAt(idx + 1) ?? slideAt(idx - 1)
       editor.setActiveSlide(neighbor ? neighbor.id : null)
@@ -461,7 +338,7 @@ export function SlideWell({
     >
       {/* Sized spacer holding the windowed rows; the main-axis extent is the virtualizer's total so the
           strip scrolls the full length even though only the visible rows are mounted. The trailing
-          inserter + add/generate tiles flow after it as normal (non-virtualized) footer items. */}
+          inserter + add tile flow after it as normal (non-virtualized) footer items. */}
       <div
         style={{
           position: 'relative',
@@ -542,16 +419,12 @@ export function SlideWell({
                 <div className="well__thumb">{thumbnailForSlide(s)}</div>
                 <span className="well__badge">{i + 1}</span>
                 {editor.canEdit && (
-                  <button
-                    className="well__del"
-                    title="Delete slide"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteSlide(s, i)
-                    }}
-                  >
-                    ×
-                  </button>
+                  <SafeDeleteButton
+                    slide={s}
+                    onDelete={(components, note) =>
+                      deleteSlide(s, i, components, note)
+                    }
+                  />
                 )}
               </div>
             </div>
@@ -578,434 +451,89 @@ export function SlideWell({
           <Plus size={16} /> Slide
         </button>
       )}
-      {editor.canEdit && (
-        <div className="well__gen">
-          {genOpen ? (
-            <GenerateForm
-              deckId={editor.deckId}
-              isMember={isMember}
-              onGenerated={handleGenerated}
-              onClose={() => setGenOpen(false)}
-            />
-          ) : narrateOpen ? (
-            <NarrateForm
-              deckId={editor.deckId}
-              isMember={isMember}
-              onNarrated={handleNarrated}
-              onClose={() => setNarrateOpen(false)}
-            />
-          ) : (
-            <div className="well__gen-toggles">
-              <button
-                className="well__gen-toggle"
-                onClick={() => setGenOpen(true)}
-                title="Ask AI to generate slides from a description"
-              >
-                <Sparkles size={15} /> Generate slides
-              </button>
-              <button
-                className="well__gen-toggle"
-                onClick={() => setNarrateOpen(true)}
-                title="Turn a talk recording or transcript into slides + speaker notes"
-              >
-                <Mic size={15} /> From a recording
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
 
-// The "✨ Generate slides" form: a natural-language description → POST /api/generate → hand the returned
-// deck up to be appended. For an anonymous (guest) user it renders a sign-in nudge instead — the toggle is
-// visible to everyone (discoverability) but the feature is member-gated (the route enforces it too).
-// Sign-in returns to the current deck so in-progress work + the guest's decks carry over on promotion.
-function GenerateForm({
-  deckId,
-  isMember,
-  onGenerated,
-  onClose,
+/**
+ * A delete affordance is armed only after both cascaded relationships are snapshotted: the lean
+ * per-slide notes query has an authoritative server answer (including authoritative absence), and every
+ * component fragment has produced its latest row. Only mounted/visible well rows subscribe, preserving
+ * the notes table's lazy-loading posture for the rest of a large deck.
+ */
+function SafeDeleteButton({
+  slide,
+  onDelete,
 }: {
-  deckId: string
-  isMember: boolean
-  onGenerated: (deck: GeneratedDeck) => void
-  onClose: () => void
+  slide: SlideDetail
+  onDelete: (components: AnyComponent[], note: SlideNoteSnapshot | null) => void
 }) {
-  const [prompt, setPrompt] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-  // Focus the prompt the moment the panel opens so the user can just start typing.
-  useEffect(() => {
-    inputRef.current?.focus()
+  const query = slideNotesQuery({ slideId: slide.id })
+  const notes = useQuery(query)
+  const notesStatus = useQueryStatus(query)
+  const componentRefs = mergeComponentRefs(slide)
+  const componentData = useRef(new Map<string, AnyComponent>())
+  const [componentCount, setComponentCount] = useState(0)
+
+  const remember = useCallback((component: AnyComponent) => {
+    const isNew = !componentData.current.has(component.id)
+    componentData.current.set(component.id, { ...component })
+    if (isNew) setComponentCount(componentData.current.size)
+  }, [])
+  const forget = useCallback((id: string) => {
+    if (!componentData.current.delete(id)) return
+    setComponentCount(componentData.current.size)
   }, [])
 
-  if (!isMember) {
-    const back =
-      typeof window !== 'undefined'
-        ? window.location.pathname + window.location.search
-        : '/'
-    return (
-      <div className="well__gen-panel">
-        <div className="well__gen-gate">Sign in to generate slides with AI</div>
-        <div className="well__gen-signin">
-          <button
-            onClick={() =>
-              authClient.signIn.social({
-                provider: 'github',
-                callbackURL: back,
-              })
-            }
-          >
-            GitHub
-          </button>
-          <button
-            onClick={() =>
-              authClient.signIn.social({
-                provider: 'google',
-                callbackURL: back,
-              })
-            }
-          >
-            Google
-          </button>
-        </div>
-        <button className="well__gen-close" onClick={onClose}>
-          Cancel
-        </button>
-      </div>
-    )
-  }
-
-  async function submit() {
-    if (loading || !prompt.trim()) return
-    setLoading(true)
-    setError(null)
-    try {
-      const body: GenerateRequest = { deckId, prompt }
-      const res = await fetch(appPath('/api/generate'), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const b = (await res.json().catch(() => null)) as {
-          message?: string
-        } | null
-        setError(
-          res.status === 401
-            ? 'Sign in to generate slides.'
-            : // Prefer the server's message (e.g. the daily-quota notice); fall back per status.
-              (b?.message ??
-                (res.status === 429
-                  ? 'Too many requests — wait a moment.'
-                  : 'AI is unavailable right now.')),
-        )
-        return
-      }
-      const deck = (await res.json()) as GeneratedDeck
-      if (!Array.isArray(deck.slides) || deck.slides.length === 0) {
-        setError('No slides came back — try rephrasing.')
-        return
-      }
-      onGenerated(deck)
-      setPrompt('')
-    } catch {
-      setError('Network error — try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const notesReady = notesStatus === 'complete'
+  const componentsReady = componentCount === componentRefs.length
+  const ready = notesReady && componentsReady
+  const title = !notesReady
+    ? 'Loading slide notes…'
+    : !componentsReady
+      ? 'Loading slide content…'
+      : 'Delete slide'
 
   return (
-    <div className="well__gen-panel">
-      <textarea
-        ref={inputRef}
-        className="well__gen-input"
-        rows={3}
-        placeholder="Describe your slides — e.g. “6 slides introducing our Q3 roadmap”"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={(e) => {
-          // Enter alone is a newline in the textarea; ⌘/Ctrl+Enter submits, Escape closes.
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault()
-            submit()
-          } else if (e.key === 'Escape') onClose()
+    <>
+      {componentRefs.map((component) => (
+        <ComponentDataReader
+          key={componentRefKey(component)}
+          component={component}
+          onData={remember}
+          onRemove={forget}
+        >
+          {() => null}
+        </ComponentDataReader>
+      ))}
+      <button
+        className="well__del"
+        title={title}
+        aria-label={title}
+        disabled={!ready}
+        onPointerDown={(e) => {
+          // Don't let a delete press begin the parent card's touch reorder gesture. Blurring first also
+          // commits an active body/notes edit before the slide snapshot is deleted and recorded.
+          e.stopPropagation()
+          const active = document.activeElement
+          if (active instanceof HTMLElement) active.blur()
         }}
-        disabled={loading}
-      />
-      {error && <div className="well__gen-error">{error}</div>}
-      <div className="well__gen-actions">
-        <button
-          className="well__gen-go"
-          onClick={submit}
-          disabled={loading || !prompt.trim()}
-          title="Generate slides (⌘/Ctrl+Enter)"
-        >
-          {loading ? (
-            <span className="well__gen-spinner" aria-label="Generating" />
-          ) : (
-            <>
-              <Sparkles size={14} /> Generate
-            </>
-          )}
-        </button>
-        <button
-          className="well__gen-close"
-          onClick={onClose}
-          disabled={loading}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// The "🎙️ From a recording" form: drop in an audio file (transcribed via /api/transcribe) OR paste a
-// transcript, optionally pick a target slide count, then POST /api/narrate → hand the returned deck up to be
-// appended (slides + speaker notes). Member-gated exactly like GenerateForm — the toggle is visible to
-// everyone (discoverability) but the feature is member-gated (the routes enforce it too). The audio → text
-// step is a separate call so the recognized transcript lands in the box EDITABLE — the user can fix Whisper
-// before spending a generate on it.
-function NarrateForm({
-  deckId,
-  isMember,
-  onNarrated,
-  onClose,
-}: {
-  deckId: string
-  isMember: boolean
-  onNarrated: (deck: NarratedDeck) => void
-  onClose: () => void
-}) {
-  const [transcript, setTranscript] = useState('')
-  const [target, setTarget] = useState('') // '' = let the model choose
-  const [loading, setLoading] = useState(false) // generating slides
-  const [transcribing, setTranscribing] = useState(false) // audio → text
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
-
-  if (!isMember) {
-    const back =
-      typeof window !== 'undefined'
-        ? window.location.pathname + window.location.search
-        : '/'
-    return (
-      <div className="well__gen-panel">
-        <div className="well__gen-gate">
-          Sign in to build slides from a recording
-        </div>
-        <div className="well__gen-signin">
-          <button
-            onClick={() =>
-              authClient.signIn.social({
-                provider: 'github',
-                callbackURL: back,
-              })
-            }
-          >
-            GitHub
-          </button>
-          <button
-            onClick={() =>
-              authClient.signIn.social({
-                provider: 'google',
-                callbackURL: back,
-              })
-            }
-          >
-            Google
-          </button>
-        </div>
-        <button className="well__gen-close" onClick={onClose}>
-          Cancel
-        </button>
-      </div>
-    )
-  }
-
-  const busy = loading || transcribing
-
-  // Transcribe a picked audio file into the transcript box (appended, so mixing audio + paste works). The
-  // size cap is checked client-side too so an oversized file fails fast without an upload.
-  async function transcribeFile(file: File) {
-    if (busy) return
-    setError(null)
-    if (file.size > TRANSCRIBE_LIMITS.maxAudioBytes) {
-      const mb = Math.round(TRANSCRIBE_LIMITS.maxAudioBytes / (1024 * 1024))
-      setError(
-        `That recording is too large (max ${mb} MB). Paste the transcript instead.`,
-      )
-      return
-    }
-    setTranscribing(true)
-    try {
-      const res = await fetch(appPath('/api/transcribe'), {
-        method: 'POST',
-        headers: { 'content-type': file.type || 'application/octet-stream' },
-        credentials: 'same-origin',
-        body: file,
-      })
-      if (!res.ok) {
-        const b = (await res.json().catch(() => null)) as {
-          message?: string
-        } | null
-        setError(
-          res.status === 401
-            ? 'Sign in to transcribe audio.'
-            : (b?.message ??
-                (res.status === 429
-                  ? 'Too many requests — wait a moment.'
-                  : 'Transcription is unavailable right now.')),
-        )
-        return
-      }
-      const { text } = (await res.json()) as TranscribeResult
-      if (!text.trim()) {
-        setError(
-          'No speech detected in that file — try another recording or paste a transcript.',
-        )
-        return
-      }
-      // Append to whatever's already there so a user can transcribe several clips (or add to a paste).
-      setTranscript((prev) =>
-        prev.trim() ? prev.trimEnd() + '\n\n' + text : text,
-      )
-      inputRef.current?.focus()
-    } catch {
-      setError('Network error — try again.')
-    } finally {
-      setTranscribing(false)
-    }
-  }
-
-  async function submit() {
-    if (busy || !transcript.trim()) return
-    setLoading(true)
-    setError(null)
-    try {
-      const body: NarrateRequest = {
-        deckId,
-        transcript,
-        targetSlides: target ? Number(target) : undefined,
-      }
-      const res = await fetch(appPath('/api/narrate'), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const b = (await res.json().catch(() => null)) as {
-          message?: string
-        } | null
-        setError(
-          res.status === 401
-            ? 'Sign in to generate slides.'
-            : (b?.message ??
-                (res.status === 429
-                  ? 'Too many requests — wait a moment.'
-                  : 'AI is unavailable right now.')),
-        )
-        return
-      }
-      const deck = (await res.json()) as NarratedDeck
-      if (!Array.isArray(deck.slides) || deck.slides.length === 0) {
-        setError('No slides came back — try a longer transcript.')
-        return
-      }
-      onNarrated(deck)
-      setTranscript('')
-    } catch {
-      setError('Network error — try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="well__gen-panel">
-      <label className={'well__gen-file' + (transcribing ? ' is-busy' : '')}>
-        {transcribing ? (
-          <>
-            <span className="well__gen-mini-spinner" /> Transcribing…
-          </>
-        ) : (
-          <>
-            <Mic size={14} /> Choose an audio file
-          </>
-        )}
-        <input
-          type="file"
-          accept="audio/*"
-          disabled={busy}
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            e.target.value = '' // let the same file be re-picked after an error
-            if (f) transcribeFile(f)
-          }}
-        />
-      </label>
-      <div className="well__gen-or">or paste a transcript</div>
-      <textarea
-        ref={inputRef}
-        className="well__gen-input"
-        rows={4}
-        placeholder="Paste your talk transcript here…"
-        value={transcript}
-        onChange={(e) => setTranscript(e.target.value)}
-        onKeyDown={(e) => {
-          // Enter alone is a newline; ⌘/Ctrl+Enter submits, Escape closes.
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault()
-            submit()
-          } else if (e.key === 'Escape') onClose()
+        onClick={(e) => {
+          e.stopPropagation()
+          if (!ready) return
+          const note = notes.length
+            ? { deckId: notes[0].deck_id, doc: notes[0].doc }
+            : null
+          onDelete(
+            [...componentData.current.values()].sort(
+              (a, b) => a.z_order - b.z_order,
+            ),
+            note,
+          )
         }}
-        disabled={busy}
-      />
-      <div className="well__gen-row">
-        <span>Slides</span>
-        <select
-          className="well__gen-select"
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          disabled={busy}
-        >
-          <option value="">Auto</option>
-          <option value="5">5</option>
-          <option value="8">8</option>
-          <option value="12">12</option>
-          <option value="16">16</option>
-        </select>
-      </div>
-      {error && <div className="well__gen-error">{error}</div>}
-      <div className="well__gen-actions">
-        <button
-          className="well__gen-go"
-          onClick={submit}
-          disabled={busy || !transcript.trim()}
-          title="Generate slides from the transcript (⌘/Ctrl+Enter)"
-        >
-          {loading ? (
-            <span className="well__gen-spinner" aria-label="Generating" />
-          ) : (
-            <>
-              <Sparkles size={14} /> Generate
-            </>
-          )}
-        </button>
-        <button className="well__gen-close" onClick={onClose} disabled={busy}>
-          Cancel
-        </button>
-      </div>
-    </div>
+      >
+        ×
+      </button>
+    </>
   )
 }

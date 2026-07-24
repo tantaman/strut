@@ -93,6 +93,17 @@ describe('serialize round-trip with markdown + theme', () => {
     expect(s1.text_align).toBe('right')
   })
 
+  it('preserves raw Markdown from legacy rows even when a doc is also present', () => {
+    const b = bundle()
+    b.slides[0].markdown = '# Original source\n\n| A | B |\n| - | - |'
+    const json = serializeDeck(b)
+    const raw = (json.slides as Array<Record<string, unknown>>)[0]
+    expect(raw.markdown).toBe('# Original source\n\n| A | B |\n| - | - |')
+    expect(deserializeDeck(json).slides[0].markdown).toBe(
+      '# Original source\n\n| A | B |\n| - | - |',
+    )
+  })
+
   it('omits markdown fields for a spatial slide and restores them as empty', () => {
     const json = serializeDeck(bundle())
     const rawSlides = json.slides as Array<Record<string, unknown>>
@@ -117,6 +128,15 @@ describe('serialize round-trip with markdown + theme', () => {
     expect(back.default_slide_mode).toBe('')
     expect(back.text_align).toBe('')
     expect(back.slides[0].render_mode).toBe('')
+    expect(back.slides[0].doc).toBe('')
+  })
+
+  it('parses a legacy raw-Markdown-only slide without inventing a doc', () => {
+    const back = deserializeDeck({
+      fileName: 'legacy markdown',
+      slides: [{ type: 'slide', markdown: '# Still here', components: [] }],
+    })
+    expect(back.slides[0].markdown).toBe('# Still here')
     expect(back.slides[0].doc).toBe('')
   })
 })

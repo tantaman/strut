@@ -1,8 +1,7 @@
 // The write model behind body editing, detached from the chrome around it: a TipTap editor bound to one
 // CELL of a slide, streaming every keystroke through a `.folded` mutation (debounced, last-value-wins)
-// and committing ONE undo step per edit session on blur. Extracted from TipTapSlideEditor so the same
-// model can back BOTH surfaces — the Stage's single fit-to-viewport editor and Doc mode's column of N
-// cards — without either owning the other's layout.
+// and committing ONE undo step per edit session on blur. The model is independent of card chrome and
+// supports every body-layout cell without forking persistence logic.
 //
 // A slide's layout tiles the canvas into cells (types.ts). Cell 0's doc is the `doc` column, written via
 // setSlideDoc — exactly as before, so a full-layout slide is unchanged. Cells 1..N live in the `cells`
@@ -19,11 +18,12 @@ import { useHistory } from './UndoProvider'
 import { strutExtensions } from './tiptapSchema'
 import { SlashCommand } from './slashCommand'
 import { parseDoc } from './tiptapDoc'
+import { markdownToHtml } from './markdown'
 import { cellDocAt, writeCellDoc } from './types'
 import type { SlideDetail } from './deckDetail'
 
 export interface SlideEditorOpts {
-  // Doc mode claims the ACTIVE slide from whichever cell you type into. Held in a ref so a fresh inline
+  // The editor claims the active slide from whichever cell you type into. Held in a ref so a fresh inline
   // callback each render never re-registers.
   onFocus?: () => void
 }
@@ -42,9 +42,18 @@ export function useSlideCellEditor(
   // whatever the sibling cells currently hold (the editor callbacks close over the FIRST render's slide).
   const slideRef = useRef(slide)
   slideRef.current = slide
+  const liveEditorRef = useRef<Editor | null>(null)
   // This cell's doc JSON at the start of the edit session — one coarse undo step is pushed on blur (the
   // per-keystroke stream is a live-preview write, not an undo boundary).
   const baselineRef = useRef(cellDocAt(slide, idx))
+  const storedDoc = cellDocAt(slide, idx)
+  // Markdown-only rows predate `doc`. Seed their primary editor from the safe legacy renderer, but keep
+  // the raw stored baseline: the first keystroke writes the canonical doc, while Undo restores `doc: ''`
+  // and therefore reveals the original Markdown source again without a lossy eager migration.
+  const initialContent =
+    idx <= 0 && !storedDoc && slide.markdown.trim()
+      ? markdownToHtml(slide.markdown)
+      : parseDoc(storedDoc)
 
   // Write this cell's doc. Cell 0 → the `doc` column (unchanged path); cells 1..N → the `cells` blob,
   // merging just this cell in. `stream` folds per (slide, cell) for the live keystroke preview; the
@@ -92,16 +101,27 @@ export function useSlideCellEditor(
     // because it's editor-only chrome (React, `document`) and the schema array stays render-path safe
     // for SSR/export. It contributes no nodes or marks, so it can't change what a doc serializes to.
     extensions: [...strutExtensions, SlashCommand],
-    content: parseDoc(cellDocAt(slide, idx)),
+    content: initialContent,
     // The editable element IS the `.strut-md` surface, so it inherits the exact theme/typography the
     // renderer uses. `immediatelyRender: false` keeps it SSR-safe (no DOM at first render).
     immediatelyRender: false,
     editorProps: {
       attributes: { class: 'strut-md', spellcheck: 'false' },
     },
+    onCreate: ({ editor: ed }) => {
+      liveEditorRef.current = ed
+    },
     onUpdate: ({ editor: ed }) => streamDoc(JSON.stringify(ed.getJSON())),
     onFocus: () => optsRef.current?.onFocus?.(),
     onBlur: ({ editor: ed }) => commit(ed),
+    // Virtualized cards can leave the mounted window while focused. TipTap's destroy event is the last
+    // reliable boundary before that editor disappears, so commit the already-streamed session as the
+    // same one coarse undo step a normal blur would create.
+    onDestroy: () => {
+      const ed = liveEditorRef.current
+      if (ed) commit(ed)
+      liveEditorRef.current = null
+    },
   })
 }
 

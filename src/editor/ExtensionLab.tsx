@@ -145,11 +145,9 @@ export default function ExtensionLab() {
       )}
 
       <p style={hint}>
-        Added text is a spatial component. It's directly editable only while the
-        slide is in <strong>Objects</strong> mode — in <strong>Markdown</strong>
-        mode (the default for new slides) objects render locked on top of the
-        doc. Switch the slide to Objects mode in the header to select, move, or
-        double-click-edit it.
+        Added text is a positioned object. It renders over the slide body; use
+        the card's <strong>Edit positioned objects</strong> affordance to
+        select, move, or double-click-edit it.
       </p>
     </div>
   )
