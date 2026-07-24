@@ -11,9 +11,9 @@
 // render. It also makes this virtualizer simpler than Research's —
 // every row is exactly `cardH + DOC_GAP`, so `estimateSize` is EXACT and nothing needs measureElement.
 //
-// The primary text component edits directly on the card; every other component is visible but inert.
-// Precision opens over this same editor and suspends the card's TipTap instance while covered, so there
-// is always exactly one writer for the component. Closing it restores the exact scroll position.
+// Every text component edits directly on the card; media and shapes remain visible but inert. Precision
+// opens over this same editor and suspends the card's TipTap instances while covered, so there is always
+// exactly one writer per component. Closing it restores the exact scroll position.
 //
 // The coupling to "one active slide" is resolved here rather than pushed onto the rest of the editor:
 // AI actions and contextual tools act on `?slide=` — so the card under the viewport center drives it
@@ -51,7 +51,9 @@ import { StaticComponent } from './ObjectsLayer'
 import { UserStyle } from './CssEditor'
 import { BackgroundImageLayer, cmpStyle, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
+import type { AnyComponent } from './types'
 import type { DeckRoot, SlideDetail } from './deckDetail'
+import { DocTextLayoutPicker } from './DocTextLayoutPicker'
 import { TextComponentEditor } from './TextComponentEditor'
 import { componentClassName } from './componentClasses'
 import {
@@ -433,8 +435,8 @@ function DocCard({
 }) {
   const editor = useEditor()
   const active = slide.id === editor.activeSlideId
-  // Every owned card's primary text component is directly writable; precision reveals the same component
-  // row's frame alongside the rest of the positioned objects.
+  // Every owned card's text components are directly writable; precision reveals those same component
+  // rows and frames alongside the rest of the positioned objects.
   const editable = editor.canEdit
   const drop = useDropImage(slide)
   // The back mounts on the FIRST flip and then stays while the card lives: mounting is what starts
@@ -481,6 +483,7 @@ function DocCard({
               <SlideView slide={slide} deck={deck} width={colW} />
             </button>
           )}
+          {editable && !flipped && <DocPrimaryTextLayout slide={slide} />}
           {/* Hover-× removes a dropped photo in place as one undoable command. */}
           {editable && !flipped && (
             <DocImageRemovers slide={slide} scale={scale} />
@@ -518,6 +521,28 @@ function DocCard({
         <NotebookPen size={14} />
       </button>
     </div>
+  )
+}
+
+/** Resolve the canonical primary row at the card boundary so its layout control stays unscaled and
+ *  beside the precision affordance. Fragment reads are local/deduped with the component stack above. */
+function DocPrimaryTextLayout({ slide }: { slide: SlideDetail }) {
+  return (
+    <>
+      {mergeComponentRefs(slide).map((component) => (
+        <ComponentDataReader
+          key={`layout:${componentRefKey(component)}`}
+          component={component}
+        >
+          {(candidate) =>
+            candidate.id === slide.body_component_id &&
+            candidate.kind === 'text' ? (
+              <DocTextLayoutPicker component={candidate} />
+            ) : null
+          }
+        </ComponentDataReader>
+      ))}
+    </>
   )
 }
 
@@ -582,8 +607,19 @@ function DocCardBody({
   )
 }
 
-/** One component stack powers both editor depths. Doc-first gives only the primary text component a
- *  caret; every other component remains a faithful inert rendering until precision is opened. */
+/** Doc-first is the low-friction editing depth, not a special body-only data model. Every text
+ *  component therefore remains directly writable there; opening precision temporarily suspends every
+ *  writer so the same component can never have two live TipTap instances. */
+export function isDocTextEditable(
+  component: Pick<AnyComponent, 'kind'>,
+  bodyEditing: boolean,
+): boolean {
+  return bodyEditing && component.kind === 'text'
+}
+
+/** One component stack powers both editor depths. The primary text component supplies the full-slide
+ *  default, while every text component accepts a caret in doc-first. Non-text objects remain faithful,
+ *  inert renderings until precision is opened. */
 function DocComponentLayer({
   slide,
   bodyEditing,
@@ -603,19 +639,20 @@ function DocComponentLayer({
         >
           {(c) => {
             const primary = c.id === slide.body_component_id
-            if (!primary || c.kind !== 'text' || !bodyEditing)
+            if (!isDocTextEditable(c, bodyEditing))
               return <StaticComponent c={c} primary={primary} />
             return (
               <div
                 className={componentClassName(c, [
-                  'is-primary',
+                  ...(primary ? ['is-primary'] : []),
                   'is-doc-editable',
                 ])}
                 style={cmpStyle(c)}
               >
                 <TextComponentEditor
                   component={c}
-                  primary
+                  primary={primary}
+                  isolatePointer={false}
                   onFocus={() => onFocusEditor(slide.id)}
                 />
               </div>

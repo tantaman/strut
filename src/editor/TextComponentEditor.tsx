@@ -11,6 +11,7 @@ export function TextComponentEditor({
   component,
   primary = false,
   autoFocus = false,
+  isolatePointer = true,
   className = '',
   onFocus,
   onBlur,
@@ -18,6 +19,10 @@ export function TextComponentEditor({
   component: AnyComponent
   primary?: boolean
   autoFocus?: boolean
+  /** Precision owns drag/select gestures on the component wrapper, so its writer isolates pointer
+   *  events. Doc-first has no competing spatial gesture and leaves the native contenteditable hit path
+   *  untouched — coordinate-level clicks can place the caret directly. */
+  isolatePointer?: boolean
   className?: string
   onFocus?: TextComponentEditorOptions['onFocus']
   onBlur?: TextComponentEditorOptions['onBlur']
@@ -31,7 +36,9 @@ export function TextComponentEditor({
   return (
     <div
       className={`text-component-editor${primary ? ' is-primary' : ''}${className ? ` ${className}` : ''}`}
-      onPointerDown={(event) => event.stopPropagation()}
+      onPointerDown={
+        isolatePointer ? (event) => event.stopPropagation() : undefined
+      }
       onKeyDown={(event) => {
         if (event.key !== 'Escape') return
         event.preventDefault()

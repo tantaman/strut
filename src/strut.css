@@ -1188,9 +1188,9 @@ button {
   outline: none;
 }
 
-/* Doc-first renders the real component stack, but only its primary text component accepts input.
-   Positioned media remains visible and pointer-transparent; its quiet hover remove affordance lives in
-   a separate overlay. Suspending the editor for precision removes the one pointer-active child too. */
+/* Doc-first renders the real component stack, with every text component accepting input. Positioned
+   media remains visible and pointer-transparent; its quiet remove affordance lives in a separate overlay.
+   Suspending the editors for precision removes every pointer-active text child. */
 .doc__components {
   position: absolute;
   inset: 0;
@@ -3409,6 +3409,111 @@ button {
   color: var(--coral);
   border-color: var(--coral);
 }
+/* Primary text layouts are materialized component frames, exposed through the first quiet card-corner
+   control. The overlay itself is inert so the full-slide TipTap surface remains directly editable. */
+.doc-layout {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.doc-layout__button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: auto;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+.doc__card:hover .doc-layout__button,
+.doc-layout__button.is-open,
+.doc-layout__button:focus-visible {
+  opacity: 1;
+}
+.doc-layout__button:hover,
+.doc-layout__button.is-open {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+.doc-layout__glyph {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.doc-layout__glyph i {
+  position: absolute;
+  display: block;
+  min-width: 1px;
+  min-height: 1px;
+  background: currentColor;
+  border: 1px solid var(--panel);
+  border-radius: 1px;
+  box-sizing: border-box;
+}
+.doc-layout__popover {
+  position: fixed;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(72px, 1fr));
+  gap: 8px;
+  width: 176px;
+}
+.doc-layout__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  height: 58px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s;
+}
+.doc-layout__choice:hover,
+.doc-layout__choice.is-active {
+  color: var(--coral);
+  border-color: var(--coral);
+}
+.doc-layout__choice.is-active {
+  background: var(--coral-soft);
+}
+.doc-layout__choice .doc-layout__glyph {
+  width: 40px;
+  height: 24px;
+}
+.doc-layout__choice .doc-layout__glyph i {
+  border-color: var(--panel-2);
+}
+.doc-layout__choice.is-active .doc-layout__glyph i {
+  border-color: var(--coral-soft);
+}
 /* Opens the positioned-object focus surface. It shares the layout button's corner idiom and remains
    invisible at rest, so a slide still reads as content rather than a toolbar. */
 .doc__objectsbtn {
@@ -3478,9 +3583,10 @@ button {
 }
 .doc__imgtool {
   position: absolute;
-  pointer-events: auto;
+  pointer-events: none;
 }
-/* A faint scrim on hover so the centered × reads on a bright photo — quiet until the image is reached for. */
+/* A faint scrim only while the real delete control is reached. The photo-sized wrapper never becomes a
+   hit target, so text can remain directly editable even when it overlaps an image. */
 .doc__imgtool::after {
   content: '';
   position: absolute;
@@ -3489,7 +3595,8 @@ button {
   transition: background 0.12s;
   pointer-events: none;
 }
-.doc__imgtool:hover::after {
+.doc__imgtool:has(.doc__imgtool-del:hover)::after,
+.doc__imgtool:has(.doc__imgtool-del:focus-visible)::after {
   background: rgba(0, 0, 0, 0.16);
 }
 /* Centered on the photo, revealed on hover. Removal is one undo, so it stays a light touch rather than a
@@ -3510,6 +3617,9 @@ button {
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
+  /* The photo-sized wrapper is only a positioning scope. Arm this destructive target only after it is
+     visibly disclosed; on touch, deletion remains available in precision instead of as a hidden tap. */
+  pointer-events: none;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.85);
   transition:
@@ -3517,10 +3627,17 @@ button {
     transform 0.12s,
     background 0.12s;
 }
-.doc__imgtool:hover .doc__imgtool-del,
 .doc__imgtool-del:focus-visible {
   opacity: 1;
+  pointer-events: auto;
   transform: translate(-50%, -50%) scale(1);
+}
+@media (hover: hover) {
+  .doc__card:hover .doc__imgtool-del {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 .doc__imgtool-del:hover {
   background: var(--danger);
@@ -3584,7 +3701,8 @@ button {
     padding: 102px 12px 96px;
   }
   .doc__flipbtn,
-  .doc__objectsbtn {
+  .doc__objectsbtn,
+  .doc-layout__button {
     opacity: 1;
   }
   .doc__seam .doc__ins {

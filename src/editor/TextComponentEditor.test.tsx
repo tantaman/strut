@@ -286,4 +286,29 @@ describe('TextComponentEditor', () => {
     expect(mocks.domBlur).toHaveBeenCalledOnce()
     expect(mocks.blur).toHaveBeenCalledOnce()
   })
+
+  it('isolates precision pointers but leaves doc-first native caret clicks alone', () => {
+    const precisionPointerDown = vi.fn()
+    const precision = render(
+      <div onPointerDown={precisionPointerDown}>
+        <TextComponentEditor component={component()} />
+      </div>,
+    )
+    fireEvent.pointerDown(
+      precision.container.querySelector('.text-component-editor')!,
+    )
+    expect(precisionPointerDown).not.toHaveBeenCalled()
+    precision.unmount()
+
+    const docPointerDown = vi.fn()
+    const doc = render(
+      <div onPointerDown={docPointerDown}>
+        <TextComponentEditor component={component()} isolatePointer={false} />
+      </div>,
+    )
+    fireEvent.pointerDown(
+      doc.container.querySelector('.text-component-editor')!,
+    )
+    expect(docPointerDown).toHaveBeenCalledOnce()
+  })
 })
