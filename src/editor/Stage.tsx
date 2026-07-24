@@ -1,19 +1,10 @@
-// The operating table (spec §5.2): renders the active slide at 1280×720, auto-scaled to fit, with
-// on-canvas component manipulation — move (single + multi, shift=20px snap), resize (SE handle,
-// aspect-locked unless shift), rotate (shift=22.5° snap), delete, double-click text editing, and
-// marquee selection. High-frequency drags use Rindle's `.folded` (debounced last-value-wins) writes.
+// The precision canvas: a 1280×720 slide with Bento-inspired direct manipulation (smart guides,
+// eight-handle/group resize, group rotation, exact arrange commands, keyboard nudge/duplicate) adapted
+// to Strut's optimistic Rindle rows. Every gesture is still one shared undo command.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
-import {
-  GRID_SNAP,
-  newId,
-  ROTATE_SNAP,
-  SKEW_BASE,
-  SKEW_SNAP,
-  SLIDE_H,
-  SLIDE_W,
-} from '../config'
+import { newId, ROTATE_SNAP, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
@@ -51,6 +42,11 @@ import {
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
 import { Inspector } from './Inspector'
+import type {
+  PrecisionArrangeAction,
+  PrecisionFramePatch,
+  PrecisionInspectorActions,
+} from './Inspector'
 import { RichTextToolbar } from './RichTextToolbar'
 import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
@@ -60,6 +56,23 @@ import {
   componentRefKey,
   mergeComponentRefs,
 } from './componentFragments'
+import {
+  alignFrames,
+  distributeFrames,
+  matchFrameSize,
+  planZReorder,
+  resizeGroupFrames,
+  selectionBounds,
+  snapMove,
+} from './precisionGeometry'
+import type {
+  Alignment,
+  PrecisionBounds,
+  PrecisionFrame,
+  ResizeHandle,
+  SnapGuide,
+  ZReorderAction,
+} from './precisionGeometry'
 
 interface DeckRow extends DeckThemeFields {
   background: string
@@ -87,11 +100,16 @@ function isEditableTarget(target: EventTarget | null): boolean {
 export function Stage({
   slide,
   deck,
+  inspectorHost,
 }: {
   slide: SlideDetail
   deck: DeckRow | null
+  inspectorHost?: HTMLElement | null
 }) {
   const slideData = slide
+  const editor = useEditor()
+  const editorRef = useRef(editor)
+  editorRef.current = editor
   const componentRefs = useMemo(
     () => mergeComponentRefs(slideData),
     [slideData],
@@ -102,11 +120,27 @@ export function Stage({
     componentDataRef.current.clear()
     lastSlideIdRef.current = slideData.id
   }
+  const [, setComponentRevision] = useState(0)
   const rememberComponent = useCallback((component: AnyComponent) => {
     componentDataRef.current.set(component.id, component)
+    // The component fragment renders below this parent. Bump the lightweight parent revision so the
+    // combined selection frame/portal inspector can follow that independently-rendered live row.
+    setComponentRevision((revision) => revision + 1)
   }, [])
   const forgetComponent = useCallback((id: string) => {
     componentDataRef.current.delete(id)
+    // Fragment refs can briefly remount when the ordered component list changes. Defer stale-selection
+    // cleanup until replacement readers have had a chance to publish the same id again.
+    queueMicrotask(() => {
+      if (componentDataRef.current.has(id)) return
+      const currentEditor = editorRef.current
+      if (currentEditor.selected.has(id)) {
+        currentEditor.selectMany(
+          [...currentEditor.selected].filter((selectedId) => selectedId !== id),
+        )
+      }
+    })
+    setComponentRevision((revision) => revision + 1)
   }, [])
   const getComponents = useCallback(
     () =>
@@ -118,7 +152,6 @@ export function Stage({
   const stageRef = useRef<HTMLDivElement>(null)
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H)
   const mutate = useMutate()
-  const editor = useEditor()
   const history = useHistory()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [marquee, setMarquee] = useState<null | {
@@ -127,6 +160,7 @@ export function Stage({
     w: number
     h: number
   }>(null)
+  const [guides, setGuides] = useState<readonly SnapGuide[]>([])
   // Live preview (slide coords + baked markup) while drawing a shape with the armed shape tool.
   const [shapeDraft, setShapeDraft] = useState<null | {
     x: number
@@ -141,6 +175,268 @@ export function Stage({
   const bgImg = resolveBackgroundImage(slideData.background, deck?.background)
   const surf = resolveSurface(slideData.surface, deck?.surface)
   const surfImg = backgroundImage(slideData.surface, deck?.surface)
+
+  type GeometrySnapshot = {
+    id: string
+    x: number
+    y: number
+    scale_x: number
+    scale_y: number
+    scale_w: number
+    scale_h: number
+    rotate: number
+    skew_x: number
+    skew_y: number
+  }
+
+  function frameForComponent(component: AnyComponent): PrecisionFrame {
+    const fallback = componentSize(component)
+    // Intrinsic legacy text has 0×0 in the row. offsetWidth/Height are unscaled, unrotated layout
+    // dimensions, exactly what a first precision resize should materialize into the spatial columns.
+    const node = [
+      ...(stageRef.current?.querySelectorAll<HTMLElement>('.cmp[data-id]') ??
+        []),
+    ].find((candidate) => candidate.dataset.id === component.id)
+    const w =
+      component.scale_w ||
+      node?.offsetWidth ||
+      fallback.w ||
+      Math.max(40, component.size ?? 72)
+    const h =
+      component.scale_h ||
+      node?.offsetHeight ||
+      fallback.h ||
+      Math.max(20, component.size ?? 72)
+    return {
+      id: component.id,
+      x: component.x,
+      y: component.y,
+      w,
+      h,
+      rotate: component.rotate,
+    }
+  }
+
+  function geometryOf(component: AnyComponent): GeometrySnapshot {
+    return {
+      id: component.id,
+      x: component.x,
+      y: component.y,
+      scale_x: component.scale_x,
+      scale_y: component.scale_y,
+      scale_w: component.scale_w,
+      scale_h: component.scale_h,
+      rotate: component.rotate,
+      skew_x: component.skew_x,
+      skew_y: component.skew_y,
+    }
+  }
+
+  function geometryFromFrame(
+    component: AnyComponent,
+    frame: PrecisionFrame,
+  ): GeometrySnapshot {
+    return {
+      ...geometryOf(component),
+      x: frame.x,
+      y: frame.y,
+      // A frame always has measured dimensions. Persist them when a precision command changes size;
+      // callers that only move retain the component's stored dimensions below.
+      scale_w: frame.w,
+      scale_h: frame.h,
+      rotate: frame.rotate,
+    }
+  }
+
+  function applyGeometry(
+    snapshots: readonly GeometrySnapshot[],
+    folded = false,
+  ) {
+    for (const value of snapshots) {
+      const move = { id: value.id, x: value.x, y: value.y }
+      const transform = {
+        id: value.id,
+        scale_x: value.scale_x,
+        scale_y: value.scale_y,
+        scale_w: value.scale_w,
+        scale_h: value.scale_h,
+        rotate: value.rotate,
+        skew_x: value.skew_x,
+        skew_y: value.skew_y,
+      }
+      if (folded) {
+        mutate.moveComponent.folded({ key: value.id }, move)
+        mutate.transformComponent.folded({ key: value.id }, transform)
+      } else {
+        mutate.moveComponent(move)
+        mutate.transformComponent(transform)
+      }
+    }
+  }
+
+  function commitGeometry(
+    label: string,
+    components: readonly AnyComponent[],
+    frames: readonly PrecisionFrame[],
+    options: { persistSize?: boolean; alreadyApplied?: boolean } = {},
+  ) {
+    const frameById = new Map(frames.map((frame) => [frame.id, frame]))
+    const before = components.map(geometryOf)
+    const after = components.flatMap((component) => {
+      const frame = frameById.get(component.id)
+      if (!frame) return []
+      const snapshot = geometryFromFrame(component, frame)
+      if (!options.persistSize) {
+        snapshot.scale_w = component.scale_w
+        snapshot.scale_h = component.scale_h
+      }
+      return [snapshot]
+    })
+    if (after.length === 0) return
+    const changed = after.some((value, index) => {
+      const previous = before[index]
+      return (
+        value.x !== previous.x ||
+        value.y !== previous.y ||
+        value.scale_w !== previous.scale_w ||
+        value.scale_h !== previous.scale_h ||
+        value.rotate !== previous.rotate
+      )
+    })
+    if (!changed) return
+    if (!options.alreadyApplied) applyGeometry(after)
+    history.push({
+      label,
+      redo: () => applyGeometry(after),
+      undo: () => applyGeometry(before),
+    })
+  }
+
+  function componentsFor(ids: Iterable<string>): AnyComponent[] {
+    const wanted = new Set(ids)
+    return getComponents().filter((component) => wanted.has(component.id))
+  }
+
+  // Selection insertion order matters for commands such as Match width/height, where the first
+  // selected object is the reference. Paint-order sorting is still used everywhere else.
+  function componentsInOrder(ids: Iterable<string>): AnyComponent[] {
+    const byId = new Map(
+      getComponents().map((component) => [component.id, component]),
+    )
+    return [...ids].flatMap((id) => {
+      const component = byId.get(id)
+      return component ? [component] : []
+    })
+  }
+
+  function duplicateComponents(source: readonly AnyComponent[]) {
+    if (!editor.canEdit || source.length === 0) return
+    const current = getComponents()
+    const maxZ = current.reduce(
+      (value, component) => Math.max(value, component.z_order),
+      0,
+    )
+    const copies = source.map((component, index) => ({
+      ...component,
+      id: newId(),
+      x: component.x + COMPONENT_PASTE_OFFSET,
+      y: component.y + COMPONENT_PASTE_OFFSET,
+      z_order: maxZ + index + 1,
+    }))
+    for (const copy of copies) reinsertComponent(mutate, copy)
+    editor.selectMany(copies.map((copy) => copy.id))
+    history.push({
+      label: copies.length > 1 ? 'Duplicate components' : 'Duplicate component',
+      redo: () => copies.forEach((copy) => reinsertComponent(mutate, copy)),
+      undo: () =>
+        copies.forEach((copy) => mutate.removeComponent({ id: copy.id })),
+    })
+  }
+
+  const nudgeBurstRef = useRef<null | {
+    key: string
+    before: GeometrySnapshot[]
+    after: GeometrySnapshot[]
+    timer: ReturnType<typeof setTimeout> | null
+  }>(null)
+
+  function flushNudge() {
+    const burst = nudgeBurstRef.current
+    if (!burst) return
+    if (burst.timer) clearTimeout(burst.timer)
+    nudgeBurstRef.current = null
+    if (
+      !burst.after.some((value, index) => {
+        const before = burst.before[index]
+        return value.x !== before.x || value.y !== before.y
+      })
+    )
+      return
+    history.push({
+      label: burst.after.length > 1 ? 'Nudge components' : 'Nudge component',
+      redo: () => applyGeometry(burst.after),
+      undo: () => applyGeometry(burst.before),
+    })
+  }
+
+  // Bento/Figma keyboard muscle memory: arrows nudge by one, Shift by ten, and Cmd/Ctrl+D duplicates.
+  // A held arrow is one gesture, so its repeat burst collapses to a single undo after a short idle.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (!editor.canEdit || isEditableTarget(event.target)) return
+      const selected = componentsFor(editor.selected)
+      if (selected.length === 0) return
+      const mod = event.metaKey || event.ctrlKey
+      if (mod && event.key.toLowerCase() === 'd') {
+        event.preventDefault()
+        flushNudge()
+        duplicateComponents(selected)
+        return
+      }
+      if (
+        event.key !== 'ArrowLeft' &&
+        event.key !== 'ArrowRight' &&
+        event.key !== 'ArrowUp' &&
+        event.key !== 'ArrowDown'
+      )
+        return
+      event.preventDefault()
+      const step = event.shiftKey ? 10 : 1
+      const dx =
+        event.key === 'ArrowLeft'
+          ? -step
+          : event.key === 'ArrowRight'
+            ? step
+            : 0
+      const dy =
+        event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0
+      const key = selected
+        .map((component) => component.id)
+        .sort()
+        .join(':')
+      if (nudgeBurstRef.current?.key !== key) flushNudge()
+      const burst = nudgeBurstRef.current ?? {
+        key,
+        before: selected.map(geometryOf),
+        after: selected.map(geometryOf),
+        timer: null,
+      }
+      burst.after = burst.after.map((value) => ({
+        ...value,
+        x: value.x + dx,
+        y: value.y + dy,
+      }))
+      applyGeometry(burst.after)
+      if (burst.timer) clearTimeout(burst.timer)
+      burst.timer = setTimeout(flushNudge, 220)
+      nudgeBurstRef.current = burst
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      flushNudge()
+    }
+  }, [editor.canEdit, editor.selected, history, mutate, slideData.id])
 
   // Delete key removes selected components (spec §11), unless typing.
   useEffect(() => {
@@ -275,20 +571,48 @@ export function Stage({
     editor.selectMany(pasted.map((c) => c.id))
   }
 
-  function raise(c: AnyComponent) {
-    const maxZ = getComponents().reduce((m, x) => Math.max(m, x.z_order), 0)
-    if (c.z_order < maxZ) mutate.setComponentZ({ id: c.id, z_order: maxZ + 1 })
-  }
-
   // ---- gestures ----
   function dragListen(move: (ev: PointerEvent) => void, end?: () => void) {
-    const up = () => {
+    let finished = false
+    const finish = () => {
+      if (finished) return
+      finished = true
       window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointerup', finish)
+      window.removeEventListener('pointercancel', finish)
+      window.removeEventListener('blur', finish)
       end?.()
     }
     window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    window.addEventListener('pointerup', finish)
+    window.addEventListener('pointercancel', finish)
+    window.addEventListener('blur', finish)
+  }
+
+  function deepSelect(event: RPointerEvent) {
+    const canvas = stageRef.current?.querySelector<HTMLElement>('.slide-canvas')
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / scale
+    const y = (event.clientY - rect.top) / scale
+    const candidates = getComponents()
+      .filter((component) => {
+        const frame = frameForComponent(component)
+        return (
+          x >= frame.x &&
+          x <= frame.x + frame.w &&
+          y >= frame.y &&
+          y <= frame.y + frame.h
+        )
+      })
+      .sort((a, b) => b.z_order - a.z_order)
+    if (candidates.length === 0) return
+    const current = editor.selected.size === 1 ? [...editor.selected][0] : null
+    const currentIndex = current
+      ? candidates.findIndex((component) => component.id === current)
+      : -1
+    const next = candidates[(currentIndex + 1) % candidates.length]
+    editor.select(next.id)
   }
 
   function beginMove(c: AnyComponent, e: RPointerEvent) {
@@ -297,278 +621,285 @@ export function Stage({
     // shape works even when it starts over an existing object (Figma behavior).
     if (editor.pendingShape) return
     e.stopPropagation()
-    const additive = e.shiftKey || e.metaKey || e.ctrlKey
-    if (additive) editor.select(c.id, true)
-    else if (!editor.isSelected(c.id)) editor.select(c.id, false)
-    raise(c)
-
-    const ids =
-      editor.isSelected(c.id) && editor.selected.size > 0
-        ? [...editor.selected]
-        : [c.id]
-    const starts = new Map(
-      getComponents()
-        .filter((x) => ids.includes(x.id))
-        .map((x) => [x.id, { x: x.x, y: x.y }]),
-    )
-    const finals = new Map<string, { x: number; y: number }>()
-    const sx = e.clientX
-    const sy = e.clientY
-    editor.setDraggingComponentId(c.id)
-    dragListen(
-      (ev) => {
-        const dx = (ev.clientX - sx) / scale
-        const dy = (ev.clientY - sy) / scale
-        starts.forEach((s, id) => {
-          let nx = s.x + dx
-          let ny = s.y + dy
-          if (ev.shiftKey) {
-            nx = Math.round(nx / GRID_SNAP) * GRID_SNAP
-            ny = Math.round(ny / GRID_SNAP) * GRID_SNAP
-          }
-          const pos = { x: Math.round(nx), y: Math.round(ny) }
-          finals.set(id, pos)
-          mutate.moveComponent.folded({ key: id }, { id, x: pos.x, y: pos.y })
-        })
-      },
-      () => {
-        editor.setDraggingComponentId(null)
-        // One undoable step for the whole (possibly multi-) drag.
-        const moved = [...finals].filter(([id, f]) => {
-          const s = starts.get(id)!
-          return s.x !== f.x || s.y !== f.y
-        })
-        if (moved.length === 0) return
-        history.push({
-          label: 'Move',
-          redo: () =>
-            moved.forEach(([id, f]) =>
-              mutate.moveComponent({ id, x: f.x, y: f.y }),
-            ),
-          undo: () =>
-            moved.forEach(([id]) => {
-              const s = starts.get(id)!
-              mutate.moveComponent({ id, x: s.x, y: s.y })
-            }),
-        })
-      },
-    )
-  }
-
-  function beginResize(c: AnyComponent, e: RPointerEvent) {
-    if (!editor.canEdit) return
-    e.stopPropagation()
-    const sx = e.clientX
-    const sy = e.clientY
-    if (c.kind === 'text') {
-      const startSize = c.size ?? 72
-      let lastSize = startSize
-      const text = c.text ?? ''
-      // '' color/font = theme-inherited — must survive the blob rewrite untouched.
-      const color = c.color ?? ''
-      const font = c.font_family ?? ''
-      const textType = textTypeOf(c)
-      editor.setDraggingComponentId(c.id)
-      dragListen(
-        (ev) => {
-          lastSize = Math.max(
-            8,
-            Math.round(startSize + (ev.clientY - sy) / scale),
-          )
-          mutate.setText.folded(
-            { key: c.id },
-            {
-              id: c.id,
-              text,
-              size: lastSize,
-              color,
-              font_family: font,
-              text_type: textType,
-            },
-          )
-        },
-        () => {
-          editor.setDraggingComponentId(null)
-          if (lastSize === startSize) return
-          const applySize = (size: number) =>
-            mutate.setText({
-              id: c.id,
-              text,
-              size,
-              color,
-              font_family: font,
-              text_type: textType,
-            })
-          history.push({
-            label: 'Resize text',
-            redo: () => applySize(lastSize),
-            undo: () => applySize(startSize),
-          })
-        },
-      )
+    if (e.altKey) {
+      deepSelect(e)
       return
     }
-    const { w, h } = componentSize(c)
-    const ratio = h / w
-    const before = { scale_w: c.scale_w, scale_h: c.scale_h }
-    let last = { scale_w: c.scale_w, scale_h: c.scale_h }
-    editor.setDraggingComponentId(c.id)
-    dragListen(
-      (ev) => {
-        const nw = Math.max(20, Math.round(w + (ev.clientX - sx) / scale))
-        const nh = ev.shiftKey
-          ? Math.max(20, Math.round(h + (ev.clientY - sy) / scale))
-          : Math.round(nw * ratio)
-        last = { scale_w: nw, scale_h: nh }
-        mutate.transformComponent.folded(
-          { key: c.id },
-          {
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: nw,
-            scale_h: nh,
-            rotate: c.rotate,
-            skew_x: c.skew_x,
-            skew_y: c.skew_y,
-          },
-        )
-      },
-      () => {
-        editor.setDraggingComponentId(null)
-        if (last.scale_w === before.scale_w && last.scale_h === before.scale_h)
-          return
-        const apply = (s: { scale_w: number; scale_h: number }) =>
-          mutate.transformComponent({
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: s.scale_w,
-            scale_h: s.scale_h,
-            rotate: c.rotate,
-            skew_x: c.skew_x,
-            skew_y: c.skew_y,
-          })
-        history.push({
-          label: 'Resize',
-          redo: () => apply(last),
-          undo: () => apply(before),
-        })
-      },
-    )
-  }
-
-  function beginRotate(c: AnyComponent, e: RPointerEvent) {
-    if (!editor.canEdit) return
-    e.stopPropagation()
-    const el = stageRef.current?.querySelector(`.cmp[data-id="${c.id}"]`)
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const cx = r.left + r.width / 2
-    const cy = r.top + r.height / 2
-    const start = Math.atan2(e.clientY - cy, e.clientX - cx)
-    const startRot = c.rotate
-    let lastRot = startRot
-    editor.setDraggingComponentId(c.id)
-    dragListen(
-      (ev) => {
-        let a = Math.atan2(ev.clientY - cy, ev.clientX - cx) - start + startRot
-        if (ev.shiftKey) a = Math.round(a / ROTATE_SNAP) * ROTATE_SNAP
-        lastRot = a
-        mutate.transformComponent.folded(
-          { key: c.id },
-          {
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: c.scale_w,
-            scale_h: c.scale_h,
-            rotate: a,
-            skew_x: c.skew_x,
-            skew_y: c.skew_y,
-          },
-        )
-      },
-      () => {
-        editor.setDraggingComponentId(null)
-        if (lastRot === startRot) return
-        const apply = (rot: number) =>
-          mutate.transformComponent({
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: c.scale_w,
-            scale_h: c.scale_h,
-            rotate: rot,
-            skew_x: c.skew_x,
-            skew_y: c.skew_y,
-          })
-        history.push({
-          label: 'Rotate',
-          redo: () => apply(lastRot),
-          undo: () => apply(startRot),
-        })
-      },
-    )
-  }
-
-  function beginSkew(c: AnyComponent, e: RPointerEvent, axis: 'x' | 'y') {
-    if (!editor.canEdit) return
-    e.stopPropagation()
+    // Cmd/Ctrl-click is an unambiguous toggle and never mutates geometry. Shift-click adds a new item;
+    // Shift-drag on an existing selection remains available for Bento-style axis locking.
+    if (e.metaKey || e.ctrlKey) {
+      editor.select(c.id, true)
+      return
+    }
+    const selectedIds = new Set(editor.selected)
+    if (!selectedIds.has(c.id)) {
+      if (e.shiftKey) selectedIds.add(c.id)
+      else {
+        selectedIds.clear()
+        selectedIds.add(c.id)
+      }
+      editor.selectMany([...selectedIds])
+    }
+    const moving = componentsFor(selectedIds)
+    const starts = moving.map(frameForComponent)
+    const peers = getComponents().map(frameForComponent)
+    let lastFrames = starts
     const sx = e.clientX
     const sy = e.clientY
-    const start = { skew_x: c.skew_x, skew_y: c.skew_y }
-    let last = { ...start }
     editor.setDraggingComponentId(c.id)
     dragListen(
       (ev) => {
-        // Shear grows with pointer travel; atan2 against a fixed baseline caps near ±90°
-        // so the control can't produce a degenerate (near-flat) skew.
-        const drag =
-          axis === 'x' ? (ev.clientX - sx) / scale : (ev.clientY - sy) / scale
-        let a =
-          (axis === 'x' ? start.skew_x : start.skew_y) +
-          Math.atan2(drag, SKEW_BASE)
-        if (ev.shiftKey) a = Math.round(a / SKEW_SNAP) * SKEW_SNAP
-        last =
-          axis === 'x'
-            ? { skew_x: a, skew_y: start.skew_y }
-            : { skew_x: start.skew_x, skew_y: a }
-        mutate.transformComponent.folded(
-          { key: c.id },
+        let dx = (ev.clientX - sx) / scale
+        let dy = (ev.clientY - sy) / scale
+        if (ev.shiftKey) {
+          if (Math.abs(dx) >= Math.abs(dy)) dy = 0
+          else dx = 0
+        }
+        const snapped = snapMove(starts, { x: dx, y: dy }, peers, {
+          threshold: 6 / scale,
+        })
+        lastFrames = snapped.frames
+        setGuides(snapped.guides)
+        for (const frame of lastFrames) {
+          mutate.moveComponent.folded(
+            { key: frame.id },
+            { id: frame.id, x: frame.x, y: frame.y },
+          )
+        }
+      },
+      () => {
+        editor.setDraggingComponentId(null)
+        setGuides([])
+        commitGeometry(
+          moving.length > 1 ? 'Move components' : 'Move',
+          moving,
+          lastFrames,
           {
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: c.scale_w,
-            scale_h: c.scale_h,
-            rotate: c.rotate,
-            skew_x: last.skew_x,
-            skew_y: last.skew_y,
+            alreadyApplied: true,
           },
+        )
+      },
+    )
+  }
+
+  function beginResize(
+    components: readonly AnyComponent[],
+    handle: ResizeHandle,
+    event: RPointerEvent,
+  ) {
+    if (!editor.canEdit || components.length === 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    const starts = components.map(frameForComponent)
+    let lastFrames = starts
+    const sx = event.clientX
+    const sy = event.clientY
+    editor.setDraggingComponentId(components[0].id)
+    dragListen(
+      (moveEvent) => {
+        const result = resizeGroupFrames(
+          starts,
+          handle,
+          {
+            x: (moveEvent.clientX - sx) / scale,
+            y: (moveEvent.clientY - sy) / scale,
+          },
+          {
+            aspectLock: moveEvent.shiftKey,
+            center: moveEvent.altKey,
+            minSize: 8,
+          },
+        )
+        lastFrames = result.frames
+        const byId = new Map(lastFrames.map((frame) => [frame.id, frame]))
+        applyGeometry(
+          components.flatMap((component) => {
+            const frame = byId.get(component.id)
+            return frame ? [geometryFromFrame(component, frame)] : []
+          }),
+          true,
         )
       },
       () => {
         editor.setDraggingComponentId(null)
-        if (last.skew_x === start.skew_x && last.skew_y === start.skew_y) return
-        const apply = (s: { skew_x: number; skew_y: number }) =>
-          mutate.transformComponent({
-            id: c.id,
-            scale_x: 1,
-            scale_y: 1,
-            scale_w: c.scale_w,
-            scale_h: c.scale_h,
-            rotate: c.rotate,
-            skew_x: s.skew_x,
-            skew_y: s.skew_y,
-          })
-        history.push({
-          label: 'Skew',
-          redo: () => apply(last),
-          undo: () => apply(start),
-        })
+        commitGeometry(
+          components.length > 1 ? 'Resize components' : 'Resize',
+          components,
+          lastFrames,
+          { persistSize: true, alreadyApplied: true },
+        )
       },
     )
+  }
+
+  function beginRotate(
+    components: readonly AnyComponent[],
+    event: RPointerEvent,
+  ) {
+    if (!editor.canEdit || components.length === 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    const starts = components.map(frameForComponent)
+    const bounds = selectionBounds(starts)
+    const canvas = stageRef.current?.querySelector<HTMLElement>('.slide-canvas')
+    if (!bounds || !canvas) return
+    const canvasRect = canvas.getBoundingClientRect()
+    const center = { x: bounds.centerX, y: bounds.middleY }
+    const centerClient = {
+      x: canvasRect.left + center.x * scale,
+      y: canvasRect.top + center.y * scale,
+    }
+    const startAngle = Math.atan2(
+      event.clientY - centerClient.y,
+      event.clientX - centerClient.x,
+    )
+    let lastFrames = starts
+    editor.setDraggingComponentId(components[0].id)
+    dragListen(
+      (moveEvent) => {
+        let delta =
+          Math.atan2(
+            moveEvent.clientY - centerClient.y,
+            moveEvent.clientX - centerClient.x,
+          ) - startAngle
+        if (moveEvent.shiftKey)
+          delta = Math.round(delta / ROTATE_SNAP) * ROTATE_SNAP
+        const cos = Math.cos(delta)
+        const sin = Math.sin(delta)
+        lastFrames = starts.map((frame) => {
+          const frameCenter = {
+            x: frame.x + frame.w / 2,
+            y: frame.y + frame.h / 2,
+          }
+          const dx = frameCenter.x - center.x
+          const dy = frameCenter.y - center.y
+          const nextCenter = {
+            x: center.x + dx * cos - dy * sin,
+            y: center.y + dx * sin + dy * cos,
+          }
+          return {
+            ...frame,
+            x: nextCenter.x - frame.w / 2,
+            y: nextCenter.y - frame.h / 2,
+            rotate: frame.rotate + delta,
+          }
+        })
+        const byId = new Map(lastFrames.map((frame) => [frame.id, frame]))
+        applyGeometry(
+          components.flatMap((component) => {
+            const frame = byId.get(component.id)
+            if (!frame) return []
+            const snapshot = geometryFromFrame(component, frame)
+            snapshot.scale_w = component.scale_w
+            snapshot.scale_h = component.scale_h
+            return [snapshot]
+          }),
+          true,
+        )
+      },
+      () => {
+        editor.setDraggingComponentId(null)
+        commitGeometry(
+          components.length > 1 ? 'Rotate components' : 'Rotate',
+          components,
+          lastFrames,
+          { alreadyApplied: true },
+        )
+      },
+    )
+  }
+
+  function setPrecisionFrame(
+    id: string,
+    patch: PrecisionFramePatch,
+    label: string,
+  ) {
+    if (!editor.canEdit) return
+    const component = getComponents().find((candidate) => candidate.id === id)
+    if (!component) return
+    const frame = { ...frameForComponent(component), ...patch, id }
+    commitGeometry(label, [component], [frame], {
+      persistSize: patch.w !== undefined || patch.h !== undefined,
+    })
+  }
+
+  function arrangeComponents(
+    ids: readonly string[],
+    action: PrecisionArrangeAction,
+  ) {
+    if (!editor.canEdit) return
+    const components = componentsInOrder(ids)
+    const frames = components.map(frameForComponent)
+    let arranged: PrecisionFrame[]
+    let label: string
+    let persistSize = false
+
+    if (action === 'distribute-horizontal') {
+      arranged = distributeFrames(frames, 'horizontal')
+      label = 'Distribute horizontally'
+    } else if (action === 'distribute-vertical') {
+      arranged = distributeFrames(frames, 'vertical')
+      label = 'Distribute vertically'
+    } else if (action === 'match-width') {
+      arranged = matchFrameSize(frames, 'width')
+      label = 'Match widths'
+      persistSize = true
+    } else if (action === 'match-height') {
+      arranged = matchFrameSize(frames, 'height')
+      label = 'Match heights'
+      persistSize = true
+    } else {
+      arranged = alignFrames(frames, action)
+      label = `Align ${alignmentLabel(action)}`
+    }
+
+    commitGeometry(label, components, arranged, { persistSize })
+  }
+
+  function reorderComponents(ids: readonly string[], action: ZReorderAction) {
+    if (!editor.canEdit) return
+    const all = getComponents()
+    const plan = planZReorder(
+      all.map((component) => ({ id: component.id, z: component.z_order })),
+      ids,
+      action,
+    )
+    if (plan.moves.length === 0) return
+
+    const before = plan.assignments.map(({ id, previousZ }) => ({
+      id,
+      z_order: previousZ,
+    }))
+    const after = plan.assignments.map(({ id, z }) => ({ id, z_order: z }))
+    const apply = (values: readonly { id: string; z_order: number }[]) => {
+      for (const value of values) mutate.setComponentZ(value)
+    }
+    apply(after)
+    history.push({
+      label:
+        action === 'front'
+          ? 'Bring to front'
+          : action === 'forward'
+            ? 'Bring forward'
+            : action === 'backward'
+              ? 'Send backward'
+              : 'Send to back',
+      redo: () => apply(after),
+      undo: () => apply(before),
+    })
+  }
+
+  const inspectorActions: PrecisionInspectorActions = {
+    frameFor: frameForComponent,
+    setFrame: setPrecisionFrame,
+    duplicate: (ids) => duplicateComponents(componentsInOrder(ids)),
+    delete: (ids) => {
+      const components = componentsInOrder(ids)
+      deleteComponents(components)
+      editor.clearSelection()
+    },
+    arrange: arrangeComponents,
+    reorder: reorderComponents,
   }
 
   function commitText(c: AnyComponent, html: string) {
@@ -839,6 +1170,11 @@ export function Stage({
     else beginMarquee(e)
   }
 
+  const selectedComponents = componentsInOrder(editor.selected)
+  const selectedBounds = selectionBounds(
+    selectedComponents.map(frameForComponent),
+  )
+
   return (
     <div
       className="stage"
@@ -850,6 +1186,8 @@ export function Stage({
         componentRefs={componentRefs}
         getComponents={getComponents}
         deck={deck}
+        actions={inspectorActions}
+        host={inspectorHost}
       />
       <div
         className="slide-surface"
@@ -888,17 +1226,9 @@ export function Stage({
                 <ComponentView
                   c={c}
                   scale={scale}
-                  canEdit={editor.canEdit}
                   selected={editor.isSelected(c.id)}
-                  soleSelected={
-                    editor.selected.size <= 1 && editor.isSelected(c.id)
-                  }
                   editing={editingId === c.id}
                   onPointerDownBody={(e) => beginMove(c, e)}
-                  onResize={(e) => beginResize(c, e)}
-                  onRotate={(e) => beginRotate(c, e)}
-                  onSkew={(e, axis) => beginSkew(c, e, axis)}
-                  onDelete={() => deleteComponents([c])}
                   onStartEdit={() =>
                     c.kind === 'text' && editor.canEdit && setEditingId(c.id)
                   }
@@ -906,6 +1236,33 @@ export function Stage({
                 />
               )}
             </ComponentDataReader>
+          ))}
+          {selectedBounds &&
+            selectedComponents.length > 0 &&
+            !editingId &&
+            !editor.pendingShape &&
+            editor.canEdit && (
+              <SelectionFrame
+                bounds={selectedBounds}
+                scale={scale}
+                count={selectedComponents.length}
+                onResize={(handle, event) =>
+                  beginResize(selectedComponents, handle, event)
+                }
+                onRotate={(event) => beginRotate(selectedComponents, event)}
+              />
+            )}
+          {guides.map((guide, index) => (
+            <div
+              key={`${guide.axis}-${guide.position}-${index}`}
+              className={`precision-guide precision-guide--${guide.axis}`}
+              style={
+                guide.axis === 'x'
+                  ? { left: guide.position, width: 1 / scale }
+                  : { top: guide.position, height: 1 / scale }
+              }
+              aria-hidden
+            />
           ))}
           {shapeDraft && editor.pendingShape && (
             <div
@@ -941,33 +1298,20 @@ export function Stage({
 function ComponentView({
   c,
   scale,
-  canEdit,
   selected,
-  soleSelected,
   editing,
   onPointerDownBody,
-  onResize,
-  onRotate,
-  onSkew,
-  onDelete,
   onStartEdit,
   onCommitEdit,
 }: {
   c: AnyComponent
   scale: number
-  canEdit: boolean
   selected: boolean
-  soleSelected: boolean
   editing: boolean
   onPointerDownBody: (e: RPointerEvent) => void
-  onResize: (e: RPointerEvent) => void
-  onRotate: (e: RPointerEvent) => void
-  onSkew: (e: RPointerEvent, axis: 'x' | 'y') => void
-  onDelete: () => void
   onStartEdit: () => void
   onCommitEdit: (html: string) => void
 }) {
-  const counter = { transform: `translate(-50%, -50%) scale(${1 / scale})` }
   return (
     <div
       className={componentClassName(c, selected ? ['is-selected'] : [])}
@@ -981,42 +1325,83 @@ function ComponentView({
       ) : (
         renderInner(c)
       )}
-      {selected && canEdit && (
-        <button
-          className="handle__del"
-          style={counter}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={onDelete}
-        >
-          ×
-        </button>
-      )}
-      {soleSelected && !editing && canEdit && (
-        <>
-          <div
-            className="handle handle--se"
-            style={counter}
-            onPointerDown={onResize}
-          />
-          <div
-            className="handle handle--rotate"
-            style={counter}
-            onPointerDown={onRotate}
-          />
-          <div
-            className="handle handle--skewx"
-            style={counter}
-            onPointerDown={(e) => onSkew(e, 'x')}
-          />
-          <div
-            className="handle handle--skewy"
-            style={counter}
-            onPointerDown={(e) => onSkew(e, 'y')}
-          />
-        </>
-      )}
     </div>
   )
+}
+
+const RESIZE_HANDLES: readonly ResizeHandle[] = [
+  'nw',
+  'n',
+  'ne',
+  'e',
+  'se',
+  's',
+  'sw',
+  'w',
+]
+
+function SelectionFrame({
+  bounds,
+  scale,
+  count,
+  onResize,
+  onRotate,
+}: {
+  bounds: PrecisionBounds
+  scale: number
+  count: number
+  onResize: (handle: ResizeHandle, event: RPointerEvent) => void
+  onRotate: (event: RPointerEvent) => void
+}) {
+  const counterScale = {
+    transform: `translate(-50%, -50%) scale(${1 / scale})`,
+  }
+  return (
+    <div
+      className="precision-selection"
+      style={{
+        left: bounds.x,
+        top: bounds.y,
+        width: bounds.w,
+        height: bounds.h,
+        borderWidth: 1 / scale,
+      }}
+      aria-label={`${count} selected ${count === 1 ? 'object' : 'objects'}`}
+    >
+      <span
+        className="precision-selection__rotate-stem"
+        style={{
+          top: -24 / scale,
+          height: 24 / scale,
+          borderLeftWidth: 1 / scale,
+        }}
+        aria-hidden
+      />
+      <span
+        className="precision-selection__rotate"
+        style={{ ...counterScale, top: -30 / scale }}
+        aria-hidden="true"
+        title="Rotate · Shift snaps to 15°"
+        onPointerDown={onRotate}
+      />
+      {RESIZE_HANDLES.map((handle) => (
+        <span
+          key={handle}
+          className={`precision-selection__handle precision-selection__handle--${handle}`}
+          style={counterScale}
+          aria-hidden="true"
+          title="Resize · Shift keeps ratio · Option resizes from center"
+          onPointerDown={(event) => onResize(handle, event)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function alignmentLabel(alignment: Alignment): string {
+  if (alignment === 'centerX') return 'center'
+  if (alignment === 'middleY') return 'middle'
+  return alignment
 }
 
 function TextEditor({

@@ -1,77 +1,112 @@
-// Floating selection inspector (spec §6.2/§6.3/§8.5): when exactly one component is selected on the
-// stage, offer property controls — text font/size/color, shape fill, z-order, and CSS classes. All
-// edits go through the named Rindle mutators (setText/setShapeFill/setComponentZ/setComponentClasses).
+// Contextual selected-object properties rail. Stage owns geometry and selection commands; this component
+// owns only their compact, portalable UI plus the established type-specific Rindle mutations. Keeping
+// that split lets the document remain the editor while precise object work appears only when selected.
 
-import { memo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { DEFAULT_FONT, FONT_SIZES } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
-import { useEditor } from './EditorState'
-import { useHistory } from './UndoProvider'
-import { textTypeOf } from './types'
-import type { AnyComponent, DeckThemeFields } from './types'
+import { buildArtifactModule } from './artifactBuild'
+import { ColorField } from './ColorField'
 import { ComponentDataReader, componentRefKey } from './componentFragments'
 import type { ComponentRef } from './componentFragments'
-import { ColorField } from './ColorField'
+import { useEditor } from './EditorState'
+import type {
+  Alignment,
+  PrecisionFrame,
+  ZReorderAction,
+} from './precisionGeometry'
 import { FontOptions } from './render'
+import { textTypeOf } from './types'
+import type { AnyComponent, DeckThemeFields } from './types'
+import { useHistory } from './UndoProvider'
 import { uploadArtifact } from './upload'
-import { buildArtifactModule } from './artifactBuild'
+
+export type PrecisionFramePatch = Partial<
+  Pick<PrecisionFrame, 'x' | 'y' | 'w' | 'h' | 'rotate'>
+>
+
+export type PrecisionArrangeAction =
+  | Alignment
+  | 'distribute-horizontal'
+  | 'distribute-vertical'
+  | 'match-width'
+  | 'match-height'
+
+/** Geometry/selection commands stay in Stage so every direct manipulation and rail action shares the
+ *  same component snapshots, mutation folding, and one-undo boundary. */
+export interface PrecisionInspectorActions {
+  frameFor: (component: AnyComponent) => PrecisionFrame
+  setFrame: (id: string, patch: PrecisionFramePatch, label: string) => void
+  duplicate: (ids: readonly string[]) => void
+  delete: (ids: readonly string[]) => void
+  arrange: (ids: readonly string[], action: PrecisionArrangeAction) => void
+  reorder: (ids: readonly string[], action: ZReorderAction) => void
+}
 
 export function Inspector({
   componentRefs,
   getComponents,
   deck,
+  actions,
+  host,
 }: {
   componentRefs: readonly ComponentRef[]
   getComponents: () => AnyComponent[]
   deck?: DeckThemeFields | null
+  actions: PrecisionInspectorActions
+  host?: HTMLElement | null
 }) {
   const editor = useEditor()
+  const ids = [...editor.selected]
+  if (ids.length === 0) return null
 
-  if (editor.selected.size !== 1) return null
-  const selectedId = [...editor.selected][0]
-
-  if (editor.draggingComponentId === selectedId) {
-    const components = getComponents()
-    const selected = components.find((c) => c.id === selectedId)
-    return selected ? (
-      <InspectorPanel c={selected} components={components} deck={deck} />
-    ) : null
+  let content: React.ReactNode
+  if (ids.length > 1) {
+    content = <MultiInspector ids={ids} actions={actions} />
+  } else {
+    const selectedId = ids[0]
+    if (editor.draggingComponentId === selectedId) {
+      const selected = getComponents().find((c) => c.id === selectedId)
+      content = selected ? (
+        <InspectorPanel c={selected} deck={deck} actions={actions} />
+      ) : null
+    } else {
+      content = (
+        <>
+          {componentRefs.map((component) => (
+            <ComponentDataReader
+              key={componentRefKey(component)}
+              component={component}
+            >
+              {(c) =>
+                c.id === selectedId ? (
+                  <InspectorPanel c={c} deck={deck} actions={actions} />
+                ) : null
+              }
+            </ComponentDataReader>
+          ))}
+        </>
+      )
+    }
   }
 
-  return (
-    <>
-      {componentRefs.map((component) => (
-        <ComponentDataReader
-          key={componentRefKey(component)}
-          component={component}
-        >
-          {(c) =>
-            c.id === selectedId ? (
-              <InspectorPanel c={c} components={getComponents()} deck={deck} />
-            ) : null
-          }
-        </ComponentDataReader>
-      ))}
-    </>
-  )
+  return host ? createPortal(content, host) : content
 }
 
-interface InspectorPanelProps {
-  c: AnyComponent
-  components: readonly AnyComponent[]
-  deck?: DeckThemeFields | null
-}
-
-const InspectorPanel = memo(function InspectorPanel({
+function InspectorPanel({
   c,
-  components,
   deck,
-}: InspectorPanelProps) {
+  actions,
+}: {
+  c: AnyComponent
+  deck?: DeckThemeFields | null
+  actions: PrecisionInspectorActions
+}) {
   const mutate = useMutate()
   const history = useHistory()
-  const allComponents = components.some((x) => x.id === c.id)
-    ? components.map((x) => (x.id === c.id ? c : x))
-    : [...components, c]
+  const frame = actions.frameFor(c)
+  const ids = [c.id]
 
   // '' color/font_family = inherit the deck theme for this component's category — preserved
   // through edits (defaults here must NOT materialize a concrete override).
@@ -98,9 +133,14 @@ const InspectorPanel = memo(function InspectorPanel({
       font_family: patch.font_family ?? before.font_family,
       text_type: patch.text_type ?? before.text_type,
     }
-    const apply = (v: typeof before) => mutate.setText({ id: c.id, ...v })
+    const apply = (value: typeof before) =>
+      mutate.setText({ id: c.id, ...value })
     apply(after)
-    history.push({ label, redo: () => apply(after), undo: () => apply(before) })
+    history.push({
+      label,
+      redo: () => apply(after),
+      undo: () => apply(before),
+    })
   }
 
   const setFill = (fill: string) => {
@@ -117,11 +157,8 @@ const InspectorPanel = memo(function InspectorPanel({
   const setClasses = (next: string) => {
     const before = c.custom_classes
     if (before === next) return
-    const apply = (v: string) =>
-      mutate.setComponentClasses({
-        id: c.id,
-        custom_classes: v,
-      })
+    const apply = (custom_classes: string) =>
+      mutate.setComponentClasses({ id: c.id, custom_classes })
     apply(next)
     history.push({
       label: 'Classes',
@@ -130,22 +167,12 @@ const InspectorPanel = memo(function InspectorPanel({
     })
   }
 
-  const setZ = (z: number) => {
-    const before = c.z_order
-    mutate.setComponentZ({ id: c.id, z_order: z })
-    history.push({
-      label: 'Order',
-      redo: () => mutate.setComponentZ({ id: c.id, z_order: z }),
-      undo: () => mutate.setComponentZ({ id: c.id, z_order: before }),
-    })
-  }
-
-  // Save an artifact's source + freshly-built URL as one undoable step (undo restores the prior code+src).
+  // Save an artifact's source + freshly-built URL as one undoable step (undo restores prior code+src).
   const setArtifactProps = (code: string, src: string) => {
     const before = { code: c.code ?? '', src: c.src ?? '' }
     const after = { code, src }
-    const apply = (v: typeof before) =>
-      mutate.setArtifact({ id: c.id, code: v.code, src: v.src })
+    const apply = (value: typeof before) =>
+      mutate.setArtifact({ id: c.id, code: value.code, src: value.src })
     apply(after)
     history.push({
       label: 'Edit artifact',
@@ -154,126 +181,489 @@ const InspectorPanel = memo(function InspectorPanel({
     })
   }
 
-  const maxZ = allComponents.reduce((m, x) => Math.max(m, x.z_order), 0)
-  const minZ = allComponents.reduce((m, x) => Math.min(m, x.z_order), 0)
-
   return (
-    <div className="insp" onPointerDown={(e) => e.stopPropagation()}>
-      <div className="insp__head">{c.kind}</div>
+    <div className="insp" onPointerDown={(event) => event.stopPropagation()}>
+      <InspectorTitle
+        title={c.kind}
+        onDuplicate={() => actions.duplicate(ids)}
+        onDelete={() => actions.delete(ids)}
+      />
 
-      {c.kind === 'text' &&
-        (() => {
-          const cat = textTypeOf(c)
-          const themeFont =
-            (cat === 'heading' ? deck?.heading_font : deck?.body_font) ||
-            DEFAULT_FONT
-          const themeColor =
-            (cat === 'heading' ? deck?.heading_color : deck?.body_color) ||
-            '111111'
-          return (
-            <>
-              <label className="insp__row">
-                <span>Type</span>
-                <select
-                  value={cat}
-                  onChange={(e) =>
-                    editText({ text_type: e.target.value }, 'Text type')
-                  }
-                >
-                  <option value="body">Body</option>
-                  <option value="heading">Heading</option>
-                </select>
-              </label>
-              <label className="insp__row">
-                <span>Font</span>
-                <select
-                  value={c.font_family || ''}
-                  onChange={(e) => editText({ font_family: e.target.value })}
-                >
-                  <option value="">Theme · {themeFont}</option>
-                  <FontOptions />
-                </select>
-              </label>
-              <label className="insp__row">
-                <span>Size</span>
-                <input
-                  type="number"
-                  min={8}
-                  max={400}
-                  value={c.size ?? 72}
-                  onChange={(e) =>
-                    editText({
-                      size: Math.max(8, Number(e.target.value) || 72),
-                    })
-                  }
-                  list="strut-font-sizes"
-                />
-                <datalist id="strut-font-sizes">
-                  {FONT_SIZES.map((s) => (
-                    <option key={s} value={s} />
-                  ))}
-                </datalist>
-              </label>
-              <div className="insp__row">
-                <span>Color</span>
-                <ColorField
-                  value={c.color ?? ''}
-                  onChange={(hex) => editText({ color: hex })}
-                  themeDefault={{
-                    color: themeColor,
-                    title: `Theme (${cat}) color`,
-                  }}
-                />
-              </div>
-            </>
-          )
-        })()}
+      <InspectorSection title="Frame">
+        <div className="insp__frame-grid">
+          <NumericCommitField
+            label="X"
+            title="Horizontal position"
+            value={frame.x}
+            onCommit={(x) => actions.setFrame(c.id, { x }, 'Set X')}
+          />
+          <NumericCommitField
+            label="Y"
+            title="Vertical position"
+            value={frame.y}
+            onCommit={(y) => actions.setFrame(c.id, { y }, 'Set Y')}
+          />
+          <NumericCommitField
+            label="W"
+            title="Width"
+            min={1}
+            value={frame.w}
+            onCommit={(w) => actions.setFrame(c.id, { w }, 'Set width')}
+          />
+          <NumericCommitField
+            label="H"
+            title="Height"
+            min={1}
+            value={frame.h}
+            onCommit={(h) => actions.setFrame(c.id, { h }, 'Set height')}
+          />
+          <NumericCommitField
+            label="°"
+            title="Angle"
+            value={radiansToDegrees(frame.rotate)}
+            onCommit={(degrees) =>
+              actions.setFrame(
+                c.id,
+                { rotate: degreesToRadians(degrees) },
+                'Set angle',
+              )
+            }
+          />
+        </div>
+      </InspectorSection>
+
+      {c.kind === 'text' && (
+        <TextControls c={c} deck={deck} editText={editText} />
+      )}
 
       {c.kind === 'shape' && (
-        <div className="insp__row">
-          <span>Color</span>
-          <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
-        </div>
+        <InspectorSection title="Shape">
+          <div className="insp__row">
+            <span>Color</span>
+            <ColorField value={c.fill ?? '3498db'} onChange={setFill} />
+          </div>
+        </InspectorSection>
       )}
 
       {c.kind === 'artifact' && (
-        <ArtifactControls key={c.id} c={c} onSave={setArtifactProps} />
+        <InspectorSection title="Artifact">
+          <ArtifactControls key={c.id} c={c} onSave={setArtifactProps} />
+        </InspectorSection>
       )}
 
-      <label className="insp__row">
-        <span>Classes</span>
-        <input
-          type="text"
-          placeholder="css-class…"
-          defaultValue={c.custom_classes}
-          onBlur={(e) => setClasses(e.target.value.trim())}
-        />
-      </label>
+      <InspectorSection title="Align to slide">
+        <AlignmentActions ids={ids} actions={actions} />
+      </InspectorSection>
 
-      <div className="insp__row insp__zrow">
-        <span>Order</span>
-        <button
-          className="btn btn--ghost"
-          disabled={c.z_order >= maxZ}
-          onClick={() => setZ(maxZ + 1)}
-        >
-          Front
-        </button>
-        <button
-          className="btn btn--ghost"
-          disabled={c.z_order <= minZ}
-          onClick={() => setZ(minZ - 1)}
-        >
-          Back
-        </button>
+      <InspectorSection title="Layers">
+        <LayerActions ids={ids} actions={actions} />
+      </InspectorSection>
+
+      <details className="insp__advanced">
+        <summary>Advanced</summary>
+        <ClassCommitField value={c.custom_classes} onCommit={setClasses} />
+      </details>
+    </div>
+  )
+}
+
+function MultiInspector({
+  ids,
+  actions,
+}: {
+  ids: readonly string[]
+  actions: PrecisionInspectorActions
+}) {
+  return (
+    <div className="insp" onPointerDown={(event) => event.stopPropagation()}>
+      <InspectorTitle
+        title={`${ids.length} objects`}
+        onDuplicate={() => actions.duplicate(ids)}
+        onDelete={() => actions.delete(ids)}
+      />
+
+      <InspectorSection title="Align">
+        <AlignmentActions ids={ids} actions={actions} />
+      </InspectorSection>
+
+      <InspectorSection title="Distribute">
+        <div className="insp__action-grid insp__action-grid--two">
+          <RailButton
+            label="Horizontal"
+            title="Distribute horizontally"
+            onClick={() => actions.arrange(ids, 'distribute-horizontal')}
+          />
+          <RailButton
+            label="Vertical"
+            title="Distribute vertically"
+            onClick={() => actions.arrange(ids, 'distribute-vertical')}
+          />
+        </div>
+      </InspectorSection>
+
+      <InspectorSection title="Match size">
+        <div className="insp__action-grid insp__action-grid--two">
+          <RailButton
+            label="Width"
+            title="Match width to the first selected object"
+            onClick={() => actions.arrange(ids, 'match-width')}
+          />
+          <RailButton
+            label="Height"
+            title="Match height to the first selected object"
+            onClick={() => actions.arrange(ids, 'match-height')}
+          />
+        </div>
+      </InspectorSection>
+
+      <InspectorSection title="Layers">
+        <LayerActions ids={ids} actions={actions} />
+      </InspectorSection>
+    </div>
+  )
+}
+
+function InspectorTitle({
+  title,
+  onDuplicate,
+  onDelete,
+}: {
+  title: string
+  onDuplicate: () => void
+  onDelete: () => void
+}) {
+  return (
+    <div className="insp__titlebar">
+      <div className="insp__head">{title}</div>
+      <div className="insp__toolbar">
+        <RailButton
+          label="Duplicate"
+          title="Duplicate selected objects"
+          onClick={onDuplicate}
+        />
+        <RailButton
+          label="Delete"
+          title="Delete selected objects"
+          danger
+          onClick={onDelete}
+        />
       </div>
     </div>
   )
-}, sameInspectorPanelProps)
+}
 
-/** Code editor + Run for a runnable artifact. `draft` is a local editing buffer (keyed by component id in
- *  the parent, so selecting a different artifact remounts with fresh code). Run builds the source via the
- *  API and saves both the code and the returned URL onto the component (one undoable step). */
+function InspectorSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="insp__section">
+      <h3 className="insp__section-title">{title}</h3>
+      {children}
+    </section>
+  )
+}
+
+function AlignmentActions({
+  ids,
+  actions,
+}: {
+  ids: readonly string[]
+  actions: PrecisionInspectorActions
+}) {
+  const alignments: readonly {
+    action: Alignment
+    label: string
+    title: string
+  }[] = [
+    { action: 'left', label: 'Left', title: 'Align left' },
+    { action: 'centerX', label: 'Center', title: 'Align horizontal centers' },
+    { action: 'right', label: 'Right', title: 'Align right' },
+    { action: 'top', label: 'Top', title: 'Align top' },
+    { action: 'middleY', label: 'Middle', title: 'Align vertical centers' },
+    { action: 'bottom', label: 'Bottom', title: 'Align bottom' },
+  ]
+  return (
+    <div className="insp__action-grid insp__action-grid--three">
+      {alignments.map(({ action, label, title }) => (
+        <RailButton
+          key={action}
+          label={label}
+          title={title}
+          onClick={() => actions.arrange(ids, action)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function LayerActions({
+  ids,
+  actions,
+}: {
+  ids: readonly string[]
+  actions: PrecisionInspectorActions
+}) {
+  const layers: readonly {
+    action: ZReorderAction
+    label: string
+    title: string
+  }[] = [
+    { action: 'front', label: 'Front', title: 'Bring to front' },
+    { action: 'forward', label: 'Forward', title: 'Bring forward one layer' },
+    { action: 'backward', label: 'Backward', title: 'Send backward one layer' },
+    { action: 'back', label: 'Back', title: 'Send to back' },
+  ]
+  return (
+    <div className="insp__action-grid insp__action-grid--two">
+      {layers.map(({ action, label, title }) => (
+        <RailButton
+          key={action}
+          label={label}
+          title={title}
+          onClick={() => actions.reorder(ids, action)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function RailButton({
+  label,
+  title,
+  danger = false,
+  onClick,
+}: {
+  label: string
+  title: string
+  danger?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`btn btn--ghost insp__action${danger ? ' insp__action--danger' : ''}`}
+      title={title}
+      aria-label={title}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  )
+}
+
+function TextControls({
+  c,
+  deck,
+  editText,
+}: {
+  c: AnyComponent
+  deck?: DeckThemeFields | null
+  editText: (
+    patch: Partial<
+      Pick<
+        AnyComponent,
+        'size' | 'color' | 'font_family' | 'text' | 'text_type'
+      >
+    >,
+    label?: string,
+  ) => void
+}) {
+  const category = textTypeOf(c)
+  const themeFont =
+    (category === 'heading' ? deck?.heading_font : deck?.body_font) ||
+    DEFAULT_FONT
+  const themeColor =
+    (category === 'heading' ? deck?.heading_color : deck?.body_color) ||
+    '111111'
+
+  return (
+    <InspectorSection title="Text">
+      <label className="insp__row">
+        <span>Type</span>
+        <select
+          value={category}
+          onChange={(event) =>
+            editText({ text_type: event.target.value }, 'Text type')
+          }
+        >
+          <option value="body">Body</option>
+          <option value="heading">Heading</option>
+        </select>
+      </label>
+      <label className="insp__row">
+        <span>Font</span>
+        <select
+          value={c.font_family || ''}
+          onChange={(event) =>
+            editText({ font_family: event.target.value }, 'Text font')
+          }
+        >
+          <option value="">Theme · {themeFont}</option>
+          <FontOptions />
+        </select>
+      </label>
+      <NumericCommitField
+        label="Size"
+        title="Text size"
+        min={8}
+        max={400}
+        list="strut-font-sizes"
+        value={c.size ?? 72}
+        onCommit={(size) => editText({ size }, 'Text size')}
+      />
+      <datalist id="strut-font-sizes">
+        {FONT_SIZES.map((size) => (
+          <option key={size} value={size} />
+        ))}
+      </datalist>
+      <div className="insp__row">
+        <span>Color</span>
+        <ColorField
+          value={c.color ?? ''}
+          onChange={(color) => editText({ color }, 'Text color')}
+          themeDefault={{
+            color: themeColor,
+            title: `Theme (${category}) color`,
+          }}
+        />
+      </div>
+    </InspectorSection>
+  )
+}
+
+function NumericCommitField({
+  label,
+  title,
+  value,
+  min,
+  max,
+  list,
+  onCommit,
+}: {
+  label: string
+  title?: string
+  value: number
+  min?: number
+  max?: number
+  list?: string
+  onCommit: (value: number) => void
+}) {
+  const focused = useRef(false)
+  const [draft, setDraft] = useState(() => formatNumber(value))
+
+  useEffect(() => {
+    if (!focused.current) setDraft(formatNumber(value))
+  }, [value])
+
+  const reset = () => setDraft(formatNumber(value))
+  const commit = () => {
+    if (draft.trim() === '') {
+      reset()
+      return
+    }
+    const parsed = Number(draft)
+    if (!Number.isFinite(parsed)) {
+      reset()
+      return
+    }
+    const next = Math.min(max ?? Infinity, Math.max(min ?? -Infinity, parsed))
+    setDraft(formatNumber(next))
+    if (next !== value) onCommit(next)
+  }
+
+  return (
+    <label className="insp__field" title={title}>
+      <span>{label}</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        step="any"
+        min={min}
+        max={max}
+        list={list}
+        aria-label={title ?? label}
+        value={draft}
+        onFocus={() => {
+          focused.current = true
+        }}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          focused.current = false
+          commit()
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            event.currentTarget.blur()
+          } else if (event.key === 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            reset()
+            event.currentTarget.select()
+          }
+        }}
+      />
+    </label>
+  )
+}
+
+function ClassCommitField({
+  value,
+  onCommit,
+}: {
+  value: string
+  onCommit: (value: string) => void
+}) {
+  const focused = useRef(false)
+  const [draft, setDraft] = useState(value)
+
+  useEffect(() => {
+    if (!focused.current) setDraft(value)
+  }, [value])
+
+  const reset = () => setDraft(value)
+  const commit = () => {
+    const next = draft.trim()
+    setDraft(next)
+    if (next !== value) onCommit(next)
+  }
+
+  return (
+    <label className="insp__row">
+      <span>Classes</span>
+      <input
+        type="text"
+        placeholder="css-class…"
+        value={draft}
+        onFocus={() => {
+          focused.current = true
+        }}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          focused.current = false
+          commit()
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            event.currentTarget.blur()
+          } else if (event.key === 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            reset()
+            event.currentTarget.select()
+          }
+        }}
+      />
+    </label>
+  )
+}
+
+/** Code editor + Run for a runnable artifact. Run builds and saves source + URL as one undo step. */
 function ArtifactControls({
   c,
   onSave,
@@ -289,13 +679,11 @@ function ArtifactControls({
     setBusy(true)
     setError(null)
     try {
-      // A raw React component (JSX + bare `react` imports + default export) is transpiled and given a
-      // mount shim here; a plain ES module passes through untouched. See artifactBuild.ts.
       const built = await buildArtifactModule(draft)
       const url = await uploadArtifact(built)
       onSave(draft, url)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Build failed')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Build failed')
     } finally {
       setBusy(false)
     }
@@ -307,7 +695,7 @@ function ArtifactControls({
         className="insp__code"
         spellCheck={false}
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(event) => setDraft(event.target.value)}
         rows={12}
         style={{
           width: '100%',
@@ -322,86 +710,25 @@ function ArtifactControls({
       />
       {error && <p className="modal__error">{error}</p>}
       <div className="insp__row insp__zrow">
-        <button className="btn btn--primary" disabled={busy} onClick={run}>
+        <button
+          type="button"
+          className="btn btn--primary"
+          disabled={busy}
+          onClick={run}
+        >
           {busy ? 'Building…' : 'Run'}
         </button>
-        <span className="insp__hint" style={{ opacity: 0.6, fontSize: 12 }}>
-          runs sandboxed
-        </span>
+        <span className="insp__hint">runs sandboxed</span>
       </div>
     </div>
   )
 }
 
-function sameInspectorPanelProps(
-  prev: InspectorPanelProps,
-  next: InspectorPanelProps,
-): boolean {
-  return (
-    sameInspectorComponent(prev.c, next.c) &&
-    sameZBounds(prev.components, next.components) &&
-    sameDeckTheme(prev.deck, next.deck)
-  )
+function formatNumber(value: number): string {
+  const rounded = Number(value.toFixed(2))
+  return String(Object.is(rounded, -0) ? 0 : rounded)
 }
 
-function sameDeckTheme(
-  a: DeckThemeFields | null | undefined,
-  b: DeckThemeFields | null | undefined,
-): boolean {
-  return (
-    a?.heading_font === b?.heading_font &&
-    a?.heading_color === b?.heading_color &&
-    a?.body_font === b?.body_font &&
-    a?.body_color === b?.body_color
-  )
-}
+const radiansToDegrees = (radians: number): number => (radians * 180) / Math.PI
 
-function sameInspectorComponent(a: AnyComponent, b: AnyComponent): boolean {
-  if (
-    a.id !== b.id ||
-    a.kind !== b.kind ||
-    a.z_order !== b.z_order ||
-    a.custom_classes !== b.custom_classes
-  )
-    return false
-
-  switch (a.kind) {
-    case 'text':
-      return (
-        a.text === b.text &&
-        a.size === b.size &&
-        a.color === b.color &&
-        a.font_family === b.font_family &&
-        a.text_type === b.text_type
-      )
-    case 'shape':
-      return a.fill === b.fill
-    case 'artifact':
-      return a.code === b.code && a.src === b.src
-    default:
-      return true
-  }
-}
-
-function sameZBounds(
-  a: readonly AnyComponent[],
-  b: readonly AnyComponent[],
-): boolean {
-  if (a.length !== b.length) return false
-  const boundsA = zBounds(a)
-  const boundsB = zBounds(b)
-  return boundsA.min === boundsB.min && boundsA.max === boundsB.max
-}
-
-function zBounds(components: readonly AnyComponent[]): {
-  min: number
-  max: number
-} {
-  let min = Infinity
-  let max = -Infinity
-  for (const c of components) {
-    min = Math.min(min, c.z_order)
-    max = Math.max(max, c.z_order)
-  }
-  return { min, max }
-}
+const degreesToRadians = (degrees: number): number => (degrees * Math.PI) / 180

@@ -613,6 +613,248 @@ button {
 .context-tool--objects {
   padding-top: var(--editor-dock-height, 53px);
 }
+
+/* Precision is a depth of the one editor, not a second routed mode. Once the user deliberately enters
+   it, the canvas can afford Bento-like working chrome: a narrow slide strip, the focused stage, and a
+   property rail. Leaving it returns to the untouched document column underneath. */
+.precision-workspace {
+  position: relative;
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr) 252px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: var(--stage);
+}
+.precision-workspace__well,
+.precision-workspace__stage,
+.precision-workspace__inspector {
+  min-width: 0;
+  min-height: 0;
+}
+.precision-workspace__well {
+  z-index: 2;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+.precision-workspace__well > .well {
+  width: 100%;
+  height: 100%;
+  border-right: 0;
+}
+.precision-workspace__stage {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+.precision-workspace__stage > .stage {
+  flex: 1;
+}
+.precision-workspace__inspector {
+  z-index: 2;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  scrollbar-width: thin;
+}
+.precision-workspace__inspector .insp {
+  position: static;
+  width: auto;
+  min-height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 16px 14px 24px;
+  background: transparent;
+}
+.precision-workspace__hint {
+  position: absolute;
+  left: calc(176px + (100% - 176px - 252px) / 2);
+  bottom: 13px;
+  z-index: 3;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #101219 64%, transparent);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+/* No object selected: slide-level controls occupy the same quiet rail as the selected-object inspector.
+   Deck-wide style remains in the ambient Design lane; this panel is intentionally all local overrides. */
+.precision-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  padding: 16px 14px 28px;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+.precision-panel__header {
+  min-height: 28px;
+  padding: 1px 2px 11px;
+  font-family: var(--font-brand);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.precision-panel__section {
+  display: grid;
+  gap: 9px;
+  padding: 13px 2px;
+  border-top: 1px solid var(--line);
+}
+.precision-panel__section-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.065em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.precision-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 10px;
+}
+.precision-panel__label {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+.precision-panel__image {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.precision-panel__field {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.precision-panel__input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  outline: 0;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+}
+.precision-panel__input:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.precision-panel__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+.precision-panel__action,
+.precision-panel__choice {
+  min-width: 0;
+  min-height: 29px;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: color-mix(in srgb, var(--text) 82%, var(--muted));
+  font-size: 11px;
+  line-height: 1.15;
+}
+.precision-panel__action:hover:not(:disabled),
+.precision-panel__choice:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+}
+.precision-panel__action:focus-visible,
+.precision-panel__choice:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 1px;
+}
+.precision-panel__action:disabled,
+.precision-panel__choice:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+.precision-panel__file {
+  display: none;
+}
+.precision-panel__seg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+  gap: 5px;
+  min-width: 0;
+}
+.precision-panel__choice.is-active {
+  border-color: color-mix(in srgb, var(--coral) 54%, var(--line));
+  background: var(--coral-soft);
+  color: var(--coral-strong);
+  font-weight: 600;
+}
+.precision-panel__checks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+.precision-panel__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 28px;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.precision-panel__check:has(input:checked) {
+  border-color: color-mix(in srgb, var(--coral) 54%, var(--line));
+  background: var(--coral-soft);
+  color: var(--coral-strong);
+}
+.precision-panel__check:has(input:disabled) {
+  cursor: default;
+  opacity: 0.42;
+}
+.precision-panel__check input {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  accent-color: var(--coral);
+}
+.precision-panel__error {
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.precision-panel .popchip__trigger {
+  min-width: 34px;
+  justify-content: center;
+  padding: 4px 6px;
+}
 .context-tool__close {
   position: absolute;
   top: 14px;
@@ -1193,6 +1435,112 @@ button {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   z-index: 11;
+}
+
+/* Bento-style selection frame shared by one or many objects. The canvas itself is scaled, while the
+   controls counter-scale in Stage so their visual hit targets remain crisp and predictable. */
+.precision-selection {
+  position: absolute;
+  box-sizing: border-box;
+  /* Component z_order values are epoch-like and can be ~1.8B. Keep the manipulation layer above
+     every authored object without changing its persisted paint order. */
+  z-index: 2147483646;
+  border-style: solid;
+  border-color: var(--coral);
+  pointer-events: none;
+}
+.precision-selection__handle,
+.precision-selection__rotate {
+  position: absolute;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--coral);
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 22, 28, 0.18);
+  pointer-events: auto;
+  touch-action: none;
+}
+.precision-selection__handle:focus-visible,
+.precision-selection__rotate:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 3px;
+}
+.precision-selection__handle--nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+.precision-selection__handle--n {
+  top: 0;
+  left: 50%;
+  cursor: ns-resize;
+}
+.precision-selection__handle--ne {
+  top: 0;
+  left: 100%;
+  cursor: nesw-resize;
+}
+.precision-selection__handle--e {
+  top: 50%;
+  left: 100%;
+  cursor: ew-resize;
+}
+.precision-selection__handle--se {
+  top: 100%;
+  left: 100%;
+  cursor: nwse-resize;
+}
+.precision-selection__handle--s {
+  top: 100%;
+  left: 50%;
+  cursor: ns-resize;
+}
+.precision-selection__handle--sw {
+  top: 100%;
+  left: 0;
+  cursor: nesw-resize;
+}
+.precision-selection__handle--w {
+  top: 50%;
+  left: 0;
+  cursor: ew-resize;
+}
+.precision-selection__rotate-stem {
+  position: absolute;
+  left: 50%;
+  border-left-style: solid;
+  border-left-color: var(--coral);
+  pointer-events: none;
+}
+.precision-selection__rotate {
+  left: 50%;
+  border-radius: 50%;
+  background: var(--panel);
+  cursor: grab;
+}
+.precision-selection__rotate:active {
+  cursor: grabbing;
+}
+
+/* Only the winning snap target on each axis is rendered, keeping alignment feedback quiet. */
+.precision-guide {
+  position: absolute;
+  z-index: 2147483645;
+  background: var(--coral);
+  opacity: 0.82;
+  pointer-events: none;
+}
+.precision-guide--x {
+  top: 0;
+  bottom: 0;
+}
+.precision-guide--y {
+  left: 0;
+  right: 0;
 }
 
 /* marquee */
@@ -2071,6 +2419,170 @@ button {
   font-size: 11px;
   color: var(--muted);
   letter-spacing: 0.06em;
+}
+.insp__titlebar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 8px;
+  padding: 0 1px 2px;
+}
+.insp__titlebar .insp__head {
+  min-width: 0;
+  padding-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.insp__toolbar {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+.insp__toolbar .insp__action {
+  width: auto;
+  min-height: 25px;
+  padding: 3px 6px;
+  border-color: transparent;
+  font-size: 10px;
+}
+.insp__section {
+  display: grid;
+  gap: 8px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+.insp__section-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.065em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.insp__frame-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.insp__frame-grid .insp__field:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.insp__field {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  gap: 5px;
+}
+.insp__field > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+.insp__field input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  outline: 0;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.insp__field input:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.insp__action-grid {
+  display: grid;
+  gap: 5px;
+}
+.insp__action-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.insp__action-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.insp__action.btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 29px;
+  padding: 5px 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: color-mix(in srgb, var(--text) 80%, var(--muted));
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.15;
+  white-space: normal;
+}
+.insp__action.btn:hover {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+}
+.insp__action.btn:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 1px;
+}
+.insp__action--danger.btn {
+  color: var(--muted);
+}
+.insp__action--danger.btn:hover,
+.insp__action--danger.btn:focus-visible {
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--line));
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  color: var(--danger);
+}
+.insp__advanced {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.insp__advanced summary {
+  width: fit-content;
+  padding: 2px 1px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+.insp__advanced[open] summary {
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.insp__advanced .insp__row {
+  color: var(--text);
+}
+.insp__artifact {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.insp__code {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  outline: 0;
+  background: var(--code-bg);
+  color: var(--text);
+  padding: 8px;
+}
+.insp__code:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--coral-soft);
+}
+.insp__hint {
+  color: var(--muted);
+  font-size: 10px;
 }
 .insp__row {
   display: flex;
@@ -3865,6 +4377,43 @@ button {
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Bento is desktop-first too. On a phone, keep the precision canvas primary and reuse Strut's
+     proven horizontal filmstrip + inspector sheet instead of crushing three columns side-by-side. */
+  .precision-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) var(--m-strip-h);
+  }
+  .precision-workspace__stage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .precision-workspace__well {
+    grid-column: 1;
+    grid-row: 2;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+  }
+  .precision-workspace__inspector {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+  .precision-workspace__inspector > * {
+    pointer-events: auto;
+  }
+  /* Slide-level precision controls are intentionally desktop-only. Phones keep the canvas and filmstrip
+     unobstructed until an object is selected; that selection's portaled inspector becomes a sheet below. */
+  .precision-workspace__inspector .precision-panel {
+    display: none;
+  }
+  .precision-workspace__hint {
+    left: 50%;
+    bottom: calc(var(--m-strip-h) + 10px);
+  }
+
   /* Touch cannot summon a hover edge, so the quiet command bar stays visible. */
   .editor__topdock {
     top: 0;
@@ -4019,6 +4568,35 @@ button {
     height: 26px;
     font-size: 16px;
   }
+  /* Precision affordances keep their quiet 10px visual while exposing a full finger-sized hit area.
+     Stage counter-scales these controls, so 44px here remains 44 screen pixels at every zoom level. */
+  .precision-selection__handle,
+  .precision-selection__rotate {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .precision-selection__handle::after,
+  .precision-selection__rotate::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid var(--coral);
+    border-radius: 2px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(20, 22, 28, 0.18);
+  }
+  .precision-selection__rotate::after {
+    border-radius: 50%;
+    background: var(--panel);
+  }
 
   /* ---- Inspector → bottom sheet (was a panel floating over the top-right of the canvas) --- */
   .insp {
@@ -4033,6 +4611,35 @@ button {
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
     z-index: 40;
+  }
+  /* Match the desktop rail selector's specificity so its position:static/min-height rules cannot pin a
+     portaled precision inspector inside the otherwise pointer-transparent host on small screens. */
+  .precision-workspace__inspector .insp {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: calc(var(--m-strip-h) + var(--m-sheet-gap));
+    width: auto;
+    min-height: 0;
+    max-height: 52vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+  }
+  .precision-workspace__inspector .insp__action {
+    min-height: 38px;
+  }
+  .precision-workspace__inspector .insp__field input,
+  .precision-workspace__inspector .insp__row select,
+  .precision-workspace__inspector .insp__row input {
+    min-height: 38px;
+    font-size: 16px;
   }
 
   /* ---- Advisor → full sheet ------------------------------------------------------------- */

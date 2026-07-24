@@ -27,6 +27,7 @@ import type { SlideDetail } from './deckDetail'
 export function SlideWell({
   slides,
   deck,
+  onActivateSlide,
 }: {
   slides: SlideDetail[]
   deck:
@@ -34,6 +35,9 @@ export function SlideWell({
         background: string
       } & DeckThemeFields)
     | null
+  /** Optional contextual owner hook. The well still updates EditorState itself so existing dock
+   *  consumers keep their exact behavior; precision workspaces use this to follow the activated slide. */
+  onActivateSlide?: (id: string) => void
 }) {
   const editor = useEditor()
   const mutate = useMutate()
@@ -125,7 +129,13 @@ export function SlideWell({
   // append) — shared with the scrolling deck's seam inserters, see useAddSlide.
   const addSlideAt = useAddSlide(slides)
 
-  const addSlide = () => addSlideAt(slides.length)
+  const addAndActivateSlide = (at: number) => {
+    const id = addSlideAt(at)
+    onActivateSlide?.(id)
+    return id
+  }
+
+  const addSlide = () => addAndActivateSlide(slides.length)
 
   function deleteSlide(
     s: SlideDetail,
@@ -141,6 +151,7 @@ export function SlideWell({
     if (editor.activeSlideId === s.id) {
       const neighbor = slideAt(idx + 1) ?? slideAt(idx - 1)
       editor.setActiveSlide(neighbor ? neighbor.id : null)
+      if (neighbor) onActivateSlide?.(neighbor.id)
     }
   }
 
@@ -311,7 +322,7 @@ export function SlideWell({
           title="Add a slide here"
           onClick={(e) => {
             e.stopPropagation()
-            addSlideAt(at)
+            addAndActivateSlide(at)
           }}
         >
           <Plus size={14} />
@@ -414,6 +425,7 @@ export function SlideWell({
                   // A press that turned into a touch reorder swallows its trailing click here.
                   if (suppressClickRef.current) return
                   editor.setActiveSlide(s.id)
+                  onActivateSlide?.(s.id)
                 }}
               >
                 <div className="well__thumb">{thumbnailForSlide(s)}</div>

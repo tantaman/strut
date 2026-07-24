@@ -152,4 +152,31 @@ describe('standalone body export', () => {
     expect(html).toContain('class="cmp cmp--text hero"')
     expect(html).not.toContain('onload=')
   })
+
+  it('exports materialized precision text boxes without changing legacy intrinsic text', () => {
+    const component = {
+      id: 'text-1',
+      slide_id: 'slide-1',
+      kind: 'text' as const,
+      z_order: 1,
+      x: 10,
+      y: 20,
+      scale_x: 1,
+      scale_y: 1,
+      scale_w: 0,
+      scale_h: 0,
+      rotate: 0,
+      skew_x: 0,
+      skew_y: 0,
+      custom_classes: '',
+      text: 'Precision text',
+    }
+
+    expect(toImpressHTML(bundle({}, [component]))).toContain(
+      'max-width:1100px;',
+    )
+    expect(
+      toImpressHTML(bundle({}, [{ ...component, scale_w: 320, scale_h: 140 }])),
+    ).toContain('width:320px;height:140px;overflow:hidden;')
+  })
 })

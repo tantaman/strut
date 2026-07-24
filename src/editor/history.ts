@@ -14,7 +14,10 @@ export interface Command {
   redo: () => void
 }
 
-const CAP = 20
+// Precision work produces lots of small, intentional gestures (nudges, aligns, resize passes). Bento's
+// editor keeps a deep enough trail that experimenting never feels risky; match that trust contract here
+// while still bounding memory. Commands hold closures over small row snapshots, not whole deck copies.
+const CAP = 100
 
 export class History {
   private undoStack: Command[] = []

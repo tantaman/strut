@@ -86,7 +86,12 @@ function componentHTML(c: AnyComponent): string {
       const font = c.font_family
         ? `'${esc(c.font_family)}',sans-serif`
         : `var(--strut-${cat}-font, 'Lato',sans-serif)`
-      extra = `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;max-width:1100px;`
+      const boxed = c.scale_w > 0 || c.scale_h > 0
+      extra =
+        `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;` +
+        (boxed
+          ? `${c.scale_w > 0 ? `width:${c.scale_w}px;` : ''}${c.scale_h > 0 ? `height:${c.scale_h}px;` : ''}overflow:hidden;`
+          : 'max-width:1100px;')
       body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
       break
     }

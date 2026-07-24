@@ -200,6 +200,7 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
   }
   if (c.kind === 'text') {
     const cat = textTypeOf(c)
+    const hasBox = c.scale_w > 0 || c.scale_h > 0
     return {
       ...base,
       fontSize: c.size ?? 72,
@@ -216,7 +217,13 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
         : `var(--strut-${cat}-font, ${cssFontFamily('')})`,
       whiteSpace: 'pre-wrap',
       lineHeight: 1.1,
-      maxWidth: 1100,
+      // Legacy text stays intrinsically sized. The first precision resize materializes a real text box
+      // in the spatial columns, after which wrapping/height are identical in Stage, cards, Play, share,
+      // and export. This adds precision without migrating or moving existing deck data.
+      width: c.scale_w > 0 ? c.scale_w : undefined,
+      height: c.scale_h > 0 ? c.scale_h : undefined,
+      maxWidth: hasBox ? undefined : 1100,
+      overflow: hasBox ? 'hidden' : undefined,
     }
   }
   const { w, h } = componentSize(c)

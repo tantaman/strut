@@ -13,8 +13,8 @@ import { EditorStateProvider, useEditor } from '../editor/EditorState'
 import { parseEditorSearch } from '../editor/editorSearch'
 import { UndoProvider } from '../editor/UndoProvider'
 import { Header } from '../editor/Header'
-import { Stage } from '../editor/Stage'
 import { DocView } from '../editor/DocView'
+import { PrecisionWorkspace } from '../editor/PrecisionWorkspace'
 import { ArrangeView } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
 import { PoweredByRindle } from '../editor/PoweredByRindle'
@@ -276,10 +276,14 @@ function EditorInner({ deckId }: { deckId: string }) {
         <DocView slides={slides} deck={deck} onEditObjects={editObjects} />
         {objectSlide && (
           <div className="context-tool context-tool--objects">
-            <Stage slide={objectSlide} deck={deck} />
-            <div className="context-tool__hint">
-              Move, resize, or use the command bar to add objects · Esc returns
-            </div>
+            <PrecisionWorkspace
+              slides={slides}
+              activeSlide={objectSlide}
+              deck={deck}
+              onActivateSlide={(slideId) =>
+                setActiveTool({ kind: 'objects', slideId })
+              }
+            />
           </div>
         )}
         {arrangeOpen && (
