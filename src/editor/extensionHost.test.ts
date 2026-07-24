@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { AddTextArgs } from '../../shared/app-def'
 import { DEFAULT_FONT_SIZE } from '../config'
 import { compileAssemblyScript } from './asCompile'
+import type { AscOptions } from './asCompile'
+import { docText } from './aiArrange'
 import { runTextExtension } from './extensionHost'
 
 // Phase C of issue #438: the full end-to-end path, headless. An extension written in AssemblyScript
@@ -24,7 +26,9 @@ const EXTENSION_SOURCE = `
 
 async function compileExtension(source: string): Promise<Uint8Array> {
   // exportRuntime → the loader can read strings back out of linear memory (__getString).
-  const result = await compileAssemblyScript(source, { exportRuntime: true })
+  const result = await compileAssemblyScript(source, {
+    exportRuntime: true,
+  } as AscOptions)
   if (!result.ok) throw new Error(`compile failed: ${result.error}`)
   return result.wasm
 }
@@ -43,8 +47,8 @@ describe('runTextExtension', () => {
     expect(calls).toHaveLength(2)
 
     // The string survived the trip through linear memory.
-    expect(calls[0].text).toBe('Hello from WASM')
-    expect(calls[1].text).toBe('second box')
+    expect(docText(calls[0].content)).toBe('Hello from WASM')
+    expect(docText(calls[1].content)).toBe('second box')
 
     // Coordinates passed straight through.
     expect(calls[0].x).toBe(100)
@@ -64,7 +68,6 @@ describe('runTextExtension', () => {
     expect(calls[0].size).toBe(DEFAULT_FONT_SIZE)
     expect(calls[0].color).toBe('')
     expect(calls[0].font_family).toBe('')
-    expect(calls[0].text_type).toBe('body')
   }, 30_000)
 
   it('honors a custom starting z-order', async () => {

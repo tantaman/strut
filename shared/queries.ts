@@ -11,7 +11,7 @@
 
 import { defineQuery } from '@rindle/client'
 import { q, rels } from './app-def.ts'
-import { SlideFragment } from './fragments.ts'
+import { DeckFragment, SlideFragment } from './fragments.ts'
 
 function reqString(raw: unknown, field: string): string {
   const v = (raw as Record<string, unknown>)[field]
@@ -38,6 +38,7 @@ export const decksQuery = defineQuery(
   (raw): { limit: number } => ({ limit: reqLimit(raw) }),
   ({ limit }: { limit: number }) =>
     q.deck
+      .include(DeckFragment)
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
@@ -54,6 +55,7 @@ export const deckVariantsQuery = defineQuery(
   ({ deckId, limit }: { deckId: string; limit: number }) =>
     q.deck.where
       .source_deck_id(deckId)
+      .include(DeckFragment)
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
@@ -70,6 +72,7 @@ export const deckVariantsQuery = defineQuery(
 type DeckRoot = ReturnType<typeof q.deck.where.id>
 export function deckDetailBody(root: DeckRoot) {
   return root
+    .include(DeckFragment)
     .sub('slides', rels.deckSlides, (s) =>
       s.orderBy('sort', 'asc').include(SlideFragment),
     )

@@ -3,34 +3,20 @@
 
 import { memo, useMemo } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import {
-  bodyStyleFor,
-  cellDocAt,
-  cellPad,
-  cssHex,
-  cssUrlValue,
-  layoutCells,
-  resolveLayout,
-  resolveTextAlign,
-  slideBodyVAlign,
-  slidePadScale,
-  textTypeOf,
-} from './types'
+import { cssHex, cssUrlValue, resolveTextAlign } from './types'
 import type {
   AnyComponent,
   BackgroundImageSpec,
   ComponentKind,
   DeckPresentationFields,
-  Rect,
-  SlideCellFields,
   SlideThemeFields,
 } from './types'
-import { docToHtml, isDocEmpty } from './tiptapDoc'
-import { markdownToHtml } from './markdown'
+import { docToHtml } from './tiptapDoc'
 import { FONTS_BY_CATEGORY } from '../config'
 
 const DEFAULT_W: Record<ComponentKind, number> = {
-  text: 0,
+  // New text always persists an exact box. This is only a defensive fallback for a malformed row.
+  text: 400,
   image: 400,
   shape: 200,
   video: 480,
@@ -38,7 +24,7 @@ const DEFAULT_W: Record<ComponentKind, number> = {
   artifact: 640,
 }
 const DEFAULT_H: Record<ComponentKind, number> = {
-  text: 0,
+  text: 240,
   image: 300,
   shape: 200,
   video: 270,
@@ -76,30 +62,12 @@ export function FontOptions() {
   )
 }
 
-/** The deck text theme as CSS variables. Set on every slide container (stage canvas, thumbnail
- *  frame, impress export), so a text component with an empty color/font_family can inherit via
- *  `var(--strut-<category>-…)` no matter which surface renders it. `--strut-text-align` (slide
- *  override → deck default → 'left') drives markdown-mode alignment; the optional `slide` supplies
- *  the per-slide override.
- *
- *  `--strut-body-pad` / `--strut-type-scale` carry the body's REGION (see resolveBodyRegion). Riding
- *  as vars on the container is what keeps partitioning to one place: every app surface already sets
- *  these vars, so the thumbnail, the stage, Doc's cards, Play and share all partition for free — none
- *  of them needs to learn the concept. The standalone export has its own twin, themeVarsCss.
- *
- *  IMPORTANT: every var added here must also be added to `themeVarsCss` in impressExport.ts, or an
- *  exported deck renders differently from the app. `themeVars.test.ts` pins the two together. */
+/** The deck text theme as CSS variables. The primary text component owns its geometry; the slide only
+ *  supplies typography, alignment, and one quiet full-slide safe-area default. */
 export function themeVars(
   theme: DeckPresentationFields | null | undefined,
   slide?: SlideThemeFields | null,
 ): CSSProperties {
-  // The body sits in the layout's first cell (or, for a full layout, the legacy single region). Same
-  // three CSS vars either way, so thumbnail/stage/Doc/Play/export all confine the body for free.
-  const region = bodyStyleFor(slide, theme)
-  // Vertical alignment: '' auto keeps the region's own display (block for a full body, flex for a
-  // partitioned one) and lands on the stylesheet's `safe center`; an explicit valign forces flex so a
-  // full-bleed body can also centre/bottom-pin. Cells inherit --strut-body-justify from the container.
-  const valign = slideBodyVAlign(slide?.valign)
   return {
     '--strut-heading-color': cssHex(theme?.heading_color ?? '', '111111'),
     '--strut-heading-font': cssFontFamily(theme?.heading_font ?? ''),
@@ -109,10 +77,10 @@ export function themeVars(
       slide?.text_align,
       theme?.text_align,
     ),
-    '--strut-body-pad': region.pad,
-    '--strut-type-scale': String(region.scale),
-    '--strut-body-display': valign.flex ? 'flex' : region.display,
-    '--strut-body-justify': valign.justify,
+    '--strut-body-pad': '64px 88px',
+    '--strut-type-scale': '1',
+    '--strut-body-display': 'block',
+    '--strut-body-justify': 'safe center',
   } as CSSProperties
 }
 
@@ -199,31 +167,44 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
     transform: `rotate(${c.rotate}rad) skewX(${c.skew_x}rad) skewY(${c.skew_y}rad)`,
   }
   if (c.kind === 'text') {
-    const cat = textTypeOf(c)
-    const hasBox = c.scale_w > 0 || c.scale_h > 0
+    const { w, h } = componentSize(c)
+    const color = c.color
+      ? cssHex(c.color, '111111')
+      : 'var(--strut-body-color, #111111)'
+    const font = c.font_family
+      ? cssFontFamily(c.font_family)
+      : `var(--strut-body-font, ${cssFontFamily('')})`
+    const typeVars = {
+      '--strut-type-scale': (c.size ?? 32) / 32,
+    } as CSSProperties
     return {
       ...base,
-      fontSize: c.size ?? 72,
-      // '' = inherit the deck theme default for this component's category (heading | body), read
-      // from the CSS variables every slide container sets (themeVars above).
-      color: c.color
-        ? cssHex(c.color, '111111')
-        : `var(--strut-${cat}-color, #111111)`,
+      ...typeVars,
+      fontSize: c.size ?? 32,
+      // Component-level defaults are body typography; heading nodes in the TipTap doc resolve the deck's
+      // heading variables through `.strut-md`.
+      color,
       // Quote the family: an unquoted CSS font-family token can't start with a digit, so a name
       // like "Press Start 2P" is invalid unquoted and the browser drops the whole declaration.
       // (The impress export already quotes it the same way.)
-      fontFamily: c.font_family
-        ? cssFontFamily(c.font_family)
-        : `var(--strut-${cat}-font, ${cssFontFamily('')})`,
+      fontFamily: font,
+      ...(c.color
+        ? ({
+            '--strut-body-color': color,
+            '--strut-heading-color': color,
+          } as CSSProperties)
+        : {}),
+      ...(c.font_family
+        ? ({
+            '--strut-body-font': font,
+            '--strut-heading-font': font,
+          } as CSSProperties)
+        : {}),
       whiteSpace: 'pre-wrap',
       lineHeight: 1.1,
-      // Legacy text stays intrinsically sized. The first precision resize materializes a real text box
-      // in the spatial columns, after which wrapping/height are identical in Stage, cards, Play, share,
-      // and export. This adds precision without migrating or moving existing deck data.
-      width: c.scale_w > 0 ? c.scale_w : undefined,
-      height: c.scale_h > 0 ? c.scale_h : undefined,
-      maxWidth: hasBox ? undefined : 1100,
-      overflow: hasBox ? 'hidden' : undefined,
+      width: w,
+      height: h,
+      overflow: 'hidden',
     }
   }
   const { w, h } = componentSize(c)
@@ -232,11 +213,14 @@ export function cmpStyle(c: AnyComponent): CSSProperties {
 
 const FULL_SIZE_STYLE: CSSProperties = { width: '100%', height: '100%' }
 
-const TextBody = memo(function TextBody({ html }: { html: string }) {
-  const dangerouslySetInnerHTML = useMemo(() => ({ __html: html }), [html])
+const TextBody = memo(function TextBody({ doc }: { doc?: string }) {
+  const dangerouslySetInnerHTML = useMemo(
+    () => ({ __html: docToHtml(doc) }),
+    [doc],
+  )
   return (
     <div
-      className="cmp__textbody"
+      className="cmp__textbody strut-md"
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
     />
   )
@@ -252,124 +236,6 @@ const MarkupBody = memo(function MarkupBody({ markup }: { markup: string }) {
   )
 })
 
-/** A read-only slide body surface. Renders a stored TipTap `doc` (JSON
- *  string) to sanitized HTML inside a `.strut-md` scope; the theme (fonts/colors/alignment) flows in
- *  via the CSS vars the enclosing slide container sets (themeVars). Used by every read-only surface —
- *  thumbnails, spatial arranging, presenter, share, and contextual object focus. The direct card editor
- *  mounts TipTap into the same `.strut-md` scope. */
-export const MarkdownSurface = memo(function MarkdownSurface({
-  doc,
-}: {
-  doc: string | null | undefined
-}) {
-  const dangerouslySetInnerHTML = useMemo(
-    () => ({ __html: docToHtml(doc) }),
-    [doc],
-  )
-  return (
-    <div
-      className="strut-md"
-      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
-    />
-  )
-})
-
-/** Compatibility renderer for rows/files that predate the TipTap `doc` column. A non-empty stored
- *  `doc` always wins — including an intentionally empty TipTap document after the user clears a body.
- *  The raw source remains untouched until the first direct edit writes a doc, so importing an old deck
- *  does not silently discard Markdown features outside the current editor schema. */
-export const LegacyMarkdownSurface = memo(function LegacyMarkdownSurface({
-  markdown,
-}: {
-  markdown: string
-}) {
-  const dangerouslySetInnerHTML = useMemo(
-    () => ({ __html: markdownToHtml(markdown) }),
-    [markdown],
-  )
-  return (
-    <div
-      className="strut-md"
-      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
-    />
-  )
-})
-
-/** The absolute box for one layout cell (canvas px) carrying the per-cell body vars. The enclosed
- *  `.strut-md` fills the box and confines/scales itself off these vars — the SAME `--strut-body-*`
- *  mechanism the single body uses, now set per cell instead of once on the container (themeVars). So a
- *  cell body partitions for free on every surface, exactly like the whole-slide body does. */
-export function cellBoxStyle(rect: Rect, padScale = 1): CSSProperties {
-  const { padX, padY, scale } = cellPad(rect, padScale)
-  return {
-    position: 'absolute',
-    left: rect.x,
-    top: rect.y,
-    width: rect.w,
-    height: rect.h,
-    '--strut-body-pad': `${padY}px ${padX}px`,
-    '--strut-type-scale': String(scale),
-    '--strut-body-display': 'flex',
-  } as CSSProperties
-}
-
-type SlideBodyFields = SlideThemeFields &
-  SlideCellFields & { markdown?: string | null }
-
-function hasLegacyBody(slide: SlideBodyFields, index: number): boolean {
-  return index === 0 && !slide.doc && !!slide.markdown?.trim()
-}
-
-function CellBody({ slide, index }: { slide: SlideBodyFields; index: number }) {
-  if (hasLegacyBody(slide, index))
-    return <LegacyMarkdownSurface markdown={slide.markdown ?? ''} />
-  const doc = cellDocAt(slide, index)
-  return isDocEmpty(doc) ? null : <MarkdownSurface doc={doc} />
-}
-
-/** True when a slide has ANY body content — its single doc/legacy source (full layout) or any visible
- *  cell (tiled). Lets the positioned-object canvas skip an empty body underlay. */
-export function slideHasBody(slide: SlideBodyFields): boolean {
-  const layout = resolveLayout(slide.layout)
-  if (layout === '') return hasLegacyBody(slide, 0) || !isDocEmpty(slide.doc)
-  return layoutCells(layout).some(
-    (_, i) => hasLegacyBody(slide, i) || !isDocEmpty(cellDocAt(slide, i)),
-  )
-}
-
-/** The markdown body/bodies for a slide — the ONE shared read renderer, so thumbnails, overview,
- *  presenter, share and the stage viewer all tile identically. A full-layout slide renders its single
- *  `doc` (confined by the container's --strut-body-pad, i.e. today's behavior); a tiled slide renders one
- *  positioned `.strut-md` per non-empty cell (each confined by its own cellBoxStyle vars). */
-export const MarkdownBodies = memo(function MarkdownBodies({
-  slide,
-}: {
-  slide: SlideBodyFields
-}) {
-  const layout = resolveLayout(slide.layout)
-  if (layout === '') {
-    return <CellBody slide={slide} index={0} />
-  }
-  const padScale = slidePadScale(slide)
-  return (
-    <>
-      {layoutCells(layout).map((cell, i) => {
-        const doc = cellDocAt(slide, i)
-        if (!hasLegacyBody(slide, i) && isDocEmpty(doc)) return null
-        return (
-          <div
-            key={i}
-            className="strut-md-cell"
-            style={cellBoxStyle(cell, padScale)}
-          >
-            <CellBody slide={slide} index={i} />
-          </div>
-        )
-      })}
-    </>
-  )
-})
-
 /** `opts.interactive` lets presented embeds accept pointer events. Everywhere else they stay
  *  pointer-transparent so the editor can drag/select the box and thumbnails stay inert. */
 export function renderInner(
@@ -378,7 +244,7 @@ export function renderInner(
 ): ReactNode {
   switch (c.kind) {
     case 'text':
-      return <TextBody html={c.text && c.text.length ? c.text : 'Text'} />
+      return <TextBody doc={c.doc} />
     case 'image':
       return c.src ? (
         <img src={c.src} alt="" draggable={false} />

@@ -12,59 +12,15 @@ import {
   parseBackgroundImageToken,
   resolveBackground,
   resolveBackgroundImage,
-  resolveLayout,
-  resolveSlidePad,
-  resolveSlideValign,
   resolveSurface,
-  SLIDE_LAYOUTS,
-  SLIDE_PADS,
-  SLIDE_VALIGNS,
   SURFACE_SWATCHES,
-  TEXT_ALIGNS,
 } from './types'
-import type {
-  BackgroundImageLayout,
-  SlideLayout,
-  SlidePad,
-  SlideValign,
-  TextAlign,
-} from './types'
+import type { BackgroundImageLayout } from './types'
 import { uploadImage } from './upload'
 
 type SlideThemeField =
   | 'background'
   | 'surface'
-  | 'layout'
-  | 'pad'
-  | 'valign'
-  | 'text_align'
-
-const LAYOUT_LABELS: Record<SlideLayout, string> = {
-  '': 'Full',
-  'cols-2': 'Columns',
-  'rows-2': 'Rows',
-  tri: 'Three',
-  'grid-4': 'Grid',
-  'split-l': 'Split',
-}
-
-const PAD_LABELS: Record<SlidePad, string> = {
-  '': 'Comfortable',
-  compact: 'Compact',
-  edge: 'Edge',
-}
-
-const VALIGN_LABELS: Record<SlideValign, string> = {
-  top: 'Top',
-  middle: 'Middle',
-  bottom: 'Bottom',
-}
-
-const ALIGN_LABELS: Record<TextAlign, string> = {
-  left: 'Left',
-  center: 'Center',
-  right: 'Right',
-}
 
 /**
  * The contextual precision workspace's no-selection state. It deliberately edits only the active
@@ -189,10 +145,6 @@ export function PrecisionSlidePanel({
     }
   }
 
-  const currentLayout = resolveLayout(slide.layout)
-  const currentPad = resolveSlidePad(slide.pad)
-  const currentValign = resolveSlideValign(slide)
-  const storedAlign = readField('text_align')
   const hasImage = !!(effectiveImage?.src || imageUrl.trim())
 
   return (
@@ -354,79 +306,6 @@ export function PrecisionSlidePanel({
         </div>
       </section>
 
-      <section className="precision-panel__section">
-        <h3 className="precision-panel__section-title">Layout</h3>
-        <ChoiceGroup
-          label="Slide layout"
-          values={SLIDE_LAYOUTS}
-          active={currentLayout}
-          labelFor={(value) => LAYOUT_LABELS[value]}
-          onChange={(layout) => commitField('layout', layout, 'Change layout')}
-        />
-      </section>
-
-      <section className="precision-panel__section">
-        <h3 className="precision-panel__section-title">Density</h3>
-        <ChoiceGroup
-          label="Slide content density"
-          values={SLIDE_PADS}
-          active={currentPad}
-          labelFor={(value) => PAD_LABELS[value]}
-          onChange={(pad) => commitField('pad', pad, 'Change padding')}
-        />
-      </section>
-
-      <section className="precision-panel__section">
-        <h3 className="precision-panel__section-title">Vertical alignment</h3>
-        <ChoiceGroup
-          label="Vertical content alignment"
-          values={SLIDE_VALIGNS}
-          active={currentValign}
-          labelFor={(value) => VALIGN_LABELS[value]}
-          onChange={(valign) =>
-            commitField('valign', valign, 'Change vertical alignment')
-          }
-        />
-      </section>
-
-      <section className="precision-panel__section">
-        <h3 className="precision-panel__section-title">Horizontal alignment</h3>
-        <div
-          className="precision-panel__seg"
-          role="group"
-          aria-label="Horizontal text alignment"
-        >
-          <button
-            type="button"
-            className={
-              'precision-panel__choice' +
-              (storedAlign === '' ? ' is-active' : '')
-            }
-            aria-pressed={storedAlign === ''}
-            onClick={() =>
-              commitField('text_align', '', 'Inherit text alignment')
-            }
-          >
-            Deck
-          </button>
-          {TEXT_ALIGNS.map((align) => (
-            <button
-              key={align}
-              type="button"
-              className={
-                'precision-panel__choice' +
-                (storedAlign === align ? ' is-active' : '')
-              }
-              aria-pressed={storedAlign === align}
-              onClick={() =>
-                commitField('text_align', align, 'Change horizontal alignment')
-              }
-            >
-              {ALIGN_LABELS[align]}
-            </button>
-          ))}
-        </div>
-      </section>
     </aside>
   )
 }

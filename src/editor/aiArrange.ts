@@ -7,7 +7,7 @@
 import type { JSONContent } from '@tiptap/core'
 import { keysBetween } from '../lib/order'
 import { parseDoc } from './tiptapDoc'
-import { cellDocAt, layoutCells, resolveLayout } from './types'
+import type { AnyComponent } from './types'
 import { LAYOUTS } from './layouts'
 import type { LayoutTransform } from './layouts'
 import type { History } from './history'
@@ -66,8 +66,8 @@ function placementOverrides(
   return m
 }
 
-// Collect the plain text of a TipTap doc (markdown-mode slides store content as doc JSON) by walking
-// text nodes — cheaper and safer than rendering to HTML and stripping tags. Exported so the AI Edit lane
+// Collect the plain text of a TipTap document by walking text nodes — cheaper and safer than rendering
+// to HTML and stripping tags. Exported so the AI Edit lane
 // can flatten a slide's research-note doc the same way (both are TipTap docs).
 export function docText(raw: string | null | undefined): string {
   const parts: string[] = []
@@ -79,67 +79,55 @@ export function docText(raw: string | null | undefined): string {
   return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
 
-/** The body columns needed to flatten a slide without depending on a particular Rindle query shape. */
-export interface SlideBodyTextFields {
-  doc?: string | null
-  markdown?: string | null
-  layout?: string | null
-  cells?: string | null
+/** Plain text for one canonical rich-text component. */
+export function componentText(component: AnyComponent): string {
+  return component.kind === 'text' ? docText(component.doc) : ''
 }
 
-/** Populated body cells in visual reading order. Cell 0 lives in `doc`; siblings live in the `cells` blob.
- *  Only cells in the current layout are visible/grounded — dormant cells retained from a larger prior
- *  layout stay untouched and reappear if that layout is restored. */
-export function slideCellTexts(
-  s: SlideBodyTextFields,
-): Array<{ index: number; text: string }> {
-  const count = layoutCells(resolveLayout(s.layout)).length
-  const legacy = legacyMarkdownText(s.markdown)
-  const hasStoredPrimaryDoc = Boolean(s.doc)
-  const populated: Array<{ index: number; text: string }> = []
-  for (let index = 0; index < count; index++) {
-    const text =
-      docText(cellDocAt(s, index)) ||
-      (index === 0 && !hasStoredPrimaryDoc ? legacy : '')
-    if (text) populated.push({ index, text })
-  }
-  return populated
-}
-
-// Slides have no `title` column. Their readable body is every populated cell in the current tiling, in
-// visual reading order. The legacy raw-markdown column remains cell 0's fallback for imported decks.
-// (Spatial slides carry their text in component fragment refs, which need a React `useFragment` to read;
-// pulling that into the digest is a follow-up. Body writing is the default, so the
-// model still has content to reason about for typical decks.)
-export function slideText(s: SlideBodyTextFields): string {
-  return slideCellTexts(s)
-    .map((cell) => cell.text)
+/** Every text layer in spatial reading order. The primary document is an ordinary component, so AI sees
+ *  exactly the same content that doc-first, precision, Present, and export render. */
+export function slideText(components: readonly AnyComponent[]): string {
+  return [...components]
+    .sort((a, b) => a.z_order - b.z_order)
+    .map(componentText)
+    .filter(Boolean)
     .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
-/** Full active-slide grounding with cell boundaries retained, so a rewrite can distinguish the primary
- *  body (cell 1) from siblings that `set_body` deliberately preserves. */
-export function slideGroundingText(s: SlideBodyTextFields): string {
-  const cells = slideCellTexts(s)
-  if (resolveLayout(s.layout) === '') return cells[0]?.text ?? ''
-  return cells.map(({ index, text }) => `Cell ${index + 1}: ${text}`).join('\n')
+/** Full active-slide grounding. Keeping each layer on its own line gives the model useful structure
+ *  without reviving a second body/cell model. */
+export function slideGroundingText(
+  components: readonly AnyComponent[],
+): string {
+  return [...components]
+    .sort((a, b) => a.z_order - b.z_order)
+    .map(componentText)
+    .filter(Boolean)
+    .join('\n')
 }
 
-function legacyMarkdownText(md: unknown): string {
-  return typeof md === 'string'
-    ? md
-        .replace(/[#*_>`~-]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-    : ''
+/** The action lane rewrites only this document, so ground it in exactly the component it can mutate. */
+export function primarySlideText(
+  slide: Pick<SlideDetail, 'body_component_id'>,
+  components: readonly AnyComponent[],
+): string {
+  const primary = components.find(
+    (component) => component.id === slide.body_component_id,
+  )
+  return primary ? componentText(primary) : ''
 }
 
 /** Reduce the editor's live slides to the model digest (the client already has this rendered — no
  *  server re-read). Title is a short prefix of the content (slides have no title column); truncation is
  *  best-effort here — the server re-clamps to ARRANGE_LIMITS. */
-export function buildDigest(slides: SlideDetail[]): SlideDigest[] {
+export function buildDigest(
+  slides: SlideDetail[],
+  componentsBySlide: Readonly<Record<string, readonly AnyComponent[]>>,
+): SlideDigest[] {
   return slides.map((s) => {
-    const text = slideText(s)
+    const text = slideText(componentsBySlide[s.id] ?? [])
     return {
       id: s.id,
       title: text.slice(0, 80).trim(),

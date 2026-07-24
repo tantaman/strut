@@ -55,6 +55,14 @@ export type Alignment =
 export type DistributionAxis = 'horizontal' | 'vertical'
 export type MatchDimension = 'width' | 'height'
 
+/** The slide-sized primary document stays directly editable, but ordinary object marquee ignores it. */
+export function isMarqueeSelectableComponent(
+  id: string | undefined,
+  primaryComponentId: string | null | undefined,
+): id is string {
+  return Boolean(id && id !== primaryComponentId)
+}
+
 /** Axis-aligned bounds of the frame after its box is rotated around its center. */
 export function frameBounds(frame: PrecisionFrame): PrecisionBounds {
   const centerX = frame.x + frame.w / 2

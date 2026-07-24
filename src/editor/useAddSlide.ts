@@ -13,6 +13,7 @@ import { useMutate } from '../rindle/RindleProvider'
 import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import type { AddSlideArgs } from '../../shared/app-def'
+import { primaryTextId } from '../../shared/app-def'
 import type { SlideDetail } from './deckDetail'
 
 /** Returns `addSlideAt(at)` — inserts a blank slide so it lands at index `at` (0 = before the first,
@@ -27,11 +28,6 @@ export function useAddSlide(slides: SlideDetail[]): (at: number) => string {
         i >= 0 && i < slides.length ? slides[i] : undefined
       const before = slideAt(at - 1)
       const after = slideAt(at)
-      // Continue the neighbor's FRAME (layout tiling / density / alignment) instead of resetting to
-      // defaults — so a run of similar slides doesn't mean re-picking the same settings each time. Prefer
-      // the slide above the insertion point (the one you were just working under), else the one below for
-      // an insert-at-top. Only the frame is carried; content (doc/cells) always starts empty.
-      const src = before ?? after
       const id = newId()
       const between = (
         b: number | undefined,
@@ -51,14 +47,6 @@ export function useAddSlide(slides: SlideDetail[]): (at: number) => string {
         sort: keyBetween(before?.sort, after?.sort),
         x: between(before?.x, after?.x, 0),
         y: between(before?.y, after?.y, 0),
-        // The single editor is body-first. This persisted value keeps new data legible to older readers;
-        // current Strut renders body and positioned objects together regardless of the compatibility flag.
-        render_mode: 'markdown',
-        // …and the neighbor's frame, so the new slide picks up where you left off.
-        layout: src?.layout ?? '',
-        pad: src?.pad ?? '',
-        valign: src?.valign ?? '',
-        text_align: src?.text_align ?? '',
         now: Date.now(),
       }
       mutate.addSlide(args)
@@ -66,7 +54,8 @@ export function useAddSlide(slides: SlideDetail[]): (at: number) => string {
       history.push({
         label: 'Add slide',
         redo: () => mutate.addSlide(args),
-        undo: () => mutate.deleteSlide({ id, componentIds: [] }),
+        undo: () =>
+          mutate.deleteSlide({ id, componentIds: [primaryTextId(id)] }),
       })
       return id
     },

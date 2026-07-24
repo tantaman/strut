@@ -3,7 +3,7 @@
 
 import { parseProps } from '../../shared/componentProps'
 import type { ComponentProps, ComponentType } from '../../shared/componentProps'
-import { DEFAULT_FONT, SLIDE_H, SLIDE_W } from '../config'
+import { DEFAULT_FONT } from '../config'
 
 export type ComponentKind = ComponentType
 
@@ -24,11 +24,21 @@ export interface SpatialBase {
   custom_classes: string
 }
 
+/** Generic canvas rectangle used by direct-placement helpers. */
+export interface Rect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 /** A raw `component` row as it materializes off a fragment/query: spatial base + `type` discriminator
  *  + `fill` column + the typed `props` JSON object (json<ComponentProps>()). */
 export interface ComponentRow extends SpatialBase {
   type: string
   fill: string
+  /** Canonical TipTap JSON for text components. Empty for every other kind. */
+  content: string
   props: ComponentProps
 }
 
@@ -37,12 +47,11 @@ export interface ComponentRow extends SpatialBase {
 export type AnyComponent = SpatialBase & {
   kind: ComponentKind
   fill?: string
-  // text ('' color/font_family = inherit the deck theme default for text_type; see DeckThemeFields)
-  text?: string
+  // text (the document is a real column so streamed typing never replaces style props)
+  doc?: string
   size?: number
   color?: string
   font_family?: string
-  text_type?: string
   // image / video / webframe / artifact
   src?: string
   image_type?: string
@@ -76,6 +85,7 @@ export function componentFromRow(row: ComponentRow): AnyComponent {
     custom_classes: row.custom_classes,
     kind: row.type as ComponentKind,
     fill: row.fill || undefined,
+    doc: row.type === 'text' ? row.content : undefined,
     ...parseProps(row.props),
   }
 }
@@ -202,9 +212,8 @@ export function strokeGeometry(
 
 // ---- deck text theme ------------------------------------------------------------------------------
 
-/** The deck's text-theme default columns ('' / null = built-in default: Lato / 111111). Text
- *  components fall into two categories — 'heading' | 'body' (`text_type`, '' = body) — and a text
- *  component with an empty color/font_family inherits the deck default for its category. */
+/** The deck's text-theme default columns ('' / null = built-in default: Lato / 111111). Heading/body
+ *  semantics live in the TipTap document; an empty component color/font inherits the body default. */
 export interface DeckThemeFields {
   heading_font?: string | null
   heading_color?: string | null
@@ -215,34 +224,14 @@ export interface DeckThemeFields {
   text_align?: string | null
 }
 
-/** The slide-side columns the shared presentation resolution reads: the alignment override, the two
- *  inputs to the body's region (its own pin + the background whose image supplies the auto rule), and
- *  the layout tiling. `layout` (when a real multi-cell tiling) supersedes `body_region` — the body
- *  takes the layout's first cell; see bodyCells / rectBodyStyle. */
+/** The slide-side typography override read by every presentation surface. */
 export interface SlideThemeFields {
   text_align?: string | null
-  background?: string | null
-  body_region?: string | null
-  layout?: string | null
-  // Density: how much safe-area padding the body gets ('' = comfortable | 'compact' | 'edge' = full
-  // bleed). Orthogonal to `layout`; scales only the outer safe-area, never interior gutters.
-  pad?: string | null
-  // Vertical alignment of the body in its box ('' = auto | 'top' | 'middle' | 'bottom'). A per-card
-  // property every cell snaps to; horizontal alignment is `text_align`. See slideBodyVAlign.
-  valign?: string | null
 }
 
 /** A deck as the presentation resolvers see it: text theme + the background the slide falls back to. */
 export type DeckPresentationFields = DeckThemeFields & {
   background?: string | null
-}
-
-export const TEXT_TYPES = ['body', 'heading'] as const
-export type TextType = (typeof TEXT_TYPES)[number]
-
-/** Normalize a stored `text_type` ('' / absent = body, so legacy rows need no backfill). */
-export function textTypeOf(c: { text_type?: string }): TextType {
-  return c.text_type === 'heading' ? 'heading' : 'body'
 }
 
 // ---- unified theme resolution --------------------------------------------------------------------
@@ -259,466 +248,6 @@ export function resolveTextAlign(
 ): TextAlign {
   const v = (slideAlign && slideAlign !== '' ? slideAlign : deckAlign) || 'left'
   return v === 'center' || v === 'right' ? v : 'left'
-}
-
-// ---- body region ---------------------------------------------------------------------------------
-// Which part of the 1280×720 canvas the markdown body occupies. The slide column stores INTENT ('' =
-// auto, else a pinned region); the geometry below is DERIVED, so the two can evolve apart — a future
-// free-rect body can keep these names as presets that produce one, with no migration.
-//
-// Named `region`, deliberately not `layout`: `layouts.ts` already owns that word for where slides sit
-// relative to each other in the 3-D overview world, which is a different problem entirely.
-
-export const BODY_REGIONS = ['full', 'left', 'right', 'top', 'bottom'] as const
-export type BodyRegion = (typeof BODY_REGIONS)[number]
-
-/** Resolve where the body sits. A pinned slide value wins outright. Otherwise it's AUTO: derived from
- *  the slide's background image, which already half-bleeds via its own `layout` enum — so the body
- *  simply takes the half the image doesn't. That makes "paste an image and the card partitions itself"
- *  a consequence of one rule rather than a special case, and it un-partitions on its own when the
- *  image goes away. Auto only ever yields full/left/right (the image's own axis); top/bottom are
- *  reachable by pinning. */
-export function resolveBodyRegion(
-  pinned: string | null | undefined,
-  imageLayout: BackgroundImageLayout | null | undefined,
-): BodyRegion {
-  if (pinned && (BODY_REGIONS as readonly string[]).includes(pinned))
-    return pinned as BodyRegion
-  if (imageLayout === 'left') return 'right'
-  if (imageLayout === 'right') return 'left'
-  return 'full'
-}
-
-// The full-bleed body's inset — the entire "safe area" concept, and the value `.strut-md` falls back to.
-const PAD_Y = 64
-const PAD_X = 88
-// Breathing room between the body and whatever occupies the other half.
-const GUTTER = 24
-
-export interface BodyRegionStyle {
-  /** A `padding` shorthand that confines the body to its region (the body box itself still fills the
-   *  canvas, so nothing about stacking or `position` changes — only where its content may land). */
-  pad: string
-  /** Multiplier on every absolute font size in `.strut-md`. Type is sized in px against a 1280-wide
-   *  canvas (h1 88px), so a half-width region would otherwise fit ~5 characters on a heading line. */
-  scale: number
-  /** `.strut-md`'s display. A partitioned body centres in its half ('flex' + the stylesheet's column
-   *  `justify-content: safe center`); a full-bleed one stays 'block' and top-aligned — which is both
-   *  what it has always done and what a canvas wants, so no existing slide moves by a pixel. */
-  display: 'block' | 'flex'
-}
-
-/** The area a region visually claims, in canvas px — what the drag preview paints and where the grip
- *  sits. The inset in `bodyRegionStyle` is this rect plus the safe-area padding. */
-export function bodyRegionRect(region: BodyRegion): {
-  x: number
-  y: number
-  w: number
-  h: number
-} {
-  const halfW = SLIDE_W / 2
-  const halfH = SLIDE_H / 2
-  switch (region) {
-    case 'left':
-      return { x: 0, y: 0, w: halfW, h: SLIDE_H }
-    case 'right':
-      return { x: halfW, y: 0, w: halfW, h: SLIDE_H }
-    case 'top':
-      return { x: 0, y: 0, w: SLIDE_W, h: halfH }
-    case 'bottom':
-      return { x: 0, y: halfH, w: SLIDE_W, h: halfH }
-    default:
-      return { x: 0, y: 0, w: SLIDE_W, h: SLIDE_H }
-  }
-}
-
-// How close to the middle counts as "put it back to full-bleed". Rectangular rather than radial: the
-// canvas is 16:9, so a radius would reach much further vertically than it looks like it should.
-const CENTER_ZONE = 0.18
-
-/** The region a drag lands on, from a pointer at normalized (0..1) coords within the slide. Snapping
- *  by dominant axis is the window-snap gesture — drag toward an edge, get that half; drag to the
- *  middle, get full-bleed. Pure so the feel can be tested without a browser. */
-export function regionAtPoint(nx: number, ny: number): BodyRegion {
-  const dx = nx - 0.5
-  const dy = ny - 0.5
-  if (Math.abs(dx) < CENTER_ZONE && Math.abs(dy) < CENTER_ZONE) return 'full'
-  if (Math.abs(dx) >= Math.abs(dy)) return dx < 0 ? 'left' : 'right'
-  return dy < 0 ? 'top' : 'bottom'
-}
-
-/** The geometry for a region: an inset + a type scale. Pure — both the app (themeVars) and the
- *  standalone export (themeVarsCss) derive their CSS vars from this one function. */
-export function bodyRegionStyle(
-  region: BodyRegion,
-  padScale = 1,
-): BodyRegionStyle {
-  // Only the safe-area margin scales with density; the confinement half (halfX/halfY) is what pins the
-  // body to its region, so it must NOT scale — else full-bleed would dissolve the region.
-  const px = Math.round(PAD_X * padScale)
-  const py = Math.round(PAD_Y * padScale)
-  const halfX = SLIDE_W / 2 + GUTTER
-  const halfY = SLIDE_H / 2 + GUTTER
-  switch (region) {
-    // Width is the binding constraint on a column, so type shrinks with the measure.
-    case 'left':
-      return {
-        pad: `${py}px ${halfX}px ${py}px ${px}px`,
-        scale: 0.68,
-        display: 'flex',
-      }
-    case 'right':
-      return {
-        pad: `${py}px ${px}px ${py}px ${halfX}px`,
-        scale: 0.68,
-        display: 'flex',
-      }
-    // A row keeps the full measure; height is what's scarce, so type shrinks only slightly.
-    case 'top':
-      return {
-        pad: `${py}px ${px}px ${halfY}px ${px}px`,
-        scale: 0.85,
-        display: 'flex',
-      }
-    case 'bottom':
-      return {
-        pad: `${halfY}px ${px}px ${py}px ${px}px`,
-        scale: 0.85,
-        display: 'flex',
-      }
-    default:
-      return { pad: `${py}px ${px}px`, scale: 1, display: 'block' }
-  }
-}
-
-// ---- layout: a tiling of the canvas into ordered cells --------------------------------------------
-// `body_region` (above) pins the ONE markdown body to a rect; a `layout` generalizes that to N cells,
-// each destined to become its own editor (phase 2). Phase 1: cell 0 hosts the existing body, so a
-// full-layout ('' ) slide is byte-identical to before — nothing here runs unless a real tiling is set.
-//
-// Named against the screenshot's Instagram-style picker. Rects are canvas px (0..1280 × 0..720), so
-// the same math positions cells on every surface. The order is reading order (top-left → bottom-right),
-// which is the order cell editors will take and the camera/export will follow.
-
-export const SLIDE_LAYOUTS = [
-  '', // full — one cell, the whole canvas (default; today's single body)
-  'cols-2', // two columns
-  'rows-2', // two rows
-  'tri', // three columns
-  'grid-4', // 2×2
-  'split-l', // narrow-left / wide-right (image-beside-text)
-] as const
-export type SlideLayout = (typeof SLIDE_LAYOUTS)[number]
-
-/** Normalize a stored `layout` to a known preset ('' / unknown = full). */
-export function resolveLayout(layout: string | null | undefined): SlideLayout {
-  return (SLIDE_LAYOUTS as readonly string[]).includes(layout ?? '')
-    ? ((layout ?? '') as SlideLayout)
-    : ''
-}
-
-export interface Rect {
-  x: number
-  y: number
-  w: number
-  h: number
-}
-
-const SPLIT_L_FRAC = 0.4 // the narrow column in 'split-l'
-
-/** The ordered cell rects a layout tiles the canvas into (canvas px). Full = one whole-canvas cell. */
-export function layoutCells(layout: SlideLayout): Rect[] {
-  const W = SLIDE_W
-  const H = SLIDE_H
-  const hw = W / 2
-  const hh = H / 2
-  switch (layout) {
-    case 'cols-2':
-      return [
-        { x: 0, y: 0, w: hw, h: H },
-        { x: hw, y: 0, w: hw, h: H },
-      ]
-    case 'rows-2':
-      return [
-        { x: 0, y: 0, w: W, h: hh },
-        { x: 0, y: hh, w: W, h: hh },
-      ]
-    case 'tri': {
-      const tw = W / 3
-      return [
-        { x: 0, y: 0, w: tw, h: H },
-        { x: tw, y: 0, w: tw, h: H },
-        { x: 2 * tw, y: 0, w: tw, h: H },
-      ]
-    }
-    case 'grid-4':
-      return [
-        { x: 0, y: 0, w: hw, h: hh },
-        { x: hw, y: 0, w: hw, h: hh },
-        { x: 0, y: hh, w: hw, h: hh },
-        { x: hw, y: hh, w: hw, h: hh },
-      ]
-    case 'split-l': {
-      const lw = Math.round(W * SPLIT_L_FRAC)
-      return [
-        { x: 0, y: 0, w: lw, h: H },
-        { x: lw, y: 0, w: W - lw, h: H },
-      ]
-    }
-    default:
-      return [{ x: 0, y: 0, w: W, h: H }]
-  }
-}
-
-/** A single interior boundary between cells — a line, not a box edge. Canvas px; `vertical` picks the
- *  axis, `length` runs along it from (x, y). */
-export interface LayoutDivider {
-  x: number
-  y: number
-  length: number
-  vertical: boolean
-}
-
-/** The tiling's interior gridlines, each drawn ONCE. A cell edge that touches the canvas boundary is
- *  not a divider; a shared edge between two cells would be produced by both, so identical segments are
- *  deduped — that's what stops two abutting cells rendering a double-width line. (All current presets
- *  are guillotine grids, so shared edges match exactly; a future T-junction layout would want collinear
- *  segments merged, but none exist yet.) */
-export function layoutDividers(layout: SlideLayout): LayoutDivider[] {
-  const seen = new Set<string>()
-  const out: LayoutDivider[] = []
-  const addV = (x: number, y0: number, y1: number) => {
-    if (x <= 0 || x >= SLIDE_W) return
-    const k = `v|${x}|${y0}|${y1}`
-    if (seen.has(k)) return
-    seen.add(k)
-    out.push({ x, y: y0, length: y1 - y0, vertical: true })
-  }
-  const addH = (y: number, x0: number, x1: number) => {
-    if (y <= 0 || y >= SLIDE_H) return
-    const k = `h|${y}|${x0}|${x1}`
-    if (seen.has(k)) return
-    seen.add(k)
-    out.push({ x: x0, y, length: x1 - x0, vertical: false })
-  }
-  for (const c of layoutCells(layout)) {
-    addV(c.x, c.y, c.y + c.h) // left edge
-    addV(c.x + c.w, c.y, c.y + c.h) // right edge
-    addH(c.y, c.x, c.x + c.w) // top edge
-    addH(c.y + c.h, c.x, c.x + c.w) // bottom edge
-  }
-  return out
-}
-
-/** The body-style (pad / type-scale / display) for a body confined to an arbitrary cell — the generic
- *  form of `bodyRegionStyle`, used for layout cells. The body element still fills the whole canvas, so
- *  the padding is what confines it: on a side that touches the canvas edge, the safe-area pad; on an
- *  interior side, the full distance to that edge PLUS a gutter (exactly what bodyRegionStyle's half/row
- *  cases compute, e.g. 'left' pads right by SLIDE_W/2 + GUTTER). Type shrinks with the cell's smaller
- *  dimension so a heading still fits the measure. Pure, so app + export derive identical CSS from it. */
-export function rectBodyStyle(rect: Rect, padScale = 1): BodyRegionStyle {
-  // Density scales only the safe-area sides (those touching the canvas edge); interior sides keep their
-  // full distance-to-edge + gutter, which is what confines the body to the cell.
-  const px = Math.round(PAD_X * padScale)
-  const py = Math.round(PAD_Y * padScale)
-  const atLeft = rect.x <= 0
-  const atTop = rect.y <= 0
-  const atRight = rect.x + rect.w >= SLIDE_W
-  const atBottom = rect.y + rect.h >= SLIDE_H
-  if (atLeft && atTop && atRight && atBottom)
-    return { pad: `${py}px ${px}px`, scale: 1, display: 'block' }
-  const left = atLeft ? px : Math.round(rect.x) + GUTTER
-  const right = atRight ? px : Math.round(SLIDE_W - rect.x - rect.w) + GUTTER
-  const top = atTop ? py : Math.round(rect.y) + GUTTER
-  const bottom = atBottom
-    ? py
-    : Math.round(SLIDE_H - rect.y - rect.h) + GUTTER
-  const wf = rect.w / SLIDE_W
-  const hf = rect.h / SLIDE_H
-  const scale = Math.round((0.4 + 0.6 * Math.min(wf, hf)) * 100) / 100
-  return {
-    pad: `${top}px ${right}px ${bottom}px ${left}px`,
-    scale,
-    display: 'flex',
-  }
-}
-
-/** The cells this slide's body layout resolves to. A real multi-cell tiling wins; otherwise the single
- *  legacy body region (full/left/right/top/bottom + auto-image) as one cell — so `layout=''` is exactly
- *  today's behavior. Cell 0 is where the markdown body sits in phase 1. */
-export function bodyCells(
-  slide: SlideThemeFields | null | undefined,
-  deck: DeckPresentationFields | null | undefined,
-): Rect[] {
-  const layout = resolveLayout(slide?.layout)
-  if (layout !== '') return layoutCells(layout)
-  const region = resolveBodyRegion(
-    slide?.body_region,
-    resolveBackgroundImage(
-      slide?.background ?? undefined,
-      deck?.background ?? undefined,
-    )?.layout,
-  )
-  return [bodyRegionRect(region)]
-}
-
-/** The body-style for this slide's FIRST cell — what the single markdown body renders with. Layout
- *  tilings derive it generically; the legacy single-region path keeps its exact tuned values. */
-export function bodyStyleFor(
-  slide: SlideThemeFields | null | undefined,
-  deck: DeckPresentationFields | null | undefined,
-): BodyRegionStyle {
-  const padScale = slidePadScale(slide)
-  const layout = resolveLayout(slide?.layout)
-  if (layout !== '') return rectBodyStyle(layoutCells(layout)[0], padScale)
-  return bodyRegionStyle(
-    resolveBodyRegion(
-      slide?.body_region,
-      resolveBackgroundImage(
-        slide?.background ?? undefined,
-        deck?.background ?? undefined,
-      )?.layout,
-    ),
-    padScale,
-  )
-}
-
-// ---- per-cell content (layout phase 2) ------------------------------------------------------------
-// A layout tiles the canvas into N cells; each is its own editor. Cell 0's doc is the slide's `doc`
-// column (unchanged — a full-layout slide only ever has cell 0, so it's byte-identical to before). Cells
-// 1..N live in the `cells` column: a JSON string[] of TipTap doc JSON strings, index-aligned to
-// layoutCells. Index 0 in that array is an unused placeholder ('') — the doc column is the source of
-// truth for cell 0. Switching layouts is non-destructive: content stays in its cell index, so a cell
-// hidden by a smaller layout reappears when the larger one returns.
-
-/** The slide columns per-cell content reads: cell 0's doc + the higher cells' JSON blob. */
-export interface SlideCellFields {
-  doc?: string | null
-  cells?: string | null
-}
-
-/** Parse the `cells` column (JSON string[]) into an array of TipTap doc JSON strings. Tolerant of
- *  null/empty/malformed (all → []), like parseDoc. */
-export function parseCells(raw: string | null | undefined): string[] {
-  if (!raw) return []
-  try {
-    const v = JSON.parse(raw)
-    return Array.isArray(v)
-      ? v.map((x) => (typeof x === 'string' ? x : ''))
-      : []
-  } catch {
-    return []
-  }
-}
-
-/** The stored doc (TipTap JSON string) for cell `i`: cell 0 is the slide's `doc` column; cells 1..N come
- *  from the `cells` blob. '' when that cell has no content yet. */
-export function cellDocAt(
-  slide: SlideCellFields | null | undefined,
-  i: number,
-): string {
-  if (i <= 0) return slide?.doc ?? ''
-  return parseCells(slide?.cells)[i] ?? ''
-}
-
-/** A new `cells` JSON string with cell `i` (i≥1) set to `doc`, every sibling cell preserved — the merge
- *  the client applies before a setSlideCells write so streaming one cell never clobbers another. Index 0
- *  stays a placeholder; cell 0 is written through the `doc` column instead. */
-export function writeCellDoc(
-  cellsRaw: string | null | undefined,
-  i: number,
-  doc: string,
-): string {
-  const arr = parseCells(cellsRaw)
-  while (arr.length <= i) arr.push('')
-  arr[i] = doc
-  return JSON.stringify(arr)
-}
-
-/** Inner padding + type-scale for a cell drawn as its OWN positioned box (per-cell editor). Distinct
- *  from rectBodyStyle, which pads a full-canvas body DOWN to a region: here the box is already sized to
- *  the cell, so this is a comfortable safe-area inset that eases off for smaller cells, plus the same
- *  type down-scale (shared with rectBodyStyle) so a heading still fits the narrower measure. Pure, so the
- *  editor and every read surface derive identical geometry. */
-export function cellPad(
-  rect: Rect,
-  padScale = 1,
-): {
-  padX: number
-  padY: number
-  scale: number
-} {
-  const wf = rect.w / SLIDE_W
-  const hf = rect.h / SLIDE_H
-  return {
-    padX: Math.round(PAD_X * (0.55 + 0.45 * wf) * padScale),
-    padY: Math.round(PAD_Y * (0.55 + 0.45 * hf) * padScale),
-    scale: Math.round((0.4 + 0.6 * Math.min(wf, hf)) * 100) / 100,
-  }
-}
-
-// ---- density: how much safe-area padding the body gets (the LayoutPicker's second axis) -----------
-// Orthogonal to `layout`: a slide can be a tight two-column OR a full-bleed single. The preset scales
-// only the OUTER safe-area (PAD_X/PAD_Y in rectBodyStyle/bodyRegionStyle/cellPad); interior cell gutters
-// never scale, so a full-bleed multi-cell slide reaches the outer edges without its cells colliding.
-
-export const SLIDE_PADS = ['', 'compact', 'edge'] as const
-export type SlidePad = (typeof SLIDE_PADS)[number]
-
-/** Normalize a stored `pad` to a known preset ('' / unknown = comfortable). */
-export function resolveSlidePad(pad: string | null | undefined): SlidePad {
-  return (SLIDE_PADS as readonly string[]).includes(pad ?? '')
-    ? ((pad ?? '') as SlidePad)
-    : ''
-}
-
-const PAD_SCALE: Record<SlidePad, number> = { '': 1, compact: 0.5, edge: 0 }
-
-/** The multiplier a slide's density applies to the body's safe-area padding: comfortable (1, today's
- *  value — so existing slides are unchanged) / compact (½) / edge (0 = full bleed). */
-export function slidePadScale(slide: SlideThemeFields | null | undefined): number {
-  return PAD_SCALE[resolveSlidePad(slide?.pad)]
-}
-
-// ---- vertical alignment: where the body sits in its box (the LayoutPicker's third axis) -----------
-// The picker offers top / middle / bottom; the stored column adds '' = AUTO, which preserves today's
-// exact behavior — a full-layout body stays block/top-aligned, a tiled cell stays flex/centered. Any
-// explicit value forces the body to `display:flex` and drives `justify-content`, so a full-bleed slide
-// can centre or bottom-pin its text. A per-card property (every cell reads the same container var);
-// horizontal alignment is the orthogonal `text_align`.
-
-export const SLIDE_VALIGNS = ['top', 'middle', 'bottom'] as const
-export type SlideValign = (typeof SLIDE_VALIGNS)[number]
-
-/** The `justify-content` a valign maps to, and whether it must force the body to flex (so the align
- *  takes effect on an otherwise-block full body). '' / unknown = auto: keep the layout's natural default
- *  — display untouched, justify falls back to the stylesheet's `safe center`. `safe *` degrades to
- *  flex-start when content overflows, so a centred body never clips its heading off the top. */
-export function slideBodyVAlign(valign: string | null | undefined): {
-  justify: string
-  flex: boolean
-} {
-  switch (valign) {
-    case 'top':
-      return { justify: 'safe flex-start', flex: true }
-    case 'middle':
-      return { justify: 'safe center', flex: true }
-    case 'bottom':
-      return { justify: 'safe flex-end', flex: true }
-    default:
-      return { justify: 'safe center', flex: false }
-  }
-}
-
-/** The valign chip the picker shows as active. A stored value wins; when it's '' (auto), report the
- *  layout's effective default so the picker always reflects where the body actually sits — a full
- *  slide reads 'top', a tiled slide reads 'middle'. */
-export function resolveSlideValign(
-  slide: SlideThemeFields | null | undefined,
-): SlideValign {
-  const v = slide?.valign
-  if (v === 'top' || v === 'middle' || v === 'bottom') return v
-  return resolveLayout(slide?.layout) === '' ? 'top' : 'middle'
 }
 
 /** The fully-resolved theme for one slide: deck fonts/colors (with built-in defaults) + the resolved

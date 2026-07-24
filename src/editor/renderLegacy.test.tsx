@@ -1,43 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { cmpStyle, MarkdownBodies, slideHasBody } from './render'
+import { cmpStyle, renderInner } from './render'
 import type { AnyComponent } from './types'
 
-const EMPTY_DOC = JSON.stringify({
-  type: 'doc',
-  content: [{ type: 'paragraph' }],
-})
-
-describe('legacy Markdown body compatibility', () => {
-  it('renders a markdown-only row through the shared body surface', () => {
-    const slide = {
-      doc: '',
-      cells: '',
-      layout: '',
-      markdown: '# Legacy title\n\n<script>alert(1)</script>',
-    }
-
-    expect(slideHasBody(slide)).toBe(true)
-    const html = renderToStaticMarkup(<MarkdownBodies slide={slide} />)
-    expect(html).toContain('<h1>Legacy title</h1>')
-    expect(html).toContain('&lt;script&gt;')
-    expect(html).not.toContain('<script>')
+function doc(text: string): string {
+  return JSON.stringify({
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
   })
+}
 
-  it('does not resurrect legacy source after a newer doc was deliberately cleared', () => {
-    const slide = {
-      doc: EMPTY_DOC,
-      cells: '',
-      layout: '',
-      markdown: '# Superseded source',
-    }
-
-    expect(slideHasBody(slide)).toBe(false)
-    expect(renderToStaticMarkup(<MarkdownBodies slide={slide} />)).toBe('')
-  })
-})
-
-describe('precision text boxes', () => {
+describe('rich-text component rendering', () => {
   const text = {
     id: 'text-1',
     slide_id: 'slide-1',
@@ -47,22 +20,36 @@ describe('precision text boxes', () => {
     y: 20,
     scale_x: 1,
     scale_y: 1,
-    scale_w: 0,
-    scale_h: 0,
+    scale_w: 320,
+    scale_h: 140,
     rotate: 0,
     skew_x: 0,
     skew_y: 0,
     custom_classes: '',
-    text: 'Intrinsic until resized',
+    doc: doc('One shared document'),
   } satisfies AnyComponent
 
-  it('keeps legacy text intrinsic until precision resize materializes a box', () => {
-    expect(cmpStyle(text)).toMatchObject({ maxWidth: 1100 })
-    expect(cmpStyle(text).width).toBeUndefined()
+  it('renders TipTap content through the shared strut document scope', () => {
+    const html = renderToStaticMarkup(<>{renderInner(text)}</>)
 
-    expect(cmpStyle({ ...text, scale_w: 320, scale_h: 140 })).toMatchObject({
+    expect(html).toContain('class="cmp__textbody strut-md"')
+    expect(html).toContain('<p>One shared document</p>')
+  })
+
+  it('always renders exact text-box geometry', () => {
+    expect(cmpStyle(text)).toMatchObject({
+      left: 10,
+      top: 20,
       width: 320,
       height: 140,
+      overflow: 'hidden',
+    })
+  })
+
+  it('uses a bounded defensive frame when a malformed row has no persisted size', () => {
+    expect(cmpStyle({ ...text, scale_w: 0, scale_h: 0 })).toMatchObject({
+      width: 400,
+      height: 240,
       overflow: 'hidden',
     })
   })

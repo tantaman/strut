@@ -12,7 +12,7 @@ import { parseProps } from '../../shared/componentProps'
 import type { ComponentProps } from '../../shared/componentProps'
 import { CHAT_LIMITS } from '../../shared/chat'
 import { deckDetailQuery } from '../../shared/queries'
-import { slideGroundingText } from './aiArrange'
+import { docText } from './aiArrange'
 
 const MAX_EVENTS = 300
 const MAX_FIELD = 220
@@ -54,13 +54,8 @@ const SLIDE_FIELDS = [
   'background',
   'surface',
   'text_align',
-  'body_region',
-  'layout',
-  'pad',
-  'valign',
 ]
 
-const SLIDE_BODY_FIELDS = ['doc', 'markdown', 'cells']
 const SLIDE_SPATIAL_FIELDS = [
   'sort',
   'x',
@@ -75,12 +70,8 @@ const SLIDE_STYLE_FIELDS = [
   'background',
   'surface',
   'text_align',
-  'body_region',
-  'layout',
-  'pad',
-  'valign',
 ]
-const SLIDE_ALL_FIELDS = [...SLIDE_BODY_FIELDS, ...SLIDE_FIELDS]
+const SLIDE_ALL_FIELDS = [...SLIDE_FIELDS]
 
 const COMPONENT_FIELDS = [
   'slide_id',
@@ -113,7 +104,7 @@ const COMPONENT_SPATIAL_FIELDS = [
 ]
 
 const COMPONENT_DETAIL_FIELDS = ['slide_id', 'type', 'custom_classes', 'fill']
-const COMPONENT_ALL_FIELDS = [...COMPONENT_FIELDS, 'props']
+const COMPONENT_ALL_FIELDS = [...COMPONENT_FIELDS, 'content', 'props']
 const CUSTOM_BACKGROUND_FIELDS = ['klass', 'style']
 
 type EditGroup = {
@@ -137,11 +128,11 @@ const EDIT_GROUPS: EditGroup[] = [
     render: renderDeckEdit,
   },
   {
-    name: 'slide-body',
-    path: 'slides',
-    fields: SLIDE_BODY_FIELDS,
-    allFields: SLIDE_ALL_FIELDS,
-    render: renderSlideEdit,
+    name: 'component-content',
+    path: 'slides.components',
+    fields: ['content'],
+    allFields: COMPONENT_ALL_FIELDS,
+    render: renderComponentEdit,
   },
   {
     name: 'slide-spatial',
@@ -368,15 +359,10 @@ function slideSummary(row: NamedRow): string {
   return [
     `id=${s(row.id)}`,
     `sort=${q(row.sort)}`,
-    `body=${q(slideBody(row))}`,
     `transform=${slideTransform(row)}`,
     `background=${q(row.background)}`,
     `surface=${q(row.surface)}`,
     `align=${q(row.text_align)}`,
-    `region=${q(row.body_region)}`,
-    `layout=${q(row.layout)}`,
-    `pad=${q(row.pad)}`,
-    `valign=${q(row.valign)}`,
   ].join(' ')
 }
 
@@ -389,6 +375,7 @@ function componentSummary(row: NamedRow, parent?: NamedRow): string {
     `spatial=${componentSpatial(row)}`,
     `fill=${q(row.fill)}`,
     `classes=${q(row.custom_classes)}`,
+    row.type === 'text' ? `text=${q(cap(docText(s(row.content)), MAX_BODY))}` : '',
     props ? `props={${props}}` : '',
   ]
     .filter(Boolean)
@@ -439,22 +426,12 @@ function renderCustomBackgroundEdit(
 }
 
 function changedSlideFields(row: NamedRow, old?: NamedRow): string[] {
-  const out = changedFields(
+  return changedFields(
     row,
     old,
     SLIDE_FIELDS,
     (k, v, prev) => `${k} ${formatScalar(prev)} -> ${formatScalar(v)}`,
   )
-  if (
-    old &&
-    (row.doc !== old.doc ||
-      row.markdown !== old.markdown ||
-      !same(row.cells, old.cells) ||
-      row.layout !== old.layout)
-  ) {
-    out.push(`body=${q(slideBody(row))}`)
-  }
-  return out
 }
 
 function changedComponentFields(row: NamedRow, old?: NamedRow): string[] {
@@ -467,6 +444,8 @@ function changedComponentFields(row: NamedRow, old?: NamedRow): string[] {
   if (old && !same(row.props, old.props)) {
     out.push(`props={${propsSummary(parseProps(row.props))}}`)
   }
+  if (old && row.content !== old.content)
+    out.push(`text=${q(cap(docText(s(row.content)), MAX_BODY))}`)
   return out
 }
 
@@ -515,17 +494,11 @@ function formatDeckField(
   return `${field} ${formatScalar(previous)} -> ${formatScalar(value)}`
 }
 
-function slideBody(row: NamedRow): string {
-  return cap(slideGroundingText(row), MAX_BODY)
-}
-
 function propsSummary(props: ComponentProps): string {
   const parts: string[] = []
-  if (props.text) parts.push(`text=${q(cap(props.text, MAX_FIELD))}`)
   if (props.size !== undefined) parts.push(`size=${n(props.size)}`)
   if (props.color) parts.push(`color=${q(props.color)}`)
   if (props.font_family) parts.push(`font=${q(props.font_family)}`)
-  if (props.text_type) parts.push(`text_type=${q(props.text_type)}`)
   if (props.src) parts.push(`src=${q(cap(props.src, MAX_FIELD))}`)
   if (props.image_type) parts.push(`image_type=${q(props.image_type)}`)
   if (props.shape) parts.push(`shape=${q(props.shape)}`)

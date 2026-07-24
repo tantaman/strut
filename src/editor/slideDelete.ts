@@ -28,15 +28,8 @@ interface SlideRowSnapshot {
   impScale: number
   background: string
   surface: string
-  markdown: string
-  renderMode: '' | 'markdown'
   textAlign: string
-  doc: string
-  bodyRegion: string
-  layout: string
-  cells: string
-  pad: string
-  valign: string
+  bodyComponentId: string
 }
 
 export interface DeletedSlideSnapshot {
@@ -65,15 +58,8 @@ export function captureDeletedSlide(
       impScale: slide.imp_scale,
       background: slide.background,
       surface: slide.surface,
-      markdown: slide.markdown,
-      renderMode: slide.render_mode === 'markdown' ? 'markdown' : '',
       textAlign: slide.text_align,
-      doc: slide.doc,
-      bodyRegion: slide.body_region,
-      layout: slide.layout,
-      cells: slide.cells,
-      pad: slide.pad,
-      valign: slide.valign,
+      bodyComponentId: slide.body_component_id,
     },
     components: components
       .map((component) => ({ ...component }))
@@ -89,6 +75,9 @@ export function restoreDeletedSlide(
 ): void {
   const { slide, components, note } = snapshot
   const now = Date.now()
+  const primary = components.find(
+    (component) => component.id === slide.bodyComponentId,
+  )
 
   mutate.addSlide({
     id: slide.id,
@@ -96,11 +85,7 @@ export function restoreDeletedSlide(
     sort: slide.sort,
     x: slide.x,
     y: slide.y,
-    render_mode: slide.renderMode,
-    layout: slide.layout,
-    pad: slide.pad,
-    valign: slide.valign,
-    text_align: slide.textAlign,
+    content: primary?.doc ?? '',
     now,
   })
   mutate.setSlideTransform({
@@ -119,16 +104,33 @@ export function restoreDeletedSlide(
     background: slide.background,
     surface: slide.surface,
     text_align: slide.textAlign,
-    body_region: slide.bodyRegion,
-    layout: slide.layout,
-    pad: slide.pad,
-    valign: slide.valign,
     now,
   })
-  // Write even empty values: exact restoration should not depend on addSlide's current defaults.
-  mutate.setSlideMarkdown({ id: slide.id, markdown: slide.markdown, now })
-  mutate.setSlideDoc({ id: slide.id, doc: slide.doc, now })
-  mutate.setSlideCells({ id: slide.id, cells: slide.cells, now })
+  if (primary) {
+    mutate.moveComponent({ id: primary.id, x: primary.x, y: primary.y })
+    mutate.transformComponent({
+      id: primary.id,
+      scale_x: primary.scale_x,
+      scale_y: primary.scale_y,
+      scale_w: primary.scale_w,
+      scale_h: primary.scale_h,
+      rotate: primary.rotate,
+      skew_x: primary.skew_x,
+      skew_y: primary.skew_y,
+    })
+    mutate.setComponentZ({ id: primary.id, z_order: primary.z_order })
+    mutate.setText({
+      id: primary.id,
+      size: primary.size ?? 32,
+      color: primary.color ?? '',
+      font_family: primary.font_family ?? '',
+    })
+    if (primary.custom_classes)
+      mutate.setComponentClasses({
+        id: primary.id,
+        custom_classes: primary.custom_classes,
+      })
+  }
   if (note) {
     mutate.setSlideNotes({
       slideId: slide.id,
@@ -137,7 +139,9 @@ export function restoreDeletedSlide(
       now,
     })
   }
-  for (const component of components) reinsertComponent(mutate, component)
+  for (const component of components)
+    if (component.id !== slide.bodyComponentId)
+      reinsertComponent(mutate, component)
 }
 
 /** Apply the cascade and record the complete subtree restoration as one History command. */

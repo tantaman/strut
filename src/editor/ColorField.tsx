@@ -96,9 +96,7 @@ export function NativeColorInput({
     }
   }, [onCommit, onLive])
   return (
-    // stopPropagation on mousedown so a toolbar that blanket-`preventDefault`s pointer-downs to keep a
-    // text selection alive (the markdown format bar) can't also swallow the click that opens this native
-    // OS picker. A no-op everywhere else — no other host of this control preventDefaults its pointerdowns.
+    // Keep parent drag/selection surfaces from swallowing the native OS picker click.
     <label
       className={'insp__custom' + (active ? ' is-active' : '')}
       onMouseDown={(e) => e.stopPropagation()}

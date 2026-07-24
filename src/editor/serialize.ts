@@ -14,7 +14,6 @@ export interface DeckRowLike {
   body_font?: string | null
   body_color?: string | null
   text_align?: string | null
-  default_slide_mode?: string | null
   chosen_presenter: string
   canned_transition: string
   custom_stylesheet: string
@@ -22,6 +21,8 @@ export interface DeckRowLike {
 }
 export interface SlideRowLike {
   id: string
+  /** The component rendered as the doc-first, full-slide rich-text surface. */
+  body_component_id?: string | null
   x: number
   y: number
   z: number
@@ -31,19 +32,7 @@ export interface SlideRowLike {
   imp_scale: number
   background: string
   surface: string
-  markdown?: string | null
-  // TipTap body JSON; supersedes the legacy raw `markdown` field.
-  doc?: string | null
-  render_mode?: string | null
   text_align?: string | null
-  body_region?: string | null
-  layout?: string | null
-  // Per-cell content (layout phase 2): a JSON string[] of TipTap docs for cells 1..N.
-  cells?: string | null
-  // Body density preset ('' | 'compact' | 'edge').
-  pad?: string | null
-  // Vertical-alignment preset ('' = auto | 'top' | 'middle' | 'bottom').
-  valign?: string | null
 }
 export interface CustomBgRow {
   klass: string
@@ -77,7 +66,10 @@ const TYPE_TO_KIND: Partial<Record<string, ComponentKind>> = {
 
 // ---- serialize (export) -------------------------------------------------------------------------
 
-function serializeComponent(c: AnyComponent): Record<string, unknown> {
+function serializeComponent(
+  c: AnyComponent,
+  primary: boolean,
+): Record<string, unknown> {
   const scale: Record<string, number> = { x: c.scale_x || 1, y: c.scale_y || 1 }
   if (c.scale_w) scale.width = c.scale_w
   if (c.scale_h) scale.height = c.scale_h
@@ -87,6 +79,7 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
     y: c.y,
     scale,
   }
+  if (primary) base.primary = true
   if (c.rotate) base.rotate = c.rotate
   if (c.skew_x) base.skewX = c.skew_x
   if (c.skew_y) base.skewY = c.skew_y
@@ -94,11 +87,10 @@ function serializeComponent(c: AnyComponent): Record<string, unknown> {
   switch (c.kind) {
     case 'text':
       if (c.size) base.size = c.size
-      if (c.text) base.text = c.text
-      // color/fontFamily omitted when '' (theme-inherited); textType only when a heading.
+      if (c.doc) base.content = c.doc
+      // color/fontFamily are omitted when theme-inherited.
       if (c.color) base.color = c.color
       if (c.font_family) base.fontFamily = c.font_family
-      if (c.text_type && c.text_type !== 'body') base.textType = c.text_type
       break
     case 'image':
       base.src = c.src ?? ''
@@ -145,7 +137,6 @@ export function serializeDeck(
     bodyFont: deck.body_font || '',
     bodyColor: deck.body_color || '',
     textAlign: deck.text_align || '',
-    defaultSlideMode: deck.default_slide_mode || '',
     cannedTransition: deck.canned_transition || 'none',
     customStylesheet: deck.custom_stylesheet || '',
     customBackgrounds: {
@@ -164,20 +155,11 @@ export function serializeDeck(
         rotateZ: s.rotate_z,
         background: s.background || '',
         surface: s.surface || '',
-        components: (componentsBySlide[s.id] ?? []).map(serializeComponent),
+        components: (componentsBySlide[s.id] ?? []).map((component) =>
+          serializeComponent(component, component.id === s.body_component_id),
+        ),
       }
-      // Compatibility marker + per-slide alignment + a pinned body region: emitted only when set.
-      // Preserve legacy raw Markdown alongside `doc` when present: `doc` wins for modern readers, while
-      // old markdown-only rows/files still round-trip without silently losing their source.
-      if (s.render_mode) slide.renderMode = s.render_mode
-      if (s.markdown) slide.markdown = s.markdown
-      if (s.doc) slide.doc = s.doc
       if (s.text_align) slide.textAlign = s.text_align
-      if (s.body_region) slide.bodyRegion = s.body_region
-      if (s.layout) slide.layout = s.layout
-      if (s.cells) slide.cells = s.cells
-      if (s.pad) slide.pad = s.pad
-      if (s.valign) slide.valign = s.valign
       return slide
     }),
   }
@@ -187,6 +169,7 @@ export function serializeDeck(
 
 export interface ImportedComponent {
   kind: ComponentKind
+  primary: boolean
   x: number
   y: number
   z_order: number
@@ -198,11 +181,10 @@ export interface ImportedComponent {
   skew_x: number
   skew_y: number
   custom_classes: string
-  text?: string
+  doc?: string
   size?: number
   color?: string
   font_family?: string
-  text_type?: string
   src?: string
   image_type?: string
   shape?: string
@@ -223,15 +205,7 @@ export interface ImportedSlide {
   imp_scale: number
   background: string
   surface: string
-  markdown: string
-  doc: string
-  render_mode: string
   text_align: string
-  body_region: string
-  layout: string
-  cells: string
-  pad: string
-  valign: string
   components: ImportedComponent[]
 }
 export interface ImportedDeck {
@@ -243,7 +217,6 @@ export interface ImportedDeck {
   body_font: string
   body_color: string
   text_align: string
-  default_slide_mode: string
   canned_transition: string
   custom_stylesheet: string
   deck_version: string
@@ -264,6 +237,7 @@ function deserializeComponent(
   const scale = (raw.scale ?? {}) as Record<string, unknown>
   const c: ImportedComponent = {
     kind,
+    primary: raw.primary === true,
     x: num(raw.x),
     y: num(raw.y),
     z_order: z,
@@ -278,14 +252,11 @@ function deserializeComponent(
   }
   switch (kind) {
     case 'text':
-      c.text = str(raw.text, 'Text')
-      c.size = num(raw.size, 72)
-      // Missing color/fontFamily = theme-inherited. Legacy files always wrote an explicit color
-      // ('111111') + family ('Lato'), so they round-trip as overrides; only a theme-authored file
-      // omits them. text_type absent = body.
+      c.doc = str(raw.content)
+      c.size = num(raw.size, 32)
+      // Missing color/fontFamily = theme-inherited.
       c.color = str(raw.color, '')
       c.font_family = str(raw.fontFamily, '')
-      c.text_type = str(raw.textType, '')
       break
     case 'image':
       // legacy {docKey,attachKey} attachments aren't supported (no bytes in JSON) — keep string srcs.
@@ -332,7 +303,6 @@ export function deserializeDeck(json: unknown): ImportedDeck {
     body_font: str(o.bodyFont),
     body_color: str(o.bodyColor),
     text_align: str(o.textAlign),
-    default_slide_mode: str(o.defaultSlideMode),
     canned_transition: str(o.cannedTransition, 'none'),
     custom_stylesheet: str(o.customStylesheet),
     deck_version: str(o.deckVersion, '1.0'),
@@ -349,15 +319,7 @@ export function deserializeDeck(json: unknown): ImportedDeck {
       imp_scale: num(s.impScale, 3),
       background: str(s.background),
       surface: str(s.surface),
-      markdown: str(s.markdown),
-      doc: str(s.doc),
-      render_mode: str(s.renderMode),
       text_align: str(s.textAlign),
-      body_region: str(s.bodyRegion),
-      layout: str(s.layout),
-      cells: str(s.cells),
-      pad: str(s.pad),
-      valign: str(s.valign),
       components: (Array.isArray(s.components)
         ? (s.components as Array<Record<string, unknown>>)
         : []

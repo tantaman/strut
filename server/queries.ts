@@ -12,6 +12,7 @@
 import { and, defineQuery, existsNoSync, or } from '@rindle/client'
 import type { ApiContext } from '@rindle/api-server'
 import { q, rels, deck, deck_share } from '../shared/app-def.ts'
+import { DeckFragment } from '../shared/fragments.ts'
 import { deckDetailBody, profileQuery } from '../shared/queries.ts'
 
 type User = string
@@ -48,6 +49,7 @@ const decksQuery = defineQuery(
   ({ limit }: { limit: number }, ctx: Ctx) =>
     q.deck
       .where(deckAccess(ctx.user))
+      .include(DeckFragment)
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
@@ -63,6 +65,7 @@ const deckVariantsQuery = defineQuery(
     q.deck.where
       .source_deck_id(deckId)
       .where(deckAccess(ctx.user))
+      .include(DeckFragment)
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),

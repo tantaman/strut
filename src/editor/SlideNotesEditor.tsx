@@ -1,9 +1,9 @@
-// Rich-text editor for a slide's notes (`slide_notes`). It mirrors the body editor's write model: the
-// stored note `doc` (TipTap JSON) is the source of truth, streamed via Rindle's
+// Rich-text editor for a slide's notes (`slide_notes`). It mirrors the primary text editor's write model:
+// the stored note `doc` (TipTap JSON) is the source of truth, streamed via Rindle's
 // `.folded` (debounced, last-value-wins) on every keystroke, with ONE coarse undo step committed on blur —
 // but renders as a plain full-width document rather than the fit-to-slide slide surface. Reuses the SAME
-// `strutExtensions` as slides, so a note IS a slide-shaped doc (renderable by the static renderer, and
-// groundable by the AI Edit lane later). Bound by slide_id; deck_id rides along for the deck-scoped write.
+// `strutExtensions` as text components, so notes share the same document vocabulary and remain
+// groundable by the AI Edit lane. Bound by slide_id; deck_id rides along for the deck-scoped write.
 
 import { useCallback, useEffect, useRef } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'

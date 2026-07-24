@@ -24,11 +24,12 @@ import { buildArtifactModule } from './artifactBuild'
 import { uploadArtifact } from './upload'
 import { History } from './history'
 import type { SlideDetail } from './deckDetail'
+import type { AnyComponent } from './types'
 import type { ChatAction } from '../../shared/chatAction'
 import type { ArrangementPlan } from '../../shared/arrange'
 import type { GeneratedDeck } from '../../shared/generate'
 import { appPath } from '../../shared/appPath'
-import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
+import { primaryTextId } from '../../shared/app-def'
 import type {
   AddArtifactArgs,
   AddImageArgs,
@@ -58,11 +59,14 @@ export type ChatActionMutate = ArrangeMutate &
 export interface DispatchCtx {
   deckId: string
   slides: SlideDetail[]
+  componentsBySlide: Readonly<Record<string, readonly AnyComponent[]>>
   deck: ThemeDeck | null
   mutate: ChatActionMutate
   history: History
   /** The slide a freshly-authored component lands on — the add_* actions need it. Null = no slide open. */
   activeSlideId: string | null
+  /** Turn-local primary documents for slides created before a later action targets them. */
+  createdPrimaryContent?: Map<string, string>
   /** Async chat work may mutate only while the editor is still at the history revision it started from. */
   isRequestCurrent?: () => boolean
 }
@@ -89,7 +93,8 @@ export async function dispatchActions(
   if (!requestIsCurrent(ctx)) return editConflict()
 
   const rec = new History() // collects each step; drained into one parent command at the end
-  const recCtx: DispatchCtx = { ...ctx, history: rec }
+  const createdPrimaryContent = new Map<string, string>()
+  const recCtx: DispatchCtx = { ...ctx, history: rec, createdPrimaryContent }
   const refMap = new Map<string, string>() // create_slide ref → freshly-minted slide id
   const applied: string[] = []
   let firstError: string | null = null
@@ -121,6 +126,7 @@ export async function dispatchActions(
       if (res.ok) {
         tail.sort = res.sort
         tail.x = res.x
+        createdPrimaryContent.set(res.id, res.content)
         refMap.set(LAST_CREATED, res.id) // implicit target for a component with no slideId
       }
       out = res.ok
@@ -235,8 +241,8 @@ const lastSort = (s: SlideDetail[]): string | null => lastSlide(s)?.sort ?? null
 const lastX = (s: SlideDetail[]): number => lastSlide(s)?.x ?? 0
 const lastY = (s: SlideDetail[]): number => lastSlide(s)?.y ?? 0
 
-/** Append ONE slide using the canonical older-reader compatibility marker. Current rendering composites
- *  its body and positioned objects whether or not `markdown` seeds Cell 1. Records the add/delete on the
+/** Append one canonical slide and seed its full-slide primary text component when Markdown is present.
+ *  Records the paired slide/component add-delete on the
  *  recorder history and returns the new id plus the advanced tail (sort key + x) so a second create_slide
  *  in the same batch lands after it, not on top. */
 function applyCreateSlide(
@@ -244,7 +250,14 @@ function applyCreateSlide(
   ctx: DispatchCtx,
   tail: { sort: string | null; x: number; y: number },
 ):
-  | { ok: true; id: string; label: string; sort: string; x: number }
+  | {
+      ok: true
+      id: string
+      label: string
+      sort: string
+      x: number
+      content: string
+    }
   | { ok: false; error: string } {
   if (!requestIsCurrent(ctx)) return editConflict()
   const now = Date.now()
@@ -257,20 +270,22 @@ function applyCreateSlide(
     sort,
     x,
     y: tail.y,
-    // Current Strut does not branch rendering on this legacy field; stamp every new slide consistently so
-    // older readers prefer its body while current readers still composite positioned objects on top.
-    render_mode: DEFAULT_SLIDE_MODE,
+    content: a.markdown ? markdownToDoc(a.markdown) : '',
     now,
   }
-  const doc = a.markdown ? markdownToDoc(a.markdown) : ''
-  const redo = () => {
-    ctx.mutate.addSlide(args)
-    if (doc) ctx.mutate.setSlideDoc({ id, doc, now })
-  }
-  const undo = () => ctx.mutate.deleteSlide({ id, componentIds: [] })
+  const redo = () => ctx.mutate.addSlide(args)
+  const undo = () =>
+    ctx.mutate.deleteSlide({ id, componentIds: [primaryTextId(id)] })
   redo()
   ctx.history.push({ label: 'Add slide', redo, undo })
-  return { ok: true, id, label: 'Add slide', sort, x }
+  return {
+    ok: true,
+    id,
+    label: 'Add slide',
+    sort,
+    x,
+    content: args.content ?? '',
+  }
 }
 
 // ---- free-form component inserts (add_image / add_web / add_artifact) ------------------------------
@@ -488,12 +503,23 @@ function applyBody(
   const ok = applyBodyEdit(
     a.slideId,
     a.markdown,
-    { mutate: ctx.mutate, history: ctx.history, slides: ctx.slides },
+    {
+      mutate: ctx.mutate,
+      history: ctx.history,
+      slides: ctx.slides,
+      componentsBySlide: ctx.componentsBySlide,
+      createdPrimaryContent: ctx.createdPrimaryContent?.get(a.slideId),
+    },
     'AI edit',
   )
+  if (ok && ctx.createdPrimaryContent?.has(a.slideId))
+    ctx.createdPrimaryContent.set(a.slideId, markdownToDoc(a.markdown))
   return ok
     ? { ok: true, label: 'AI edit' }
-    : { ok: false, error: 'That slide is no longer in the deck.' }
+    : {
+        ok: false,
+        error: 'That slide’s primary text is unavailable. Try again.',
+      }
 }
 
 // ---- generate (reuses /api/generate → applyGenerated) ---------------------------------------------
@@ -548,7 +574,7 @@ async function runArrange(
       body: JSON.stringify({
         deckId: ctx.deckId,
         instruction: a.instruction,
-        slides: buildDigest(ctx.slides),
+        slides: buildDigest(ctx.slides, ctx.componentsBySlide),
       }),
     })
   } catch {

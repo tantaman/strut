@@ -5,10 +5,22 @@ import type { ComponentKind } from './types'
 // string, without letting quotes / angle brackets / attribute-shaped text become markup.
 const SAFE_CLASS_TOKEN = /^(?:-?[_A-Za-z]|--[_A-Za-z0-9])[-_A-Za-z0-9]*$/
 
+// These are renderer-owned state tokens. Persisted classes may style a component, but they must not be
+// able to opt a freeform object into primary-document behavior or impersonate transient editor state.
+const INTERNAL_STATE_CLASSES = new Set([
+  'is-primary',
+  'is-selected',
+  'is-editing',
+  'is-doc-editable',
+])
+
 export function customClassTokens(raw: string | null | undefined): string[] {
   const tokens = (raw ?? '')
     .split(/\s+/)
-    .filter((token) => SAFE_CLASS_TOKEN.test(token))
+    .filter(
+      (token) =>
+        SAFE_CLASS_TOKEN.test(token) && !INTERNAL_STATE_CLASSES.has(token),
+    )
   return [...new Set(tokens)]
 }
 

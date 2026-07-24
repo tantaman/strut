@@ -36,7 +36,7 @@ import {
   Share2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { DEFAULT_FONT, DEFAULT_FONT_SIZE, newId } from '../config'
+import { DEFAULT_FONT, newId } from '../config'
 import { useApp, useMutate } from '../rindle/RindleProvider'
 import { uploadArtifact, uploadImage } from './upload'
 import { place, zNow } from './componentOps'
@@ -65,6 +65,7 @@ import type { BackgroundImageLayout } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 import { ThemeToggle } from '../ThemeToggle'
+import { markdownToDoc } from './aiGenerate'
 
 // Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
 // keyboard shortcut wired up in Stage.
@@ -220,14 +221,28 @@ export function Header({
       x: p.x,
       y: p.y,
       z_order: zNow(),
-      text: 'New text',
-      size: DEFAULT_FONT_SIZE,
-      // '' color/font = follow the deck theme (body category) until explicitly overridden.
+      content: markdownToDoc('New text'),
+      size: 32,
       color: '',
       font_family: '',
-      text_type: 'body',
     }
-    recordInsert(id, () => mutate.addText(args), 'Add text')
+    recordInsert(
+      id,
+      () => {
+        mutate.addText(args)
+        mutate.transformComponent({
+          id,
+          scale_x: 1,
+          scale_y: 1,
+          scale_w: 400,
+          scale_h: 160,
+          rotate: 0,
+          skew_x: 0,
+          skew_y: 0,
+        })
+      },
+      'Add text',
+    )
   }
 
   function addShape(name: string) {

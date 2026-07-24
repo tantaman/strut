@@ -5,30 +5,20 @@
 import { googleFontsHref, SLIDE_H, SLIDE_W } from '../config'
 import { componentSize } from './render'
 import { componentClassName } from './componentClasses'
-import { docToHtml, isDocEmpty } from './tiptapDoc'
-import { markdownToHtml } from './markdown'
+import { docToHtml } from './tiptapDoc'
 import {
   backgroundImage,
-  bodyStyleFor,
-  cellDocAt,
-  cellPad,
   composeBackground,
   cssHex,
   cssUrlValue,
-  layoutCells,
   resolveBackground,
   resolveBackgroundImage,
-  resolveLayout,
   resolveSurface,
   resolveTextAlign,
-  slideBodyVAlign,
-  slidePadScale,
-  textTypeOf,
 } from './types'
 import type {
   AnyComponent,
   BackgroundImageSpec,
-  BodyRegionStyle,
   DeckThemeFields,
 } from './types'
 import { flightFor } from './transitions'
@@ -39,12 +29,10 @@ import type { DeckBundle } from './serialize'
 const WORLD = SLIDE_W / 240
 const deg = (rad: number) => (rad * 180) / Math.PI
 
-// Markdown-mode surface styling — mirrors the `.strut-md` scope in src/strut.css so an exported deck
-// renders markdown slides identically to the editor. Reads the same theme CSS vars (themeVarsCss),
-// including the body-region pair (--strut-body-pad / --strut-type-scale) — keep both the rules here
-// and the vars in themeVarsCss in step with their twins, or an exported deck partitions differently.
-const STRUT_MD_CSS = `  .strut-md-cell{position:absolute;overflow:hidden;}
-  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:var(--strut-body-justify,safe center);overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
+// Rich-text component styling — mirrors the `.strut-md` scope in src/strut.css. A primary text box keeps
+// the slide-safe document typography; a freeform box uses the same document schema but inherits the exact
+// component font/color/size and drops the primary box's padding.
+const STRUT_MD_CSS = `  .strut-md{box-sizing:border-box;width:100%;height:100%;padding:var(--strut-body-pad,64px 88px);display:var(--strut-body-display,block);flex-direction:column;justify-content:var(--strut-body-justify,safe center);overflow:hidden;font-family:var(--strut-body-font,'Lato',sans-serif);color:var(--strut-body-color,#111);text-align:var(--strut-text-align,left);line-height:1.35;font-size:calc(32px * var(--strut-type-scale,1));}
   .strut-md>*:first-child{margin-top:0;}
   .strut-md h1,.strut-md h2,.strut-md h3,.strut-md h4{font-family:var(--strut-heading-font,'Lato',sans-serif);color:var(--strut-heading-color,#111);line-height:1.1;margin:0 0 .4em;font-weight:700;text-indent:-.045em;}
   .strut-md h1{font-size:calc(88px * var(--strut-type-scale,1));}
@@ -61,7 +49,14 @@ const STRUT_MD_CSS = `  .strut-md-cell{position:absolute;overflow:hidden;}
   .strut-md blockquote{border-left:4px solid rgba(0,0,0,.18);padding-left:.8em;opacity:.85;}
   .strut-md img{max-width:100%;}
   .strut-md table{border-collapse:collapse;}
-  .strut-md td,.strut-md th{border:1px solid rgba(0,0,0,.2);padding:.3em .6em;}`
+  .strut-md td,.strut-md th{border:1px solid rgba(0,0,0,.2);padding:.3em .6em;}
+  .cmp--text:not(.is-primary) .strut-md{padding:0;display:block;font-family:inherit;color:inherit;text-align:inherit;font-size:inherit;line-height:inherit;}
+  .cmp--text:not(.is-primary) .strut-md h1{font-size:2.75em;}
+  .cmp--text:not(.is-primary) .strut-md h2{font-size:2em;}
+  .cmp--text:not(.is-primary) .strut-md h3{font-size:1.5em;}
+  .cmp--text:not(.is-primary) .strut-md h4{font-size:1.1875em;}
+  .cmp--image img,.cmp--shape svg{display:block;width:100%;height:100%;}
+  .cmp--image img{object-fit:cover;}`
 
 const esc = (s: string) =>
   s
@@ -70,34 +65,37 @@ const esc = (s: string) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
-function componentHTML(c: AnyComponent): string {
+function componentHTML(c: AnyComponent, primary = false): string {
   const { w, h } = componentSize(c)
   const transform = `rotate(${c.rotate || 0}rad) skewX(${c.skew_x || 0}rad) skewY(${c.skew_y || 0}rad)`
   let body = ''
   let extra = ''
   switch (c.kind) {
     case 'text': {
-      // '' color/font = inherit the deck theme default for this category via the CSS vars set on
-      // the slide container (see themeVarsCss / stepHTML).
-      const cat = textTypeOf(c)
+      // The document is the same TipTap JSON edited in doc-first and precision. `docToHtml` is the
+      // shared schema renderer, so standalone HTML cannot drift back to the retired raw-HTML text path.
       const color = c.color
         ? cssHex(c.color, '111111')
-        : `var(--strut-${cat}-color, #111111)`
+        : 'var(--strut-body-color, #111111)'
       const font = c.font_family
         ? `'${esc(c.font_family)}',sans-serif`
-        : `var(--strut-${cat}-font, 'Lato',sans-serif)`
-      const boxed = c.scale_w > 0 || c.scale_h > 0
+        : "var(--strut-body-font, 'Lato',sans-serif)"
       extra =
-        `font-size:${c.size ?? 72}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;` +
-        (boxed
-          ? `${c.scale_w > 0 ? `width:${c.scale_w}px;` : ''}${c.scale_h > 0 ? `height:${c.scale_h}px;` : ''}overflow:hidden;`
-          : 'max-width:1100px;')
-      body = `<div class="cmp-text">${c.text && c.text.length ? c.text : 'Text'}</div>`
+        `font-size:${c.size ?? 32}px;color:${color};font-family:${font};line-height:1.1;white-space:pre-wrap;` +
+        `--strut-type-scale:${(c.size ?? 32) / 32};` +
+        (c.color
+          ? `--strut-body-color:${color};--strut-heading-color:${color};`
+          : '') +
+        (c.font_family
+          ? `--strut-body-font:${font};--strut-heading-font:${font};`
+          : '') +
+        'overflow:hidden;'
+      body = `<div class="cmp__textbody strut-md">${docToHtml(c.doc)}</div>`
       break
     }
     case 'image':
       body = c.src
-        ? `<img src="${esc(c.src)}" style="width:100%;height:100%;object-fit:contain" alt="">`
+        ? `<img src="${esc(c.src)}" style="width:100%;height:100%;object-fit:cover" alt="">`
         : ''
       break
     case 'shape':
@@ -121,8 +119,9 @@ function componentHTML(c: AnyComponent): string {
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f4f4f5;color:#71717a;font:600 14px system-ui">▶ runnable</div>`
       break
   }
-  const sizeStyle = c.kind === 'text' ? '' : `width:${w}px;height:${h}px;`
-  return `<div class="${esc(componentClassName(c))}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:center center;${extra}">${body}</div>`
+  const sizeStyle = `width:${w}px;height:${h}px;`
+  const classes = componentClassName(c, primary ? ['is-primary'] : [])
+  return `<div class="${esc(classes)}" style="position:absolute;left:${c.x}px;top:${c.y}px;${sizeStyle}transform:${transform};transform-origin:center center;${extra}">${body}</div>`
 }
 
 function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
@@ -158,65 +157,20 @@ function backgroundImageLayerHTML(image: BackgroundImageSpec): string {
   return `<div class="slide-bg-img" style="${esc(outer.join(';'))}"><div class="slide-bg-img__media" style="${esc(inner.join(';'))}"></div></div>`
 }
 
-/** The standalone twin of `MarkdownBodies` in render.tsx. Full-layout slides keep the original single
- *  body element; tiled slides emit one positioned body per populated cell, using the same geometry,
- *  density and type-scale helpers as the app renderer. */
-function bodyHTML(slide: DeckBundle['slides'][number]): string {
-  const contentAt = (index: number): string => {
-    if (index === 0 && !slide.doc && slide.markdown?.trim())
-      return markdownToHtml(slide.markdown)
-    const doc = cellDocAt(slide, index)
-    return isDocEmpty(doc) ? '' : docToHtml(doc)
-  }
-  const layout = resolveLayout(slide.layout)
-  if (layout === '') {
-    const content = contentAt(0)
-    return content ? `      <div class="strut-md">${content}</div>` : ''
-  }
-
-  const padScale = slidePadScale(slide)
-  return layoutCells(layout)
-    .map((cell, index) => {
-      const content = contentAt(index)
-      if (!content) return ''
-      const { padX, padY, scale } = cellPad(cell, padScale)
-      const style =
-        `left:${cell.x}px;top:${cell.y}px;width:${cell.w}px;height:${cell.h}px;` +
-        `--strut-body-pad:${padY}px ${padX}px;--strut-type-scale:${scale};` +
-        '--strut-body-display:flex;'
-      return `      <div class="strut-md-cell" style="${style}"><div class="strut-md">${content}</div></div>`
-    })
-    .filter(Boolean)
-    .join('\n')
-}
-
-/** The deck text theme as CSS custom-property declarations for the slide container, so a text
- *  component with '' color/font resolves `var(--strut-<category>-…)` in the standalone export.
- *  `align` is the slide-resolved alignment (drives markdown-mode text-align); `style` is the
- *  slide-resolved body style (its layout cell's inset + type scale + display).
- *
- *  The string twin of `themeVars` in render.tsx — it must emit the SAME set of var names, or an
- *  exported deck renders differently from the app. `bodyRegion.test.ts` pins the two together. */
-function themeVarsCss(
-  theme: DeckThemeFields,
-  align: string,
-  style: BodyRegionStyle,
-  valign: string | null | undefined,
-): string {
+/** Standalone twin of `themeVars` in render.tsx. */
+function themeVarsCss(theme: DeckThemeFields, align: string): string {
   const font = (f: string | null | undefined) =>
     `'${esc((f || 'Lato').replace(/'/g, ''))}',sans-serif`
-  const r = style
-  const va = slideBodyVAlign(valign)
   return (
     `--strut-heading-color:${cssHex(theme.heading_color ?? '', '111111')};` +
     `--strut-heading-font:${font(theme.heading_font)};` +
     `--strut-body-color:${cssHex(theme.body_color ?? '', '111111')};` +
     `--strut-body-font:${font(theme.body_font)};` +
     `--strut-text-align:${align};` +
-    `--strut-body-pad:${r.pad};` +
-    `--strut-type-scale:${r.scale};` +
-    `--strut-body-display:${va.flex ? 'flex' : r.display};` +
-    `--strut-body-justify:${va.justify};`
+    '--strut-body-pad:64px 88px;' +
+    '--strut-type-scale:1;' +
+    '--strut-body-display:block;' +
+    '--strut-body-justify:safe center;'
   )
 }
 
@@ -249,21 +203,14 @@ function stepHTML(
     backgroundImage(slide.surface, deck.surface),
   )
   const align = resolveTextAlign(slide.text_align, deck.text_align)
-  // The body's cell-0 style — a real layout tiling, else the legacy single region (auto-derived from
-  // the half-bleed image above). Exactly what themeVars resolves in-app, so exports match.
-  const bodyStyle = bodyStyleFor(slide, deck)
-  // Both layers, composited like every app surface: the markdown Body underlay (`.strut-md`, same
-  // doc→HTML renderer) with the positioned Objects painted on top (absolute → above the static body).
-  // Each is emitted only when it has content, so single-layer slides export exactly as before.
-  const body = bodyHTML(slide)
   const objects = [...components]
     .sort((a, b) => a.z_order - b.z_order)
-    .map((c) => '      ' + componentHTML(c))
+    .map((c) => '      ' + componentHTML(c, c.id === slide.body_component_id))
     .join('\n')
   const bgLayer = bgImage ? '      ' + backgroundImageLayerHTML(bgImage) : ''
-  const inner = [bgLayer, body, objects].filter(Boolean).join('\n')
+  const inner = [bgLayer, objects].filter(Boolean).join('\n')
   return `  <div class="step" data-state="strut-slide-${index}" data-surface="${esc(surface)}" ${attrs.join(' ')}>
-    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align, bodyStyle, slide.valign)}">
+    <div class="slideContainer strut-surface" style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:${bg};overflow:hidden;position:relative;${themeVarsCss(deck, align)}">
 ${inner}
     </div>
   </div>`

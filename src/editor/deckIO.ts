@@ -12,6 +12,7 @@ import type { DeckDetail } from './deckDetail'
 import { deserializeDeck, serializeDeck } from './serialize'
 import type { DeckBundle, ImportedDeck } from './serialize'
 import { toImpressHTML } from './impressExport'
+import { primaryTextId } from '../../shared/app-def'
 
 type Store = StrutApp['store']
 type Mutate = StrutApp['mutate']
@@ -133,8 +134,6 @@ export function importDeck(
     body_font: imported.body_font,
     body_color: imported.body_color,
     text_align: imported.text_align,
-    default_slide_mode:
-      imported.default_slide_mode === 'markdown' ? 'markdown' : '',
     custom_stylesheet: imported.custom_stylesheet,
     canned_transition: imported.canned_transition,
     now,
@@ -150,6 +149,9 @@ export function importDeck(
   let prevSort: string | null = null
   for (const s of imported.slides) {
     const slideId = newId()
+    const importedPrimary = s.components.find(
+      (component) => component.kind === 'text' && component.primary,
+    )
     const sort = generateKeyBetween(prevSort, null)
     prevSort = sort
     mutate.addSlide({
@@ -158,8 +160,7 @@ export function importDeck(
       sort,
       x: s.x,
       y: s.y,
-      // Imported render_mode is an open string; coerce to the SlideMode union addSlide expects.
-      render_mode: s.render_mode === 'markdown' ? 'markdown' : '',
+      content: importedPrimary?.doc ?? '',
       now,
     })
     mutate.setSlideTransform({
@@ -173,36 +174,54 @@ export function importDeck(
       imp_scale: s.imp_scale,
       now,
     })
-    if (
-      s.background ||
-      s.surface ||
-      s.text_align ||
-      s.body_region ||
-      s.layout ||
-      s.pad ||
-      s.valign
-    )
+    if (s.background || s.surface || s.text_align)
       mutate.setSlideTheme({
         id: slideId,
         background: s.background,
         surface: s.surface,
         text_align: s.text_align,
-        body_region: s.body_region,
-        layout: s.layout,
-        pad: s.pad,
-        valign: s.valign,
         now,
       })
-    // Older `.strut` files carry only raw Markdown. Preserve that source exactly; every editor/read
-    // surface falls back to it until a direct edit writes the canonical TipTap `doc`.
-    if (s.markdown)
-      mutate.setSlideMarkdown({ id: slideId, markdown: s.markdown, now })
-    if (s.doc) mutate.setSlideDoc({ id: slideId, doc: s.doc, now })
-    if (s.cells) mutate.setSlideCells({ id: slideId, cells: s.cells, now })
-    for (const c of s.components)
+    if (importedPrimary)
+      restoreImportedPrimary(mutate, primaryTextId(slideId), importedPrimary)
+    for (const c of s.components) {
+      if (c === importedPrimary) continue
       insertComponent(mutate, { id: newId(), slideId }, c)
+    }
   }
   return deckId
+}
+
+/** `addSlide` already inserted the deterministic primary row. Reapply an imported primary's exact
+ *  style/geometry onto that row instead of inserting a second body component. */
+function restoreImportedPrimary(
+  mutate: Mutate,
+  id: string,
+  component: ImportedDeck['slides'][number]['components'][number],
+): void {
+  mutate.setText({
+    id,
+    size: component.size ?? 32,
+    color: component.color ?? '',
+    font_family: component.font_family ?? '',
+  })
+  mutate.moveComponent({ id, x: component.x, y: component.y })
+  mutate.transformComponent({
+    id,
+    scale_x: component.scale_x,
+    scale_y: component.scale_y,
+    scale_w: component.scale_w,
+    scale_h: component.scale_h,
+    rotate: component.rotate,
+    skew_x: component.skew_x,
+    skew_y: component.skew_y,
+  })
+  mutate.setComponentZ({ id, z_order: component.z_order })
+  if (component.custom_classes)
+    mutate.setComponentClasses({
+      id,
+      custom_classes: component.custom_classes,
+    })
 }
 
 /** Read a File (from an <input type=file>) and parse it into a normalized deck. */

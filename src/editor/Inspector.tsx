@@ -17,7 +17,6 @@ import type {
   ZReorderAction,
 } from './precisionGeometry'
 import { FontOptions } from './render'
-import { textTypeOf } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import { useHistory } from './UndoProvider'
 import { uploadArtifact } from './upload'
@@ -111,27 +110,18 @@ function InspectorPanel({
   // '' color/font_family = inherit the deck theme for this component's category — preserved
   // through edits (defaults here must NOT materialize a concrete override).
   const editText = (
-    patch: Partial<
-      Pick<
-        AnyComponent,
-        'size' | 'color' | 'font_family' | 'text' | 'text_type'
-      >
-    >,
+    patch: Partial<Pick<AnyComponent, 'size' | 'color' | 'font_family'>>,
     label = 'Edit text',
   ) => {
     const before = {
-      text: c.text ?? '',
-      size: c.size ?? 72,
+      size: c.size ?? 32,
       color: c.color ?? '',
       font_family: c.font_family ?? '',
-      text_type: textTypeOf(c) as string,
     }
     const after = {
-      text: patch.text ?? before.text,
       size: patch.size ?? before.size,
       color: patch.color ?? before.color,
       font_family: patch.font_family ?? before.font_family,
-      text_type: patch.text_type ?? before.text_type,
     }
     const apply = (value: typeof before) =>
       mutate.setText({ id: c.id, ...value })
@@ -463,37 +453,15 @@ function TextControls({
   c: AnyComponent
   deck?: DeckThemeFields | null
   editText: (
-    patch: Partial<
-      Pick<
-        AnyComponent,
-        'size' | 'color' | 'font_family' | 'text' | 'text_type'
-      >
-    >,
+    patch: Partial<Pick<AnyComponent, 'size' | 'color' | 'font_family'>>,
     label?: string,
   ) => void
 }) {
-  const category = textTypeOf(c)
-  const themeFont =
-    (category === 'heading' ? deck?.heading_font : deck?.body_font) ||
-    DEFAULT_FONT
-  const themeColor =
-    (category === 'heading' ? deck?.heading_color : deck?.body_color) ||
-    '111111'
+  const themeFont = deck?.body_font || DEFAULT_FONT
+  const themeColor = deck?.body_color || '111111'
 
   return (
     <InspectorSection title="Text">
-      <label className="insp__row">
-        <span>Type</span>
-        <select
-          value={category}
-          onChange={(event) =>
-            editText({ text_type: event.target.value }, 'Text type')
-          }
-        >
-          <option value="body">Body</option>
-          <option value="heading">Heading</option>
-        </select>
-      </label>
       <label className="insp__row">
         <span>Font</span>
         <select
@@ -512,7 +480,7 @@ function TextControls({
         min={8}
         max={400}
         list="strut-font-sizes"
-        value={c.size ?? 72}
+        value={c.size ?? 32}
         onCommit={(size) => editText({ size }, 'Text size')}
       />
       <datalist id="strut-font-sizes">
@@ -527,7 +495,7 @@ function TextControls({
           onChange={(color) => editText({ color }, 'Text color')}
           themeDefault={{
             color: themeColor,
-            title: `Theme (${category}) color`,
+            title: 'Theme text color',
           }}
         />
       </div>

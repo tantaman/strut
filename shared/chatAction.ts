@@ -47,7 +47,7 @@ export type ChatAction =
       /** Full replacement stylesheet, normalized through the generated-theme CSS firewall. */
       custom_stylesheet?: string
     }
-  | { kind: 'set_body'; slideId: string; markdown: string } // rewrite cell 0; preserve sibling cells/layout
+  | { kind: 'set_body'; slideId: string; markdown: string } // rewrite the primary text component
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
   | { kind: 'arrange'; instruction: string } // reorder / lay out the slides
   // Add ONE blank slide (appended to the deck). `ref` is a turn-local alias later actions in the SAME turn
@@ -90,8 +90,8 @@ export interface ChatActTheme {
 }
 
 /** The currently-active slide's id + its FULL visible body text (not the 240-char digest excerpt), with
- *  cell labels when tiled — the natural target for a `set_body` rewrite ("tighten this slide").
- *  `set_body` replaces only Cell 1; labeled sibling cells are grounding and remain untouched.
+ *  full primary rich-text document — the natural target for a `set_body` rewrite ("tighten this slide").
+ *  `set_body` replaces that component only; positioned text and media remain untouched.
  *  Absent when no slide is active / it's empty.
  *  `notes` carries the author's private RESEARCH notes / backing evidence for this slide (flattened text)
  *  when they've written any — grounding for "draft this slide from my notes". Never shown in a presentation. */

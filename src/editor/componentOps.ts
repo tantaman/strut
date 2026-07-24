@@ -41,14 +41,14 @@ export function insertComponent(
   }
   switch (c.kind) {
     case 'text':
-      // '' color/font_family = theme-inherited; '' text_type = body — preserve, don't materialize.
+      // Content is the canonical TipTap JSON column; style remains in props. Keeping those writes split
+      // lets folded typing coexist with inspector font/color changes.
       mutate.addText({
         ...common,
-        text: c.text ?? 'Text',
-        size: c.size ?? 72,
+        content: c.doc ?? '',
+        size: c.size ?? 32,
         color: c.color ?? '',
         font_family: c.font_family ?? '',
-        text_type: c.text_type ?? '',
       })
       break
     case 'image':

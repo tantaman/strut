@@ -293,13 +293,6 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     sharedMutators.setSlideTransform,
   ),
   setSlideTheme: withSlideEditable((a) => a.id, sharedMutators.setSlideTheme),
-  setSlideMarkdown: withSlideEditable(
-    (a) => a.id,
-    sharedMutators.setSlideMarkdown,
-  ),
-  setSlideDoc: withSlideEditable((a) => a.id, sharedMutators.setSlideDoc),
-  setSlideCells: withSlideEditable((a) => a.id, sharedMutators.setSlideCells),
-  setSlideMode: withSlideEditable((a) => a.id, sharedMutators.setSlideMode),
   // Research notes upsert a slide_notes row keyed by slide_id, so gate on the target SLIDE being
   // editable (NOT the client-claimed deck) — otherwise a known slide_id could clobber another user's
   // note. The guard also verifies the claimed deck_id is the slide's real deck.
@@ -331,6 +324,10 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     sharedMutators.setComponentClasses,
   ),
   setText: withComponentEditable((a) => a.id, sharedMutators.setText),
+  setTextContent: withComponentEditable(
+    (a) => a.id,
+    sharedMutators.setTextContent,
+  ),
   setShapeFill: withComponentEditable((a) => a.id, sharedMutators.setShapeFill),
   setArtifact: withComponentEditable((a) => a.id, sharedMutators.setArtifact),
   removeComponent: withComponentEditable(

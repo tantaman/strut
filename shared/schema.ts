@@ -29,6 +29,7 @@ export const component = table("component")
     custom_classes: string(),
     fill: string(),
     props: json(),
+    content: string(),
   })
   .primaryKey("id");
 
@@ -103,6 +104,7 @@ export const slide = table("slide")
     cells: string(),
     pad: string(),
     valign: string(),
+    body_component_id: string(),
   })
   .primaryKey("id");
 

@@ -3,7 +3,6 @@ import { useRef, useState } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
 import { Plus, Upload, X } from 'lucide-react'
 import { decksQuery, DECKS_LIMIT } from '../../shared/queries'
-import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import { useMutate } from '../rindle/RindleProvider'
 import { preloadDecks } from '../rindle/appSsr'
 import { AccountControl } from '../rindle/AccountControl'
@@ -66,15 +65,13 @@ function Dashboard() {
     const id = newId()
     const now = Date.now()
     mutate.createDeck({ id, title, now, ...newDeckVisibility() })
-    // Seed the deck with one blank slide so the editor opens onto something. The persisted marker is
-    // retained for older readers; current Strut has one editor and composites body + positioned objects.
+    // Seed the deck with one blank slide and its canonical full-slide text component.
     mutate.addSlide({
       id: newId(),
       deckId: id,
       sort: 'a0',
       x: 0,
       y: 0,
-      render_mode: DEFAULT_SLIDE_MODE,
       now,
     })
     setCreating(false)

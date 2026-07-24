@@ -1,7 +1,5 @@
-// Markdown → safe HTML. Pure (no React) so render surfaces, the direct-editor migration path and the
-// standalone impress export can share one converter. The Marked renderer is deliberately safe without
-// a DOM: legacy markdown-only rows can therefore render during SSR without briefly injecting raw HTML
-// before hydration. DOMPurify remains a client-side second line of defence.
+// Markdown → safe HTML for AI/import ingestion before it becomes canonical TipTap JSON. The Marked
+// renderer is deliberately safe without a DOM; DOMPurify remains a client-side second line of defence.
 
 import { Marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -58,8 +56,7 @@ markdown.use({
   },
 })
 
-/** Convert a markdown source string to sanitized HTML ready for `dangerouslySetInnerHTML`. Tolerates
- *  null/undefined (legacy slide rows predate the `markdown` column). */
+/** Convert Markdown to sanitized HTML for TipTap parsing. Tolerates null/undefined input. */
 export function markdownToHtml(md: string | null | undefined): string {
   const raw = markdown.parse(md ?? '', { async: false })
   return typeof window === 'undefined' ? raw : DOMPurify.sanitize(raw)

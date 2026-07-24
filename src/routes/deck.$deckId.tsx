@@ -273,7 +273,12 @@ function EditorInner({ deckId }: { deckId: string }) {
         </div>
       )}
       <div className="editor__body">
-        <DocView slides={slides} deck={deck} onEditObjects={editObjects} />
+        <DocView
+          slides={slides}
+          deck={deck}
+          onEditObjects={editObjects}
+          editingSuspended={objectSlide != null}
+        />
         {objectSlide && (
           <div className="context-tool context-tool--objects">
             <PrecisionWorkspace

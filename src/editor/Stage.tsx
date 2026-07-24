@@ -21,9 +21,7 @@ import {
   BackgroundImageLayer,
   cmpStyle,
   componentSize,
-  MarkdownBodies,
   renderInner,
-  slideHasBody,
   themeVars,
 } from './render'
 import {
@@ -37,7 +35,6 @@ import {
   SHAPES,
   SHAPE_TOOLS,
   strokeGeometry,
-  textTypeOf,
 } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -47,7 +44,7 @@ import type {
   PrecisionFramePatch,
   PrecisionInspectorActions,
 } from './Inspector'
-import { RichTextToolbar } from './RichTextToolbar'
+import { TextComponentEditor } from './TextComponentEditor'
 import { useFitScale } from './useFitScale'
 import { UserStyle } from './CssEditor'
 import { componentClassName } from './componentClasses'
@@ -59,6 +56,7 @@ import {
 import {
   alignFrames,
   distributeFrames,
+  isMarqueeSelectableComponent,
   matchFrameSize,
   planZReorder,
   resizeFrameInLocalAxes,
@@ -193,8 +191,8 @@ export function Stage({
 
   function frameForComponent(component: AnyComponent): PrecisionFrame {
     const fallback = componentSize(component)
-    // Intrinsic legacy text has 0×0 in the row. offsetWidth/Height are unscaled, unrotated layout
-    // dimensions, exactly what a first precision resize should materialize into the spatial columns.
+    // Imported or extension-authored text may omit explicit dimensions. offsetWidth/Height are unscaled,
+    // unrotated layout dimensions, exactly what a first precision resize should materialize.
     const node = [
       ...(stageRef.current?.querySelectorAll<HTMLElement>('.cmp[data-id]') ??
         []),
@@ -203,12 +201,12 @@ export function Stage({
       component.scale_w ||
       node?.offsetWidth ||
       fallback.w ||
-      Math.max(40, component.size ?? 72)
+      Math.max(40, component.size ?? 32)
     const h =
       component.scale_h ||
       node?.offsetHeight ||
       fallback.h ||
-      Math.max(20, component.size ?? 72)
+      Math.max(20, component.size ?? 32)
     return {
       id: component.id,
       x: component.x,
@@ -530,6 +528,9 @@ export function Stage({
 
   // Remove component(s) as one undoable step (undo reinserts them with full geometry).
   function deleteComponents(victims: AnyComponent[]) {
+    // A slide always owns one doc-first text layer. Clearing it is valid; deleting the row would leave
+    // the main editor with nowhere to put the caret.
+    victims = victims.filter((c) => c.id !== slideData.body_component_id)
     if (victims.length === 0) return
     const snapshots = victims.map((c) => ({ ...c }))
     history.batch(
@@ -955,40 +956,6 @@ export function Stage({
     reorder: reorderComponents,
   }
 
-  function commitText(c: AnyComponent, html: string) {
-    setEditingId(null)
-    const plain = html
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .trim()
-    if (plain.length === 0) {
-      deleteComponents([c]) // empty box is deleted (undoable — reinserts it)
-      return
-    }
-    if (html === (c.text ?? '')) return // no change
-    const before = c.text ?? ''
-    const size = c.size ?? 72
-    // '' color/font = theme-inherited — must survive the blob rewrite untouched.
-    const color = c.color ?? ''
-    const font = c.font_family ?? ''
-    const textType = textTypeOf(c)
-    const apply = (text: string) =>
-      mutate.setText({
-        id: c.id,
-        text,
-        size,
-        color,
-        font_family: font,
-        text_type: textType,
-      })
-    apply(html)
-    history.push({
-      label: 'Edit text',
-      redo: () => apply(html),
-      undo: () => apply(before),
-    })
-  }
-
   // ---- marquee on empty canvas ----
   function beginMarquee(e: RPointerEvent) {
     if (!editor.canEdit) return
@@ -1023,6 +990,11 @@ export function Stage({
       stageRef.current
         ?.querySelectorAll<HTMLElement>('.cmp[data-id]')
         .forEach((el) => {
+          const id = el.dataset.id
+          // The primary document is the slide-sized editing surface, not an ordinary positioned
+          // object. Selecting it here would make every marquee select the whole slide.
+          if (!isMarqueeSelectableComponent(id, slideData.body_component_id))
+            return
           const r = el.getBoundingClientRect()
           if (
             r.left < box.right &&
@@ -1030,7 +1002,7 @@ export function Stage({
             r.top < box.bottom &&
             r.bottom > box.top
           )
-            hit.push(el.dataset.id!)
+            hit.push(id)
         })
       editor.selectMany(hit)
     }
@@ -1220,6 +1192,7 @@ export function Stage({
   // Bare-canvas pointer-down: draw a shape when the shape tool is armed, else marquee-select.
   function onCanvasPointerDown(e: RPointerEvent) {
     if (editor.pendingShape) beginDrawShape(e)
+    else if (e.altKey) deepSelect(e)
     else beginMarquee(e)
   }
 
@@ -1266,6 +1239,14 @@ export function Stage({
             editor.pendingShape ? ' is-placing' : ''
           }`}
           onPointerDown={onCanvasPointerDown}
+          onDoubleClick={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              editor.canEdit &&
+              slideData.body_component_id
+            )
+              setEditingId(slideData.body_component_id)
+          }}
           style={{
             width: SLIDE_W,
             height: SLIDE_H,
@@ -1275,14 +1256,6 @@ export function Stage({
           }}
         >
           <BackgroundImageLayer image={bgImg} />
-          {/* Body underlay: the markdown doc, shown behind the editable objects but inert (its layer
-              is pointer-events:none) so marquee/canvas clicks pass through. Skipped when empty, so a
-              pure-objects slide is unchanged. */}
-          {slideHasBody(slideData) && (
-            <div className="slide-locked-layer">
-              <MarkdownBodies slide={slideData} />
-            </div>
-          )}
           {componentRefs.map((component) => (
             <ComponentDataReader
               key={componentRefKey(component)}
@@ -1293,14 +1266,14 @@ export function Stage({
               {(c) => (
                 <ComponentView
                   c={c}
-                  scale={scale}
                   selected={editor.isSelected(c.id)}
                   editing={editingId === c.id}
+                  primary={c.id === slideData.body_component_id}
                   onPointerDownBody={(e) => beginMove(c, e)}
                   onStartEdit={() =>
                     c.kind === 'text' && editor.canEdit && setEditingId(c.id)
                   }
-                  onCommitEdit={(html) => commitText(c, html)}
+                  onStopEdit={() => setEditingId(null)}
                 />
               )}
             </ComponentDataReader>
@@ -1377,31 +1350,40 @@ export function Stage({
 
 function ComponentView({
   c,
-  scale,
   selected,
   editing,
+  primary,
   onPointerDownBody,
   onStartEdit,
-  onCommitEdit,
+  onStopEdit,
 }: {
   c: AnyComponent
-  scale: number
   selected: boolean
   editing: boolean
+  primary: boolean
   onPointerDownBody: (e: RPointerEvent) => void
   onStartEdit: () => void
-  onCommitEdit: (html: string) => void
+  onStopEdit: () => void
 }) {
   return (
     <div
-      className={componentClassName(c, selected ? ['is-selected'] : [])}
+      className={componentClassName(c, [
+        ...(selected ? ['is-selected'] : []),
+        ...(primary ? ['is-primary'] : []),
+        ...(editing ? ['is-editing'] : []),
+      ])}
       data-id={c.id}
       style={cmpStyle(c)}
       onPointerDown={onPointerDownBody}
       onDoubleClick={onStartEdit}
     >
       {editing && c.kind === 'text' ? (
-        <TextEditor c={c} scale={scale} onCommit={onCommitEdit} />
+        <TextComponentEditor
+          component={c}
+          primary={primary}
+          autoFocus
+          onBlur={onStopEdit}
+        />
       ) : (
         renderInner(c)
       )}
@@ -1486,59 +1468,4 @@ function alignmentLabel(alignment: Alignment): string {
   if (alignment === 'centerX') return 'center'
   if (alignment === 'middleY') return 'middle'
   return alignment
-}
-
-function TextEditor({
-  c,
-  scale,
-  onCommit,
-}: {
-  c: AnyComponent
-  scale: number
-  onCommit: (html: string) => void
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.innerHTML = c.text && c.text.length ? c.text : ''
-    el.focus()
-    // Legacy tags (<b>/<i>/<font>) so text serializes the way the renderer reads it (spec §6.3).
-    try {
-      document.execCommand('styleWithCSS', false, 'false')
-    } catch {
-      /* not supported everywhere — harmless */
-    }
-    const range = document.createRange()
-    range.selectNodeContents(el)
-    range.collapse(false)
-    const sel = window.getSelection()
-    sel?.removeAllRanges()
-    sel?.addRange(range)
-  }, [])
-  return (
-    <>
-      <RichTextToolbar scale={scale} />
-      <div
-        ref={ref}
-        className="cmp__textbody"
-        contentEditable
-        suppressContentEditableWarning
-        onPointerDown={(e) => e.stopPropagation()}
-        onBlur={() => onCommit(ref.current?.innerHTML ?? '')}
-        // Paste plain text only (spec §6.3).
-        onPaste={(e) => {
-          e.preventDefault()
-          const text = e.clipboardData.getData('text/plain')
-          document.execCommand('insertText', false, text)
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            e.preventDefault()
-            ref.current?.blur()
-          }
-        }}
-      />
-    </>
-  )
 }

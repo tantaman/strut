@@ -1,10 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import { importDeck } from './deckIO'
-import type { ImportedDeck } from './serialize'
+import type { ImportedComponent, ImportedDeck } from './serialize'
 
-function imported(markdown: string, doc = ''): ImportedDeck {
+const DOC = JSON.stringify({
+  type: 'doc',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Body' }] }],
+})
+
+function imported(components: ImportedComponent[]): ImportedDeck {
   return {
-    title: 'Legacy deck',
+    title: 'Unified deck',
     background: 'bg-default',
     surface: 'bg-default',
     heading_font: '',
@@ -12,7 +17,6 @@ function imported(markdown: string, doc = ''): ImportedDeck {
     body_font: '',
     body_color: '',
     text_align: '',
-    default_slide_mode: '',
     canned_transition: 'none',
     custom_stylesheet: '',
     deck_version: '1.0',
@@ -28,39 +32,60 @@ function imported(markdown: string, doc = ''): ImportedDeck {
         imp_scale: 3,
         background: '',
         surface: '',
-        markdown,
-        doc,
-        render_mode: '',
         text_align: '',
-        body_region: '',
-        layout: '',
-        cells: '',
-        pad: '',
-        valign: '',
-        components: [],
+        components,
       },
     ],
   }
 }
 
-describe('deck import compatibility', () => {
-  it('preserves legacy raw Markdown instead of importing a blank body', () => {
+function text(primary: boolean): ImportedComponent {
+  return {
+    kind: 'text',
+    primary,
+    x: primary ? 0 : 120,
+    y: primary ? 0 : 140,
+    z_order: primary ? 0 : 1,
+    scale_x: 1,
+    scale_y: 1,
+    scale_w: primary ? 1280 : 360,
+    scale_h: primary ? 720 : 120,
+    rotate: 0,
+    skew_x: 0,
+    skew_y: 0,
+    custom_classes: '',
+    doc: DOC,
+  }
+}
+
+describe('unified component deck import', () => {
+  it('hydrates the deterministic primary row and inserts freeform text separately', () => {
+    const source = imported([text(true), text(false)])
     const mutate = {
       createDeck: vi.fn(),
       setDeckTheme: vi.fn(),
       addSlide: vi.fn(),
       setSlideTransform: vi.fn(),
-      setSlideMarkdown: vi.fn(),
+      setText: vi.fn(),
+      moveComponent: vi.fn(),
+      transformComponent: vi.fn(),
+      setComponentZ: vi.fn(),
+      setComponentClasses: vi.fn(),
+      addText: vi.fn(),
     }
 
-    importDeck(
-      mutate as unknown as Parameters<typeof importDeck>[0],
-      imported('# Still here'),
-    )
+    importDeck(mutate as unknown as Parameters<typeof importDeck>[0], source)
 
-    expect(mutate.setSlideMarkdown).toHaveBeenCalledOnce()
-    expect(mutate.setSlideMarkdown).toHaveBeenCalledWith(
-      expect.objectContaining({ markdown: '# Still here' }),
+    const slideId = mutate.addSlide.mock.calls[0][0].id
+    expect(mutate.addSlide).toHaveBeenCalledWith(
+      expect.objectContaining({ content: DOC }),
+    )
+    expect(mutate.setText).toHaveBeenCalledWith(
+      expect.objectContaining({ id: `${slideId}:body` }),
+    )
+    expect(mutate.addText).toHaveBeenCalledOnce()
+    expect(mutate.addText).toHaveBeenCalledWith(
+      expect.objectContaining({ slideId, content: DOC }),
     )
   })
 })

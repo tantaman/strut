@@ -6,11 +6,10 @@ import { applyBodyEdit } from './aiBody'
 import { dispatchAction, dispatchActions } from './aiChatActions'
 import type { DispatchCtx } from './aiChatActions'
 import { uploadArtifact } from './upload'
-import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 import type {
   AddSlideArgs,
   SetDeckThemeArgs,
-  SetSlideDocArgs,
+  SetTextContentArgs,
 } from '../../shared/app-def'
 import type { SlideDetail } from './deckDetail'
 
@@ -99,37 +98,53 @@ describe('applyThemePatch', () => {
 })
 
 describe('applyBodyEdit', () => {
-  const slides = [{ id: 's1', doc: 'BEFORE_DOC' } as unknown as SlideDetail]
+  const slides = [
+    {
+      id: 's1',
+      body_component_id: 's1:body',
+    } as unknown as SlideDetail,
+  ]
+  const componentsBySlide = {
+    s1: [{ id: 's1:body', kind: 'text', doc: 'BEFORE_DOC' } as never],
+  }
 
   it('swaps in the converted doc and restores the prior doc on undo', () => {
-    const calls: SetSlideDocArgs[] = []
-    const mutate = { setSlideDoc: (a: SetSlideDocArgs) => calls.push(a) }
+    const calls: SetTextContentArgs[] = []
+    const mutate = {
+      setTextContent: (a: SetTextContentArgs) => calls.push(a),
+    }
     const history = new History()
 
     const ok = applyBodyEdit('s1', '# Tighter\n\n- a\n- b', {
       mutate,
       history,
       slides,
+      componentsBySlide,
     })
     expect(ok).toBe(true)
     expect(calls).toHaveLength(1)
     // markdownToDoc produced a real (non-empty, JSON) doc that isn't the old value.
-    expect(calls[0].id).toBe('s1')
-    expect(calls[0].doc).not.toBe('BEFORE_DOC')
-    expect(() => JSON.parse(calls[0].doc)).not.toThrow()
+    expect(calls[0].id).toBe('s1:body')
+    expect(calls[0].content).not.toBe('BEFORE_DOC')
+    expect(() => JSON.parse(calls[0].content)).not.toThrow()
 
     history.undo()
     expect(calls).toHaveLength(2)
-    expect(calls[1]).toMatchObject({ id: 's1', doc: 'BEFORE_DOC' })
+    expect(calls[1]).toMatchObject({ id: 's1:body', content: 'BEFORE_DOC' })
   })
 
   it('returns false (no mutation) when the target slide is gone', () => {
-    const mutate = { setSlideDoc: vi.fn() }
+    const mutate = { setTextContent: vi.fn() }
     const history = new History()
-    expect(applyBodyEdit('ghost', '# x', { mutate, history, slides })).toBe(
-      false,
-    )
-    expect(mutate.setSlideDoc).not.toHaveBeenCalled()
+    expect(
+      applyBodyEdit('ghost', '# x', {
+        mutate,
+        history,
+        slides,
+        componentsBySlide,
+      }),
+    ).toBe(false)
+    expect(mutate.setTextContent).not.toHaveBeenCalled()
     expect(history.canUndo).toBe(false)
   })
 })
@@ -145,6 +160,7 @@ function makeCtx(
   return {
     deckId: 'd',
     slides: [],
+    componentsBySlide: {},
     deck: null,
     mutate: mutate as unknown as DispatchCtx['mutate'],
     history: new History(),
@@ -353,13 +369,11 @@ describe('dispatchAction · add_image', () => {
 // ---- dispatchActions: a LIST of actions applied as ONE undo, with create_slide + ref targeting ------
 
 describe('dispatchActions · multi-action turn', () => {
-  it('uses one compatibility marker for both blank and body-seeded slides', async () => {
+  it('creates blank and body-seeded slides through the same canonical component insert', async () => {
     const slides: AddSlideArgs[] = []
-    const docs: SetSlideDocArgs[] = []
     const ctx = makeCtx(
       {
         addSlide: (args: AddSlideArgs) => slides.push(args),
-        setSlideDoc: (args: SetSlideDocArgs) => docs.push(args),
         deleteSlide: vi.fn(),
       },
       null,
@@ -374,11 +388,45 @@ describe('dispatchActions · multi-action turn', () => {
     )
 
     expect(out.ok).toBe(true)
-    expect(slides.map((slide) => slide.render_mode)).toEqual([
-      DEFAULT_SLIDE_MODE,
-      DEFAULT_SLIDE_MODE,
+    expect(slides[0].content).toBe('')
+    expect(() => JSON.parse(slides[1].content ?? '')).not.toThrow()
+  })
+
+  it('can create and then rewrite the new slide primary document in the same turn', async () => {
+    const slides: AddSlideArgs[] = []
+    const writes: SetTextContentArgs[] = []
+    const deleted: Array<{ id: string; componentIds: string[] }> = []
+    const ctx = makeCtx(
+      {
+        addSlide: (args: AddSlideArgs) => slides.push(args),
+        setTextContent: (args: SetTextContentArgs) => writes.push(args),
+        deleteSlide: (args: { id: string; componentIds: string[] }) =>
+          deleted.push(args),
+      },
+      null,
+    )
+
+    const out = await dispatchActions(
+      [
+        { kind: 'create_slide', ref: 'draft', markdown: '# Initial' },
+        { kind: 'set_body', slideId: 'draft', markdown: '# Final' },
+      ],
+      ctx,
+    )
+
+    expect(out).toEqual({ ok: true, label: '2 changes' })
+    expect(writes).toHaveLength(1)
+    expect(writes[0].id).toBe(`${slides[0].id}:body`)
+    expect(writes[0].content).not.toBe(slides[0].content)
+
+    ctx.history.undo()
+    expect(writes.at(-1)).toEqual({
+      id: `${slides[0].id}:body`,
+      content: slides[0].content,
+    })
+    expect(deleted).toEqual([
+      { id: slides[0].id, componentIds: [`${slides[0].id}:body`] },
     ])
-    expect(docs).toHaveLength(1)
   })
 
   it('creates a slide and drops an image ON it — even with no slide open — in one undo', async () => {
@@ -395,7 +443,6 @@ describe('dispatchActions · multi-action turn', () => {
     const ctx = makeCtx(
       {
         addSlide: (a: { id: string; slideId: string }) => slides.push(a),
-        setSlideDoc: vi.fn(),
         deleteSlide: (a: { id: string }) => deleted.push(a),
         addImage: (a: { id: string; slideId: string; src: string }) =>
           images.push(a),
@@ -426,7 +473,9 @@ describe('dispatchActions · multi-action turn', () => {
     expect(ctx.history.canUndo).toBe(true)
     ctx.history.undo()
     expect(removed).toEqual([{ id: images[0].id }])
-    expect(deleted).toEqual([{ id: slides[0].id, componentIds: [] }])
+    expect(deleted).toEqual([
+      { id: slides[0].id, componentIds: [`${slides[0].id}:body`] },
+    ])
   })
 
   it('defaults a component with no slideId onto the slide created earlier in the turn', async () => {
@@ -435,7 +484,6 @@ describe('dispatchActions · multi-action turn', () => {
     const ctx = makeCtx(
       {
         addSlide: (a: { id: string }) => slides.push(a),
-        setSlideDoc: vi.fn(),
         deleteSlide: vi.fn(),
         addWebframe: (a: { slideId: string }) => webs.push(a),
         removeComponent: vi.fn(),

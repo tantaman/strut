@@ -3,6 +3,7 @@ import {
   alignFrames,
   distributeFrames,
   frameBounds,
+  isMarqueeSelectableComponent,
   matchFrameSize,
   nudgeFrames,
   planZReorder,
@@ -23,6 +24,14 @@ const frame = (
 ): PrecisionFrame => ({ id, x, y, w, h, rotate })
 
 describe('precision geometry basics', () => {
+  it('keeps the primary document out of ordinary object marquee', () => {
+    expect(isMarqueeSelectableComponent('shape-1', 'slide-1:body')).toBe(true)
+    expect(isMarqueeSelectableComponent('slide-1:body', 'slide-1:body')).toBe(
+      false,
+    )
+    expect(isMarqueeSelectableComponent(undefined, 'slide-1:body')).toBe(false)
+  })
+
   it('finds visible selection bounds and preserves fractional nudges', () => {
     const frames = [frame('a', 1.25, 8.5, 10.5, 20.25), frame('b', 20, 2, 4, 6)]
 

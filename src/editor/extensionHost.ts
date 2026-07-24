@@ -16,6 +16,18 @@ import { instantiate as loaderInstantiate } from '@assemblyscript/loader'
 import type { AddTextArgs } from '../../shared/app-def'
 import { DEFAULT_FONT_SIZE, newId } from '../config'
 
+function plainTextDoc(text: string): string {
+  return JSON.stringify({
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: text ? [{ type: 'text', text }] : [],
+      },
+    ],
+  })
+}
+
 /** The slice of the live `mutate` facade an extension needs. Structural so the real facade (which has
  *  every mutator) stays assignable — and so tests can pass a fake. */
 export interface ExtensionMutate {
@@ -68,12 +80,11 @@ export async function runTextExtension(
           x,
           y,
           z_order: z++,
-          text,
+          content: plainTextDoc(text),
           size: DEFAULT_FONT_SIZE,
           // '' = inherit the deck theme's body defaults, exactly like the toolbar's Add Text.
           color: '',
           font_family: '',
-          text_type: 'body',
         })
         added++
       },
@@ -84,7 +95,7 @@ export async function runTextExtension(
   readString = exports.__getString
 
   const entryName = deps.entry ?? 'render'
-  const entry = (exports as Record<string, unknown>)[entryName]
+  const entry = (exports as unknown as Record<string, unknown>)[entryName]
   if (typeof entry === 'function') (entry as () => void)()
 
   return { added }

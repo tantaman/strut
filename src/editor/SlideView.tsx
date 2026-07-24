@@ -9,7 +9,7 @@
 // Stacking is CSS z-index from z_order, so refs do not need a parent-level materialized sort.
 
 import { SLIDE_W } from '../config'
-import { BackgroundImageLayer, MarkdownBodies, themeVars } from './render'
+import { BackgroundImageLayer, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { AnyComponent, DeckThemeFields } from './types'
 import type { SlideDetail } from './deckDetail'
@@ -72,13 +72,11 @@ export function SlideView({
   onComponentData?: (component: AnyComponent) => void
   onComponentRemove?: (id: string) => void
 }) {
-  // Both layers, always composited: the markdown Body underlay + the positioned Objects on top. Each
-  // is emitted only when it has content, so old object-only and body-only data renders unchanged. The
-  // persisted `render_mode` field is compatibility metadata, not a rendering branch.
+  // A slide has one visual tree: its primary doc-first text box and every freeform object are ordinary
+  // components. Play, share, thumbnails and precision therefore render the exact same persisted content.
   const components = mergeComponentRefs(slide)
   return (
     <SlideFrame slide={slide} deck={deck} width={width}>
-      <MarkdownBodies slide={slide} />
       {components.map((component) => (
         <ComponentDataReader
           key={componentRefKey(component)}
@@ -86,7 +84,14 @@ export function SlideView({
           onData={onComponentData}
           onRemove={onComponentRemove}
         >
-          {(c) => <StaticComponent c={c} live={false} present={present} />}
+          {(c) => (
+            <StaticComponent
+              c={c}
+              live={false}
+              present={present}
+              primary={c.id === slide.body_component_id}
+            />
+          )}
         </ComponentDataReader>
       ))}
     </SlideFrame>

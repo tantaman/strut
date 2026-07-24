@@ -12,6 +12,7 @@ import { useEditor } from './EditorState'
 import { useMutate } from '../rindle/RindleProvider'
 import { zNow } from './componentOps'
 import { compileAssemblyScript } from './asCompile'
+import type { AscOptions } from './asCompile'
 import { runTextExtension } from './extensionHost'
 
 // A starter extension. `render()` runs on Run; `strut.addText` is the one capability the host grants
@@ -53,7 +54,7 @@ export default function ExtensionLab() {
       // exportRuntime → the loader can read strings back out of WASM memory (extensionHost).
       const compiled = await compileAssemblyScript(source, {
         exportRuntime: true,
-      })
+      } as AscOptions)
       if (!compiled.ok) {
         setStatus({ kind: 'error', note: compiled.error })
         return

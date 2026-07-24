@@ -9,43 +9,41 @@ function doc(text: string): string {
   })
 }
 
-const emptyDoc = JSON.stringify({ type: 'doc', content: [] })
+function component(id: string, text: string, z_order: number): AnyComponent {
+  return {
+    id,
+    slide_id: 's1',
+    kind: 'text',
+    doc: doc(text),
+    z_order,
+    x: 0,
+    y: 0,
+    scale_x: 1,
+    scale_y: 1,
+    scale_w: 400,
+    scale_h: 160,
+    rotate: 0,
+    skew_x: 0,
+    skew_y: 0,
+    custom_classes: '',
+  }
+}
 
 describe('variant slide grounding', () => {
-  it('includes populated visible cells in reading order without legacy or dormant duplicates', () => {
-    const text = variantSlideText(
-      {
-        doc: doc('Primary story'),
-        markdown: '# Stale legacy copy',
-        layout: 'grid-4',
-        cells: JSON.stringify([
-          '',
-          doc('Supporting metric'),
-          '',
-          doc('Closing evidence'),
-          doc('Dormant fifth cell'),
-        ]),
-      },
-      [{ kind: 'text', text: 'Positioned caption' } as AnyComponent],
-    )
+  it('uses every canonical text component in spatial order', () => {
+    const text = variantSlideText(null, [
+      component('caption', 'Positioned caption', 2),
+      component('body', 'Primary story', 0),
+      component('metric', 'Supporting metric', 1),
+    ])
 
     expect(text).toBe(
-      'Primary story Supporting metric Closing evidence Positioned caption',
+      'Primary story Supporting metric Positioned caption',
     )
-    expect(text).not.toContain('Stale legacy copy')
-    expect(text).not.toContain('Dormant fifth cell')
   })
 
-  it('uses legacy markdown only when no primary doc is stored', () => {
-    expect(
-      variantSlideText({ doc: '', markdown: '# Legacy only', layout: '' }, []),
-    ).toBe('Legacy only')
-
-    expect(
-      variantSlideText(
-        { doc: emptyDoc, markdown: '# Stale legacy copy', layout: '' },
-        [],
-      ),
-    ).toBe('')
+  it('ignores non-text components and empty documents', () => {
+    const image = { ...component('image', '', 1), kind: 'image' as const }
+    expect(variantSlideText(null, [component('body', '', 0), image])).toBe('')
   })
 })

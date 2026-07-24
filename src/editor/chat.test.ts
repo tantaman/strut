@@ -1,11 +1,96 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CHAT_LIMITS, clampChatRequest } from '../../shared/chat'
-import { parseSseDelta, sendChat, sendChatAction } from './aiChat'
+import {
+  beginChatTurn,
+  needsPrimaryContentValidation,
+  parseSseDelta,
+  primaryContentIsCurrent,
+  primaryContentVersions,
+  sendChat,
+  sendChatAction,
+} from './aiChat'
 import type { ChatMessage } from './aiChat'
 import type { DispatchOutcome } from './aiChatActions'
 import type { ChatAction } from '../../shared/chatAction'
 import type { StrutStore } from '../rindle/client'
+import type { SlideDetail } from './deckDetail'
+import type { AnyComponent } from './types'
+
+function primaryVersion(content: string, id = 's1:body') {
+  const slides = [{ id: 's1', body_component_id: id }] as SlideDetail[]
+  const component = {
+    id,
+    slide_id: 's1',
+    kind: 'text',
+    doc: content,
+  } as AnyComponent
+  return primaryContentVersions(slides, { s1: [component] })
+}
+
+describe('action-chat concurrency guards', () => {
+  it('claims the pre-stream send gap synchronously and releases it safely', () => {
+    const gate = { current: false }
+    const finishFirst = beginChatTurn(gate)
+
+    expect(finishFirst).toBeTypeOf('function')
+    expect(gate.current).toBe(true)
+    expect(beginChatTurn(gate)).toBeNull()
+
+    finishFirst?.()
+    const finishSecond = beginChatTurn(gate)
+    expect(finishSecond).toBeTypeOf('function')
+    // A stale/double release from turn one cannot unlock turn two.
+    finishFirst?.()
+    expect(gate.current).toBe(true)
+    finishSecond?.()
+    expect(gate.current).toBe(false)
+  })
+
+  it('rejects set_body when a collaborator changed the captured primary document', () => {
+    const actions: ChatAction[] = [
+      { kind: 'set_body', slideId: 's1', markdown: '# Rewrite' },
+    ]
+    expect(needsPrimaryContentValidation(actions)).toBe(true)
+    expect(
+      primaryContentIsCurrent(
+        actions,
+        primaryVersion('Before'),
+        primaryVersion('Collaborator edit'),
+      ),
+    ).toBe(false)
+    expect(
+      primaryContentIsCurrent(
+        actions,
+        primaryVersion('Before'),
+        primaryVersion('Before'),
+      ),
+    ).toBe(true)
+  })
+
+  it('also rejects a missing/replaced primary row but skips same-turn created refs', () => {
+    const existing: ChatAction[] = [
+      { kind: 'set_body', slideId: 's1', markdown: '# Rewrite' },
+    ]
+    expect(
+      primaryContentIsCurrent(existing, primaryVersion('Before'), new Map()),
+    ).toBe(false)
+    expect(
+      primaryContentIsCurrent(
+        existing,
+        primaryVersion('Before'),
+        primaryVersion('Before', 'replacement'),
+      ),
+    ).toBe(false)
+
+    const created: ChatAction[] = [
+      { kind: 'create_slide', ref: 'draft' },
+      { kind: 'set_body', slideId: 'draft', markdown: '# New slide' },
+    ]
+    expect(needsPrimaryContentValidation(created)).toBe(false)
+    expect(primaryContentIsCurrent(created, new Map(), new Map())).toBe(true)
+  })
+})
 
 // ---- clampChatRequest: the input half of the trust boundary (there's no output firewall — chat is prose,
 // sanitized at render, see shared/chat.ts). Whatever the client sends, the server trims it before the model.

@@ -1,16 +1,16 @@
 // The client ↔ server contract for "✨ Generate slides" — the slide-well analogue of AI Arrange
 // (shared/arrange.ts). Where Arrange REORDERS existing slides, Generate AUTHORS new ones: a
 // natural-language description → a small set of slides, each a chunk of Markdown (a `# title` + a few
-// bullets or a short paragraph). The client turns that Markdown into a TipTap `doc` and appends the
-// slides via the ordinary `addSlide` + `setSlideDoc` mutations (so sync, permissions, and undo come
-// free), exactly like Arrange rides `reorderSlide`/`setSlideTransform`.
+// bullets or a short paragraph). The client turns that Markdown into TipTap JSON and passes it to the
+// ordinary `addSlide` mutation, which creates the slide and canonical primary text component together
+// (so sync, permissions, and undo come free).
 //
 // `normalizeGenerated` is the load-bearing safety primitive AND the prompt-injection firewall: whatever
 // the model returns, we cap the count, cap each slide's length, and drop non-string/empty entries. The
 // worst a poisoned description can do is author some benign extra slides — one undo away. (There is no
 // injection SINK either: the Markdown is sanitized on its way to a `doc`, see src/editor/aiGenerate.ts.)
 
-/** One model-authored slide: a chunk of Markdown that becomes the slide's body (a markdown-mode `doc`). */
+/** One model-authored slide: Markdown converted into the slide's primary rich-text component. */
 export interface GeneratedSlide {
   markdown: string
 }

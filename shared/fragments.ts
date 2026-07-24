@@ -12,7 +12,35 @@
 // one /query), and z-order across mixed types is a plain ORDER BY (no JS merge of five arrays).
 
 import { defineFragment } from '@rindle/client'
-import { component, rels, slide } from './app-def.ts'
+import { component, deck, rels, slide } from './app-def.ts'
+
+// Canonical deck fields. The retired physical `default_slide_mode` column stays out of every synced
+// deck surface while additive migrations leave it in the underlying table.
+export const DeckFragment = defineFragment(deck, (f) =>
+  f.select(
+    'id',
+    'title',
+    'created',
+    'modified',
+    'background',
+    'surface',
+    'chosen_presenter',
+    'canned_transition',
+    'custom_stylesheet',
+    'deck_version',
+    'owner_id',
+    'visibility',
+    'share_token',
+    'heading_font',
+    'heading_color',
+    'body_font',
+    'body_color',
+    'text_align',
+    'source_deck_id',
+    'variant_label',
+    'variant_prompt',
+  ),
+)
 
 // One leaf fragment for every component. `props` is a typed json<ComponentProps>() object (refined in
 // app-def). Selecting explicitly keeps the sync footprint tight for these high-volume rows.
@@ -33,15 +61,34 @@ export const ComponentFragment = defineFragment(component, (f) =>
     'skew_y',
     'custom_classes',
     'fill',
+    'content',
     'props',
   ),
 )
 
-// One slide + its components, z-ordered under a single alias. The component edges use fragment refs, so
-// React readers can subscribe at the individual component boundary while the root deck query still
-// syncs the whole subtree.
+// One canonical slide + its components, z-ordered under a single alias. The legacy markdown/doc/cell/
+// layout columns remain physically present but are not part of the runtime query footprint.
 export const SlideFragment = defineFragment(slide, (f) =>
-  f.sub('components', rels.slideComponents, ComponentFragment, (t) =>
-    t.orderBy('z_order', 'asc'),
-  ),
+  f
+    .select(
+      'id',
+      'deck_id',
+      'sort',
+      'x',
+      'y',
+      'z',
+      'rotate_x',
+      'rotate_y',
+      'rotate_z',
+      'imp_scale',
+      'background',
+      'surface',
+      'created',
+      'modified',
+      'text_align',
+      'body_component_id',
+    )
+    .sub('components', rels.slideComponents, ComponentFragment, (t) =>
+      t.orderBy('z_order', 'asc'),
+    ),
 )

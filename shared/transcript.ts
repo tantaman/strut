@@ -5,9 +5,8 @@
 //   • the POINTS the speaker makes in a segment → the slide's body (Markdown, like Generate), and
 //   • the speaker's own WORDS for that segment → the slide's speaker notes (`slide_notes`).
 // So the deck arrives with notes already populated and in sync — the thing no plain "generate"
-// does. The client turns each slide's Markdown into a TipTap `doc` and appends via the ordinary
-// addSlide + setSlideDoc + setSlideNotes mutations (sync, permissions, and undo come free); see
-// src/editor/aiNarrate.ts.
+// does. The client turns each slide's Markdown into TipTap JSON, creates it through `addSlide`'s
+// canonical primary text component, and writes narration through `setSlideNotes`; see aiNarrate.ts.
 //
 // `normalizeNarrated` is the load-bearing safety primitive AND the prompt-injection firewall: whatever the
 // model returns, we cap the count, cap each slide's body/notes length, and drop invalid entries. A poisoned

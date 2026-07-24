@@ -12,15 +12,14 @@ import type { JSONContent } from '@tiptap/core'
 import DOMPurify from 'dompurify'
 import { strutExtensions } from './tiptapSchema'
 
-/** An empty TipTap doc (one empty paragraph) — the seed for a fresh markdown-mode slide and the
- *  fallback whenever a stored `doc` is missing or unparseable. */
+/** An empty TipTap document (one empty paragraph) — the seed for a fresh text component and the
+ *  fallback whenever stored content is missing or unparseable. */
 export const EMPTY_DOC: JSONContent = {
   type: 'doc',
   content: [{ type: 'paragraph' }],
 }
 
-/** Parse a stored `doc` column (JSON string) into a TipTap document. Tolerates null/undefined (fresh
- *  slides, legacy rows that predate the `doc` column) and malformed JSON by returning an empty doc. */
+/** Parse stored TipTap JSON. Tolerates null/undefined and malformed JSON by returning an empty doc. */
 export function parseDoc(raw: string | null | undefined): JSONContent {
   if (!raw) return EMPTY_DOC
   try {

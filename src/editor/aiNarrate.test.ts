@@ -6,7 +6,7 @@ import { History } from './history'
 import type { SlideDetail } from './deckDetail'
 import type { AddSlideArgs, SetSlideNotesArgs } from '../../shared/app-def'
 
-// Integration test for the differentiated apply path: applyNarrated must append markdown-mode slides AND
+// Integration test for the differentiated apply path: applyNarrated must append canonical text slides AND
 // write each slide's narration into the slide_notes side table (the thing that makes Research mode land
 // populated) — all as ONE undoable step whose undo removes the slides (the notes cascade with them). Driven
 // against the REAL History so the undo/redo semantics are exercised, not mocked.
@@ -17,7 +17,6 @@ function recorder() {
   const calls: Call[] = []
   const mutate: NarrateMutate = {
     addSlide: (a) => void calls.push({ fn: 'addSlide', args: a }),
-    setSlideDoc: (a) => void calls.push({ fn: 'setSlideDoc', args: a }),
     setSlideNotes: (a) => void calls.push({ fn: 'setSlideNotes', args: a }),
     deleteSlide: (a) => void calls.push({ fn: 'deleteSlide', args: a }),
   }
@@ -50,19 +49,17 @@ describe('applyNarrated', () => {
     const adds = calls
       .filter((c) => c.fn === 'addSlide')
       .map((c) => c.args as AddSlideArgs)
-    const docs = calls.filter((c) => c.fn === 'setSlideDoc')
     const notes = calls
       .filter((c) => c.fn === 'setSlideNotes')
       .map((c) => c.args as SetSlideNotesArgs)
 
     expect(adds).toHaveLength(2)
-    expect(docs).toHaveLength(2)
     // Notes are written ONLY for the slide that had narration (the empty-notes slide gets no row).
     expect(notes).toHaveLength(1)
 
-    // Every new slide is markdown-mode and on the right deck.
+    // Every new slide is born with a parseable primary component document on the right deck.
     for (const a of adds) {
-      expect(a.render_mode).toBe('markdown')
+      expect(JSON.parse(a.content ?? '').type).toBe('doc')
       expect(a.deckId).toBe(deckId)
     }
 

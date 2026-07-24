@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { deserializeDeck, serializeDeck } from './serialize'
 import type { DeckBundle } from './serialize'
 
-// A representative TipTap/ProseMirror doc (JSON-stringified) — the stored shape of a markdown slide.
 const DOC = JSON.stringify({
   type: 'doc',
   content: [
@@ -11,22 +10,15 @@ const DOC = JSON.stringify({
       attrs: { level: 1 },
       content: [{ type: 'text', text: 'Hello' }],
     },
-    {
-      type: 'paragraph',
-      content: [
-        { type: 'text', text: 'A ' },
-        { type: 'text', marks: [{ type: 'bold' }], text: 'doc' },
-        { type: 'text', text: ' slide.' },
-      ],
-    },
+    { type: 'paragraph', content: [{ type: 'text', text: 'Shared body' }] },
   ],
 })
 
-function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
-  const base: DeckBundle = {
+function bundle(): DeckBundle {
+  return {
     deck: {
       id: 'd1',
-      title: 'Markdown deck',
+      title: 'Unified deck',
       background: 'bg-ink',
       surface: 'bg-surf-ink',
       heading_font: 'Space Grotesk',
@@ -34,7 +26,6 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
       body_font: 'Lato',
       body_color: 'dddddd',
       text_align: 'center',
-      default_slide_mode: 'markdown',
       chosen_presenter: 'impress',
       canned_transition: 'zoom',
       custom_stylesheet: '',
@@ -43,6 +34,7 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
     slides: [
       {
         id: 's1',
+        body_component_id: 'body-1',
         x: 0,
         y: 0,
         z: 0,
@@ -52,91 +44,78 @@ function bundle(overrides?: Partial<DeckBundle>): DeckBundle {
         imp_scale: 3,
         background: '',
         surface: '',
-        doc: DOC,
-        render_mode: 'markdown',
         text_align: 'right',
       },
-      {
-        id: 's2',
-        x: 240,
-        y: 0,
-        z: 0,
-        rotate_x: 0,
-        rotate_y: 0,
-        rotate_z: 0,
-        imp_scale: 3,
-        background: '',
-        surface: '',
-        // a plain spatial slide (no markdown fields)
-      },
     ],
-    componentsBySlide: {},
+    componentsBySlide: {
+      s1: [
+        {
+          id: 'body-1',
+          slide_id: 's1',
+          kind: 'text',
+          z_order: 0,
+          x: 0,
+          y: 0,
+          scale_x: 1,
+          scale_y: 1,
+          scale_w: 1280,
+          scale_h: 720,
+          rotate: 0,
+          skew_x: 0,
+          skew_y: 0,
+          custom_classes: '',
+          doc: DOC,
+        },
+        {
+          id: 'caption-1',
+          slide_id: 's1',
+          kind: 'text',
+          z_order: 1,
+          x: 100,
+          y: 120,
+          scale_x: 1,
+          scale_y: 1,
+          scale_w: 360,
+          scale_h: 120,
+          rotate: 0,
+          skew_x: 0,
+          skew_y: 0,
+          custom_classes: '',
+          doc: DOC,
+        },
+      ],
+    },
     customBackgrounds: [],
   }
-  return { ...base, ...overrides }
 }
 
-describe('serialize round-trip with markdown + theme', () => {
-  it('carries deck default_slide_mode + text_align across a round-trip', () => {
-    const json = serializeDeck(bundle())
-    const back = deserializeDeck(json)
-    expect(back.default_slide_mode).toBe('markdown')
-    expect(back.text_align).toBe('center')
+describe('unified component serialization', () => {
+  it('round-trips the primary marker, TipTap content and freeform text', () => {
+    const raw = serializeDeck(bundle())
+    const rawComponents = (
+      raw.slides as Array<{ components: Array<Record<string, unknown>> }>
+    )[0].components
+
+    expect(rawComponents[0]).toMatchObject({ primary: true, content: DOC })
+    expect(rawComponents[1]).toMatchObject({ content: DOC })
+    expect(rawComponents[1].primary).toBeUndefined()
+
+    const restored = deserializeDeck(raw).slides[0].components
+    expect(restored[0]).toMatchObject({ primary: true, doc: DOC })
+    expect(restored[1]).toMatchObject({ primary: false, doc: DOC })
   })
 
-  it('carries a markdown slide (doc, mode, alignment) across a round-trip', () => {
-    const json = serializeDeck(bundle())
-    const back = deserializeDeck(json)
-    const s1 = back.slides[0]
-    expect(s1.render_mode).toBe('markdown')
-    expect(s1.doc).toBe(DOC)
-    expect(s1.text_align).toBe('right')
+  it('keeps deck and slide presentation styling around the component tree', () => {
+    const restored = deserializeDeck(serializeDeck(bundle()))
+
+    expect(restored.text_align).toBe('center')
+    expect(restored.slides[0].text_align).toBe('right')
+    expect(restored.canned_transition).toBe('zoom')
   })
 
-  it('preserves raw Markdown from legacy rows even when a doc is also present', () => {
-    const b = bundle()
-    b.slides[0].markdown = '# Original source\n\n| A | B |\n| - | - |'
-    const json = serializeDeck(b)
-    const raw = (json.slides as Array<Record<string, unknown>>)[0]
-    expect(raw.markdown).toBe('# Original source\n\n| A | B |\n| - | - |')
-    expect(deserializeDeck(json).slides[0].markdown).toBe(
-      '# Original source\n\n| A | B |\n| - | - |',
+  it('rejects files without a slide list', () => {
+    expect(() => deserializeDeck({ fileName: 'broken' })).toThrow(
+      /missing "slides"/,
     )
-  })
-
-  it('omits markdown fields for a spatial slide and restores them as empty', () => {
-    const json = serializeDeck(bundle())
-    const rawSlides = json.slides as Array<Record<string, unknown>>
-    // The spatial slide should not carry markdown-mode keys in the exported JSON.
-    expect(rawSlides[1].renderMode).toBeUndefined()
-    expect(rawSlides[1].doc).toBeUndefined()
-    expect(rawSlides[1].textAlign).toBeUndefined()
-
-    const back = deserializeDeck(json)
-    const s2 = back.slides[1]
-    expect(s2.render_mode).toBe('')
-    expect(s2.doc).toBe('')
-    expect(s2.text_align).toBe('')
-  })
-
-  it('still parses a legacy file with no markdown/theme-align keys', () => {
-    const legacy = {
-      fileName: 'legacy',
-      slides: [{ type: 'slide', x: 0, y: 0, components: [] }],
-    }
-    const back = deserializeDeck(legacy)
-    expect(back.default_slide_mode).toBe('')
-    expect(back.text_align).toBe('')
-    expect(back.slides[0].render_mode).toBe('')
-    expect(back.slides[0].doc).toBe('')
-  })
-
-  it('parses a legacy raw-Markdown-only slide without inventing a doc', () => {
-    const back = deserializeDeck({
-      fileName: 'legacy markdown',
-      slides: [{ type: 'slide', markdown: '# Still here', components: [] }],
-    })
-    expect(back.slides[0].markdown).toBe('# Still here')
-    expect(back.slides[0].doc).toBe('')
   })
 })

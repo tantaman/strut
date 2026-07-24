@@ -3,8 +3,8 @@
 // engine stores/serializes the object on the wire and hands it back parsed on read, so there is no
 // hand-rolled string codec anymore. Because the ISOMORPHIC mutator body runs the SAME code on both
 // tiers, the client's optimistic row and the server's authoritative row are built identically (no
-// byte-order concern — that was the old string codec's job). Geometry, z-order, custom_classes and
-// `fill` are real columns; everything below lives in `props`.
+// byte-order concern — that was the old string codec's job). Geometry, z-order, custom_classes,
+// `fill`, and rich-text `content` are real columns; everything below lives in `props`.
 
 export type ComponentType =
   | 'text'
@@ -26,13 +26,11 @@ export const COMPONENT_TYPES: readonly ComponentType[] = [
 // The per-type leaf payload. `fill` is intentionally NOT here (it's a column). Fields are optional so
 // a parsed blob spreads cleanly onto the flat in-memory component (see src/editor/types.ts).
 export type ComponentProps = Partial<{
-  // text — color/font_family may be '' meaning "inherit the deck theme default for text_type";
-  // text_type is 'heading' | 'body' ('' / absent = body, so legacy rows need no backfill).
-  text: string
+  // text style — the TipTap document itself lives in component.content so keystrokes update one
+  // narrow column instead of rewriting this JSON payload. Empty color/font means inherit the theme.
   size: number
   color: string
   font_family: string
-  text_type: string
   // image
   image_type: string
   // shape
@@ -59,11 +57,9 @@ export function componentProps(
   switch (type) {
     case 'text':
       return {
-        text: a.text as string | undefined,
         size: a.size as number | undefined,
         color: a.color as string | undefined,
         font_family: a.font_family as string | undefined,
-        text_type: a.text_type as string | undefined,
       }
     case 'image':
       return {

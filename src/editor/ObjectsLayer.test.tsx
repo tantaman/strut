@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { StaticComponent } from './ObjectsLayer'
 import type { AnyComponent, ComponentKind } from './types'
 
+const textDoc = JSON.stringify({
+  type: 'doc',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
+})
+
 function component(
   kind: ComponentKind,
   props: Partial<AnyComponent> = {},
@@ -70,7 +75,7 @@ describe('StaticComponent presentation embeds', () => {
     const html = renderToStaticMarkup(
       <StaticComponent
         c={component('text', {
-          text: 'Hello',
+          doc: textDoc,
           custom_classes: 'hero hero bad" onload=alert(1)',
         })}
         live={false}
@@ -78,5 +83,18 @@ describe('StaticComponent presentation embeds', () => {
     )
     expect(html).toContain('class="cmp cmp--text hero"')
     expect(html).not.toContain('onload=')
+  })
+
+  it('marks the slide body as the primary instance of the same text component', () => {
+    const html = renderToStaticMarkup(
+      <StaticComponent
+        c={component('text', { doc: textDoc })}
+        live={false}
+        primary
+      />,
+    )
+
+    expect(html).toContain('class="cmp cmp--text hero is-primary"')
+    expect(html).toContain('<p>Hello</p>')
   })
 })

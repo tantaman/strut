@@ -1,12 +1,17 @@
-import { describe, expect, it } from 'vitest'
-import type { SemanticEvent } from '@rindle/narrator'
+// @vitest-environment jsdom
+import { describe, expect, it, vi } from 'vitest'
 import { systemPrompt } from '../../server/chatAct'
-import type { SetSlideDocArgs } from '../../shared/app-def'
-import { buildDigest, slideGroundingText, slideText } from './aiArrange'
+import type { SetTextContentArgs } from '../../shared/app-def'
+import {
+  buildDigest,
+  primarySlideText,
+  slideGroundingText,
+  slideText,
+} from './aiArrange'
 import { applyBodyEdit } from './aiBody'
-import { digestChatNarration } from './chatNarration'
 import type { SlideDetail } from './deckDetail'
 import { History } from './history'
+import type { AnyComponent } from './types'
 
 function doc(text: string): string {
   return JSON.stringify({
@@ -15,127 +20,105 @@ function doc(text: string): string {
   })
 }
 
-function tiledSlide(): SlideDetail {
+function textComponent(
+  id: string,
+  text: string,
+  z_order: number,
+): AnyComponent {
   return {
-    id: 's1',
-    doc: doc('Primary story'),
-    layout: 'grid-4',
-    cells: JSON.stringify([
-      '',
-      doc('Supporting metric'),
-      '',
-      doc('Closing evidence'),
-      doc('Dormant fifth cell'),
-    ]),
-    pad: 'compact',
-    valign: 'bottom',
-  } as unknown as SlideDetail
-}
-
-function editEvent(
-  row: Record<string, unknown>,
-  old: Record<string, unknown>,
-): SemanticEvent {
-  return {
-    query: 'deckDetail',
-    phase: 'batch',
-    salience: 'info',
-    text: 'body changed',
-    resolved: {
-      aliasChain: ['slides'],
-      alias: 'slides',
-      op: 'edit',
-      row,
-      old,
-      levelSchema: { columns: [], relationships: [] },
-    } as unknown as SemanticEvent['resolved'],
+    id,
+    slide_id: 's1',
+    kind: 'text',
+    doc: doc(text),
+    size: 32,
+    color: '',
+    font_family: '',
+    z_order,
+    x: 0,
+    y: 0,
+    scale_x: 1,
+    scale_y: 1,
+    scale_w: 400,
+    scale_h: 160,
+    rotate: 0,
+    skew_x: 0,
+    skew_y: 0,
+    custom_classes: '',
   }
 }
 
-describe('multi-cell AI grounding', () => {
-  it('includes every populated visible cell in reading order', () => {
-    const slide = tiledSlide()
+const slide = {
+  id: 's1',
+  body_component_id: 's1:body',
+} as SlideDetail
+const components = [
+  textComponent('caption', 'Supporting metric', 2),
+  textComponent('s1:body', 'Primary story', 0),
+]
 
-    expect(slideText(slide)).toBe(
-      'Primary story Supporting metric Closing evidence',
+describe('canonical text-component AI grounding', () => {
+  it('grounds every text layer in spatial order', () => {
+    expect(slideText(components)).toBe('Primary story Supporting metric')
+    expect(slideGroundingText(components)).toBe(
+      'Primary story\nSupporting metric',
     )
-    expect(slideGroundingText(slide)).toBe(
-      'Cell 1: Primary story\n' +
-        'Cell 2: Supporting metric\n' +
-        'Cell 4: Closing evidence',
+    expect(buildDigest([slide], { s1: components })[0].text).toBe(
+      'Primary story Supporting metric',
     )
-    expect(slideGroundingText(slide)).not.toContain('Dormant fifth cell')
-    expect(buildDigest([slide])[0].text).toContain('Supporting metric')
   })
 
-  it('narrates sibling-cell edits into chat context', () => {
-    const before = tiledSlide()
-    const after = {
-      ...before,
-      cells: JSON.stringify(['', doc('Updated metric'), '', doc('Evidence')]),
-    }
-
-    const narration = digestChatNarration([editEvent(after, before)])
-
-    expect(narration).toContain('Cell 1: Primary story')
-    expect(narration).toContain('Cell 2: Updated metric')
-    expect(narration).toContain('Cell 4: Evidence')
+  it('grounds set_body in only the primary document it can replace', () => {
+    expect(primarySlideText(slide, components)).toBe('Primary story')
   })
 
-  it('narrates newly visible stored cells when the layout expands', () => {
-    const before = { ...tiledSlide(), layout: 'cols-2' }
-    const after = { ...before, layout: 'grid-4' }
-
-    const narration = digestChatNarration([editEvent(after, before)])
-
-    expect(narration).toContain('layout "cols-2" -> "grid-4"')
-    expect(narration).toContain('Cell 4: Closing evidence')
-  })
-
-  it('tells the model that set_body changes only Cell 1', () => {
+  it('describes set_body as the primary component, not a legacy cell model', () => {
     const prompt = systemPrompt(['Inter'])
-    expect(prompt).toContain('PRIMARY body (Cell 1)')
+    expect(prompt).toContain('primary rich-text layer')
     expect(prompt).toContain(
-      'Existing sibling cells, layout, padding, and alignment are preserved.',
+      'Positioned text and media layers remain untouched',
     )
+    expect(prompt).not.toContain('Cell 1')
+    expect(prompt).not.toContain('populated cells')
   })
 })
 
-describe('multi-cell set_body fidelity', () => {
-  it('rewrites only cell 0 and restores it as one undo', () => {
-    const slide = tiledSlide()
-    const original = {
-      cells: slide.cells,
-      layout: slide.layout,
-      pad: slide.pad,
-      valign: slide.valign,
-    }
-    const calls: SetSlideDocArgs[] = []
+describe('primary-component set_body fidelity', () => {
+  it('rewrites only the primary component and restores it as one undo', () => {
+    const calls: SetTextContentArgs[] = []
     const history = new History()
 
     expect(
       applyBodyEdit('s1', '# Revised primary', {
-        mutate: { setSlideDoc: (args) => calls.push(args) },
+        mutate: { setTextContent: (args) => calls.push(args) },
         history,
         slides: [slide],
+        componentsBySlide: { s1: components },
       }),
     ).toBe(true)
 
     expect(calls).toHaveLength(1)
-    expect(calls[0].id).toBe('s1')
-    expect(calls[0].doc).not.toBe(slide.doc)
-    expect(calls[0]).not.toHaveProperty('cells')
-    expect(calls[0]).not.toHaveProperty('layout')
-    expect(calls[0]).not.toHaveProperty('pad')
-    expect(calls[0]).not.toHaveProperty('valign')
-    expect(slide).toMatchObject(original)
+    expect(calls[0].id).toBe('s1:body')
+    expect(calls[0].content).not.toBe(components[1].doc)
     expect(history.undoLabel).toBe('AI edit')
 
     history.undo()
+    expect(calls[1]).toEqual({ id: 's1:body', content: components[1].doc })
+    expect(history.canUndo).toBe(false)
+  })
 
-    expect(calls).toHaveLength(2)
-    expect(calls[1]).toMatchObject({ id: 's1', doc: slide.doc })
-    expect(slide).toMatchObject(original)
+  it('refuses to invent an empty undo snapshot when the primary row is unavailable', () => {
+    const setTextContent = vi.fn()
+    const history = new History()
+
+    expect(
+      applyBodyEdit('s1', '# Revised primary', {
+        mutate: { setTextContent },
+        history,
+        slides: [slide],
+        componentsBySlide: {},
+      }),
+    ).toBe(false)
+    expect(setTextContent).not.toHaveBeenCalled()
     expect(history.canUndo).toBe(false)
   })
 })

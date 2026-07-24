@@ -25,7 +25,8 @@ import {
 import { useQuery } from '@rindle/react'
 import { newId } from '../config'
 import { slideNotesQuery } from '../../shared/queries'
-import { docText, slideGroundingText } from './aiArrange'
+import { docText, primarySlideText } from './aiArrange'
+import { gatherDeckBundle } from './deckIO'
 import { CHAT_EDIT_CONFLICT, dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
@@ -37,6 +38,7 @@ import type { StrutStore } from '../rindle/client'
 import type { ChatMessageRow } from '../rindle/localSchema'
 import type { ThemeDeck } from './aiTheme'
 import type { SlideDetail } from './deckDetail'
+import type { AnyComponent } from './types'
 import type { DeckChatContext } from './chatNarration'
 import type { ChatRequest, ChatTurn } from '../../shared/chat'
 import { appPath } from '../../shared/appPath'
@@ -600,10 +602,11 @@ export interface ChatEditContext {
 }
 
 /** Build the action grounding: the deck's CURRENT resolved theme (so "make it warmer" is grounded) and the
- *  active slide's FULL body text (so a body rewrite sees the whole slide, not the 240-char digest). */
+ *  active slide's primary document (the exact layer `set_body` can rewrite). */
 function buildActGrounding(
   deck: ThemeDeck | null,
   activeSlide: SlideDetail | null,
+  activeComponents: readonly AnyComponent[],
   notesText = '',
 ): { theme?: ChatActTheme; activeSlide?: ChatActSlide } {
   const out: { theme?: ChatActTheme; activeSlide?: ChatActSlide } = {}
@@ -623,12 +626,86 @@ function buildActGrounding(
   if (activeSlide) {
     out.activeSlide = {
       id: activeSlide.id,
-      text: slideGroundingText(activeSlide),
+      text: primarySlideText(activeSlide, activeComponents),
     }
     // Attach the slide's research notes so a set_body rewrite can be grounded in the author's evidence.
     if (notesText) out.activeSlide.notes = notesText
   }
   return out
+}
+
+export interface PrimaryContentVersion {
+  componentId: string
+  content: string
+}
+
+/** Immutable primary-document versions used to keep a streamed rewrite from overwriting collaboration. */
+export function primaryContentVersions(
+  slides: readonly SlideDetail[],
+  componentsBySlide: Readonly<Record<string, readonly AnyComponent[]>>,
+): ReadonlyMap<string, PrimaryContentVersion> {
+  const versions = new Map<string, PrimaryContentVersion>()
+  for (const slide of slides) {
+    const componentId = slide.body_component_id
+    const primary = (componentsBySlide[slide.id] ?? []).find(
+      (component) => component.id === componentId && component.kind === 'text',
+    )
+    if (primary && typeof primary.doc === 'string')
+      versions.set(slide.id, { componentId, content: primary.doc })
+  }
+  return versions
+}
+
+function createdSlideRefs(actions: readonly ChatAction[]): Set<string> {
+  return new Set(
+    actions.flatMap((action) =>
+      action.kind === 'create_slide' && action.ref ? [action.ref] : [],
+    ),
+  )
+}
+
+/** Whether this turn rewrites a slide that existed before the turn (rather than a same-turn ref). */
+export function needsPrimaryContentValidation(
+  actions: readonly ChatAction[],
+): boolean {
+  const refs = createdSlideRefs(actions)
+  return actions.some(
+    (action) => action.kind === 'set_body' && !refs.has(action.slideId),
+  )
+}
+
+/** Compare only the existing primary documents `set_body` can mutate; unrelated collaboration is safe. */
+export function primaryContentIsCurrent(
+  actions: readonly ChatAction[],
+  captured: ReadonlyMap<string, PrimaryContentVersion>,
+  current: ReadonlyMap<string, PrimaryContentVersion>,
+): boolean {
+  const refs = createdSlideRefs(actions)
+  for (const action of actions) {
+    if (action.kind !== 'set_body' || refs.has(action.slideId)) continue
+    const before = captured.get(action.slideId)
+    const now = current.get(action.slideId)
+    if (
+      !before ||
+      !now ||
+      before.componentId !== now.componentId ||
+      before.content !== now.content
+    )
+      return false
+  }
+  return true
+}
+
+/** Acquire the synchronous gap before the local streaming row makes reactive `busy` true. */
+export function beginChatTurn(gate: { current: boolean }): (() => void) | null {
+  if (gate.current) return null
+  gate.current = true
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    gate.current = false
+  }
 }
 
 /** Read + drive the advisor thread for `deckId`, grounded in the live `slides`. Reads the memory-only
@@ -682,6 +759,8 @@ export function useChat(
     label: string
     revision: number
   } | null>(null)
+  const sendInFlightRef = useRef(false)
+  const [sendStarting, setSendStarting] = useState(false)
   const historyRevision = useSyncExternalStore(
     history.subscribe,
     () => history.revision,
@@ -715,64 +794,122 @@ export function useChat(
   )
   const messages = useSyncExternalStore(subscribe, getSnapshot, () => EMPTY)
 
-  const busy = messages.some((m) => m.status === 'streaming')
+  const busy =
+    sendStarting || messages.some((message) => message.status === 'streaming')
 
   const send = useCallback(
     (text: string, references: readonly File[] = []) => {
       if (!store || busy || !canEdit || !text.trim()) return
-      // History = only settled turns — an in-flight/errored assistant row isn't real model context.
-      const convo: ChatTurn[] = messages
-        .filter((m) => m.status === 'done')
-        .map((m) => ({ role: m.role, content: m.content }))
-      const grounding = buildActGrounding(deck, activeSlide, activeNotesText)
-      const contextText = deckContext?.take() ?? ''
-      // The dispatcher gets the LIVE SlideDetail[] (for applyPlan/applyGenerated/applyBodyEdit); the
-      // request carries append-only deck narration plus a slide-id allowlist.
-      const dctx: DispatchCtx = {
-        deckId,
-        slides,
-        deck,
-        mutate,
-        history,
-        activeSlideId: activeSlide?.id ?? null,
-      }
+      const finishTurn = beginChatTurn(sendInFlightRef)
+      if (!finishTurn) return
+      setSendStarting(true)
       const sentAt = history.revision
       const sentEditVersion = editVersionRef.current.version
       const historyIsCurrent = () => history.isCurrent(sentAt)
-      dctx.isRequestCurrent = historyIsCurrent
-      let appliedAt: number | null = null
       setUndoCandidate(null)
-      track('chat:sent', { turn: convo.length })
-      notifyUsageChanged() // a chat turn spends an app-paid unit → refresh the usage ring
-      void sendChatAction(
-        store,
-        {
-          deckId,
-          deckContext: contextText,
-          slideIds: slides.map((s) => s.id),
-          history: convo,
-          theme: grounding.theme,
-          activeSlide: grounding.activeSlide,
-        },
-        text,
-        async (actions) => {
-          const outcome = await dispatchActions(actions, dctx)
-          if (outcome.ok) appliedAt = history.revision
-          return outcome
-        },
-        {
-          isRequestCurrent: () =>
-            historyIsCurrent() &&
-            editVersionRef.current.version === sentEditVersion,
-          references,
-        },
-      ).then((tip) => {
-        if (!tip) return
-        track('chat:edit', { slides: slides.length })
-        if (appliedAt !== null && history.isCurrent(appliedAt)) {
-          setUndoCandidate({ label: tip.label, revision: appliedAt })
+      void (async () => {
+        try {
+          // Materialize the canonical component documents at send time. Fragment refs deliberately hide
+          // row data; this one-shot bundle includes offscreen slides without mounting hidden React readers.
+          const bundle = await gatherDeckBundle(store, deckId).catch(() => null)
+          if (!historyIsCurrent()) return
+          const liveSlides: SlideDetail[] = bundle
+            ? (bundle.slides as SlideDetail[])
+            : slides
+          const componentsBySlide = bundle?.componentsBySlide ?? {}
+          const capturedPrimary = primaryContentVersions(
+            liveSlides,
+            componentsBySlide,
+          )
+          const liveActive = activeSlide
+            ? (liveSlides.find((slide) => slide.id === activeSlide.id) ??
+              activeSlide)
+            : null
+          const grounding = buildActGrounding(
+            deck,
+            liveActive,
+            liveActive ? (componentsBySlide[liveActive.id] ?? []) : [],
+            activeNotesText,
+          )
+          const convo: ChatTurn[] = messages
+            .filter((message) => message.status === 'done')
+            .map((message) => ({
+              role: message.role,
+              content: message.content,
+            }))
+          const dctx: DispatchCtx = {
+            deckId,
+            slides: liveSlides,
+            componentsBySlide,
+            deck,
+            mutate,
+            history,
+            activeSlideId: liveActive?.id ?? null,
+            isRequestCurrent: historyIsCurrent,
+          }
+          const applied = { revision: null as number | null }
+          track('chat:sent', { turn: convo.length })
+          notifyUsageChanged()
+          const tip = await sendChatAction(
+            store,
+            {
+              deckId,
+              deckContext: deckContext?.take() ?? '',
+              slideIds: liveSlides.map((slide) => slide.id),
+              history: convo,
+              theme: grounding.theme,
+              activeSlide: grounding.activeSlide,
+            },
+            text,
+            async (actions) => {
+              // Without the canonical component snapshot there is no trustworthy before-value for undo.
+              // Advice may still stream, but a mutation waits for a fresh turn once the bundle is readable.
+              if (!bundle)
+                return {
+                  ok: false,
+                  error:
+                    'The deck is still loading. Try that edit again in a moment.',
+                }
+              if (needsPrimaryContentValidation(actions)) {
+                const fresh = await gatherDeckBundle(store, deckId).catch(
+                  () => null,
+                )
+                if (
+                  !fresh ||
+                  !historyIsCurrent() ||
+                  editVersionRef.current.version !== sentEditVersion ||
+                  !primaryContentIsCurrent(
+                    actions,
+                    capturedPrimary,
+                    primaryContentVersions(
+                      fresh.slides as SlideDetail[],
+                      fresh.componentsBySlide,
+                    ),
+                  )
+                )
+                  return { ok: false, error: CHAT_EDIT_CONFLICT }
+              }
+              const outcome = await dispatchActions(actions, dctx)
+              if (outcome.ok) applied.revision = history.revision
+              return outcome
+            },
+            {
+              isRequestCurrent: () =>
+                historyIsCurrent() &&
+                editVersionRef.current.version === sentEditVersion,
+              references,
+            },
+          )
+          if (!tip) return
+          track('chat:edit', { slides: liveSlides.length })
+          const revision = applied.revision
+          if (revision !== null && history.isCurrent(revision))
+            setUndoCandidate({ label: tip.label, revision })
+        } finally {
+          finishTurn()
+          setSendStarting(false)
         }
-      })
+      })()
     },
     [
       store,

@@ -25,48 +25,72 @@ function event(
 }
 
 describe('digestChatNarration', () => {
-  it('coalesces buffered slide-body edits to the last body update', () => {
+  const doc = (text: string) =>
+    JSON.stringify({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+    })
+
+  const textRow = (text: string) => ({
+    id: 'c1',
+    slide_id: 's1',
+    type: 'text',
+    content: doc(text),
+    props: {},
+  })
+
+  it('coalesces streamed component-content edits to the last document', () => {
     const out = digestChatNarration([
-      event({ id: 's1', doc: '', markdown: 'a' }, { id: 's1', doc: '', markdown: '' }, 'body=a'),
-      event({ id: 's1', doc: '', markdown: 'ab' }, { id: 's1', doc: '', markdown: 'a' }, 'body=ab'),
-      event({ id: 's1', doc: '', markdown: 'abc' }, { id: 's1', doc: '', markdown: 'ab' }, 'body=abc'),
+      event(textRow('a'), textRow(''), 'text=a', ['slides', 'components']),
+      event(textRow('ab'), textRow('a'), 'text=ab', [
+        'slides',
+        'components',
+      ]),
+      event(textRow('abc'), textRow('ab'), 'text=abc', [
+        'slides',
+        'components',
+      ]),
     ])
 
     const lines = out.split('\n')
-    expect(lines).toContain('[info] Slide s1 updated: body="abc".')
-    expect(lines).not.toContain('[info] Slide s1 updated: body="a".')
-    expect(lines).not.toContain('[info] Slide s1 updated: body="ab".')
+    expect(lines).toContain(
+      '[info] Component c1 on slide s1 updated: text="abc".',
+    )
+    expect(lines.join('\n')).not.toContain('text="a".')
+    expect(lines.join('\n')).not.toContain('text="ab".')
   })
 
-  it('does not coalesce a slide body edit with a separate transform edit', () => {
+  it('does not coalesce component content with a separate slide transform', () => {
     const out = digestChatNarration([
-      event({ id: 's1', doc: '', markdown: 'a' }, { id: 's1', doc: '', markdown: '' }, 'body=a'),
-      event({ id: 's1', x: 10, doc: '', markdown: 'a' }, { id: 's1', x: 0, doc: '', markdown: 'a' }, 'x=10'),
+      event(textRow('a'), textRow(''), 'text=a', ['slides', 'components']),
+      event({ id: 's1', x: 10 }, { id: 's1', x: 0 }, 'x=10'),
     ])
 
-    expect(out).toContain('body="a"')
+    expect(out).toContain('text="a"')
     expect(out).toContain('x 0 -> 10')
   })
 
   it('coalesces high-frequency component prop edits independently', () => {
     const out = digestChatNarration([
       event(
-        { id: 'c1', props: { text: 'h' } },
-        { id: 'c1', props: { text: '' } },
-        'text=h',
+        { id: 'c1', slide_id: 's1', props: { size: 24 } },
+        { id: 'c1', slide_id: 's1', props: { size: 16 } },
+        'size=24',
         ['slides', 'components'],
       ),
       event(
-        { id: 'c1', props: { text: 'hi' } },
-        { id: 'c1', props: { text: 'h' } },
-        'text=hi',
+        { id: 'c1', slide_id: 's1', props: { size: 32 } },
+        { id: 'c1', slide_id: 's1', props: { size: 24 } },
+        'size=32',
         ['slides', 'components'],
       ),
     ])
 
     const lines = out.split('\n')
-    expect(lines).toContain('[info] Component c1 on slide  updated: props={text="hi"}.')
-    expect(lines).not.toContain('[info] Component c1 on slide  updated: props={text="h"}.')
+    expect(lines).toContain(
+      '[info] Component c1 on slide s1 updated: props={size=32}.',
+    )
+    expect(lines.join('\n')).not.toContain('props={size=24}')
   })
 
   it('renders coalesced edits from the first old row to the latest row', () => {

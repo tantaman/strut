@@ -2,8 +2,7 @@ import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keysBetween } from '../lib/order'
 import type { StrutApp } from '../rindle/client'
 import { markdownToDoc } from './aiGenerate'
-import { slideCellTexts } from './aiArrange'
-import type { SlideBodyTextFields } from './aiArrange'
+import { slideText } from './aiArrange'
 import { gatherDeckBundle } from './deckIO'
 import type { AnyComponent } from './types'
 import type {
@@ -12,7 +11,6 @@ import type {
   VariantSourceSlide,
 } from '../../shared/variant'
 import { appPath } from '../../shared/appPath'
-import { DEFAULT_SLIDE_MODE } from '../../shared/app-def'
 
 export interface DeckVisibilitySeed {
   visibility: 'private' | 'public-read'
@@ -27,29 +25,12 @@ export interface CreateDeckVariantArgs {
   initialVisibility: DeckVisibilitySeed
 }
 
-function componentText(components: AnyComponent[]): string {
-  return components
-    .map((c) => (c.kind === 'text' ? (c.text ?? '') : ''))
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-/** Source text for one variant slide: visible body cells in layout reading order, followed by any
- *  positioned text. Hidden retained cells stay out of the prompt until their layout makes them visible. */
+/** Source text for one variant slide comes from the same canonical text layers every editor surface uses. */
 export function variantSlideText(
-  slide: SlideBodyTextFields,
+  _slide: unknown,
   components: AnyComponent[],
 ): string {
-  return [
-    ...slideCellTexts(slide).map((cell) => cell.text),
-    componentText(components),
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return slideText(components)
 }
 
 function sourceSlides(
@@ -132,7 +113,6 @@ export async function createDeckVariant({
     body_font: source.deck.body_font ?? '',
     body_color: source.deck.body_color ?? '',
     text_align: source.deck.text_align ?? '',
-    default_slide_mode: DEFAULT_SLIDE_MODE,
     custom_stylesheet: source.deck.custom_stylesheet,
     chosen_presenter: source.deck.chosen_presenter,
     canned_transition: source.deck.canned_transition,
@@ -156,10 +136,9 @@ export async function createDeckVariant({
       sort: keys[i],
       x: i * OVERVIEW_CARD_GAP,
       y: 0,
-      render_mode: DEFAULT_SLIDE_MODE,
+      content: markdownToDoc(slide.markdown),
       now,
     })
-    mutate.setSlideDoc({ id: slideId, doc: markdownToDoc(slide.markdown), now })
   }
 
   return deckId

@@ -71,8 +71,8 @@ describe('clampGenerateRequest', () => {
   })
 })
 
-// markdownToDoc is the one piece of real work on the apply path: markdown → sanitized HTML → ProseMirror
-// JSON via the shared schema (markdown-mode slides render from `doc`, not the raw markdown column).
+// markdownToDoc is the one piece of real work on the apply path: Markdown → sanitized HTML →
+// ProseMirror JSON for the canonical primary text component.
 describe('markdownToDoc', () => {
   it('produces a parseable TipTap doc with the expected structure', () => {
     const doc = JSON.parse(markdownToDoc('# Title\n\n- one\n- two'))

@@ -177,11 +177,10 @@ function normalizeSpec(v: unknown): ComponentClipboardSpec | null {
   copyOptionalString(v, base, 'fill')
   switch (base.kind) {
     case 'text':
-      copyOptionalString(v, base, 'text')
+      copyOptionalString(v, base, 'doc')
       copyOptionalNumber(v, base, 'size')
       copyOptionalString(v, base, 'color')
       copyOptionalString(v, base, 'font_family')
-      copyOptionalString(v, base, 'text_type')
       break
     case 'image':
       copyOptionalString(v, base, 'src')

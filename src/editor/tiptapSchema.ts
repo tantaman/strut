@@ -1,8 +1,9 @@
-// The single TipTap/ProseMirror schema for slide bodies — the ONE place the node/mark set is declared.
+// The single TipTap/ProseMirror schema for every rich-text component — the ONE place the node/mark set
+// is declared.
 // Both the direct editor (`useEditor`) and the read-only renderer (tiptapDoc
 // `docToHtml` via the static renderer) build from this same array, so what you edit and what a
-// thumbnail/export shows can't drift. Because a slide's `doc` is now stored JSON, this list is a DATA
-// CONTRACT: adding/removing a node type is effectively a schema change for already-saved slides.
+// thumbnail/export shows can't drift. Because component content is stored as TipTap JSON, this list is
+// a DATA CONTRACT: adding/removing a node type is effectively a schema change for saved text boxes.
 //
 // Deliberately React-free and DOM-free (it only pulls `@tiptap/starter-kit`), so the render path stays
 // usable from the pure impress export and during SSR. The editor imports `@tiptap/react` separately.
@@ -26,8 +27,8 @@ export const strutExtensions: Extensions = [
       HTMLAttributes: { rel: 'noopener nofollow', target: '_blank' },
     },
   }),
-  // Per-selection inline formatting so markdown slides author like a document rather than carrying one
-  // slide-wide setting. TextStyle is the base `<span style>` mark that Color + FontFamily hang their
+  // Per-selection inline formatting lets every text box author like a document rather than carrying one
+  // box-wide setting. TextStyle is the base `<span style>` mark that Color + FontFamily hang their
   // attributes on; TextAlign writes a per-block `text-align` (only for the block types listed, and only
   // when set — an unaligned block emits no inline style, so it still inherits the deck's
   // `--strut-text-align` default). All four are pure schema/command defs (no DOM, no React), so the

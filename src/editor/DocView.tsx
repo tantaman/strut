@@ -6,13 +6,14 @@
 // back = what you (and the AI) know. Notes load lazily on first flip; the back keeps the card's exact
 // geometry (long notes scroll inside it) so the flip never disturbs the virtualizer's exact row math.
 //
-// Cards stay SLIDE-SHAPED (1280×720 scaled to the column, not reflowed into prose): the fixed geometry is
-// the contract LockedObjects, the spatial components and the impress export all depend on, and it keeps
-// what you edit identical to what renders. It also makes this virtualizer simpler than Research's —
+// Cards stay SLIDE-SHAPED (1280×720 scaled to the column, not reflowed into prose): the primary body is
+// a real full-slide text component, so the row edited here is the same row precision, Play and export
+// render. It also makes this virtualizer simpler than Research's —
 // every row is exactly `cardH + DOC_GAP`, so `estimateSize` is EXACT and nothing needs measureElement.
 //
-// Bodies edit directly on the card. Positioned objects open in a contextual focused canvas layered over
-// this same editor; it is contextual, and closing it returns to the exact scroll position.
+// The primary text component edits directly on the card; every other component is visible but inert.
+// Precision opens over this same editor and suspends the card's TipTap instance while covered, so there
+// is always exactly one writer for the component. Closing it restores the exact scroll position.
 //
 // The coupling to "one active slide" is resolved here rather than pushed onto the rest of the editor:
 // AI actions and contextual tools act on `?slide=` — so the card under the viewport center drives it
@@ -20,9 +21,9 @@
 // Present/Esc round-trip intact. Formatting needs no such hoisting: it rides the keys (markdown
 // input rules + the `/` menu), so N cards mean N editors and zero bars.
 //
-// Windowing unmounts offscreen editors. Every keystroke streams through `setSlideDoc.folded` (keyed per
-// slide), and the destroy boundary records the same one-undo edit session as blur, so a remount re-seeds
-// from the latest synced doc without losing history.
+// Windowing unmounts offscreen editors. Every keystroke streams through `setTextContent.folded` (keyed
+// per component), and the destroy boundary records the same one-undo edit session as blur, so a remount
+// re-seeds from the latest synced document without losing history.
 
 import {
   useCallback,
@@ -32,7 +33,6 @@ import {
   useState,
 } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { SlideBodyEditors } from './SlideBodyEditors'
 import type { ReactNode } from 'react'
 import { NotebookPen, Plus, Shapes } from 'lucide-react'
 import { useQuery, useQueryStatus } from '@rindle/react'
@@ -44,15 +44,21 @@ import { useEditor } from './EditorState'
 import { useHistory } from './UndoProvider'
 import { useAddSlide } from './useAddSlide'
 import { WellDock } from './WellDock'
-import { useDropImage, DropCellHighlight, DocImageRemovers } from './imageDrop'
-import { LayoutPicker } from './LayoutPicker'
+import { useDropImage, DropImageHighlight, DocImageRemovers } from './imageDrop'
 import { SlideNotesEditor } from './SlideNotesEditor'
 import { SlideView } from './SlideView'
-import { LockedObjects } from './ObjectsLayer'
+import { StaticComponent } from './ObjectsLayer'
 import { UserStyle } from './CssEditor'
-import { BackgroundImageLayer, themeVars } from './render'
+import { BackgroundImageLayer, cmpStyle, themeVars } from './render'
 import { resolveBackground, resolveBackgroundImage } from './types'
 import type { DeckRoot, SlideDetail } from './deckDetail'
+import { TextComponentEditor } from './TextComponentEditor'
+import { componentClassName } from './componentClasses'
+import {
+  ComponentDataReader,
+  componentRefKey,
+  mergeComponentRefs,
+} from './componentFragments'
 
 // The gap between two cards — also the hit area of the seam inserter that lives in it. Wide enough that
 // the 24px "+" pill sits with clear air above and below, not flush against either neighbor.
@@ -64,10 +70,14 @@ export function DocView({
   slides,
   deck,
   onEditObjects,
+  editingSuspended = false,
 }: {
   slides: SlideDetail[]
   deck: DeckRoot | null
   onEditObjects: (slideId: string) => void
+  /** Precision stays mounted over this column to preserve scroll position. Suspend its TipTap writers
+   *  while covered so the precision canvas is the component's only live editor. */
+  editingSuspended?: boolean
 }) {
   const editor = useEditor()
   const mutate = useMutate()
@@ -373,6 +383,7 @@ export function DocView({
                   onToggleFlip={toggleFlip}
                   onFocusEditor={onFocusEditor}
                   onEditObjects={onEditObjects}
+                  bodyEditing={!editingSuspended}
                 />
               </div>
             )
@@ -407,6 +418,7 @@ function DocCard({
   onToggleFlip,
   onFocusEditor,
   onEditObjects,
+  bodyEditing,
 }: {
   slide: SlideDetail
   deck: DeckRoot | null
@@ -417,14 +429,14 @@ function DocCard({
   onToggleFlip: (id: string) => void
   onFocusEditor: (slideId: string) => void
   onEditObjects: (slideId: string) => void
+  bodyEditing: boolean
 }) {
   const editor = useEditor()
   const active = slide.id === editor.activeSlideId
-  // Every owned card is directly writable. `render_mode` remains readable for old deck/export data,
-  // but it no longer splits the product into body-vs-object editors: body text lives here and positioned
-  // objects are always reachable through the contextual focus affordance.
+  // Every owned card's primary text component is directly writable; precision reveals the same component
+  // row's frame alongside the rest of the positioned objects.
   const editable = editor.canEdit
-  const drop = useDropImage(slide, deck)
+  const drop = useDropImage(slide)
   // The back mounts on the FIRST flip and then stays while the card lives: mounting is what starts
   // the notes query (so a deck you never flip never loads notes), and staying is what keeps the
   // flip-back animation from rotating an empty face. Windowing resets this with the card — fine,
@@ -441,11 +453,11 @@ function DocCard({
         'doc__card' +
         (active ? ' is-active' : '') +
         (flipped ? ' is-flipped' : '') +
-        (drop.cellIndex != null ? ' is-dropping' : '')
+        (drop.preview ? ' is-dropping' : '')
       }
       style={{ width: colW, height: cardH }}
-      // Drop an image and it becomes an image object snapped to the cell it landed on (fills an empty
-      // cell, or lands as a movable object on one that already has text). The highlight shows the target.
+      // Drop an image and it becomes an aspect-correct object at the pointer. The preview is the exact
+      // box that precision will reveal.
       onDragOver={dropActive ? drop.onDragOver : undefined}
       onDragLeave={dropActive ? drop.onDragLeave : undefined}
       onDrop={dropActive ? drop.onDrop : undefined}
@@ -458,6 +470,7 @@ function DocCard({
               deck={deck}
               scale={scale}
               onFocusEditor={onFocusEditor}
+              bodyEditing={bodyEditing}
             />
           ) : (
             // Viewers get the exact composited render while owners use the direct body editor above.
@@ -468,20 +481,12 @@ function DocCard({
               <SlideView slide={slide} deck={deck} width={colW} />
             </button>
           )}
-          {/* The layout picker + empty-cell outlines ride above the scaled canvas, in the card's own
-              coordinate space, so the button stays a constant size at any column width. */}
-          {editable && <LayoutPicker slide={slide} deck={deck} scale={scale} />}
           {/* Hover-× removes a dropped photo in place as one undoable command. */}
           {editable && !flipped && (
             <DocImageRemovers slide={slide} scale={scale} />
           )}
           {dropActive && (
-            <DropCellHighlight
-              slide={slide}
-              deck={deck}
-              index={drop.cellIndex}
-              scale={scale}
-            />
+            <DropImageHighlight rect={drop.preview} scale={scale} />
           )}
           {drop.busy && <div className="doc__drop-busy">Uploading image…</div>}
         </div>
@@ -558,18 +563,67 @@ function DocCardBody({
   deck,
   scale,
   onFocusEditor,
+  bodyEditing,
 }: {
   slide: SlideDetail
   deck: DeckRoot | null
   scale: number
   onFocusEditor: (slideId: string) => void
+  bodyEditing: boolean
 }) {
   return (
     <DocCanvas slide={slide} deck={deck} scale={scale}>
-      <SlideBodyEditors slide={slide} onFocusEditor={onFocusEditor} />
-      {/* The slide's objects, composited on top but inert — so body text is placed in the real layout. */}
-      <LockedObjects slide={slide} />
+      <DocComponentLayer
+        slide={slide}
+        bodyEditing={bodyEditing}
+        onFocusEditor={onFocusEditor}
+      />
     </DocCanvas>
+  )
+}
+
+/** One component stack powers both editor depths. Doc-first gives only the primary text component a
+ *  caret; every other component remains a faithful inert rendering until precision is opened. */
+function DocComponentLayer({
+  slide,
+  bodyEditing,
+  onFocusEditor,
+}: {
+  slide: SlideDetail
+  bodyEditing: boolean
+  onFocusEditor: (slideId: string) => void
+}) {
+  const components = mergeComponentRefs(slide)
+  return (
+    <div className="doc__components">
+      {components.map((component) => (
+        <ComponentDataReader
+          key={componentRefKey(component)}
+          component={component}
+        >
+          {(c) => {
+            const primary = c.id === slide.body_component_id
+            if (!primary || c.kind !== 'text' || !bodyEditing)
+              return <StaticComponent c={c} primary={primary} />
+            return (
+              <div
+                className={componentClassName(c, [
+                  'is-primary',
+                  'is-doc-editable',
+                ])}
+                style={cmpStyle(c)}
+              >
+                <TextComponentEditor
+                  component={c}
+                  primary
+                  onFocus={() => onFocusEditor(slide.id)}
+                />
+              </div>
+            )
+          }}
+        </ComponentDataReader>
+      ))}
+    </div>
   )
 }
 

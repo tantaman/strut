@@ -14,6 +14,19 @@ describe('component custom classes', () => {
     ).toEqual(['hero'])
   })
 
+  it('reserves renderer state tokens for trusted runtime state', () => {
+    expect(
+      customClassTokens(
+        'hero is-primary is-selected is-editing is-doc-editable',
+      ),
+    ).toEqual(['hero'])
+    expect(
+      componentClassName({ kind: 'text', custom_classes: 'hero is-primary' }, [
+        'is-primary',
+      ]),
+    ).toBe('cmp cmp--text hero is-primary')
+  })
+
   it('combines stable kind, custom, and transient state classes', () => {
     expect(
       componentClassName(

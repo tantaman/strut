@@ -1,17 +1,9 @@
-// The "objects" layer: a slide's positioned spatial components rendered read-only (no selection, no
-// handles). Two consumers share it — the read surfaces (SlideView thumbnails/overview/presenter/share)
-// and the editor's LOCKED overlay, shown when the Body layer is the one being edited. The editor's
-// INTERACTIVE objects (drag/resize/rotate) live in Stage; this is only the inert rendering.
+// A slide's positioned components rendered read-only (no selection or handles). Read surfaces use this
+// component; precision editing's interactive stack lives in Stage.
 
 import { cmpStyle, renderInner } from './render'
 import { componentClassName } from './componentClasses'
 import type { AnyComponent } from './types'
-import type { SlideDetail } from './deckDetail'
-import {
-  ComponentDataReader,
-  componentRefKey,
-  mergeComponentRefs,
-} from './componentFragments'
 
 /** One component's pure visual box — `cmpStyle` + `renderInner`, minus interaction. `live=false` (read
  *  surfaces) shows video/web frames as black placeholders so a thumbnail never spins up a live embed;
@@ -23,13 +15,19 @@ export function StaticComponent({
   c,
   live = true,
   present = false,
+  primary = false,
 }: {
   c: AnyComponent
   live?: boolean
   present?: boolean
+  /** The slide's doc-first text component. It shares the same geometry/content as precision editing. */
+  primary?: boolean
 }) {
   return (
-    <div className={componentClassName(c)} style={cmpStyle(c)}>
+    <div
+      className={componentClassName(c, primary ? ['is-primary'] : [])}
+      style={cmpStyle(c)}
+    >
       {c.kind === 'artifact' ? (
         live || present ? (
           renderInner(c, { interactive: present })
@@ -61,27 +59,6 @@ function ArtifactPoster() {
       }}
     >
       ▶ runnable
-    </div>
-  )
-}
-
-/** The locked objects overlay for the editor's Body-edit layer: the slide's components rendered on top
- *  of the markdown but inert (pointer-events:none via `.slide-locked-layer`) so clicks fall through to
- *  the text being edited. Renders nothing when the slide has no components (so a pure-markdown slide is
- *  unchanged). */
-export function LockedObjects({ slide }: { slide: SlideDetail }) {
-  const components = mergeComponentRefs(slide)
-  if (components.length === 0) return null
-  return (
-    <div className="slide-locked-layer">
-      {components.map((component) => (
-        <ComponentDataReader
-          key={componentRefKey(component)}
-          component={component}
-        >
-          {(c) => <StaticComponent c={c} />}
-        </ComponentDataReader>
-      ))}
     </div>
   )
 }

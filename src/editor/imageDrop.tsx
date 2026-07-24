@@ -1,16 +1,9 @@
-// Drop an image FILE onto a slide and it becomes an image OBJECT (a `component`, so positioning/resizing
-// stay in our hands), snapped to the layout CELL it landed on:
-//   • empty cell  → the image FILLS the cell (box = cell rect, object-fit: cover). Dropping a photo into
-//                   a blank column is "image beside text" with zero manual sizing; a blank full slide
-//                   becomes a full-bleed hero.
-//   • occupied cell (has body text) → a modest, aspect-correct object lands AT the drop point instead, so
-//                   it never buries the text you already wrote. One rule, no single-vs-multi special case.
-//
-// (Supersedes the old drop-sets-a-half-bleed-BACKGROUND gesture — images are objects now. Structured
-// splits are the LayoutPicker's job; this composes with whatever layout the slide has.)
+// Drop an image FILE onto a slide and it becomes an aspect-correct positioned object at the pointer.
+// There is no parallel body/layout occupancy model: doc-first and precision reveal the same image box,
+// and the user can refine it spatially from there.
 
 import { useState } from 'react'
-import { newId, SLIDE_W } from '../config'
+import { newId, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import { reinsertComponent, zNow } from './componentOps'
@@ -21,12 +14,8 @@ import {
   mergeComponentRefs,
 } from './componentFragments'
 import { uploadImage } from './upload'
-import { bodyCells, cellDocAt } from './types'
-import { isDocEmpty } from './tiptapDoc'
-import type { AnyComponent, Rect, DeckPresentationFields } from './types'
+import type { AnyComponent, Rect } from './types'
 import type { SlideDetail } from './deckDetail'
-
-type Deck = DeckPresentationFields | null | undefined
 
 const hasImageFile = (dt: DataTransfer | null) =>
   !!dt && Array.from(dt.items).some((i) => i.type.startsWith('image/'))
@@ -36,9 +25,7 @@ const hasImageFile = (dt: DataTransfer | null) =>
 // card (Doc). Read synchronously (before any await) — React nulls the event after the handler returns.
 function canvasHit(
   e: React.DragEvent<HTMLElement>,
-  slide: SlideDetail,
-  deck: Deck,
-): { cx: number; cy: number; idx: number; cells: Rect[] } | null {
+): { cx: number; cy: number } | null {
   const el = e.currentTarget
   const canvas = el.classList.contains('slide-canvas')
     ? el
@@ -49,31 +36,26 @@ function canvasHit(
   const scale = r.width / SLIDE_W
   const cx = (e.clientX - r.left) / scale
   const cy = (e.clientY - r.top) / scale
-  const cells = bodyCells(slide, deck)
-  let idx = cells.findIndex(
-    (c) => cx >= c.x && cx < c.x + c.w && cy >= c.y && cy < c.y + c.h,
-  )
-  if (idx < 0) idx = 0 // a hair outside any cell (edges/rounding) → the first cell
-  return { cx, cy, idx, cells }
+  return { cx, cy }
 }
 
-// The box for an image PLACED on an occupied cell: ~half the cell wide, its natural aspect, centred on the
-// drop point and clamped to stay inside the cell. `dims` null (aspect unknown) falls back to 3:2.
+// The box for a placed image: roughly half the available bounds, preserving its natural aspect, centred
+// on the drop point and clamped to the slide. `dims` null (aspect unknown) falls back to 3:2.
 function placedBox(
-  cell: Rect,
+  bounds: Rect,
   cx: number,
   cy: number,
   dims: { w: number; h: number } | null,
 ): Rect {
   const ratio = dims && dims.h ? dims.w / dims.h : 3 / 2
-  let w = Math.min(Math.max(cell.w * 0.5, 240), 560)
+  let w = Math.min(Math.max(bounds.w * 0.5, 240), 560)
   let h = w / ratio
-  const maxW = cell.w * 0.9
-  const maxH = cell.h * 0.9
+  const maxW = bounds.w * 0.9
+  const maxH = bounds.h * 0.9
   if (w > maxW) ((w = maxW), (h = w / ratio))
   if (h > maxH) ((h = maxH), (w = h * ratio))
-  const x = Math.max(cell.x, Math.min(cx - w / 2, cell.x + cell.w - w))
-  const y = Math.max(cell.y, Math.min(cy - h / 2, cell.y + cell.h - h))
+  const x = Math.max(bounds.x, Math.min(cx - w / 2, bounds.x + bounds.w - w))
+  const y = Math.max(bounds.y, Math.min(cy - h / 2, bounds.y + bounds.h - h))
   return { x, y, w, h }
 }
 
@@ -90,22 +72,23 @@ async function fileDims(file: File): Promise<{ w: number; h: number } | null> {
   }
 }
 
-/** Drag-and-drop image handlers for a slide surface (Doc card or Stage canvas). `cellIndex` is the cell
- *  the pointer is currently over (for a drop-target highlight); `busy` is true while uploading. */
-export function useDropImage(slide: SlideDetail, deck: Deck) {
+const SLIDE_RECT: Rect = { x: 0, y: 0, w: SLIDE_W, h: SLIDE_H }
+
+/** Drag-and-drop image handlers for a slide surface. `preview` is the box that will be inserted. */
+export function useDropImage(slide: SlideDetail) {
   const mutate = useMutate()
   const history = useHistory()
   const [busy, setBusy] = useState(false)
-  const [cellIndex, setCellIndex] = useState<number | null>(null)
+  const [preview, setPreview] = useState<Rect | null>(null)
 
   const onDragOver = (e: React.DragEvent<HTMLElement>) => {
     if (!hasImageFile(e.dataTransfer)) return
     e.preventDefault() // required, or the browser refuses the drop
     e.dataTransfer.dropEffect = 'copy'
-    const hit = canvasHit(e, slide, deck)
-    setCellIndex(hit ? hit.idx : null)
+    const hit = canvasHit(e)
+    setPreview(hit ? placedBox(SLIDE_RECT, hit.cx, hit.cy, null) : null)
   }
-  const onDragLeave = () => setCellIndex(null)
+  const onDragLeave = () => setPreview(null)
 
   const onDrop = async (e: React.DragEvent<HTMLElement>) => {
     const file = Array.from(e.dataTransfer.files).find((f) =>
@@ -113,16 +96,14 @@ export function useDropImage(slide: SlideDetail, deck: Deck) {
     )
     if (!file) return
     e.preventDefault()
-    const hit = canvasHit(e, slide, deck) // read BEFORE awaiting (event is pooled)
-    setCellIndex(null)
+    const hit = canvasHit(e) // read BEFORE awaiting (event is pooled)
+    setPreview(null)
     if (!hit) return
-    const cell = hit.cells[hit.idx]
-    const occupied = !isDocEmpty(cellDocAt(slide, hit.idx))
     setBusy(true)
     try {
-      const dims = occupied ? await fileDims(file) : null
+      const dims = await fileDims(file)
       const src = await uploadImage(file)
-      const box = occupied ? placedBox(cell, hit.cx, hit.cy, dims) : cell
+      const box = placedBox(SLIDE_RECT, hit.cx, hit.cy, dims)
       const id = newId()
       const args = {
         id,
@@ -149,34 +130,26 @@ export function useDropImage(slide: SlideDetail, deck: Deck) {
     }
   }
 
-  return { onDragOver, onDragLeave, onDrop, cellIndex, busy }
+  return { onDragOver, onDragLeave, onDrop, preview, busy }
 }
 
-/** The drop-target highlight: a coral wash over the cell the image would land in. Positioned in the
- *  surface's own coordinate space (canvas px × scale), so it lines up with the card/stage cells. */
-export function DropCellHighlight({
-  slide,
-  deck,
-  index,
+/** Quiet preview of the exact image box that will be inserted. */
+export function DropImageHighlight({
+  rect,
   scale,
 }: {
-  slide: SlideDetail
-  deck: Deck
-  index: number | null
+  rect: Rect | null
   scale: number
 }) {
-  if (index == null) return null
-  const cells = bodyCells(slide, deck)
-  if (index < 0 || index >= cells.length) return null
-  const cell = cells[index]
+  if (!rect) return null
   return (
     <div
-      className="drop-cell"
+      className="drop-image-preview"
       style={{
-        left: cell.x * scale,
-        top: cell.y * scale,
-        width: cell.w * scale,
-        height: cell.h * scale,
+        left: rect.x * scale,
+        top: rect.y * scale,
+        width: rect.w * scale,
+        height: rect.h * scale,
       }}
     />
   )
@@ -185,7 +158,7 @@ export function DropCellHighlight({
 /** Hover-to-remove for images placed on an editor card. The card's positioned-object layer is inert so
  *  clicks reach body text, so this overlays a quiet × on each photo instead of forcing a separate focus
  *  step. Removal is ONE undo (the exact inverse of the drop).
- *  Positioned in the card's own coordinate space (canvas px × scale) like the LayoutPicker, so the ×
+ *  Positioned in the card's own coordinate space (canvas px × scale), so the ×
  *  stays a constant on-screen size at any column width. The overlay root is inert; only the per-image
  *  boxes opt back into pointer events — over the (opaque) photo they cover, never the surrounding text. */
 export function DocImageRemovers({

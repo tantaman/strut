@@ -1,6 +1,6 @@
 // Shared contract imported by BOTH the browser client and the API server.
 // - refined `schema` / tables: the generated schema.ts narrowed within-kind (json<ComponentProps>()
-//   on component.props, literal unions on type/visibility/role/render_mode) — refineTable/refineSchema.
+//   on component.props, literal unions on type/visibility/role) — refineTable/refineSchema.
 // - `q` / `rels`: the query builder + relationships used to build named queries.
 // - arg schemas (zod): written once; the SERVER parses untrusted wire args through them, and BOTH
 //   tiers derive the arg TYPE via z.infer.
@@ -50,9 +50,6 @@ export type { ComponentType } from './componentProps.ts'
 // ---- literal unions the SQL can't carry (refined once here; survive every schema regen) -----------
 export type CollaboratorRole = 'editor' | 'viewer'
 export type Visibility = 'private' | 'public-read'
-// Legacy compatibility markers. Current rendering composites body + positioned objects in one slide.
-// Older readers interpret '' as objects-first and 'markdown' as body-first.
-export type SlideMode = '' | 'markdown'
 
 // refineTable re-types the generated columns within their kind (runtime-validated identity — the wire
 // shape is unchanged). props becomes the typed JSON object; the discriminator + enums become unions.
@@ -62,13 +59,11 @@ export const component = refineTable(componentGen, {
 })
 export const deck = refineTable(deckGen, {
   visibility: string<Visibility>(),
-  default_slide_mode: string<SlideMode>(),
 })
 export const deck_share = refineTable(deckShareGen, {
   role: string<CollaboratorRole>(),
 })
-// slide.render_mode narrowed to SlideMode; text_align stays a bare string (open value set).
-export const slide = refineTable(slideGen, { render_mode: string<SlideMode>() })
+export const slide = slideGen
 
 export const schema = refineSchema(schemaGen, {
   tables: [component, deck, deck_share, slide],
@@ -100,9 +95,11 @@ export type Deck = Row<typeof deck>
 export type Slide = Row<typeof slide>
 export type Component = Row<typeof component>
 
-// Compatibility marker stamped on a brand-new deck and its seed slide. New authoring is body-first;
-// current rendering does not branch on this field.
-export const DEFAULT_SLIDE_MODE: SlideMode = 'markdown'
+/** Stable primary-text id derived from the slide id. Shared mutators must be deterministic because
+ *  they replay during optimistic rebases, so the paired slide + body insert cannot mint an id itself. */
+export function primaryTextId(slideId: string): string {
+  return `${slideId}:body`
+}
 
 // ---- mutator arg schemas (zod; the single source of shape for both tiers + the UI) ---------------
 
@@ -144,9 +141,8 @@ export const setDeckThemeArgs = z.object({
   heading_color: z.string().optional(),
   body_font: z.string().optional(),
   body_color: z.string().optional(),
-  // Unified theme: deck-wide default text alignment and an older-reader compatibility marker.
+  // Unified theme: deck-wide default text alignment.
   text_align: z.string().optional(),
-  default_slide_mode: z.enum(['', 'markdown']).optional(),
   custom_stylesheet: z.string().optional(),
   chosen_presenter: z.string().optional(),
   canned_transition: z.string().optional(),
@@ -169,15 +165,8 @@ export const addSlideArgs = z.object({
   sort: z.string(),
   x: z.number(),
   y: z.number(),
-  // Older-reader compatibility marker; current Strut composites both body and positioned objects.
-  render_mode: z.enum(['', 'markdown']).optional(),
-  // The FRAME a new slide inherits from its neighbor (layout tiling / density / vertical + horizontal
-  // alignment) so building a run of similar slides doesn't mean re-picking the same settings every time.
-  // Omitted = '' everywhere = full / comfortable / auto / deck-align. Content is NEVER inherited.
-  layout: z.string().optional(),
-  pad: z.string().optional(),
-  valign: z.string().optional(),
-  text_align: z.string().optional(),
+  // TipTap JSON for the deterministic full-slide primary text component. Empty = blank slide.
+  content: z.string().optional(),
   now: z.number(),
 })
 export type AddSlideArgs = z.infer<typeof addSlideArgs>
@@ -211,46 +200,8 @@ export const setSlideThemeArgs = z.object({
   surface: z.string().optional(),
   // Per-slide alignment override ('' = inherit the deck default).
   text_align: z.string().optional(),
-  // Which part of the canvas the markdown body occupies ('' = auto — derived from the background
-  // image's half; see resolveBodyRegion).
-  body_region: z.string().optional(),
-  // The slide's layout tiling ('' = full — one cell; else 'cols-2' | 'rows-2' | 'tri' | 'grid-4' |
-  // 'split-l'). Supersedes body_region when a real tiling; see layoutCells / bodyCells.
-  layout: z.string().optional(),
-  // Body density ('' = comfortable | 'compact' | 'edge' = full bleed). Scales the safe-area padding;
-  // orthogonal to layout. See slidePadScale.
-  pad: z.string().optional(),
-  // Vertical alignment of the body within its box ('' = auto | 'top' | 'middle' | 'bottom'). A per-card
-  // property all cells snap to; orthogonal to layout/pad. Horizontal is text_align. See slideBodyVAlign.
-  valign: z.string().optional(),
 })
 export type SetSlideThemeArgs = z.infer<typeof setSlideThemeArgs>
-
-export const setSlideMarkdownArgs = z.object({
-  id: z.string(),
-  markdown: z.string(),
-  now: z.number(),
-})
-export type SetSlideMarkdownArgs = z.infer<typeof setSlideMarkdownArgs>
-
-// Markdown-mode content: a TipTap/ProseMirror document, JSON-stringified. Streamed via `.folded`.
-export const setSlideDocArgs = z.object({
-  id: z.string(),
-  doc: z.string(),
-  now: z.number(),
-})
-export type SetSlideDocArgs = z.infer<typeof setSlideDocArgs>
-
-// Per-CELL markdown content (layout phase 2): the docs for cells 1..N as a JSON string[] of TipTap doc
-// JSON strings, index-aligned to layoutCells (index 0 is a placeholder — cell 0 lives in `doc`). Written
-// wholesale as a plain column patch (the client read-modify-writes the blob, preserving sibling cells),
-// streamed via `.folded` keyed per (slide, cell). See cellDocAt / writeCellDoc in src/editor/types.ts.
-export const setSlideCellsArgs = z.object({
-  id: z.string(),
-  cells: z.string(),
-  now: z.number(),
-})
-export type SetSlideCellsArgs = z.infer<typeof setSlideCellsArgs>
 
 // Per-slide RESEARCH NOTES: a free-form TipTap doc (JSON string) stored in the `slide_notes` side table
 // (loaded on demand via the deckNotes query, NOT with the deck). Upserted by slide_id; carries deck_id
@@ -263,13 +214,6 @@ export const setSlideNotesArgs = z.object({
 })
 export type SetSlideNotesArgs = z.infer<typeof setSlideNotesArgs>
 
-export const setSlideModeArgs = z.object({
-  id: z.string(),
-  render_mode: z.enum(['', 'markdown']),
-  now: z.number(),
-})
-export type SetSlideModeArgs = z.infer<typeof setSlideModeArgs>
-
 // Component spatial base — the fields every add-* carries.
 const spatialArgs = z.object({
   id: z.string(),
@@ -279,13 +223,12 @@ const spatialArgs = z.object({
   z_order: z.number(),
 })
 
-// color/font_family = '' means "inherit the deck theme default for text_type" (heading | body).
+// color/font_family = '' means "inherit the deck theme"; heading/body semantics live in the TipTap doc.
 export const addTextArgs = spatialArgs.extend({
-  text: z.string(),
+  content: z.string(),
   size: z.number(),
   color: z.string(),
   font_family: z.string(),
-  text_type: z.string(),
 })
 export type AddTextArgs = z.infer<typeof addTextArgs>
 
@@ -359,13 +302,19 @@ export type RemoveComponentArgs = z.infer<typeof removeComponentArgs>
 
 export const setTextArgs = z.object({
   id: z.string(),
-  text: z.string(),
   size: z.number(),
   color: z.string(),
   font_family: z.string(),
-  text_type: z.string(),
 })
 export type SetTextArgs = z.infer<typeof setTextArgs>
+
+// Rich text is its own real column, so a streamed keystroke never races a concurrent style edit by
+// replacing the component's props object. Fold by component id at the client call site.
+export const setTextContentArgs = z.object({
+  id: z.string(),
+  content: z.string(),
+})
+export type SetTextContentArgs = z.infer<typeof setTextContentArgs>
 
 export const setShapeFillArgs = z.object({ id: z.string(), fill: z.string() })
 export type SetShapeFillArgs = z.infer<typeof setShapeFillArgs>
@@ -422,6 +371,7 @@ const spatialBase = (a: z.infer<typeof spatialArgs>) => ({
   skew_x: 0,
   skew_y: 0,
   custom_classes: '',
+  content: '',
 })
 
 export const mutators = {
@@ -451,7 +401,8 @@ export const mutators = {
         heading_color: '',
         body_font: '',
         body_color: '',
-        default_slide_mode: DEFAULT_SLIDE_MODE,
+        // Retired physical column: migrations are additive, so inserts still satisfy its NOT NULL shape.
+        default_slide_mode: '',
         text_align: '',
         source_deck_id: a.source_deck_id ?? '',
         variant_label: a.variant_label ?? '',
@@ -494,8 +445,6 @@ export const mutators = {
       if (a.body_font !== undefined) row.body_font = a.body_font
       if (a.body_color !== undefined) row.body_color = a.body_color
       if (a.text_align !== undefined) row.text_align = a.text_align
-      if (a.default_slide_mode !== undefined)
-        row.default_slide_mode = a.default_slide_mode
       if (a.custom_stylesheet !== undefined)
         row.custom_stylesheet = a.custom_stylesheet
       if (a.chosen_presenter !== undefined)
@@ -522,6 +471,7 @@ export const mutators = {
   addSlide: shared(
     addSlideArgs,
     function* (tx: IsoTx, a: AddSlideArgs): MutationGen {
+      const bodyId = primaryTextId(a.id)
       yield tx.insert('slide', {
         id: a.id,
         deck_id: a.deckId,
@@ -537,15 +487,39 @@ export const mutators = {
         surface: '',
         created: a.now,
         modified: a.now,
+        // Retired physical columns. Additive migrations keep them NOT NULL, but no runtime query or
+        // mutation exposes them; component.content is the sole on-slide rich-text source of truth.
         markdown: '',
         doc: '',
-        render_mode: a.render_mode ?? '',
-        text_align: a.text_align ?? '',
+        render_mode: '',
+        text_align: '',
         body_region: '',
-        layout: a.layout ?? '',
+        layout: '',
         cells: '',
-        pad: a.pad ?? '',
-        valign: a.valign ?? '',
+        pad: '',
+        valign: '',
+        body_component_id: bodyId,
+      })
+      // The doc-first body is not a parallel slide field: it is the first ordinary text component,
+      // with concrete full-slide geometry that precision editing can reveal and transform directly.
+      yield tx.insert('component', {
+        ...spatialBase({
+          id: bodyId,
+          slideId: a.id,
+          x: 0,
+          y: 0,
+          z_order: 0,
+        }),
+        scale_w: 1280,
+        scale_h: 720,
+        type: 'text',
+        fill: '',
+        content: a.content ?? '',
+        props: componentProps('text', {
+          size: 32,
+          color: '',
+          font_family: '',
+        }),
       })
     },
   ),
@@ -553,7 +527,10 @@ export const mutators = {
   deleteSlide: shared(
     deleteSlideArgs,
     function* (tx: IsoTx, a: DeleteSlideArgs): MutationGen {
-      for (const id of a.componentIds) yield tx.delete('component', { id })
+      // The primary row is a required child of every canonical slide. Include its deterministic id and
+      // dedupe it when the caller's complete component snapshot already enumerated it.
+      for (const id of new Set([primaryTextId(a.id), ...a.componentIds]))
+        yield tx.delete('component', { id })
       // Also drop the slide's research note (PK = slide_id) so the optimistic store holds no orphan when
       // deleting from the Research surface. No-op if the note row isn't present. The server twin
       // (rindle-api.ts deleteSlide) cascades the same delete authoritatively.
@@ -593,41 +570,7 @@ export const mutators = {
       if (a.background !== undefined) row.background = a.background
       if (a.surface !== undefined) row.surface = a.surface
       if (a.text_align !== undefined) row.text_align = a.text_align
-      if (a.body_region !== undefined) row.body_region = a.body_region
-      if (a.layout !== undefined) row.layout = a.layout
-      if (a.pad !== undefined) row.pad = a.pad
-      if (a.valign !== undefined) row.valign = a.valign
       yield tx.update('slide', row)
-    },
-  ),
-
-  // Markdown source (per-slide). Non-destructive re. components — a plain column patch.
-  setSlideMarkdown: shared(
-    setSlideMarkdownArgs,
-    function* (tx: IsoTx, a: SetSlideMarkdownArgs): MutationGen {
-      yield tx.update('slide', {
-        id: a.id,
-        markdown: a.markdown,
-        modified: a.now,
-      })
-    },
-  ),
-
-  // Markdown-mode content as a TipTap doc (JSON string). Plain column patch, streamed via `.folded`.
-  setSlideDoc: shared(
-    setSlideDocArgs,
-    function* (tx: IsoTx, a: SetSlideDocArgs): MutationGen {
-      yield tx.update('slide', { id: a.id, doc: a.doc, modified: a.now })
-    },
-  ),
-
-  // Per-cell markdown content for cells 1..N (layout phase 2). Plain column patch of the whole `cells`
-  // JSON blob — the caller merges its one cell into the current blob before sending, so this stays a
-  // dumb last-write-wins column write (same shape/coarseness as setSlideDoc), streamed via `.folded`.
-  setSlideCells: shared(
-    setSlideCellsArgs,
-    function* (tx: IsoTx, a: SetSlideCellsArgs): MutationGen {
-      yield tx.update('slide', { id: a.id, cells: a.cells, modified: a.now })
     },
   ),
 
@@ -647,18 +590,6 @@ export const mutators = {
     },
   ),
 
-  // Compatibility setter retained for synced older clients. The current editor does not call it.
-  setSlideMode: shared(
-    setSlideModeArgs,
-    function* (tx: IsoTx, a: SetSlideModeArgs): MutationGen {
-      yield tx.update('slide', {
-        id: a.id,
-        render_mode: a.render_mode,
-        modified: a.now,
-      })
-    },
-  ),
-
   // One `component` table: each insert stamps `type`, the shared spatial base + `fill` column, and the
   // type-specific `props` JSON object. `fill` is only meaningful for shapes; '' elsewhere.
   addText: shared(
@@ -668,6 +599,7 @@ export const mutators = {
         ...spatialBase(a),
         type: 'text',
         fill: '',
+        content: a.content,
         props: componentProps('text', a),
       })
     },
@@ -782,7 +714,8 @@ export const mutators = {
     },
   ),
 
-  // Rewrites the whole text `props` object (it carries all text fields, so no partial-merge needed).
+  // Text style and rich content are independent columns. A style edit rewrites only the small props
+  // payload; a keystroke below updates only content, so concurrent edits do not clobber each other.
   setText: shared(
     setTextArgs,
     function* (tx: IsoTx, a: SetTextArgs): MutationGen {
@@ -790,6 +723,13 @@ export const mutators = {
         id: a.id,
         props: componentProps('text', a),
       })
+    },
+  ),
+
+  setTextContent: shared(
+    setTextContentArgs,
+    function* (tx: IsoTx, a: SetTextContentArgs): MutationGen {
+      yield tx.update('component', { id: a.id, content: a.content })
     },
   ),
 
