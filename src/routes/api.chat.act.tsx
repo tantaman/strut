@@ -51,9 +51,19 @@ export const Route = createFileRoute('/api/chat/act')({
           return json({ error: 'sign_in_required' }, 401)
         }
 
-        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or app Workers AI.
+        const {
+          isStyleReferenceRequest,
+          parseChatActPayload,
+          ChatActPayloadError,
+        } = await import('../../server/chatActPayload')
+        const styleRequest = isStyleReferenceRequest(request)
+
+        // A photo-driven style turn gets the scoped GPT-5.4-mini default. Text-only chat retains the
+        // existing provider choice, and a connected OpenRouter model still overrides either path.
         const { resolveModel } = await import('../../server/llm')
-        const choice = await resolveModel(account.id)
+        const choice = await resolveModel(account.id, {
+          purpose: styleRequest ? 'style' : 'general',
+        })
         const byo = choice.kind === 'openrouter'
 
         // App-paid inference stays member-only; BYO is open to any session because the USER pays.
@@ -64,24 +74,19 @@ export const Route = createFileRoute('/api/chat/act')({
           return json({ error: 'rate_limited' }, 429)
         }
 
-        let body: unknown
+        let parsed: Awaited<ReturnType<typeof parseChatActPayload>>
         try {
-          body = await request.json()
-        } catch {
+          parsed = await parseChatActPayload(request)
+        } catch (err) {
+          if (err instanceof ChatActPayloadError) {
+            return json(
+              { error: 'bad_request', message: err.message },
+              err.status,
+            )
+          }
           return json({ error: 'bad_request' }, 400)
         }
-        if (typeof body !== 'object' || body === null) {
-          return json({ error: 'bad_request' }, 400)
-        }
-        const b = body as Partial<ChatActRequest>
-        if (
-          typeof b.deckId !== 'string' ||
-          !Array.isArray(b.messages) ||
-          typeof b.deckContext !== 'string' ||
-          !Array.isArray(b.slideIds)
-        ) {
-          return json({ error: 'bad_request' }, 400)
-        }
+        const b: ChatActRequest = parsed.body
 
         // Durable daily quota — ONLY for the app-paid path, and the SAME bucket as the advisor (an Edit
         // turn is a chat turn). Consumed BEFORE the model call so concurrent turns can't race the cap.
@@ -118,8 +123,9 @@ export const Route = createFileRoute('/api/chat/act')({
         const { chatActStream, ChatActUnavailableError } =
           await import('../../server/chatAct')
         try {
-          const stream = await chatActStream(b as ChatActRequest, choice, {
+          const stream = await chatActStream(b, choice, {
             fonts: FONT_FAMILIES,
+            images: parsed.images,
           })
           // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client: it
           // types the reply out of `{response}` frames and applies the terminal `{result}` frame.

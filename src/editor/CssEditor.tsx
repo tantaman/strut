@@ -4,8 +4,10 @@
 // present mode. (A full CodeMirror editor is the spec's ideal; a monospace textarea is the MVP.)
 
 import { useState } from 'react'
-import { useMutate } from '../rindle/RindleProvider'
 import { scopeCss } from './css'
+import { useMutate } from '../rindle/RindleProvider'
+import { useHistory } from './UndoProvider'
+import { applyThemePatch } from './aiTheme'
 
 const PLACEHOLDER = `/* Custom CSS — auto-scoped to the slide surface. e.g.
 
@@ -23,10 +25,21 @@ export function CssEditorModal({
   onClose: () => void
 }) {
   const mutate = useMutate()
+  const history = useHistory()
   const [css, setCss] = useState(initial)
 
   function save() {
-    mutate.setDeckTheme({ id: deckId, custom_stylesheet: css, now: Date.now() })
+    if (css !== initial) {
+      applyThemePatch(
+        { custom_stylesheet: css },
+        {
+          mutate,
+          history,
+          deck: { id: deckId, custom_stylesheet: initial },
+        },
+        'Custom CSS',
+      )
+    }
     onClose()
   }
 

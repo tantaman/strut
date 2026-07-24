@@ -24,6 +24,7 @@ export interface ThemePatch {
   body_font?: string
   body_color?: string
   text_align?: string
+  custom_stylesheet?: string
 }
 
 /** The deck row this reads before-values off (only `id` + the patched columns matter). DeckRoot and the
@@ -37,6 +38,7 @@ export interface ThemeDeck {
   body_font?: string | null
   body_color?: string | null
   text_align?: string | null
+  custom_stylesheet?: string | null
 }
 
 /** Apply a theme patch as ONE undoable step: capture the CURRENT value of each touched column, apply the
@@ -48,18 +50,25 @@ export function applyThemePatch(
   label = 'Theme',
 ): void {
   const { mutate, history, deck } = ctx
-  const keys = Object.keys(patch) as (keyof ThemePatch)[]
+  const source = deck as unknown as Record<string, unknown>
+  const changed: ThemePatch = {}
+  for (const key of Object.keys(patch) as (keyof ThemePatch)[]) {
+    const current = typeof source[key] === 'string' ? source[key] : ''
+    const next = patch[key]
+    if (next !== undefined && next !== current)
+      (changed as Record<string, string>)[key] = next
+  }
+  const keys = Object.keys(changed) as (keyof ThemePatch)[]
   if (keys.length === 0) return
 
   const before: ThemePatch = {}
-  const source = deck as unknown as Record<string, unknown>
   for (const k of keys) {
     const cur = source[k]
     before[k] = typeof cur === 'string' ? cur : ''
   }
 
   const redo = () =>
-    mutate.setDeckTheme({ id: deck.id, ...patch, now: Date.now() })
+    mutate.setDeckTheme({ id: deck.id, ...changed, now: Date.now() })
   const undo = () =>
     mutate.setDeckTheme({ id: deck.id, ...before, now: Date.now() })
   redo()

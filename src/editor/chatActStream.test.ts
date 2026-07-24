@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   extractResult,
+  normalizeChatActResult,
   proseSoFar,
   readResponseLine,
   transformActStream,
@@ -14,6 +15,43 @@ import { applyNote, parseActLine } from './aiChat'
 // AS IT ARRIVES (proseSoFar), and finalizes by splitting reply-from-actions (extractResult) into a firewalled
 // `{result}` frame; the client (parseActLine) types the reply out and applies the result. These are the
 // load-bearing string parsers on that path.
+
+describe('normalizeChatActResult — visual-reference authority', () => {
+  it('retains at most one validated theme action and preserves the reply', () => {
+    expect(
+      normalizeChatActResult(
+        {
+          say: 'Matched it.',
+          actions: [
+            { kind: 'set_body', slideId: 's1', markdown: '# Hijacked' },
+            { kind: 'set_theme', background: '#101010' },
+            { kind: 'set_theme', background: '#202020' },
+            { kind: 'generate', description: 'Do more' },
+          ],
+        },
+        { slideIds: ['s1'], fonts: ['Inter'], styleOnly: true },
+      ),
+    ).toEqual({
+      say: 'Matched it.',
+      actions: [{ kind: 'set_theme', background: '101010' }],
+    })
+  })
+
+  it('keeps the general action lane unchanged without visual references', () => {
+    expect(
+      normalizeChatActResult(
+        {
+          say: 'Updated it.',
+          actions: [
+            { kind: 'set_body', slideId: 's1', markdown: '# Updated' },
+            { kind: 'set_theme', background: '#101010' },
+          ],
+        },
+        { slideIds: ['s1'], fonts: ['Inter'] },
+      ).actions,
+    ).toHaveLength(2)
+  })
+})
 
 describe('readResponseLine — consuming the model stream', () => {
   it('extracts the response delta from a Workers-AI-shaped frame', () => {

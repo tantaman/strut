@@ -454,6 +454,9 @@ function applyTheme(
   if (a.body_color !== undefined) patch.body_color = a.body_color
   if (a.heading_font !== undefined) patch.heading_font = a.heading_font
   if (a.body_font !== undefined) patch.body_font = a.body_font
+  if (a.text_align !== undefined) patch.text_align = a.text_align
+  if (a.custom_stylesheet !== undefined)
+    patch.custom_stylesheet = a.custom_stylesheet
 
   if (Object.keys(patch).length === 0)
     return { ok: false, error: 'Nothing to change in the theme.' }

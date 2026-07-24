@@ -52,6 +52,39 @@ describe('normalizeActions · set_theme', () => {
       one({ kind: 'set_theme', background: 'nope', body_font: 'Nope' }),
     ).toBeNull()
   })
+
+  it('keeps alignment and a safe generated stylesheet', () => {
+    expect(
+      one({
+        kind: 'set_theme',
+        text_align: 'center',
+        custom_stylesheet:
+          '.strut-md h1 { letter-spacing: -.04em; position: fixed; }',
+      }),
+    ).toEqual({
+      kind: 'set_theme',
+      text_align: 'center',
+      custom_stylesheet: '.strut-md h1 { letter-spacing: -.04em; }',
+    })
+  })
+
+  it('drops unsafe CSS without discarding other safe theme fields', () => {
+    expect(
+      one({
+        kind: 'set_theme',
+        body_color: '#112233',
+        text_align: 'justify',
+        custom_stylesheet: '@import "https://tracker.example/x.css";',
+      }),
+    ).toEqual({ kind: 'set_theme', body_color: '112233' })
+  })
+
+  it('allows an explicit stylesheet reset', () => {
+    expect(one({ kind: 'set_theme', custom_stylesheet: '' })).toEqual({
+      kind: 'set_theme',
+      custom_stylesheet: '',
+    })
+  })
 })
 
 describe('normalizeActions · set_body', () => {
@@ -299,6 +332,10 @@ describe('clampChatActRequest', () => {
         bodyColor: '#333',
         headingFont: 'Lato',
         bodyFont: 'Inter',
+        textAlign: 'left',
+        customStylesheet: 'x'.repeat(
+          CHAT_ACTION_LIMITS.maxThemeCssContext + 50,
+        ),
       },
       activeSlide: {
         id: 's1',
@@ -309,6 +346,9 @@ describe('clampChatActRequest', () => {
     expect(req.deckContext).toBe('Deck context.')
     expect(req.slideIds).toEqual(['s1'])
     expect(req.theme?.background).toBe('#000')
+    expect(req.theme?.customStylesheet).toHaveLength(
+      CHAT_ACTION_LIMITS.maxThemeCssContext,
+    )
     expect(req.activeSlide?.text).toHaveLength(CHAT_ACTION_LIMITS.maxActiveText)
   })
 

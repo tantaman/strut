@@ -116,6 +116,7 @@ function EditorInner({ deckId }: { deckId: string }) {
   // scroll/caret state without introducing route or URL state.
   const [activeTool, setActiveTool] = useState<ActiveTool>(null)
   const [chatOpen, setChatOpen] = useState(false)
+  const [styleIntent, setStyleIntent] = useState(0)
   const [controlsOpen, setControlsOpen] = useState(false)
   const topDockRef = useRef<HTMLDivElement>(null)
   const objectSlide =
@@ -180,21 +181,37 @@ function EditorInner({ deckId }: { deckId: string }) {
         return
       event.preventDefault()
       if (activeTool) setActiveTool(null)
-      else setChatOpen(false)
+      else {
+        setChatOpen(false)
+        setStyleIntent(0)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [activeTool, chatOpen, editor.pendingShape])
 
+  const closeChat = () => {
+    setChatOpen(false)
+    setStyleIntent(0)
+  }
+
   const toggleChat = () => {
     setControlsOpen(false)
     setActiveTool(null)
+    setStyleIntent(0)
     setChatOpen((open) => !open)
+  }
+
+  const openStyle = () => {
+    setControlsOpen(false)
+    setActiveTool(null)
+    setChatOpen(true)
+    setStyleIntent((intent) => intent + 1)
   }
 
   const toggleArrange = () => {
     setControlsOpen(false)
-    setChatOpen(false)
+    closeChat()
     setActiveTool((tool) =>
       tool?.kind === 'arrange' ? null : { kind: 'arrange' },
     )
@@ -202,7 +219,7 @@ function EditorInner({ deckId }: { deckId: string }) {
 
   const editObjects = (slideId: string) => {
     setControlsOpen(false)
-    setChatOpen(false)
+    closeChat()
     editor.setActiveSlide(slideId)
     setActiveTool({ kind: 'objects', slideId })
   }
@@ -228,6 +245,7 @@ function EditorInner({ deckId }: { deckId: string }) {
           onToggleArrange={toggleArrange}
           chatOpen={chatOpen}
           onToggleChat={toggleChat}
+          onOpenStyle={openStyle}
         />
         {!objectSlide && (
           <button
@@ -281,7 +299,8 @@ function EditorInner({ deckId }: { deckId: string }) {
             activeSlide={activeSlide}
             deckContext={deckContext}
             canEdit={editor.canEdit}
-            onClose={() => setChatOpen(false)}
+            styleIntent={styleIntent}
+            onClose={closeChat}
           />
         )}
       </div>

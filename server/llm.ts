@@ -3,10 +3,9 @@
 //   • BYO — the user connected an OpenRouter key (server/modelCred.ts): call OpenRouter with THEIR key,
 //     THEY pay. OpenRouter is OpenAI-compatible, so it's a plain fetch — no binding, and it works under
 //     `pnpm dev` (Node) too, unlike the Workers AI object binding.
-//   • default (app pays) — no connected key: Anthropic Claude Haiku when ANTHROPIC_API_KEY is set (the
-//     "free taste" — a small, genuinely good model that replaces Llama), else Cloudflare Workers AI (Llama)
-//     as the no-key fallback. Both are the METERED path (choice.kind !== 'openrouter'), so the existing
-//     daily quota + guest gate apply unchanged; only the model behind them changes.
+//   • default (app pays) — photo-reference styling uses OpenAI GPT-5.4 mini when OPENAI_API_KEY is set;
+//     other lanes use Anthropic Claude Haiku when ANTHROPIC_API_KEY is set, else Cloudflare Workers AI.
+//     Every app-paid choice is metered (choice.kind !== 'openrouter') behind the existing quota + gate.
 //
 // This folds together the three formerly-duplicated loadAi()/AiBinding/extractJson copies that lived in
 // server/{arrange,generate,chat}.ts. Those adapters now just build messages + schema and call callModel /
@@ -20,7 +19,14 @@ import { getCredential } from './modelCred.ts'
 const WORKERS_AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 // OpenRouter's auto-router when the user didn't pin a specific model id.
 const OPENROUTER_DEFAULT_MODEL = 'openrouter/auto'
+const OPENROUTER_STYLE_MODEL = 'openai/gpt-5.4-mini'
 const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
+// Photo-driven theme generation is intentionally the only lane that defaults to OpenAI. This keeps the
+// model change narrow while giving the multimodal styling task a fast, reliable model with native image
+// input and streaming. Other AI features retain their existing provider selection.
+export const OPENAI_STYLE_MODEL = 'gpt-5.4-mini'
+const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions'
 
 // App-paid default when ANTHROPIC_API_KEY is set: Claude Haiku 4.5 — small, fast, and genuinely good, so a
 // few free calls are a real "taste" (fractions of a cent each) rather than Llama slop. Called over plain
@@ -34,10 +40,16 @@ export type ModelChoice =
   | { kind: 'workers-ai'; model: string }
   | { kind: 'openrouter'; model: string; apiKey: string }
   | { kind: 'anthropic'; model: string; apiKey: string }
+  | { kind: 'openai'; model: string; apiKey: string }
 
 export interface ModelMessage {
   role: 'system' | 'user' | 'assistant'
   content: string
+}
+
+export interface ModelImage {
+  mediaType: 'image/jpeg' | 'image/png' | 'image/webp'
+  bytes: Uint8Array
 }
 
 export interface CallInput {
@@ -57,17 +69,23 @@ export class ModelUnavailableError extends Error {
   }
 }
 
-/** Pick the backend for a user: their connected OpenRouter key if present (they pay), else the app-paid
- *  default — Anthropic Haiku when ANTHROPIC_API_KEY is set, otherwise Workers AI (Llama). A credential
- *  read/decrypt failure falls through to the same app-paid default (logged) so a misconfigured
- *  MODEL_CRED_KEY never hard-fails the ✨ features. */
-export async function resolveModel(userId: string): Promise<ModelChoice> {
+/** Pick the backend for a user: their connected OpenRouter key if present (they pay), else the scoped
+ *  app-paid default — GPT-5.4 mini for visual styling, Anthropic Haiku for general inference when set,
+ *  otherwise Workers AI. A credential read/decrypt failure falls through to the same app-paid default. */
+export async function resolveModel(
+  userId: string,
+  options: { purpose?: 'general' | 'style' } = {},
+): Promise<ModelChoice> {
   try {
     const cred = await getCredential(userId)
     if (cred && cred.provider === 'openrouter' && cred.apiKey) {
       return {
         kind: 'openrouter',
-        model: cred.model || OPENROUTER_DEFAULT_MODEL,
+        model:
+          cred.model ||
+          (options.purpose === 'style'
+            ? OPENROUTER_STYLE_MODEL
+            : OPENROUTER_DEFAULT_MODEL),
         apiKey: cred.apiKey,
       }
     }
@@ -76,6 +94,16 @@ export async function resolveModel(userId: string): Promise<ModelChoice> {
       '[llm] credential resolution failed; falling back to the app-paid default:',
       err instanceof Error ? err.message : err,
     )
+  }
+  if (options.purpose === 'style') {
+    const openaiKey = process.env.OPENAI_API_KEY
+    if (openaiKey) {
+      return {
+        kind: 'openai',
+        model: OPENAI_STYLE_MODEL,
+        apiKey: openaiKey,
+      }
+    }
   }
   // App-paid default. Prefer Haiku (the "free taste") when the app has a key; else Workers AI so
   // key-less environments — and `pnpm dev` before you set one — keep working. Both are metered by the
@@ -189,6 +217,33 @@ export async function callModel(
     return extractJson(anthropicText(payload))
   }
 
+  if (choice.kind === 'openai') {
+    const body: Record<string, unknown> = {
+      model: choice.model,
+      messages: input.messages,
+      reasoning_effort: 'none',
+      store: false,
+    }
+    const rf = toOpenRouterResponseFormat(input.response_format)
+    if (rf) body.response_format = rf
+    if (typeof input.max_tokens === 'number')
+      body.max_completion_tokens = input.max_tokens
+
+    const res = await openaiFetch(choice, body)
+    let payload: unknown
+    try {
+      payload = await res.json()
+    } catch {
+      throw new ModelUnavailableError('OpenAI returned a non-JSON response.')
+    }
+    const content = (
+      payload as {
+        choices?: Array<{ message?: { content?: unknown } }>
+      } | null
+    )?.choices?.[0]?.message?.content
+    return extractJson(content)
+  }
+
   if (choice.kind === 'openrouter') {
     const body: Record<string, unknown> = {
       model: choice.model,
@@ -244,21 +299,29 @@ export async function callModel(
  *  normalized. Plain PROSE only — no `response_format`: Workers AI's JSON Mode is mutually exclusive with
  *  streaming (developers.cloudflare.com/workers-ai/features/json-mode), so a streaming feature that needs
  *  structure (the Edit lane) prompts for a fenced JSON block in the prose and parses it out (server/
- *  chatAct.ts) instead of relying on json_schema. Throws ModelUnavailableError if the backend is
+ *  chatAct.ts) instead of relying on json_schema. OpenAI/OpenRouter messages may additionally carry the
+ *  turn's ephemeral images. Throws ModelUnavailableError if the backend is
  *  unreachable / fails before a stream exists. */
 export async function streamModel(
   choice: ModelChoice,
-  input: { messages: ModelMessage[] },
+  input: {
+    messages: ModelMessage[]
+    images?: ModelImage[]
+    max_tokens?: number
+  },
 ): Promise<ReadableStream<Uint8Array>> {
   if (choice.kind === 'anthropic') {
     // Plain prose only (no response_format) — same contract as the Workers AI streaming path; a streaming
     // feature that needs structure (the Edit lane) prompts for a fenced JSON block and parses it out.
-    const { system, messages } = toAnthropicRequest({
+    const { system, messages: textMessages } = toAnthropicRequest({
       messages: input.messages,
     })
+    const messages = input.images?.length
+      ? attachImagesToAnthropicMessages(textMessages, input.images)
+      : textMessages
     const body: Record<string, unknown> = {
       model: choice.model,
-      max_tokens: 4096,
+      max_tokens: input.max_tokens ?? 4096,
       messages,
       stream: true,
     }
@@ -271,16 +334,38 @@ export async function streamModel(
     return normalizeAnthropicSse(res.body)
   }
 
+  if (choice.kind === 'openai') {
+    const res = await openaiFetch(choice, {
+      model: choice.model,
+      messages: attachImagesToOpenAiMessages(input.messages, input.images),
+      reasoning_effort: 'none',
+      max_completion_tokens: input.max_tokens,
+      store: false,
+      stream: true,
+    })
+    if (!res.body) {
+      throw new ModelUnavailableError('OpenAI returned no stream body.')
+    }
+    return normalizeOpenRouterSse(res.body)
+  }
+
   if (choice.kind === 'openrouter') {
     const res = await openrouterFetch(choice, {
       model: choice.model,
-      messages: input.messages,
+      messages: attachImagesToOpenAiMessages(input.messages, input.images),
+      max_tokens: input.max_tokens,
       stream: true,
     })
     if (!res.body) {
       throw new ModelUnavailableError('OpenRouter returned no stream body.')
     }
     return normalizeOpenRouterSse(res.body)
+  }
+
+  if (input.images?.length) {
+    throw new ModelUnavailableError(
+      'Visual style matching needs OPENAI_API_KEY or a connected multimodal model.',
+    )
   }
 
   const ai = await loadAi()
@@ -293,6 +378,7 @@ export async function streamModel(
   try {
     result = await ai.run(choice.model, {
       messages: input.messages,
+      max_tokens: input.max_tokens,
       stream: true,
     })
   } catch (err) {
@@ -307,7 +393,116 @@ export async function streamModel(
   return result as ReadableStream<Uint8Array>
 }
 
-// ---- OpenRouter transport ----
+// ---- OpenAI / OpenRouter transport ----
+
+/** Attach ephemeral image bytes to the final user turn in the OpenAI-compatible multimodal shape. */
+export function attachImagesToOpenAiMessages(
+  messages: ModelMessage[],
+  images: ModelImage[] | undefined,
+): unknown[] {
+  if (!images?.length) return messages
+  const target = findLastUserMessage(messages)
+  if (target === -1) return messages
+  return messages.map((message, index) =>
+    index === target
+      ? {
+          ...message,
+          content: [
+            { type: 'text', text: message.content },
+            ...images.map((image) => ({
+              type: 'image_url',
+              image_url: {
+                url: `data:${image.mediaType};base64,${base64(image.bytes)}`,
+                detail: 'auto',
+              },
+            })),
+          ],
+        }
+      : message,
+  )
+}
+
+function attachImagesToAnthropicMessages(
+  messages: ModelMessage[],
+  images: ModelImage[],
+): unknown[] {
+  const target = findLastUserMessage(messages)
+  if (target === -1) return messages
+  return messages.map((message, index) =>
+    index === target
+      ? {
+          ...message,
+          content: [
+            ...images.map((image) => ({
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: image.mediaType,
+                data: base64(image.bytes),
+              },
+            })),
+            { type: 'text', text: message.content },
+          ],
+        }
+      : message,
+  )
+}
+
+function findLastUserMessage(messages: ModelMessage[]): number {
+  for (let index = messages.length - 1; index >= 0; index--)
+    if (messages[index].role === 'user') return index
+  return -1
+}
+
+function base64(bytes: Uint8Array): string {
+  let binary = ''
+  const size = 0x8000
+  for (let index = 0; index < bytes.length; index += size)
+    binary += String.fromCharCode(...bytes.subarray(index, index + size))
+  return btoa(binary)
+}
+
+async function openaiFetch(
+  choice: { apiKey: string },
+  body: Record<string, unknown>,
+): Promise<Response> {
+  let res: Response
+  try {
+    res = await fetch(OPENAI_CHAT_URL, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${choice.apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+  } catch (err) {
+    throw new ModelUnavailableError(
+      'Could not reach OpenAI: ' +
+        (err instanceof Error ? err.message : String(err)),
+    )
+  }
+  if (!res.ok) {
+    const detail = await readOpenAiError(res)
+    throw new ModelUnavailableError(
+      `OpenAI error ${res.status}${detail ? ': ' + detail : ''}`,
+    )
+  }
+  return res
+}
+
+async function readOpenAiError(res: Response): Promise<string> {
+  try {
+    const payload = (await res.clone().json()) as {
+      error?: { message?: unknown }
+    } | null
+    return typeof payload?.error?.message === 'string'
+      ? payload.error.message
+      : ''
+  } catch {
+    return ''
+  }
+}
 
 async function openrouterFetch(
   choice: { apiKey: string },
@@ -481,44 +676,76 @@ async function readAnthropicError(res: Response): Promise<string> {
 // (`data: {"response":"…"}` + a terminal `data: [DONE]`). Anthropic emits typed events; we forward only
 // `text_delta` content and close on `message_stop`. `event:` lines are ignored — each `data:` JSON carries
 // its own `type`. Buffers partial lines across chunk boundaries. Mirrors normalizeOpenRouterSse.
-function normalizeAnthropicSse(
+export function normalizeAnthropicSse(
   src: ReadableStream<Uint8Array>,
 ): ReadableStream<Uint8Array> {
   const dec = new TextDecoder()
   const enc = new TextEncoder()
   let buffer = ''
+  let sawDone = false
+
+  const consumeLine = (
+    line: string,
+    controller: TransformStreamDefaultController<Uint8Array>,
+  ) => {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith('data:') || sawDone) return
+    const payload = trimmed.slice(5).trim()
+    if (!payload) return
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(payload) as unknown
+    } catch {
+      // Anthropic keep-alive / non-JSON extension — ignore. Missing message_stop still fails in flush.
+      return
+    }
+    if (!parsed || typeof parsed !== 'object') return
+    const obj = parsed as {
+      type?: string
+      delta?: { type?: string; text?: unknown }
+      error?: { message?: unknown }
+    }
+    if (obj.type === 'error') {
+      const raw = obj.error?.message
+      const detail = typeof raw === 'string' ? raw.slice(0, 300) : ''
+      throw new ModelUnavailableError(
+        `Anthropic stream failed${detail ? ': ' + detail : '.'}`,
+      )
+    }
+    if (
+      obj.type === 'content_block_delta' &&
+      obj.delta?.type === 'text_delta' &&
+      typeof obj.delta.text === 'string' &&
+      obj.delta.text.length
+    ) {
+      controller.enqueue(
+        enc.encode(`data: ${JSON.stringify({ response: obj.delta.text })}\n\n`),
+      )
+      return
+    }
+    if (obj.type === 'message_stop') {
+      sawDone = true
+      controller.enqueue(enc.encode('data: [DONE]\n\n'))
+    }
+  }
+
   const transform = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
       buffer += dec.decode(chunk, { stream: true })
       let nl: number
       while ((nl = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, nl).trim()
+        const line = buffer.slice(0, nl)
         buffer = buffer.slice(nl + 1)
-        if (!line.startsWith('data:')) continue
-        const payload = line.slice(5).trim()
-        if (!payload) continue
-        try {
-          const obj = JSON.parse(payload) as {
-            type?: string
-            delta?: { type?: string; text?: unknown }
-          }
-          if (
-            obj.type === 'content_block_delta' &&
-            obj.delta?.type === 'text_delta' &&
-            typeof obj.delta.text === 'string' &&
-            obj.delta.text.length
-          ) {
-            controller.enqueue(
-              enc.encode(
-                `data: ${JSON.stringify({ response: obj.delta.text })}\n\n`,
-              ),
-            )
-          } else if (obj.type === 'message_stop') {
-            controller.enqueue(enc.encode('data: [DONE]\n\n'))
-          }
-        } catch {
-          // ping / comment / partial frame — ignore
-        }
+        consumeLine(line, controller)
+      }
+    },
+    flush(controller) {
+      buffer += dec.decode()
+      if (buffer.trim()) consumeLine(buffer, controller)
+      if (!sawDone) {
+        throw new ModelUnavailableError(
+          'Anthropic stream ended before its completion marker.',
+        )
       }
     },
   })
@@ -591,41 +818,86 @@ function sanitizeSchema(node: unknown): unknown {
   return node
 }
 
-// Transform OpenRouter's OpenAI-style SSE (`data: {"choices":[{"delta":{"content":"…"}}]}`) into the
+// Transform OpenAI-compatible SSE (`data: {"choices":[{"delta":{"content":"…"}}]}`) into the
 // Workers-AI-shaped frames the client parses (`data: {"response":"…"}`), passing `[DONE]` through. Buffers
-// partial lines across chunk boundaries.
-function normalizeOpenRouterSse(
+// partial lines across chunk boundaries and requires an explicit terminal marker: an HTTP 200 whose stream
+// carries a provider error or simply stops mid-generation is a failed turn, not a successful partial edit.
+export function normalizeOpenRouterSse(
   src: ReadableStream<Uint8Array>,
 ): ReadableStream<Uint8Array> {
   const dec = new TextDecoder()
   const enc = new TextEncoder()
   let buffer = ''
+  let sawDone = false
+
+  const consumeLine = (
+    line: string,
+    controller: TransformStreamDefaultController<Uint8Array>,
+  ) => {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith('data:') || sawDone) return
+    const payload = trimmed.slice(5).trim()
+    if (!payload) return
+    if (payload === '[DONE]') {
+      sawDone = true
+      controller.enqueue(enc.encode('data: [DONE]\n\n'))
+      return
+    }
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(payload) as unknown
+    } catch {
+      // Provider keep-alive / non-JSON extension — ignore. A missing terminal marker still fails in flush.
+      return
+    }
+    if (!parsed || typeof parsed !== 'object') return
+    const obj = parsed as {
+      error?: unknown
+      choices?: Array<{ delta?: { content?: unknown } }>
+    }
+    if ('error' in obj) {
+      const raw = obj.error
+      const message =
+        typeof raw === 'string'
+          ? raw
+          : raw && typeof raw === 'object'
+            ? (raw as { message?: unknown }).message
+            : ''
+      const detail =
+        typeof message === 'string'
+          ? message.length > 300
+            ? message.slice(0, 300) + '…'
+            : message
+          : ''
+      throw new ModelUnavailableError(
+        `Model stream failed${detail ? ': ' + detail : '.'}`,
+      )
+    }
+    const delta = obj.choices?.[0]?.delta?.content
+    if (typeof delta === 'string' && delta.length) {
+      controller.enqueue(
+        enc.encode(`data: ${JSON.stringify({ response: delta })}\n\n`),
+      )
+    }
+  }
+
   const transform = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
       buffer += dec.decode(chunk, { stream: true })
       let nl: number
       while ((nl = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, nl).trim()
+        const line = buffer.slice(0, nl)
         buffer = buffer.slice(nl + 1)
-        if (!line.startsWith('data:')) continue
-        const payload = line.slice(5).trim()
-        if (payload === '[DONE]') {
-          controller.enqueue(enc.encode('data: [DONE]\n\n'))
-          continue
-        }
-        try {
-          const obj = JSON.parse(payload) as {
-            choices?: Array<{ delta?: { content?: unknown } }>
-          }
-          const delta = obj.choices?.[0]?.delta?.content
-          if (typeof delta === 'string' && delta.length) {
-            controller.enqueue(
-              enc.encode(`data: ${JSON.stringify({ response: delta })}\n\n`),
-            )
-          }
-        } catch {
-          // keep-alive / comment / partial frame — ignore
-        }
+        consumeLine(line, controller)
+      }
+    },
+    flush(controller) {
+      buffer += dec.decode()
+      if (buffer.trim()) consumeLine(buffer, controller)
+      if (!sawDone) {
+        throw new ModelUnavailableError(
+          'Model stream ended before its completion marker.',
+        )
       }
     },
   })

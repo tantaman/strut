@@ -133,6 +133,7 @@ export function Header({
   onToggleArrange,
   chatOpen,
   onToggleChat,
+  onOpenStyle,
 }: {
   deck: DeckRow | null
   activeSlide: SlideDetail | null
@@ -146,6 +147,7 @@ export function Header({
   // nudge); state is owned by the editor page so the panel can mount alongside the well/stage.
   chatOpen: boolean
   onToggleChat: () => void
+  onOpenStyle: () => void
 }) {
   const editor = useEditor()
   const mutate = useMutate()
@@ -418,43 +420,6 @@ export function Header({
     setBg(scope, klass)
   }
 
-  // ---- live drag preview -------------------------------------------------------------------------
-  // While the native color picker is dragged it streams frames; fold them into one debounced write per
-  // target so the deck updates in real time without flooding history. Custom bg/surface picks assign
-  // `bg-custom-<hex>` WITHOUT minting a class per frame — resolveBackground/resolveSurface read the hex
-  // straight out of the class name, so the editor previews instantly; the `<style>` rule is minted once
-  // on commit (setCustom, fired by the picker's terminating `change`).
-  function setBgLive(scope: 'bg' | 'surface', value: string) {
-    if (!deck) return
-    const patch = scope === 'bg' ? { background: value } : { surface: value }
-    mutate.setDeckTheme.folded(
-      { key: `deck-theme:${scope}` },
-      { id: deck.id, ...patch, now: Date.now() },
-    )
-  }
-
-  function setCustomLive(scope: 'bg' | 'surface', hex: string) {
-    const bare = hex.replace(/^#+/, '').toLowerCase()
-    setBgLive(scope, `bg-custom-${bare}`)
-  }
-
-  function setTextThemeLive(
-    patch: Partial<
-      Record<
-        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
-        string
-      >
-    >,
-  ) {
-    if (!deck) return
-    // One target per drag (a single color input) → key the fold on that column.
-    const key = Object.keys(patch)[0] ?? 'text'
-    mutate.setDeckTheme.folded(
-      { key: `deck-theme:${key}` },
-      { id: deck.id, ...patch, now: Date.now() },
-    )
-  }
-
   return (
     <div className="hdr">
       {editingObjects && (
@@ -597,14 +562,29 @@ export function Header({
 
             <div className="hdr__sep" />
             <div className="hdr__group">
-              <div style={{ position: 'relative' }} ref={themeRef}>
+              <div className="hdr__design" ref={themeRef}>
                 <button
-                  className="btn"
-                  onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
-                  title="Theme & custom CSS"
+                  className="btn hdr__design-main"
+                  onClick={() => {
+                    setMenu(null)
+                    onOpenStyle()
+                  }}
+                  title="Match a look with AI"
                   disabled={!deck}
                 >
                   <Palette size={16} /> <span className="lbl">Design</span>
+                </button>
+                <button
+                  className="btn hdr__design-more"
+                  type="button"
+                  onClick={() => setMenu(menu === 'theme' ? null : 'theme')}
+                  title="Fine tune design"
+                  aria-label="Fine tune design"
+                  aria-haspopup="menu"
+                  aria-expanded={menu === 'theme'}
+                  disabled={!deck}
+                >
+                  <ChevronDown size={13} />
                 </button>
                 {menu === 'theme' && deck && (
                   <ThemePopover
@@ -612,16 +592,13 @@ export function Header({
                     activeSlide={activeSlide}
                     onBackground={(v) => setBg('bg', v)}
                     onCustomBackground={(hex) => setCustom('bg', hex)}
-                    onCustomBackgroundLive={(hex) => setCustomLive('bg', hex)}
                     onSlideBackground={setSlideBackground}
                     onSlideCustomBackground={setSlideCustomBackground}
                     onSlideSurface={setSlideSurface}
                     onSlideCustomSurface={setSlideCustomSurface}
                     onSurface={(v) => setBg('surface', v)}
                     onCustomSurface={(hex) => setCustom('surface', hex)}
-                    onCustomSurfaceLive={(hex) => setCustomLive('surface', hex)}
                     onText={setTextTheme}
-                    onTextLive={setTextThemeLive}
                     onAlign={setDeckAlign}
                     onEditCss={() => {
                       setMenu(null)
@@ -895,16 +872,13 @@ function ThemePopover({
   activeSlide,
   onBackground,
   onCustomBackground,
-  onCustomBackgroundLive,
   onSlideBackground,
   onSlideCustomBackground,
   onSlideSurface,
   onSlideCustomSurface,
   onSurface,
   onCustomSurface,
-  onCustomSurfaceLive,
   onText,
-  onTextLive,
   onAlign,
   onEditCss,
 }: {
@@ -912,23 +886,13 @@ function ThemePopover({
   activeSlide: SlideDetail | null
   onBackground: (value: string) => void
   onCustomBackground: (hex: string) => void
-  onCustomBackgroundLive: (hex: string) => void
   onSlideBackground: (value: string) => void
   onSlideCustomBackground: (hex: string) => void
   onSlideSurface: (value: string) => void
   onSlideCustomSurface: (hex: string) => void
   onSurface: (value: string) => void
   onCustomSurface: (hex: string) => void
-  onCustomSurfaceLive: (hex: string) => void
   onText: (
-    patch: Partial<
-      Record<
-        'heading_font' | 'heading_color' | 'body_font' | 'body_color',
-        string
-      >
-    >,
-  ) => void
-  onTextLive: (
     patch: Partial<
       Record<
         'heading_font' | 'heading_color' | 'body_font' | 'body_color',
@@ -995,7 +959,6 @@ function ThemePopover({
                 resolve={(v) => resolveBackground(v, v)}
                 onPick={onBackground}
                 onCustom={onCustomBackground}
-                onCustomLive={onCustomBackgroundLive}
                 allowTransparent
                 imageAction={{
                   title: 'Set deck background image',
@@ -1037,7 +1000,6 @@ function ThemePopover({
                 resolve={(v) => resolveSurface(v, v)}
                 onPick={onSurface}
                 onCustom={onCustomSurface}
-                onCustomLive={onCustomSurfaceLive}
                 imageAction={{
                   title: 'Set surface image',
                   active: !!parseBackgroundImageToken(deck.surface),
@@ -1087,7 +1049,6 @@ function ThemePopover({
             <ColorField
               value={deck.heading_color ?? ''}
               onChange={(hex) => onText({ heading_color: hex })}
-              onLive={(hex) => onTextLive({ heading_color: hex })}
             />
           </div>
         </div>
@@ -1106,7 +1067,6 @@ function ThemePopover({
             <ColorField
               value={deck.body_color ?? ''}
               onChange={(hex) => onText({ body_color: hex })}
-              onLive={(hex) => onTextLive({ body_color: hex })}
             />
           </div>
         </div>

@@ -293,6 +293,42 @@ describe('sendChatAction', () => {
     })
   })
 
+  it('posts references as multipart and shows immediate study feedback', async () => {
+    const { rows, store } = fakeStore()
+    let noteBeforeResponse = ''
+    let sentBody: BodyInit | null | undefined
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((_url: string, init?: RequestInit) => {
+        noteBeforeResponse = assistantOf(rows)?.note ?? ''
+        sentBody = init?.body
+        return Promise.resolve(
+          sseStreamResponse([
+            'data: {"response":"Matched the look."}\n\n',
+            'data: {"result":{"say":"Matched the look.","actions":[]}}\n\n',
+            'data: [DONE]\n\n',
+          ]),
+        )
+      }),
+    )
+    const file = new File(['look'], 'look.png', { type: 'image/png' })
+
+    await sendChatAction(store, ctx, 'match this', vi.fn(), {
+      references: [file],
+    })
+
+    expect(noteBeforeResponse).toBe('Studying 1 reference…')
+    expect(sentBody).toBeInstanceOf(FormData)
+    const form = sentBody as FormData
+    expect(form.getAll('reference')).toHaveLength(1)
+    expect(typeof form.get('request')).toBe('string')
+    expect(assistantOf(rows)).toMatchObject({
+      content: 'Matched the look.',
+      note: '',
+      status: 'done',
+    })
+  })
+
   it('keeps the reply but does not apply it after the deck changes', async () => {
     const dispatch = vi.fn()
     vi.stubGlobal(

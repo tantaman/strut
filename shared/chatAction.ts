@@ -24,6 +24,10 @@
 
 import { clampChatRequest } from './chat.ts'
 import type { ChatTurn } from './chat.ts'
+import {
+  MAX_GENERATED_THEME_CSS,
+  sanitizeGeneratedThemeCss,
+} from './generatedThemeCss.ts'
 
 // ---- the action union (v1) ------------------------------------------------------------------------
 
@@ -39,6 +43,9 @@ export type ChatAction =
       body_color?: string
       heading_font?: string // known family, or '' = reset to default
       body_font?: string
+      text_align?: 'left' | 'center' | 'right'
+      /** Full replacement stylesheet, normalized through the generated-theme CSS firewall. */
+      custom_stylesheet?: string
     }
   | { kind: 'set_body'; slideId: string; markdown: string } // rewrite cell 0; preserve sibling cells/layout
   | { kind: 'generate'; description: string; count?: number } // author + append new slides
@@ -78,6 +85,8 @@ export interface ChatActTheme {
   bodyColor: string
   headingFont: string
   bodyFont: string
+  textAlign: string
+  customStylesheet: string
 }
 
 /** The currently-active slide's id + its FULL visible body text (not the 240-char digest excerpt), with
@@ -116,6 +125,7 @@ export const CHAT_ACTION_LIMITS = {
   maxActiveText: 8000, // the active slide's full body, for set_body grounding
   maxActiveNotes: 8000, // the active slide's research notes, for evidence-grounded rewrites
   maxThemeField: 80,
+  maxThemeCssContext: MAX_GENERATED_THEME_CSS,
   maxSlideIds: 150,
   maxSlideId: 200,
   maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
@@ -162,6 +172,11 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
       bodyColor: str(t.bodyColor).slice(0, cap),
       headingFont: str(t.headingFont).slice(0, cap),
       bodyFont: str(t.bodyFont).slice(0, cap),
+      textAlign: str(t.textAlign).slice(0, cap),
+      customStylesheet: str(t.customStylesheet).slice(
+        0,
+        CHAT_ACTION_LIMITS.maxThemeCssContext,
+      ),
     }
   }
   const a = req.activeSlide
@@ -295,6 +310,14 @@ function normalizeOneAction(
       if (hf !== undefined) out.heading_font = hf
       const bf = clampFont(r.body_font, opts.fonts)
       if (bf !== undefined) out.body_font = bf
+      if (
+        r.text_align === 'left' ||
+        r.text_align === 'center' ||
+        r.text_align === 'right'
+      )
+        out.text_align = r.text_align
+      const stylesheet = sanitizeGeneratedThemeCss(r.custom_stylesheet)
+      if (stylesheet !== undefined) out.custom_stylesheet = stylesheet
       // An action that set no usable field is noise — drop it (nothing to apply).
       return Object.keys(out).length > 1 ? out : null
     }

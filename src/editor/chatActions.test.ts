@@ -31,10 +31,19 @@ describe('applyThemePatch', () => {
     const calls: SetDeckThemeArgs[] = []
     const mutate = { setDeckTheme: (a: SetDeckThemeArgs) => calls.push(a) }
     const history = new History()
-    const deck = { id: 'd', background: 'bg-default', heading_color: '' }
+    const deck = {
+      id: 'd',
+      background: 'bg-default',
+      heading_color: '',
+      custom_stylesheet: '.strut-md { color: blue; }',
+    }
 
     applyThemePatch(
-      { background: 'bg-custom-abc', heading_color: 'ff0000' },
+      {
+        background: 'bg-custom-abc',
+        heading_color: 'ff0000',
+        custom_stylesheet: '.strut-md { color: red; }',
+      },
       { mutate, history, deck },
       'AI theme',
     )
@@ -45,6 +54,7 @@ describe('applyThemePatch', () => {
       id: 'd',
       background: 'bg-custom-abc',
       heading_color: 'ff0000',
+      custom_stylesheet: '.strut-md { color: red; }',
     })
     expect(history.canUndo).toBe(true)
     expect(history.undoLabel).toBe('AI theme')
@@ -56,6 +66,7 @@ describe('applyThemePatch', () => {
       id: 'd',
       background: 'bg-default',
       heading_color: '',
+      custom_stylesheet: '.strut-md { color: blue; }',
     })
   })
 
@@ -63,6 +74,25 @@ describe('applyThemePatch', () => {
     const mutate = { setDeckTheme: vi.fn() }
     const history = new History()
     applyThemePatch({}, { mutate, history, deck: { id: 'd' } })
+    expect(mutate.setDeckTheme).not.toHaveBeenCalled()
+    expect(history.canUndo).toBe(false)
+  })
+
+  it('does not create a fake undo when every value is already current', () => {
+    const mutate = { setDeckTheme: vi.fn() }
+    const history = new History()
+    applyThemePatch(
+      { background: 'bg-default', custom_stylesheet: '.x { color: red; }' },
+      {
+        mutate,
+        history,
+        deck: {
+          id: 'd',
+          background: 'bg-default',
+          custom_stylesheet: '.x { color: red; }',
+        },
+      },
+    )
     expect(mutate.setDeckTheme).not.toHaveBeenCalled()
     expect(history.canUndo).toBe(false)
   })

@@ -8,13 +8,19 @@
 // sign-in nudge (the server route enforces it too), mirroring AI Arrange / Generate.
 
 import { useEffect, useRef, useState } from 'react'
-import { RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
+import { ImagePlus, RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
 import { authClient } from '../rindle/authClient'
 import { markdownToHtml } from './markdown'
 import { useChat } from './aiChat'
 import type { ChatMessage } from './aiChat'
 import type { DeckRoot, SlideDetail } from './deckDetail'
 import type { DeckChatContext } from './chatNarration'
+import {
+  MAX_STYLE_REFERENCE_BYTES,
+  MAX_STYLE_REFERENCES,
+  MAX_STYLE_REFERENCES_TOTAL_BYTES,
+  STYLE_REFERENCE_MIMES,
+} from '../../shared/styleReferences'
 
 export function ChatPanel({
   deckId,
@@ -23,6 +29,7 @@ export function ChatPanel({
   activeSlide,
   deckContext,
   canEdit = false,
+  styleIntent = 0,
   onClose,
 }: {
   deckId: string
@@ -34,6 +41,8 @@ export function ChatPanel({
   deckContext: DeckChatContext
   /** Secure-by-default until the deck route wires the resolved owner/collaborator permission. */
   canEdit?: boolean
+  /** Incremented when Design hands off to this ambient surface. */
+  styleIntent?: number
   onClose: () => void
 }) {
   // Membership gate (a promoted, non-anonymous account). During the initial session resolve we treat the
@@ -49,8 +58,18 @@ export function ChatPanel({
     { deck, activeSlide, deckContext, canEdit },
   )
   const [text, setText] = useState('')
+  const [references, setReferences] = useState<PendingReference[]>([])
+  const [referenceError, setReferenceError] = useState<string | null>(null)
+  const [draggingReferences, setDraggingReferences] = useState(false)
+  const [styleReady, setStyleReady] = useState(false)
   const threadRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const previewUrls = useRef(new Set<string>())
+  const referenceTurn = useRef<{
+    pending: boolean
+    previousAssistantId: string | null
+  }>({ pending: false, previousAssistantId: null })
 
   // Follow the newest content as the thread grows AND as the streaming turn fills in (messages is a fresh
   // array on every token flush, so this fires per frame during a stream).
@@ -60,18 +79,165 @@ export function ChatPanel({
   }, [messages])
 
   useEffect(() => {
-    if (isMember && canEdit) inputRef.current?.focus()
-  }, [isMember, canEdit])
+    if (isMember && canEdit && !styleIntent && hasFinePointer())
+      inputRef.current?.focus()
+  }, [isMember, canEdit, styleIntent])
+
+  useEffect(() => {
+    if (!styleIntent) return
+    setStyleReady(true)
+    setReferenceError(null)
+  }, [styleIntent])
+
+  useEffect(
+    () => () => {
+      for (const url of previewUrls.current) URL.revokeObjectURL(url)
+      previewUrls.current.clear()
+    },
+    [],
+  )
+
+  useEffect(() => {
+    const turn = referenceTurn.current
+    if (!turn.pending) return
+    const assistant = [...messages]
+      .reverse()
+      .find((message) => message.role === 'assistant')
+    if (
+      !assistant ||
+      assistant.id === turn.previousAssistantId ||
+      assistant.status === 'streaming'
+    )
+      return
+    turn.pending = false
+    if (assistant.status === 'done') {
+      clearReferences()
+      setStyleReady(false)
+    }
+  }, [messages])
+
+  function addReferences(files: File[]) {
+    if (busy || !canEdit) return
+    const room = MAX_STYLE_REFERENCES - references.length
+    if (room <= 0) {
+      setReferenceError('Add up to 5 style references.')
+      return
+    }
+    const next: PendingReference[] = []
+    let total = references.reduce(
+      (bytes, reference) => bytes + reference.file.size,
+      0,
+    )
+    let error: string | null =
+      files.length > room ? 'Add up to 5 style references.' : null
+    for (const original of files.slice(0, room)) {
+      const file = withInferredImageType(original)
+      if (!file) {
+        error = 'Use JPEG, PNG, or WebP images.'
+        continue
+      }
+      if (!STYLE_REFERENCE_TYPES.has(file.type)) {
+        error = 'Use JPEG, PNG, or WebP images.'
+        continue
+      }
+      if (!file.size) {
+        error = 'That image is empty.'
+        continue
+      }
+      if (file.size > MAX_STYLE_REFERENCE_BYTES) {
+        error = 'Each reference must be under 4 MB.'
+        continue
+      }
+      if (total + file.size > MAX_STYLE_REFERENCES_TOTAL_BYTES) {
+        error = 'Style references must be under 8 MB total.'
+        continue
+      }
+      total += file.size
+      const previewUrl = URL.createObjectURL(file)
+      previewUrls.current.add(previewUrl)
+      next.push({ id: previewUrl, file, previewUrl })
+    }
+    if (next.length) {
+      setReferences((current) => [...current, ...next])
+      setStyleReady(true)
+    }
+    setReferenceError(error)
+  }
+
+  function removeReference(id: string) {
+    setReferences((current) => {
+      const removed = current.find((reference) => reference.id === id)
+      if (removed) {
+        URL.revokeObjectURL(removed.previewUrl)
+        previewUrls.current.delete(removed.previewUrl)
+      }
+      return current.filter((reference) => reference.id !== id)
+    })
+    setReferenceError(null)
+  }
+
+  function clearReferences() {
+    for (const reference of references) {
+      URL.revokeObjectURL(reference.previewUrl)
+      previewUrls.current.delete(reference.previewUrl)
+    }
+    setReferences([])
+    setReferenceError(null)
+  }
 
   function submit() {
-    const t = text.trim()
+    const t =
+      text.trim() ||
+      (references.length
+        ? 'Restyle this deck using these images as visual references.'
+        : '')
     if (!t || busy || !canEdit) return
-    send(t)
+    const files = references.map((reference) => reference.file)
+    if (files.length) {
+      referenceTurn.current = {
+        pending: true,
+        previousAssistantId:
+          [...messages]
+            .reverse()
+            .find((message) => message.role === 'assistant')?.id ?? null,
+      }
+      send(t, files)
+    } else {
+      send(t)
+      setStyleReady(false)
+    }
     setText('')
   }
 
   return (
-    <aside className="chat" aria-label="AI chat">
+    <aside
+      className={'chat' + (draggingReferences ? ' is-reference-drop' : '')}
+      aria-label="AI chat"
+      onDragEnter={(event) => {
+        if (!isFileDrag(event.dataTransfer)) return
+        event.preventDefault()
+        event.stopPropagation()
+        if (isMember && canEdit && !busy) setDraggingReferences(true)
+      }}
+      onDragOver={(event) => {
+        if (!isFileDrag(event.dataTransfer)) return
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onDragLeave={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null))
+          return
+        setDraggingReferences(false)
+      }}
+      onDrop={(event) => {
+        if (!isFileDrag(event.dataTransfer)) return
+        event.preventDefault()
+        event.stopPropagation()
+        setDraggingReferences(false)
+        if (isMember && canEdit && !busy)
+          addReferences(Array.from(event.dataTransfer.files))
+      }}
+    >
       <header className="chat__head">
         <div className="chat__title">
           <Sparkles size={15} /> Chat
@@ -79,7 +245,11 @@ export function ChatPanel({
         <div className="chat__head-actions">
           <button
             className="chat__icon"
-            onClick={clear}
+            onClick={() => {
+              clear()
+              clearReferences()
+              setStyleReady(false)
+            }}
             disabled={!canEdit || messages.length === 0}
             title="Clear chat"
           >
@@ -100,9 +270,19 @@ export function ChatPanel({
           <div className="chat__thread" ref={threadRef}>
             {messages.length === 0 ? (
               <div className="chat__empty">
-                Ask for critique or tell the AI to change the deck: “does this
-                flow?”, “make the background darker”, “add three slides on
-                pricing”, “tighten this slide”.
+                {styleReady ? (
+                  <>
+                    Drop up to five images that capture the look. Strut will
+                    translate their palette, type, rhythm, and finish into one
+                    reversible theme.
+                  </>
+                ) : (
+                  <>
+                    Ask for critique or tell the AI to change the deck: “does
+                    this flow?”, “make the background darker”, “add three slides
+                    on pricing”, “tighten this slide”.
+                  </>
+                )}
               </div>
             ) : (
               messages.map((m) => <ChatBubble key={m.id} message={m} />)
@@ -119,12 +299,61 @@ export function ChatPanel({
                 </div>
               </div>
             )}
+            {references.length > 0 && (
+              <div className="chat__references" aria-label="Style references">
+                {references.map((reference) => (
+                  <div className="chat__reference" key={reference.id}>
+                    <img src={reference.previewUrl} alt={reference.file.name} />
+                    <button
+                      type="button"
+                      onClick={() => removeReference(reference.id)}
+                      disabled={busy}
+                      title={`Remove ${reference.file.name}`}
+                      aria-label={`Remove ${reference.file.name}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {referenceError && (
+              <div className="chat__reference-error" role="alert">
+                {referenceError}
+              </div>
+            )}
             <div className="chat__composer">
+              <input
+                ref={fileRef}
+                className="chat__file-input"
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                disabled={busy}
+                onChange={(event) => {
+                  addReferences(Array.from(event.currentTarget.files ?? []))
+                  event.currentTarget.value = ''
+                }}
+              />
+              <button
+                type="button"
+                className="chat__attach"
+                onClick={() => fileRef.current?.click()}
+                disabled={busy || references.length >= MAX_STYLE_REFERENCES}
+                title="Add style references"
+                aria-label="Add style references"
+              >
+                <ImagePlus size={17} />
+              </button>
               <textarea
                 ref={inputRef}
                 className="chat__input"
                 rows={2}
-                placeholder="Ask or tell the AI what to change… (⌘/Ctrl+Enter)"
+                placeholder={
+                  styleReady
+                    ? 'Optional: what should Strut borrow from these?'
+                    : 'Ask or tell the AI what to change… (⌘/Ctrl+Enter)'
+                }
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
@@ -138,7 +367,7 @@ export function ChatPanel({
               <button
                 className="chat__send"
                 onClick={submit}
-                disabled={busy || !text.trim()}
+                disabled={busy || (!text.trim() && references.length === 0)}
                 title="Send (⌘/Ctrl+Enter)"
               >
                 {busy ? (
@@ -151,8 +380,55 @@ export function ChatPanel({
           </div>
         </>
       )}
+      {draggingReferences && (
+        <div className="chat__drop-overlay">Drop style references</div>
+      )}
     </aside>
   )
+}
+
+const STYLE_REFERENCE_TYPES = new Set<string>(STYLE_REFERENCE_MIMES)
+
+interface PendingReference {
+  id: string
+  file: File
+  previewUrl: string
+}
+
+function isFileDrag(dataTransfer: DataTransfer): boolean {
+  return (
+    Array.from(dataTransfer.types).includes('Files') ||
+    dataTransfer.files.length > 0
+  )
+}
+
+function hasFinePointer(): boolean {
+  const matchMedia = (
+    window as unknown as {
+      matchMedia?: (query: string) => MediaQueryList
+    }
+  ).matchMedia
+  return matchMedia?.('(pointer: fine)').matches ?? false
+}
+
+function withInferredImageType(file: File): File | null {
+  if (STYLE_REFERENCE_TYPES.has(file.type)) return file
+  if (file.type) return null
+  const extension = file.name.split('.').pop()?.toLowerCase()
+  const type =
+    extension === 'jpg' || extension === 'jpeg'
+      ? 'image/jpeg'
+      : extension === 'png'
+        ? 'image/png'
+        : extension === 'webp'
+          ? 'image/webp'
+          : null
+  return type
+    ? new File([file], file.name, {
+        type,
+        lastModified: file.lastModified,
+      })
+    : null
 }
 
 /** One thread turn. User turns are plain-text bubbles on the right; assistant turns render Markdown
@@ -194,7 +470,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
           <span className="chat__caret" />
         ) : null}
         {streaming && message.note ? (
-          <div className="chat__note">
+          <div className="chat__note" role="status" aria-live="polite">
             <span className="chat__dots" aria-hidden>
               <span />
               <span />

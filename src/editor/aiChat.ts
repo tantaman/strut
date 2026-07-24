@@ -341,6 +341,8 @@ export interface ActionSendContext {
 export interface ActionSendOptions {
   /** Rechecked after the response arrives, immediately before any model-authored mutation may run. */
   isRequestCurrent?: () => boolean
+  /** Ephemeral visual references for this turn. They are multipart-uploaded and never persisted. */
+  references?: readonly File[]
 }
 
 /** Run ONE action-capable chat turn: append the user turn + a working assistant turn, POST /api/chat/act,
@@ -358,6 +360,7 @@ export async function sendChatAction(
 ): Promise<{ label: string } | null> {
   const text = userText.trim()
   if (!text) return null
+  const references = options.references?.slice(0, 5) ?? []
   const now = Date.now()
 
   const userRow: ChatMessageRow = {
@@ -377,7 +380,9 @@ export async function sendChatAction(
     role: 'assistant',
     content: '',
     status: 'streaming',
-    note: '',
+    note: references.length
+      ? `Studying ${references.length} reference${references.length === 1 ? '' : 's'}…`
+      : '',
     created: now + 1,
   }
   await store.writeLocal((tx) => {
@@ -403,19 +408,33 @@ export async function sendChatAction(
       theme: ctx.theme,
       activeSlide: ctx.activeSlide,
     }
+    const payload = references.length ? new FormData() : null
+    if (payload) {
+      payload.append('request', JSON.stringify(body))
+      for (const file of references)
+        payload.append('reference', file, file.name)
+    }
     res = await fetch(appPath('/api/chat/act'), {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: payload ? undefined : { 'content-type': 'application/json' },
       credentials: 'same-origin',
-      body: JSON.stringify(body),
+      body: payload ?? JSON.stringify(body),
     })
   } catch {
-    await commit({ status: 'error', content: 'Network error — try again.' })
+    await commit({
+      status: 'error',
+      content: 'Network error — try again.',
+      note: '',
+    })
     return null
   }
 
   if (!res.ok || !res.body) {
-    await commit({ status: 'error', content: await friendlyError(res) })
+    await commit({
+      status: 'error',
+      content: await friendlyError(res),
+      note: '',
+    })
     return null
   }
 
@@ -430,12 +449,12 @@ export async function sendChatAction(
   const canRaf = typeof requestAnimationFrame === 'function'
   const flush = () => {
     frame = null
-    void commit({ content: acc, status: 'streaming' })
+    void commit({ content: acc, note: '', status: 'streaming' })
   }
   const schedule = () => {
     if (frame !== null) return
     if (canRaf) frame = requestAnimationFrame(flush)
-    else void commit({ content: acc, status: 'streaming' })
+    else void commit({ content: acc, note: '', status: 'streaming' })
   }
   const cancel = () => {
     if (frame !== null && canRaf) cancelAnimationFrame(frame)
@@ -474,6 +493,7 @@ export async function sendChatAction(
     cancel()
     await commit({
       content: acc || 'The response was interrupted — try again.',
+      note: '',
       status: 'error',
     })
     return null
@@ -489,6 +509,7 @@ export async function sendChatAction(
   if (actions.length === 0) {
     await commit({
       content: say || acc || '(no change needed)',
+      note: '',
       status: 'done',
     })
     return null
@@ -557,7 +578,7 @@ export interface UseChat {
   /** The thread for this deck, in `created` order. Reactive — every `writeLocal` re-renders. */
   messages: readonly ChatMessage[]
   /** Send one chat turn. The model may answer only, or apply normalized deck changes. */
-  send: (text: string) => void
+  send: (text: string, references?: readonly File[]) => void
   /** True while an assistant turn is still streaming / an edit is being applied. */
   busy: boolean
   /** Clear the whole thread for this deck (removes every local row). */
@@ -595,6 +616,8 @@ function buildActGrounding(
       bodyColor: rt.bodyColor,
       headingFont: rt.headingFont,
       bodyFont: rt.bodyFont,
+      textAlign: deck.text_align || 'left',
+      customStylesheet: deck.custom_stylesheet || '',
     }
   }
   if (activeSlide) {
@@ -695,7 +718,7 @@ export function useChat(
   const busy = messages.some((m) => m.status === 'streaming')
 
   const send = useCallback(
-    (text: string) => {
+    (text: string, references: readonly File[] = []) => {
       if (!store || busy || !canEdit || !text.trim()) return
       // History = only settled turns — an in-flight/errored assistant row isn't real model context.
       const convo: ChatTurn[] = messages
@@ -741,6 +764,7 @@ export function useChat(
           isRequestCurrent: () =>
             historyIsCurrent() &&
             editVersionRef.current.version === sentEditVersion,
+          references,
         },
       ).then((tip) => {
         if (!tip) return
