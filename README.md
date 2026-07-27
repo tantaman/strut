@@ -85,6 +85,23 @@ separately. `pnpm deploy` builds the Worker (`CF=1 vite build`) and ships it wit
 `pnpm dev`/`pnpm build` stay on Node and are unaffected. See **[`docs/DEPLOY_CLOUDFLARE.md`](docs/DEPLOY_CLOUDFLARE.md)**
 for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
+## AI: who pays
+
+The ✨ features (Chat and everything it can do — author slides, arrange, restyle, edit) run on a model
+**the user supplies**: connect an [OpenRouter](https://openrouter.ai/keys) key once and AI turns on
+across the editor, on their credits, with no account required. A **paid plan** (where a deployment has
+one — see below) is the other way in.
+
+There is deliberately **no free app-paid tier**. Without a connected key or an entitlement,
+`resolveModel` (`server/llm.ts`) returns no model at all, every ✨ route answers `402`, and the editor
+shows a connect-a-model gate instead of the composer. An unmetered free tier on someone else's provider
+bill only works if a human is watching for abuse — so the default is that nobody's key gets spent by
+strangers.
+
+Self-hosting on **your own** provider key (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY`, or the Workers AI
+binding) and happy for every signed-in member to use it? Opt in explicitly with **`STRUT_APP_PAID_AI=1`**
+(see [`.env.example`](.env.example)). Off by default, everywhere.
+
 ## Commercial / hosted (optional)
 
 Strut is fully open source and self-hostable for free. The **official hosted** Strut (marketing page +

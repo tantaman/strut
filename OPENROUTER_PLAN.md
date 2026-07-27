@@ -75,6 +75,10 @@ Three earlier forks are resolved and baked into the phases below:
 1. **Guests with a connected key CAN use the ✨ features.** A BYO call costs the app nothing and every
    session (guest or member) is unforgeable, so the gate becomes "some session + a connected model,"
    not "member." App-paid calls stay member-only.
+   > **Superseded (2026-07-24):** app-paid calls are now **paid-plan only** — being a member is no
+   > longer enough. BYO is the default way ✨ turns on; `resolveModel` returns `null` for everyone else
+   > and the routes answer `402`. A self-hoster re-opens the app-paid path with `STRUT_APP_PAID_AI=1`.
+   > See `server/entitlements.ts` `canUseAppAi` and the README's "AI: who pays".
 2. **No quota for BYO calls.** `consume*Quota` is skipped entirely when the user's own key is in use;
    only the per-isolate burst throttle remains (protects the Worker, not model cost).
 3. **BYOK (paste an API key) ships first.** OpenRouter OAuth PKCE is a Phase 5 fast-follow; the

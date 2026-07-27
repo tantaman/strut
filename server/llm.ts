@@ -3,15 +3,18 @@
 //   • BYO — the user connected an OpenRouter key (server/modelCred.ts): call OpenRouter with THEIR key,
 //     THEY pay. OpenRouter is OpenAI-compatible, so it's a plain fetch — no binding, and it works under
 //     `pnpm dev` (Node) too, unlike the Workers AI object binding.
-//   • default (app pays) — photo-reference styling uses OpenAI GPT-5.4 mini when OPENAI_API_KEY is set;
-//     other lanes use Anthropic Claude Haiku when ANTHROPIC_API_KEY is set, else Cloudflare Workers AI.
-//     Every app-paid choice is metered (choice.kind !== 'openrouter') behind the existing quota + gate.
+//   • default (app pays) — PAID PLANS ONLY (server/entitlements.ts `canUseAppAi`; a self-hoster on their
+//     own key opts the instance in with STRUT_APP_PAID_AI=1). Photo-reference styling uses OpenAI GPT-5.4
+//     mini when OPENAI_API_KEY is set; other lanes use Anthropic Claude Haiku when ANTHROPIC_API_KEY is
+//     set, else Cloudflare Workers AI. Every app-paid choice is metered (choice.kind !== 'openrouter')
+//     behind the existing quota. No entitlement and no key ⇒ resolveModel returns null and the route 402s.
 //
 // This folds together the three formerly-duplicated loadAi()/AiBinding/extractJson copies that lived in
 // server/{arrange,generate,chat}.ts. Those adapters now just build messages + schema and call callModel /
 // streamModel; the ROUTE resolves the choice (resolveModel) and passes it in, and reads choice.kind for
 // its pay/guest/quota branching (a BYO call skips the app quota and is open to guests — the user pays).
 
+import { canUseAppAi, getEntitlements } from './entitlements.ts'
 import { getCredential } from './modelCred.ts'
 
 // The Workers AI instruct model used when the app pays (unchanged from the adapters): structured JSON +
@@ -69,13 +72,20 @@ export class ModelUnavailableError extends Error {
   }
 }
 
-/** Pick the backend for a user: their connected OpenRouter key if present (they pay), else the scoped
- *  app-paid default — GPT-5.4 mini for visual styling, Anthropic Haiku for general inference when set,
- *  otherwise Workers AI. A credential read/decrypt failure falls through to the same app-paid default. */
+/** Pick the backend for a user, or NULL when there is no model they may spend.
+ *
+ *  - Connected OpenRouter key → use it. They pay, so it's always allowed (guest or member).
+ *  - No key → the APP would pay, which is a paid-plan feature (server/entitlements.ts `canUseAppAi`).
+ *    Not entitled ⇒ **null**, and the caller answers 402 rather than burning the app's provider bill.
+ *  - Entitled ⇒ the scoped app-paid default: GPT-5.4 mini for visual styling, Anthropic Haiku for general
+ *    inference when set, otherwise Workers AI.
+ *
+ *  Returning null (rather than throwing) makes the gate type-checked: every route must handle "no model".
+ *  A credential read/decrypt failure falls through to the same app-paid branch — and therefore the gate. */
 export async function resolveModel(
   userId: string,
   options: { purpose?: 'general' | 'style' } = {},
-): Promise<ModelChoice> {
+): Promise<ModelChoice | null> {
   try {
     const cred = await getCredential(userId)
     if (cred && cred.provider === 'openrouter' && cred.apiKey) {
@@ -95,6 +105,10 @@ export async function resolveModel(
       err instanceof Error ? err.message : err,
     )
   }
+  // Past this point the APP pays. That is the paid surface (or a self-hoster's explicit opt-in) — no
+  // connected key and no entitlement means no model at all.
+  if (!canUseAppAi(await getEntitlements(userId))) return null
+
   if (options.purpose === 'style') {
     const openaiKey = process.env.OPENAI_API_KEY
     if (openaiKey) {

@@ -36,11 +36,12 @@ export const Route = createFileRoute('/api/variant')({
 
         const { resolveModel } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
-        const byo = choice.kind === 'openrouter'
-
-        if (!byo && account.isAnonymous) {
-          return json({ error: 'sign_in_required' }, 401)
+        // Null = no connected key and no plan that pays for one: nothing this caller may spend.
+        if (!choice) {
+          const { modelRequired } = await import('../../server/entitlements')
+          return json(modelRequired(), 402)
         }
+        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }

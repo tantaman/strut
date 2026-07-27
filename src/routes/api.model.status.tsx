@@ -2,9 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 
 // "Connect your model" — status. GET whether the current session has a connected BYO model, and which
 // (provider + model id), WITHOUT ever returning the key. Available to ANY session, guest or member: a
-// guest can connect their own OpenRouter key and use the ✨ features on their own credits (the login gate
-// only bites when there's no key to pay with — OPENROUTER_PLAN.md "Decisions"). No session at all → simply
-// "not connected". Cheap: hasCredential does no crypto, so this never touches MODEL_CRED_KEY.
+// guest can connect their own OpenRouter key and use the ✨ features on their own credits. No session at
+// all → simply "not connected". Cheap: hasCredential does no crypto, so this never touches MODEL_CRED_KEY.
+//
+// It also answers `appPaid` — whether this viewer's PLAN pays for inference (server/entitlements.ts
+// canUseAppAi). Together the two fields are the client's whole answer to "can I use ✨ at all?":
+// `connected || appPaid`. The ChatPanel reads exactly that to decide between the chat and its
+// connect-a-model gate; the routes enforce the same rule authoritatively.
 
 function json(data: unknown, status: number): Response {
   return new Response(JSON.stringify(data), {
@@ -13,7 +17,12 @@ function json(data: unknown, status: number): Response {
   })
 }
 
-const DISCONNECTED = { connected: false, provider: null, model: null }
+const DISCONNECTED = {
+  connected: false,
+  provider: null,
+  model: null,
+  appPaid: false,
+}
 
 export const Route = createFileRoute('/api/model/status')({
   server: {
@@ -23,12 +32,16 @@ export const Route = createFileRoute('/api/model/status')({
         const account = await resolveSessionAccount(request)
         if (!account) return json(DISCONNECTED, 200)
 
+        const { canUseAppAi, getEntitlements } =
+          await import('../../server/entitlements')
+        const appPaid = canUseAppAi(await getEntitlements(account.id))
+
         const { hasCredential } = await import('../../server/modelCred')
         try {
-          return json(await hasCredential(account.id), 200)
+          return json({ ...(await hasCredential(account.id)), appPaid }, 200)
         } catch (err) {
           console.error('[model.status] failed:', err)
-          return json(DISCONNECTED, 200)
+          return json({ ...DISCONNECTED, appPaid }, 200)
         }
       },
     },

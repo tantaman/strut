@@ -4,8 +4,8 @@ import { createFileRoute } from '@tanstack/react-router'
 // stored in R2 (server/image.ts). Image generation is Workers-AI-only (there's no BYO-OpenRouter image
 // path), so it is ALWAYS app-paid — hence the same two boundaries as /api/generate applied to EVERY
 // caller (not just the app-paid path):
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can trigger
-//      the control but can't spend the app's inference budget.
+//   1. PLAN GATE — a session is required, and the plan must include app-paid inference (canUseAppAi).
+//      A connected BYO key does NOT unlock this lane: there is no image path that spends the user's key.
 //   2. COST BOUND — a cheap per-isolate burst throttle plus the AUTHORITATIVE durable daily quota in
 //      server/quota.ts (image_usage, D1), consumed before the model call and refunded if it fails.
 
@@ -40,6 +40,15 @@ export const Route = createFileRoute('/api/image')({
         if (!account || account.isAnonymous) {
           return json({ error: 'sign_in_required' }, 401)
         }
+        // Image generation ALWAYS spends the app's own account, so a connected BYO key can't pay for it:
+        // it is plan-gated outright (server/entitlements.ts canUseAppAi). The chat lane surfaces the
+        // message as the assistant's reply when it tried to add a generated image.
+        const { getEntitlements, aiMetering, appAiRequired, canUseAppAi } =
+          await import('../../server/entitlements')
+        const ent = await getEntitlements(account.id)
+        if (!canUseAppAi(ent)) {
+          return json(appAiRequired('Image generation'), 402)
+        }
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -59,9 +68,6 @@ export const Route = createFileRoute('/api/image')({
         // `ai.meter === false` (unlimited) skips it; otherwise consumeAiQuota charges the plan's window
         // (a paid plan's pooled monthly allowance, or the free tier's daily image cap).
         const now = Date.now()
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ent = await getEntitlements(account.id)
         const ai = aiMetering(ent, 'image')
         // Per-plan storage ceiling (free tier). null (self-host / Pro) skips it. Reject before spending
         // inference when there's no headroom; the generated image's bytes are recorded after a success.

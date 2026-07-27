@@ -8,19 +8,20 @@ import type { DeckChatContext } from './chatNarration'
 const mocks = vi.hoisted(() => ({
   send: vi.fn(),
   useChat: vi.fn(),
+  useModelStatus: vi.fn(),
 }))
 
 vi.mock('./aiChat', () => ({
   useChat: mocks.useChat,
 }))
 
-vi.mock('../rindle/authClient', () => ({
-  authClient: {
-    useSession: () => ({
-      data: { user: { id: 'member', isAnonymous: false } },
-    }),
-    signIn: { social: vi.fn() },
-  },
+// The panel's access signal: a connected key or a plan that pays for inference. Default here is "the
+// viewer connected their own model", the ordinary way ✨ is on.
+vi.mock('../rindle/modelClient', () => ({
+  useModelStatus: mocks.useModelStatus,
+  getModelStatus: vi.fn(),
+  connectModel: vi.fn(),
+  disconnectModel: vi.fn(),
 }))
 
 const deckContext: DeckChatContext = {
@@ -31,6 +32,16 @@ const deckContext: DeckChatContext = {
 beforeEach(() => {
   mocks.send.mockReset()
   mocks.useChat.mockReset()
+  mocks.useModelStatus.mockReset().mockReturnValue({
+    status: {
+      connected: true,
+      provider: 'openrouter',
+      model: null,
+      appPaid: false,
+    },
+    loading: false,
+    refresh: vi.fn(),
+  })
   mocks.useChat.mockReturnValue({
     messages: [],
     send: mocks.send,
@@ -75,6 +86,56 @@ describe('ChatPanel permissions', () => {
       [],
       expect.objectContaining({ canEdit: false }),
     )
+  })
+
+  it('offers the connect flow instead of the composer when there is no model to run on', () => {
+    mocks.useModelStatus.mockReturnValue({
+      status: {
+        connected: false,
+        provider: null,
+        model: null,
+        appPaid: false,
+      },
+      loading: false,
+      refresh: vi.fn(),
+    })
+
+    render(
+      <ChatPanel
+        deckId="d1"
+        slides={[]}
+        deck={null}
+        activeSlide={null}
+        deckContext={deckContext}
+        canEdit
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Connect a model' })).toBeTruthy()
+  })
+
+  it('composes on a paid plan with no connected key', () => {
+    mocks.useModelStatus.mockReturnValue({
+      status: { connected: false, provider: null, model: null, appPaid: true },
+      loading: false,
+      refresh: vi.fn(),
+    })
+
+    render(
+      <ChatPanel
+        deckId="d1"
+        slides={[]}
+        deck={null}
+        activeSlide={null}
+        deckContext={deckContext}
+        canEdit
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('textbox')).toBeTruthy()
   })
 
   it('lets an editable member compose and send', () => {

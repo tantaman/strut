@@ -4247,11 +4247,11 @@ button {
   font-size: 13px;
   line-height: 1.5;
 }
-.chat__gate-signin {
+.chat__gate-actions {
   display: flex;
   gap: 8px;
 }
-.chat__gate-signin button {
+.chat__gate-actions button {
   padding: 7px 14px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -4260,7 +4260,7 @@ button {
   font-weight: 600;
   font-size: 13px;
 }
-.chat__gate-signin button:hover {
+.chat__gate-actions button:hover {
   border-color: var(--coral);
   color: var(--coral);
 }

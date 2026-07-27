@@ -4,12 +4,18 @@
 //
 // Trust boundary at render: the assistant's turn is free Markdown, so it flows through the app's existing
 // `markdownToHtml` sink (marked → DOMPurify) — the SAME sanitizer the slide surfaces use — before it
-// reaches dangerouslySetInnerHTML. User turns render as plain text (React escapes them). Guests see a
-// sign-in nudge (the server route enforces it too), mirroring AI Arrange / Generate.
+// reaches dangerouslySetInnerHTML. User turns render as plain text (React escapes them).
+//
+// Access: AI runs on a model the VIEWER supplies (a connected OpenRouter key) or one their PAID plan pays
+// for — there is no free app-paid tier. `/api/model/status` answers both bits, so the panel shows either
+// the composer or a connect-a-model gate. Sign-in is not part of this: a guest with a key can chat, and a
+// member without one can't. The routes enforce the same rule (402); this is UX only.
 
 import { useEffect, useRef, useState } from 'react'
 import { ImagePlus, RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
-import { authClient } from '../rindle/authClient'
+import { ModelModal } from '../rindle/ModelControl'
+import { useModelStatus } from '../rindle/modelClient'
+import type { ModelStatus } from '../rindle/modelClient'
 import { markdownToHtml } from './markdown'
 import { useChat } from './aiChat'
 import type { ChatMessage } from './aiChat'
@@ -45,12 +51,11 @@ export function ChatPanel({
   styleIntent?: number
   onClose: () => void
 }) {
-  // Membership gate (a promoted, non-anonymous account). During the initial session resolve we treat the
-  // user as a non-member (nudge shown). The route enforces the same gate server-side.
-  const { data: session } = authClient.useSession()
-  const isMember =
-    !!session?.user &&
-    (session.user as { isAnonymous?: boolean }).isAnonymous !== true
+  // Does this viewer have a model to run on — their own connected key, or one their plan pays for?
+  // While the status resolves we show neither the composer nor the gate, so an entitled author never sees
+  // a "connect a model" flash. The route enforces the same rule server-side.
+  const { status: model, loading: modelLoading, refresh } = useModelStatus()
+  const aiReady = model.connected || model.appPaid
 
   const { messages, send, busy, clear, undoTip, undoLast } = useChat(
     deckId,
@@ -79,9 +84,9 @@ export function ChatPanel({
   }, [messages])
 
   useEffect(() => {
-    if (isMember && canEdit && !styleIntent && hasFinePointer())
+    if (aiReady && canEdit && !styleIntent && hasFinePointer())
       inputRef.current?.focus()
-  }, [isMember, canEdit, styleIntent])
+  }, [aiReady, canEdit, styleIntent])
 
   useEffect(() => {
     if (!styleIntent) return
@@ -217,7 +222,7 @@ export function ChatPanel({
         if (!isFileDrag(event.dataTransfer)) return
         event.preventDefault()
         event.stopPropagation()
-        if (isMember && canEdit && !busy) setDraggingReferences(true)
+        if (aiReady && canEdit && !busy) setDraggingReferences(true)
       }}
       onDragOver={(event) => {
         if (!isFileDrag(event.dataTransfer)) return
@@ -234,7 +239,7 @@ export function ChatPanel({
         event.preventDefault()
         event.stopPropagation()
         setDraggingReferences(false)
-        if (isMember && canEdit && !busy)
+        if (aiReady && canEdit && !busy)
           addReferences(Array.from(event.dataTransfer.files))
       }}
     >
@@ -263,8 +268,10 @@ export function ChatPanel({
 
       {!canEdit ? (
         <ReadOnlyGate />
-      ) : !isMember ? (
-        <SignInGate />
+      ) : modelLoading ? (
+        <div className="chat__gate" aria-busy="true" />
+      ) : !aiReady ? (
+        <ConnectModelGate status={model} onConnected={refresh} />
       ) : (
         <>
           <div className="chat__thread" ref={threadRef}>
@@ -494,34 +501,34 @@ function ReadOnlyGate() {
   )
 }
 
-/** Guest nudge — same GitHub/Google sign-in as AI Arrange / Generate. Sign-in returns to the current deck
- *  so in-progress work + the guest's decks carry over on promotion. */
-function SignInGate() {
-  const back =
-    typeof window !== 'undefined'
-      ? window.location.pathname + window.location.search
-      : '/'
+/** No model to run on — the viewer has no connected key and no plan that pays for inference. The connect
+ *  flow is offered right here (the same modal as the dashboard control), so turning ✨ on never costs a
+ *  trip out of the deck; `onConnected` re-reads status and the composer replaces this in place. */
+function ConnectModelGate({
+  status,
+  onConnected,
+}: {
+  status: ModelStatus
+  onConnected: () => void
+}) {
+  const [open, setOpen] = useState(false)
   return (
     <div className="chat__gate">
       <p className="chat__gate-text">
-        Sign in to chat with AI about your deck.
+        Chat runs on your own model. Connect an OpenRouter key and ✨ turns on
+        across the editor — the key is encrypted on the server and shown to no
+        one.
       </p>
-      <div className="chat__gate-signin">
-        <button
-          onClick={() =>
-            authClient.signIn.social({ provider: 'github', callbackURL: back })
-          }
-        >
-          GitHub
-        </button>
-        <button
-          onClick={() =>
-            authClient.signIn.social({ provider: 'google', callbackURL: back })
-          }
-        >
-          Google
-        </button>
+      <div className="chat__gate-actions">
+        <button onClick={() => setOpen(true)}>Connect a model</button>
       </div>
+      {open && (
+        <ModelModal
+          status={status}
+          onChanged={onConnected}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   )
 }
