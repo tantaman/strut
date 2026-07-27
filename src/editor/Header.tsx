@@ -66,6 +66,7 @@ import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 import { ThemeToggle } from '../ThemeToggle'
 import { appPath } from '../../shared/appPath'
+import { AamuSlidesLogo } from '../AamuSlidesLogo'
 import { markdownToDoc } from './aiGenerate'
 
 // Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
@@ -457,11 +458,7 @@ export function Header({
           className="hdr__home"
           title="Project decks"
         >
-          <img
-            className="aamu-slides-logo"
-            src={appPath('/aamu-slides-logo.svg')}
-            alt="Aamu Slides"
-          />
+          <AamuSlidesLogo />
         </Link>
       ) : (
         <Link to="/" className="hdr__home" title="All decks">

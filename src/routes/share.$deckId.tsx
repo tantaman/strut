@@ -14,6 +14,7 @@ import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { appPath } from '../../shared/appPath'
+import { AamuSlidesLogo } from '../AamuSlidesLogo'
 import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/share/$deckId')({
@@ -175,13 +176,11 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         {i + 1} / {slides.length} · → next · ← back
       </div>
       <div className="share-badge">
-        <img
-          className={deck.pid ? 'aamu-slides-logo' : undefined}
-          src={appPath(
-            deck.pid ? '/aamu-slides-logo.svg' : '/strut-logo.png',
-          )}
-          alt={deck.pid ? 'Aamu Slides' : 'Strut'}
-        />
+        {deck.pid ? (
+          <AamuSlidesLogo />
+        ) : (
+          <img src={appPath('/strut-logo.png')} alt="Strut" />
+        )}
         <span>shared read-only</span>
       </div>
     </div>

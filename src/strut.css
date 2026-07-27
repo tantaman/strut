@@ -201,6 +201,15 @@ button {
 :root[data-theme='dark'] .share-gate__logo {
   filter: brightness(0) invert(1);
 }
+.aamu-slides-logo--dark {
+  display: none !important;
+}
+:root[data-theme='dark'] .aamu-slides-logo--light {
+  display: none !important;
+}
+:root[data-theme='dark'] .aamu-slides-logo--dark {
+  display: block !important;
+}
 
 /* ---- dashboard ---- */
 .dash {

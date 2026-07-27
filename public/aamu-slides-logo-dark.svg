@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-labelledby="title">
+  <title id="title">Aamu Slides</title>
+  <rect x=".75" y=".75" width="258.5" height="62.5" rx="13.25" fill="#171411" stroke="#3a342f" stroke-width="1.5"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M32 9v7M14.5 16.5l5 5M49.5 16.5l-5 5M8 32h7M49 32h7" stroke="#ff9800" stroke-width="4.5"/>
+    <path d="M21 36a11 11 0 0 1 22 0" fill="#ff9800" stroke="#ff9800" stroke-width="3"/>
+    <path d="M10 40h15l7-6 7 6h15M18 48h28M24 55h16" stroke="#36bdf5" stroke-width="4.5"/>
+  </g>
+  <text x="70" y="39" fill="#f7f7f7" font-family="Poppins, Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="-.5">Aamu</text>
+  <text x="143" y="39" fill="#57b9ff" font-family="Poppins, Arial, sans-serif" font-size="25" font-weight="600" letter-spacing="-.5">Slides</text>
+</svg>

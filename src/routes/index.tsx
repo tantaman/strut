@@ -17,6 +17,7 @@ import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
 import { ThemeToggle } from '../ThemeToggle'
 import { appPath } from '../../shared/appPath'
+import { AamuSlidesLogo } from '../AamuSlidesLogo'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -127,17 +128,15 @@ export function DashboardView({
           href="/"
           title={isAamu ? 'Aamu home' : 'Strut home'}
         >
-          <img
-            className={
-              isAamu
-                ? 'brandbar__logo aamu-slides-logo'
-                : 'brandbar__logo'
-            }
-            src={appPath(
-              isAamu ? '/aamu-slides-logo.svg' : '/strut-logo.png',
-            )}
-            alt={isAamu ? 'Aamu Slides' : 'Strut'}
-          />
+          {isAamu ? (
+            <AamuSlidesLogo className="brandbar__logo" />
+          ) : (
+            <img
+              className="brandbar__logo"
+              src={appPath('/strut-logo.png')}
+              alt="Strut"
+            />
+          )}
         </a>
         <span className="brandbar__tag">
           {isAamu ? 'Presentations in Aamu' : 'Spatial presentations'}
