@@ -2,11 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import type { ArrangeRequest } from '../../shared/arrange'
 
 // "✨ AI Arrange" endpoint. Takes a deck digest + instruction, returns a validated ArrangementPlan
-// (server/arrange.ts → Workers AI). Two boundaries live here:
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can SEE the
-//      Arrange button (the client renders it disabled) but cannot spend the app's inference budget. The
+// (server/arrange.ts → the shared model seam). Two boundaries live here:
+//   1. MODEL GATE — the caller must have a model to spend: their own connected key, or a paid plan that
+//      includes app-paid inference (server/llm.ts resolveModel → null ⇒ 402). No free app-paid tier. The
 //      client gate is UX only; THIS is the real one, mirroring server/session.ts's trust posture.
-//   2. COST BOUND — the app pays for inference, so two layers cap it: a cheap per-isolate burst throttle
+//   2. COST BOUND — when the app pays for inference, two layers cap it: a cheap per-isolate burst throttle
 //      (below) as a first-line filter, and the AUTHORITATIVE durable daily quota in server/quota.ts (D1),
 //      consumed before the model call and refunded if that call fails. Plus the ARRANGE_LIMITS payload
 //      caps in the adapter.
@@ -50,16 +50,15 @@ export const Route = createFileRoute('/api/arrange')({
           return json({ error: 'sign_in_required' }, 401)
         }
 
-        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or app Workers AI.
+        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or, for a paid
+        // plan, the app's own default. Null = neither, so there is nothing this caller may spend.
         const { resolveModel } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
-        const byo = choice.kind === 'openrouter'
-
-        // App-paid inference stays member-only (a guest can't spend the app's budget); BYO is open to any
-        // session, guest or member, because the USER pays (OPENROUTER_PLAN.md "Decisions").
-        if (!byo && account.isAnonymous) {
-          return json({ error: 'sign_in_required' }, 401)
+        if (!choice) {
+          const { modelRequired } = await import('../../server/entitlements')
+          return json(modelRequired(), 402)
         }
+        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }

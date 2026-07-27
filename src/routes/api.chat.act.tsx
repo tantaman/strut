@@ -8,9 +8,9 @@ import type { ChatActRequest } from '../../shared/chatAction'
 // Like the prose-only twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot
 // JSON so the client can branch BEFORE it reads the stream. Same two boundaries as /api/arrange and
 // /api/generate:
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path;
-//      a BYO OpenRouter caller (they pay) is allowed. Mirrors server/session.ts's trust posture.
-//   2. COST BOUND — the app pays for inference, so a per-isolate burst throttle + the AUTHORITATIVE durable
+//   1. MODEL GATE — the caller must have a model to spend: their own connected key, or a paid plan that
+//      includes app-paid inference (server/llm.ts resolveModel → null ⇒ 402). No free app-paid tier.
+//   2. COST BOUND — when the app pays for inference, a per-isolate burst throttle + the AUTHORITATIVE durable
 //      daily quota (server/quota.ts) cap it. An action-capable chat turn is one model call, so it meters
 //      exactly like a prose-only chat turn — it shares the SAME 'chat' quota bucket (consumeAiQuota).
 // We do NOT verify the user owns `deckId` here: the result is only a proposed change; APPLYING it flows
@@ -64,12 +64,12 @@ export const Route = createFileRoute('/api/chat/act')({
         const choice = await resolveModel(account.id, {
           purpose: styleRequest ? 'style' : 'general',
         })
-        const byo = choice.kind === 'openrouter'
-
-        // App-paid inference stays member-only; BYO is open to any session because the USER pays.
-        if (!byo && account.isAnonymous) {
-          return json({ error: 'sign_in_required' }, 401)
+        // Null = no connected key and no plan that pays for one: nothing this caller may spend.
+        if (!choice) {
+          const { modelRequired } = await import('../../server/entitlements')
+          return json(modelRequired(), 402)
         }
+        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }

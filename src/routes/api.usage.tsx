@@ -33,7 +33,7 @@ export const Route = createFileRoute('/api/usage')({
         // (arrange/generate/chat run on the user's own credits). Image is Workers-AI-only, so it stays
         // capped even with a key — mirroring the `if (!byo)` gating in the AI routes.
         const { resolveModel } = await import('../../server/llm')
-        const byo = (await resolveModel(account.id)).kind === 'openrouter'
+        const byo = (await resolveModel(account.id))?.kind === 'openrouter'
         const BYO_UNLIMITED: Record<AiFeature, boolean> = {
           arrange: true,
           generate: true,
@@ -46,22 +46,31 @@ export const Route = createFileRoute('/api/usage')({
           transcribe: false,
         }
 
+        // Can this viewer use ✨ at all? Only with a connected key or a plan that pays for inference —
+        // otherwise the AI counters describe a surface they can't reach, so we report none of them and
+        // the meter says so instead of showing caps that will never be spent.
+        const { canUseAppAi } = await import('../../server/entitlements')
+        const available = byo || canUseAppAi(ent)
+
         // A pooled plan (Pro) reports ONE shared monthly counter instead of the per-feature daily buckets;
         // the free tier reports each daily bucket. (aiUnlimited short-circuits both to "Unlimited".)
-        const pooled = !ent.aiUnlimited && ent.aiMonthlyPool != null
+        const pooled =
+          available && !ent.aiUnlimited && ent.aiMonthlyPool != null
         let pool: { used: number; limit: number } | null = null
         let features: Array<{
           key: AiFeature
           used: number
           limit: number | null
         }> = []
+        // `pooled` already implies `available`, so an unavailable viewer falls past BOTH branches: no D1
+        // reads, no counters — there is nothing to meter.
         if (pooled) {
           const { peekPool } = await import('../../server/quota')
           pool = {
             used: await peekPool(account.id, now),
             limit: ent.aiMonthlyPool as number,
           }
-        } else {
+        } else if (available) {
           const { peekUsage, FEATURE_DEFAULT_LIMIT } =
             await import('../../server/quota')
           features = await Promise.all(
@@ -100,7 +109,7 @@ export const Route = createFileRoute('/api/usage')({
             upgradeUrl: entitlementSummary(ent).upgradeUrl,
             resetsAt: reset.toISOString(),
             storage: { used: storageUsed, limit: ent.storageLimitBytes },
-            ai: { unlimited: ent.aiUnlimited, pool, features },
+            ai: { available, unlimited: ent.aiUnlimited, pool, features },
           },
           200,
         )

@@ -3,9 +3,9 @@ import type { NarrateRequest } from '../../shared/transcript'
 
 // "🎙️ From a recording" — the NARRATE endpoint. Takes a talk transcript, returns a validated NarratedDeck
 // (server/narrate.ts → the shared model seam). Same two boundaries as /api/generate:
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected on the app-paid path.
-//      Guests can SEE the control (the client renders a sign-in nudge) but can't spend the app's inference
-//      budget. BYO (connected OpenRouter key) is open to guests — the USER pays.
+//   1. MODEL GATE — the caller must have a model to spend: their own connected key (open to guests — the
+//      USER pays), or a paid plan that includes app-paid inference (server/llm.ts resolveModel → null ⇒
+//      402). No free app-paid tier.
 //   2. COST BOUND — a cheap per-isolate burst throttle plus the AUTHORITATIVE durable daily quota in
 //      server/quota.ts (narrate_usage, D1), consumed before the model call and refunded if it fails. Plus
 //      the NARRATE_LIMITS caps in the adapter.
@@ -45,16 +45,15 @@ export const Route = createFileRoute('/api/narrate')({
           return json({ error: 'sign_in_required' }, 401)
         }
 
-        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or app default.
+        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or, for a paid
+        // plan, the app's own default. Null = neither, so there is nothing this caller may spend.
         const { resolveModel } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
-        const byo = choice.kind === 'openrouter'
-
-        // App-paid inference stays member-only (a guest can't spend the app's budget); BYO is open to any
-        // session because the USER pays.
-        if (!byo && account.isAnonymous) {
-          return json({ error: 'sign_in_required' }, 401)
+        if (!choice) {
+          const { modelRequired } = await import('../../server/entitlements')
+          return json(modelRequired(), 402)
         }
+        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }

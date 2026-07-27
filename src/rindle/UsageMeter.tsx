@@ -17,6 +17,9 @@ interface Usage {
   resetsAt: string
   storage: { used: number; limit: number | null }
   ai: {
+    /** false → this viewer has no model to spend (no connected key, no plan that pays), so there are no
+     *  AI counters to show — the panel says how to turn ✨ on instead. */
+    available: boolean
     unlimited: boolean
     /** A pooled plan (Pro): one shared monthly allowance across the ✨ inference features. null = the
      *  free tier's per-feature daily buckets (see `features`). */
@@ -113,7 +116,10 @@ export function UsageMeter() {
       unit: 'bytes',
     },
   ]
-  if (usage.ai.unlimited) {
+  if (!usage.ai.available) {
+    // No model to spend — AI isn't part of this account's usage at all (the footer explains how to
+    // turn it on). Showing daily caps here would describe a surface the viewer can't reach.
+  } else if (usage.ai.unlimited) {
     meters.push({
       id: 'ai',
       label: 'AI features',
@@ -217,14 +223,19 @@ export function UsageMeter() {
             )
           })}
 
-          {(usage.byo || !usage.ai.unlimited) && (
+          {(!usage.ai.available || usage.byo || !usage.ai.unlimited) && (
             <div className="usage__reset">
+              {!usage.ai.available && (
+                <div>
+                  ✨ AI runs on your own model — connect one to turn it on.
+                </div>
+              )}
               {usage.byo && (
                 <div>
                   AI layout, slide creation, and Chat use your connected model.
                 </div>
               )}
-              {!usage.ai.unlimited && (
+              {usage.ai.available && !usage.ai.unlimited && (
                 <div>AI limits reset in {fmtReset(usage.resetsAt)}</div>
               )}
             </div>

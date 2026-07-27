@@ -1,7 +1,9 @@
 // The "Connect your model" control in the dashboard chrome (brandbar), beside AccountControl. Bring your
 // own LLM via OpenRouter: paste a key (validated + envelope-encrypted server-side, never returned) and the
-// ✨ features run on YOUR OpenRouter credits instead of the app's Workers AI. Available to guests too — a
-// connected key is what unlocks AI without an account (OPENROUTER_PLAN.md "Decisions"). Status is fetched
+// ✨ features run on YOUR OpenRouter credits. This is how AI turns on for everyone who isn't on a paid
+// plan — a connected key is the default way to use ✨, with or without an account. `ModelModal` is
+// exported so the in-editor gate (src/editor/ChatPanel.tsx) can offer the same connect flow in place,
+// without sending the author back to the dashboard. Status is fetched
 // client-side (no SSR seed needed for a secondary control); initial paint shows "Connect model" and flips
 // to the connected model once /api/model/status resolves.
 
@@ -15,7 +17,9 @@ export function ModelControl() {
   const { status, refresh } = useModelStatus()
   const [open, setOpen] = useState(false)
 
-  const label = status.connected ? status.model || 'Your model' : 'Connect model'
+  const label = status.connected
+    ? status.model || 'Your model'
+    : 'Connect model'
   const title = status.connected
     ? `Connected: ${status.provider ?? 'model'}${status.model ? ` · ${status.model}` : ''}`
     : 'Bring your own LLM via OpenRouter'
@@ -41,7 +45,7 @@ export function ModelControl() {
   )
 }
 
-function ModelModal({
+export function ModelModal({
   status,
   onChanged,
   onClose,
@@ -84,10 +88,7 @@ function ModelModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal modal--model"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="modal modal--model" onClick={(e) => e.stopPropagation()}>
         <div className="model-conn__head">
           <h3>Connect your model</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">

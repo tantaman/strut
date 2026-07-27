@@ -5,8 +5,8 @@ import { TRANSCRIBE_LIMITS } from '../../shared/transcript'
 // request body with the file's content-type, like /api/rindle/upload), returns { text } transcribed by
 // Workers AI Whisper (server/transcribe.ts). Speech-to-text is Workers-AI-only (no BYO path), so it is
 // ALWAYS app-paid — hence the same two boundaries as /api/image applied to EVERY caller:
-//   1. LOGIN GATE — anonymous (guest) sessions and no-session requests are rejected. Guests can trigger the
-//      control but can't spend the app's inference budget.
+//   1. PLAN GATE — a session is required, and the plan must include app-paid inference (canUseAppAi).
+//      A connected BYO key does NOT unlock this lane: there is no speech path that spends the user's key.
 //   2. COST BOUND — a cheap per-isolate burst throttle plus the AUTHORITATIVE durable daily quota in
 //      server/quota.ts (transcribe_usage, D1), consumed before the model call and refunded if it fails.
 // The audio is never persisted — ephemeral in, text out.
@@ -42,6 +42,14 @@ export const Route = createFileRoute('/api/transcribe')({
         if (!account || account.isAnonymous) {
           return json({ error: 'sign_in_required' }, 401)
         }
+        // Whisper runs on the app's own Workers AI account (no BYO speech path), so this lane is plan-gated
+        // outright — a connected key can't pay for it. Checked before the body is read.
+        const { getEntitlements, aiMetering, appAiRequired, canUseAppAi } =
+          await import('../../server/entitlements')
+        const ent = await getEntitlements(account.id)
+        if (!canUseAppAi(ent)) {
+          return json(appAiRequired('Transcription'), 402)
+        }
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -72,9 +80,7 @@ export const Route = createFileRoute('/api/transcribe')({
         // Durable daily quota — consumed BEFORE the model call so concurrent calls can't race past the cap.
         // `ai.meter === false` (unlimited plan) skips it.
         const now = Date.now()
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'transcribe')
+        const ai = aiMetering(ent, 'transcribe')
         const { consumeAiQuota, refundAiQuota } =
           await import('../../server/quota')
         if (ai.meter) {
