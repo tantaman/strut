@@ -67,6 +67,7 @@ const config = defineConfig(({ mode }) => {
   }
 
   return {
+    base: APP_BASEPATH ? `${APP_BASEPATH}/` : '/',
     resolve: {
       tsconfigPaths: true,
       // An overlay build swaps the `#commercial` stub for the real (private) module. An explicit

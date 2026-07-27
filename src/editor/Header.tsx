@@ -65,6 +65,7 @@ import type { BackgroundImageLayout } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 import { ThemeToggle } from '../ThemeToggle'
+import { appPath } from '../../shared/appPath'
 import { markdownToDoc } from './aiGenerate'
 
 // Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
@@ -449,7 +450,7 @@ export function Header({
         </button>
       )}
       <Link to="/" className="hdr__home" title="All decks">
-        <img src="/strut-logo.png" alt="Strut" />
+        <img src={appPath('/strut-logo.png')} alt="Strut" />
       </Link>
       <input
         className="hdr__title"
