@@ -120,9 +120,6 @@ importers:
       '@rindle/cli':
         specifier: ^0.4.4
         version: 0.4.4
-      '@rindle/react-devtools':
-        specifier: ^0.4.4
-        version: 0.4.4(react@19.2.7)
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.20(tailwindcss@4.3.1)
@@ -1236,9 +1233,6 @@ packages:
   '@rindle/daemon-client@0.4.4':
     resolution: {integrity: sha512-guGCQelHc3yUXoWoZPr4x4nIDyGnb/AY2st5LoWxGijbyXge9cqvFM9MqhSXONlglTs61ehVlwad2LPhxjlQig==}
 
-  '@rindle/devtools@0.4.4':
-    resolution: {integrity: sha512-hLB3EC1S218bDCQy3JVP2za+2NEnxkD3/3+Wj22TjiscLLUg5gxgQSd4DL6ktmS3rSSmOb5t/FqSavLbIHbQYQ==}
-
   '@rindle/narrator@0.4.4':
     resolution: {integrity: sha512-fIAeLbhI3o0bqrVtYoeoSwFI5jx/OeJjL1biPOfmB5ppDGPd8DBiCe1m1o98mbvGxRQyrlrYFlW+hFQBIUoj4A==}
 
@@ -1250,11 +1244,6 @@ packages:
 
   '@rindle/query-compiler@0.4.4':
     resolution: {integrity: sha512-B1a4aP6K3X2JeP7UFaqwAjjgqxGpLoj07OxDjVTGkXDr9H+TcDR8hNBXfFYA1s0jtHh02R601+E2ncEwc69UQA==}
-
-  '@rindle/react-devtools@0.4.4':
-    resolution: {integrity: sha512-Q7PJcZ/AiN05TK9KulxV0Qh3P39iA78vwYgiP7Ww292bqBHAPGpwDr0QBG3dw3eeQO36fyp05CuKymUmxFDZdw==}
-    peerDependencies:
-      react: '>=18.0.0'
 
   '@rindle/react@0.4.4':
     resolution: {integrity: sha512-jScfC/N0RWmn9pLTkYL9Kfjfk52DEtk+tVmTkMP9sEvvOrPYR8h9B63dLEjVeakndCAS0A9ot1mcA+5xof5eCA==}
@@ -4840,10 +4829,6 @@ snapshots:
 
   '@rindle/daemon-client@0.4.4': {}
 
-  '@rindle/devtools@0.4.4':
-    dependencies:
-      '@rindle/client': 0.4.4
-
   '@rindle/narrator@0.4.4':
     dependencies:
       '@rindle/client': 0.4.4
@@ -4863,11 +4848,6 @@ snapshots:
   '@rindle/query-compiler@0.4.4':
     dependencies:
       '@rindle/client': 0.4.4
-
-  '@rindle/react-devtools@0.4.4(react@19.2.7)':
-    dependencies:
-      '@rindle/devtools': 0.4.4
-      react: 19.2.7
 
   '@rindle/react@0.4.4(react@19.2.7)':
     dependencies:

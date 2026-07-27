@@ -23,8 +23,6 @@ import type { StrutApp } from './client.ts'
 
 const AppContext = createContext<StrutApp | null>(null)
 
-type RindleDevtoolsComponent = (props: { defaultOpen?: boolean }) => ReactNode
-
 /** The dehydrated Rindle snapshot (a JSON string) a matched route preloaded in its loader, if any. */
 function useRindleSeed(): string | null {
   const matches = useMatches()
@@ -119,30 +117,7 @@ export function RindleProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={app}>
       <RindleSSR schema={schema} ssrState={ssrState} boot={getApp}>
         {children}
-        {import.meta.env.DEV ? <RindleDevtoolsMount /> : null}
       </RindleSSR>
     </AppContext.Provider>
   )
-}
-
-function RindleDevtoolsMount() {
-  const [Devtools, setDevtools] = useState<RindleDevtoolsComponent | null>(null)
-
-  useEffect(() => {
-    if (!import.meta.env.DEV) return
-
-    let live = true
-    void import('@rindle/react-devtools')
-      .then(({ RindleDevtools }) => {
-        if (live) setDevtools(() => RindleDevtools)
-      })
-      .catch((e) => console.error('[rindle] failed to load devtools:', e))
-
-    return () => {
-      live = false
-    }
-  }, [])
-
-  if (!Devtools) return null
-  return <Devtools />
 }

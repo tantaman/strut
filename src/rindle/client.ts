@@ -119,12 +119,6 @@ async function create() {
       console.error(`[rindle] ${envelope.name} rejected:`, reason),
   })
 
-  if (import.meta.env.DEV) {
-    void import('@rindle/react-devtools')
-      .then(({ attachDevtools }) => attachDevtools(app))
-      .catch((e) => console.error('[rindle] failed to load devtools:', e))
-  }
-
   return app
 }
 
