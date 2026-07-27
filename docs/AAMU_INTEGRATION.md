@@ -25,10 +25,21 @@ SLIDES_RINDLE_WS_URL=wss://example.aamu.app/slides/rindle
 RINDLE_DAEMON_TOKEN=...
 ```
 
+The Aamu server pulls an authoritative snapshot once a minute by default
+(`AAMU_SLIDES_RECONCILE_INTERVAL_MS`) and Strut persists webhook deliveries in
+its local SQL outbox. `SLIDES_INTERNAL_URL` can point Aamu directly at the
+Slides container; otherwise Aamu uses `SLIDES_PUBLIC_URL`.
+
 For local MinIO, the existing `MINIO_ROOT_USER` and
 `MINIO_ROOT_PASSWORD` are sufficient. Aamu's development compose creates
 `${S3_BUCKET_SLIDES:-aamu-slides-dev}` idempotently. Slides uses path-style S3
 requests and serves private objects through its authenticated upload route.
+
+The standalone compose joins Aamu's default development network
+`docker-dev_aamu-net`; override `AAMU_DOCKER_NETWORK` for another environment.
+It exposes Slides at host port `3010` and Rindle WebSocket at `7601` by
+default. Aamu's development nginx forwards `/slides/` and
+`/slides/rindle` to these ports.
 
 The current image deliberately uses Rindle 0.4's single local daemon and a
 persistent SQLite volume. A future r0.7 migration only needs to replace the

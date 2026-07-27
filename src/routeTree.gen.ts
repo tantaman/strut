@@ -38,6 +38,7 @@ import { Route as ApiModelConnectRouteImport } from './routes/api.model.connect'
 import { Route as ApiChatActRouteImport } from './routes/api.chat.act'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as ApiAamuSessionRouteImport } from './routes/api.aamu.session'
+import { Route as ApiAamuDecksRouteImport } from './routes/api.aamu.decks'
 import { Route as ApiRindleUploadsKeyRouteImport } from './routes/api.rindle.uploads.$key'
 
 const SigninRoute = SigninRouteImport.update({
@@ -185,6 +186,11 @@ const ApiAamuSessionRoute = ApiAamuSessionRouteImport.update({
   path: '/api/aamu/session',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAamuDecksRoute = ApiAamuDecksRouteImport.update({
+  id: '/api/aamu/decks',
+  path: '/api/aamu/decks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRindleUploadsKeyRoute = ApiRindleUploadsKeyRouteImport.update({
   id: '/api/rindle/uploads/$key',
   path: '/api/rindle/uploads/$key',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/project/$pid': typeof ProjectPidRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/aamu/decks': typeof ApiAamuDecksRoute
   '/api/aamu/session': typeof ApiAamuSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/act': typeof ApiChatActRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/project/$pid': typeof ProjectPidRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/aamu/decks': typeof ApiAamuDecksRoute
   '/api/aamu/session': typeof ApiAamuSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/act': typeof ApiChatActRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/deck/$deckId': typeof DeckDeckIdRoute
   '/project/$pid': typeof ProjectPidRoute
   '/share/$deckId': typeof ShareDeckIdRoute
+  '/api/aamu/decks': typeof ApiAamuDecksRoute
   '/api/aamu/session': typeof ApiAamuSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/act': typeof ApiChatActRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/project/$pid'
     | '/share/$deckId'
+    | '/api/aamu/decks'
     | '/api/aamu/session'
     | '/api/auth/$'
     | '/api/chat/act'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/project/$pid'
     | '/share/$deckId'
+    | '/api/aamu/decks'
     | '/api/aamu/session'
     | '/api/auth/$'
     | '/api/chat/act'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/deck/$deckId'
     | '/project/$pid'
     | '/share/$deckId'
+    | '/api/aamu/decks'
     | '/api/aamu/session'
     | '/api/auth/$'
     | '/api/chat/act'
@@ -404,6 +416,7 @@ export interface RootRouteChildren {
   DeckDeckIdRoute: typeof DeckDeckIdRoute
   ProjectPidRoute: typeof ProjectPidRoute
   ShareDeckIdRoute: typeof ShareDeckIdRoute
+  ApiAamuDecksRoute: typeof ApiAamuDecksRoute
   ApiAamuSessionRoute: typeof ApiAamuSessionRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiModelConnectRoute: typeof ApiModelConnectRoute
@@ -624,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAamuSessionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/aamu/decks': {
+      id: '/api/aamu/decks'
+      path: '/api/aamu/decks'
+      fullPath: '/api/aamu/decks'
+      preLoaderRoute: typeof ApiAamuDecksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rindle/uploads/$key': {
       id: '/api/rindle/uploads/$key'
       path: '/api/rindle/uploads/$key'
@@ -662,6 +682,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeckDeckIdRoute: DeckDeckIdRoute,
   ProjectPidRoute: ProjectPidRoute,
   ShareDeckIdRoute: ShareDeckIdRoute,
+  ApiAamuDecksRoute: ApiAamuDecksRoute,
   ApiAamuSessionRoute: ApiAamuSessionRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiModelConnectRoute: ApiModelConnectRoute,

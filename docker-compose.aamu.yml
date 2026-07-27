@@ -26,12 +26,12 @@ services:
       PORT: 3000
       STRUT_APP_BASEPATH: /slides
       RINDLE_DAEMON_URL: http://slides-rindle:7600
-      RINDLE_DAEMON_WS: ${SLIDES_RINDLE_WS_URL:-ws://localhost:7601}
+      RINDLE_DAEMON_WS: ${SLIDES_RINDLE_WS_URL:?SLIDES_RINDLE_WS_URL is required}
       RINDLE_DAEMON_TOKEN: ${RINDLE_DAEMON_TOKEN:?RINDLE_DAEMON_TOKEN is required}
       STRUT_AUTH_DB: /var/lib/slides-auth/auth.db
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${SLIDES_PUBLIC_URL:?SLIDES_PUBLIC_URL is required}
-      AAMU_INTERNAL_URL: ${AAMU_INTERNAL_URL:-http://aamuapp:4001}
+      AAMU_INTERNAL_URL: ${AAMU_INTERNAL_URL:-http://host.docker.internal:4001}
       AAMU_SLIDES_SHARED_SECRET: ${AAMU_SLIDES_SHARED_SECRET:?AAMU_SLIDES_SHARED_SECRET is required}
       AAMU_SLIDES_SESSION_SECRET: ${AAMU_SLIDES_SESSION_SECRET:?AAMU_SLIDES_SESSION_SECRET is required}
       AAMU_SLIDES_WEBHOOK_SECRET: ${AAMU_SLIDES_WEBHOOK_SECRET:-}
@@ -43,8 +43,10 @@ services:
       S3_FORCE_PATH_STYLE: "true"
     volumes:
       - slides-auth-data:/var/lib/slides-auth
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
-      - "${SLIDES_HTTP_PORT:-3000}:3000"
+      - "${SLIDES_HTTP_PORT:-3010}:3000"
     networks:
       - aamu-net
     restart: unless-stopped
@@ -52,6 +54,7 @@ services:
 networks:
   aamu-net:
     external: true
+    name: ${AAMU_DOCKER_NETWORK:-docker-dev_aamu-net}
 
 volumes:
   slides-rindle-data:

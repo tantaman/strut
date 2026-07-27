@@ -11,6 +11,17 @@
 
 import { createSchema, json, number, string, table } from '@rindle/client'
 
+export const aamu_event_outbox = table('aamu_event_outbox')
+  .columns({
+    id: string(),
+    body: string(),
+    created_at: number(),
+    attempts: number(),
+    next_attempt_at: number(),
+    last_error: string(),
+  })
+  .primaryKey('id')
+
 export const component = table('component')
   .columns({
     id: string(),
@@ -129,6 +140,7 @@ export const user_profile = table('user_profile')
 
 export const schema = createSchema({
   tables: [
+    aamu_event_outbox,
     component,
     custom_background,
     deck,
