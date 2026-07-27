@@ -195,9 +195,9 @@ button {
   padding: 0;
 }
 
-:root[data-theme='dark'] .brandbar__logo,
-:root[data-theme='dark'] .hdr__home img,
-:root[data-theme='dark'] .share-badge img,
+:root[data-theme='dark'] .brandbar__logo:not(.aamu-slides-logo),
+:root[data-theme='dark'] .hdr__home img:not(.aamu-slides-logo),
+:root[data-theme='dark'] .share-badge img:not(.aamu-slides-logo),
 :root[data-theme='dark'] .share-gate__logo {
   filter: brightness(0) invert(1);
 }
@@ -3073,59 +3073,6 @@ button {
   letter-spacing: 0.04em;
   color: var(--muted);
 }
-.powered-by {
-  position: fixed;
-  bottom: 14px;
-  right: 14px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--glass);
-  backdrop-filter: blur(6px);
-  border-radius: 999px;
-  padding: 5px 12px 5px 10px;
-  box-shadow: var(--shadow);
-  text-decoration: none;
-  opacity: 0.8;
-  transition: opacity 120ms ease;
-}
-.powered-by:hover {
-  opacity: 1;
-}
-.powered-by svg {
-  height: 16px;
-  width: 16px;
-  display: block;
-}
-.powered-by span {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-/* Inline variant for the app's top chrome (editor header, dashboard brandbar): sheds the floating
-   pill's fixed positioning / frosted background and reads as a quiet brand credit, divided from the
-   Strut lockup the same way `.brandbar__tag` is. */
-.powered-by--inline {
-  position: static;
-  bottom: auto;
-  right: auto;
-  z-index: auto;
-  gap: 7px;
-  padding: 0 0 0 14px;
-  border-left: 1px solid var(--line);
-  border-radius: 0;
-  background: none;
-  backdrop-filter: none;
-  box-shadow: none;
-  opacity: 0.85;
-}
-.powered-by--inline svg {
-  height: 15px;
-  width: 15px;
-}
 .share-gate {
   position: fixed;
   inset: 0;
@@ -4342,10 +4289,6 @@ button {
     padding: 0;
     gap: 0;
     font-size: 0;
-  }
-  /* The floating credit would collide with the touch tray. Present/share viewers live outside .editor. */
-  .editor .powered-by {
-    display: none;
   }
   .hdr__title {
     flex: 1 1 48px;

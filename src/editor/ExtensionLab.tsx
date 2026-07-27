@@ -172,7 +172,7 @@ const panel: React.CSSProperties = {
   position: 'fixed',
   zIndex: 9999,
   // Top-right, below the header: keeps clear of the TanStack devtools (bottom-left) and the
-  // "powered by rindle" credit / Overview controls (bottom-right).
+  // Overview controls (bottom-right).
   top: 64,
   right: 12,
   width: 380,

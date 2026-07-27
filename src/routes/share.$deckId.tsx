@@ -12,7 +12,6 @@ import { presentationSurfaceBackground } from '../editor/presentationSurface'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
-import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
 import { appPath } from '../../shared/appPath'
 import type { DeckRoot } from '../editor/deckDetail'
@@ -176,10 +175,15 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         {i + 1} / {slides.length} · → next · ← back
       </div>
       <div className="share-badge">
-        <img src={appPath('/strut-logo.png')} alt="Strut" />
+        <img
+          className={deck.pid ? 'aamu-slides-logo' : undefined}
+          src={appPath(
+            deck.pid ? '/aamu-slides-logo.svg' : '/strut-logo.png',
+          )}
+          alt={deck.pid ? 'Aamu Slides' : 'Strut'}
+        />
         <span>shared read-only</span>
       </div>
-      <PoweredByRindle />
     </div>
   )
 }

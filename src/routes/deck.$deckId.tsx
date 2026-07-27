@@ -17,7 +17,6 @@ import { DocView } from '../editor/DocView'
 import { PrecisionWorkspace } from '../editor/PrecisionWorkspace'
 import { ArrangeView } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
-import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { useDeckChatContext } from '../editor/chatNarration'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
@@ -320,7 +319,6 @@ function EditorInner({ deckId }: { deckId: string }) {
           />
         )}
       </div>
-      {!arrangeOpen && <PoweredByRindle />}
     </div>
   )
 }

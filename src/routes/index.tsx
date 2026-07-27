@@ -13,7 +13,6 @@ import type { AppSeed } from '../rindle/appSsr'
 import { AccountControl } from '../rindle/AccountControl'
 import { ModelControl } from '../rindle/ModelControl'
 import { UsageMeter } from '../rindle/UsageMeter'
-import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
 import { ThemeToggle } from '../ThemeToggle'
@@ -62,7 +61,8 @@ export function DashboardView({
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
   const { account, entitlement } = loaderData
-  const aamuNeedsProject = account?.id.startsWith('aamu:') === true && !pid
+  const isAamu = account?.id.startsWith('aamu:') === true
+  const aamuNeedsProject = isAamu && !pid
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
@@ -122,15 +122,26 @@ export function DashboardView({
       <div className="brandbar">
         {/* Plain anchor (not a router Link) so it navigates to the site root `/` — the marketing home
             served by the commercial overlay, which lives OUTSIDE the app's /app basepath. */}
-        <a className="brandbar__home" href="/" title="Strut home">
+        <a
+          className="brandbar__home"
+          href="/"
+          title={isAamu ? 'Aamu home' : 'Strut home'}
+        >
           <img
-            className="brandbar__logo"
-            src={appPath('/strut-logo.png')}
-            alt="Strut"
+            className={
+              isAamu
+                ? 'brandbar__logo aamu-slides-logo'
+                : 'brandbar__logo'
+            }
+            src={appPath(
+              isAamu ? '/aamu-slides-logo.svg' : '/strut-logo.png',
+            )}
+            alt={isAamu ? 'Aamu Slides' : 'Strut'}
           />
         </a>
-        <span className="brandbar__tag">Spatial presentations</span>
-        <PoweredByRindle variant="inline" />
+        <span className="brandbar__tag">
+          {isAamu ? 'Presentations in Aamu' : 'Spatial presentations'}
+        </span>
         <ModelControl />
         <UsageMeter />
         <AccountControl initial={account} entitlement={entitlement} />
@@ -141,7 +152,7 @@ export function DashboardView({
           <h1 className="dash__title">Your decks</h1>
           <p className="dash__sub">
             {decks.length} presentation{decks.length === 1 ? '' : 's'},
-            local-first on Rindle.
+            {isAamu ? ' synced with Aamu.' : ' local-first.'}
           </p>
         </div>
         <div className="dash__actions">

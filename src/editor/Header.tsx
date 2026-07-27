@@ -457,7 +457,11 @@ export function Header({
           className="hdr__home"
           title="Project decks"
         >
-          <img src={appPath('/strut-logo.png')} alt="Strut" />
+          <img
+            className="aamu-slides-logo"
+            src={appPath('/aamu-slides-logo.svg')}
+            alt="Aamu Slides"
+          />
         </Link>
       ) : (
         <Link to="/" className="hdr__home" title="All decks">
