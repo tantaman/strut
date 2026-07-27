@@ -62,6 +62,7 @@ export function DashboardView({
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
   const { account, entitlement } = loaderData
+  const aamuNeedsProject = account?.id.startsWith('aamu:') === true && !pid
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
@@ -154,18 +155,35 @@ export function DashboardView({
           <button
             className="btn"
             onClick={() => fileRef.current?.click()}
-            title="Import a .strut file"
+            title={
+              aamuNeedsProject
+                ? 'Open Slides from an Aamu project before importing'
+                : 'Import a .strut file'
+            }
+            disabled={aamuNeedsProject}
           >
             <Upload size={16} /> Import
           </button>
           <button
             className="btn btn--primary"
             onClick={() => setCreating(true)}
+            disabled={aamuNeedsProject}
+            title={
+              aamuNeedsProject
+                ? 'Open Slides from an Aamu project before creating a deck'
+                : undefined
+            }
           >
             <Plus size={16} /> New deck
           </button>
         </div>
       </div>
+
+      {aamuNeedsProject && (
+        <p className="dash__sub">
+          Open Slides from an Aamu project to create or import decks.
+        </p>
+      )}
 
       {decks.length === 0 ? (
         <div className="dash__empty">

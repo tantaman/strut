@@ -81,6 +81,7 @@ const SHAPE_TOOL_ICONS: Record<string, LucideIcon> = {
 
 interface DeckRow {
   id: string
+  pid: string
   title: string
   background: string
   surface: string
@@ -449,9 +450,20 @@ export function Header({
           <ArrowLeft size={17} />
         </button>
       )}
-      <Link to="/" className="hdr__home" title="All decks">
-        <img src={appPath('/strut-logo.png')} alt="Strut" />
-      </Link>
+      {deck?.pid ? (
+        <Link
+          to="/project/$pid"
+          params={{ pid: deck.pid }}
+          className="hdr__home"
+          title="Project decks"
+        >
+          <img src={appPath('/strut-logo.png')} alt="Strut" />
+        </Link>
+      ) : (
+        <Link to="/" className="hdr__home" title="All decks">
+          <img src={appPath('/strut-logo.png')} alt="Strut" />
+        </Link>
+      )}
       <input
         className="hdr__title"
         value={deck?.title ?? ''}
