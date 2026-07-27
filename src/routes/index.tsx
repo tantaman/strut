@@ -2,9 +2,14 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useQuery, useQueryStatus } from '@rindle/react'
 import { Plus, Upload, X } from 'lucide-react'
-import { decksQuery, DECKS_LIMIT } from '../../shared/queries'
+import {
+  decksQuery,
+  projectDecksQuery,
+  DECKS_LIMIT,
+} from '../../shared/queries'
 import { useMutate } from '../rindle/RindleProvider'
 import { preloadDecks } from '../rindle/appSsr'
+import type { AppSeed } from '../rindle/appSsr'
 import { AccountControl } from '../rindle/AccountControl'
 import { ModelControl } from '../rindle/ModelControl'
 import { UsageMeter } from '../rindle/UsageMeter'
@@ -12,6 +17,7 @@ import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { newId } from '../config'
 import { importDeck, readDeckFile } from '../editor/deckIO'
 import { ThemeToggle } from '../ThemeToggle'
+import { appPath } from '../../shared/appPath'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -22,13 +28,26 @@ export const Route = createFileRoute('/')({
 })
 
 function Dashboard() {
+  return <DashboardView loaderData={Route.useLoaderData()} />
+}
+
+export function DashboardView({
+  loaderData,
+  pid,
+}: {
+  loaderData: AppSeed
+  pid?: string
+}) {
   // Server-authoritative read (NOT a local `useRoot` read): `slideCount` is a server-computed `countAs`
   // aggregate and the decks coverage doesn't sync the underlying slide rows, so a purely-local read would
   // count them as 0. `<DecksKeepalive>` (mounted at the root) holds this same coverage warm across the
   // session, so returning from the editor re-materializes against resident rows — no flash — while the
   // counts stay correct.
-  const liveDecks = useQuery(decksQuery({ limit: DECKS_LIMIT }))
-  const decksStatus = useQueryStatus(decksQuery({ limit: DECKS_LIMIT }))
+  const query = pid
+    ? projectDecksQuery({ pid, limit: DECKS_LIMIT })
+    : decksQuery({ limit: DECKS_LIMIT })
+  const liveDecks = useQuery(query)
+  const decksStatus = useQueryStatus(query)
   // Bridge the SSR-seed → live-client handoff on INITIAL load (the keepalive covers back-nav, but on a
   // cold first paint nothing is warm yet). The seed correctly first-paints the decks, but when the live
   // wasm store swaps in, its decks view resets (schema set) one daemon round-trip BEFORE its first
@@ -42,7 +61,7 @@ function Dashboard() {
   const decks = decksStatus === 'complete' ? liveDecks : lastComplete.current
   // The account resolved server-side (appSsr.ts) seeds AccountControl's first paint so the sign-in
   // pill doesn't pop in after the client's useSession() resolves.
-  const { account, entitlement } = Route.useLoaderData()
+  const { account, entitlement } = loaderData
   const mutate = useMutate()
   const navigate = useNavigate()
   const [creating, setCreating] = useState(false)
@@ -64,7 +83,7 @@ function Dashboard() {
   function createDeck(title: string) {
     const id = newId()
     const now = Date.now()
-    mutate.createDeck({ id, title, now, ...newDeckVisibility() })
+    mutate.createDeck({ id, title, now, pid, ...newDeckVisibility() })
     // Seed the deck with one blank slide and its canonical full-slide text component.
     mutate.addSlide({
       id: newId(),
@@ -87,6 +106,7 @@ function Dashboard() {
         mutate,
         await readDeckFile(file),
         newDeckVisibility(),
+        { pid },
       )
       navigate({ to: '/deck/$deckId', params: { deckId } })
     } catch (err) {
@@ -102,7 +122,11 @@ function Dashboard() {
         {/* Plain anchor (not a router Link) so it navigates to the site root `/` — the marketing home
             served by the commercial overlay, which lives OUTSIDE the app's /app basepath. */}
         <a className="brandbar__home" href="/" title="Strut home">
-          <img className="brandbar__logo" src="/strut-logo.png" alt="Strut" />
+          <img
+            className="brandbar__logo"
+            src={appPath('/strut-logo.png')}
+            alt="Strut"
+          />
         </a>
         <span className="brandbar__tag">Spatial presentations</span>
         <PoweredByRindle variant="inline" />

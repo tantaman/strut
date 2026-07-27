@@ -45,18 +45,23 @@ import {
   deleteDeckArgs,
   deleteSlideArgs,
 } from '../shared/app-def.ts'
+import type { SessionPrincipal } from './session.ts'
 
-export type User = string
+export type User = SessionPrincipal
 type ServerCtx = MutationContext<User>
 const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
 
 // ---- principal + access predicates --------------------------------------------------------------
 
-function requireUser(user: User): string {
-  if (typeof user !== 'string' || user.length === 0) {
+function requirePrincipal(user: User): User {
+  if (!user || typeof user.id !== 'string' || user.id.length === 0) {
     throw new RindleApiError('forbidden', 'a user is required', 403)
   }
   return user
+}
+
+function requireUser(user: User): string {
+  return requirePrincipal(user).id
 }
 
 /** The MutatorCtx a shared body sees on the server: the AUTHENTICATED principal. */
@@ -65,11 +70,25 @@ function sharedCtx(ctx: ServerCtx): MutatorCtx {
 }
 
 /** Condition on a DECK row: the principal OWNS it OR is an 'editor' collaborator. */
-function deckEditableBy(user: string) {
-  return or(
-    deck.owner_id(user),
-    exists(rels.deckShares, (s) =>
-      s.where(and(deck_share.user_id(user), deck_share.role('editor'))),
+function deckScope(principal: User) {
+  if (principal.source === 'better-auth') return and(deck.cid(''), deck.pid(''))
+  const pidScope =
+    principal.pids.length === 1
+      ? deck.pid(principal.pids[0])
+      : or(...principal.pids.map((pid) => deck.pid(pid)))
+  return and(deck.cid(principal.cid), pidScope)
+}
+
+function deckEditableBy(principal: User) {
+  return and(
+    deckScope(principal),
+    or(
+      deck.owner_id(principal.id),
+      exists(rels.deckShares, (s) =>
+        s.where(
+          and(deck_share.user_id(principal.id), deck_share.role('editor')),
+        ),
+      ),
     ),
   )
 }
@@ -81,16 +100,12 @@ function deckEditableBy(user: string) {
 /** Generic: authorize via a boolean read against the open txn, then run the shared body. */
 function guarded<TArgs>(
   gen: SharedMutatorWithArgs<TArgs>,
-  authorized: (
-    tx: ServerMutationTx,
-    a: TArgs,
-    user: string,
-  ) => Promise<boolean>,
+  authorized: (tx: ServerMutationTx, a: TArgs, user: User) => Promise<boolean>,
 ): ApiMutator<User, unknown> {
   return async (tx, raw, ctx) => {
     const a = gen.args.parse(raw)
-    const user = requireUser(ctx.user)
-    if (!(await authorized(tx, a, user))) {
+    const principal = requirePrincipal(ctx.user)
+    if (!(await authorized(tx, a, principal))) {
       throw new RindleApiError(
         'forbidden',
         'not permitted to edit this deck',
@@ -106,9 +121,9 @@ const withDeckEditable = <TArgs>(
   deckIdOf: (a: TArgs) => string,
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
-      q.deck.where.id(deckIdOf(a)).where(deckEditableBy(user)).one(),
+      q.deck.where.id(deckIdOf(a)).where(deckEditableBy(principal)).one(),
     )
     return row != null
   })
@@ -118,11 +133,13 @@ const withSlideEditable = <TArgs>(
   slideIdOf: (a: TArgs) => string,
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
       q.slide.where
         .id(slideIdOf(a))
-        .where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))
+        .where(
+          exists(rels.slideDeck, (d) => d.where(deckEditableBy(principal))),
+        )
         .one(),
     )
     return row != null
@@ -140,12 +157,14 @@ const withSlideNotesEditable = <
 >(
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
       q.slide.where
         .id(a.slideId)
         .where(slide.deck_id(a.deckId))
-        .where(exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))))
+        .where(
+          exists(rels.slideDeck, (d) => d.where(deckEditableBy(principal))),
+        )
         .one(),
     )
     return row != null
@@ -156,14 +175,14 @@ const withComponentEditable = <TArgs>(
   compIdOf: (a: TArgs) => string,
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
       q.component.where
         .id(compIdOf(a))
         .where(
           exists(rels.componentSlide, (s) =>
             s.where(
-              exists(rels.slideDeck, (d) => d.where(deckEditableBy(user))),
+              exists(rels.slideDeck, (d) => d.where(deckEditableBy(principal))),
             ),
           ),
         )
@@ -177,9 +196,13 @@ const withDeckOwner = <TArgs>(
   deckIdOf: (a: TArgs) => string,
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
-      q.deck.where.id(deckIdOf(a)).where(deck.owner_id(user)).one(),
+      q.deck.where
+        .id(deckIdOf(a))
+        .where(deckScope(principal))
+        .where.owner_id(principal.id)
+        .one(),
     )
     return row != null
   })
@@ -189,11 +212,15 @@ const withShareOwner = <TArgs>(
   shareIdOf: (a: TArgs) => string,
   gen: SharedMutatorWithArgs<TArgs>,
 ) =>
-  guarded(gen, async (tx, a, user) => {
+  guarded(gen, async (tx, a, principal) => {
     const row = await tx.query(
       q.deck_share.where
         .id(shareIdOf(a))
-        .where(exists(rels.shareDeck, (d) => d.where(deck.owner_id(user))))
+        .where(
+          exists(rels.shareDeck, (d) =>
+            d.where(deckScope(principal)).where.owner_id(principal.id),
+          ),
+        )
         .one(),
     )
     return row != null
@@ -211,7 +238,17 @@ const withShareOwner = <TArgs>(
 const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   const gen = sharedMutators.createDeck
   const a = gen.args.parse(raw)
-  const user = requireUser(ctx.user)
+  const principal = requirePrincipal(ctx.user)
+  const user = principal.id
+  if (principal.source === 'aamu') {
+    if (!a.pid || !principal.pids.includes(a.pid)) {
+      throw new RindleApiError('forbidden', 'project access is required', 403)
+    }
+    a.cid = principal.cid
+  } else {
+    a.cid = ''
+    a.pid = ''
+  }
   const ent = await getEntitlements(user)
   if (!ent.canKeepPrivate) {
     a.visibility = 'public-read'
@@ -230,9 +267,14 @@ const setDeckVisibilityGuarded: ApiMutator<User, unknown> = async (
 ) => {
   const gen = sharedMutators.setDeckVisibility
   const a = gen.args.parse(raw)
-  const user = requireUser(ctx.user)
+  const principal = requirePrincipal(ctx.user)
+  const user = principal.id
   const owns = await tx.query(
-    q.deck.where.id(a.id).where(deck.owner_id(user)).one(),
+    q.deck.where
+      .id(a.id)
+      .where(deckScope(principal))
+      .where(deck.owner_id(user))
+      .one(),
   )
   if (owns == null) {
     throw new RindleApiError(
@@ -340,7 +382,21 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   // row is deleted LAST.
   deleteDeck: async (tx: ServerMutationTx, raw: unknown, ctx: ServerCtx) => {
     const { id } = deleteDeckArgs.parse(raw)
-    const user = requireUser(ctx.user)
+    const principal = requirePrincipal(ctx.user)
+    const user = principal.id
+    const allowed = await tx.query(
+      q.deck.where
+        .id(id)
+        .where(deckScope(principal))
+        .where(deck.owner_id(user))
+        .one(),
+    )
+    if (!allowed)
+      throw new RindleApiError(
+        'forbidden',
+        'not permitted to delete this deck',
+        403,
+      )
     const owner = 'EXISTS (SELECT 1 FROM deck WHERE id = ? AND owner_id = ?)'
     tx.exec(
       `DELETE FROM component WHERE slide_id IN (SELECT id FROM slide WHERE deck_id = ?) AND ${owner}`,
@@ -368,7 +424,22 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   // componentIds, which a malicious client could point at another deck), then the slide.
   deleteSlide: async (tx: ServerMutationTx, raw: unknown, ctx: ServerCtx) => {
     const { id } = deleteSlideArgs.parse(raw)
-    const user = requireUser(ctx.user)
+    const principal = requirePrincipal(ctx.user)
+    const user = principal.id
+    const allowed = await tx.query(
+      q.slide.where
+        .id(id)
+        .where(
+          exists(rels.slideDeck, (d) => d.where(deckEditableBy(principal))),
+        )
+        .one(),
+    )
+    if (!allowed)
+      throw new RindleApiError(
+        'forbidden',
+        'not permitted to delete this slide',
+        403,
+      )
     const editableSlides =
       "(SELECT id FROM slide WHERE deck_id IN (SELECT id FROM deck WHERE owner_id = ? UNION SELECT deck_id FROM deck_share WHERE user_id = ? AND role = 'editor'))"
     tx.exec(
@@ -403,8 +474,10 @@ const api = createRindleApiServer<User>({
   mutators: apiMutators,
   // Coarse gate: require a non-empty principal. Row-level access lives where Rindle gives the tools —
   // queries are owner/share-scoped (server/queries.ts) and mutators are access-guarded (above).
-  authorizeQuery: ({ user }) => typeof user === 'string' && user.length > 0,
-  authorizeMutation: ({ user }) => typeof user === 'string' && user.length > 0,
+  authorizeQuery: ({ user }) =>
+    Boolean(user && typeof user.id === 'string' && user.id.length > 0),
+  authorizeMutation: ({ user }) =>
+    Boolean(user && typeof user.id === 'string' && user.id.length > 0),
 })
 
 // Web-standard entrypoint used by the TanStack Start server routes (src/routes/api.rindle.*).
@@ -419,14 +492,46 @@ export async function handleRindleJson(
     // Principal = the server-verified session (the cookie), NOT the client's `x-user` header. The
     // browser mints an anonymous session on first touch, so a principal is normally always present; a
     // missing/invalid session → '' → the coarse authorize* gates reject.
-    const { resolveSessionUser } = await import('./session.ts')
-    const ctx = { user: await resolveSessionUser(request), request }
+    const { resolveSessionPrincipal } = await import('./session.ts')
+    const principal = await resolveSessionPrincipal(request)
+    if (!principal)
+      throw new RindleApiError('forbidden', 'a user is required', 403)
+    const ctx = { user: principal, request }
+    const envelopes = kind === 'mutate' ? mutationEnvelopes(body) : []
+    const beforeDelete = new Map<string, Record<string, unknown>>()
+    for (const envelope of envelopes) {
+      if (envelope.name !== 'deleteDeck') continue
+      const deckId = deckIdFromEnvelope(envelope)
+      if (!deckId) continue
+      const mirror = await readDeckMirror(principal, deckId, request)
+      if (mirror) beforeDelete.set(deckId, mirror)
+    }
     const out =
       kind === 'query'
         ? await api.handleQueryJson(body, ctx)
         : kind === 'read'
           ? await api.handleReadJson(body, ctx)
           : await api.handleMutateJson(body, ctx)
+    if (kind === 'mutate') {
+      const { emitAamuDeckEvent } = await import('./aamu-events.ts')
+      for (const envelope of envelopes) {
+        const deckId = deckIdFromEnvelope(envelope)
+        if (!deckId) continue
+        const deleted = envelope.name === 'deleteDeck'
+        const mirror = deleted
+          ? beforeDelete.get(deckId)
+          : await readDeckMirror(principal, deckId, request)
+        if (!mirror) continue
+        await emitAamuDeckEvent(
+          deleted
+            ? 'deck.deleted'
+            : envelope.name === 'createDeck'
+              ? 'deck.created'
+              : 'deck.updated',
+          mirror as never,
+        )
+      }
+    }
     return Response.json(out)
   } catch (err) {
     const status = err instanceof RindleApiError ? err.status : 500
@@ -440,12 +545,66 @@ export async function handleRindleJson(
   }
 }
 
+interface WireEnvelope {
+  name: string
+  args: Record<string, unknown>
+}
+
+function mutationEnvelopes(body: unknown): WireEnvelope[] {
+  if (!body || typeof body !== 'object') return []
+  const value = body as Record<string, unknown>
+  const raw = Array.isArray(value.envelopes)
+    ? value.envelopes
+    : [value.envelope ?? value]
+  return raw.flatMap((item) => {
+    if (!item || typeof item !== 'object') return []
+    const envelope = item as Record<string, unknown>
+    if (typeof envelope.name !== 'string') return []
+    return [
+      {
+        name: envelope.name,
+        args:
+          envelope.args && typeof envelope.args === 'object'
+            ? (envelope.args as Record<string, unknown>)
+            : {},
+      },
+    ]
+  })
+}
+
+function deckIdFromEnvelope(envelope: WireEnvelope): string {
+  const directDeckMutators = new Set([
+    'createDeck',
+    'renameDeck',
+    'touchDeck',
+    'deleteDeck',
+    'setDeckTheme',
+    'setDeckVisibility',
+  ])
+  const value = directDeckMutators.has(envelope.name)
+    ? envelope.args.id
+    : envelope.args.deckId
+  return typeof value === 'string' ? value : ''
+}
+
+async function readDeckMirror(
+  principal: User,
+  deckId: string,
+  request: Request,
+): Promise<Record<string, unknown> | null> {
+  const out = await api.handleReadJson(
+    { name: 'deckMirror', args: { deckId } },
+    { user: principal, request },
+  )
+  return out.rows[0]?.cols ?? null
+}
+
 // One-shot SSR read of a named query: the server-side SSR preload (src/rindle/shareSsr.ts) calls this
 // to seed a route's first paint through the same authoritative (gated) path as the live subscription.
 export async function readNamedQuery(
   name: string,
   args: unknown,
-  user: string,
+  user: User,
   request?: Request,
 ): Promise<{ rows: { cols: Record<string, unknown> }[]; cvMin?: number }> {
   const ctx = {

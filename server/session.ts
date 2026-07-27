@@ -6,21 +6,52 @@
 // authorize* gates reject it.
 
 import { getAuth } from './auth.ts'
+import { resolveAamuPrincipal, type AamuSessionPrincipal } from './aamu-auth.ts'
 
-/** Resolve the acting principal from the request's session cookie, or '' when there is no valid
- *  session. Never throws — a resolution failure is treated as "no principal" (the gates reject). */
-export async function resolveSessionUser(request: Request): Promise<string> {
+export interface BetterAuthPrincipal {
+  id: string
+  source: 'better-auth'
+  cid: ''
+  pids: []
+  name: string
+  email: string
+  isAnonymous: boolean
+}
+
+export type SessionPrincipal = AamuSessionPrincipal | BetterAuthPrincipal
+
+export async function resolveSessionPrincipal(
+  request: Request,
+): Promise<SessionPrincipal | null> {
+  const aamu = await resolveAamuPrincipal(request)
+  if (aamu) return aamu
   try {
     const auth = await getAuth(request)
     const session = await auth.api.getSession({ headers: request.headers })
-    return session?.user.id ?? ''
+    const user = session?.user
+    if (!user) return null
+    return {
+      id: user.id,
+      source: 'better-auth',
+      cid: '',
+      pids: [],
+      name: user.name,
+      email: user.email,
+      isAnonymous: (user as { isAnonymous?: boolean }).isAnonymous === true,
+    }
   } catch (err) {
     console.error(
       '[auth] session resolution failed:',
       err instanceof Error ? err.message : err,
     )
-    return ''
+    return null
   }
+}
+
+/** Resolve the acting principal from the request's session cookie, or '' when there is no valid
+ *  session. Never throws — a resolution failure is treated as "no principal" (the gates reject). */
+export async function resolveSessionUser(request: Request): Promise<string> {
+  return (await resolveSessionPrincipal(request))?.id ?? ''
 }
 
 /** The account fields the dashboard's account control first-paints with. Plain primitives so it rides
@@ -40,22 +71,13 @@ export interface SessionAccount {
 export async function resolveSessionAccount(
   request: Request,
 ): Promise<SessionAccount | null> {
-  try {
-    const auth = await getAuth(request)
-    const session = await auth.api.getSession({ headers: request.headers })
-    const user = session?.user
-    if (!user) return null
-    return {
-      id: user.id,
-      isAnonymous: (user as { isAnonymous?: boolean }).isAnonymous === true,
-      name: user.name,
-      email: user.email,
-    }
-  } catch (err) {
-    console.error(
-      '[auth] session account resolution failed:',
-      err instanceof Error ? err.message : err,
-    )
-    return null
+  const principal = await resolveSessionPrincipal(request)
+  if (!principal) return null
+  return {
+    id: principal.id,
+    isAnonymous:
+      principal.source === 'better-auth' ? principal.isAnonymous : false,
+    name: principal.name,
+    email: principal.email,
   }
 }

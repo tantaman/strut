@@ -116,6 +116,7 @@ export function importDeck(
     visibility: 'private' | 'public-read'
     share_token: string
   } = { visibility: 'private', share_token: '' },
+  scope: { pid?: string; cid?: string } = {},
 ): string {
   const now = Date.now()
   const deckId = newId()
@@ -124,6 +125,7 @@ export function importDeck(
     title: imported.title,
     now,
     ...initialVisibility,
+    ...scope,
   })
   mutate.setDeckTheme({
     id: deckId,

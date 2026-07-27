@@ -36,6 +36,13 @@ const SERVER_ENV = [
   'R2_SECRET_ACCESS_KEY',
   'R2_BUCKET',
   'R2_PUBLIC_BASE_URL',
+  'S3_ENDPOINT',
+  'S3_REGION',
+  'S3_BUCKET',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+  'S3_FORCE_PATH_STYLE',
+  'S3_PUBLIC_BASE_URL',
   'ARTIFACT_ORIGIN',
   // Better-Auth (server/auth.ts). Under `pnpm dev` sessions run off a local better-sqlite3 DB, so only
   // the secret + base URL are needed for the guest flow; the OAuth creds are optional (promotion).
@@ -46,6 +53,11 @@ const SERVER_ENV = [
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'STRUT_AUTH_DB',
+  'AAMU_INTERNAL_URL',
+  'AAMU_SLIDES_SHARED_SECRET',
+  'AAMU_SLIDES_SESSION_SECRET',
+  'AAMU_SLIDES_WEBHOOK_SECRET',
+  'AAMU_EVENT_URL',
 ]
 
 const config = defineConfig(({ mode }) => {

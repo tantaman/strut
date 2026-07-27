@@ -33,7 +33,15 @@ export const preloadShareDeck = createServerFn({ method: 'GET' })
         const { rows, cvMin } = await readNamedQuery(
           name ?? 'publicDeckDetail',
           args,
-          'ssr',
+          {
+            id: 'public-share',
+            source: 'better-auth',
+            cid: '',
+            pids: [],
+            name: '',
+            email: '',
+            isAnonymous: true,
+          },
         )
         return { rows: rows as never, cvMin }
       },

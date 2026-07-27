@@ -44,6 +44,23 @@ export const decksQuery = defineQuery(
       .countAs('slideCount', rels.deckSlides),
 )
 
+// Aamu project dashboard. The client-side pid predicate keeps project tabs isolated even when
+// the local replica contains rows from several allowed projects.
+export const projectDecksQuery = defineQuery(
+  'projectDecks',
+  (raw): { pid: string; limit: number } => ({
+    pid: reqString(raw, 'pid'),
+    limit: reqLimit(raw),
+  }),
+  ({ pid, limit }: { pid: string; limit: number }) =>
+    q.deck.where
+      .pid(pid)
+      .include(DeckFragment)
+      .orderBy('modified', 'desc')
+      .limit(limit)
+      .countAs('slideCount', rels.deckSlides),
+)
+
 // Variants derived from a source deck, newest first. The server twin gates each variant by the viewer's
 // normal deck access, so this shows only derived decks the current principal can see.
 export const deckVariantsQuery = defineQuery(
@@ -145,6 +162,7 @@ export const publicDeckDetailQuery = defineQuery(
 
 export const allQueries = [
   decksQuery,
+  projectDecksQuery,
   deckVariantsQuery,
   deckDetailQuery,
   publicDeckDetailQuery,
