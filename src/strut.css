@@ -211,6 +211,42 @@ button {
   display: block !important;
 }
 
+.aamu-strut-source {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--glass);
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0.72;
+  backdrop-filter: blur(8px);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+.aamu-strut-source:hover,
+.aamu-strut-source:focus-visible {
+  color: var(--text);
+  border-color: var(--line-strong);
+  opacity: 1;
+}
+.aamu-strut-source:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
 /* ---- dashboard ---- */
 .dash {
   max-width: 1140px;
@@ -4215,6 +4251,15 @@ button {
   :root {
     --m-strip-h: 100px;
     --m-sheet-gap: calc(env(safe-area-inset-bottom) + 8px);
+  }
+
+  .aamu-strut-source {
+    right: 8px;
+    bottom: calc(var(--m-strip-h) + var(--m-sheet-gap));
+    padding: 7px;
+  }
+  .aamu-strut-source span {
+    display: none;
   }
 
   .editor {

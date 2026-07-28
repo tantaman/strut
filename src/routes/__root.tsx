@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Github } from 'lucide-react'
 
 import appCss from '../styles.css?url'
 import strutCss from '../strut.css?url'
@@ -9,6 +10,7 @@ import { DecksKeepalive } from '../rindle/DecksKeepalive'
 import { ANALYTICS_ENABLED, UMAMI_ID, UMAMI_SRC } from '../lib/analytics'
 import { googleFontsHref } from '../config'
 import { themeBootstrapScript } from '../ThemeToggle'
+import { APP_BASEPATH } from '../../shared/appPath'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -74,6 +76,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             ]}
           />
         ) : null}
+        {APP_BASEPATH === '/slides' && (
+          <a
+            className="aamu-strut-source"
+            href="https://github.com/tantaman/strut"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open the original tantaman/strut repository"
+          >
+            <Github size={15} aria-hidden="true" />
+            <span>tantaman/strut</span>
+          </a>
+        )}
         <Scripts />
       </body>
     </html>
