@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Github } from 'lucide-react'
 
 import appCss from '../styles.css?url'
 import strutCss from '../strut.css?url'
@@ -9,18 +10,21 @@ import { DecksKeepalive } from '../rindle/DecksKeepalive'
 import { ANALYTICS_ENABLED, UMAMI_ID, UMAMI_SRC } from '../lib/analytics'
 import { googleFontsHref } from '../config'
 import { themeBootstrapScript } from '../ThemeToggle'
+import { APP_BASEPATH } from '../../shared/appPath'
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Strut' },
+      { title: APP_BASEPATH === '/slides' ? 'Aamu Slides' : 'Strut' },
     ],
     links: [
-      // Strut favicon (the stacked-bars mark from strut.io). Versioned to bust the
-      // browser's aggressive favicon cache when it changes.
-      { rel: 'icon', href: '/favicon.ico?v=strut', sizes: 'any' },
+      {
+        rel: 'shortcut icon',
+        type: 'image/png',
+        href: 'https://st.aamu.app/img/logo-160-round-wbg.png',
+      },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       {
         rel: 'preconnect',
@@ -61,15 +65,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <DecksKeepalive />
           {children}
         </RindleProvider>
-        <TanStackDevtools
-          config={{ position: 'bottom-left' }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        {import.meta.env.DEV ? (
+          <TanStackDevtools
+            config={{ position: 'bottom-left' }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+        ) : null}
+        {APP_BASEPATH === '/slides' && (
+          <a
+            className="aamu-strut-source"
+            href="https://github.com/tantaman/strut"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open the original tantaman/strut repository"
+          >
+            <Github size={15} aria-hidden="true" />
+            <span>tantaman/strut</span>
+          </a>
+        )}
         <Scripts />
       </body>
     </html>

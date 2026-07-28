@@ -9,9 +9,20 @@
 // ONCE in a hand-written module with refineTable(...) + refineSchema(...); they survive every regen
 // of this file.
 
-import { createSchema, json, number, string, table } from "@rindle/client";
+import { createSchema, json, number, string, table } from '@rindle/client'
 
-export const component = table("component")
+export const aamu_event_outbox = table('aamu_event_outbox')
+  .columns({
+    id: string(),
+    body: string(),
+    created_at: number(),
+    attempts: number(),
+    next_attempt_at: number(),
+    last_error: string(),
+  })
+  .primaryKey('id')
+
+export const component = table('component')
   .columns({
     id: string(),
     slide_id: string(),
@@ -31,18 +42,18 @@ export const component = table("component")
     props: json(),
     content: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const custom_background = table("custom_background")
+export const custom_background = table('custom_background')
   .columns({
     id: string(),
     deck_id: string(),
     klass: string(),
     style: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const deck = table("deck")
+export const deck = table('deck')
   .columns({
     id: string(),
     title: string(),
@@ -66,10 +77,12 @@ export const deck = table("deck")
     source_deck_id: string(),
     variant_label: string(),
     variant_prompt: string(),
+    cid: string(),
+    pid: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const deck_share = table("deck_share")
+export const deck_share = table('deck_share')
   .columns({
     id: string(),
     deck_id: string(),
@@ -77,9 +90,9 @@ export const deck_share = table("deck_share")
     role: string(),
     created: number(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const slide = table("slide")
+export const slide = table('slide')
   .columns({
     id: string(),
     deck_id: string(),
@@ -106,23 +119,34 @@ export const slide = table("slide")
     valign: string(),
     body_component_id: string(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const slide_notes = table("slide_notes")
+export const slide_notes = table('slide_notes')
   .columns({
     slide_id: string(),
     deck_id: string(),
     doc: string(),
     modified: number(),
   })
-  .primaryKey("slide_id");
+  .primaryKey('slide_id')
 
-export const user_profile = table("user_profile")
+export const user_profile = table('user_profile')
   .columns({
     id: string(),
     display_name: string(),
     updated: number(),
   })
-  .primaryKey("id");
+  .primaryKey('id')
 
-export const schema = createSchema({ tables: [component, custom_background, deck, deck_share, slide, slide_notes, user_profile] });
+export const schema = createSchema({
+  tables: [
+    aamu_event_outbox,
+    component,
+    custom_background,
+    deck,
+    deck_share,
+    slide,
+    slide_notes,
+    user_profile,
+  ],
+})

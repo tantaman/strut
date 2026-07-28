@@ -17,7 +17,6 @@ import { DocView } from '../editor/DocView'
 import { PrecisionWorkspace } from '../editor/PrecisionWorkspace'
 import { ArrangeView } from '../editor/Overview'
 import { ChatPanel } from '../editor/ChatPanel'
-import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { useDeckChatContext } from '../editor/chatNarration'
 import type { DeckRoot, SlideDetail } from '../editor/deckDetail'
 
@@ -55,7 +54,14 @@ function EditorAccess({ deckId }: { deckId: string }) {
   // server-side from the cookie) so canEdit is correct during SSR + first paint — no read-only flash;
   // the live session hook takes over after hydration (and reflects a mid-session guest→account promote).
   const { userId: ssrUserId } = Route.useLoaderData()
-  const me = authClient.useSession().data?.user.id ?? ssrUserId
+  const betterAuthUserId = authClient.useSession().data?.user.id
+  // Aamu authentication is independent of Better Auth. A browser may still carry an older anonymous
+  // Better Auth cookie, but it must never override the signed Aamu principal resolved by the loader.
+  // Standalone Strut keeps preferring the live Better Auth session so guest→account promotion still
+  // takes effect without reopening the editor.
+  const me = ssrUserId.startsWith('aamu:')
+    ? ssrUserId
+    : (betterAuthUserId ?? ssrUserId)
   const canEdit =
     !!deck &&
     (deck.owner_id === me ||
@@ -313,7 +319,6 @@ function EditorInner({ deckId }: { deckId: string }) {
           />
         )}
       </div>
-      {!arrangeOpen && <PoweredByRindle />}
     </div>
   )
 }

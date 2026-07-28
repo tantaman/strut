@@ -12,8 +12,9 @@ import { presentationSurfaceBackground } from '../editor/presentationSurface'
 import { UserStyle } from '../editor/CssEditor'
 import { flightFor } from '../editor/transitions'
 import { preloadShareDeck } from '../rindle/shareSsr'
-import { PoweredByRindle } from '../editor/PoweredByRindle'
 import { SLIDE_H, SLIDE_W } from '../config'
+import { appPath } from '../../shared/appPath'
+import { AamuSlidesLogo } from '../AamuSlidesLogo'
 import type { DeckRoot } from '../editor/deckDetail'
 
 export const Route = createFileRoute('/share/$deckId')({
@@ -41,7 +42,11 @@ function Share() {
   if (!token)
     return (
       <div className="share-gate">
-        <img src="/strut-logo.png" alt="Strut" className="share-gate__logo" />
+        <img
+          src={appPath('/strut-logo.png')}
+          alt="Strut"
+          className="share-gate__logo"
+        />
         <p>This share link is missing its access token.</p>
       </div>
     )
@@ -85,7 +90,11 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
     if (!ready) return <div className="strut-boot">Loading shared deck…</div>
     return (
       <div className="share-gate">
-        <img src="/strut-logo.png" alt="Strut" className="share-gate__logo" />
+        <img
+          src={appPath('/strut-logo.png')}
+          alt="Strut"
+          className="share-gate__logo"
+        />
         <p>
           {!deck
             ? "This deck isn't shared, or the link is invalid."
@@ -167,10 +176,13 @@ function ShareViewer({ deckId, token }: { deckId: string; token: string }) {
         {i + 1} / {slides.length} · → next · ← back
       </div>
       <div className="share-badge">
-        <img src="/strut-logo.png" alt="Strut" />
+        {deck.pid ? (
+          <AamuSlidesLogo />
+        ) : (
+          <img src={appPath('/strut-logo.png')} alt="Strut" />
+        )}
         <span>shared read-only</span>
       </div>
-      <PoweredByRindle />
     </div>
   )
 }

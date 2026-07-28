@@ -14,8 +14,9 @@ import type { ApiContext } from '@rindle/api-server'
 import { q, rels, deck, deck_share } from '../shared/app-def.ts'
 import { DeckFragment } from '../shared/fragments.ts'
 import { deckDetailBody, profileQuery } from '../shared/queries.ts'
+import type { SessionPrincipal } from './session.ts'
 
-type User = string
+type User = SessionPrincipal
 type Ctx = ApiContext<User>
 
 function reqString(raw: unknown, field: string): string {
@@ -37,10 +38,22 @@ function reqLimit(raw: unknown): number {
 }
 
 // Condition on a DECK row: principal owns it OR collaborates on it.
-function deckAccess(user: string) {
-  return or(
-    deck.owner_id(user),
-    existsNoSync(rels.deckShares, (s) => s.where.user_id(user)),
+function deckScope(principal: User) {
+  if (principal.source === 'better-auth') return and(deck.cid(''), deck.pid(''))
+  const pidScope =
+    principal.pids.length === 1
+      ? deck.pid(principal.pids[0])
+      : or(...principal.pids.map((pid) => deck.pid(pid)))
+  return and(deck.cid(principal.cid), pidScope)
+}
+
+function deckAccess(principal: User) {
+  return and(
+    deckScope(principal),
+    or(
+      deck.owner_id(principal.id),
+      existsNoSync(rels.deckShares, (s) => s.where.user_id(principal.id)),
+    ),
   )
 }
 const decksQuery = defineQuery(
@@ -53,6 +66,34 @@ const decksQuery = defineQuery(
       .orderBy('modified', 'desc')
       .limit(limit)
       .countAs('slideCount', rels.deckSlides),
+)
+
+const projectDecksQuery = defineQuery(
+  'projectDecks',
+  (raw): { pid: string; limit: number } => ({
+    pid: reqString(raw, 'pid'),
+    limit: reqLimit(raw),
+  }),
+  ({ pid, limit }: { pid: string; limit: number }, ctx: Ctx) =>
+    q.deck.where
+      .pid(pid)
+      .where(deckAccess(ctx.user))
+      .include(DeckFragment)
+      .orderBy('modified', 'desc')
+      .limit(limit)
+      .countAs('slideCount', rels.deckSlides),
+)
+
+const deckMirrorQuery = defineQuery(
+  'deckMirror',
+  (raw): { deckId: string } => ({ deckId: reqString(raw, 'deckId') }),
+  ({ deckId }: { deckId: string }, ctx: Ctx) =>
+    q.deck.where
+      .id(deckId)
+      .where(deckAccess(ctx.user))
+      .include(DeckFragment)
+      .countAs('slideCount', rels.deckSlides)
+      .one(),
 )
 
 const deckVariantsQuery = defineQuery(
@@ -89,8 +130,10 @@ const deckSharesQuery = defineQuery(
   ({ deckId }: { deckId: string }, ctx: Ctx) =>
     q.deck_share.where.deck_id(deckId).where(
       or(
-        deck_share.user_id(ctx.user),
-        existsNoSync(rels.shareDeck, (d) => d.where.owner_id(ctx.user)),
+        deck_share.user_id(ctx.user.id),
+        existsNoSync(rels.shareDeck, (d) =>
+          d.where(deckAccess(ctx.user)).where.owner_id(ctx.user.id),
+        ),
       ),
     ),
 )
@@ -136,6 +179,8 @@ const slideNotesQuery = defineQuery(
 // profile is world-readable — reuse the un-gated client definition.
 export const serverQueries = [
   decksQuery,
+  projectDecksQuery,
+  deckMirrorQuery,
   deckVariantsQuery,
   deckDetailQuery,
   publicDeckDetailQuery,

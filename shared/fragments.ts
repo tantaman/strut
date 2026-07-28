@@ -39,6 +39,8 @@ export const DeckFragment = defineFragment(deck, (f) =>
     'source_deck_id',
     'variant_label',
     'variant_prompt',
+    'cid',
+    'pid',
   ),
 )
 

@@ -115,6 +115,10 @@ export const createDeckArgs = z.object({
   source_deck_id: z.string().optional(),
   variant_label: z.string().optional(),
   variant_prompt: z.string().optional(),
+  // Aamu tenant/project scope. Standalone Strut uses the empty-string defaults.
+  // The server validates and authoritatively rewrites these from its signed principal.
+  cid: z.string().optional(),
+  pid: z.string().optional(),
 })
 export type CreateDeckArgs = z.infer<typeof createDeckArgs>
 
@@ -407,6 +411,8 @@ export const mutators = {
         source_deck_id: a.source_deck_id ?? '',
         variant_label: a.variant_label ?? '',
         variant_prompt: a.variant_prompt ?? '',
+        cid: a.cid ?? '',
+        pid: a.pid ?? '',
       })
     },
   ),

@@ -26,6 +26,29 @@ export function currentUserId(): string {
  *  session cookie then rides same-origin on every /api/rindle/* fetch, so the server can derive the
  *  same principal. */
 async function ensureSession(): Promise<string> {
+  try {
+    const response = await fetch(appPath('/api/aamu/session'), {
+      credentials: 'same-origin',
+    })
+    if (response.ok) {
+      const aamu = (await response.json()) as {
+        enabled?: boolean
+        principal?: { id?: string } | null
+      }
+      if (aamu.principal?.id) {
+        sessionUserId = aamu.principal.id
+        return sessionUserId
+      }
+      // An Aamu-configured deployment must not silently mint an unrelated
+      // Better Auth guest: the launch flow has to establish the Aamu session.
+      if (aamu.enabled) {
+        sessionUserId = ''
+        return sessionUserId
+      }
+    }
+  } catch {
+    // Standalone fallback below.
+  }
   const existing = await authClient.getSession()
   let user = existing.data?.user
   if (!user) {
@@ -95,12 +118,6 @@ async function create() {
     onRejected: (envelope, reason) =>
       console.error(`[rindle] ${envelope.name} rejected:`, reason),
   })
-
-  if (import.meta.env.DEV) {
-    void import('@rindle/react-devtools')
-      .then(({ attachDevtools }) => attachDevtools(app))
-      .catch((e) => console.error('[rindle] failed to load devtools:', e))
-  }
 
   return app
 }

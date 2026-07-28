@@ -1,0 +1,8 @@
+{
+  "bindHost": "0.0.0.0",
+  "db": "/var/lib/slides/rindle.db",
+  "httpPort": 7600,
+  "nWorkers": 2,
+  "tables": [],
+  "wsPort": 7601
+}

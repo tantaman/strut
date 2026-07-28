@@ -6,7 +6,7 @@
 // Storage, in priority order (see docs/DEPLOY_CLOUDFLARE.md):
 //   1. Native Cloudflare R2 binding — when deployed to Workers (env.STRUT_UPLOADS is passed in). No
 //      S3 credentials needed. This is the production path on Cloudflare.
-//   2. R2 over the S3-compatible API — when the R2_* env vars are set on a non-Workers host.
+//   2. S3-compatible storage — AWS S3, MinIO, or R2 via S3 API.
 //   3. Local disk under .uploads/ — the zero-config dev fallback (served back by serveUploadByKey).
 
 import type { S3Client as S3ClientT } from '@aws-sdk/client-s3'
@@ -58,36 +58,54 @@ async function putR2Binding(
     : `${UPLOAD_SERVE_PREFIX}${key}`
 }
 
-// ---- storage backend 2: R2 over the S3-compatible API (non-Workers host) ------------------------
+// ---- storage backend 2: S3-compatible API (AWS S3 / MinIO / R2) --------------------------------
 
-interface R2Config {
-  accountId: string
+interface S3Config {
   accessKeyId: string
   secretAccessKey: string
   bucket: string
-  publicBase: string
+  region: string
+  endpoint?: string
+  publicBase?: string
+  forcePathStyle: boolean
 }
 
-function r2Config(): R2Config | null {
-  const accountId = process.env.R2_ACCOUNT_ID
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
-  const bucket = process.env.R2_BUCKET
-  const publicBase = process.env.R2_PUBLIC_BASE_URL
-  if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBase)
-    return null
-  return { accountId, accessKeyId, secretAccessKey, bucket, publicBase }
+function s3Config(): S3Config | null {
+  const r2AccountId = process.env.R2_ACCOUNT_ID
+  const accessKeyId =
+    process.env.S3_ACCESS_KEY_ID ?? process.env.R2_ACCESS_KEY_ID
+  const secretAccessKey =
+    process.env.S3_SECRET_ACCESS_KEY ?? process.env.R2_SECRET_ACCESS_KEY
+  const bucket = process.env.S3_BUCKET ?? process.env.R2_BUCKET
+  if (!accessKeyId || !secretAccessKey || !bucket) return null
+  return {
+    accessKeyId,
+    secretAccessKey,
+    bucket,
+    region: process.env.S3_REGION ?? (r2AccountId ? 'auto' : 'us-east-1'),
+    endpoint:
+      process.env.S3_ENDPOINT ??
+      (r2AccountId
+        ? `https://${r2AccountId}.r2.cloudflarestorage.com`
+        : undefined),
+    publicBase:
+      process.env.S3_PUBLIC_BASE_URL ?? process.env.R2_PUBLIC_BASE_URL,
+    forcePathStyle:
+      process.env.S3_FORCE_PATH_STYLE === 'true' ||
+      process.env.S3_FORCE_PATH_STYLE === '1',
+  }
 }
 
 // Memoized S3 client (AWS SDK imported lazily so the binding/local paths need nothing at runtime; the
 // dynamic import is ESM-cached, so re-importing PutObjectCommand per call in putS3 is free).
 let s3ClientPromise: Promise<S3ClientT> | null = null
-function getS3Client(cfg: R2Config): Promise<S3ClientT> {
+function getS3Client(cfg: S3Config): Promise<S3ClientT> {
   s3ClientPromise ??= import('@aws-sdk/client-s3').then(
     ({ S3Client }) =>
       new S3Client({
-        region: 'auto',
-        endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
+        region: cfg.region,
+        ...(cfg.endpoint ? { endpoint: cfg.endpoint } : {}),
+        forcePathStyle: cfg.forcePathStyle,
         credentials: {
           accessKeyId: cfg.accessKeyId,
           secretAccessKey: cfg.secretAccessKey,
@@ -98,7 +116,7 @@ function getS3Client(cfg: R2Config): Promise<S3ClientT> {
 }
 
 async function putS3(
-  cfg: R2Config,
+  cfg: S3Config,
   key: string,
   body: Uint8Array,
   contentType: string,
@@ -116,7 +134,9 @@ async function putS3(
       CacheControl: IMMUTABLE_CACHE,
     }),
   )
-  return `${cfg.publicBase.replace(/\/+$/, '')}/${key}`
+  return cfg.publicBase
+    ? `${cfg.publicBase.replace(/\/+$/, '')}/${key}`
+    : `${UPLOAD_SERVE_PREFIX}${key}`
 }
 
 // ---- storage backend 3: local disk (dev fallback) -----------------------------------------------
@@ -161,6 +181,38 @@ export async function serveUploadByKey(
     })
   }
 
+  const cfg = s3Config()
+  if (cfg) {
+    try {
+      const [client, { GetObjectCommand }] = await Promise.all([
+        getS3Client(cfg),
+        import('@aws-sdk/client-s3'),
+      ])
+      const object = await client.send(
+        new GetObjectCommand({ Bucket: cfg.bucket, Key: key }),
+      )
+      if (!object.Body) return new Response('not found', { status: 404 })
+      const body = await object.Body.transformToByteArray()
+      const bodyBuffer = body.buffer.slice(
+        body.byteOffset,
+        body.byteOffset + body.byteLength,
+      ) as ArrayBuffer
+      return new Response(bodyBuffer, {
+        headers: {
+          'content-type':
+            object.ContentType ?? mimeFromExt ?? 'application/octet-stream',
+          'cache-control': object.CacheControl ?? IMMUTABLE_CACHE,
+        },
+      })
+    } catch (error) {
+      const status = (error as { $metadata?: { httpStatusCode?: number } })
+        .$metadata?.httpStatusCode
+      if (status === 404) return new Response('not found', { status: 404 })
+      console.error('[upload] S3 read failed:', error)
+      return new Response('storage error', { status: 502 })
+    }
+  }
+
   const { readFile } = await import('node:fs/promises')
   const { join } = await import('node:path')
   try {
@@ -188,7 +240,7 @@ export async function storeImageBytes(
 ): Promise<string> {
   const ext = EXT[contentType] ?? 'png'
   const key = `${crypto.randomUUID()}.${ext}`
-  const cfg = r2 ? null : r2Config()
+  const cfg = r2 ? null : s3Config()
   return r2
     ? putR2Binding(r2, key, body, contentType)
     : cfg
@@ -243,7 +295,7 @@ export async function uploadFromRequest(
 
     // crypto.randomUUID() is a global in both Node 20+ and the Workers runtime.
     const key = `${crypto.randomUUID()}.${ext}`
-    const cfg = r2 ? null : r2Config()
+    const cfg = r2 ? null : s3Config()
     const url = r2
       ? await putR2Binding(r2, key, body, contentType)
       : cfg

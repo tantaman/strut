@@ -25,7 +25,7 @@ async function seedContext() {
   const [
     { createServerStore },
     { readNamedQuery },
-    { resolveSessionAccount },
+    { resolveSessionAccount, resolveSessionPrincipal },
     { schema },
     { getRequest },
   ] = await Promise.all([
@@ -35,11 +35,15 @@ async function seedContext() {
     import('../../shared/app-def'),
     import('@tanstack/react-start/server'),
   ])
-  const account = await resolveSessionAccount(getRequest())
-  if (!account) return null
+  const request = getRequest()
+  const [account, principal] = await Promise.all([
+    resolveSessionAccount(request),
+    resolveSessionPrincipal(request),
+  ])
+  if (!account || !principal) return null
   const store = createServerStore(schema, {
     query: async ({ name, args }) => {
-      const { rows, cvMin } = await readNamedQuery(name ?? '', args, account.id)
+      const { rows, cvMin } = await readNamedQuery(name ?? '', args, principal)
       return { rows: rows as never, cvMin }
     },
   })
@@ -97,6 +101,34 @@ export const preloadDecks = createServerFn({ method: 'GET' }).handler(
     }
   },
 )
+
+export const preloadProjectDecks = createServerFn({ method: 'GET' })
+  .validator((input: { pid: string }) => input)
+  .handler(async ({ data }): Promise<AppSeed> => {
+    const ctx = await seedContext()
+    if (!ctx)
+      return { rindle: null, userId: '', account: null, entitlement: null }
+    const { projectDecksQuery, DECKS_LIMIT } =
+      await import('../../shared/queries')
+    const state = await ctx.store.preloadAll(
+      [projectDecksQuery({ pid: data.pid, limit: DECKS_LIMIT })],
+      {
+        onError: (_q, err) =>
+          console.error(
+            '[ssr] project decks preload failed:',
+            err instanceof Error ? err.message : err,
+          ),
+      },
+    )
+    const { getEntitlements, entitlementSummary } =
+      await import('../../server/entitlements')
+    return {
+      rindle: JSON.stringify(state),
+      userId: ctx.account.id,
+      account: ctx.account,
+      entitlement: entitlementSummary(await getEntitlements(ctx.account.id)),
+    }
+  })
 
 // Editor: the deck subtree (deckDetail) + its collaborators (deckShares) — the two queries the editor
 // opens on first render. Both are access-gated to the principal server-side, so a stranger loading a

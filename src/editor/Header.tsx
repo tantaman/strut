@@ -65,6 +65,8 @@ import type { BackgroundImageLayout } from './types'
 import { cssFontFamily, FontOptions, parseVideo } from './render'
 import type { SlideDetail } from './deckDetail'
 import { ThemeToggle } from '../ThemeToggle'
+import { appPath } from '../../shared/appPath'
+import { AamuSlidesLogo } from '../AamuSlidesLogo'
 import { markdownToDoc } from './aiGenerate'
 
 // Shape-tool icons, in SHAPE_TOOLS order. The menu shows the "2"–"7" hint that matches the
@@ -80,6 +82,7 @@ const SHAPE_TOOL_ICONS: Record<string, LucideIcon> = {
 
 interface DeckRow {
   id: string
+  pid: string
   title: string
   background: string
   surface: string
@@ -448,9 +451,20 @@ export function Header({
           <ArrowLeft size={17} />
         </button>
       )}
-      <Link to="/" className="hdr__home" title="All decks">
-        <img src="/strut-logo.png" alt="Strut" />
-      </Link>
+      {deck?.pid ? (
+        <Link
+          to="/project/$pid"
+          params={{ pid: deck.pid }}
+          className="hdr__home"
+          title="Project decks"
+        >
+          <AamuSlidesLogo />
+        </Link>
+      ) : (
+        <Link to="/" className="hdr__home" title="All decks">
+          <img src={appPath('/strut-logo.png')} alt="Strut" />
+        </Link>
+      )}
       <input
         className="hdr__title"
         value={deck?.title ?? ''}

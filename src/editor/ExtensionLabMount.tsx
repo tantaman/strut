@@ -1,6 +1,6 @@
 // DEV-only lazy mount for the Extension Lab (issue #438). Statically importable and cheap: in a
 // production build `import.meta.env.DEV` is false, so the effect never runs and the panel module (which
-// pulls in the AssemblyScript compiler on demand) is never even fetched. Mirrors RindleDevtoolsMount in
+// pulls in the AssemblyScript compiler on demand) is never even fetched. Mirrors the lazy dev-only tools in
 // src/rindle/RindleProvider.tsx.
 
 import { useEffect, useState } from 'react'

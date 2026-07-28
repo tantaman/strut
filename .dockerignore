@@ -1,0 +1,9 @@
+.git
+.rindle
+.uploads
+auth.db
+dist
+node_modules
+rindle.db
+*.db-shm
+*.db-wal
