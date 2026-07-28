@@ -63,7 +63,7 @@ services:
         - CMD
         - node
         - -e
-        - "Promise.all([fetch('http://127.0.0.1:3000/slides/api/rindle/config'),fetch(process.env.RINDLE_DAEMON_URL+'/schema',{headers:{authorization:'Bearer '+process.env.RINDLE_DAEMON_TOKEN}})]).then(rs=>{if(rs.some(r=>!r.ok))process.exit(1)}).catch(()=>process.exit(1))"
+        - "Promise.all([fetch('http://127.0.0.1:3000/slides/api/rindle/config'),fetch('http://127.0.0.1:3000/slides/api/auth/get-session'),fetch('http://127.0.0.1:3000/slides/api/usage'),fetch(process.env.RINDLE_DAEMON_URL+'/schema',{headers:{authorization:'Bearer '+process.env.RINDLE_DAEMON_TOKEN}})]).then(([config,auth,usage,rindle])=>{if(!config.ok||auth.status>=500||usage.status>=500||!rindle.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 5s
       timeout: 3s
       retries: 20

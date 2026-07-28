@@ -18,6 +18,7 @@ RUN useradd --create-home --uid 10001 slides
 COPY --chown=slides:slides --from=build /app/node_modules ./node_modules
 COPY --chown=slides:slides --from=build /app/dist ./dist
 COPY --chown=slides:slides --from=build /app/migrations ./migrations
+COPY --chown=slides:slides --from=build /app/migrations-d1 ./migrations-d1
 COPY --chown=slides:slides --from=build /app/scripts/start-rindle-docker.mjs ./scripts/start-rindle-docker.mjs
 COPY --chown=slides:slides --from=build /app/server/node-server.mjs ./server/node-server.mjs
 COPY --chown=slides:slides --from=build /app/package.json ./
