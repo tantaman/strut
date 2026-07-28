@@ -31,6 +31,22 @@ function normalizeBasepath(value) {
   return `/${value.replace(/^\/+|\/+$/g, '')}`
 }
 
+function firstHeader(value) {
+  const raw = Array.isArray(value) ? value[0] : value
+  return typeof raw === 'string' ? raw.split(',')[0].trim() : ''
+}
+
+function requestOrigin(incoming) {
+  const forwardedProtocol = firstHeader(incoming.headers['x-forwarded-proto'])
+  const protocol = ['http', 'https'].includes(forwardedProtocol)
+    ? forwardedProtocol
+    : 'http'
+  const forwardedHost = firstHeader(incoming.headers['x-forwarded-host'])
+  const host = forwardedHost || firstHeader(incoming.headers.host) || 'localhost'
+  if (/[@/\\\s]/.test(host)) throw new Error('Invalid request host')
+  return `${protocol}://${host}`
+}
+
 async function serveStatic(pathname, response) {
   if (basepath && !pathname.startsWith(`${basepath}/`)) return false
   const relative = decodeURIComponent(
@@ -60,7 +76,7 @@ async function serveStatic(pathname, response) {
 
 createServer(async (incoming, outgoing) => {
   try {
-    const origin = `http://${incoming.headers.host || 'localhost'}`
+    const origin = requestOrigin(incoming)
     const url = new URL(incoming.url || '/', origin)
     if (
       (incoming.method === 'GET' || incoming.method === 'HEAD') &&
