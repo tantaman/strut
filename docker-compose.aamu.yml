@@ -37,7 +37,7 @@ services:
       PORT: 3000
       STRUT_APP_BASEPATH: /slides
       RINDLE_DAEMON_URL: http://slides-rindle:7600
-      RINDLE_DAEMON_WS: ${SLIDES_RINDLE_WS_URL:?SLIDES_RINDLE_WS_URL is required}
+      RINDLE_DAEMON_WS: ${SLIDES_RINDLE_WS_URL:-}
       RINDLE_DAEMON_TOKEN: ${RINDLE_DAEMON_TOKEN:?RINDLE_DAEMON_TOKEN is required}
       STRUT_AUTH_DB: /var/lib/slides-auth/auth.db
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
