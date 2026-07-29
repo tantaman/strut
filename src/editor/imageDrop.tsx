@@ -2,7 +2,7 @@
 // There is no parallel body/layout occupancy model: doc-first and precision reveal the same image box,
 // and the user can refine it spatially from there.
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { newId, SLIDE_H, SLIDE_W } from '../config'
 import { useMutate } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
@@ -17,8 +17,19 @@ import { uploadImage } from './upload'
 import type { AnyComponent, Rect } from './types'
 import type { SlideDetail } from './deckDetail'
 
+const imageFile = (dt: DataTransfer | null): File | null => {
+  if (!dt) return null
+  const file = Array.from(dt.files).find((f) => f.type.startsWith('image/'))
+  if (file) return file
+  const item = Array.from(dt.items).find(
+    (i) => i.kind === 'file' && i.type.startsWith('image/'),
+  )
+  return item?.getAsFile() ?? null
+}
+
 const hasImageFile = (dt: DataTransfer | null) =>
-  !!dt && Array.from(dt.items).some((i) => i.type.startsWith('image/'))
+  imageFile(dt) != null ||
+  (!!dt && Array.from(dt.items).some((i) => i.type.startsWith('image/')))
 
 // The `.slide-canvas` is the fixed 1280×720 stage, transform-origin top-left, so its on-screen rect maps
 // linearly back to canvas px. Resolve it whether the handler sits ON the canvas (Stage) or on an ancestor
@@ -80,29 +91,80 @@ export function useDropImage(slide: SlideDetail) {
   const history = useHistory()
   const [busy, setBusy] = useState(false)
   const [preview, setPreview] = useState<Rect | null>(null)
+  const previewHit = useRef<{ cx: number; cy: number } | null>(null)
+  const dragImage = useRef<{
+    key: string
+    resolved: boolean
+    dims: { w: number; h: number } | null
+    promise: Promise<{ w: number; h: number } | null>
+  } | null>(null)
+
+  const prepareImage = (file: File) => {
+    const key = `${file.name}:${file.type}:${file.size}:${file.lastModified}`
+    if (dragImage.current?.key === key) return dragImage.current
+    const entry = {
+      key,
+      resolved: false,
+      dims: null as { w: number; h: number } | null,
+      promise: Promise.resolve(null) as Promise<{
+        w: number
+        h: number
+      } | null>,
+    }
+    entry.promise = fileDims(file).then((dims) => {
+      entry.resolved = true
+      entry.dims = dims
+      if (dragImage.current === entry && previewHit.current) {
+        const { cx, cy } = previewHit.current
+        setPreview(placedBox(SLIDE_RECT, cx, cy, dims))
+      }
+      return dims
+    })
+    dragImage.current = entry
+    return entry
+  }
 
   const onDragOver = (e: React.DragEvent<HTMLElement>) => {
     if (!hasImageFile(e.dataTransfer)) return
     e.preventDefault() // required, or the browser refuses the drop
     e.dataTransfer.dropEffect = 'copy'
     const hit = canvasHit(e)
-    setPreview(hit ? placedBox(SLIDE_RECT, hit.cx, hit.cy, null) : null)
+    previewHit.current = hit
+    if (!hit) {
+      setPreview(null)
+      return
+    }
+    const file = imageFile(e.dataTransfer)
+    if (!file) {
+      setPreview(placedBox(SLIDE_RECT, hit.cx, hit.cy, null))
+      return
+    }
+    const prepared = prepareImage(file)
+    setPreview(
+      prepared.resolved
+        ? placedBox(SLIDE_RECT, hit.cx, hit.cy, prepared.dims)
+        : null,
+    )
   }
-  const onDragLeave = () => setPreview(null)
+  const onDragLeave = () => {
+    previewHit.current = null
+    setPreview(null)
+  }
 
   const onDrop = async (e: React.DragEvent<HTMLElement>) => {
-    const file = Array.from(e.dataTransfer.files).find((f) =>
-      f.type.startsWith('image/'),
-    )
+    const file = imageFile(e.dataTransfer)
     if (!file) return
     e.preventDefault()
     const hit = canvasHit(e) // read BEFORE awaiting (event is pooled)
+    previewHit.current = null
     setPreview(null)
     if (!hit) return
     setBusy(true)
     try {
-      const dims = await fileDims(file)
-      const src = await uploadImage(file)
+      const [dims, src] = await Promise.all([
+        prepareImage(file).promise,
+        uploadImage(file),
+      ])
       const box = placedBox(SLIDE_RECT, hit.cx, hit.cy, dims)
       const id = newId()
       const args = {
