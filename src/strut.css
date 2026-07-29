@@ -1135,6 +1135,22 @@ button {
   box-shadow: var(--shadow-lg);
   border-radius: 2px;
 }
+.slide-surface.is-dropping {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--coral);
+}
+.stage__drop-busy {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(24, 26, 33, 0.78);
+  color: #fff;
+  font-size: 12px;
+}
 .slide-canvas {
   position: absolute;
   top: 0;
