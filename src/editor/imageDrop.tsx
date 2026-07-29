@@ -139,9 +139,9 @@ export function useDropImage(slide: SlideDetail) {
     const file = imageFile(e.dataTransfer)
     if (!file) {
       // OS file drags are commonly in protected mode until `drop`: the MIME type is visible through
-      // `items`, but getAsFile()/files expose no bytes to decode. Do not claim a fake 3:2 aspect;
-      // the armed slide outline is the honest hover affordance until the real file becomes readable.
-      setPreview(null)
+      // `items`, but getAsFile()/files expose no bytes to decode. Use the established 3:2 preview in
+      // that case; the inserted image still uses its decoded natural aspect after the drop.
+      setPreview(placedBox(SLIDE_RECT, hit.cx, hit.cy, null))
       return
     }
     const prepared = prepareImage(file)

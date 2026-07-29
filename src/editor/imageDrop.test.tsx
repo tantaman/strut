@@ -117,7 +117,7 @@ describe('useDropImage preview', () => {
     expect(createImageBitmap).toHaveBeenCalledOnce()
   })
 
-  it('arms the surface without showing a fake aspect ratio in protected drag mode', () => {
+  it('uses the 3:2 fallback preview in protected drag mode', () => {
     const dataTransfer = {
       files: [],
       items: [
@@ -150,6 +150,10 @@ describe('useDropImage preview', () => {
     })
 
     expect(canvas.classList.contains('is-dropping')).toBe(true)
-    expect(container.querySelector('.drop-image-preview')).toBeNull()
+    const preview = container.querySelector<HTMLElement>('.drop-image-preview')
+    expect(preview).not.toBeNull()
+    expect(Number.parseFloat(preview!.style.width)).toBeCloseTo(
+      Number.parseFloat(preview!.style.height) * 1.5,
+    )
   })
 })
