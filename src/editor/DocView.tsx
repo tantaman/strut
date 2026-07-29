@@ -455,7 +455,7 @@ function DocCard({
         'doc__card' +
         (active ? ' is-active' : '') +
         (flipped ? ' is-flipped' : '') +
-        (drop.preview ? ' is-dropping' : '')
+        (drop.active ? ' is-dropping' : '')
       }
       style={{ width: colW, height: cardH }}
       // Drop an image and it becomes an aspect-correct object at the pointer. The preview is the exact

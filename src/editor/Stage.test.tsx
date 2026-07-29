@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
     onDragOver: vi.fn(),
     onDragLeave: vi.fn(),
     onDrop: vi.fn(),
+    active: true,
     preview: { x: 100, y: 120, w: 320, h: 180 },
     busy: true,
   },

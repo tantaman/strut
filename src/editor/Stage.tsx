@@ -1233,7 +1233,7 @@ export function Stage({
         host={inspectorHost}
       />
       <div
-        className={`slide-surface${imageDrop.preview ? ' is-dropping' : ''}`}
+        className={`slide-surface${imageDrop.active ? ' is-dropping' : ''}`}
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
       >
         <div
