@@ -64,6 +64,7 @@ import {
   selectionBounds,
   snapMove,
 } from './precisionGeometry'
+import { DropImageHighlight, useDropImage } from './imageDrop'
 import type {
   Alignment,
   PrecisionBounds,
@@ -153,6 +154,7 @@ export function Stage({
   const scale = useFitScale(stageRef, SLIDE_W, SLIDE_H, 112)
   const mutate = useMutate()
   const history = useHistory()
+  const imageDrop = useDropImage(slideData)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [marquee, setMarquee] = useState<null | {
     x: number
@@ -1231,7 +1233,7 @@ export function Stage({
         host={inspectorHost}
       />
       <div
-        className="slide-surface"
+        className={`slide-surface${imageDrop.preview ? ' is-dropping' : ''}`}
         style={{ width: SLIDE_W * scale, height: SLIDE_H * scale }}
       >
         <div
@@ -1239,6 +1241,9 @@ export function Stage({
             editor.pendingShape ? ' is-placing' : ''
           }`}
           onPointerDown={onCanvasPointerDown}
+          onDragOver={editor.canEdit ? imageDrop.onDragOver : undefined}
+          onDragLeave={editor.canEdit ? imageDrop.onDragLeave : undefined}
+          onDrop={editor.canEdit ? imageDrop.onDrop : undefined}
           onDoubleClick={(event) => {
             if (
               event.target === event.currentTarget &&
@@ -1302,6 +1307,7 @@ export function Stage({
             transform: `scale(${scale})`,
           }}
         >
+          <DropImageHighlight rect={imageDrop.preview} scale={1} />
           {selectedBounds &&
             selectedComponents.length > 0 &&
             !editingId &&
@@ -1331,6 +1337,11 @@ export function Stage({
             />
           ))}
         </div>
+        {imageDrop.busy && (
+          <div className="stage__drop-busy" role="status">
+            Uploading image…
+          </div>
+        )}
       </div>
       {marquee && (
         <div
