@@ -90,6 +90,7 @@ export function useDropImage(slide: SlideDetail) {
   const mutate = useMutate()
   const history = useHistory()
   const [busy, setBusy] = useState(false)
+  const [active, setActive] = useState(false)
   const [preview, setPreview] = useState<Rect | null>(null)
   const previewHit = useRef<{ cx: number; cy: number } | null>(null)
   const dragImage = useRef<{
@@ -128,6 +129,7 @@ export function useDropImage(slide: SlideDetail) {
     if (!hasImageFile(e.dataTransfer)) return
     e.preventDefault() // required, or the browser refuses the drop
     e.dataTransfer.dropEffect = 'copy'
+    setActive(true)
     const hit = canvasHit(e)
     previewHit.current = hit
     if (!hit) {
@@ -136,7 +138,10 @@ export function useDropImage(slide: SlideDetail) {
     }
     const file = imageFile(e.dataTransfer)
     if (!file) {
-      setPreview(placedBox(SLIDE_RECT, hit.cx, hit.cy, null))
+      // OS file drags are commonly in protected mode until `drop`: the MIME type is visible through
+      // `items`, but getAsFile()/files expose no bytes to decode. Do not claim a fake 3:2 aspect;
+      // the armed slide outline is the honest hover affordance until the real file becomes readable.
+      setPreview(null)
       return
     }
     const prepared = prepareImage(file)
@@ -148,6 +153,7 @@ export function useDropImage(slide: SlideDetail) {
   }
   const onDragLeave = () => {
     previewHit.current = null
+    setActive(false)
     setPreview(null)
   }
 
@@ -157,6 +163,7 @@ export function useDropImage(slide: SlideDetail) {
     e.preventDefault()
     const hit = canvasHit(e) // read BEFORE awaiting (event is pooled)
     previewHit.current = null
+    setActive(false)
     setPreview(null)
     if (!hit) return
     setBusy(true)
@@ -192,7 +199,7 @@ export function useDropImage(slide: SlideDetail) {
     }
   }
 
-  return { onDragOver, onDragLeave, onDrop, preview, busy }
+  return { onDragOver, onDragLeave, onDrop, active, preview, busy }
 }
 
 /** Quiet preview of the exact image box that will be inserted. */

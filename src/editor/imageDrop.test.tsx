@@ -33,7 +33,7 @@ function Harness() {
   const drop = useDropImage(slide)
   return (
     <div
-      className="slide-canvas"
+      className={`slide-canvas${drop.active ? ' is-dropping' : ''}`}
       onDragOver={drop.onDragOver}
       onDragLeave={drop.onDragLeave}
       onDrop={drop.onDrop}
@@ -115,5 +115,41 @@ describe('useDropImage preview', () => {
       ),
     )
     expect(createImageBitmap).toHaveBeenCalledOnce()
+  })
+
+  it('arms the surface without showing a fake aspect ratio in protected drag mode', () => {
+    const dataTransfer = {
+      files: [],
+      items: [
+        {
+          kind: 'file',
+          type: 'image/png',
+          getAsFile: () => null,
+        },
+      ],
+      dropEffect: 'none',
+    }
+    const { container } = render(<Harness />)
+    const canvas = container.querySelector<HTMLElement>('.slide-canvas')!
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 1280,
+      bottom: 720,
+      width: 1280,
+      height: 720,
+      toJSON: () => ({}),
+    })
+
+    fireEvent.dragOver(canvas, {
+      clientX: 640,
+      clientY: 360,
+      dataTransfer,
+    })
+
+    expect(canvas.classList.contains('is-dropping')).toBe(true)
+    expect(container.querySelector('.drop-image-preview')).toBeNull()
   })
 })
