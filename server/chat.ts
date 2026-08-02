@@ -1,20 +1,14 @@
 // The "✨ Chat" server adapter: turn a running conversation + append-only deck context into a STREAMED prose answer
-// from a presentation advisor. Inference goes through the shared model seam (server/llm.ts), which routes
-// to the caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app
-// pays). This adapter builds the grounded message list; the ROUTE resolves the ModelChoice and passes it
-// in. The response is a TOKEN STREAM (SSE) the route hands straight to the client — streamModel normalizes
-// OpenRouter's OpenAI-style frames to the Workers-AI `{response}` shape the client already parses, so the
-// client stays provider-agnostic.
+// from a presentation advisor. Inference goes through the caller's connected OpenRouter model. This
+// adapter builds the grounded message list; the route resolves the ModelChoice and passes it in. The
+// response is a token stream normalized to Strut's existing `{response}` SSE shape.
 
 import { clampChatRequest } from '../shared/chat.ts'
 import type { ChatRequest } from '../shared/chat.ts'
 import { streamModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice } from './llm.ts'
 
-/** Thrown when inference can't be reached (no binding / the initial call failed before any token
- *  streamed). The route maps it to a 503 with a user-facing message rather than a 500, and REFUNDS the
- *  app-paid quota unit — no inference was spent. A failure AFTER tokens start is NOT this error (the
- *  stream just ends); that unit stays consumed because partial inference was paid for. */
+/** Thrown when inference can't be reached or the initial call fails before any token streams. */
 export class ChatUnavailableError extends Error {
   constructor(message: string) {
     super(message)
@@ -61,7 +55,7 @@ interface ChatTurnMessage {
 }
 
 // Deterministic local stub (STRUT_CHAT_STUB) so the chat panel's streaming UI is exercisable under
-// `pnpm dev` with no workerd/AI. Emits a few Workers-AI-shaped SSE frames (`data: {"response":"…"}`) then
+// `pnpm dev`. Emits a few Strut-shaped SSE frames (`data: {"response":"…"}`) then
 // `data: [DONE]`, so the client's SSE parser + rAF-throttled writeLocal path run end-to-end. NOT used in
 // production.
 function stubStream(req: ChatRequest): ReadableStream<Uint8Array> {
@@ -70,7 +64,9 @@ function stubStream(req: ChatRequest): ReadableStream<Uint8Array> {
     [...req.messages].reverse().find((m) => m.role === 'user')?.content ?? ''
   const tokens = [
     '**(dev stub)** ',
-    req.deckContext ? 'I received narrated deck context. ' : 'I have no deck context yet. ',
+    req.deckContext
+      ? 'I received narrated deck context. '
+      : 'I have no deck context yet. ',
     'You said: ',
     `“${lastUser.slice(0, 80)}”. `,
     'Deploy under workerd (`pnpm preview:cf`) for a real answer.',
@@ -89,10 +85,8 @@ function stubStream(req: ChatRequest): ReadableStream<Uint8Array> {
 }
 
 /** Produce a TOKEN STREAM (SSE, `text/event-stream`) answering the conversation, grounded in the deck
- *  digest. Passes Workers AI's SSE through UNTOUCHED — the client parses `data: {"response":"…"}` frames
- *  (see src/editor/aiChat.ts `parseSseDelta`). Throws ChatUnavailableError when Workers AI is unreachable
- *  or the initial call fails BEFORE a stream exists (the route refunds quota + returns 503); once the
- *  stream is returned, any mid-stream failure just ends it. */
+ *  digest. Normalizes OpenRouter's stream to `data: {"response":"…"}` frames for the client. Throws
+ *  ChatUnavailableError when OpenRouter is unreachable or the initial call fails before a stream exists. */
 export async function chatStream(
   reqRaw: ChatRequest,
   choice: ModelChoice,
@@ -102,13 +96,7 @@ export async function chatStream(
   try {
     return await streamModel(choice, { messages: buildMessages(req) })
   } catch (err) {
-    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_CHAT_STUB emits a fake token stream so the
-    // chat UI is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
-    if (
-      choice.kind === 'workers-ai' &&
-      process.env.STRUT_CHAT_STUB &&
-      err instanceof ModelUnavailableError
-    ) {
+    if (process.env.STRUT_CHAT_STUB && err instanceof ModelUnavailableError) {
       return stubStream(req)
     }
     throw new ChatUnavailableError(

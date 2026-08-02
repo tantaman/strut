@@ -2,22 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import type { ArrangeRequest } from '../../shared/arrange'
 
 // "✨ AI Arrange" endpoint. Takes a deck digest + instruction, returns a validated ArrangementPlan
-// (server/arrange.ts → the shared model seam). Two boundaries live here:
-//   1. MODEL GATE — the caller must have a model to spend: their own connected key, or a paid plan that
-//      includes app-paid inference (server/llm.ts resolveModel → null ⇒ 402). No free app-paid tier. The
-//      client gate is UX only; THIS is the real one, mirroring server/session.ts's trust posture.
-//   2. COST BOUND — when the app pays for inference, two layers cap it: a cheap per-isolate burst throttle
-//      (below) as a first-line filter, and the AUTHORITATIVE durable daily quota in server/quota.ts (D1),
-//      consumed before the model call and refunded if that call fails. Plus the ARRANGE_LIMITS payload
-//      caps in the adapter.
+// (server/arrange.ts → the shared model seam). The caller must have a connected OpenRouter key; the client
+// gate is UX only and this route is authoritative. A small per-isolate throttle protects the service from
+// accidental rapid-fire requests while the user pays OpenRouter directly.
 // Note we do NOT verify the user owns `deckId`/`slides` here: the returned plan is only reading order +
 // a preset, and APPLYING it flows through the authoritative slide-edit mutations (server/rindle-api.ts
 // `withSlideEditable`), which independently reject edits to slides the user can't touch. So the only
-// thing this endpoint spends is inference, which auth + the quota gate.
+// thing this endpoint spends is the caller's own inference credits.
 
-// Per-isolate rolling-window burst throttle — a cheap brake on rapid-fire calls that also spares the
-// durable quota a D1 write per hammered request. Best-effort (doesn't survive isolate recycling); the
-// durable per-user daily quota (server/quota.ts) is the real cost ceiling.
+// Per-isolate rolling-window burst throttle. Best-effort; it deliberately is not a billing meter.
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 8
 const hits = new Map<string, number[]>()
@@ -50,15 +43,11 @@ export const Route = createFileRoute('/api/arrange')({
           return json({ error: 'sign_in_required' }, 401)
         }
 
-        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or, for a paid
-        // plan, the app's own default. Null = neither, so there is nothing this caller may spend.
-        const { resolveModel } = await import('../../server/llm')
+        const { resolveModel, modelRequired } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
         if (!choice) {
-          const { modelRequired } = await import('../../server/entitlements')
           return json(modelRequired(), 402)
         }
-        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -81,51 +70,12 @@ export const Route = createFileRoute('/api/arrange')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable daily quota — ONLY for the app-paid path. A BYO call spends the user's OWN OpenRouter
-        // credits, so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse.
-        // Consumed BEFORE the model call so concurrent calls can't race past the cap.
-        const now = Date.now()
-        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
-        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap.
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'arrange')
-        if (!byo && ai.meter) {
-          const { consumeAiQuota } = await import('../../server/quota')
-          let quota
-          try {
-            quota = await consumeAiQuota(account.id, now, 'arrange', ai)
-          } catch (err) {
-            console.error('[arrange] quota check failed:', err)
-            return json({ error: 'internal' }, 500)
-          }
-          if (!quota.allowed) {
-            return json(
-              {
-                error: 'quota_exceeded',
-                message:
-                  quota.window === 'month'
-                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
-                    : `Daily AI arrange limit reached (${quota.limit}/day). Try again tomorrow.`,
-              },
-              429,
-            )
-          }
-        }
-
         const { arrange, ArrangeUnavailableError } =
           await import('../../server/arrange')
         try {
           const plan = await arrange(b as ArrangeRequest, choice)
           return json(plan, 200)
         } catch (err) {
-          // The work didn't happen — refund the consumed unit (only if we metered it).
-          if (!byo && ai.meter) {
-            const { refundAiQuota } = await import('../../server/quota')
-            await refundAiQuota(account.id, now, 'arrange', ai.window).catch(
-              () => {},
-            )
-          }
           if (err instanceof ArrangeUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

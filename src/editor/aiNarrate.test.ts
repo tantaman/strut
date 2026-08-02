@@ -79,7 +79,7 @@ describe('applyNarrated', () => {
     applyNarrated(narrated, mutate, { deckId, slides: [] }, history)
 
     expect(history.canUndo).toBe(true)
-    expect(history.undoLabel).toBe('Generate slides from recording')
+    expect(history.undoLabel).toBe('Generate slides from transcript')
 
     const before = calls.length
     history.undo()

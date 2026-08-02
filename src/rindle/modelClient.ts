@@ -10,16 +10,12 @@ export interface ModelStatus {
   connected: boolean
   provider: string | null
   model: string | null
-  /** Does this viewer's PLAN pay for inference? ✨ is available when `connected || appPaid` — everyone
-   *  else brings their own key (the routes enforce the same rule, answering 402). */
-  appPaid: boolean
 }
 
 const DISCONNECTED: ModelStatus = {
   connected: false,
   provider: null,
   model: null,
-  appPaid: false,
 }
 
 export interface ConnectResult {

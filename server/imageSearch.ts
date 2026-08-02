@@ -1,7 +1,7 @@
 // Stock-photo search for "✨ add image → search": proxy a query to Openverse (openverse.org) — a free,
 // no-API-key aggregator of openly-licensed images — and return a few direct image URLs. Done server-side
 // so there's no browser CORS dance and we can validate/shape the results (https-only). It spends no
-// inference, so the route guards it with just a burst throttle (no daily quota). Swap the upstream for
+// inference, so the route guards it with only a light burst throttle. Swap the upstream for
 // Unsplash/Pexels if an API key is ever added — only this file changes.
 
 const OPENVERSE = 'https://api.openverse.org/v1/images/'
@@ -31,7 +31,10 @@ export async function searchImages(queryRaw: unknown): Promise<string[]> {
   let res: Response
   try {
     res = await fetch(url, {
-      headers: { accept: 'application/json', 'user-agent': 'strut.io/image-search' },
+      headers: {
+        accept: 'application/json',
+        'user-agent': 'strut.io/image-search',
+      },
     })
   } catch {
     throw new ImageSearchError('image search unavailable', 502)

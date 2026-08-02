@@ -5,16 +5,6 @@
 // marketing, and — with no overlay — the COMMUNITY entitlement below, which equals the historical
 // behavior so a clone never regresses and needs no payment setup.
 
-export type AiFeature =
-  | 'arrange'
-  | 'generate'
-  | 'chat'
-  | 'image'
-  | 'artifact'
-  // "🎙️ From a recording": `transcribe` = audio → text (Whisper); `narrate` = transcript → slides + notes.
-  | 'transcribe'
-  | 'narrate'
-
 /** What a viewer's plan grants. Resolved server-side (server/entitlements.ts) and, in summary form
  *  ({@link EntitlementSummary}), seeded to the client for the account UI. */
 export interface Entitlements {
@@ -24,32 +14,20 @@ export interface Entitlements {
    *  deck private is the paid feature. false → new decks are created public and cannot be set private.
    *  (COMMUNITY/self-host = true: decks are private by default, exactly as before.) */
   canKeepPrivate: boolean
-  /** Total storage ceiling (bytes) across the account's stored images; null = unlimited. The cap on the
-   *  free tier's unlimited public decks — enforced on the R2 write paths (image uploads + AI images) via
-   *  server/storage.ts's per-user counter. (Artifacts are excluded: small, deduped, separately capped.) */
+  /** Total storage ceiling (bytes) across the account's uploaded images; null = unlimited. Enforced on
+   *  the R2 upload path via server/storage.ts's per-user counter. Artifacts are excluded: they are small,
+   *  content-addressed, and protected by a light burst throttle. */
   storageLimitBytes: number | null
-  /** Skip the per-user daily AI quota entirely (mirrors the BYO-key path). */
-  aiUnlimited: boolean
-  /** Per-feature daily-cap overrides; null = use the built-in server/quota.ts constants. */
-  aiDailyLimits: Partial<Record<AiFeature, number>> | null
-  /** A single POOLED monthly allowance shared across the inference features (arrange/generate/chat/image) —
-   *  one counter, any of those ✨ actions = 1 message, e.g. 1000/month for Pro. When set (and aiUnlimited
-   *  is false) it REPLACES the per-feature daily caps for those four features; artifact keeps its own daily
-   *  cap (it spends R2, not model inference). null = not pooled (use aiDailyLimits / the daily defaults). */
-  aiMonthlyPool: number | null
   /** Drop the PoweredBy / "shared read-only" watermark on shared decks (Pro white-label). */
   whiteLabelShare: boolean
 }
 
-/** The no-overlay default — equals this repo's historical behavior (private decks allowed, no storage
- *  cap, built-in AI caps). Self-hosters get the full app with zero billing setup. */
+/** The no-overlay default — private decks allowed and no hosted-storage cap. AI remains BYOK, as it is on
+ *  every hosted plan. Self-hosters get the full app with zero billing setup. */
 export const COMMUNITY: Entitlements = {
   pro: false,
   canKeepPrivate: true,
   storageLimitBytes: null,
-  aiUnlimited: false,
-  aiDailyLimits: null,
-  aiMonthlyPool: null,
   whiteLabelShare: false,
 }
 

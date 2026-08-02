@@ -1,13 +1,10 @@
 // The "✨ Chat" action-capable server adapter: turn a running conversation + deck grounding into a validated
-// { say, actions } result. Inference goes through the shared model seam (server/llm.ts), which routes to the
-// caller's connected OpenRouter model (they pay) or an app-paid model. Photo-reference turns use the scoped
-// GPT-5.4-mini default. This adapter builds the prompt, streams the turn, and validates the output; the
-// ROUTE resolves the ModelChoice and the font allowlist and passes them in.
+// { say, actions } result. Inference goes through the caller's connected OpenRouter model. Unpinned
+// photo-reference turns use a scoped multimodal default. This adapter builds the prompt, streams the turn,
+// and validates the output; the route resolves the ModelChoice and font allowlist.
 //
-// STREAMING vs. structure — why this DOESN'T use json_schema: a one-shot structured call reads dead (the
-// user waits on thinking dots with no feedback), but Workers AI — the default backend — can't stream JSON
-// Mode at all (developers.cloudflare.com/workers-ai/features/json-mode: "JSON Mode currently doesn't support
-// streaming"). So action-capable chat streams PLAIN PROSE and asks the model to append a fenced ```json
+// STREAMING vs. structure: a one-shot structured call reads dead while the user waits, so action-capable
+// chat streams plain prose and asks the model to append a fenced ```json
 // block for the change. `chatActStream` forwards the prose before the fence AS IT ARRIVES (the reply types
 // out live, same `data: {"response":"…"}` frames the advisor client renders), then at the end parses the
 // fenced JSON, runs the firewall, and emits ONE terminal `data: {"result":{say,actions}}` frame — the
@@ -17,9 +14,7 @@
 //
 // The output is untrusted: `normalizeActions` (shared/chatAction.ts) is the firewall — target ids must be
 // real (or a ref created this turn), colors clamp to hex, fonts to the allowlist, and the list is capped.
-// Dev-without-workerd: STRUT_CHAT_STUB yields a
-// deterministic keyword-driven stub so action-capable chat is exercisable under `pnpm dev` (BYO OpenRouter
-// works in dev directly).
+// STRUT_CHAT_STUB yields a deterministic keyword-driven local development fallback.
 
 import { clampChatActRequest, normalizeActions } from '../shared/chatAction.ts'
 import type {
@@ -31,8 +26,7 @@ import type {
 import { streamModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice, ModelImage, ModelMessage } from './llm.ts'
 
-/** Thrown when inference can't be reached (no binding / the model call failed). The route maps it to a
- *  503 with a user-facing message rather than a 500 (and refunds the app-paid quota unit). */
+/** Thrown when inference can't be reached or the model call fails. */
 export class ChatActUnavailableError extends Error {
   constructor(message: string) {
     super(message)
@@ -87,9 +81,9 @@ export function systemPrompt(fonts: string[]): string {
     '- arrange — reorder / lay out the slides. Field: instruction (how).',
     '',
     'You can also drop free-form objects onto a slide — as many as you like across the turn:',
-    '- add_image — place an image. Fields: source and value. Set source to "generate" and put an image',
-    '  DESCRIPTION in value to have one generated; "search" with a short photo QUERY to fetch a stock',
-    '  photo; or "url" with a full https image URL you already know. Optional: alt (short description).',
+    '- add_image — place an image. Fields: source and value. Use "search" with a short photo QUERY to',
+    '  fetch an openly licensed image, or "url" with a full https image URL you already know.',
+    '  Optional: alt (short description).',
     '- add_web — embed a live website. Field: src (a full https URL).',
     '- add_artifact — AUTHOR a runnable component and drop it live on the slide. Field: code — a single,',
     '  self-contained default-exported React component (JSX; may import npm packages like react, recharts,',
@@ -213,7 +207,7 @@ function stubResult(req: ChatActRequest, hasReferences = false): ChatActResult {
     raw.say = '(dev stub) New slide with an image on it.'
     raw.actions = [
       { kind: 'create_slide', ref: 's1' },
-      { kind: 'add_image', source: 'generate', value: last, slideId: 's1' },
+      { kind: 'add_image', source: 'search', value: last, slideId: 's1' },
     ]
   } else if (
     /\b(artifact|chart|widget|component|animation|interactive)\b/.test(t)
@@ -230,7 +224,7 @@ function stubResult(req: ChatActRequest, hasReferences = false): ChatActResult {
     ]
   } else if (/\b(image|picture|photo|photograph|illustration)\b/.test(t)) {
     raw.say = `(dev stub) Adding an image of: "${last.slice(0, 60)}".`
-    raw.actions = [{ kind: 'add_image', source: 'generate', value: last }]
+    raw.actions = [{ kind: 'add_image', source: 'search', value: last }]
   } else if (/\b(embed|website|web page|webpage|iframe|url|site)\b/.test(t)) {
     raw.say = '(dev stub) Embedding a web page.'
     raw.actions = [{ kind: 'add_web', src: 'https://example.com' }]
@@ -269,8 +263,8 @@ function stubResult(req: ChatActRequest, hasReferences = false): ChatActResult {
 /** Stream a validated action-capable chat turn. The OK response is an SSE byte stream: zero or more
  *  `data: {"response":"…"}` prose frames (the reply typing out) followed by exactly one
  *  `data: {"result":{say,actions}}` frame (the normalizeActions-safe value the client applies) and
- *  `data: [DONE]`. Throws ChatActUnavailableError if the backend is unreachable BEFORE a stream exists (the
- *  route maps that to 503 + a quota refund). Once the stream is returned the turn is committed. */
+ *  `data: [DONE]`. Throws ChatActUnavailableError if OpenRouter is unreachable before a stream exists;
+ *  the route maps that to 503. Once the stream is returned the turn is committed. */
 export async function chatActStream(
   reqRaw: ChatActRequest,
   choice: ModelChoice,
@@ -293,13 +287,7 @@ export async function chatActStream(
       max_tokens: opts.images?.length ? 3000 : undefined,
     })
   } catch (err) {
-    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_CHAT_STUB yields a deterministic result so
-    // action-capable chat is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
-    if (
-      choice.kind === 'workers-ai' &&
-      process.env.STRUT_CHAT_STUB &&
-      err instanceof ModelUnavailableError
-    ) {
+    if (process.env.STRUT_CHAT_STUB && err instanceof ModelUnavailableError) {
       return stubStream(norm(stubResult(req, !!opts.images?.length)))
     }
     throw new ChatActUnavailableError(

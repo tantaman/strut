@@ -2,7 +2,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   attachImagesToOpenAiMessages,
-  normalizeAnthropicSse,
   normalizeOpenRouterSse,
   streamModel,
 } from '../../server/llm'
@@ -87,45 +86,8 @@ describe('normalizeOpenRouterSse', () => {
   })
 })
 
-describe('normalizeAnthropicSse', () => {
-  it('normalizes text and a buffered terminal event', async () => {
-    const stream = normalizeAnthropicSse(
-      byteStream([
-        'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}\n\n',
-        'data: {"type":"message_stop"}',
-      ]),
-    )
-
-    await expect(new Response(stream).text()).resolves.toBe(
-      'data: {"response":"Hello"}\n\ndata: [DONE]\n\n',
-    )
-  })
-
-  it('rejects provider errors and truncated streams', async () => {
-    await expect(
-      new Response(
-        normalizeAnthropicSse(
-          byteStream([
-            'data: {"type":"error","error":{"message":"overloaded"}}',
-          ]),
-        ),
-      ).text(),
-    ).rejects.toThrow('Anthropic stream failed: overloaded')
-
-    await expect(
-      new Response(
-        normalizeAnthropicSse(
-          byteStream([
-            'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"partial"}}',
-          ]),
-        ),
-      ).text(),
-    ).rejects.toThrow('Anthropic stream ended before its completion marker')
-  })
-})
-
 describe('streamModel visual output cap', () => {
-  it('sends the requested cap to OpenAI while preserving streaming', async () => {
+  it('sends the requested cap to OpenRouter while preserving streaming', async () => {
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         new Response('data: [DONE]\n\n', {
@@ -136,7 +98,7 @@ describe('streamModel visual output cap', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const stream = await streamModel(
-      { kind: 'openai', model: 'gpt-5.4-mini', apiKey: 'test-key' },
+      { kind: 'openrouter', model: 'openai/gpt-5.4-mini', apiKey: 'test-key' },
       {
         messages: [{ role: 'user', content: 'Match these references.' }],
         max_tokens: 3000,
@@ -148,9 +110,8 @@ describe('streamModel visual output cap', () => {
     expect(init).toBeDefined()
     const body = JSON.parse(String(init?.body)) as Record<string, unknown>
     expect(body).toMatchObject({
-      model: 'gpt-5.4-mini',
-      max_completion_tokens: 3000,
-      store: false,
+      model: 'openai/gpt-5.4-mini',
+      max_tokens: 3000,
       stream: true,
     })
   })

@@ -1,4 +1,4 @@
-// Client side of "🎙️ From a recording": turn a model-authored NarratedDeck (a Markdown body + speaker
+// Client side of transcript-to-slides: turn a model-authored NarratedDeck (a Markdown body + speaker
 // notes per slide) into new slides appended to the deck, as a SINGLE undoable step (applyNarrated). Like
 // "✨ Generate slides" (aiGenerate.ts), the model is just another producer of the ordinary mutations a human
 // makes — here addSlide with its primary text component, plus setSlideNotes for the narration — so it inherits
@@ -89,6 +89,6 @@ export function applyNarrated(
       })
   }
   redo()
-  history.push({ label: 'Generate slides from recording', redo, undo })
+  history.push({ label: 'Generate slides from transcript', redo, undo })
   return items[0].add.id
 }

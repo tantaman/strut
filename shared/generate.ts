@@ -50,7 +50,7 @@ export function clampGenerateRequest(req: GenerateRequest): GenerateRequest {
   }
 }
 
-/** JSON schema handed to Workers AI's `response_format: { type: 'json_schema' }`. `maxItems` nudges the
+/** JSON schema handed to OpenRouter's structured-output request. `maxItems` nudges the
  *  model to respect the cap; `normalizeGenerated` is the actual guarantee (some models honor it loosely). */
 export function generateJsonSchema() {
   return {

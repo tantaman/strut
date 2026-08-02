@@ -47,7 +47,6 @@ import { useHistory, useHistoryState } from './UndoProvider'
 import { CssEditorModal } from './CssEditor'
 import { ShareModal } from './ShareModal'
 import { createDeckVariant } from './deckVariant'
-import { UsageMeter } from '../rindle/UsageMeter'
 import { applyThemePatch } from './aiTheme'
 import { ColorField, TokenColorField } from './ColorField'
 import {
@@ -279,7 +278,7 @@ export function Header({
   }
 
   // Drop a runnable artifact seeded with the starter snippet. We build it first (so it runs immediately),
-  // but if the build fails — offline, over quota — we still insert with the code and an empty src, which
+  // but if the build fails — offline or rate-limited — we still insert with the code and an empty src, which
   // renders the "press Run" placeholder; the inspector's Run button rebuilds it. One undoable step.
   async function addArtifact() {
     if (!active) return
@@ -748,7 +747,6 @@ export function Header({
 
       {/* Usage ring — this is the point of consumption (AI + uploads), so it lives here too. Hidden on
           the mobile app-bar (the actions it tracks move to the tab bar). */}
-      <UsageMeter />
 
       <ThemeToggle className="hdr__theme-toggle" />
 

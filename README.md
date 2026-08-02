@@ -89,18 +89,11 @@ for the full guide (daemon hosting, R2 setup, secrets, deploy steps).
 
 The ✨ features (Chat and everything it can do — author slides, arrange, restyle, edit) run on a model
 **the user supplies**: connect an [OpenRouter](https://openrouter.ai/keys) key once and AI turns on
-across the editor, on their credits, with no account required. A **paid plan** (where a deployment has
-one — see below) is the other way in.
+across the editor, on their credits, with no account required.
 
-There is deliberately **no free app-paid tier**. Without a connected key or an entitlement,
-`resolveModel` (`server/llm.ts`) returns no model at all, every ✨ route answers `402`, and the editor
-shows a connect-a-model gate instead of the composer. An unmetered free tier on someone else's provider
-bill only works if a human is watching for abuse — so the default is that nobody's key gets spent by
-strangers.
-
-Self-hosting on **your own** provider key (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY`, or the Workers AI
-binding) and happy for every signed-in member to use it? Opt in explicitly with **`STRUT_APP_PAID_AI=1`**
-(see [`.env.example`](.env.example)). Off by default, everywhere.
+That is the only inference path. Without a connected key, every ✨ route answers `402` and the editor
+shows a connect-a-model gate. Strut has no deployment-funded provider keys, AI quota ledger, generated-
+image backend, or speech-to-text backend to monitor. Image uploads and openly licensed image search remain.
 
 ## Commercial / hosted (optional)
 
@@ -110,8 +103,8 @@ deploy time — so a clone has **no billing, no marketing, and no paywall**, and
 today. This follows the same opt-in posture as the analytics above.
 
 The repo ships the open-core **seam** (`#commercial`) that an overlay plugs into: the app _reads_ an
-entitlement (`server/entitlements.ts`) to lift AI caps / the deck cap / publishing, and _renders_ an
-optional Upgrade affordance — all inert without an overlay. `pnpm deploy` builds the free app on a single
+entitlement (`server/entitlements.ts`) for hosted storage, private-deck, and white-label features, and
+_renders_ an optional Upgrade affordance — all inert without an overlay. `pnpm deploy` builds the free app on a single
 host; `pnpm deploy:pro` builds the app **plus** the overlay as one Worker (marketing on `strut.io`, the
 app on `strut.io/app`). See **[`docs/COMMERCIAL_OVERLAY.md`](docs/COMMERCIAL_OVERLAY.md)**.
 

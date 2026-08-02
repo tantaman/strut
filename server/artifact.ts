@@ -20,6 +20,25 @@ const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable'
 // A bare content-addressed key on the wire: 64 hex chars + .html. Rejects path traversal / image keys.
 const KEY_RE = /^[a-f0-9]{64}\.html$/
 
+// A light, per-isolate brake on accidental build loops. It protects Worker/R2 capacity without creating
+// an account meter or durable quota to operate.
+const ARTIFACT_WINDOW_MS = 60_000
+const ARTIFACTS_PER_WINDOW = 20
+const artifactHits = new Map<string, number[]>()
+function artifactThrottled(userId: string): boolean {
+  const now = Date.now()
+  const recent = (artifactHits.get(userId) ?? []).filter(
+    (time) => now - time < ARTIFACT_WINDOW_MS,
+  )
+  if (recent.length >= ARTIFACTS_PER_WINDOW) {
+    artifactHits.set(userId, recent)
+    return true
+  }
+  recent.push(now)
+  artifactHits.set(userId, recent)
+  return false
+}
+
 class ArtifactError extends Error {
   status: number
   constructor(message: string, status: number) {
@@ -135,10 +154,14 @@ export async function uploadArtifactFromRequest(
 ): Promise<Response> {
   try {
     // Any authenticated session (guests included) may create artifacts — mirrors the image-upload gate.
-    // The durable per-user daily quota (server/quota.ts) is the real abuse ceiling; consumed here.
     const { resolveSessionUser } = await import('./session.ts')
     const user = await resolveSessionUser(request)
     if (!user) throw new ArtifactError('unauthorized', 401)
+    if (artifactThrottled(user))
+      throw new ArtifactError(
+        'too many artifact builds; try again shortly',
+        429,
+      )
 
     const declared = Number(request.headers.get('content-length') || 0)
     if (declared > MAX_CODE_BYTES)
@@ -148,48 +171,24 @@ export async function uploadArtifactFromRequest(
     if (new TextEncoder().encode(code).byteLength > MAX_CODE_BYTES)
       throw new ArtifactError('artifact source must be under 512 KB', 413)
 
-    // `ai.meter === false` = unlimited. Artifact spends R2, not model inference, so it's NOT part of the
-    // pooled AI-message allowance (aiMetering excludes it from POOLED_FEATURES) — it always meters on its
-    // own daily bucket, even on a pooled paid plan.
-    const { getEntitlements, aiMetering } = await import('./entitlements.ts')
-    const ai = aiMetering(await getEntitlements(user), 'artifact')
-    const { consumeAiQuota, refundAiQuota } = await import('./quota.ts')
-    const now = Date.now()
-    if (ai.meter) {
-      const quota = await consumeAiQuota(user, now, 'artifact', ai)
-      if (!quota.allowed)
-        throw new ArtifactError(
-          `Daily artifact limit reached (${quota.limit}/day). Try again tomorrow.`,
-          429,
-        )
+    const html = artifactHtml(code)
+    const bytes = new TextEncoder().encode(html)
+    const key = `${await sha256Hex(bytes)}.html`
+    if (r2) {
+      await r2.put(`${ARTIFACT_PREFIX}${key}`, bytes, {
+        httpMetadata: {
+          contentType: 'text/html; charset=utf-8',
+          cacheControl: IMMUTABLE_CACHE,
+        },
+      })
+    } else {
+      await putLocal(key, html)
     }
-
-    try {
-      const html = artifactHtml(code)
-      const bytes = new TextEncoder().encode(html)
-      const key = `${await sha256Hex(bytes)}.html`
-      if (r2) {
-        await r2.put(`${ARTIFACT_PREFIX}${key}`, bytes, {
-          httpMetadata: {
-            contentType: 'text/html; charset=utf-8',
-            cacheControl: IMMUTABLE_CACHE,
-          },
-        })
-      } else {
-        await putLocal(key, html)
-      }
-      // Prefer the dedicated sandbox origin (real cross-origin isolation); else serve same-origin through
-      // the Worker at /a/<key> (or /app/a/<key> when the app is mounted there).
-      const base = (process.env.ARTIFACT_ORIGIN || '').replace(/\/+$/, '')
-      const url = base ? `${base}/a/${key}` : appPath(`/a/${key}`)
-      return Response.json({ url })
-    } catch (err) {
-      // The store failed — refund the consumed quota unit so the user isn't charged for nothing
-      // (only if we metered it).
-      if (ai.meter)
-        await refundAiQuota(user, now, 'artifact', ai.window).catch(() => {})
-      throw err
-    }
+    // Prefer the dedicated sandbox origin (real cross-origin isolation); else serve same-origin through
+    // the Worker at /a/<key> (or /app/a/<key> when the app is mounted there).
+    const base = (process.env.ARTIFACT_ORIGIN || '').replace(/\/+$/, '')
+    const url = base ? `${base}/a/${key}` : appPath(`/a/${key}`)
+    return Response.json({ url })
   } catch (err) {
     const status = err instanceof ArtifactError ? err.status : 500
     const message =

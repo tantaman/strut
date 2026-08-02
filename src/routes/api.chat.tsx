@@ -1,27 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import type { ChatRequest } from '../../shared/chat'
 
-// "✨ Chat" endpoint. Takes a running conversation + append-only deck context and STREAMS a prose answer (server/chat.ts
-// → Workers AI SSE). Same two boundaries as /api/arrange and /api/generate:
-//   1. MODEL GATE — the caller must have a model to spend: their own connected key, or a paid plan that
-//      includes app-paid inference (server/llm.ts resolveModel → null ⇒ 402). Everyone can SEE the Chat
-//      panel (it renders a "connect a model" gate); THIS is the real boundary.
-//   2. COST BOUND — when the app pays for inference, two layers cap it: a cheap per-isolate burst throttle
-//      (below), and the AUTHORITATIVE durable daily quota in server/quota.ts (chat_usage, D1), consumed
-//      before the model call and refunded ONLY if that call fails before any token streams. Plus the
-//      CHAT_LIMITS caps in the adapter.
+// "✨ Chat" endpoint. Takes a running conversation + append-only deck context and streams a prose answer
+// from the caller's connected OpenRouter model. Everyone can see the Chat panel, but this route is the
+// authoritative model gate. A small per-isolate throttle protects the service; the caller pays inference.
 // We do NOT verify the user owns `deckId` here: the endpoint only READS client-supplied context and returns
-// prose — advisor chat can't mutate the deck. The only thing it spends is inference, gated by auth + quota.
+// prose — advisor chat can't mutate the deck.
 //
 // Streaming contract: unlike arrange/generate (one-shot JSON), the OK response is `text/event-stream` — the
-// raw Workers AI SSE, passed through untouched; the client parses `data: {"response":"…"}` frames. Errors
-// (auth/throttle/quota/unavailable) are still one-shot JSON so the client can branch on them BEFORE it
-// starts reading the stream.
+// normalized SSE; the client parses `data: {"response":"…"}` frames. Errors remain one-shot JSON so the
+// client can branch before it starts reading the stream.
 
-// Per-isolate rolling-window burst throttle — a cheap brake on rapid-fire turns that also spares the durable
-// quota a D1 write per hammered request. Chat is conversational, so bursts are natural; the window is a
-// touch roomier than arrange's. Best-effort (doesn't survive isolate recycling); the durable per-user daily
-// quota (server/quota.ts) is the real cost ceiling.
+// Per-isolate rolling-window burst throttle. Chat is conversational, so this is roomier than arrange's.
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 20
 const hits = new Map<string, number[]>()
@@ -54,15 +44,11 @@ export const Route = createFileRoute('/api/chat')({
           return json({ error: 'sign_in_required' }, 401)
         }
 
-        // Pick the backend from the user's connected model: BYO OpenRouter (they pay) or, for a paid
-        // plan, the app's own default. Null = neither, so there is nothing this caller may spend.
-        const { resolveModel } = await import('../../server/llm')
+        const { resolveModel, modelRequired } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
         if (!choice) {
-          const { modelRequired } = await import('../../server/entitlements')
           return json(modelRequired(), 402)
         }
-        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -85,43 +71,11 @@ export const Route = createFileRoute('/api/chat')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        // Durable quota — ONLY for the app-paid path. A BYO turn spends the user's OWN OpenRouter credits,
-        // so the app-cost ceiling doesn't apply; the burst throttle above still guards abuse. Consumed (one
-        // unit per user turn) BEFORE the model call so concurrent turns can't race the cap.
-        const now = Date.now()
-        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
-        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap.
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'chat')
-        if (!byo && ai.meter) {
-          const { consumeAiQuota } = await import('../../server/quota')
-          let quota
-          try {
-            quota = await consumeAiQuota(account.id, now, 'chat', ai)
-          } catch (err) {
-            console.error('[chat] quota check failed:', err)
-            return json({ error: 'internal' }, 500)
-          }
-          if (!quota.allowed) {
-            return json(
-              {
-                error: 'quota_exceeded',
-                message:
-                  quota.window === 'month'
-                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
-                    : `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
-              },
-              429,
-            )
-          }
-        }
-
         const { chatStream, ChatUnavailableError } =
           await import('../../server/chat')
         try {
           const stream = await chatStream(b as ChatRequest, choice)
-          // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client.
+          // The provider stream exists; hand the normalized SSE straight to the client.
           return new Response(stream, {
             status: 200,
             headers: {
@@ -130,14 +84,6 @@ export const Route = createFileRoute('/api/chat')({
             },
           })
         } catch (err) {
-          // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
-          // (only if we metered it).
-          if (!byo && ai.meter) {
-            const { refundAiQuota } = await import('../../server/quota')
-            await refundAiQuota(account.id, now, 'chat', ai.window).catch(
-              () => {},
-            )
-          }
           if (err instanceof ChatUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

@@ -330,27 +330,6 @@ describe('dispatchAction · add_image', () => {
     vi.unstubAllGlobals()
   })
 
-  it('generate mode posts the prompt to /api/image and uses the returned url', async () => {
-    const fetchMock = vi.fn(async () =>
-      okJson({ url: 'https://cdn.example/gen.jpg' }),
-    )
-    vi.stubGlobal('fetch', fetchMock)
-    const added: Array<{ src: string }> = []
-    const ctx = makeCtx({
-      addImage: (a: { src: string }) => added.push(a),
-      removeComponent: vi.fn(),
-    })
-
-    const out = await dispatchAction(
-      { kind: 'add_image', source: 'generate', value: 'a red bike' },
-      ctx,
-    )
-    expect(out.ok).toBe(true)
-    expect(added[0].src).toBe('https://cdn.example/gen.jpg')
-    expect(fetchMock).toHaveBeenCalledWith('/api/image', expect.anything())
-    vi.unstubAllGlobals()
-  })
-
   it('surfaces a friendly error when a search returns nothing', async () => {
     vi.stubGlobal(
       'fetch',
@@ -434,7 +413,9 @@ describe('dispatchActions · multi-action turn', () => {
     // freshly-created slide. This is the exact case the author hit ("new slide + add an image").
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => okJson({ url: 'https://cdn.example/gen.jpg' })),
+      vi.fn(async () =>
+        okJson({ results: ['https://cdn.example/search.jpg'] }),
+      ),
     )
     const slides: Array<{ id: string; slideId: string }> = []
     const images: Array<{ id: string; slideId: string; src: string }> = []
@@ -456,7 +437,7 @@ describe('dispatchActions · multi-action turn', () => {
         { kind: 'create_slide', ref: 's1' },
         {
           kind: 'add_image',
-          source: 'generate',
+          source: 'search',
           value: 'a bike',
           slideId: 's1',
         },
@@ -535,7 +516,7 @@ describe('dispatchActions · multi-action turn', () => {
       ctx,
     )
     expect(out.ok).toBe(false)
-    if (!out.ok) expect(out.error).toMatch(/photos/i)
+    if (!out.ok) expect(out.error).toMatch(/images/i)
     expect(webs).toHaveLength(0)
     expect(ctx.history.canUndo).toBe(false)
     vi.unstubAllGlobals()

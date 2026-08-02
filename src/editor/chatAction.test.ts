@@ -194,7 +194,10 @@ describe('normalizeActions · add_image', () => {
   it('drops an unknown source or an empty value', () => {
     expect(one({ kind: 'add_image', source: 'nope', value: 'x' })).toBeNull()
     expect(
-      one({ kind: 'add_image', source: 'generate', value: '   ' }),
+      one({ kind: 'add_image', source: 'generate', value: 'x' }),
+    ).toBeNull()
+    expect(
+      one({ kind: 'add_image', source: 'search', value: '   ' }),
     ).toBeNull()
   })
 })

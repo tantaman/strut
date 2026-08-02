@@ -1,7 +1,6 @@
-// The client ↔ server contract for "🎙️ From a recording" — the slide-well sibling of "✨ Generate
+// The client ↔ server contract for turning a talk transcript into slides — the sibling of "✨ Generate
 // slides" (shared/generate.ts). Where Generate authors slides from a short DESCRIPTION, this authors them
-// from a TALK: the user drops in an audio recording (transcribed by Whisper, server/transcribe.ts) or
-// pastes a transcript, and the model splits that NARRATION two ways at once —
+// from a pasted transcript, and the user's connected model splits that NARRATION two ways at once —
 //   • the POINTS the speaker makes in a segment → the slide's body (Markdown, like Generate), and
 //   • the speaker's own WORDS for that segment → the slide's speaker notes (`slide_notes`).
 // So the deck arrives with notes already populated and in sync — the thing no plain "generate"
@@ -37,28 +36,14 @@ export interface NarrateRequest {
 
 // Server-side ceilings. Login-gating already limits callers to real accounts; these bound the per-call
 // cost. `maxSlides` is the hard cap the model is asked to honor and `normalizeNarrated` enforces.
-// `maxTranscript` is sized to stay well within the smallest backend's context window (Workers AI
-// llama-3.3-70b-instruct-fp8-fast ≈ 24k tokens) once the echoed notes are counted against the output too —
-// a longer talk is truncated (not rejected), and the paste path lets a user pre-trim. Text is truncated,
-// never rejected.
+// `maxTranscript` keeps request and response size bounded across OpenRouter models. A longer talk is
+// truncated (not rejected), and the caller can pre-trim. Text is truncated, never rejected.
 export const NARRATE_LIMITS = {
   maxSlides: 40,
   maxTranscript: 24_000,
   maxMarkdownPerSlide: 2_000,
   maxNotesPerSlide: 6_000,
 } as const
-
-// Audio transcription ceilings (server/transcribe.ts). A hard byte cap on the uploaded recording — Whisper
-// on Workers AI (and the Worker request body) bound how much we can transcribe in one shot; anything longer
-// falls back to the paste-a-transcript path. Chunking long audio is a deliberate fast-follow, not v1.
-export const TRANSCRIBE_LIMITS = {
-  maxAudioBytes: 25 * 1024 * 1024,
-} as const
-
-/** What `/api/transcribe` returns: the recognized text (fed into the narrate form's transcript box). */
-export interface TranscribeResult {
-  text: string
-}
 
 // Coerce an untrusted value to a string — requests are parsed from JSON, so declared types are only a hope
 // until we check (and it keeps the truncation below null-safe).
@@ -84,7 +69,7 @@ export function clampNarrateRequest(req: NarrateRequest): NarrateRequest {
   }
 }
 
-/** JSON schema handed to Workers AI's `response_format: { type: 'json_schema' }`. `maxItems` nudges the
+/** JSON schema handed to OpenRouter's structured-output request. `maxItems` nudges the
  *  model to respect the cap; `normalizeNarrated` is the actual guarantee (some models honor it loosely). */
 export function narrateJsonSchema() {
   return {

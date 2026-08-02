@@ -15,12 +15,9 @@
 // declared, colors coerce to bare hex, fonts clamp to the known family set, and free text is length-capped.
 // The worst a poisoned slide/theme value can do is a bounded change to the user's OWN deck — one undo away.
 //
-// Transport is prose + a fenced ```json action block, NOT native tool-calling and NOT streamed json_schema:
-// action-capable chat STREAMS (server/chatAct.ts) and Workers AI — the default backend — can't stream JSON
-// Mode (developers.cloudflare.com/workers-ai/features/json-mode), so the model writes a friendly reply then
-// a fenced JSON array of the changes, which the adapter parses out. `normalizeActions` below is the firewall
-// on that parsed list, exactly as before. (Arrange/Generate keep their one-shot json_schema calls — the
-// streaming constraint is specific to this path.)
+// Transport is prose + a fenced ```json action block rather than native tool-calling: the model writes a
+// friendly reply and then a JSON array of changes, which the adapter parses. `normalizeActions` below is
+// the firewall on that parsed list. Arrange/Generate keep their one-shot json_schema calls.
 
 import { clampChatRequest } from './chat.ts'
 import type { ChatTurn } from './chat.ts'
@@ -59,8 +56,8 @@ export type ChatAction =
   // ref; omitted, it lands on the most-recently-created slide this turn, else the active slide.
   | {
       kind: 'add_image'
-      source: 'generate' | 'search' | 'url' // how `value` resolves to an image src (client picks the path)
-      value: string // generate: an image DESCRIPTION · search: a photo QUERY · url: a full https URL
+      source: 'search' | 'url' // how `value` resolves to an image src (client picks the path)
+      value: string // search: a photo QUERY · url: a full https URL
       alt?: string
       slideId?: string
     }
@@ -128,13 +125,13 @@ export const CHAT_ACTION_LIMITS = {
   maxThemeCssContext: MAX_GENERATED_THEME_CSS,
   maxSlideIds: 150,
   maxSlideId: 200,
-  maxImageValue: 600, // add_image `value` in generate/search mode (a description / query)
+  maxImageValue: 600, // add_image search query
   maxUrl: 2000, //       any URL: add_web src + add_image url-mode value (URLs run longer than 600)
   maxAlt: 300, //        add_image alt text
   maxArtifactCode: 16000, // add_artifact source — generous, but well under the 512 KB build cap
   maxRef: 64, //          a create_slide turn-local alias
   // The one bound on a turn's action LIST. Not a product bound (the author asked for no per-turn ceiling on
-  // components/slides) but a runaway guard: every add_image/generate can fan out to network/inference, so an
+  // components/slides) but a runaway guard: add_image/generate can fan out to network/model calls, so an
   // unbounded list is a cost/DoS vector. Sized well past any real "build me a slide with a few things" turn.
   maxActions: 25,
 } as const
@@ -195,7 +192,7 @@ export function clampChatActRequest(req: ChatActRequest): ChatActRequest {
 }
 
 // The model is prompted to emit the action as a fenced ```json object (see server/chatAct.ts systemPrompt);
-// there is no response_format schema handed to the model anymore (Workers AI can't stream JSON Mode). The
+// there is no response_format schema handed to the streaming model. The
 // slide-id + font allowlists that used to `enum`-nudge the schema now live in that prompt, and the firewall
 // below is — as it always was — the actual guarantee.
 
@@ -372,9 +369,7 @@ function normalizeOneAction(
     }
     case 'add_image': {
       const source =
-        r.source === 'generate' || r.source === 'search' || r.source === 'url'
-          ? r.source
-          : undefined
+        r.source === 'search' || r.source === 'url' ? r.source : undefined
       if (!source) return null
       // url mode is the only one whose `value` is a URL — gate it through httpUrl (blocks javascript:/data:).
       const value =

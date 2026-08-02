@@ -105,8 +105,7 @@ For defense-in-depth, serve artifacts from a **separate origin** than the app:
    there; `/a/<key>` answers on that host from the same Worker.
 
 If `ARTIFACT_ORIGIN` is empty (the default, and dev), artifacts are served **same-origin** at `/a/<key>` —
-still fully sandboxed (opaque origin), just without the second boundary. Apply the quota migration with
-the others: `wrangler d1 migrations apply strut-auth` (adds `artifact_usage`).
+still fully sandboxed (opaque origin), just without the second boundary.
 
 ---
 

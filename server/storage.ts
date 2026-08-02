@@ -1,7 +1,7 @@
 // Durable per-user cumulative STORAGE counter (bytes) in the auth D1 — the ceiling for the free tier's
-// unlimited PUBLIC decks (Entitlements.storageLimitBytes). Enforced on the R2 write paths: image uploads
-// (server/upload.ts) and AI-generated images (src/routes/api.image.tsx). Mirrors server/quota.ts's dual
-// D1/better-sqlite3 store; ONE row per user, monotonic — R2 objects are content-addressed / immutable and
+// unlimited PUBLIC decks (Entitlements.storageLimitBytes). Enforced on image uploads (server/upload.ts).
+// Uses the auth D1 in production and better-sqlite3 locally; ONE row per user, monotonic — R2 objects are
+// content-addressed / immutable and
 // aren't GC'd on deck delete, so usage only grows. NOT touched for self-host / Pro (storageLimitBytes null
 // → the callers skip it entirely). Artifacts (small, deduped, count-capped) are excluded from accounting.
 
@@ -19,7 +19,7 @@ interface StorageStore {
 }
 
 // Structural subsets (avoid pulling @cloudflare/workers-types / the native module into the build graph —
-// same reasoning as server/quota.ts).
+// keeps native runtime globals out of the build graph).
 interface D1Like {
   prepare: (sql: string) => {
     bind: (...args: unknown[]) => {

@@ -112,7 +112,7 @@ export function clampRequest(req: ArrangeRequest): ArrangeRequest {
   }
 }
 
-/** JSON schema handed to Workers AI's `response_format: { type: 'json_schema' }`. Constraining `order`'s
+/** JSON schema handed to OpenRouter's structured-output request. Constraining `order`'s
  *  items to `enum: slideIds` nudges the model to emit only real ids; `normalizePlan` is the actual
  *  guarantee (some models honor the enum loosely). */
 export function arrangeJsonSchema(slideIds: string[]) {
@@ -153,15 +153,34 @@ export function arrangeJsonSchema(slideIds: string[]) {
           type: 'object',
           properties: {
             id: slideIdEnum,
-            x: { type: 'number', description: 'Horizontal position (card units; 0 = centre).' },
-            y: { type: 'number', description: 'Vertical position (card units; 0 = centre, +down).' },
-            z: { type: 'number', description: 'Depth toward/away from the camera (card units).' },
-            rotate_x: { type: 'number', description: 'Tilt about the horizontal axis, in DEGREES.' },
-            rotate_y: { type: 'number', description: 'Tilt about the vertical axis, in DEGREES.' },
-            rotate_z: { type: 'number', description: 'In-plane spin, in DEGREES.' },
+            x: {
+              type: 'number',
+              description: 'Horizontal position (card units; 0 = centre).',
+            },
+            y: {
+              type: 'number',
+              description: 'Vertical position (card units; 0 = centre, +down).',
+            },
+            z: {
+              type: 'number',
+              description: 'Depth toward/away from the camera (card units).',
+            },
+            rotate_x: {
+              type: 'number',
+              description: 'Tilt about the horizontal axis, in DEGREES.',
+            },
+            rotate_y: {
+              type: 'number',
+              description: 'Tilt about the vertical axis, in DEGREES.',
+            },
+            rotate_z: {
+              type: 'number',
+              description: 'In-plane spin, in DEGREES.',
+            },
             imp_scale: {
               type: 'number',
-              description: 'Zoom/size of the card. 3 is the default; larger is bigger, smaller shrinks.',
+              description:
+                'Zoom/size of the card. 3 is the default; larger is bigger, smaller shrinks.',
             },
           },
           required: ['id'],
@@ -184,11 +203,7 @@ const clampN = (v: number, lo: number, hi: number): number =>
 
 /** A finite number clamped to [lo, hi], or undefined for any non-number/NaN/Infinity — so an absent or
  *  garbage field is simply left unset (the preset/current value shows through) rather than defaulted. */
-const clampField = (
-  v: unknown,
-  lo: number,
-  hi: number,
-): number | undefined =>
+const clampField = (v: unknown, lo: number, hi: number): number | undefined =>
   typeof v === 'number' && Number.isFinite(v) ? clampN(v, lo, hi) : undefined
 
 /** Validate + normalize a raw model plan against the deck's ACTUAL slide ids. Guarantees:

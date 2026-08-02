@@ -15,8 +15,7 @@ vi.mock('./aiChat', () => ({
   useChat: mocks.useChat,
 }))
 
-// The panel's access signal: a connected key or a plan that pays for inference. Default here is "the
-// viewer connected their own model", the ordinary way ✨ is on.
+// The panel's access signal is the viewer's connected model.
 vi.mock('../rindle/modelClient', () => ({
   useModelStatus: mocks.useModelStatus,
   getModelStatus: vi.fn(),
@@ -37,7 +36,6 @@ beforeEach(() => {
       connected: true,
       provider: 'openrouter',
       model: null,
-      appPaid: false,
     },
     loading: false,
     refresh: vi.fn(),
@@ -94,7 +92,6 @@ describe('ChatPanel permissions', () => {
         connected: false,
         provider: null,
         model: null,
-        appPaid: false,
       },
       loading: false,
       refresh: vi.fn(),
@@ -114,28 +111,6 @@ describe('ChatPanel permissions', () => {
 
     expect(screen.queryByRole('textbox')).toBeNull()
     expect(screen.getByRole('button', { name: 'Connect a model' })).toBeTruthy()
-  })
-
-  it('composes on a paid plan with no connected key', () => {
-    mocks.useModelStatus.mockReturnValue({
-      status: { connected: false, provider: null, model: null, appPaid: true },
-      loading: false,
-      refresh: vi.fn(),
-    })
-
-    render(
-      <ChatPanel
-        deckId="d1"
-        slides={[]}
-        deck={null}
-        activeSlide={null}
-        deckContext={deckContext}
-        canEdit
-        onClose={vi.fn()}
-      />,
-    )
-
-    expect(screen.getByRole('textbox')).toBeTruthy()
   })
 
   it('lets an editable member compose and send', () => {

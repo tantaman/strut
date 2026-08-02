@@ -31,7 +31,6 @@ import { CHAT_EDIT_CONFLICT, dispatchActions } from './aiChatActions'
 import type { DispatchCtx, DispatchOutcome } from './aiChatActions'
 import { resolveBackground, resolveSurface, resolveTheme } from './types'
 import { track } from '../lib/analytics'
-import { notifyUsageChanged } from '../lib/usage'
 import { useMutate, useStore } from '../rindle/RindleProvider'
 import { useHistory } from './UndoProvider'
 import type { StrutStore } from '../rindle/client'
@@ -65,7 +64,7 @@ export interface SseEvent {
 
 /** Parse ONE SSE line into a token event. Returns `null` for a line that carries no token — a blank event
  *  separator, a `:`-comment keep-alive, or any non-`data:` field — so the caller simply skips it. A
- *  `data: [DONE]` line returns `{ done: true }`; a `data: {"response":"…"}` frame (Workers AI's shape,
+ *  `data: [DONE]` line returns `{ done: true }`; a normalized `data: {"response":"…"}` frame
  *  passed through untouched by server/chat.ts) returns its text delta. An unparseable data payload returns
  *  `null` (tolerated — a partial/garbled frame is skipped, not fatal). Pure — unit-tested in chat.test.ts. */
 export function parseSseDelta(line: string): SseEvent | null {
@@ -152,11 +151,9 @@ export function applyNote(actions: ChatAction[]): string {
     case 'arrange':
       return 'Rearranging slides…'
     case 'add_image':
-      return action.source === 'generate'
-        ? 'Generating an image…'
-        : action.source === 'search'
-          ? 'Finding a photo…'
-          : 'Adding the image…'
+      return action.source === 'search'
+        ? 'Finding an image…'
+        : 'Adding the image…'
     case 'add_web':
       return 'Embedding the page…'
     case 'add_artifact':
@@ -849,7 +846,6 @@ export function useChat(
           }
           const applied = { revision: null as number | null }
           track('chat:sent', { turn: convo.length })
-          notifyUsageChanged()
           const tip = await sendChatAction(
             store,
             {

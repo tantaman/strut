@@ -10,7 +10,6 @@
 
 import { newId, OVERVIEW_CARD_GAP } from '../config'
 import { keyBetween } from '../lib/order'
-import { notifyUsageChanged } from '../lib/usage'
 import { applyPlan, buildDigest } from './aiArrange'
 import { applyGenerated, markdownToDoc } from './aiGenerate'
 import { applyThemePatch } from './aiTheme'
@@ -332,50 +331,27 @@ async function runAddImage(
   return insertWithUndo(ctx, id, () => ctx.mutate.addImage(args), 'Add image')
 }
 
-/** Turn an add_image action into a concrete image URL: a direct url, a stock-photo search, or an
- *  AI-generated image (both round-trip to their API routes). Errors are user-facing chat copy. */
+/** Turn an add_image action into a concrete URL, directly or through openly licensed image search. */
 async function resolveImageSrc(
   a: Extract<ChatAction, { kind: 'add_image' }>,
 ): Promise<{ ok: true; src: string } | { ok: false; error: string }> {
   if (a.source === 'url') return { ok: true, src: a.value }
-  if (a.source === 'search') {
-    let res: Response
-    try {
-      res = await fetch(
-        appPath(`/api/image-search?q=${encodeURIComponent(a.value)}`),
-        {
-          credentials: 'same-origin',
-        },
-      )
-    } catch {
-      return { ok: false, error: 'Network error — try again.' }
-    }
-    if (!res.ok) return { ok: false, error: await friendlyError(res) }
-    const body = (await res.json().catch(() => null)) as {
-      results?: string[]
-    } | null
-    const src = body?.results?.[0]
-    if (!src) return { ok: false, error: `No photos found for “${a.value}”.` }
-    return { ok: true, src }
-  }
-  // generate
   let res: Response
   try {
-    res = await fetch(appPath('/api/image'), {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ prompt: a.value }),
-    })
+    res = await fetch(
+      appPath(`/api/image-search?q=${encodeURIComponent(a.value)}`),
+      { credentials: 'same-origin' },
+    )
   } catch {
     return { ok: false, error: 'Network error — try again.' }
   }
   if (!res.ok) return { ok: false, error: await friendlyError(res) }
-  const body = (await res.json().catch(() => null)) as { url?: string } | null
-  if (!body?.url)
-    return { ok: false, error: 'The image didn’t come back — try again.' }
-  notifyUsageChanged() // a generated image spends an AI unit + storage → refresh the usage ring
-  return { ok: true, src: body.url }
+  const body = (await res.json().catch(() => null)) as {
+    results?: string[]
+  } | null
+  const src = body?.results?.[0]
+  if (!src) return { ok: false, error: `No images found for “${a.value}”.` }
+  return { ok: true, src }
 }
 
 function addWeb(

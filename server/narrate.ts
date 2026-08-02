@@ -1,10 +1,8 @@
-// The "🎙️ From a recording" server adapter: turn a talk TRANSCRIPT into a set of slides, each with a
+// The transcript-to-slides server adapter: turn a talk TRANSCRIPT into a set of slides, each with a
 // Markdown body (the distilled points) AND speaker notes (the narration for that segment). Inference goes
-// through the shared model seam (server/llm.ts) — a plain text→JSON call, so it routes to the caller's
-// connected OpenRouter model (they pay) or the app-paid default (Anthropic Haiku, else Workers AI Llama),
-// exactly like Generate. This adapter only builds the prompt + schema and validates the output; the ROUTE
-// resolves the ModelChoice and passes it in. Mirrors server/generate.ts. Dev-without-workerd:
-// STRUT_NARRATE_STUB yields a local stub when the app-paid binding is absent (BYO OpenRouter works in dev).
+// through the caller's connected OpenRouter model. This adapter only builds the prompt + schema and
+// validates the output; the route resolves the ModelChoice and passes it in. Mirrors server/generate.ts.
+// STRUT_NARRATE_STUB provides a local fallback in development.
 
 import {
   clampNarrateRequest,
@@ -16,8 +14,7 @@ import type { NarrateRequest, NarratedDeck } from '../shared/transcript.ts'
 import { callModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice } from './llm.ts'
 
-/** Thrown when inference can't be reached (no binding / the model call failed). The route maps it to a 503
- *  with a user-facing message rather than a 500 (and refunds the app-paid quota unit). */
+/** Thrown when inference can't be reached or the model call fails. */
 export class NarrateUnavailableError extends Error {
   constructor(message: string) {
     super(message)
@@ -95,10 +92,7 @@ export async function narrateSlides(
       max_tokens: 8192,
     })
   } catch (err) {
-    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_NARRATE_STUB yields a deterministic deck.
-    // Only for the app-paid path (BYO OpenRouter works in dev).
     if (
-      choice.kind === 'workers-ai' &&
       process.env.STRUT_NARRATE_STUB &&
       err instanceof ModelUnavailableError
     ) {

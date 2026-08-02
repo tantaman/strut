@@ -1,5 +1,4 @@
-// The ONE place the app asks "what may this user do?". The AI quota gates (server/quota.ts callers),
-// the deck-count + publish guards (server/rindle-api.ts), and the dashboard account-UI seed
+// The ONE place the app asks "what may this user do?". Deck privacy/storage guards and the account UI
 // (src/rindle/appSsr.ts) all route through getEntitlements. It holds NO billing: it delegates to the
 // private commercial overlay's provider (`#commercial`) when one is present, else returns COMMUNITY —
 // this repo's historical defaults — so an open-source clone behaves exactly as before and needs no
@@ -8,14 +7,10 @@
 
 import { commercial } from '#commercial'
 import { COMMUNITY } from '../shared/commercial.ts'
-import type {
-  AiFeature,
-  Entitlements,
-  EntitlementSummary,
-} from '../shared/commercial.ts'
+import type { Entitlements, EntitlementSummary } from '../shared/commercial.ts'
 
 export { COMMUNITY }
-export type { AiFeature, Entitlements, EntitlementSummary }
+export type { Entitlements, EntitlementSummary }
 
 /** Resolve a user's plan. With no commercial overlay this is a pure constant (no I/O); with an overlay
  *  it reads the overlay's subscription store (auth D1). Never throws — a provider failure falls back to
@@ -32,78 +27,6 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
     )
     return COMMUNITY
   }
-}
-
-// The features that draw from a POOLED monthly allowance (aiMonthlyPool) — the ones that spend model
-// inference as a user-facing "message". Artifact is excluded: it spends R2, not tokens, so it keeps its own
-// daily cap even on a pooled plan. `transcribe` is likewise excluded: it's the audio→text precursor to
-// narrate, not a message on its own — it keeps its daily cap so a pooled plan meters the deck it authors
-// (narrate) once, not twice.
-const POOLED_FEATURES: ReadonlySet<AiFeature> = new Set([
-  'arrange',
-  'generate',
-  'chat',
-  'image',
-  'narrate',
-])
-
-/** May this user spend the APP's inference budget — i.e. run ✨ on a model the deployment pays for?
- *  PAID SUBSCRIBERS ONLY. Everyone else brings their own key (server/llm.ts `resolveModel` returns null
- *  and the ✨ routes answer 402). There is no free taste: an unmetered free tier on someone else's
- *  provider bill only works if a human is watching for abuse, and nobody is.
- *
- *  A self-hoster running the instance on their OWN provider key opens it to every signed-in member by
- *  setting `STRUT_APP_PAID_AI=1` — off by default so no deployment ever quietly pays for strangers.
- *  (BYO-key users are unaffected either way: they pay, so they never pass through here.) */
-export function canUseAppAi(ent: Entitlements): boolean {
-  return ent.pro || process.env.STRUT_APP_PAID_AI === '1'
-}
-
-/** The 402 body for a ✨ lane that CAN run on a connected key (chat, generate, arrange, narrate, variant):
- *  the caller has no key and no plan that pays for one. The client renders `message` — the ChatPanel gate
- *  and the chat lane's friendlyError both read it. Mentions Pro only where a Pro actually exists. */
-export function modelRequired(): { error: string; message: string } {
-  return {
-    error: 'ai_key_required',
-    message: commercial?.upgradeUrl
-      ? 'AI needs a model to run on — connect your own key, or upgrade to Pro.'
-      : 'AI needs a model to run on — connect your own model key to turn it on.',
-  }
-}
-
-/** The 402 body for a lane that can ONLY run on the app's own account (image generation, transcription —
- *  Workers AI has no BYO path), so a connected key can't pay for it and it is strictly plan-gated. */
-export function appAiRequired(feature: string): {
-  error: string
-  message: string
-} {
-  return {
-    error: 'ai_upgrade_required',
-    message: commercial?.upgradeUrl
-      ? `${feature} runs on Strut’s own model — it’s part of Pro.`
-      : `${feature} runs on this instance’s own model, which is turned off here.`,
-  }
-}
-
-/** How an AI feature should be metered for this plan, for use by the AI route quota gates (which pass the
- *  returned object straight to `consumeAiQuota`/`refundAiQuota` in server/quota.ts). Three outcomes:
- *   - `{ meter: false }`                     → unlimited: skip the quota entirely (like the BYO-key path).
- *   - `{ meter: true, window: 'month', limit }` → the pooled monthly allowance (one counter across the
- *                                                inference features); `limit` is always a number.
- *   - `{ meter: true, window: 'day', limit }`   → the per-feature daily cap; `limit` undefined ⇒ the
- *                                                built-in server/quota default constant.
- *  Condition on `.meter` so TS narrows `.window`/`.limit` (e.g. `if (!byo && ai.meter) consumeAiQuota(…, ai)`). */
-export type AiMetering =
-  | { meter: false }
-  | { meter: true; window: 'month'; limit: number }
-  | { meter: true; window: 'day'; limit: number | undefined }
-
-export function aiMetering(ent: Entitlements, feature: AiFeature): AiMetering {
-  if (ent.aiUnlimited) return { meter: false }
-  if (ent.aiMonthlyPool != null && POOLED_FEATURES.has(feature)) {
-    return { meter: true, window: 'month', limit: ent.aiMonthlyPool }
-  }
-  return { meter: true, window: 'day', limit: ent.aiDailyLimits?.[feature] }
 }
 
 /** The client-safe projection for the account UI, seeded through the SSR loader. `upgradeUrl` comes

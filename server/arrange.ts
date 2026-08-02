@@ -1,12 +1,9 @@
 // The "✨ AI Arrange" server adapter: turn a deck digest + a natural-language instruction into a
-// validated ArrangementPlan. Inference goes through the shared model seam (server/llm.ts), which routes to
-// the caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app pays).
-// This adapter only builds the prompt + schema and validates the output; the ROUTE resolves the ModelChoice
+// validated ArrangementPlan. Inference goes through the caller's connected OpenRouter model. This adapter
+// only builds the prompt + schema and validates the output; the route resolves the ModelChoice
 // (resolveModel) and passes it in. The arrange task is a small, bounded, structured-output call.
 //
-// Dev-without-workerd: when the app-paid Workers AI binding is absent under `pnpm dev`, callModel throws
-// and — if STRUT_ARRANGE_STUB is set — we return a deterministic local stub so the preview UI is
-// exercisable. (BYO OpenRouter needs no binding, so it works under `pnpm dev` directly.)
+// When STRUT_ARRANGE_STUB is set, a failed provider call returns a deterministic local development stub.
 
 import {
   arrangeJsonSchema,
@@ -17,7 +14,7 @@ import type { ArrangeRequest, ArrangementPlan } from '../shared/arrange.ts'
 import { callModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice } from './llm.ts'
 
-/** Thrown when inference can't be reached (no binding / the model call failed). The route maps it to a
+/** Thrown when inference can't be reached or the model call fails. The route maps it to a
  *  503 with a user-facing message rather than a 500. */
 export class ArrangeUnavailableError extends Error {
   constructor(message: string) {
@@ -79,7 +76,7 @@ function stubPlan(req: ArrangeRequest): ArrangementPlan {
 }
 
 /** Produce a validated ArrangementPlan for a deck digest + instruction. Throws ArrangeUnavailableError
- *  when Workers AI is unreachable; otherwise always returns a plan whose `order` is a full permutation of
+ *  when OpenRouter is unreachable; otherwise always returns a plan whose `order` is a full permutation of
  *  the input slide ids (normalizePlan is the trust boundary — untrusted model output can't escape it). */
 export async function arrange(
   reqRaw: ArrangeRequest,
@@ -103,10 +100,7 @@ export async function arrange(
       max_tokens: 4096,
     })
   } catch (err) {
-    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_ARRANGE_STUB yields a deterministic plan so
-    // the preview UI is exercisable. Only for the app-paid path (BYO OpenRouter works in dev).
     if (
-      choice.kind === 'workers-ai' &&
       process.env.STRUT_ARRANGE_STUB &&
       err instanceof ModelUnavailableError
     ) {

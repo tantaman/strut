@@ -7,7 +7,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Two boundaries:
 //   1. SESSION GATE — needs SOME session (guest or member); a connected key lets even a guest use the ✨
 //      features on their own credits (OPENROUTER_PLAN.md "Decisions"). Only a fully session-less request
-//      is rejected. This is deliberately looser than the app-paid AI routes (which reject guests): the
+//      is rejected. Guests may connect because every call spends their own credits: the
 //      user is paying, not the app.
 //   2. VALIDATION — we ping OpenRouter GET /api/v1/key with the supplied key before storing, so a typo'd
 //      or revoked key fails fast here rather than at first ✨ use. 200 = valid; 401 = rejected.
@@ -48,7 +48,10 @@ export const Route = createFileRoute('/api/model/connect')({
           typeof b.model === 'string' && b.model.trim() ? b.model.trim() : null
         if (!apiKey) {
           return json(
-            { error: 'bad_request', message: 'An OpenRouter API key is required.' },
+            {
+              error: 'bad_request',
+              message: 'An OpenRouter API key is required.',
+            },
             400,
           )
         }
@@ -64,23 +67,30 @@ export const Route = createFileRoute('/api/model/connect')({
           return json(
             {
               error: 'validation_unavailable',
-              message: 'Could not reach OpenRouter to verify the key. Try again.',
+              message:
+                'Could not reach OpenRouter to verify the key. Try again.',
             },
             502,
           )
         }
         if (!ok) {
           return json(
-            { error: 'invalid_key', message: 'OpenRouter rejected that API key.' },
+            {
+              error: 'invalid_key',
+              message: 'OpenRouter rejected that API key.',
+            },
             400,
           )
         }
 
-        const { putCredential, ModelCredError } = await import(
-          '../../server/modelCred'
-        )
+        const { putCredential, ModelCredError } =
+          await import('../../server/modelCred')
         try {
-          await putCredential(account.id, { provider: 'openrouter', model, apiKey })
+          await putCredential(account.id, {
+            provider: 'openrouter',
+            model,
+            apiKey,
+          })
         } catch (err) {
           // MODEL_CRED_KEY unset/invalid → the feature isn't configured on this deployment.
           if (err instanceof ModelCredError) {

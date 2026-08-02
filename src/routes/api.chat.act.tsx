@@ -6,19 +6,13 @@ import type { ChatActRequest } from '../../shared/chatAction'
 // (server/chatAct.ts chatActStream → the model seam): `data: {"response":"…"}` frames type the reply out,
 // then one terminal `data: {"result":{say,actions}}` frame carries any validated changes the client applies.
 // Like the prose-only twin (/api/chat) the OK response is `text/event-stream`; errors below stay one-shot
-// JSON so the client can branch BEFORE it reads the stream. Same two boundaries as /api/arrange and
-// /api/generate:
-//   1. MODEL GATE — the caller must have a model to spend: their own connected key, or a paid plan that
-//      includes app-paid inference (server/llm.ts resolveModel → null ⇒ 402). No free app-paid tier.
-//   2. COST BOUND — when the app pays for inference, a per-isolate burst throttle + the AUTHORITATIVE durable
-//      daily quota (server/quota.ts) cap it. An action-capable chat turn is one model call, so it meters
-//      exactly like a prose-only chat turn — it shares the SAME 'chat' quota bucket (consumeAiQuota).
+// JSON so the client can branch before it reads the stream. The caller must have a connected OpenRouter
+// key. A small per-isolate throttle protects the service while the caller pays inference directly.
 // We do NOT verify the user owns `deckId` here: the result is only a proposed change; APPLYING it flows
 // through the authoritative slide/deck mutators (server/rindle-api.ts withSlideEditable/withDeckEditable),
 // which independently reject edits the user can't make. The only thing this endpoint spends is inference.
 
-// Per-isolate rolling-window burst throttle (mirrors /api/chat). Best-effort; the durable daily quota is
-// the real ceiling.
+// Per-isolate rolling-window burst throttle (mirrors /api/chat). Best-effort, not a billing meter.
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 20
 const hits = new Map<string, number[]>()
@@ -58,18 +52,14 @@ export const Route = createFileRoute('/api/chat/act')({
         } = await import('../../server/chatActPayload')
         const styleRequest = isStyleReferenceRequest(request)
 
-        // A photo-driven style turn gets the scoped GPT-5.4-mini default. Text-only chat retains the
-        // existing provider choice, and a connected OpenRouter model still overrides either path.
-        const { resolveModel } = await import('../../server/llm')
+        // An unpinned OpenRouter connection uses a multimodal default for photo-driven style turns.
+        const { resolveModel, modelRequired } = await import('../../server/llm')
         const choice = await resolveModel(account.id, {
           purpose: styleRequest ? 'style' : 'general',
         })
-        // Null = no connected key and no plan that pays for one: nothing this caller may spend.
         if (!choice) {
-          const { modelRequired } = await import('../../server/entitlements')
           return json(modelRequired(), 402)
         }
-        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -88,38 +78,6 @@ export const Route = createFileRoute('/api/chat/act')({
         }
         const b: ChatActRequest = parsed.body
 
-        // Durable daily quota — ONLY for the app-paid path, and the SAME bucket as the advisor (an Edit
-        // turn is a chat turn). Consumed BEFORE the model call so concurrent turns can't race the cap.
-        const now = Date.now()
-        // `ai.meter === false` (BYO/unlimited) → skip. Otherwise consumeAiQuota charges the plan's window:
-        // a paid plan's pooled monthly allowance, or the free tier's per-feature daily cap. The Edit lane
-        // shares the SAME 'chat' bucket as a prose turn.
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'chat')
-        if (!byo && ai.meter) {
-          const { consumeAiQuota } = await import('../../server/quota')
-          let quota
-          try {
-            quota = await consumeAiQuota(account.id, now, 'chat', ai)
-          } catch (err) {
-            console.error('[chat/act] quota check failed:', err)
-            return json({ error: 'internal' }, 500)
-          }
-          if (!quota.allowed) {
-            return json(
-              {
-                error: 'quota_exceeded',
-                message:
-                  quota.window === 'month'
-                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
-                    : `Daily AI chat limit reached (${quota.limit}/day). Try again tomorrow.`,
-              },
-              429,
-            )
-          }
-        }
-
         const { chatActStream, ChatActUnavailableError } =
           await import('../../server/chatAct')
         try {
@@ -127,8 +85,8 @@ export const Route = createFileRoute('/api/chat/act')({
             fonts: FONT_FAMILIES,
             images: parsed.images,
           })
-          // The stream exists → the unit is legitimately spent. Hand the SSE straight to the client: it
-          // types the reply out of `{response}` frames and applies the terminal `{result}` frame.
+          // Hand the SSE straight to the client: it types the reply out of `{response}` frames and applies
+          // the terminal `{result}` frame.
           return new Response(stream, {
             status: 200,
             headers: {
@@ -137,14 +95,6 @@ export const Route = createFileRoute('/api/chat/act')({
             },
           })
         } catch (err) {
-          // Failed BEFORE any token streamed — the work didn't happen, so refund the consumed unit
-          // (only if we metered it).
-          if (!byo && ai.meter) {
-            const { refundAiQuota } = await import('../../server/quota')
-            await refundAiQuota(account.id, now, 'chat', ai.window).catch(
-              () => {},
-            )
-          }
           if (err instanceof ChatActUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

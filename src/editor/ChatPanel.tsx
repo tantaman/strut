@@ -6,10 +6,9 @@
 // `markdownToHtml` sink (marked → DOMPurify) — the SAME sanitizer the slide surfaces use — before it
 // reaches dangerouslySetInnerHTML. User turns render as plain text (React escapes them).
 //
-// Access: AI runs on a model the VIEWER supplies (a connected OpenRouter key) or one their PAID plan pays
-// for — there is no free app-paid tier. `/api/model/status` answers both bits, so the panel shows either
-// the composer or a connect-a-model gate. Sign-in is not part of this: a guest with a key can chat, and a
-// member without one can't. The routes enforce the same rule (402); this is UX only.
+// Access: AI runs only on the viewer's connected OpenRouter key. The panel shows either the composer or a
+// connect-a-model gate. Sign-in is not part of this: a guest with a key can chat and a member without one
+// cannot. The routes enforce the same rule (402); this is UX only.
 
 import { useEffect, useRef, useState } from 'react'
 import { ImagePlus, RotateCcw, Sparkles, Trash2, X } from 'lucide-react'
@@ -51,11 +50,11 @@ export function ChatPanel({
   styleIntent?: number
   onClose: () => void
 }) {
-  // Does this viewer have a model to run on — their own connected key, or one their plan pays for?
+  // Does this viewer have a connected model to run on?
   // While the status resolves we show neither the composer nor the gate, so an entitled author never sees
   // a "connect a model" flash. The route enforces the same rule server-side.
   const { status: model, loading: modelLoading, refresh } = useModelStatus()
-  const aiReady = model.connected || model.appPaid
+  const aiReady = model.connected
 
   const { messages, send, busy, clear, undoTip, undoLast } = useChat(
     deckId,

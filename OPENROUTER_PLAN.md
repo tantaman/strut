@@ -1,13 +1,17 @@
 # OpenRouter — "Bring your own LLM to the ✨ features" — Implementation Plan
 
+> Historical plan. The final product posture is now **BYOK-only**: `server/llm.ts` resolves only the
+> caller's OpenRouter credential, and app-funded fallbacks plus durable inference quotas were removed.
+> References below to Workers AI, app-paid plans, and AI metering describe earlier implementation phases.
+
 Status: **Phases 1–4 built & verified** on branch `open-router`: credential store, connect UI, the
 `server/llm.ts` seam + adapter refactor, and the routes' pay/guest/quota branching. Remaining: Phase 5+
 (OAuth PKCE, model discovery, cost surfacing) + a live browser click-through. Realizes the
 deliberately-deferred
-**BYOK path** the AI adapters already name — *"there is NO per-user credential to custody (that's the
-BYOK path we deliberately deferred)"* (`server/arrange.ts:3-4`, `server/chat.ts:8-11`) — and
+**BYOK path** the AI adapters already name — _"there is NO per-user credential to custody (that's the
+BYOK path we deliberately deferred)"_ (`server/arrange.ts:3-4`, `server/chat.ts:8-11`) — and
 the original AI Arrange plan's Phase 1 (credential store) + Phase 5 (OpenRouter OAuth,
-called *"this **is** 'LLM of choice'… the default path"*).
+called _"this **is** 'LLM of choice'… the default path"_).
 
 ## Goal
 
@@ -20,24 +24,24 @@ to the user's key with no change to prompts, schemas, undo, or the sync engine.
 
 ## The keystone: one model seam, two backends — everything else is unchanged
 
-Inference is *already* isolated to a single call per feature (`ai.run(MODEL, …)`), and every adapter's
-header comment promises *"swapping providers is a change ONLY to this file — the route and client are
-model-agnostic."* Two facts make BYO a **transport swap**, not a rewrite:
+Inference is _already_ isolated to a single call per feature (`ai.run(MODEL, …)`), and every adapter's
+header comment promises _"swapping providers is a change ONLY to this file — the route and client are
+model-agnostic."_ Two facts make BYO a **transport swap**, not a rewrite:
 
 - **OpenRouter is OpenAI-compatible.** Its `POST /api/v1/chat/completions` takes the exact `messages` +
   `response_format` + `stream` payloads the Workers AI calls already build. No provider matrix, no SDK.
-- **The three adapters duplicate the *same* inline `loadAi()` / `AiBinding` / `extractJson` code** — there
-  is no shared LLM module today. Introducing one is a net *reduction* in duplication.
+- **The three adapters duplicate the _same_ inline `loadAi()` / `AiBinding` / `extractJson` code** — there
+  is no shared LLM module today. Introducing one is a net _reduction_ in duplication.
 
 **Therefore: add the seam the codebase never had (`server/llm.ts`), route all three adapters through it,
 and add a per-user credential the seam reads.** Routes, prompt builders, JSON schemas, the `normalize*`
-trust boundary, the client `fetch` calls, undo, and the quota *plumbing* are untouched. The only new
-runtime behavior is *which* endpoint the seam calls, decided per request by whether the user has
+trust boundary, the client `fetch` calls, undo, and the quota _plumbing_ are untouched. The only new
+runtime behavior is _which_ endpoint the seam calls, decided per request by whether the user has
 connected a model.
 
 ## Load-bearing decisions
 
-- **OpenRouter first, and OpenRouter alone in v1.** One OAuth/one key fronts hundreds of models — it *is*
+- **OpenRouter first, and OpenRouter alone in v1.** One OAuth/one key fronts hundreds of models — it _is_
   "bring your own LLM." The seam's `ModelChoice` union leaves room for Anthropic/OpenAI-direct later, but
   none is built now.
 - **The BYO branch is a plain `fetch`, not an object binding.** Unlike `env.AI` / `DB` / `R2` (object
@@ -51,16 +55,16 @@ connected a model.
 - **The seam resolves the backend per request from the caller's credential.** `resolveModel(userId)`:
   connected → **OpenRouter (user pays)**; not connected → **Workers AI (app pays — today's behavior)**.
 - **When the user pays, the app-cost ceiling disappears.** The durable daily quota (`server/quota.ts`)
-  exists *because the app pays for inference*; for a BYO call it is **bypassed**. The cheap per-isolate
-  burst throttle stays (it protects *your Worker's* CPU/abuse surface, not model cost).
+  exists _because the app pays for inference_; for a BYO call it is **bypassed**. The cheap per-isolate
+  burst throttle stays (it protects _your Worker's_ CPU/abuse surface, not model cost).
 - **Streaming is normalized server-side.** OpenRouter emits OpenAI `data: {"choices":[{"delta":
-  {"content":"…"}}]}` SSE; the client parses Workers-AI `data: {"response":"…"}` frames
+{"content":"…"}}]}` SSE; the client parses Workers-AI `data: {"response":"…"}` frames
   (`src/editor/aiChat.ts:44` `parseSseDelta`). `streamModel` **re-emits BYO frames as `{response}`** so the
   client — and the two shipped SSE shapes — stay provider-agnostic. One translation point, in the seam.
 - **The `normalize*` trust boundary makes model choice safe.** Not every OpenRouter model honors
   `response_format: json_schema`. `normalizePlan` / `normalizeGenerated` already re-derive `order` as a
   validated full permutation of the deck's own ids and clamp all geometry — so a sloppy model yields a
-  *worse arrangement* (one undo away), never an arbitrary mutation or an id escape. Nothing new to defend.
+  _worse arrangement_ (one undo away), never an arbitrary mutation or an id escape. Nothing new to defend.
 
 ## Sequencing
 
@@ -82,7 +86,7 @@ Three earlier forks are resolved and baked into the phases below:
 2. **No quota for BYO calls.** `consume*Quota` is skipped entirely when the user's own key is in use;
    only the per-isolate burst throttle remains (protects the Worker, not model cost).
 3. **BYOK (paste an API key) ships first.** OpenRouter OAuth PKCE is a Phase 5 fast-follow; the
-   credential-store shape is identical, so PKCE only swaps *how the key is obtained*.
+   credential-store shape is identical, so PKCE only swaps _how the key is obtained_.
 
 Still open (do not block the MVP): one-model-vs-per-feature selection, encryption-key rotation, and the
 structured-output fallback for models that reject `response_format` — see Open questions below.
@@ -93,7 +97,7 @@ structured-output fallback for models that reject `response_format` — see Open
 
 - **Unforgeable principal + D1 both exist.** Better-Auth guest-first is shipped (`server/auth.ts`,
   `resolveSessionAccount` in `server/session.ts`), and the D1 `DB` binding is live (`wrangler.jsonc:52-62`,
-  migrations in `migrations-d1/`, local better-sqlite3 in dev). You *cannot* attach paid credentials to a
+  migrations in `migrations-d1/`, local better-sqlite3 in dev). You _cannot_ attach paid credentials to a
   spoofable identity — that risk is already closed.
 - **New secret only:** `MODEL_CRED_KEY` — a 32-byte base64 key for envelope-encrypting stored credentials
   (`wrangler secret put MODEL_CRED_KEY`). A dev default in `.env` (documented, non-secret) keeps `pnpm dev`
@@ -126,7 +130,7 @@ structured-output fallback for models that reject `response_format` — see Open
 ## Phase 2 — "Connect your model" routes + UI
 
 - **Routes** (mirror `src/routes/api.arrange.tsx`'s session guard — `resolveSessionAccount` → 401 on
-  no-session; a *member* gate is a fork, see below):
+  no-session; a _member_ gate is a fork, see below):
   - `src/routes/api.model.connect.tsx` — POST `{ apiKey, model? }`: **validate** the key by pinging
     OpenRouter `GET /api/v1/key` (cheap, returns the key's usage/limit) → `putCredential` → return
     `{ connected: true, provider: 'openrouter', model }`. **Never echoes the key.**
@@ -137,7 +141,7 @@ structured-output fallback for models that reject `response_format` — see Open
     `authClient` usage). Reactive so the ✨ controls can show "using your model."
   - A **"Connect your model"** panel next to `src/rindle/AccountControl.tsx` — the only account surface
     today (a sign-in/out popover in the dashboard chrome, `src/routes/index.tsx:88`). Model connection is
-    an *account* setting, not a per-deck one, so it belongs with the identity UI, not the editor header.
+    an _account_ setting, not a per-deck one, so it belongs with the identity UI, not the editor header.
     Provider = OpenRouter, an API-key field, an optional model field/picker, connected/disconnected state,
     a Disconnect button. Guests see a sign-in nudge unless the guest-BYO fork is taken.
 
@@ -148,8 +152,8 @@ copies:
 
 ```ts
 export type ModelChoice =
-  | { kind: 'workers-ai'; model: string }                     // app pays — the current default/fallback
-  | { kind: 'openrouter'; model: string; apiKey: string }     // user pays — BYO
+  | { kind: 'workers-ai'; model: string } // app pays — the current default/fallback
+  | { kind: 'openrouter'; model: string; apiKey: string } // user pays — BYO
 
 /** Read the user's connected credential → OpenRouter; else the Workers AI default. */
 export async function resolveModel(userId: string): Promise<ModelChoice>
@@ -158,7 +162,7 @@ export async function resolveModel(userId: string): Promise<ModelChoice>
 export async function callModel(
   choice: ModelChoice,
   input: { messages: Msg[]; response_format?: unknown; max_tokens?: number },
-): Promise<unknown>   // shape-compatible with today's ai.run(...) result → extractJson stays
+): Promise<unknown> // shape-compatible with today's ai.run(...) result → extractJson stays
 
 /** SSE token stream — Chat. Normalizes OpenRouter's OpenAI frames to `{response}` so the client is untouched. */
 export async function streamModel(
@@ -170,9 +174,9 @@ export async function streamModel(
 - **Workers AI branch:** today's `loadAi()` + `ai.run(MODEL, …)`, unchanged, keyed by the default model
   const (moved here from the three adapters).
 - **OpenRouter branch:** `fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST',
-  headers: { Authorization: \`Bearer ${apiKey}\`, 'content-type': 'application/json', 'HTTP-Referer':
-  'https://strut.io', 'X-Title': 'Strut' }, body })`. Pass `response_format`/`stream` straight through.
-  Map OpenRouter's `choices[0].message.content` (one-shot) / `choices[].delta.content` (stream) into the
+headers: { Authorization: \`Bearer ${apiKey}\`, 'content-type': 'application/json', 'HTTP-Referer':
+  'https://strut.io', 'X-Title': 'Strut' }, body })`. Pass `response_format`/`stream`straight through.
+Map OpenRouter's`choices[0].message.content`(one-shot) /`choices[].delta.content` (stream) into the
   shapes the adapters already consume.
 - **Error mapping:** OpenRouter 401 (bad/expired key), 402 (out of credits), 429 (rate limited) → the
   adapters' existing `*UnavailableError`, so the routes still 503 with a friendly message (and, for
@@ -233,27 +237,27 @@ In each of `api.arrange.tsx` / `api.generate.tsx` / `api.chat.tsx`:
 - Streaming for Arrange/Generate (they are one-shot structured calls by design).
 - Team/shared connected models (a credential is strictly per-user).
 - Multimodal (sending slide thumbnails) — orthogonal, tracked with the AI feature plans.
-- An app-owned Claude key via AI Gateway (the AI Chat plan's alternative) — a *different* lever (better
+- An app-owned Claude key via AI Gateway (the AI Chat plan's alternative) — a _different_ lever (better
   default quality, app pays) than BYO (user pays, user chooses); not this plan.
 
 ## Quick file map
 
-| File | New? | Role |
-|---|---|---|
-| `migrations-d1/0007_model_credential.sql` | new | Per-user encrypted credential table (auth D1) |
-| `server/modelCred.ts` | new | Dual-store (D1/sqlite) + AES-GCM envelope encrypt/decrypt; `put/get/delete/hasCredential` |
-| `server/llm.ts` | new | The model seam: `ModelChoice`, `resolveModel`, `callModel`, `streamModel` (SSE normalize) |
-| `server/arrange.ts` | mod | Drop private `loadAi()`/`ai.run` → `callModel(resolveModel(userId), …)`; keep prompt/schema/normalize/stub |
-| `server/generate.ts` | mod | Same refactor (one-shot structured) |
-| `server/chat.ts` | mod | Same refactor via `streamModel` (client SSE shape unchanged by normalization) |
-| `src/routes/api.model.connect.tsx` | new | POST validate + encrypt + store a key |
-| `src/routes/api.model.status.tsx` | new | GET `{ connected, provider, model }` (never the key) |
-| `src/routes/api.model.disconnect.tsx` | new | POST delete the credential |
-| `src/routes/api.arrange.tsx`, `api.generate.tsx`, `api.chat.tsx` | mod | Pass `account.id`; bypass quota when BYO; guest-gate fork |
-| `src/rindle/modelClient.ts` | new | Client fetch wrappers + `useModelStatus()` |
-| `src/rindle/AccountControl.tsx` (+ `src/routes/index.tsx`) | mod | "Connect your model" panel beside the account popover |
-| `wrangler.jsonc` | mod | Document `MODEL_CRED_KEY` secret (no new binding — OpenRouter is a `fetch`) |
-| `server/llm.test.ts` | new | `streamModel` SSE normalization (OpenAI→`{response}`), `resolveModel` backend pick |
+| File                                                             | New? | Role                                                                                                       |
+| ---------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------- |
+| `migrations-d1/0007_model_credential.sql`                        | new  | Per-user encrypted credential table (auth D1)                                                              |
+| `server/modelCred.ts`                                            | new  | Dual-store (D1/sqlite) + AES-GCM envelope encrypt/decrypt; `put/get/delete/hasCredential`                  |
+| `server/llm.ts`                                                  | new  | The model seam: `ModelChoice`, `resolveModel`, `callModel`, `streamModel` (SSE normalize)                  |
+| `server/arrange.ts`                                              | mod  | Drop private `loadAi()`/`ai.run` → `callModel(resolveModel(userId), …)`; keep prompt/schema/normalize/stub |
+| `server/generate.ts`                                             | mod  | Same refactor (one-shot structured)                                                                        |
+| `server/chat.ts`                                                 | mod  | Same refactor via `streamModel` (client SSE shape unchanged by normalization)                              |
+| `src/routes/api.model.connect.tsx`                               | new  | POST validate + encrypt + store a key                                                                      |
+| `src/routes/api.model.status.tsx`                                | new  | GET `{ connected, provider, model }` (never the key)                                                       |
+| `src/routes/api.model.disconnect.tsx`                            | new  | POST delete the credential                                                                                 |
+| `src/routes/api.arrange.tsx`, `api.generate.tsx`, `api.chat.tsx` | mod  | Pass `account.id`; bypass quota when BYO; guest-gate fork                                                  |
+| `src/rindle/modelClient.ts`                                      | new  | Client fetch wrappers + `useModelStatus()`                                                                 |
+| `src/rindle/AccountControl.tsx` (+ `src/routes/index.tsx`)       | mod  | "Connect your model" panel beside the account popover                                                      |
+| `wrangler.jsonc`                                                 | mod  | Document `MODEL_CRED_KEY` secret (no new binding — OpenRouter is a `fetch`)                                |
+| `server/llm.test.ts`                                             | new  | `streamModel` SSE normalization (OpenAI→`{response}`), `resolveModel` backend pick                         |
 
 ## Relevant existing anchors
 
@@ -270,5 +274,5 @@ In each of `api.arrange.tsx` / `api.generate.tsx` / `api.chat.tsx`:
   `migrations-d1/0001_better_auth.sql:1` (`"user"("id")`).
 - Client call sites (unchanged): `src/editor/Overview.tsx:676`, `src/editor/SlideWell.tsx:504`,
   `src/editor/aiChat.ts:138`.
-</content>
-</invoke>
+  </content>
+  </invoke>

@@ -20,14 +20,15 @@ here are **inert** until an overlay is supplied.
                      └───────────────────────┬───────────────────────────────┘
                                               │ getEntitlements(userId)
                                     ┌─────────▼─────────┐
-                                    │ auth D1 (binding  │  users/sessions/quota + `subscription`
+                                    │ auth D1 (binding  │  users/sessions + `subscription`
                                     │ DB)               │
                                     └───────────────────┘
 ```
 
 - **Pro is pure feature-gating.** Decks live in one shared Rindle daemon DB scoped by `owner_id`; tier
-  never touches storage. The Pro entitlement is a row in the **auth D1** (never Rindle → never syncs to
-  the browser), read on the server to raise AI caps, lift the deck cap, and allow publishing.
+  never changes where deck data lives. The Pro entitlement is a row in the **auth D1** (never Rindle →
+  never syncs to the browser), read on the server to allow private decks, remove the hosted image-storage
+  ceiling, and white-label shared decks. AI is BYOK on every plan.
 
 ## The seam: `#commercial`
 
@@ -56,18 +57,18 @@ Two consumers in this repo import `#commercial`:
 
 - `src/worker-entry.ts` — calls `commercial.fetch()` before the app handler (host branch).
 - `server/entitlements.ts` — `getEntitlements(userId)` delegates to `commercial.entitlements` or returns
-  `COMMUNITY` (this repo's historical defaults: no deck cap, built-in AI caps, publishing on).
+  `COMMUNITY` (the unrestricted self-host defaults).
 
 ## What the app gates on entitlements
 
 All of these are no-ops under `COMMUNITY` (a clone/self-host), so nothing changes without an overlay:
 
-| Gate                     | Where                                                                                                  | COMMUNITY behavior                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| AI daily caps            | the six `if (!byo && ai.meter)` sites in `src/routes/api.*` + `server/artifact.ts`, via `aiMetering()` | built-in `server/quota.ts` constants |
-| Deck cap                 | `createDeckCapped` in `server/rindle-api.ts`                                                           | `deckLimit: null` → unlimited        |
-| Publishing               | `setDeckVisibilityGuarded` in `server/rindle-api.ts`                                                   | `canPublish: true`                   |
-| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`)                                               | `upgradeUrl: null` → hidden          |
+| Gate                     | Where                                                    | COMMUNITY behavior          |
+| ------------------------ | -------------------------------------------------------- | --------------------------- |
+| Private decks            | guarded deck writes in `server/rindle-api.ts`            | private decks allowed       |
+| Image storage            | `server/upload.ts` via `server/storage.ts`               | unlimited                   |
+| Shared-deck white label  | share SSR/view rendering                                 | Strut attribution shown     |
+| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`) | `upgradeUrl: null` → hidden |
 
 ## Building an overlay
 

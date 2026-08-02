@@ -1,49 +1,19 @@
-// server/llm.ts — the ONE model seam (OPENROUTER_PLAN.md Phase 3). Every ✨ feature's inference flows
-// through here, and the backend is chosen PER REQUEST from the caller's connected credential:
-//   • BYO — the user connected an OpenRouter key (server/modelCred.ts): call OpenRouter with THEIR key,
-//     THEY pay. OpenRouter is OpenAI-compatible, so it's a plain fetch — no binding, and it works under
-//     `pnpm dev` (Node) too, unlike the Workers AI object binding.
-//   • default (app pays) — PAID PLANS ONLY (server/entitlements.ts `canUseAppAi`; a self-hoster on their
-//     own key opts the instance in with STRUT_APP_PAID_AI=1). Photo-reference styling uses OpenAI GPT-5.4
-//     mini when OPENAI_API_KEY is set; other lanes use Anthropic Claude Haiku when ANTHROPIC_API_KEY is
-//     set, else Cloudflare Workers AI. Every app-paid choice is metered (choice.kind !== 'openrouter')
-//     behind the existing quota. No entitlement and no key ⇒ resolveModel returns null and the route 402s.
-//
-// This folds together the three formerly-duplicated loadAi()/AiBinding/extractJson copies that lived in
-// server/{arrange,generate,chat}.ts. Those adapters now just build messages + schema and call callModel /
-// streamModel; the ROUTE resolves the choice (resolveModel) and passes it in, and reads choice.kind for
-// its pay/guest/quota branching (a BYO call skips the app quota and is open to guests — the user pays).
+// The single model seam for every ✨ feature. Strut is BYOK-only: each request resolves the caller's
+// connected OpenRouter credential and spends their credits. There is deliberately no deployment-funded
+// fallback, provider binding, entitlement path, or inference meter to operate.
 
-import { canUseAppAi, getEntitlements } from './entitlements.ts'
 import { getCredential } from './modelCred.ts'
 
-// The Workers AI instruct model used when the app pays (unchanged from the adapters): structured JSON +
-// streaming, a small bounded call, so an instruct model is plenty.
-const WORKERS_AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 // OpenRouter's auto-router when the user didn't pin a specific model id.
 const OPENROUTER_DEFAULT_MODEL = 'openrouter/auto'
 const OPENROUTER_STYLE_MODEL = 'openai/gpt-5.4-mini'
 const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Photo-driven theme generation is intentionally the only lane that defaults to OpenAI. This keeps the
-// model change narrow while giving the multimodal styling task a fast, reliable model with native image
-// input and streaming. Other AI features retain their existing provider selection.
-export const OPENAI_STYLE_MODEL = 'gpt-5.4-mini'
-const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions'
-
-// App-paid default when ANTHROPIC_API_KEY is set: Claude Haiku 4.5 — small, fast, and genuinely good, so a
-// few free calls are a real "taste" (fractions of a cent each) rather than Llama slop. Called over plain
-// HTTPS (no binding), so it works under `pnpm dev` too; the app's own key means the app pays, and the
-// existing daily quota meters it exactly as it did the Workers AI path.
-const ANTHROPIC_MODEL = 'claude-haiku-4-5'
-const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages'
-const ANTHROPIC_VERSION = '2023-06-01'
-
-export type ModelChoice =
-  | { kind: 'workers-ai'; model: string }
-  | { kind: 'openrouter'; model: string; apiKey: string }
-  | { kind: 'anthropic'; model: string; apiKey: string }
-  | { kind: 'openai'; model: string; apiKey: string }
+export type ModelChoice = {
+  kind: 'openrouter'
+  model: string
+  apiKey: string
+}
 
 export interface ModelMessage {
   role: 'system' | 'user' | 'assistant'
@@ -57,14 +27,13 @@ export interface ModelImage {
 
 export interface CallInput {
   messages: ModelMessage[]
-  /** A Workers-AI-shaped `{ type: 'json_schema', json_schema: <rawSchema> }` (or undefined). Rewrapped
-   *  into OpenAI form for the OpenRouter path; passed through untouched to Workers AI. */
+  /** Strut's historical `{ type: 'json_schema', json_schema: <rawSchema> }` shape (or undefined),
+   *  rewrapped into OpenAI-compatible form for OpenRouter. */
   response_format?: unknown
   max_tokens?: number
 }
 
-/** Thrown when the chosen backend can't be reached, or the call failed before any output. Adapters catch
- *  this and rethrow as their feature-specific *UnavailableError (route → 503; app-paid quota refunded). */
+/** Thrown when OpenRouter can't be reached or a call fails before any output. */
 export class ModelUnavailableError extends Error {
   constructor(message: string) {
     super(message)
@@ -72,16 +41,16 @@ export class ModelUnavailableError extends Error {
   }
 }
 
-/** Pick the backend for a user, or NULL when there is no model they may spend.
- *
- *  - Connected OpenRouter key → use it. They pay, so it's always allowed (guest or member).
- *  - No key → the APP would pay, which is a paid-plan feature (server/entitlements.ts `canUseAppAi`).
- *    Not entitled ⇒ **null**, and the caller answers 402 rather than burning the app's provider bill.
- *  - Entitled ⇒ the scoped app-paid default: GPT-5.4 mini for visual styling, Anthropic Haiku for general
- *    inference when set, otherwise Workers AI.
- *
- *  Returning null (rather than throwing) makes the gate type-checked: every route must handle "no model".
- *  A credential read/decrypt failure falls through to the same app-paid branch — and therefore the gate. */
+/** Shared 402 response for a caller who has not connected an OpenRouter key. */
+export function modelRequired(): { error: string; message: string } {
+  return {
+    error: 'ai_key_required',
+    message: 'Connect your OpenRouter key to turn on AI.',
+  }
+}
+
+/** Resolve the user's connected OpenRouter model, or null when they have not connected one. Photo-driven
+ *  style turns select a known multimodal default only when the user left their model unpinned. */
 export async function resolveModel(
   userId: string,
   options: { purpose?: 'general' | 'style' } = {},
@@ -101,62 +70,15 @@ export async function resolveModel(
     }
   } catch (err) {
     console.error(
-      '[llm] credential resolution failed; falling back to the app-paid default:',
+      '[llm] credential resolution failed:',
       err instanceof Error ? err.message : err,
     )
   }
-  // Past this point the APP pays. That is the paid surface (or a self-hoster's explicit opt-in) — no
-  // connected key and no entitlement means no model at all.
-  if (!canUseAppAi(await getEntitlements(userId))) return null
-
-  if (options.purpose === 'style') {
-    const openaiKey = process.env.OPENAI_API_KEY
-    if (openaiKey) {
-      return {
-        kind: 'openai',
-        model: OPENAI_STYLE_MODEL,
-        apiKey: openaiKey,
-      }
-    }
-  }
-  // App-paid default. Prefer Haiku (the "free taste") when the app has a key; else Workers AI so
-  // key-less environments — and `pnpm dev` before you set one — keep working. Both are metered by the
-  // route's existing quota (choice.kind !== 'openrouter'); only the model behind the meter changes.
-  const anthropicKey = process.env.ANTHROPIC_API_KEY
-  if (anthropicKey) {
-    return { kind: 'anthropic', model: ANTHROPIC_MODEL, apiKey: anthropicKey }
-  }
-  return { kind: 'workers-ai', model: WORKERS_AI_MODEL }
+  return null
 }
 
-// ---- Workers AI binding (single copy; was duplicated in all three adapters) ----
-
-// The sliver of the Workers AI binding we call — typed structurally so we don't pull
-// @cloudflare/workers-types (whose globals shadow the DOM lib) into the build graph. Exported so the
-// image adapter (server/image.ts) reaches the SAME memoized binding for text-to-image runs.
-export interface AiBinding {
-  run: (model: string, input: unknown) => Promise<unknown>
-}
-
-let cachedAi: AiBinding | null | undefined
-export async function loadAi(): Promise<AiBinding | null> {
-  if (cachedAi !== undefined) return cachedAi
-  try {
-    const spec = 'cloudflare:workers'
-    const mod = (await import(/* @vite-ignore */ spec)) as {
-      env?: Record<string, unknown>
-    }
-    cachedAi = (mod.env?.AI as AiBinding | undefined) ?? null
-  } catch {
-    cachedAi = null
-  }
-  return cachedAi
-}
-
-// Workers AI returns `{ response: obj|string }` for json_schema output; OpenRouter returns the content as a
-// JSON string — and a provider that ignored `response_format` may wrap it in a ```json fence or stray prose.
-// Normalize all of these to a parsed object (or {} if unsalvageable — the adapters' normalize* is the trust
-// boundary and tolerates junk). Was the per-adapter extractJson().
+// OpenRouter returns structured output as a JSON string. A provider that ignored `response_format` may
+// wrap it in a ```json fence or stray prose, so normalize it before the adapters' validation boundary.
 function extractJson(resp: unknown): unknown {
   if (resp && typeof resp === 'object') return resp
   if (typeof resp === 'string') return parseJsonLoose(resp) ?? {}
@@ -212,110 +134,34 @@ export async function callModel(
   choice: ModelChoice,
   input: CallInput,
 ): Promise<unknown> {
-  if (choice.kind === 'anthropic') {
-    const { system, messages } = toAnthropicRequest(input)
-    const body: Record<string, unknown> = {
-      model: choice.model,
-      max_tokens: input.max_tokens ?? 4096,
-      messages,
-    }
-    if (system) body.system = system
-
-    const res = await anthropicFetch(choice, body)
-    let payload: unknown
-    try {
-      payload = await res.json()
-    } catch {
-      throw new ModelUnavailableError('Anthropic returned a non-JSON response.')
-    }
-    return extractJson(anthropicText(payload))
+  const body: Record<string, unknown> = {
+    model: choice.model,
+    messages: input.messages,
   }
+  const rf = toOpenRouterResponseFormat(input.response_format)
+  if (rf) body.response_format = rf
+  if (typeof input.max_tokens === 'number') body.max_tokens = input.max_tokens
 
-  if (choice.kind === 'openai') {
-    const body: Record<string, unknown> = {
-      model: choice.model,
-      messages: input.messages,
-      reasoning_effort: 'none',
-      store: false,
-    }
-    const rf = toOpenRouterResponseFormat(input.response_format)
-    if (rf) body.response_format = rf
-    if (typeof input.max_tokens === 'number')
-      body.max_completion_tokens = input.max_tokens
-
-    const res = await openaiFetch(choice, body)
-    let payload: unknown
-    try {
-      payload = await res.json()
-    } catch {
-      throw new ModelUnavailableError('OpenAI returned a non-JSON response.')
-    }
-    const content = (
-      payload as {
-        choices?: Array<{ message?: { content?: unknown } }>
-      } | null
-    )?.choices?.[0]?.message?.content
-    return extractJson(content)
-  }
-
-  if (choice.kind === 'openrouter') {
-    const body: Record<string, unknown> = {
-      model: choice.model,
-      messages: input.messages,
-    }
-    const rf = toOpenRouterResponseFormat(input.response_format)
-    if (rf) body.response_format = rf
-    if (typeof input.max_tokens === 'number') body.max_tokens = input.max_tokens
-
-    const res = await openrouterFetch(choice, body)
-    let payload: unknown
-    try {
-      payload = await res.json()
-    } catch {
-      throw new ModelUnavailableError(
-        'OpenRouter returned a non-JSON response.',
-      )
-    }
-    const content = (
-      payload as {
-        choices?: Array<{ message?: { content?: unknown } }>
-      } | null
-    )?.choices?.[0]?.message?.content
-    return extractJson(content)
-  }
-
-  const ai = await loadAi()
-  if (!ai) {
-    throw new ModelUnavailableError(
-      'Workers AI binding is unavailable in this runtime.',
-    )
-  }
-  let result: unknown
+  const res = await openrouterFetch(choice, body)
+  let payload: unknown
   try {
-    result = await ai.run(choice.model, {
-      messages: input.messages,
-      response_format: input.response_format,
-      max_tokens: input.max_tokens,
-    })
-  } catch (err) {
-    throw new ModelUnavailableError(
-      'AI request failed: ' +
-        (err instanceof Error ? err.message : String(err)),
-    )
+    payload = await res.json()
+  } catch {
+    throw new ModelUnavailableError('OpenRouter returned a non-JSON response.')
   }
-  const r = (result ?? {}) as { response?: unknown }
-  return extractJson(r.response ?? result)
+  const content = (
+    payload as {
+      choices?: Array<{ message?: { content?: unknown } }>
+    } | null
+  )?.choices?.[0]?.message?.content
+  return extractJson(content)
 }
 
-/** Streamed completion (Chat + the Edit lane). Returns an SSE byte stream of Workers-AI-shaped
+/** Streamed completion (Chat + the Edit lane). Returns an SSE byte stream of Strut's historical
  *  `data: {"response":"…"}` frames + `data: [DONE]` — the shape the client already parses (src/editor/
- *  aiChat.ts parseSseDelta). Workers AI passes through untouched; OpenRouter's OpenAI-style frames are
- *  normalized. Plain PROSE only — no `response_format`: Workers AI's JSON Mode is mutually exclusive with
- *  streaming (developers.cloudflare.com/workers-ai/features/json-mode), so a streaming feature that needs
- *  structure (the Edit lane) prompts for a fenced JSON block in the prose and parses it out (server/
- *  chatAct.ts) instead of relying on json_schema. OpenAI/OpenRouter messages may additionally carry the
- *  turn's ephemeral images. Throws ModelUnavailableError if the backend is
- *  unreachable / fails before a stream exists. */
+ *  aiChat.ts parseSseDelta). OpenRouter's OpenAI-style frames are normalized. The Edit lane prompts for a
+ *  fenced JSON block in prose and parses it in server/chatAct.ts. Messages may additionally carry the
+ *  turn's ephemeral reference images. */
 export async function streamModel(
   choice: ModelChoice,
   input: {
@@ -324,90 +170,19 @@ export async function streamModel(
     max_tokens?: number
   },
 ): Promise<ReadableStream<Uint8Array>> {
-  if (choice.kind === 'anthropic') {
-    // Plain prose only (no response_format) — same contract as the Workers AI streaming path; a streaming
-    // feature that needs structure (the Edit lane) prompts for a fenced JSON block and parses it out.
-    const { system, messages: textMessages } = toAnthropicRequest({
-      messages: input.messages,
-    })
-    const messages = input.images?.length
-      ? attachImagesToAnthropicMessages(textMessages, input.images)
-      : textMessages
-    const body: Record<string, unknown> = {
-      model: choice.model,
-      max_tokens: input.max_tokens ?? 4096,
-      messages,
-      stream: true,
-    }
-    if (system) body.system = system
-
-    const res = await anthropicFetch(choice, body)
-    if (!res.body) {
-      throw new ModelUnavailableError('Anthropic returned no stream body.')
-    }
-    return normalizeAnthropicSse(res.body)
+  const res = await openrouterFetch(choice, {
+    model: choice.model,
+    messages: attachImagesToOpenAiMessages(input.messages, input.images),
+    max_tokens: input.max_tokens,
+    stream: true,
+  })
+  if (!res.body) {
+    throw new ModelUnavailableError('OpenRouter returned no stream body.')
   }
-
-  if (choice.kind === 'openai') {
-    const res = await openaiFetch(choice, {
-      model: choice.model,
-      messages: attachImagesToOpenAiMessages(input.messages, input.images),
-      reasoning_effort: 'none',
-      max_completion_tokens: input.max_tokens,
-      store: false,
-      stream: true,
-    })
-    if (!res.body) {
-      throw new ModelUnavailableError('OpenAI returned no stream body.')
-    }
-    return normalizeOpenRouterSse(res.body)
-  }
-
-  if (choice.kind === 'openrouter') {
-    const res = await openrouterFetch(choice, {
-      model: choice.model,
-      messages: attachImagesToOpenAiMessages(input.messages, input.images),
-      max_tokens: input.max_tokens,
-      stream: true,
-    })
-    if (!res.body) {
-      throw new ModelUnavailableError('OpenRouter returned no stream body.')
-    }
-    return normalizeOpenRouterSse(res.body)
-  }
-
-  if (input.images?.length) {
-    throw new ModelUnavailableError(
-      'Visual style matching needs OPENAI_API_KEY or a connected multimodal model.',
-    )
-  }
-
-  const ai = await loadAi()
-  if (!ai) {
-    throw new ModelUnavailableError(
-      'Workers AI binding is unavailable in this runtime.',
-    )
-  }
-  let result: unknown
-  try {
-    result = await ai.run(choice.model, {
-      messages: input.messages,
-      max_tokens: input.max_tokens,
-      stream: true,
-    })
-  } catch (err) {
-    throw new ModelUnavailableError(
-      'AI request failed: ' +
-        (err instanceof Error ? err.message : String(err)),
-    )
-  }
-  if (!(result instanceof ReadableStream)) {
-    throw new ModelUnavailableError('AI did not return a token stream.')
-  }
-  return result as ReadableStream<Uint8Array>
+  return normalizeOpenRouterSse(res.body)
 }
 
-// ---- OpenAI / OpenRouter transport ----
+// ---- OpenRouter transport ----
 
 /** Attach ephemeral image bytes to the final user turn in the OpenAI-compatible multimodal shape. */
 export function attachImagesToOpenAiMessages(
@@ -436,32 +211,6 @@ export function attachImagesToOpenAiMessages(
   )
 }
 
-function attachImagesToAnthropicMessages(
-  messages: ModelMessage[],
-  images: ModelImage[],
-): unknown[] {
-  const target = findLastUserMessage(messages)
-  if (target === -1) return messages
-  return messages.map((message, index) =>
-    index === target
-      ? {
-          ...message,
-          content: [
-            ...images.map((image) => ({
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: image.mediaType,
-                data: base64(image.bytes),
-              },
-            })),
-            { type: 'text', text: message.content },
-          ],
-        }
-      : message,
-  )
-}
-
 function findLastUserMessage(messages: ModelMessage[]): number {
   for (let index = messages.length - 1; index >= 0; index--)
     if (messages[index].role === 'user') return index
@@ -474,48 +223,6 @@ function base64(bytes: Uint8Array): string {
   for (let index = 0; index < bytes.length; index += size)
     binary += String.fromCharCode(...bytes.subarray(index, index + size))
   return btoa(binary)
-}
-
-async function openaiFetch(
-  choice: { apiKey: string },
-  body: Record<string, unknown>,
-): Promise<Response> {
-  let res: Response
-  try {
-    res = await fetch(OPENAI_CHAT_URL, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${choice.apiKey}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-  } catch (err) {
-    throw new ModelUnavailableError(
-      'Could not reach OpenAI: ' +
-        (err instanceof Error ? err.message : String(err)),
-    )
-  }
-  if (!res.ok) {
-    const detail = await readOpenAiError(res)
-    throw new ModelUnavailableError(
-      `OpenAI error ${res.status}${detail ? ': ' + detail : ''}`,
-    )
-  }
-  return res
-}
-
-async function readOpenAiError(res: Response): Promise<string> {
-  try {
-    const payload = (await res.clone().json()) as {
-      error?: { message?: unknown }
-    } | null
-    return typeof payload?.error?.message === 'string'
-      ? payload.error.message
-      : ''
-  } catch {
-    return ''
-  }
 }
 
 async function openrouterFetch(
@@ -581,198 +288,10 @@ async function readOpenRouterError(res: Response): Promise<string> {
   }
 }
 
-// ---- Anthropic transport ----
-
-// Split our {system,user,assistant} messages into the Anthropic Messages API shape: `system` is a
-// TOP-LEVEL param there (not a message role), and when the caller asked for structured JSON
-// (response_format) we fold the schema into the system prompt as an instruction. We deliberately DON'T use
-// Anthropic's native structured-output constraint: our schemas use optional fields and lack the
-// `additionalProperties:false` the strict validator requires, so prompt-guided JSON is both simpler and
-// can't hard-fail the request — Haiku follows the instruction well, and the adapters' normalize* stays the
-// trust boundary (same posture as the OpenRouter strict:false path).
-function toAnthropicRequest(input: CallInput): {
-  system: string
-  messages: ModelMessage[]
-} {
-  const systemParts: string[] = []
-  const messages: ModelMessage[] = []
-  for (const m of input.messages) {
-    if (m.role === 'system') systemParts.push(m.content)
-    else messages.push(m)
-  }
-  const schema = jsonSchemaOf(input.response_format)
-  if (schema) {
-    systemParts.push(
-      'Respond with ONLY a single JSON object that conforms to this JSON Schema. Output raw JSON — no ' +
-        'markdown fences, no prose before or after.\n' +
-        JSON.stringify(schema),
-    )
-  }
-  return { system: systemParts.join('\n\n'), messages }
-}
-
-// Pull the raw JSON Schema out of a Workers-AI-shaped `{ type:'json_schema', json_schema:<schema> }`
-// response_format (or an OpenAI-shaped `{ …, schema }` wrapper), or null when it isn't a json_schema request.
-function jsonSchemaOf(rf: unknown): unknown {
-  if (!rf || typeof rf !== 'object') return null
-  const r = rf as { type?: unknown; json_schema?: unknown }
-  if (r.type !== 'json_schema') return null
-  const inner = r.json_schema
-  if (inner && typeof inner === 'object' && 'schema' in inner) {
-    return (inner as { schema?: unknown }).schema
-  }
-  return inner
-}
-
-// Concatenate the text of an Anthropic Messages response's content blocks (ignoring non-text blocks). The
-// result is handed to extractJson → parseJsonLoose, which salvages bare / fenced / prose-wrapped JSON.
-function anthropicText(payload: unknown): string {
-  const blocks = (payload as { content?: unknown } | null)?.content
-  if (!Array.isArray(blocks)) return ''
-  let out = ''
-  for (const b of blocks) {
-    if (
-      b &&
-      typeof b === 'object' &&
-      (b as { type?: unknown }).type === 'text'
-    ) {
-      const t = (b as { text?: unknown }).text
-      if (typeof t === 'string') out += t
-    }
-  }
-  return out
-}
-
-async function anthropicFetch(
-  choice: { apiKey: string },
-  body: Record<string, unknown>,
-): Promise<Response> {
-  let res: Response
-  try {
-    res = await fetch(ANTHROPIC_MESSAGES_URL, {
-      method: 'POST',
-      headers: {
-        'x-api-key': choice.apiKey,
-        'anthropic-version': ANTHROPIC_VERSION,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-  } catch (err) {
-    throw new ModelUnavailableError(
-      'Could not reach Anthropic: ' +
-        (err instanceof Error ? err.message : String(err)),
-    )
-  }
-  if (!res.ok) {
-    // 401 = bad key, 429 = rate limited, 529 = overloaded — surface Anthropic's message.
-    const detail = await readAnthropicError(res)
-    throw new ModelUnavailableError(
-      `Anthropic error ${res.status}${detail ? ': ' + detail : ''}`,
-    )
-  }
-  return res
-}
-
-async function readAnthropicError(res: Response): Promise<string> {
-  try {
-    const j = (await res.clone().json()) as {
-      error?: { message?: unknown }
-    } | null
-    const msg = j?.error?.message
-    return typeof msg === 'string' ? msg : ''
-  } catch {
-    return ''
-  }
-}
-
-// Transform Anthropic's Messages SSE into the Workers-AI-shaped frames the client parses
-// (`data: {"response":"…"}` + a terminal `data: [DONE]`). Anthropic emits typed events; we forward only
-// `text_delta` content and close on `message_stop`. `event:` lines are ignored — each `data:` JSON carries
-// its own `type`. Buffers partial lines across chunk boundaries. Mirrors normalizeOpenRouterSse.
-export function normalizeAnthropicSse(
-  src: ReadableStream<Uint8Array>,
-): ReadableStream<Uint8Array> {
-  const dec = new TextDecoder()
-  const enc = new TextEncoder()
-  let buffer = ''
-  let sawDone = false
-
-  const consumeLine = (
-    line: string,
-    controller: TransformStreamDefaultController<Uint8Array>,
-  ) => {
-    const trimmed = line.trim()
-    if (!trimmed.startsWith('data:') || sawDone) return
-    const payload = trimmed.slice(5).trim()
-    if (!payload) return
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(payload) as unknown
-    } catch {
-      // Anthropic keep-alive / non-JSON extension — ignore. Missing message_stop still fails in flush.
-      return
-    }
-    if (!parsed || typeof parsed !== 'object') return
-    const obj = parsed as {
-      type?: string
-      delta?: { type?: string; text?: unknown }
-      error?: { message?: unknown }
-    }
-    if (obj.type === 'error') {
-      const raw = obj.error?.message
-      const detail = typeof raw === 'string' ? raw.slice(0, 300) : ''
-      throw new ModelUnavailableError(
-        `Anthropic stream failed${detail ? ': ' + detail : '.'}`,
-      )
-    }
-    if (
-      obj.type === 'content_block_delta' &&
-      obj.delta?.type === 'text_delta' &&
-      typeof obj.delta.text === 'string' &&
-      obj.delta.text.length
-    ) {
-      controller.enqueue(
-        enc.encode(`data: ${JSON.stringify({ response: obj.delta.text })}\n\n`),
-      )
-      return
-    }
-    if (obj.type === 'message_stop') {
-      sawDone = true
-      controller.enqueue(enc.encode('data: [DONE]\n\n'))
-    }
-  }
-
-  const transform = new TransformStream<Uint8Array, Uint8Array>({
-    transform(chunk, controller) {
-      buffer += dec.decode(chunk, { stream: true })
-      let nl: number
-      while ((nl = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, nl)
-        buffer = buffer.slice(nl + 1)
-        consumeLine(line, controller)
-      }
-    },
-    flush(controller) {
-      buffer += dec.decode()
-      if (buffer.trim()) consumeLine(buffer, controller)
-      if (!sawDone) {
-        throw new ModelUnavailableError(
-          'Anthropic stream ended before its completion marker.',
-        )
-      }
-    },
-  })
-  return src.pipeThrough(transform)
-}
-
-// Workers AI accepts the raw JSON Schema directly under `json_schema`; OpenAI/OpenRouter want it wrapped as
-// `{ name, schema }`. Rewrap the Workers-AI-shaped response_format for OpenRouter (strict:false — our
+// Rewrap the historical response_format shape as OpenRouter's `{ name, schema }` form (strict:false — our
 // schemas use optional fields, and OpenRouter ignores response_format for models that don't support it, so
 // output still flows and the adapters' normalize* salvages it). The inner schema is also SANITIZED
-// (sanitizeSchema) because some providers' structured-output validators reject size/range constraint
-// keywords — Anthropic errors with "For 'array' type, property 'maxItems' is not supported", which is what
-// broke Arrange/Generate over a connected Claude model. Non-json_schema shapes pass through.
+// because some providers' structured-output validators reject size/range constraint keywords.
 function toOpenRouterResponseFormat(rf: unknown): unknown {
   if (!rf || typeof rf !== 'object') return undefined
   const r = rf as { type?: unknown; json_schema?: unknown }
@@ -796,10 +315,10 @@ function toOpenRouterResponseFormat(rf: unknown): unknown {
   }
 }
 
-// JSON Schema validation keywords that stricter structured-output backends (notably Anthropic's, whether
-// direct or via Bedrock/Azure) reject outright. Our schemas use them only as SOFT hints — the adapters'
+// JSON Schema validation keywords that stricter upstream providers can reject outright. Our schemas use
+// them only as soft hints — the adapters'
 // normalize* is the real trust boundary — so we strip them for OpenRouter to keep the request portable
-// across providers. Workers AI accepts them, so its path is left untouched (sanitizeSchema runs only here).
+// across providers.
 const UNSUPPORTED_SCHEMA_KEYS = new Set([
   'minItems',
   'maxItems',
@@ -833,7 +352,7 @@ function sanitizeSchema(node: unknown): unknown {
 }
 
 // Transform OpenAI-compatible SSE (`data: {"choices":[{"delta":{"content":"…"}}]}`) into the
-// Workers-AI-shaped frames the client parses (`data: {"response":"…"}`), passing `[DONE]` through. Buffers
+// Strut-shaped frames the client parses (`data: {"response":"…"}`), passing `[DONE]` through. Buffers
 // partial lines across chunk boundaries and requires an explicit terminal marker: an HTTP 200 whose stream
 // carries a provider error or simply stops mid-generation is a failed turn, not a successful partial edit.
 export function normalizeOpenRouterSse(

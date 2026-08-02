@@ -1,9 +1,7 @@
 // The "✨ Generate slides" server adapter: turn a natural-language description into a small set of
-// Markdown slides. Inference goes through the shared model seam (server/llm.ts), which routes to the
-// caller's connected OpenRouter model (they pay) or, by default, Cloudflare Workers AI (the app pays). This
+// Markdown slides. Inference goes through the caller's connected OpenRouter model. This
 // adapter only builds the prompt + schema and validates the output; the ROUTE resolves the ModelChoice and
-// passes it in. Mirrors server/arrange.ts. Dev-without-workerd: STRUT_GENERATE_STUB yields a local stub
-// when the app-paid binding is absent (BYO OpenRouter works under `pnpm dev` directly).
+// passes it in. Mirrors server/arrange.ts. STRUT_GENERATE_STUB provides a local fallback in development.
 
 import {
   clampGenerateRequest,
@@ -15,7 +13,7 @@ import type { GenerateRequest, GeneratedDeck } from '../shared/generate.ts'
 import { callModel, ModelUnavailableError } from './llm.ts'
 import type { ModelChoice } from './llm.ts'
 
-/** Thrown when inference can't be reached (no binding / the model call failed). The route maps it to a
+/** Thrown when inference can't be reached or the model call fails. The route maps it to a
  *  503 with a user-facing message rather than a 500. */
 export class GenerateUnavailableError extends Error {
   constructor(message: string) {
@@ -58,7 +56,7 @@ function stubDeck(req: GenerateRequest): GeneratedDeck {
   }
 }
 
-/** Produce a validated GeneratedDeck for a description. Throws GenerateUnavailableError when Workers AI
+/** Produce a validated GeneratedDeck for a description. Throws GenerateUnavailableError when OpenRouter
  *  is unreachable; otherwise always returns a deck whose slides are capped + trimmed (normalizeGenerated
  *  is the trust boundary — untrusted model output can't escape it). */
 export async function generateSlides(
@@ -81,10 +79,7 @@ export async function generateSlides(
       max_tokens: 4096,
     })
   } catch (err) {
-    // Dev-only: no Workers AI binding under `pnpm dev` → STRUT_GENERATE_STUB yields a deterministic deck.
-    // Only for the app-paid path (BYO OpenRouter works in dev).
     if (
-      choice.kind === 'workers-ai' &&
       process.env.STRUT_GENERATE_STUB &&
       err instanceof ModelUnavailableError
     ) {

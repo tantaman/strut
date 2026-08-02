@@ -10,7 +10,7 @@ import {
 import { normalizeActions } from '../../shared/chatAction'
 import { applyNote, parseActLine } from './aiChat'
 
-// The Edit lane STREAMS plain prose + a fenced ```json action block (Workers AI can't stream JSON Mode):
+// The Edit lane streams plain prose + a fenced ```json action block:
 // server/chatAct.ts reassembles the reply from its `{response}` frames, forwards the prose BEFORE the fence
 // AS IT ARRIVES (proseSoFar), and finalizes by splitting reply-from-actions (extractResult) into a firewalled
 // `{result}` frame; the client (parseActLine) types the reply out and applies the result. These are the

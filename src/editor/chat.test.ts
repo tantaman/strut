@@ -146,7 +146,7 @@ describe('clampChatRequest', () => {
   })
 })
 
-// ---- parseSseDelta: the client's SSE line parser. Workers AI frames are `data: {"response":"…"}` passed
+// ---- parseSseDelta: the client's SSE line parser. Strut frames are `data: {"response":"…"}`
 // through untouched by server/chat.ts; `[DONE]` terminates; keep-alives / blanks are skipped.
 describe('parseSseDelta', () => {
   it('extracts the token delta from a data frame', () => {

@@ -34,14 +34,11 @@ export const Route = createFileRoute('/api/variant')({
         const account = await resolveSessionAccount(request)
         if (!account) return json({ error: 'sign_in_required' }, 401)
 
-        const { resolveModel } = await import('../../server/llm')
+        const { resolveModel, modelRequired } = await import('../../server/llm')
         const choice = await resolveModel(account.id)
-        // Null = no connected key and no plan that pays for one: nothing this caller may spend.
         if (!choice) {
-          const { modelRequired } = await import('../../server/entitlements')
           return json(modelRequired(), 402)
         }
-        const byo = choice.kind === 'openrouter'
         if (throttled(account.id)) {
           return json({ error: 'rate_limited' }, 429)
         }
@@ -66,45 +63,12 @@ export const Route = createFileRoute('/api/variant')({
           return json({ error: 'bad_request' }, 400)
         }
 
-        const now = Date.now()
-        const { getEntitlements, aiMetering } =
-          await import('../../server/entitlements')
-        const ai = aiMetering(await getEntitlements(account.id), 'generate')
-        if (!byo && ai.meter) {
-          const { consumeAiQuota } = await import('../../server/quota')
-          let quota
-          try {
-            quota = await consumeAiQuota(account.id, now, 'generate', ai)
-          } catch (err) {
-            console.error('[variant] quota check failed:', err)
-            return json({ error: 'internal' }, 500)
-          }
-          if (!quota.allowed) {
-            return json(
-              {
-                error: 'quota_exceeded',
-                message:
-                  quota.window === 'month'
-                    ? `You've used all ${quota.limit} AI messages in your plan this month. They reset at the start of next month.`
-                    : `Daily AI slide-generation limit reached (${quota.limit}/day). Try again tomorrow.`,
-              },
-              429,
-            )
-          }
-        }
-
         const { generateVariant, VariantUnavailableError } =
           await import('../../server/variant')
         try {
           const variant = await generateVariant(b as VariantRequest, choice)
           return json(variant, 200)
         } catch (err) {
-          if (!byo && ai.meter) {
-            const { refundAiQuota } = await import('../../server/quota')
-            await refundAiQuota(account.id, now, 'generate', ai.window).catch(
-              () => {},
-            )
-          }
           if (err instanceof VariantUnavailableError) {
             return json({ error: 'ai_unavailable', message: err.message }, 503)
           }

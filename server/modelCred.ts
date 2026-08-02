@@ -1,9 +1,9 @@
 // Per-user "bring your own LLM" credential store (OPENROUTER_PLAN.md Phase 1). Holds ONE connected model
 // per user — provider, chosen model id, and an envelope-ENCRYPTED API key — in the auth D1 (the `DB`
-// binding, same store as Better-Auth + server/quota.ts, NOT Rindle: a key must never sync to browsers).
+// binding, in the same auth store as Better-Auth, NOT Rindle: a key must never sync to browsers).
 // The table is migrations-d1/0007_model_credential.sql.
 //
-// Runtime access mirrors server/quota.ts exactly: under workerd the `DB` binding is an OBJECT binding
+// Under workerd the `DB` binding is an object binding
 // reached via the `cloudflare:workers` module (not process.env); under `pnpm dev` (Node, no D1) we open
 // the same local better-sqlite3 auth.db. The native module is dynamically imported + @vite-ignore'd (via a
 // string-indirected specifier) so it never enters the workerd/client build graph.
@@ -59,10 +59,13 @@ async function cryptoKey(): Promise<CryptoKey> {
       'MODEL_CRED_KEY must decode to 32 bytes (generate with: openssl rand -base64 32).',
     )
   }
-  cachedKey = await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, [
-    'encrypt',
-    'decrypt',
-  ])
+  cachedKey = await crypto.subtle.importKey(
+    'raw',
+    raw,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt'],
+  )
   return cachedKey
 }
 
@@ -75,7 +78,11 @@ async function seal(plain: string): Promise<string> {
   // ArrayBuffer-backed so the typed array is `Uint8Array<ArrayBuffer>` (a BufferSource) under TS 5.7+'s
   // generic typed-array typing — a bare `new Uint8Array(n)` widens to ArrayBufferLike and WebCrypto rejects it.
   const iv = crypto.getRandomValues(new Uint8Array(new ArrayBuffer(12)))
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, textEnc.encode(plain))
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    textEnc.encode(plain),
+  )
   return `${bytesToBase64(iv)}:${bytesToBase64(new Uint8Array(ct))}`
 }
 
@@ -120,7 +127,7 @@ interface CredRow {
 }
 
 /** The minimal store the credential module needs: upsert one row per user, read it back, delete it.
- *  Backed by D1 (workerd) or better-sqlite3 (dev) — the same dual-store pattern as server/quota.ts. */
+ *  Backed by D1 (workerd) or better-sqlite3 (dev). */
 interface CredStore {
   put: (
     userId: string,
@@ -143,7 +150,7 @@ const selectSql = `SELECT provider, model, ciphertext FROM ${TABLE} WHERE user_i
 const deleteSql = `DELETE FROM ${TABLE} WHERE user_id = ?`
 
 // Subset of the D1 prepared-statement surface we touch (structural — avoids importing
-// @cloudflare/workers-types, whose globals shadow the DOM lib; same reasoning as server/quota.ts).
+// @cloudflare/workers-types, whose globals shadow the DOM lib).
 interface D1Like {
   prepare: (sql: string) => {
     bind: (...args: unknown[]) => {
@@ -156,7 +163,10 @@ interface D1Like {
 function makeD1Store(db: D1Like): CredStore {
   return {
     put: async (userId, provider, model, ciphertext, created) => {
-      await db.prepare(upsertSql).bind(userId, provider, model, ciphertext, created).run()
+      await db
+        .prepare(upsertSql)
+        .bind(userId, provider, model, ciphertext, created)
+        .run()
     },
     get: async (userId) => {
       return (await db.prepare(selectSql).bind(userId).first<CredRow>()) ?? null
@@ -215,7 +225,9 @@ async function getStore(): Promise<CredStore> {
 // of the workerd/client build graph — this branch only runs under Node.
 async function loadLocalSqlite(): Promise<LocalDb> {
   const sqliteSpec = 'better-sqlite3'
-  const { default: Database } = (await import(/* @vite-ignore */ sqliteSpec)) as {
+  const { default: Database } = (await import(
+    /* @vite-ignore */ sqliteSpec
+  )) as {
     default: new (path: string) => LocalDb & { pragma: (s: string) => unknown }
   }
   const file = process.env.STRUT_AUTH_DB ?? `${process.cwd()}/auth.db`
@@ -228,20 +240,35 @@ async function loadLocalSqlite(): Promise<LocalDb> {
 
 /** Store (or replace) the user's connected model. Encrypts `cred.apiKey` before it touches the DB, and
  *  overwrites any prior connection for this user. Throws ModelCredError if MODEL_CRED_KEY is missing. */
-export async function putCredential(userId: string, cred: ModelCredential): Promise<void> {
+export async function putCredential(
+  userId: string,
+  cred: ModelCredential,
+): Promise<void> {
   const ciphertext = await seal(cred.apiKey)
   const store = await getStore()
-  await store.put(userId, cred.provider, cred.model, ciphertext, new Date().toISOString())
+  await store.put(
+    userId,
+    cred.provider,
+    cred.model,
+    ciphertext,
+    new Date().toISOString(),
+  )
 }
 
 /** The DECRYPTED credential for SERVER use (the provider call), or null if the user hasn't connected one.
  *  Never serialize the returned `apiKey` to a client response. Throws ModelCredError if decryption fails
  *  (wrong/rotated MODEL_CRED_KEY or corrupt row). */
-export async function getCredential(userId: string): Promise<ModelCredential | null> {
+export async function getCredential(
+  userId: string,
+): Promise<ModelCredential | null> {
   const store = await getStore()
   const row = await store.get(userId)
   if (!row) return null
-  return { provider: row.provider, model: row.model ?? null, apiKey: await open(row.ciphertext) }
+  return {
+    provider: row.provider,
+    model: row.model ?? null,
+    apiKey: await open(row.ciphertext),
+  }
 }
 
 /** Browser-safe status — whether a model is connected, and which, WITHOUT decrypting the key. Cheap: no

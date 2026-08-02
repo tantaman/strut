@@ -98,7 +98,6 @@ export async function generateVariant(
     })
   } catch (err) {
     if (
-      choice.kind === 'workers-ai' &&
       process.env.STRUT_GENERATE_STUB &&
       err instanceof ModelUnavailableError
     ) {

@@ -5,10 +5,8 @@ import { createFileRoute } from '@tanstack/react-router'
 // guest can connect their own OpenRouter key and use the ✨ features on their own credits. No session at
 // all → simply "not connected". Cheap: hasCredential does no crypto, so this never touches MODEL_CRED_KEY.
 //
-// It also answers `appPaid` — whether this viewer's PLAN pays for inference (server/entitlements.ts
-// canUseAppAi). Together the two fields are the client's whole answer to "can I use ✨ at all?":
-// `connected || appPaid`. The ChatPanel reads exactly that to decide between the chat and its
-// connect-a-model gate; the routes enforce the same rule authoritatively.
+// Strut is BYOK-only, so `connected` is the client's whole answer to "can I use ✨ at all?". Routes
+// independently resolve the credential before every request.
 
 function json(data: unknown, status: number): Response {
   return new Response(JSON.stringify(data), {
@@ -21,7 +19,6 @@ const DISCONNECTED = {
   connected: false,
   provider: null,
   model: null,
-  appPaid: false,
 }
 
 export const Route = createFileRoute('/api/model/status')({
@@ -32,16 +29,12 @@ export const Route = createFileRoute('/api/model/status')({
         const account = await resolveSessionAccount(request)
         if (!account) return json(DISCONNECTED, 200)
 
-        const { canUseAppAi, getEntitlements } =
-          await import('../../server/entitlements')
-        const appPaid = canUseAppAi(await getEntitlements(account.id))
-
         const { hasCredential } = await import('../../server/modelCred')
         try {
-          return json({ ...(await hasCredential(account.id)), appPaid }, 200)
+          return json(await hasCredential(account.id), 200)
         } catch (err) {
           console.error('[model.status] failed:', err)
-          return json({ ...DISCONNECTED, appPaid }, 200)
+          return json(DISCONNECTED, 200)
         }
       },
     },

@@ -1,7 +1,7 @@
 // The "Connect your model" control in the dashboard chrome (brandbar), beside AccountControl. Bring your
 // own LLM via OpenRouter: paste a key (validated + envelope-encrypted server-side, never returned) and the
-// ✨ features run on YOUR OpenRouter credits. This is how AI turns on for everyone who isn't on a paid
-// plan — a connected key is the default way to use ✨, with or without an account. `ModelModal` is
+// ✨ features run on YOUR OpenRouter credits. This is the only way AI turns on, with or without an account.
+// `ModelModal` is
 // exported so the in-editor gate (src/editor/ChatPanel.tsx) can offer the same connect flow in place,
 // without sending the author back to the dashboard. Status is fetched
 // client-side (no SSR seed needed for a secondary control); initial paint shows "Connect model" and flips
