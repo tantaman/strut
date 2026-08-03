@@ -200,14 +200,29 @@ const withShareOwner = <TArgs>(
   })
 
 // ---- entitlement-gated writes -------------------------------------------------------------------
-// Two writes carry a PLAN gate on top of the access gate — the pricing wedge: PUBLIC (link-shared) decks
-// are free & uncapped, keeping a deck PRIVATE is the paid feature. The entitlement lives in the auth D1
-// (getEntitlements), independent of the rindle txn; with no commercial overlay it's COMMUNITY
-// (canKeepPrivate=true), so both are no-ops for a clone (decks stay private by default, as before).
+// Three writes carry a PLAN gate on top of the access gate. The pricing wedge is privacy — PUBLIC
+// (link-shared) decks are free, keeping a deck PRIVATE is the paid feature — and the VOLUME caps
+// (deckLimit / slidesPerDeckLimit) bound how much a free account can pile into the hosted daemon. The
+// entitlement lives in the auth D1 (getEntitlements), independent of the rindle txn; with no commercial
+// overlay it's COMMUNITY (canKeepPrivate=true, every limit null), so all three are no-ops for a clone
+// (decks stay private by default and uncapped, exactly as before).
 
-/** createDeck: for an account that can't keep decks private (free tier), FORCE the new deck public and
- *  ensure a share token — even if a tampered client asked for 'private'. COMMUNITY/Pro (canKeepPrivate)
- *  pass straight through with the client's chosen visibility (default private). */
+/** Count rows matching a query INSIDE the open txn (read-your-writes). A root `count()` aggregate — one
+ *  `{ count }` row, `0` on empty input — so the gate costs a scalar read, not a row scan. */
+async function countRows(
+  tx: ServerMutationTx,
+  query: Parameters<ServerMutationTx['query']>[0],
+): Promise<number> {
+  const rows = (await tx.query(query)) as Array<{ count?: number }> | null
+  const n = Array.isArray(rows) ? rows[0]?.count : undefined
+  return typeof n === 'number' ? n : 0
+}
+
+/** createDeck: two plan gates. (1) For an account that can't keep decks private (free tier), FORCE the
+ *  new deck public and ensure a share token — even if a tampered client asked for 'private'. (2) Reject
+ *  once the principal already OWNS `deckLimit` decks. The count is a live read of the deck table, not a
+ *  meter, so deleting a deck frees its slot immediately. COMMUNITY/Pro pass straight through with the
+ *  client's chosen visibility (default private) and no cap. */
 const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   const gen = sharedMutators.createDeck
   const a = gen.args.parse(raw)
@@ -216,6 +231,50 @@ const createDeckGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
   if (!ent.canKeepPrivate) {
     a.visibility = 'public-read'
     if (!a.share_token) a.share_token = crypto.randomUUID()
+  }
+  if (ent.deckLimit != null) {
+    const owned = await countRows(tx, q.deck.where.owner_id(user).count())
+    if (owned >= ent.deckLimit) {
+      throw new RindleApiError(
+        'forbidden',
+        `Deck limit reached (${ent.deckLimit}). Delete a deck or upgrade to Pro for more.`,
+        403,
+      )
+    }
+  }
+  return runSharedMutation(gen, a, sharedCtx(ctx), tx)
+}
+
+/** addSlide: the normal editable-deck access gate PLUS the plan's per-deck slide cap. Counted live on
+ *  the TARGET deck (so it follows the deck, not the actor — an editor-collaborator adding to someone
+ *  else's deck is bounded by that deck, and deleting a slide frees a slot). Note this gate bites
+ *  MID-AUTHORING and the ✨ Generate / Narrate lanes append slides one mutation at a time, so a deck
+ *  that crosses the cap partway lands partially generated — see the caveat on
+ *  Entitlements.slidesPerDeckLimit before an overlay sets it non-null. */
+const addSlideGuarded: ApiMutator<User, unknown> = async (tx, raw, ctx) => {
+  const gen = sharedMutators.addSlide
+  const a = gen.args.parse(raw)
+  const user = requireUser(ctx.user)
+  const editable = await tx.query(
+    q.deck.where.id(a.deckId).where(deckEditableBy(user)).one(),
+  )
+  if (editable == null) {
+    throw new RindleApiError(
+      'forbidden',
+      'not permitted to edit this deck',
+      403,
+    )
+  }
+  const ent = await getEntitlements(user)
+  if (ent.slidesPerDeckLimit != null) {
+    const slides = await countRows(tx, q.slide.where.deck_id(a.deckId).count())
+    if (slides >= ent.slidesPerDeckLimit) {
+      throw new RindleApiError(
+        'forbidden',
+        `Slide limit reached (${ent.slidesPerDeckLimit} per deck). Upgrade to Pro for more.`,
+        403,
+      )
+    }
   }
   return runSharedMutation(gen, a, sharedCtx(ctx), tx)
 }
@@ -262,7 +321,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
   // is overridden below only to force free-tier decks public (it still writes owner_id = ctx.user).
   ...sharedApiMutators(sharedMutators, sharedCtx),
 
-  // ---- entitlement-gated: free-tier decks are forced public (see createDeckGuarded) ----
+  // ---- entitlement-gated: free-tier decks are forced public + volume-capped (see the guards above) ----
   createDeck: createDeckGuarded,
 
   // ---- deck edits: editable (owner or editor) ----
@@ -273,7 +332,7 @@ const apiMutators = defineApiMutators<User, ApiMutators<User>>({
     (a) => a.deckId,
     sharedMutators.mintCustomColor,
   ),
-  addSlide: withDeckEditable((a) => a.deckId, sharedMutators.addSlide),
+  addSlide: addSlideGuarded,
 
   // ---- deck admin: owner-only (+ publish entitlement on setDeckVisibility) ----
   setDeckVisibility: setDeckVisibilityGuarded,

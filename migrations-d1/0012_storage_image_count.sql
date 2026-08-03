@@ -1,0 +1,11 @@
+-- Cumulative per-user IMAGE COUNT, carried in the same storage_usage row as the byte total
+-- (0008_storage_usage.sql) because it has the identical lifecycle: one row per user, bumped on each
+-- stored image, monotonic (R2 objects are content-addressed / immutable and aren't garbage-collected on
+-- deck delete, so neither bytes nor count can go down). Backs the free tier's image cap
+-- (Entitlements.imageLimit; server/storage.ts) — the count companion to storageLimitBytes, bounding
+-- many-small-images abuse that a pure byte ceiling waves through. Untouched for self-host / Pro (both
+-- limits null → the write paths skip the D1 round-trip entirely). Existing rows default to 0, so accounts
+-- that uploaded before this migration start their count fresh; their bytes total is unaffected. Apply to
+-- prod with `wrangler d1 migrations apply strut-auth`; dev's local better-sqlite3 auth.db picks it up
+-- automatically (server/auth.ts migrateLocalAuth, which applies each file once).
+alter table storage_usage add column images integer not null default 0;

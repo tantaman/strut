@@ -18,16 +18,33 @@ export interface Entitlements {
    *  the R2 upload path via server/storage.ts's per-user counter. Artifacts are excluded: they are small,
    *  content-addressed, and protected by a light burst throttle. */
   storageLimitBytes: number | null
+  /** Max IMAGES the account may upload, cumulative; null = unlimited. The companion count cap to
+   *  storageLimitBytes — bytes bound what we pay R2, this bounds many-small-images abuse the byte
+   *  ceiling waves through. Monotonic for the same reason bytes are (R2 objects are content-addressed
+   *  and not GC'd on deck delete), so removing an image does NOT free a slot. */
+  imageLimit: number | null
+  /** Max DECKS the account may own; null = unlimited. Enforced at createDeck (server/rindle-api.ts) by
+   *  counting the principal's decks inside the mutation txn — a LIVE count, not a meter, so deleting a
+   *  deck frees its slot immediately. */
+  deckLimit: number | null
+  /** Max SLIDES in ONE deck; null = unlimited. Enforced at addSlide, counted live per deck like
+   *  deckLimit. Note this one bites mid-flight (the user is already authoring when they hit it) and it
+   *  bounds the ✨ Generate / Narrate lanes, which append many slides at once — prefer leaving it null
+   *  and capping deck COUNT unless there is a concrete cost to defend. */
+  slidesPerDeckLimit: number | null
   /** Drop the PoweredBy / "shared read-only" watermark on shared decks (Pro white-label). */
   whiteLabelShare: boolean
 }
 
-/** The no-overlay default — private decks allowed and no hosted-storage cap. AI remains BYOK, as it is on
- *  every hosted plan. Self-hosters get the full app with zero billing setup. */
+/** The no-overlay default — private decks allowed and no hosted-storage, image, deck or slide cap. AI
+ *  remains BYOK, as it is on every hosted plan. Self-hosters get the full app with zero billing setup. */
 export const COMMUNITY: Entitlements = {
   pro: false,
   canKeepPrivate: true,
   storageLimitBytes: null,
+  imageLimit: null,
+  deckLimit: null,
+  slidesPerDeckLimit: null,
   whiteLabelShare: false,
 }
 
@@ -38,6 +55,12 @@ export interface EntitlementSummary {
   upgradeUrl: string | null
   /** false → the client creates new decks public and hides the "make private" control (a free viewer). */
   canKeepPrivate: boolean
+  /** Seeded so the UI can DISABLE "New deck" / "Add slide" at the cap instead of letting the write fly
+   *  and snap back — frictionless means not offering what the server will reject. The server stays
+   *  authoritative; these are presentation-only. null = unlimited (the open-source default → no cap UI).
+   *  Only the counts the client can actually observe are seeded; the image cap is upload-time only. */
+  deckLimit: number | null
+  slidesPerDeckLimit: number | null
 }
 
 /** The overlay module contract: `#commercial` exports `commercial: Commercial | null`. */

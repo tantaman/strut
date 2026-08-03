@@ -51,6 +51,16 @@ function Dashboard() {
   // (self-host / Pro) creates private. The server (rindle-api createDeckGuarded) is authoritative — this
   // just keeps the optimistic row in sync so it doesn't snap on confirm.
   const makesPublic = entitlement?.canKeepPrivate === false
+
+  // Plan deck cap (null / no overlay → uncapped). Shown, and used to disable create/import, so the user
+  // never fires a write the server will reject and watch it snap back. NOTE the dashboard reads at most
+  // DECKS_LIMIT decks, so a cap ABOVE that can't be observed here — the server stays authoritative and
+  // simply rejects with its own message.
+  const deckLimit = entitlement?.deckLimit ?? null
+  const atDeckLimit = deckLimit != null && decks.length >= deckLimit
+  const deckLimitHint = atDeckLimit
+    ? `You've used all ${deckLimit} decks on your plan — delete one to make room.`
+    : undefined
   function newDeckVisibility(): {
     visibility: 'private' | 'public-read'
     share_token: string
@@ -113,8 +123,9 @@ function Dashboard() {
         <div>
           <h1 className="dash__title">Your decks</h1>
           <p className="dash__sub">
-            {decks.length} presentation{decks.length === 1 ? '' : 's'},
-            local-first on Rindle.
+            {decks.length}
+            {deckLimit != null ? ` of ${deckLimit}` : ''} presentation
+            {decks.length === 1 ? '' : 's'}, local-first on Rindle.
           </p>
         </div>
         <div className="dash__actions">
@@ -128,13 +139,16 @@ function Dashboard() {
           <button
             className="btn"
             onClick={() => fileRef.current?.click()}
-            title="Import a .strut file"
+            disabled={atDeckLimit}
+            title={deckLimitHint ?? 'Import a .strut file'}
           >
             <Upload size={16} /> Import
           </button>
           <button
             className="btn btn--primary"
             onClick={() => setCreating(true)}
+            disabled={atDeckLimit}
+            title={deckLimitHint}
           >
             <Plus size={16} /> New deck
           </button>

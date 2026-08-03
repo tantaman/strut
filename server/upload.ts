@@ -207,16 +207,24 @@ export async function uploadFromRequest(
     if (body.byteLength > MAX_BYTES)
       throw new UploadError('image must be under 10 MB', 413)
 
-    // Per-plan storage ceiling (free tier). null (self-host / Pro) skips this with no D1 touch. Pre-check
-    // before storing; record after a successful put (R2 objects aren't GC'd → the counter is monotonic).
+    // Per-plan storage ceilings (free tier): total BYTES and total IMAGE COUNT. Both null (self-host /
+    // Pro) skips this with no D1 touch. Pre-check before storing; record after a successful put (R2
+    // objects aren't GC'd → both counters are monotonic).
     const { getEntitlements } = await import('./entitlements.ts')
-    const limit = (await getEntitlements(user)).storageLimitBytes
-    if (limit != null) {
+    const ent = await getEntitlements(user)
+    const limits = {
+      bytes: ent.storageLimitBytes,
+      images: ent.imageLimit,
+    }
+    const metered = limits.bytes != null || limits.images != null
+    if (metered) {
       const { checkStorage } = await import('./storage.ts')
-      const { allowed } = await checkStorage(user, body.byteLength, limit)
-      if (!allowed)
+      const { denied } = await checkStorage(user, body.byteLength, limits)
+      if (denied)
         throw new UploadError(
-          'Storage limit reached — upgrade to Pro for more storage.',
+          denied === 'images'
+            ? 'Image limit reached — upgrade to Pro for more images.'
+            : 'Storage limit reached — upgrade to Pro for more storage.',
           413,
         )
     }
@@ -230,9 +238,9 @@ export async function uploadFromRequest(
         ? await putS3(cfg, key, body, contentType)
         : await putLocal(key, body)
 
-    if (limit != null) {
+    if (metered) {
       const { recordStorage } = await import('./storage.ts')
-      await recordStorage(user, body.byteLength).catch(() => {})
+      await recordStorage(user, body.byteLength, 1).catch(() => {})
     }
     return Response.json({ url })
   } catch (err) {

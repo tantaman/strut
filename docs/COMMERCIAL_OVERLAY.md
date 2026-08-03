@@ -27,8 +27,9 @@ here are **inert** until an overlay is supplied.
 
 - **Pro is pure feature-gating.** Decks live in one shared Rindle daemon DB scoped by `owner_id`; tier
   never changes where deck data lives. The Pro entitlement is a row in the **auth D1** (never Rindle →
-  never syncs to the browser), read on the server to allow private decks, remove the hosted image-storage
-  ceiling, and white-label shared decks. AI is BYOK on every plan.
+  never syncs to the browser), read on the server to allow private decks and to lift the hosted volume
+  ceilings (image bytes, image count, deck count, slides per deck). AI is BYOK on every plan, so
+  inference is not a tier axis — what Pro buys is privacy and headroom.
 
 ## The seam: `#commercial`
 
@@ -63,12 +64,26 @@ Two consumers in this repo import `#commercial`:
 
 All of these are no-ops under `COMMUNITY` (a clone/self-host), so nothing changes without an overlay:
 
-| Gate                     | Where                                                    | COMMUNITY behavior          |
-| ------------------------ | -------------------------------------------------------- | --------------------------- |
-| Private decks            | guarded deck writes in `server/rindle-api.ts`            | private decks allowed       |
-| Image storage            | `server/upload.ts` via `server/storage.ts`               | unlimited                   |
-| Shared-deck white label  | share SSR/view rendering                                 | Strut attribution shown     |
-| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`) | `upgradeUrl: null` → hidden |
+| Gate                     | Where                                                                     | COMMUNITY behavior          |
+| ------------------------ | ------------------------------------------------------------------------- | --------------------------- |
+| Private decks            | `createDeckGuarded` / `setDeckVisibilityGuarded` (`server/rindle-api.ts`) | private decks allowed       |
+| Image storage (bytes)    | `server/upload.ts` via `server/storage.ts`                                | unlimited                   |
+| Image count              | `server/upload.ts` via `server/storage.ts`                                | unlimited                   |
+| Deck count               | `createDeckGuarded` (`server/rindle-api.ts`)                              | unlimited                   |
+| Slides per deck          | `addSlideGuarded` (`server/rindle-api.ts`)                                | unlimited                   |
+| Shared-deck white label  | _declared only — `whiteLabelShare` is not read anywhere yet_              | Strut attribution shown     |
+| Pro badge / Upgrade link | `src/rindle/AccountControl.tsx` (seeded via `appSsr.ts`)                  | `upgradeUrl: null` → hidden |
+
+The two ceilings differ in kind, and an overlay should pick numbers accordingly:
+
+- **Meters** (`storageLimitBytes`, `imageLimit`) count against a monotonic per-user row in the auth D1.
+  R2 objects are content-addressed and never GC'd, so deleting an image does **not** give the slot back.
+- **Live counts** (`deckLimit`, `slidesPerDeckLimit`) are read from Rindle inside the mutation txn, so
+  deleting a deck or slide frees its slot immediately.
+
+`slidesPerDeckLimit` is the one to think twice about: it rejects mid-authoring, and the ✨ Generate /
+Narrate lanes append slides one mutation at a time, so a deck that crosses the cap lands partially
+generated. Prefer bounding deck **count**.
 
 ## Building an overlay
 
