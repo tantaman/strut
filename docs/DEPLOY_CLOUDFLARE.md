@@ -22,36 +22,39 @@ to it over the network:
      │                           │  https  (RINDLE_DAEMON_URL, Bearer RINDLE_DAEMON_TOKEN)
      │  wss (RINDLE_DAEMON_WS)   ▼
      └────────────────▶ ┌──────────────────────────────┐
-                        │  rindled daemon (host it!)   │  SQLite + live-query WebSocket
-                        │  :7600 control  :7601 ws     │  needs a persistent volume
+                        │  Rindle fleet (host it!)     │  SQLite + live-query WebSocket
+                        │  one ingress: control + ws   │  needs a persistent volume
                         └──────────────────────────────┘
 ```
 
 ### Hosting the daemon
 
-Run `rindled` on any host that gives you a **persistent volume** and lets you terminate **TLS** — a
+Run the fleet on any host that gives you a **persistent volume** and lets you terminate **TLS** — a
 small VM/VPS, Fly.io, Railway, Render, a container platform, etc. Requirements:
 
-- Persistent disk for `rindle.db` (and its `-wal`/`-shm` files).
-- Bind to a reachable interface, not just loopback. `daemon.json` ships with `"bindHost":
-"127.0.0.1"`; change it (e.g. `0.0.0.0`) **and put it behind a TLS-terminating reverse proxy** so
-  only `https`/`wss` is exposed publicly.
+- Persistent disk for the databases (`master.db` + `follower-0.db` and their sidecar files).
+- Bind to a reachable interface, not just loopback. The rendered configs under `.rindle/` bind
+  `127.0.0.1`; change that **and put the fleet behind a TLS-terminating reverse proxy** so only
+  `https`/`wss` is exposed publicly.
 - Set an auth token so the control plane isn't open to the world (the Worker sends
   `Authorization: Bearer <RINDLE_DAEMON_TOKEN>`; see the rindle daemon docs for enabling token auth).
 - Expose two public endpoints:
-  - the **control plane** (`:7600`) as `https://…` → the Worker's `RINDLE_DAEMON_URL` (server env)
-  - the **live-query WebSocket** (`:7601`) as `wss://…` → `RINDLE_DAEMON_WS` (server env), which the
-    Worker hands to the browser at runtime via `/api/rindle/config` — so no client rebuild per host
+  - the **control plane** as `https://…` → the Worker's `RINDLE_DAEMON_URL` (server env)
+  - the **live-query WebSocket** as `wss://…` → `RINDLE_DAEMON_WS` (server env), which the Worker
+    hands to the browser at runtime via `/api/rindle/config` — so no client rebuild per host
+
+  Since Rindle 0.9 both are the SAME ingress port (`:22050` locally); the pre-0.9 split
+  `:7600`/`:7601` daemon no longer exists.
 
 > If you don't want to operate a daemon yet, deploy the Worker anyway — it serves and builds fine —
-> but reads/writes will fail until `RINDLE_DAEMON_URL` points at a running daemon.
+> but reads/writes will fail until `RINDLE_DAEMON_URL` points at a running fleet.
 
 ### Managed daemon: Rindle Cloud (headwaters)
 
 The official Strut deployment doesn't self-host `rindled` — it runs a **managed app on Rindle Cloud**,
 and `wrangler.jsonc`'s `RINDLE_DAEMON_URL`/`RINDLE_DAEMON_WS` already point at it. The repo is bound to
 that app in `.rindle/cloud.json` (committed — it holds an app id + public names, **no secrets**, the
-`wrangler.toml` analogue). `topology.ncl` describes the daemon's shape. With that binding in place:
+`wrangler.toml` analogue). `rindle.ncl` describes the fleet's shape. With that binding in place:
 
 ```sh
 rindle login                    # once — device flow to https://cloud.rindle.sh

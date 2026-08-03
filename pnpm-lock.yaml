@@ -15,26 +15,29 @@ importers:
         specifier: ^3.1075.0
         version: 3.1075.0
       '@rindle/api-server':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@rindle/client':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@rindle/daemon-client':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@rindle/narrator':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
+      '@rindle/narrator-react':
+        specifier: ^0.9.0
+        version: 0.9.0(react@19.2.7)
       '@rindle/optimistic':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@rindle/react':
-        specifier: ^0.4.4
-        version: 0.4.4(react@19.2.7)
+        specifier: ^0.9.0
+        version: 0.9.0(react@19.2.7)
       '@rindle/wasm':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.3.1(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
@@ -46,10 +49,10 @@ importers:
         version: 1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tanstack/react-router-devtools':
         specifier: latest
-        version: 1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.13)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.15)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tanstack/react-router-ssr-query':
         specifier: latest
-        version: 1.167.1(@tanstack/query-core@5.101.1)(@tanstack/react-query@5.101.1(react@19.2.7))(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 1.167.1(@tanstack/query-core@5.101.1)(@tanstack/react-query@5.101.1(react@19.2.7))(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tanstack/react-start':
         specifier: latest
         version: 1.168.28(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
@@ -118,11 +121,11 @@ importers:
         specifier: ^1.43.0
         version: 1.43.0(vite@8.1.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(workerd@1.20260701.1)(wrangler@4.107.0)
       '@rindle/cli':
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.9.0
+        version: 0.9.0
       '@rindle/react-devtools':
-        specifier: ^0.4.4
-        version: 0.4.4(react@19.2.7)
+        specifier: ^0.9.0
+        version: 0.9.0(react@19.2.7)
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.20(tailwindcss@4.3.1)
@@ -1176,96 +1179,106 @@ packages:
       prisma:
         optional: true
 
-  '@rindle/api-server@0.4.4':
-    resolution: {integrity: sha512-nNW/+6IFPdlZQixWsa9CjDfgSXxkzwDfrslpBRDdCysFAiqw2k/bl0V069eBuXEfzJ7rgHncjL1pVfR1E3TgoQ==}
+  '@rindle/api-server@0.9.0':
+    resolution: {integrity: sha512-gs+NMHQFuOSHI0mQivgBrlXVEM9vN9VGvod7QKhvIdstLL6Xq9FC+Uk2iZXK2sA+5kfXsKDfL0t8FKnvbhKIiw==}
 
-  '@rindle/cli-darwin-arm64@0.4.4':
-    resolution: {integrity: sha512-jW3zQjw38Cpx/pDXWjKkTfhCSJ0Va03DrwyCqNkiqjLEV6X1Y6qRqQnkHwEhFg0H+sVcYePJS9oVcTp54pUGGg==}
+  '@rindle/cli-darwin-arm64@0.9.0':
+    resolution: {integrity: sha512-PAv7u1cvPlgDxEcMdzR6TFe2rZIaA6POthPVWWtEdxBclNCanKFVN797rEOOLz1QUViA8J45bzZ0c1c7crOqIw==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [darwin]
 
-  '@rindle/cli-darwin-x64@0.4.4':
-    resolution: {integrity: sha512-Sinbh2V9vAnnbe9jYugCX9whWesgA6IJbyEQSnEjeysJX63c2U0BytbHHaWnVy4HUJ4Sj6YsrNl3yM52JPPi8Q==}
+  '@rindle/cli-darwin-x64@0.9.0':
+    resolution: {integrity: sha512-bJZec/P0f6pP4JI0HPPLv/xjZq6i/eg0XBP/1tebQcnkI1PUhgSkU9Csbg89KkPcKgRrElvsOEkke2vEeDXjwA==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [darwin]
 
-  '@rindle/cli-linux-arm64-gnu@0.4.4':
-    resolution: {integrity: sha512-bnDohUJTp4Fy9aCuJ7R2080tEWcFYHXld/cc1MEGFh/2J5Um3ZCvOScpUpOBkmNl7hLyDD36scU1JdlI9v//pQ==}
+  '@rindle/cli-linux-arm64-gnu@0.9.0':
+    resolution: {integrity: sha512-w/k8XUZMjR3syuyovDpCglktW2Qv8gBOPaBpbJaKJSKA28g5JM9eHLQGQIgGL196JcTVXgI3/v9pouPaPjlrtw==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@rindle/cli-linux-arm64-musl@0.4.4':
-    resolution: {integrity: sha512-QjvtETKQOV5kcI7/Q73Xd3tPQOK7d9NWbZF/vFgNDIAWLd8QfFJ24Ss8Exccrab1LBaWLdzHcV0hIZ9QANuikw==}
+  '@rindle/cli-linux-arm64-musl@0.9.0':
+    resolution: {integrity: sha512-3S5O2vTeIQvylwj5Sc/g/gBm6AMG93O2cBR1qffekyRbM8lmnP/FWzWDHvnTA1TDIWA8EGgxv+MTioXsC6UpPQ==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@rindle/cli-linux-x64-gnu@0.4.4':
-    resolution: {integrity: sha512-0TWn2fEomzxxT0U8rciJRDyFLLPAdKDCNU5fOuwn5fGtRs1HSYZ11aNX2GzP2aEpRgjTLAI9WUoHel0ZLwVqmw==}
+  '@rindle/cli-linux-x64-gnu@0.9.0':
+    resolution: {integrity: sha512-Aq5xhkGcGXl0m/CSG04Rfgy54eu/vwSqYFBGdxFvwzjC7rgOFDHOHrQ8oooCZIpeFAbUGYb5jo6+rnbxrlqdjg==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@rindle/cli-linux-x64-musl@0.4.4':
-    resolution: {integrity: sha512-mVTZX3MXr8ZexZGqUFs3Yvupp9+CJULeGvsYmspxXJYZE3UyX/nCyinkDT92ZyOgY+oc0pTm1DbIu6Xn7peQ0g==}
+  '@rindle/cli-linux-x64-musl@0.9.0':
+    resolution: {integrity: sha512-pTuiS5lxt4VOWAFmj9eKQ01PT8Ijh/XSggCGDOY4DUKU7otU1hMNHj4AJycFsQ8eOeYektpsYN/f0ey8HZ++PQ==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@rindle/cli-win32-x64-msvc@0.4.4':
-    resolution: {integrity: sha512-M5vL5qw+cNzdekdDklz+GZ5s3DXKbBBypLiWUoI3Uu5aXCrE4F68kUvO9RZU9Lv2VUGM6/vGei7CLFSeIjxIjw==}
-    engines: {node: '>=22'}
-    cpu: [x64]
-    os: [win32]
-
-  '@rindle/cli@0.4.4':
-    resolution: {integrity: sha512-vJfIwADqA6PC8/dhkqbUUaiAw0dGRlR9xu5l/BwbsyQsCi70nGmd/rft/EhAEhQiMSDTVzTEuQHFMu4AdqA43Q==}
+  '@rindle/cli@0.9.0':
+    resolution: {integrity: sha512-UNz8C9G4QFn3yl7ViNqKtN6terhdgCB/dwda87zakbamXWwE84aMLeu9ZFUfq8d4Dkdpeb2Wrg8xHHEcYRA6Cw==}
     engines: {node: '>=22'}
     hasBin: true
 
-  '@rindle/client@0.4.4':
-    resolution: {integrity: sha512-qqSousCc9Ql29OXTXyxpWB74YAJzQ5D1r56f/Jsog6rltlRtDqCT9IAj9Sez6ZNsLAPa2skMDkDZ8EJlAz1BRg==}
+  '@rindle/client@0.9.0':
+    resolution: {integrity: sha512-3nRrI1frjgSTQjdu/wE8Xn1SX8CvpBziVHQ4/Fa9Ty/ctrZpmVMZTyxZxn1RyC78YeGzykkhZfwYNF+l/S+IlA==}
 
-  '@rindle/daemon-client@0.4.4':
-    resolution: {integrity: sha512-guGCQelHc3yUXoWoZPr4x4nIDyGnb/AY2st5LoWxGijbyXge9cqvFM9MqhSXONlglTs61ehVlwad2LPhxjlQig==}
+  '@rindle/daemon-client@0.9.0':
+    resolution: {integrity: sha512-U2bXx1qo0gqmrgKhg5sB0AElCVincS09uhw9SKpxqhnoFDKA7CsRuvyUL3kHkbT4kT1m1MgVDDfHXRjV5xM37g==}
 
-  '@rindle/devtools@0.4.4':
-    resolution: {integrity: sha512-hLB3EC1S218bDCQy3JVP2za+2NEnxkD3/3+Wj22TjiscLLUg5gxgQSd4DL6ktmS3rSSmOb5t/FqSavLbIHbQYQ==}
+  '@rindle/devtools@0.9.0':
+    resolution: {integrity: sha512-N1ncu0nrvpareiqmPRckMZc6vWl2+jfcjPg+0ZlDjwjLu6LZH3FdfuQh3H8KG7CvjMjibWtLKpQEBuX1d+KvMw==}
 
-  '@rindle/narrator@0.4.4':
-    resolution: {integrity: sha512-fIAeLbhI3o0bqrVtYoeoSwFI5jx/OeJjL1biPOfmB5ppDGPd8DBiCe1m1o98mbvGxRQyrlrYFlW+hFQBIUoj4A==}
-
-  '@rindle/normalized@0.4.4':
-    resolution: {integrity: sha512-x0awPzGkPH/VPyFwnmK+iUFHpk6SjOpGzrEVv1e7doQWt6kHCaERPNYWe3KCYhElRNEfwm758Z2VsLuY3ALsVw==}
-
-  '@rindle/optimistic@0.4.4':
-    resolution: {integrity: sha512-CatC60YZ9mJLkuekmyA1Q9COUVtiaVf97zSM5EiKkSuhrD0ylwOvdg/oVwsidktJT/oEnBCd23qrfTfYSvV7eA==}
-
-  '@rindle/query-compiler@0.4.4':
-    resolution: {integrity: sha512-B1a4aP6K3X2JeP7UFaqwAjjgqxGpLoj07OxDjVTGkXDr9H+TcDR8hNBXfFYA1s0jtHh02R601+E2ncEwc69UQA==}
-
-  '@rindle/react-devtools@0.4.4':
-    resolution: {integrity: sha512-Q7PJcZ/AiN05TK9KulxV0Qh3P39iA78vwYgiP7Ww292bqBHAPGpwDr0QBG3dw3eeQO36fyp05CuKymUmxFDZdw==}
+  '@rindle/narrator-react@0.9.0':
+    resolution: {integrity: sha512-AGDrOAl1HHXn9TaYErpDHLy3zO4J50YvHf+16DB3TnQHKKu4iYMSdTKZFe2RPI+fSiyQGG5AJ31qlrX+nicjHA==}
     peerDependencies:
       react: '>=18.0.0'
 
-  '@rindle/react@0.4.4':
-    resolution: {integrity: sha512-jScfC/N0RWmn9pLTkYL9Kfjfk52DEtk+tVmTkMP9sEvvOrPYR8h9B63dLEjVeakndCAS0A9ot1mcA+5xof5eCA==}
+  '@rindle/narrator@0.9.0':
+    resolution: {integrity: sha512-zQN9AXmbxKn7Jj2uyTti8dZN4m9o54tof3EGl7pjtdBJzpUsNKBHgEupsK4hDtpdO+trec1w9JSS3/IIv22z5Q==}
+
+  '@rindle/normalized@0.9.0':
+    resolution: {integrity: sha512-zUk8o15VJHFNGP50tHsAFG6REPp0/Za3MiF7c3g2yFrT/iWzzIa7f5PokxijNJPAB39g+nv8348A+lckfde7Yg==}
+
+  '@rindle/optimistic@0.9.0':
+    resolution: {integrity: sha512-FtV93g8cpE1rBAR+ZNsepf07PGVUAS5hpf5Chj9izxGa+bvCnSV5Bej8EW7nFJhdKwOl2VBLAp5JVkFhojqVqw==}
+
+  '@rindle/query-compiler@0.9.0':
+    resolution: {integrity: sha512-SSpb49PnEJtxJy0Bl7+QV0Dmlm2wx/luecIascFeMprLzZCBaXd0IELv4QgmHs8S1dHzDnYIJ318IJwKF+qwEg==}
+
+  '@rindle/react-devtools@0.9.0':
+    resolution: {integrity: sha512-AndPXZS0IjaEBVFLmJZ976RByG/EGp7Y/q5nN1oryutFN8eApSMuymr1xlk6Waa5gpEQitFWBDebOtTPMV7xEQ==}
     peerDependencies:
       react: '>=18.0.0'
 
-  '@rindle/remote@0.4.4':
-    resolution: {integrity: sha512-AI8puGtjG04CUoMDOEgJFEGBfeZJ//jGOVqLotnnKMiZZWRuR7Jl/z8uBo/hoTO/c/0kYJTb0+O8R4R0AQd+vg==}
+  '@rindle/react@0.9.0':
+    resolution: {integrity: sha512-MryDvBSQSbmnNycfPXjUCVMIIsfFDxh1APL3vZP+KAvd3R6ESgLI6h/0/7lhxdzrwLuzsFm3fZpv9U2hA2QWkA==}
+    peerDependencies:
+      react: '>=18.0.0'
 
-  '@rindle/wasm@0.4.4':
-    resolution: {integrity: sha512-dxIYK6HziTEZBuxrhmD/Tb3r6k/39zEbkEKSEBVeZvsCmgX29PoCuOaWJE+6/PcC/M3OFI+3ET4nOUOZdrhSCA==}
+  '@rindle/remote@0.9.0':
+    resolution: {integrity: sha512-xLkD3gPHlsuoK70afzVKA8KCIfY0XSP3l4s9GtzihGhm3CPxXdQcIyGdcj8vQsAj3CFYhA7yM2THDGMWHEs8Fw==}
+
+  '@rindle/room@0.9.0':
+    resolution: {integrity: sha512-ArG9LarCSRXr9w+QxZq4EfmHsyP5AKH5tZilEn8acuYUy+m2AqbnyOhc8HdWrKxSRiCQvqBt5YbcDthyPj1sbg==}
+
+  '@rindle/sql-client@0.9.0':
+    resolution: {integrity: sha512-yAwaaNC0tLbI2aL1MCiafvQfVkKGwGUzfWGNzYuSg7+55YKGAi5FitYe4b3z4IqkOAUQ3OBcJzinjAeZs5mNfg==}
+    peerDependencies:
+      drizzle-orm: 0.44.7
+    peerDependenciesMeta:
+      drizzle-orm:
+        optional: true
+
+  '@rindle/wasm@0.9.0':
+    resolution: {integrity: sha512-zDQlIkoMYvnZCtZZIM/EexTePcnKMj5LfCPF6AeV2lkM/CNckme5IG/hBOwjrKsYgnMV+e4j+6PmioYbBt/iUQ==}
 
   '@rolldown/binding-android-arm64@1.1.2':
     resolution: {integrity: sha512-2cZ+7xRS+DBcuJBJKnfzsbleumJhBqSlJVpuzHC0nTqfd3QQ7Vx2/x5YR/D7cBamKSeWplwo82Fn9lqYUDEMfA==}
@@ -4799,89 +4812,108 @@ snapshots:
   '@prisma/client@5.22.0':
     optional: true
 
-  '@rindle/api-server@0.4.4':
+  '@rindle/api-server@0.9.0':
     dependencies:
-      '@rindle/client': 0.4.4
-      '@rindle/daemon-client': 0.4.4
-      '@rindle/query-compiler': 0.4.4
-
-  '@rindle/cli-darwin-arm64@0.4.4':
-    optional: true
-
-  '@rindle/cli-darwin-x64@0.4.4':
-    optional: true
-
-  '@rindle/cli-linux-arm64-gnu@0.4.4':
-    optional: true
-
-  '@rindle/cli-linux-arm64-musl@0.4.4':
-    optional: true
-
-  '@rindle/cli-linux-x64-gnu@0.4.4':
-    optional: true
-
-  '@rindle/cli-linux-x64-musl@0.4.4':
-    optional: true
-
-  '@rindle/cli-win32-x64-msvc@0.4.4':
-    optional: true
-
-  '@rindle/cli@0.4.4':
+      '@rindle/client': 0.9.0
+      '@rindle/daemon-client': 0.9.0
+      '@rindle/query-compiler': 0.9.0
+      '@rindle/sql-client': 0.9.0
     optionalDependencies:
-      '@rindle/cli-darwin-arm64': 0.4.4
-      '@rindle/cli-darwin-x64': 0.4.4
-      '@rindle/cli-linux-arm64-gnu': 0.4.4
-      '@rindle/cli-linux-arm64-musl': 0.4.4
-      '@rindle/cli-linux-x64-gnu': 0.4.4
-      '@rindle/cli-linux-x64-musl': 0.4.4
-      '@rindle/cli-win32-x64-msvc': 0.4.4
+      '@rindle/room': 0.9.0
+    transitivePeerDependencies:
+      - bufferutil
+      - drizzle-orm
+      - utf-8-validate
 
-  '@rindle/client@0.4.4': {}
+  '@rindle/cli-darwin-arm64@0.9.0':
+    optional: true
 
-  '@rindle/daemon-client@0.4.4': {}
+  '@rindle/cli-darwin-x64@0.9.0':
+    optional: true
 
-  '@rindle/devtools@0.4.4':
+  '@rindle/cli-linux-arm64-gnu@0.9.0':
+    optional: true
+
+  '@rindle/cli-linux-arm64-musl@0.9.0':
+    optional: true
+
+  '@rindle/cli-linux-x64-gnu@0.9.0':
+    optional: true
+
+  '@rindle/cli-linux-x64-musl@0.9.0':
+    optional: true
+
+  '@rindle/cli@0.9.0':
+    optionalDependencies:
+      '@rindle/cli-darwin-arm64': 0.9.0
+      '@rindle/cli-darwin-x64': 0.9.0
+      '@rindle/cli-linux-arm64-gnu': 0.9.0
+      '@rindle/cli-linux-arm64-musl': 0.9.0
+      '@rindle/cli-linux-x64-gnu': 0.9.0
+      '@rindle/cli-linux-x64-musl': 0.9.0
+
+  '@rindle/client@0.9.0': {}
+
+  '@rindle/daemon-client@0.9.0': {}
+
+  '@rindle/devtools@0.9.0':
     dependencies:
-      '@rindle/client': 0.4.4
+      '@rindle/client': 0.9.0
 
-  '@rindle/narrator@0.4.4':
+  '@rindle/narrator-react@0.9.0(react@19.2.7)':
     dependencies:
-      '@rindle/client': 0.4.4
-
-  '@rindle/normalized@0.4.4':
-    dependencies:
-      '@rindle/client': 0.4.4
-      '@rindle/wasm': 0.4.4
-
-  '@rindle/optimistic@0.4.4':
-    dependencies:
-      '@rindle/client': 0.4.4
-      '@rindle/normalized': 0.4.4
-      '@rindle/remote': 0.4.4
-      '@rindle/wasm': 0.4.4
-
-  '@rindle/query-compiler@0.4.4':
-    dependencies:
-      '@rindle/client': 0.4.4
-
-  '@rindle/react-devtools@0.4.4(react@19.2.7)':
-    dependencies:
-      '@rindle/devtools': 0.4.4
+      '@rindle/client': 0.9.0
+      '@rindle/narrator': 0.9.0
+      '@rindle/react': 0.9.0(react@19.2.7)
       react: 19.2.7
 
-  '@rindle/react@0.4.4(react@19.2.7)':
+  '@rindle/narrator@0.9.0':
     dependencies:
-      '@rindle/client': 0.4.4
-      '@rindle/narrator': 0.4.4
+      '@rindle/client': 0.9.0
+
+  '@rindle/normalized@0.9.0':
+    dependencies:
+      '@rindle/client': 0.9.0
+      '@rindle/wasm': 0.9.0
+
+  '@rindle/optimistic@0.9.0':
+    dependencies:
+      '@rindle/client': 0.9.0
+      '@rindle/normalized': 0.9.0
+      '@rindle/remote': 0.9.0
+      '@rindle/wasm': 0.9.0
+
+  '@rindle/query-compiler@0.9.0':
+    dependencies:
+      '@rindle/client': 0.9.0
+
+  '@rindle/react-devtools@0.9.0(react@19.2.7)':
+    dependencies:
+      '@rindle/devtools': 0.9.0
       react: 19.2.7
 
-  '@rindle/remote@0.4.4':
+  '@rindle/react@0.9.0(react@19.2.7)':
     dependencies:
-      '@rindle/client': 0.4.4
+      '@rindle/client': 0.9.0
+      react: 19.2.7
 
-  '@rindle/wasm@0.4.4':
+  '@rindle/remote@0.9.0':
     dependencies:
-      '@rindle/client': 0.4.4
+      '@rindle/client': 0.9.0
+
+  '@rindle/room@0.9.0':
+    dependencies:
+      ws: 8.21.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    optional: true
+
+  '@rindle/sql-client@0.9.0': {}
+
+  '@rindle/wasm@0.9.0':
+    dependencies:
+      '@rindle/client': 0.9.0
 
   '@rolldown/binding-android-arm64@1.1.2':
     optional: true
@@ -5197,23 +5229,23 @@ snapshots:
       '@tanstack/query-core': 5.101.1
       react: 19.2.7
 
-  '@tanstack/react-router-devtools@1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.13)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@tanstack/react-router-devtools@1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.15)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@tanstack/react-router': 1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@tanstack/router-devtools-core': 1.168.0(@tanstack/router-core@1.171.13)(csstype@3.2.3)
+      '@tanstack/router-devtools-core': 1.168.0(@tanstack/router-core@1.171.15)(csstype@3.2.3)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
     optionalDependencies:
-      '@tanstack/router-core': 1.171.13
+      '@tanstack/router-core': 1.171.15
     transitivePeerDependencies:
       - csstype
 
-  '@tanstack/react-router-ssr-query@1.167.1(@tanstack/query-core@5.101.1)(@tanstack/react-query@5.101.1(react@19.2.7))(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@tanstack/react-router-ssr-query@1.167.1(@tanstack/query-core@5.101.1)(@tanstack/react-query@5.101.1(react@19.2.7))(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@tanstack/router-core@1.171.15)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@tanstack/query-core': 5.101.1
       '@tanstack/react-query': 5.101.1(react@19.2.7)
       '@tanstack/react-router': 1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@tanstack/router-ssr-query-core': 1.169.1(@tanstack/query-core@5.101.1)(@tanstack/router-core@1.171.13)
+      '@tanstack/router-ssr-query-core': 1.169.1(@tanstack/query-core@5.101.1)(@tanstack/router-core@1.171.15)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
     transitivePeerDependencies:
@@ -5325,9 +5357,9 @@ snapshots:
       seroval: 1.5.4
       seroval-plugins: 1.5.4(seroval@1.5.4)
 
-  '@tanstack/router-devtools-core@1.168.0(@tanstack/router-core@1.171.13)(csstype@3.2.3)':
+  '@tanstack/router-devtools-core@1.168.0(@tanstack/router-core@1.171.15)(csstype@3.2.3)':
     dependencies:
-      '@tanstack/router-core': 1.171.13
+      '@tanstack/router-core': 1.171.15
       clsx: 2.1.1
       goober: 2.1.19(csstype@3.2.3)
     optionalDependencies:
@@ -5393,10 +5425,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/router-ssr-query-core@1.169.1(@tanstack/query-core@5.101.1)(@tanstack/router-core@1.171.13)':
+  '@tanstack/router-ssr-query-core@1.169.1(@tanstack/query-core@5.101.1)(@tanstack/router-core@1.171.15)':
     dependencies:
       '@tanstack/query-core': 5.101.1
-      '@tanstack/router-core': 1.171.13
+      '@tanstack/router-core': 1.171.15
 
   '@tanstack/router-utils@1.162.2':
     dependencies:

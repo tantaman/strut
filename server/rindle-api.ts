@@ -12,7 +12,8 @@
 //     `tx.exec` escape hatch with the gate IN the SQL (accepted-but-no-op for a non-owner/-editor).
 //
 // Hosted by the TanStack Start server routes in src/routes/api.rindle.* (they import handleRindleJson).
-// The daemon control plane is :7600 (RINDLE_DAEMON_URL).
+// The fleet is reached through the dev-edge ingress on :22050 (RINDLE_DAEMON_URL), http + ws on one
+// port; `rindle dev`/`exec` inject it.
 
 import {
   createRindleApiServer,
@@ -33,6 +34,7 @@ import type {
 import { HttpRindleDaemonClient } from '@rindle/daemon-client'
 import { and, exists, or } from '@rindle/client'
 import { serverQueries } from './queries.ts'
+import { daemonUrl } from './rindleEnv.ts'
 import { getEntitlements } from './entitlements.ts'
 import {
   q,
@@ -48,7 +50,7 @@ import {
 
 export type User = string
 type ServerCtx = MutationContext<User>
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const DAEMON_URL = daemonUrl()
 
 // ---- principal + access predicates --------------------------------------------------------------
 
