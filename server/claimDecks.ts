@@ -9,8 +9,9 @@
 // the guest was granted). The guest's user_profile PK is left alone (the real account keeps its own).
 
 import { HttpRindleDaemonClient } from '@rindle/daemon-client'
+import { daemonUrl } from './rindleEnv.ts'
 
-const DAEMON_URL = process.env.RINDLE_DAEMON_URL ?? 'http://127.0.0.1:7600'
+const DAEMON_URL = daemonUrl()
 
 export async function claimDecks(from: string, to: string): Promise<void> {
   const daemon = new HttpRindleDaemonClient({

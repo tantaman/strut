@@ -353,7 +353,21 @@ enforced; don't assume `QueryData` of an `.include()`d subtree gives you the sam
 necessarily a bug — `Pick` only ever removes fields, so a wider node type is still sound against the
 runtime row — but worth knowing before you treat a raw query-data node as if it were masked.
 
-### 🟡 20. SSR seed→live handoff flashes EMPTY for one daemon round-trip — the seed is dropped on `hello`, not `snapshot` — PARTIALLY addressed in @rindle 0.4.4, workaround STILL required
+### 🟡 20. SSR seed→live handoff flashes EMPTY for one daemon round-trip — the seed is dropped on `hello`, not `snapshot` — re-tested on @rindle 0.9.0, workaround STILL required
+
+**0.9.0 update: still reproduces.** 0.9.0 added exactly the gate this note asked for — `Store.retireSeedIfLive`
+only retires a seed once the query is AUTHORITATIVE (`resultType === "complete"`), so a synchronous backend's
+pre-sync first snapshot no longer kills it — but the dashboard flash survives it. Re-ran the same runtime A/B
+(headless Chromium, hard-reload `/` with a seeded session, sampling `.deck-card__name` every animation frame):
+
+| `index.tsx` | dashboard first paint |
+| --- | --- |
+| `useQueryStatus`/`lastComplete` bridge PRESENT (shipped) | cards=1 for all 240 frames — **no flash** |
+| bridge REMOVED | cards 1 ×23 → `.dash__empty` ×4 → 1 ×213 — **flash ~4 frames** |
+
+So the bridge stays load-bearing for a third release running. The remaining gap is narrower than the 0.4.4
+one but has the same shape: `decksQuery` still can't be answered from local state at register time (its rows
++ the `slideCount` `countAs` aggregate aren't synced yet), so the wasm view reads `[]` for that window.
 
 **0.4.4 restructured seed handling but the dashboard flash STILL reproduces — the `src/routes/index.tsx`
 workaround stays.** Verified by runtime A/B (headless Chrome, hard-reload `/`, sample the deck grid every
@@ -442,3 +456,53 @@ but the write shape makes the hot path awkward:
   keyed local write would collapse both the undo-restore dance and per-chunk streaming into one call. Net:
   not a blocker (holding `prev` is trivial for a small chat row), but a per-token `edit` that needs the full
   prior row reads as accidental friction for the canonical local-table use case (draft/scratch text).
+
+### 🔴 22. Upgrading 0.4.4 → 0.9.0: the type-checker caught ONE break; the rest were silent
+
+`tsc` flagged exactly one thing across the whole jump — `useNarration` gone from `@rindle/react`. Everything
+else that broke was runtime/CLI shape, invisible to the compiler and to `vitest` (314 tests stayed green on
+both versions, because none of them touch the daemon). Worth recording as a class: for a data-layer dep, a
+green typecheck says almost nothing about whether the app still *runs*.
+
+- **`useNarration` moved to a new package.** `@rindle/react` no longer re-exports it and dropped its
+  `@rindle/narrator` type imports; the hook now ships as `@rindle/narrator-react` (same signature, same
+  `UseNarrationOptions`/`Narration` shapes — a one-line import swap in `src/editor/chatNarration.ts` plus the
+  new dep). Discoverable only from `@rindle/react/README.md` ("Agent narration is an optional integration
+  provided by `@rindle/narrator-react`"); nothing in the error output points at it. **Ask:** ship a
+  deprecated re-export, or make the removed export throw a message naming the new package.
+- **🔴 The single-daemon local runtime is GONE, silently.** 0.4.4 let `rindle up` auto-detect a hand-written
+  `daemon.json` (the legacy path strut's local dev ran on, `:7600` control / `:7601` ws). In 0.9.0 the string
+  `daemon.json` does not appear in the CLI binary at all — `rindle up` renders `rindle.ncl` and supervises a
+  three-component fleet instead (replicator `:22010/:22011` + follower `:22000/:22001` + a `rindle-dev-edge`
+  ingress on `:22050` serving http AND ws on one port). No error, no warning: the fleet comes up healthy and
+  the app just talks to a port nobody is listening on. **Ask:** if `daemon.json` is present and unsupported,
+  say so.
+- **The `dev` profile and its port inputs vanished with it.** `profile = "dev"`, `daemonHttpPort`,
+  `daemonWsPort` are no longer in the topology library (only `replicated` + `followers` survive — grep the
+  binary). A topology still naming `dev` renders **without complaint** as `activeProfile: "replicated"`, and
+  the two port fields are dropped on the floor — so the file keeps declaring `:7600` while the fleet listens
+  on `:22050`. **Ask:** reject (or warn on) unknown profile names and unconsumed inputs; a silently-ignored
+  port is the worst possible failure mode for a topology file.
+- **FYI: `topology.ncl` → `rindle.ncl`** is warned about properly (`warning: ./topology.ncl is deprecated;
+  rename it to ./rindle.ncl`), and `--remote` → `--cloud` is documented as a deprecated alias. Good.
+- **🟡 `rindle dev` and `rindle exec` inject DIFFERENT env.** `exec` hands the app the full binding set
+  (`RINDLE_URL`, `RINDLE_DAEMON_URL`, `RINDLE_FLEET_WS`, `RINDLE_REPLICATOR_URL`, `RINDLE_AFFINITY`,
+  `RINDLE_DATABASE_TOKEN`); `dev` — the one you actually run your app under — injects only `RINDLE_URL` +
+  `RINDLE_DATABASE_TOKEN`. Cost real time: the app read `RINDLE_DAEMON_URL`, which `exec` sets and `dev`
+  doesn't, so the fleet was up and the app still fell through to its own default. `server/rindleEnv.ts` now
+  resolves `RINDLE_DAEMON_URL ?? RINDLE_URL ?? local`, and derives the ws URL by scheme-swapping the http one
+  (same ingress port). **Ask:** make `dev` and `exec` inject the same set, or document the difference.
+- **✅ Migrations and schema codegen were non-events.** All 14 migrations applied clean to the replicated
+  fleet, and `rindle schema gen` emitted a **byte-identical** `shared/schema.ts`. The whole client query /
+  fragment / mutator surface — `defineQuery`, `.where`/`existsNoSync` gates, `useFragment`, `.folded`,
+  `writeLocal` — compiled and ran unchanged.
+- **✅ Verified at runtime, not just compiled** (`pnpm dev` → headless Chromium): ws opens to
+  `ws://127.0.0.1:22050`, deck create round-trips through the authoritative mutator, rows survive a reload
+  (so replicator→follower replication is live), and the dashboard's `slideCount` `countAs` aggregate still
+  reads "1 slide". Zero console/page errors, zero 4xx/5xx.
+- **FYI: new API surface not yet used by strut** — a stream plane (`useStreamedText`, `assembleDurableText`,
+  SSE frames) that looks like a direct answer to #21's per-token `writeLocal` friction; `Store.readOnce` (a
+  one-shot authoritative read, which is what `deckIO`-style exports hand-roll today); per-call-site
+  `releaseDelayMs` on `useQuery`/`useFragment`; and `tx.sql` replacing the raw `tx.exec` shorthand. Also
+  `MaterializeOutput.wsEndpoint` was replaced by an opaque `affinity` ticket — strut reads neither, so the
+  follower-affinity routing is handled entirely inside `@rindle/api-server`.
