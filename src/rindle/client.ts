@@ -78,6 +78,12 @@ async function create() {
     // writes under. The API server derives the SAME id from the session cookie for the authoritative
     // run (server/session.ts), so the prediction matches (no snap-back).
     user: () => sessionUserId,
+    // Durable local tables: persist every `local: true` table (`deck_pref`) to IndexedDB, keyed per
+    // (origin, user), and keep it coherent across this device's tabs. `ensureSession()` above already
+    // resolved `sessionUserId`, so it's the stable storage identity for this client's lifetime (an
+    // anonymous guest gets the 'anon' sentinel until it promotes). `chat_message` opts out via
+    // `local: "session"` (localSchema.ts), so the advisor thread stays ephemeral even with this on.
+    persistLocal: { user: sessionUserId || 'anon' },
     api: {
       // NOTE: request url = api.url + routes.query, and routes.query defaults to the ABSOLUTE
       // "/api/rindle/query". The app basepath is the only safe prefix here: root builds use "",
