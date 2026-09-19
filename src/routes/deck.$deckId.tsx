@@ -9,6 +9,7 @@ import {
 } from '../../shared/queries'
 import { authClient } from '../rindle/authClient'
 import { preloadDeck } from '../rindle/appSsr'
+import { useDeckChatOpen } from '../rindle/deckPref'
 import { EditorStateProvider, useEditor } from '../editor/EditorState'
 import { parseEditorSearch } from '../editor/editorSearch'
 import { UndoProvider } from '../editor/UndoProvider'
@@ -115,7 +116,9 @@ function EditorInner({ deckId }: { deckId: string }) {
   // Contextual tools are editor-local overlays. The card column stays mounted behind them, preserving
   // scroll/caret state without introducing route or URL state.
   const [activeTool, setActiveTool] = useState<ActiveTool>(null)
-  const [chatOpen, setChatOpen] = useState(false)
+  // Persisted per-deck on this device (deck_pref local table): reopen a deck with the ✨ Chat panel the
+  // way you left it, instead of always closed.
+  const [chatOpen, setChatOpen] = useDeckChatOpen(deckId)
   const [styleIntent, setStyleIntent] = useState(0)
   const [controlsOpen, setControlsOpen] = useState(false)
   const topDockRef = useRef<HTMLDivElement>(null)
