@@ -266,7 +266,7 @@ ${steps}
   <div id="overview" class="step" data-x="0" data-y="0" data-scale="10"></div>
 </div>
 <div class="hint">Use the spacebar or arrow keys to navigate</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/impress.js/2.0.0/impress.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/impress/impress.js@2.0.0/js/impress.min.js"></script>
 <script>
 (function(){
   var root = document.getElementById('impress');
